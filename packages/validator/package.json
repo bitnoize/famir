@@ -1,0 +1,20 @@
+{
+  "name": "@famir/validator",
+  "type": "module",
+  "version": "0.3.3",
+  "description": "Validator module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@famir/common": "*",
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1"
+  }
+}

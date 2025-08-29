@@ -1,0 +1,152 @@
+import { Config } from '@famir/config'
+import { Logger } from '@famir/logger'
+import { Validator } from '@famir/validator'
+import { Curl, CurlFeature } from 'node-libcurl'
+import {
+  ForwardRequest,
+  ForwardResponse,
+  HttpClient,
+  HttpClientConfig,
+  HttpClientOptions
+} from './http-client.js'
+import { httpClientSchemas } from './http-client.schemas.js'
+import { buildOptions } from './http-client.utils.js'
+
+export class CurlHttpClient implements HttpClient {
+  protected readonly options: HttpClientOptions
+
+  constructor(
+    validator: Validator,
+    config: Config<HttpClientConfig>,
+    protected readonly logger: Logger
+  ) {
+    validator.addSchemas(httpClientSchemas)
+
+    this.options = buildOptions(config.data)
+  }
+
+  async forward(request: ForwardRequest): Promise<ForwardResponse> {
+    return new Promise<ForwardResponse>((resolve) => {
+      const startTime = Date.now()
+
+      const response: ForwardResponse = {
+        statusCode: 0,
+        headers: {},
+        totalTime: 0,
+        body: Buffer.alloc(0)
+      }
+
+      const curl = new Curl()
+
+      try {
+        curl.enable(CurlFeature.Raw)
+
+        curl.setOpt(Curl.option.DNS_USE_GLOBAL_CACHE, 1)
+
+        curl.setOpt(Curl.option.MAXFILESIZE_LARGE, this.options.bodyLimit)
+
+        curl.setOpt(Curl.option.PROXY, request.proxy)
+
+        curl.setOpt(Curl.option.CUSTOMREQUEST, request.method)
+
+        curl.setOpt(Curl.option.URL, request.url)
+
+        const headers = Object.entries(request.headers)
+          .map(([name, value]) => {
+            if (Array.isArray(value)) {
+              return value.map((val) => `${name}: ${val}`)
+            } else {
+              return `${name}: ${value}`
+            }
+          })
+          .flat()
+
+        curl.setOpt(Curl.option.HTTPHEADER, headers)
+
+        if (request.body.length > 0) {
+          let uploadOffset = 0
+
+          curl.setOpt(Curl.option.INFILESIZE_LARGE, request.body.length)
+
+          curl.setOpt(Curl.option.READFUNCTION, (body: Buffer, size: number, nmemb: number) => {
+            const chunkSize = size * nmemb
+            const remaining = request.body.length - uploadOffset
+
+            if (remaining <= 0) {
+              return 0
+            }
+
+            const bytesToCopy = Math.min(chunkSize, remaining)
+            const chunk = request.body.subarray(uploadOffset, uploadOffset + bytesToCopy)
+
+            chunk.copy(body)
+            uploadOffset += bytesToCopy
+
+            return bytesToCopy
+          })
+
+          curl.setOpt(Curl.option.UPLOAD, 1)
+        }
+
+        curl.setOpt(Curl.option.CONNECTTIMEOUT_MS, request.connectTimeout)
+        curl.setOpt(Curl.option.TIMEOUT_MS, request.timeout)
+
+        curl.on('end', (statusCode: number, body: Buffer, headers: Buffer[]) => {
+          response.statusCode = statusCode
+          response.body = body
+
+          headers.forEach((header) => {
+            const headerStr = header.toString().trim()
+            const colonIdx = headerStr.indexOf(':')
+
+            if (colonIdx === -1) {
+              return
+            }
+
+            const name = headerStr.substring(0, colonIdx).trim().toLowerCase()
+            const value = headerStr.substring(colonIdx + 1).trim()
+
+            if (name === '' || value === '') {
+              return
+            }
+
+            if (response.headers[name] !== undefined) {
+              if (Array.isArray(response.headers[name])) {
+                response.headers[name].push(value)
+              } else {
+                response.headers[name] = [response.headers[name], value]
+              }
+            } else {
+              response.headers[name] = value
+            }
+          })
+
+          curl.close()
+
+          response.totalTime = Date.now() - startTime
+
+          resolve(response)
+        })
+
+        curl.on('error', (error) => {
+          curl.close()
+
+          response.totalTime = Date.now() - startTime
+          response.error = error
+
+          resolve(response)
+        })
+
+        curl.perform()
+      } catch (error) {
+        curl.close()
+
+        response.statusCode = -1
+        response.totalTime = Date.now() - startTime
+        response.error = error
+
+        resolve(response)
+      }
+    })
+  }
+}

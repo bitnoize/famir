@@ -1,0 +1,30 @@
+{
+  "name": "@famir/http-server",
+  "type": "module",
+  "version": "0.3.3",
+  "description": "Http server module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@famir/common": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
+    "@famir/validator": "*",
+    "body-parser": "^2.2.0",
+    "content-type": "^1.0.5",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.19.6",
+    "@types/content-type": "^1.1.9",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.1"
+  }
+}

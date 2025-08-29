@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "references": [
+    { "path": "../domain" },
+    { "path": "../common" },
+    { "path": "../validator" },
+    { "path": "../config" },
+    { "path": "../logger" },
+    { "path": "../database" },
+    { "path": "../task-queue" },
+    { "path": "../http-client" },
+    { "path": "../http-server" }
+  ]
+}

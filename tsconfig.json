@@ -1,0 +1,16 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/domain" },
+    { "path": "packages/common" },
+    { "path": "packages/validator" },
+    { "path": "packages/config" },
+    { "path": "packages/logger" },
+    { "path": "packages/database" },
+    { "path": "packages/task-queue" },
+    { "path": "packages/task-worker" },
+    { "path": "packages/http-client" },
+    { "path": "packages/http-server" },
+    { "path": "packages/repl-server" }
+  ]
+}

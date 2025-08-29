@@ -1,0 +1,29 @@
+{
+  "name": "@famir/reverse-proxy",
+  "type": "module",
+  "version": "0.3.3",
+  "description": "Reverse proxy module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "build": "tsc -b",
+    "start": "node --env-file=../../.env ."
+  },
+  "dependencies": {
+    "@famir/common": "*",
+    "@famir/config": "*",
+    "@famir/domain": "*",
+    "@famir/logger": "*",
+    "@famir/validator": "*",
+    "@famir/database": "*",
+    "@famir/task-queue": "*",
+    "@famir/http-client": "*",
+    "@famir/http-server": "*"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.1"
+  }
+}

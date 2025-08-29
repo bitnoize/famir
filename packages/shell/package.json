@@ -1,0 +1,27 @@
+{
+  "name": "@famir/shell",
+  "type": "module",
+  "version": "0.3.3",
+  "description": "Shell module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "build": "tsc -b",
+    "start": "node --env-file=../../.env ."
+  },
+  "dependencies": {
+    "@famir/domain": "*",
+    "@famir/common": "*",
+    "@famir/validator": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
+    "@famir/database": "*",
+    "@famir/task-queue": "*",
+    "@famir/repl-server": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1"
+  }
+}

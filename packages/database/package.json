@@ -1,0 +1,26 @@
+{
+  "name": "@famir/database",
+  "type": "module",
+  "version": "0.3.3",
+  "description": "Database module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "stylua": "stylua redis-functions",
+    "selene": "selene redis-functions",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@famir/common": "*",
+    "@famir/domain": "*",
+    "@famir/validator": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
+    "redis": "^5.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "famir",
+  "type": "module",
+  "description": "Fake mirrors entire the Web!",
+  "license": "MIT",
+  "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
+  "private": true,
+  "scripts": {
+    "format": "npm --ws run format",
+    "lint": "npm --ws run lint",
+    "build": "npm --ws run build",
+    "publish": "npm --ws publish",
+    "unpublish": "npm --ws unpublish"
+  },
+  "workspaces": [
+    "packages/domain",
+    "packages/common",
+    "packages/validator",
+    "packages/config",
+    "packages/logger",
+    "packages/database",
+    "packages/task-queue",
+    "packages/task-worker",
+    "packages/http-client",
+    "packages/http-server",
+    "packages/repl-server",
+    "packages/reverse-proxy",
+    "packages/shell",
+    "packages/heartbeat"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "eslint": "^9.19.0",
+    "eslint-config-prettier": "^10.0.1",
+    "prettier": "^3.4.2",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.21.0"
+  }
+}
