@@ -35,7 +35,7 @@ import { ShellApp } from './shell.app.js'
 import { ShellConfig } from './shell.js'
 import { configShellSchema } from './shell.schemas.js'
 
-export async function main(setup: (container: DIContainer) => void): Promise<void> {
+export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {
   const container = new DIContainer()
 
   //
@@ -189,10 +189,10 @@ export async function main(setup: (container: DIContainer) => void): Promise<voi
   )
 
   //
-  // Controllers
+  // Modules
   //
 
-  setup(container)
+  composer(container)
 
   //
   // Application

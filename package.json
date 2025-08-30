@@ -2,8 +2,8 @@
   "name": "famir",
   "type": "module",
   "description": "Fake mirrors entire the Web!",
-  "license": "MIT",
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "format": "npm --ws run format",

@@ -1,4 +1,4 @@
-import { Campaign, CampaignRepository } from '@famir/domain'
+import { CampaignRepository } from '@famir/domain'
 
 export class ScanSessionsUseCase {
   constructor(protected readonly campaignRepository: CampaignRepository) {}

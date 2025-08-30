@@ -1,4 +1,4 @@
-import { ErrorContext } from '@famir/common'
+import { ErrorContext, filterSecrets } from '@famir/common'
 import { Config } from '@famir/config'
 import { Validator, ValidatorAssertSchema } from '@famir/validator'
 import pino from 'pino'
@@ -20,13 +20,20 @@ export class PinoLogger implements Logger {
 
     this._pino = pino({
       name: this.options.appName,
-      level: this.options.level,
+      level: this.options.logLevel,
       base: {},
       transport: {
         target: this.options.transportTarget,
         options: this.options.transportOptions
       }
     })
+
+    this.info(
+      {
+        options: filterSecrets(this.options, [])
+      },
+      `Logger initialized`
+    )
   }
 
   debug(context: ErrorContext, message: string) {

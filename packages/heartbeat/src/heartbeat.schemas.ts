@@ -1,7 +1,7 @@
 import { configDatabaseConnectionUrlSchema } from '@famir/database'
 import {
   configLoggerAppNameSchema,
-  configLoggerLevelSchema,
+  configLoggerLogLevelSchema,
   configLoggerTransportOptionsSchema,
   configLoggerTransportTargetSchema
 } from '@famir/logger'
@@ -18,8 +18,8 @@ import { HeartbeatConfig } from './heartbeat.js'
 export const configHeartbeatSchema: JSONSchemaType<HeartbeatConfig> = {
   type: 'object',
   required: [
-    'LOGGER_LEVEL',
     'LOGGER_APP_NAME',
+    'LOGGER_LOG_LEVEL',
     'LOGGER_TRANSPORT_TARGET',
     'LOGGER_TRANSPORT_OPTIONS',
     'DATABASE_CONNECTION_URL',
@@ -30,16 +30,28 @@ export const configHeartbeatSchema: JSONSchemaType<HeartbeatConfig> = {
     'TASK_WORKER_LIMITER_DURATION'
   ],
   properties: {
-    LOGGER_LEVEL: configLoggerLevelSchema,
-    LOGGER_APP_NAME: configLoggerAppNameSchema,
+    LOGGER_APP_NAME: {
+      ...configLoggerAppNameSchema,
+      default: 'heartbeat'
+    },
+    LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
     LOGGER_TRANSPORT_TARGET: configLoggerTransportTargetSchema,
     LOGGER_TRANSPORT_OPTIONS: configLoggerTransportOptionsSchema,
     DATABASE_CONNECTION_URL: configDatabaseConnectionUrlSchema,
     TASK_QUEUE_CONNECTION_URL: configTaskQueueConnectionUrlSchema,
     TASK_WORKER_CONNECTION_URL: configTaskWorkerConnectionUrlSchema,
-    TASK_WORKER_CONCURRENCY: configTaskWorkerConcurrencySchema,
-    TASK_WORKER_LIMITER_MAX: configTaskWorkerLimiterMaxSchema,
-    TASK_WORKER_LIMITER_DURATION: configTaskWorkerLimiterDurationSchema
+    TASK_WORKER_CONCURRENCY: {
+      ...configTaskWorkerConcurrencySchema,
+      default: 2
+    },
+    TASK_WORKER_LIMITER_MAX: {
+      ...configTaskWorkerLimiterMaxSchema,
+      default: 1
+    },
+    TASK_WORKER_LIMITER_DURATION: {
+      ...configTaskWorkerLimiterDurationSchema,
+      default: 1000
+    }
   },
   additionalProperties: false
 } as const

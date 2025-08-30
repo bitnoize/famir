@@ -6,10 +6,10 @@ export class HeartbeatController {
   constructor(
     validator: Validator,
     protected readonly logger: Logger,
-    protected readonly dispatcher: HeartbeatDispatcher
+    dispatcher: HeartbeatDispatcher
   ) {
-    this.dispatcher.setHandler('scan-sessions', this.scanSessionsHandler)
-    this.dispatcher.setHandler('scan-messages', this.scanMessagesHandler)
+    dispatcher.setHandler('scan-sessions', this.scanSessionsHandler)
+    dispatcher.setHandler('scan-messages', this.scanMessagesHandler)
   }
 
   private readonly scanSessionsHandler = async (dto: unknown): Promise<number> => {

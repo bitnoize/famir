@@ -1,4 +1,4 @@
-import { serializeError } from '@famir/common'
+import { filterSecrets, serializeError } from '@famir/common'
 import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
@@ -52,6 +52,13 @@ export class NodeReplServer implements ReplServer {
     })
 
     this._server.maxConnections = this.options.maxConnections
+
+    this.logger.info(
+      {
+        options: filterSecrets(this.options, [])
+      },
+      `ReplServer initialized`
+    )
   }
 
   protected connectionHandler = (socket: net.Socket) => {
@@ -139,6 +146,7 @@ export class NodeReplServer implements ReplServer {
         this._connections.forEach((connection) => {
           const { remoteFamily, remoteAddress, remotePort } = connection
 
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           socket.write(` - ${remoteFamily}:${remoteAddress}:${remotePort}\n`)
         })
 
@@ -168,8 +176,20 @@ export class NodeReplServer implements ReplServer {
     })
   }
 
-  async start(): Promise<void> {
-    new Promise<void>((resolve, reject) => {
+  async listen(): Promise<void> {
+    await this._listen()
+
+    this.logger.info({}, `ReplServer listening`)
+  }
+
+  async close(): Promise<void> {
+    await this._close()
+
+    this.logger.info({}, `ReplServer closed`)
+  }
+
+  private _listen(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this._server.off('listening', listeningHandler)
 
@@ -187,22 +207,10 @@ export class NodeReplServer implements ReplServer {
 
       this._server.listen(this.options.port, this.options.address)
     })
-
-    this.logger.debug(
-      {
-        options: {
-          address: this.options.address,
-          port: this.options.port,
-          maxConnections: this.options.maxConnections,
-          socketTimeout: this.options.socketTimeout
-        }
-      },
-      `ReplServer started`
-    )
   }
 
-  async stop(): Promise<void> {
-    new Promise<void>((resolve, reject) => {
+  private _close(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this._server.off('close', closeHandler)
 
@@ -230,7 +238,5 @@ export class NodeReplServer implements ReplServer {
 
       this._connections.clear()
     })
-
-    this.logger.debug({}, `ReplServer stopped`)
   }
 }

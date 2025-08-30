@@ -1,7 +1,10 @@
 import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 
 export const configTaskWorkerConnectionUrlSchema: JSONSchemaType<string> = {
-  type: 'string'
+  type: 'string',
+  minLength: 1,
+  maxLength: 128,
+  default: 'redis://localhost:6379/1'
 } as const
 
 export const configTaskWorkerConcurrencySchema: JSONSchemaType<number> = {
@@ -18,7 +21,7 @@ export const configTaskWorkerLimiterMaxSchema: JSONSchemaType<number> = {
 
 export const configTaskWorkerLimiterDurationSchema: JSONSchemaType<number> = {
   type: 'integer',
-  minimum: 1000,
+  minimum: 1,
   maximum: 3600 * 1000
 } as const
 

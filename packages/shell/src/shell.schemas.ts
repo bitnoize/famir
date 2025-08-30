@@ -1,7 +1,7 @@
 import { configDatabaseConnectionUrlSchema } from '@famir/database'
 import {
   configLoggerAppNameSchema,
-  configLoggerLevelSchema,
+  configLoggerLogLevelSchema,
   configLoggerTransportOptionsSchema,
   configLoggerTransportTargetSchema
 } from '@famir/logger'
@@ -35,8 +35,8 @@ import { ShellConfig } from './shell.js'
 export const configShellSchema: JSONSchemaType<ShellConfig> = {
   type: 'object',
   required: [
-    'LOGGER_LEVEL',
     'LOGGER_APP_NAME',
+    'LOGGER_LOG_LEVEL',
     'LOGGER_TRANSPORT_TARGET',
     'LOGGER_TRANSPORT_OPTIONS',
     'DATABASE_CONNECTION_URL',
@@ -49,14 +49,23 @@ export const configShellSchema: JSONSchemaType<ShellConfig> = {
     'REPL_SERVER_USE_COLORS'
   ],
   properties: {
-    LOGGER_LEVEL: configLoggerLevelSchema,
-    LOGGER_APP_NAME: configLoggerAppNameSchema,
+    LOGGER_APP_NAME: {
+      ...configLoggerAppNameSchema,
+      default: 'shell'
+    },
+    LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
     LOGGER_TRANSPORT_TARGET: configLoggerTransportTargetSchema,
     LOGGER_TRANSPORT_OPTIONS: configLoggerTransportOptionsSchema,
     DATABASE_CONNECTION_URL: configDatabaseConnectionUrlSchema,
     TASK_QUEUE_CONNECTION_URL: configTaskQueueConnectionUrlSchema,
-    REPL_SERVER_ADDRESS: configReplServerAddressSchema,
-    REPL_SERVER_PORT: configReplServerPortSchema,
+    REPL_SERVER_ADDRESS: {
+      ...configReplServerAddressSchema,
+      default: '127.0.0.1'
+    },
+    REPL_SERVER_PORT: {
+      ...configReplServerPortSchema,
+      default: 5000
+    },
     REPL_SERVER_MAX_CONNECTIONS: configReplServerMaxConnectionsSchema,
     REPL_SERVER_SOCKET_TIMEOUT: configReplServerSocketTimeoutSchema,
     REPL_SERVER_PROMPT: configReplServerPromptSchema,

@@ -1,21 +1,22 @@
 import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import {
-  LOGGER_LEVELS,
+  LOGGER_LOG_LEVELS,
   LOGGER_TRANSPORT_TARGETS,
-  LoggerLevel,
+  LoggerLogLevel,
   LoggerTransportOptions,
   LoggerTransportTarget
 } from './logger.js'
 
-export const configLoggerLevelSchema: JSONSchemaType<LoggerLevel> = {
-  type: 'string',
-  enum: LOGGER_LEVELS,
-  default: LOGGER_LEVELS[1]
-} as const
-
 export const configLoggerAppNameSchema: JSONSchemaType<string> = {
   type: 'string',
-  pattern: '^[0-9a-zA-Z-_]{1,128}$'
+  minLength: 1,
+  maxLength: 128
+}
+
+export const configLoggerLogLevelSchema: JSONSchemaType<LoggerLogLevel> = {
+  type: 'string',
+  enum: LOGGER_LOG_LEVELS,
+  default: LOGGER_LOG_LEVELS[1]
 } as const
 
 export const configLoggerTransportTargetSchema: JSONSchemaType<LoggerTransportTarget> = {

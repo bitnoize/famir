@@ -1,4 +1,4 @@
-import { serializeError } from '@famir/common'
+import { filterSecrets, serializeError } from '@famir/common'
 import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
@@ -43,6 +43,13 @@ export class RedisDatabaseConnector implements DatabaseConnector {
         `Redis error event`
       )
     })
+
+    this.logger.info(
+      {
+        options: filterSecrets(this.options, ['connectionUrl'])
+      },
+      `DatabaseConnector initialized`
+    )
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -53,12 +60,12 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   async connect(): Promise<void> {
     await this._redis.connect()
 
-    this.logger.debug({}, `DatabaseConnector connected`)
+    this.logger.info({}, `DatabaseConnector connected`)
   }
 
   async close(): Promise<void> {
     await this._redis.close()
 
-    this.logger.debug({}, `DatabaseConnector closed`)
+    this.logger.info({}, `DatabaseConnector closed`)
   }
 }

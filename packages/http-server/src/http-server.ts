@@ -11,8 +11,8 @@ export interface HttpServerOptions {
 }
 
 export interface HttpServer {
-  start(): Promise<void>
-  stop(): Promise<void>
+  listen(): Promise<void>
+  close(): Promise<void>
 }
 
 export type RequestLocals = Record<string, unknown>

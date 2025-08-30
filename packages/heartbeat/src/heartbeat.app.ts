@@ -1,11 +1,10 @@
+import { SHUTDOWN_SIGNALS } from '@famir/common'
 import { DatabaseConnector } from '@famir/database'
 import { Logger } from '@famir/logger'
 import { ScanMessageQueue, ScanSessionQueue, TaskQueueConnector } from '@famir/task-queue'
 import { HeartbeatWorker, TaskWorkerConnector } from '@famir/task-worker'
 import { Validator } from '@famir/validator'
 import { heartbeatSchemas } from './heartbeat.schemas.js'
-
-const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const
 
 export class HeartbeatApp {
   constructor(

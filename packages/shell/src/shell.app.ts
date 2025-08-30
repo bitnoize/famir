@@ -1,3 +1,4 @@
+import { SHUTDOWN_SIGNALS } from '@famir/common'
 import { DatabaseConnector } from '@famir/database'
 import { Logger } from '@famir/logger'
 import { ReplServer } from '@famir/repl-server'
@@ -9,8 +10,6 @@ import {
 } from '@famir/task-queue'
 import { Validator } from '@famir/validator'
 import { shellSchemas } from './shell.schemas.js'
-
-const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const
 
 export class ShellApp {
   constructor(
@@ -41,7 +40,7 @@ export class ShellApp {
 
       //await this.taskWorkerConnector.connect()
 
-      await this.replServer.start()
+      await this.replServer.listen()
     } catch (error) {
       console.error(`Shell start failed`, { error })
 
@@ -51,7 +50,7 @@ export class ShellApp {
 
   protected async stop(): Promise<void> {
     try {
-      await this.replServer.stop()
+      await this.replServer.close()
 
       await this.taskQueueConnector.close()
 

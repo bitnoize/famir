@@ -1,4 +1,4 @@
-import { serializeError } from '@famir/common'
+import { filterSecrets, serializeError } from '@famir/common'
 import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
@@ -36,6 +36,13 @@ export class BullTaskWorkerConnector implements TaskWorkerConnector {
         `Redis error event`
       )
     })
+
+    this.logger.info(
+      {
+        options: filterSecrets(this.options, ['connectionUrl'])
+      },
+      `TaskWorkerConnector initialized`
+    )
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -46,12 +53,12 @@ export class BullTaskWorkerConnector implements TaskWorkerConnector {
   //async connect(): Promise<void> {
   //  await this._redis.connect()
   //
-  //  this.logger.debug({}, `TaskWorkerConnector connected`)
+  //  this.logger.info({}, `TaskWorkerConnector connected`)
   //}
 
   async close(): Promise<void> {
     await this._redis.quit()
 
-    this.logger.debug({}, `TaskWorkerConnector closed`)
+    this.logger.info({}, `TaskWorkerConnector closed`)
   }
 }

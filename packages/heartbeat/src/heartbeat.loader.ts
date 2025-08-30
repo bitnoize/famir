@@ -30,19 +30,27 @@ import { HeartbeatApp } from './heartbeat.app.js'
 import { HeartbeatConfig } from './heartbeat.js'
 import { configHeartbeatSchema } from './heartbeat.schemas.js'
 
-export async function main(setup: (container: DIContainer) => void): Promise<void> {
+export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {
   const container = new DIContainer()
 
   //
-  // Infrastructure
+  // Validator
   //
 
   container.registerSingleton<Validator>('Validator', () => new AjvValidator())
+
+  //
+  // Config
+  //
 
   container.registerSingleton<Config<HeartbeatConfig>>(
     'Config',
     (c) => new EnvConfig<HeartbeatConfig>(c.resolve<Validator>('Validator'), configHeartbeatSchema)
   )
+
+  //
+  // Logger
+  //
 
   container.registerSingleton<Logger>(
     'Logger',
@@ -53,6 +61,10 @@ export async function main(setup: (container: DIContainer) => void): Promise<voi
       )
   )
 
+  //
+  // Database
+  //
+
   container.registerSingleton<DatabaseConnector>(
     'DatabaseConnector',
     (c) =>
@@ -62,30 +74,6 @@ export async function main(setup: (container: DIContainer) => void): Promise<voi
         c.resolve<Logger>('Logger')
       )
   )
-
-  container.registerSingleton<TaskQueueConnector>(
-    'TaskQueueConnector',
-    (c) =>
-      new BullTaskQueueConnector(
-        c.resolve<Validator>('Validator'),
-        c.resolve<Config<HeartbeatConfig>>('Config'),
-        c.resolve<Logger>('Logger')
-      )
-  )
-
-  container.registerSingleton<TaskWorkerConnector>(
-    'TaskWorkerConnector',
-    (c) =>
-      new BullTaskWorkerConnector(
-        c.resolve<Validator>('Validator'),
-        c.resolve<Config<HeartbeatConfig>>('Config'),
-        c.resolve<Logger>('Logger')
-      )
-  )
-
-  //
-  // Repositories
-  //
 
   container.registerSingleton<CampaignRepository>(
     'CampaignRepository',
@@ -98,8 +86,18 @@ export async function main(setup: (container: DIContainer) => void): Promise<voi
   )
 
   //
-  // Queues
+  // TaskQueue
   //
+
+  container.registerSingleton<TaskQueueConnector>(
+    'TaskQueueConnector',
+    (c) =>
+      new BullTaskQueueConnector(
+        c.resolve<Validator>('Validator'),
+        c.resolve<Config<HeartbeatConfig>>('Config'),
+        c.resolve<Logger>('Logger')
+      )
+  )
 
   container.registerSingleton<ScanSessionQueue>(
     'ScanSessionQueue',
@@ -122,8 +120,18 @@ export async function main(setup: (container: DIContainer) => void): Promise<voi
   )
 
   //
-  // Worker
+  // TaskWorker
   //
+
+  container.registerSingleton<TaskWorkerConnector>(
+    'TaskWorkerConnector',
+    (c) =>
+      new BullTaskWorkerConnector(
+        c.resolve<Validator>('Validator'),
+        c.resolve<Config<HeartbeatConfig>>('Config'),
+        c.resolve<Logger>('Logger')
+      )
+  )
 
   container.registerSingleton<HeartbeatDispatcher>(
     'HeartbeatDispatcher',
@@ -145,10 +153,10 @@ export async function main(setup: (container: DIContainer) => void): Promise<voi
   )
 
   //
-  // Controllers
+  // Modules
   //
 
-  setup(container)
+  composer(container)
 
   //
   // Application

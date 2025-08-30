@@ -15,7 +15,7 @@ export function buildOptions(
     )
 
     return {
-      level: data.LOGGER_LEVEL,
+      logLevel: data.LOGGER_LOG_LEVEL,
       appName: data.LOGGER_APP_NAME,
       transportTarget: data.LOGGER_TRANSPORT_TARGET,
       transportOptions

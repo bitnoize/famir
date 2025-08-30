@@ -3,15 +3,13 @@ import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 export const configReplServerAddressSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
-  maxLength: 128,
-  default: '127.0.0.1'
+  maxLength: 128
 } as const
 
 export const configReplServerPortSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 0,
-  maximum: 65535,
-  default: 5000
+  maximum: 65535
 } as const
 
 export const configReplServerMaxConnectionsSchema: JSONSchemaType<number> = {

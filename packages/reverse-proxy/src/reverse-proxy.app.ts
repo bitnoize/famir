@@ -1,11 +1,10 @@
+import { SHUTDOWN_SIGNALS } from '@famir/common'
 import { DatabaseConnector } from '@famir/database'
 import { HttpServer } from '@famir/http-server'
 import { Logger } from '@famir/logger'
 import { TaskQueueConnector } from '@famir/task-queue'
 import { Validator } from '@famir/validator'
 import { reverseProxySchemas } from './reverse-proxy.schemas.js'
-
-const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const
 
 export class ReverseProxyApp {
   constructor(
@@ -17,7 +16,9 @@ export class ReverseProxyApp {
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      process.once(signal, () => this.stop())
+      process.once(signal, async () => {
+        await this.stop()
+      })
     })
 
     validator.addSchemas(reverseProxySchemas)
@@ -29,7 +30,7 @@ export class ReverseProxyApp {
 
       //await this.taskQueueConnector.connect()
 
-      await this.httpServer.start()
+      await this.httpServer.listen()
     } catch (error) {
       console.error(`ReverseProxy start failed`, { error })
 
@@ -39,7 +40,7 @@ export class ReverseProxyApp {
 
   protected async stop(): Promise<void> {
     try {
-      await this.httpServer.stop()
+      await this.httpServer.close()
 
       await this.taskQueueConnector.close()
 

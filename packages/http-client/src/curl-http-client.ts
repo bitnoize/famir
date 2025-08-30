@@ -1,3 +1,4 @@
+import { filterSecrets } from '@famir/common'
 import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
@@ -23,9 +24,20 @@ export class CurlHttpClient implements HttpClient {
     validator.addSchemas(httpClientSchemas)
 
     this.options = buildOptions(config.data)
+
+    this.logger.info(
+      {
+        options: filterSecrets(this.options, [])
+      },
+      `HttpClient initialized`
+    )
   }
 
   async forward(request: ForwardRequest): Promise<ForwardResponse> {
+    return await this._forward(request)
+  }
+
+  private _forward(request: ForwardRequest): Promise<ForwardResponse> {
     return new Promise<ForwardResponse>((resolve) => {
       const startTime = Date.now()
 

@@ -17,8 +17,8 @@ export interface ReplServerOptions {
 }
 
 export interface ReplServer {
-  start(): Promise<void>
-  stop(): Promise<void>
+  listen(): Promise<void>
+  close(): Promise<void>
 }
 
 export interface Context {
