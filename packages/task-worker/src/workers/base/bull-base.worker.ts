@@ -7,7 +7,7 @@ import { BullTaskWorkerConnection } from '../../bull-task-worker-connector.js'
 import { TaskWorkerError } from '../../task-worker.errors.js'
 import { TaskWorkerConfig, TaskWorkerOptions } from '../../task-worker.js'
 import { buildOptions } from '../../task-worker.utils.js'
-import { BaseDispatcher, BaseWorker } from './base.js'
+import { BaseManager, BaseWorker } from './base.js'
 
 export abstract class BullBaseWorker<D, R, N extends string> implements BaseWorker {
   protected readonly assertSchema: ValidatorAssertSchema
@@ -19,7 +19,7 @@ export abstract class BullBaseWorker<D, R, N extends string> implements BaseWork
     config: Config<TaskWorkerConfig>,
     protected readonly logger: Logger,
     protected readonly connection: BullTaskWorkerConnection,
-    protected readonly dispatcher: BaseDispatcher<D, R, N>,
+    protected readonly manager: BaseManager<D, R, N>,
     protected readonly queueName: string
   ) {
     this.assertSchema = validator.assertSchema
@@ -90,9 +90,7 @@ export abstract class BullBaseWorker<D, R, N extends string> implements BaseWork
 
   protected processorHandler: Processor<D, R, N> = async (job) => {
     try {
-      const handler = this.dispatcher.getHandler(job.name)
-
-      return await handler(job.data)
+      return await this.manager.applyTo(job)
     } catch (error) {
       return this.exceptionFilter(error, job)
     }
@@ -118,7 +116,7 @@ export abstract class BullBaseWorker<D, R, N extends string> implements BaseWork
       throw error
     } else {
       throw new TaskWorkerError(
-        'INTERNAL_ERROR',
+        'UNKNOWN_ERROR',
         {
           queue: this.queueName,
           job: {

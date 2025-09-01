@@ -19,14 +19,18 @@ export class BullScanMessageQueue
   }
 
   async addTask(messageId: string): Promise<void> {
-    await this._queue.add(
-      'default',
-      {
-        messageId
-      },
-      {
-        jobId: messageId
-      }
-    )
+    try {
+      await this._queue.add(
+        'default',
+        {
+          messageId
+        },
+        {
+          jobId: messageId
+        }
+      )
+    } catch (error) {
+      this.exceptionFilter(error, 'addTask', { messageId})
+    }
   }
 }

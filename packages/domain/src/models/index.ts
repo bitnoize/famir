@@ -1,6 +1,5 @@
 export * from './campaign/index.js'
 export * from './lure/index.js'
-export * from './message-log/index.js'
 export * from './message/index.js'
 export * from './proxy/index.js'
 export * from './redirector/index.js'

@@ -1,7 +1,7 @@
 import { Target } from '@famir/domain'
 import { Logger } from '@famir/logger'
-import { Context, ReplServerError } from '@famir/repl-server'
-import { Validator } from '@famir/validator'
+import { Context } from '@famir/repl-server'
+import { Validator, ValidatorAssertSchema } from '@famir/validator'
 import {
   CreateTargetUseCase,
   DeleteTargetUseCase,
@@ -11,7 +11,6 @@ import {
   ReadTargetUseCase,
   UpdateTargetUseCase
 } from '../../use-cases/index.js'
-import { BaseController } from '../base/base.controller.js'
 import {
   validateCreateTargetDto,
   validateDeleteTargetDto,
@@ -21,10 +20,12 @@ import {
   validateUpdateTargetDto
 } from './target.utils.js'
 
-export class TargetController extends BaseController {
+export class TargetController {
+  protected readonly assertSchema: ValidatorAssertSchema
+
   constructor(
     validator: Validator,
-    logger: Logger,
+    protected readonly logger: Logger,
     context: Context,
     protected readonly createTargetUseCase: CreateTargetUseCase,
     protected readonly readTargetUseCase: ReadTargetUseCase,
@@ -34,84 +35,54 @@ export class TargetController extends BaseController {
     protected readonly deleteTargetUseCase: DeleteTargetUseCase,
     protected readonly listTargetsUseCase: ListTargetsUseCase
   ) {
-    super(validator, logger, context, 'target')
+    this.assertSchema = validator.assertSchema
 
-    this.context.addValue(this.controllerName, {
-      create: this.createHandler,
-      read: this.readHandler,
-      update: this.updateHandler,
-      enable: this.enableHandler,
-      disable: this.disableHandler,
-      delete: this.deleteHandler,
-      list: this.listHandler
-    })
+    context.setHandler('createTarget', `Create target`, this.createHandler)
+    context.setHandler('readTarget', `Read target`, this.readHandler)
+    context.setHandler('updateTarget', `Update target`, this.updateHandler)
+    context.setHandler('enableTarget', `Enable target`, this.enableHandler)
+    context.setHandler('disableTarget', `Disable target`, this.disableHandler)
+    context.setHandler('deleteTarget', `Delete target`, this.deleteHandler)
+    context.setHandler('listTargets', `List targets`, this.listHandler)
   }
 
-  private readonly createHandler = async (dto: unknown): Promise<true | ReplServerError> => {
-    try {
-      validateCreateTargetDto(this.assertSchema, dto)
+  private readonly createHandler = async (dto: unknown): Promise<true> => {
+    validateCreateTargetDto(this.assertSchema, dto)
 
-      return await this.createTargetUseCase.execute(dto)
-    } catch (error) {
-      return this.exceptionFilter(error, 'create', dto)
-    }
+    return await this.createTargetUseCase.execute(dto)
   }
 
-  private readonly readHandler = async (dto: unknown): Promise<Target | null | ReplServerError> => {
-    try {
-      validateReadTargetDto(this.assertSchema, dto)
+  private readonly readHandler = async (dto: unknown): Promise<Target | null> => {
+    validateReadTargetDto(this.assertSchema, dto)
 
-      return await this.readTargetUseCase.execute(dto)
-    } catch (error) {
-      return this.exceptionFilter(error, 'read', dto)
-    }
+    return await this.readTargetUseCase.execute(dto)
   }
 
-  private readonly updateHandler = async (dto: unknown): Promise<true | ReplServerError> => {
-    try {
-      validateUpdateTargetDto(this.assertSchema, dto)
+  private readonly updateHandler = async (dto: unknown): Promise<true> => {
+    validateUpdateTargetDto(this.assertSchema, dto)
 
-      return await this.updateTargetUseCase.execute(dto)
-    } catch (error) {
-      return this.exceptionFilter(error, 'update', dto)
-    }
+    return await this.updateTargetUseCase.execute(dto)
   }
 
-  private readonly enableHandler = async (dto: unknown): Promise<true | ReplServerError> => {
-    try {
-      validateEnableTargetDto(this.assertSchema, dto)
+  private readonly enableHandler = async (dto: unknown): Promise<true> => {
+    validateEnableTargetDto(this.assertSchema, dto)
 
-      return await this.enableTargetUseCase.execute(dto)
-    } catch (error) {
-      return this.exceptionFilter(error, 'enable', dto)
-    }
+    return await this.enableTargetUseCase.execute(dto)
   }
 
-  private readonly disableHandler = async (dto: unknown): Promise<true | ReplServerError> => {
-    try {
-      validateDisableTargetDto(this.assertSchema, dto)
+  private readonly disableHandler = async (dto: unknown): Promise<true> => {
+    validateDisableTargetDto(this.assertSchema, dto)
 
-      return await this.disableTargetUseCase.execute(dto)
-    } catch (error) {
-      return this.exceptionFilter(error, 'disable', dto)
-    }
+    return await this.disableTargetUseCase.execute(dto)
   }
 
-  private readonly deleteHandler = async (dto: unknown): Promise<true | ReplServerError> => {
-    try {
-      validateDeleteTargetDto(this.assertSchema, dto)
+  private readonly deleteHandler = async (dto: unknown): Promise<true> => {
+    validateDeleteTargetDto(this.assertSchema, dto)
 
-      return await this.deleteTargetUseCase.execute(dto)
-    } catch (error) {
-      return this.exceptionFilter(error, 'delete', dto)
-    }
+    return await this.deleteTargetUseCase.execute(dto)
   }
 
-  private readonly listHandler = async (): Promise<Target[] | null | ReplServerError> => {
-    try {
-      return await this.listTargetsUseCase.execute()
-    } catch (error) {
-      return this.exceptionFilter(error, 'list', undefined)
-    }
+  private readonly listHandler = async (): Promise<Target[] | null> => {
+    return await this.listTargetsUseCase.execute()
   }
 }

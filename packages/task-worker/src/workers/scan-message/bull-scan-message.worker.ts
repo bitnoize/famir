@@ -10,7 +10,7 @@ import { Validator } from '@famir/validator'
 import { BullTaskWorkerConnection } from '../../bull-task-worker-connector.js'
 import { TaskWorkerConfig } from '../../task-worker.js'
 import { BullBaseWorker } from '../base/index.js'
-import { ScanMessageDispatcher, ScanMessageWorker } from './scan-message.js'
+import { ScanMessageManager, ScanMessageWorker } from './scan-message.js'
 
 export class BullScanMessageWorker
   extends BullBaseWorker<ScanMessageData, ScanMessageResult, ScanMessageName>
@@ -21,8 +21,8 @@ export class BullScanMessageWorker
     config: Config<TaskWorkerConfig>,
     logger: Logger,
     connection: BullTaskWorkerConnection,
-    dispatcher: ScanMessageDispatcher
+    manager: ScanMessageManager
   ) {
-    super(validator, config, logger, connection, dispatcher, SCAN_MESSAGE_QUEUE_NAME)
+    super(validator, config, logger, connection, manager, SCAN_MESSAGE_QUEUE_NAME)
   }
 }

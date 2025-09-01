@@ -1,5 +1,5 @@
-export * from './node-context.js'
-export * from './node-repl-server.js'
+export * from './builtin-context.js'
+export * from './builtin-repl-server.js'
 export * from './repl-server.errors.js'
 export * from './repl-server.js'
 export * from './repl-server.schemas.js'

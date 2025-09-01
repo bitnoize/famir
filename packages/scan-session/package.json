@@ -1,0 +1,24 @@
+{
+  "name": "@famir/scan-session",
+  "type": "module",
+  "version": "0.3.3",
+  "description": "ScanSession module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@famir/domain": "*",
+    "@famir/common": "*",
+    "@famir/validator": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
+    "@famir/task-worker": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1"
+  }
+}

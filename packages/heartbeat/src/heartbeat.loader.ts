@@ -21,7 +21,8 @@ import {
   BullHeartbeatWorker,
   BullTaskWorkerConnection,
   BullTaskWorkerConnector,
-  HeartbeatDispatcher,
+  HeartbeatManager,
+  BullHeartbeatManager,
   HeartbeatWorker,
   TaskWorkerConnector
 } from '@famir/task-worker'
@@ -133,9 +134,9 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
       )
   )
 
-  container.registerSingleton<HeartbeatDispatcher>(
-    'HeartbeatDispatcher',
-    () => new HeartbeatDispatcher()
+  container.registerSingleton<HeartbeatManager>(
+    'HeartbeatManager',
+    () => new BullHeartbeatManager()
   )
 
   container.registerSingleton<HeartbeatWorker>(
@@ -148,7 +149,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
         c
           .resolve<TaskWorkerConnector>('TaskWorkerConnector')
           .connection<BullTaskWorkerConnection>(),
-        c.resolve<HeartbeatDispatcher>('HeartbeatDispatcher')
+        c.resolve<HeartbeatManager>('HeartbeatManager')
       )
   )
 

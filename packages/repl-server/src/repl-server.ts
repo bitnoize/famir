@@ -21,8 +21,10 @@ export interface ReplServer {
   close(): Promise<void>
 }
 
+export type ContextHandler = (dto: unknown) => Promise<unknown>
+
 export interface Context {
   applyTo(replServer: unknown): void
-  addValue(name: string, value: unknown): void
+  setHandler(name: string, description: string, handler: ContextHandler): void
   dump(): Record<string, unknown>
 }

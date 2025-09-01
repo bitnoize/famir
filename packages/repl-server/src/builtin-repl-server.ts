@@ -9,7 +9,7 @@ import { Context, ReplServer, ReplServerConfig, ReplServerOptions } from './repl
 import { replServerSchemas } from './repl-server.schemas.js'
 import { buildOptions } from './repl-server.utils.js'
 
-export class NodeReplServer implements ReplServer {
+export class BuiltinReplServer implements ReplServer {
   protected readonly options: ReplServerOptions
   private readonly _server: net.Server
   private readonly _connections = new Set<net.Socket>()

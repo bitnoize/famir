@@ -10,7 +10,7 @@ import { Validator } from '@famir/validator'
 import { BullTaskWorkerConnection } from '../../bull-task-worker-connector.js'
 import { TaskWorkerConfig } from '../../task-worker.js'
 import { BullBaseWorker } from '../base/index.js'
-import { HeartbeatDispatcher, HeartbeatWorker } from './heartbeat.js'
+import { HeartbeatManager, HeartbeatWorker } from './heartbeat.js'
 
 export class BullHeartbeatWorker
   extends BullBaseWorker<HeartbeatData, HeartbeatResult, HeartbeatName>
@@ -21,8 +21,8 @@ export class BullHeartbeatWorker
     config: Config<TaskWorkerConfig>,
     logger: Logger,
     connection: BullTaskWorkerConnection,
-    dispatcher: HeartbeatDispatcher
+    manager: HeartbeatManager
   ) {
-    super(validator, config, logger, connection, dispatcher, HEARTBEAT_QUEUE_NAME)
+    super(validator, config, logger, connection, manager, HEARTBEAT_QUEUE_NAME)
   }
 }

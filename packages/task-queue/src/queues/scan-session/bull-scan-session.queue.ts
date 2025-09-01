@@ -19,14 +19,18 @@ export class BullScanSessionQueue
   }
 
   async addTask(sessionId: string): Promise<void> {
-    await this._queue.add(
-      'default',
-      {
-        sessionId
-      },
-      {
-        jobId: sessionId
-      }
-    )
+    try {
+      await this._queue.add(
+        'default',
+        {
+          sessionId
+        },
+        {
+          jobId: sessionId
+        }
+      )
+    } catch (error) {
+      this.exceptionFilter(error, 'addTask', { sessionId })
+    }
   }
 }

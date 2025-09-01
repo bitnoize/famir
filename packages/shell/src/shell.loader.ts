@@ -18,7 +18,7 @@ import {
   TargetRepository
 } from '@famir/domain'
 import { Logger, PinoLogger } from '@famir/logger'
-import { Context, NodeContext, NodeReplServer, ReplServer } from '@famir/repl-server'
+import { Context, BuiltinContext, BuiltinReplServer, ReplServer } from '@famir/repl-server'
 import {
   BullHeartbeatQueue,
   BullScanMessageQueue,
@@ -175,12 +175,12 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   // ReplServer
   //
 
-  container.registerSingleton<Context>('Context', () => new NodeContext())
+  container.registerSingleton<Context>('Context', () => new BuiltinContext())
 
   container.registerSingleton<ReplServer>(
     'ReplServer',
     (c) =>
-      new NodeReplServer(
+      new BuiltinReplServer(
         c.resolve<Validator>('Validator'),
         c.resolve<Config<ShellConfig>>('Config'),
         c.resolve<Logger>('Logger'),

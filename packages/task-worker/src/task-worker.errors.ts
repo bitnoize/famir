@@ -1,6 +1,6 @@
 import { CommonError, ErrorContext } from '@famir/common'
 
-export const TASK_WORKER_ERROR_CODES = ['INTERNAL_ERROR'] as const
+export const TASK_WORKER_ERROR_CODES = ['UNKNOWN_ERROR'] as const
 
 export type TaskWorkerErrorCode = (typeof TASK_WORKER_ERROR_CODES)[number]
 

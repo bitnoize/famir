@@ -4,6 +4,7 @@ import { Validator, ValidatorAssertSchema } from '@famir/validator'
 import { Queue } from 'bullmq'
 import { BullTaskQueueConnection } from '../../bull-task-queue-connector.js'
 import { BaseQueue } from './base.js'
+import { TaskQueueError } from '../../task-queue.errors.js'
 
 export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue {
   protected readonly assertSchema: ValidatorAssertSchema
@@ -42,5 +43,30 @@ export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue
 
   async getTaskCounts(): Promise<Record<string, number>> {
     return await this._queue.getJobCounts()
+  }
+
+  protected exceptionFilter(
+    error: unknown,
+    method: string,
+    params: Record<string, unknown> = {}
+  ): never {
+    if (error instanceof TaskQueueError) {
+      error.context['queue'] = this.queueName
+      error.context['method'] = method
+      error.context['params'] = params
+
+      throw error
+    } else {
+      throw new TaskQueueError(
+        'UNKNOWN_ERROR',
+        {
+          queue: this.queueName,
+          method,
+          params,
+          cause: error
+        },
+        `TaskQueue internal error`
+      )
+    }
   }
 }

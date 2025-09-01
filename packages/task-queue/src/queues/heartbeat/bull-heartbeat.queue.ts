@@ -19,34 +19,50 @@ export class BullHeartbeatQueue
   }
 
   async upsertScanSessionsScheduler(every: number): Promise<void> {
-    await this._queue.upsertJobScheduler(
-      'scan-sessions',
-      {
-        every
-      },
-      {
-        data: null
-      }
-    )
+    try {
+      await this._queue.upsertJobScheduler(
+        'scan-sessions',
+        {
+          every
+        },
+        {
+          data: null
+        }
+      )
+    } catch (error) {
+      this.exceptionFilter(error, 'upsertScanSessionsScheduler', { every })
+    }
   }
 
   async removeScanSessionsScheduler(): Promise<void> {
-    await this._queue.removeJobScheduler('scan-sessions')
+    try {
+      await this._queue.removeJobScheduler('scan-sessions')
+    } catch (error) {
+      this.exceptionFilter(error, 'removeScanSessionsScheduler')
+    }
   }
 
   async upsertScanMessagesScheduler(every: number): Promise<void> {
-    await this._queue.upsertJobScheduler(
-      'scan-messages',
-      {
-        every
-      },
-      {
-        data: null
-      }
-    )
+    try {
+      await this._queue.upsertJobScheduler(
+        'scan-messages',
+        {
+          every
+        },
+        {
+          data: null
+        }
+      )
+    } catch (error) {
+      this.exceptionFilter(error, 'upsertScanMessagesScheduler', { every })
+    }
   }
 
   async removeScanMessagesScheduler(): Promise<void> {
-    await this._queue.removeJobScheduler('scan-messages')
+    try {
+      await this._queue.removeJobScheduler('scan-messages')
+    } catch (error) {
+      this.exceptionFilter(error, 'removeScanMessagesScheduler')
+    }
   }
 }
