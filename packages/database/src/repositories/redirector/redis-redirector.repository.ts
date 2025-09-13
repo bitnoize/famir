@@ -1,4 +1,4 @@
-import { Redirector, RedirectorRepository } from '@famir/domain'
+import { Redirector, RedirectorRepository, RepositoryContainer } from '@famir/domain'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
 import { DatabaseError } from '../../database.errors.js'
@@ -6,6 +6,7 @@ import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import {
+  assertRedirector,
   buildRedirectorCollection,
   buildRedirectorModel,
   guardRedirector
@@ -16,87 +17,137 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     super(validator, logger, connection, 'redirector')
   }
 
-  async create(id: string, page: string): Promise<void> {
+  async create(
+    campaignId: string,
+    id: string,
+    page: string
+  ): Promise<RepositoryContainer<Redirector>> {
     try {
-      const status = await this.connection.redirector.create_redirector(id, page)
+      const [status, rawRedirector] = await Promise.all([
+        this.connection.redirector.create_redirector(campaignId, id, page),
+
+        this.connection.redirector.read_redirector(campaignId, id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const redirector = buildRedirectorModel(rawRedirector)
+
+        assertRedirector(redirector)
+
+        return [true, redirector, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND', 'CONFLICT'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
       this.exceptionFilter(error, 'create', {
+        campaignId,
         id,
         page
       })
     }
   }
 
-  async read(id: string): Promise<Redirector | null> {
+  async read(campaignId: string, id: string): Promise<Redirector | null> {
     try {
-      const rawRedirector = await this.connection.redirector.read_redirector(id)
+      const rawRedirector = await this.connection.redirector.read_redirector(campaignId, id)
 
-      const redirector = buildRedirectorModel(rawRedirector)
-
-      return guardRedirector(redirector) ? redirector : null
+      return buildRedirectorModel(rawRedirector)
     } catch (error) {
-      this.exceptionFilter(error, 'read', { id })
+      this.exceptionFilter(error, 'read', { campaignId, id })
     }
   }
 
-  async update(id: string, page: string | null | undefined): Promise<void> {
+  async update(
+    campaignId: string,
+    id: string,
+    page: string | null | undefined
+  ): Promise<RepositoryContainer<Redirector>> {
     try {
-      const status = await this.connection.redirector.update_redirector(id, page)
+      const [status, rawRedirector] = await Promise.all([
+        this.connection.redirector.update_redirector(campaignId, id, page),
+
+        this.connection.redirector.read_redirector(campaignId, id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const redirector = buildRedirectorModel(rawRedirector)
+
+        assertRedirector(redirector)
+
+        return [true, redirector, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
       this.exceptionFilter(error, 'update', {
+        campaignId,
         id,
         page
       })
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(campaignId: string, id: string): Promise<RepositoryContainer<Redirector>> {
     try {
-      const status = await this.connection.redirector.delete_redirector(id)
+      const [rawRedirector, status] = await Promise.all([
+        this.connection.redirector.read_redirector(campaignId, id),
+
+        this.connection.redirector.delete_redirector(campaignId, id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const redirector = buildRedirectorModel(rawRedirector)
+
+        assertRedirector(redirector)
+
+        return [true, redirector, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
-      this.exceptionFilter(error, 'delete', { id })
+      this.exceptionFilter(error, 'delete', { campaignId, id })
     }
   }
 
-  async list(): Promise<Redirector[] | null> {
+  async list(campaignId: string): Promise<Redirector[] | null> {
     try {
-      const index = await this.connection.redirector.read_redirector_index()
+      const index = await this.connection.redirector.read_redirector_index(campaignId)
 
       if (index === null) {
         return null
       }
 
       const rawRedirectors = await Promise.all(
-        index.map((id) => this.connection.redirector.read_redirector(id))
+        index.map((id) => this.connection.redirector.read_redirector(campaignId, id))
       )
 
       return buildRedirectorCollection(rawRedirectors).filter(guardRedirector)
     } catch (error) {
-      this.exceptionFilter(error, 'list')
+      this.exceptionFilter(error, 'list', { campaignId })
     }
   }
 }

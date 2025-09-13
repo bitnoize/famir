@@ -18,7 +18,7 @@ export abstract class RedisBaseRepository {
   protected exceptionFilter(
     error: unknown,
     method: string,
-    params: Record<string, unknown> = {}
+    params: Record<string, unknown>
   ): never {
     if (error instanceof DatabaseError) {
       error.context['repository'] = this.repositoryName
@@ -28,14 +28,13 @@ export abstract class RedisBaseRepository {
       throw error
     } else {
       throw new DatabaseError(
-        'INTERNAL_ERROR',
         {
           repository: this.repositoryName,
           method,
           params,
           cause: error
         },
-        `Internal database error`
+        `Database internal error`
       )
     }
   }

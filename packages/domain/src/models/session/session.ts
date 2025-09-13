@@ -1,11 +1,12 @@
-export interface Session {
-  id: string
-  proxyId: string
-  secret: string
-  isLanding: boolean
-  totalCount: number
-  successCount: number
-  failureCount: number
-  createdAt: number
-  updatedAt: number
+export class Session {
+  constructor(
+    readonly campaignId: string,
+    readonly id: string,
+    readonly proxyId: string,
+    readonly secret: string,
+    readonly isLanding: boolean,
+    readonly messageCount: number,
+    readonly createdAt: Date,
+    readonly lastAuthAt: Date
+  ) {}
 }

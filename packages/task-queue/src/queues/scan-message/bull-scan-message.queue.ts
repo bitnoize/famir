@@ -18,7 +18,7 @@ export class BullScanMessageQueue
     super(validator, logger, connection, SCAN_MESSAGE_QUEUE_NAME)
   }
 
-  async addTask(messageId: string): Promise<void> {
+  async addDefaultTask(messageId: string): Promise<void> {
     try {
       await this._queue.add(
         'default',
@@ -30,7 +30,7 @@ export class BullScanMessageQueue
         }
       )
     } catch (error) {
-      this.exceptionFilter(error, 'addTask', { messageId})
+      this.exceptionFilter(error, 'addTask', { messageId })
     }
   }
 }

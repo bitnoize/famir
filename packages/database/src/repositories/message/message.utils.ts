@@ -6,53 +6,7 @@ import {
   MessageResponseCookies
 } from '@famir/domain'
 import { ValidatorAssertSchema } from '@famir/validator'
-import { validateJson } from '../../database.utils.js'
 import { RawMessage } from './message.functions.js'
-
-export function validateMessageMethod(
-  assertSchema: ValidatorAssertSchema,
-  data: unknown
-): asserts data is MessageMethod {
-  validateJson<MessageMethod>(assertSchema, 'message-method', data, 'messageMethod')
-}
-
-export function validateMessageRequestHeaders(
-  assertSchema: ValidatorAssertSchema,
-  data: unknown
-): asserts data is MessageHeaders {
-  validateJson<MessageHeaders>(assertSchema, 'message-headers', data, 'messageRequestHeaders')
-}
-
-export function validateMessageRequestCookies(
-  assertSchema: ValidatorAssertSchema,
-  data: unknown
-): asserts data is MessageRequestCookies {
-  validateJson<MessageRequestCookies>(
-    assertSchema,
-    'message-request-cookies',
-    data,
-    'messageRequestCookies'
-  )
-}
-
-export function validateMessageResponseHeaders(
-  assertSchema: ValidatorAssertSchema,
-  data: unknown
-): asserts data is MessageHeaders {
-  validateJson<MessageHeaders>(assertSchema, 'message-headers', data, 'messageResponseHeaders')
-}
-
-export function validateMessageResponseCookies(
-  assertSchema: ValidatorAssertSchema,
-  data: unknown
-): asserts data is MessageResponseCookies {
-  validateJson<MessageResponseCookies>(
-    assertSchema,
-    'message-response-cookies',
-    data,
-    'messageResponseCookies'
-  )
-}
 
 export function buildMessageModel(
   assertSchema: ValidatorAssertSchema,
@@ -62,13 +16,14 @@ export function buildMessageModel(
     return null
   }
 
-  validateMessageMethod(assertSchema, rawMessage.method)
-  validateMessageRequestHeaders(assertSchema, rawMessage.request_headers)
-  validateMessageRequestCookies(assertSchema, rawMessage.request_cookies)
-  validateMessageResponseHeaders(assertSchema, rawMessage.response_headers)
-  validateMessageResponseCookies(assertSchema, rawMessage.response_cookies)
+  assertSchema<MessageMethod>('message-method', rawMessage.method)
+  assertSchema<MessageHeaders>('message-headers', rawMessage.request_headers)
+  assertSchema<MessageRequestCookies>('message-request-cookies', rawMessage.request_cookies)
+  assertSchema<MessageHeaders>('message-headers', rawMessage.response_headers)
+  assertSchema<MessageResponseCookies>('message-response-cookies', rawMessage.response_cookies)
 
   return new Message(
+    rawMessage.campaign_id,
     rawMessage.id,
     rawMessage.proxy_id,
     rawMessage.target_id,
@@ -86,9 +41,7 @@ export function buildMessageModel(
     Buffer.from(rawMessage.response_body, 'base64'),
     rawMessage.query_time,
     rawMessage.score,
-    rawMessage.is_complete,
-    new Date(rawMessage.created_at),
-    new Date(rawMessage.updated_at)
+    new Date(rawMessage.created_at)
   )
 }
 
@@ -97,4 +50,14 @@ export function buildMessageCollection(
   rawMessages: Array<RawMessage | null>
 ): Array<Message | null> {
   return rawMessages.map((rawMessage) => buildMessageModel(assertSchema, rawMessage))
+}
+
+export function guardMessage(data: Message | null): data is Message {
+  return data !== null
+}
+
+export function assertMessage(data: Message | null): asserts data is Message {
+  if (!guardMessage(data)) {
+    throw new Error(`Message lost`)
+  }
 }

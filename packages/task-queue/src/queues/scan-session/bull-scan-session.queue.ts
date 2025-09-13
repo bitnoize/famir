@@ -18,7 +18,7 @@ export class BullScanSessionQueue
     super(validator, logger, connection, SCAN_SESSION_QUEUE_NAME)
   }
 
-  async addTask(sessionId: string): Promise<void> {
+  async addDefaultTask(sessionId: string): Promise<void> {
     try {
       await this._queue.add(
         'default',

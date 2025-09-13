@@ -1,4 +1,10 @@
-import { EnabledTarget, Target, TargetRepository } from '@famir/domain'
+import {
+  DisabledTarget,
+  EnabledTarget,
+  RepositoryContainer,
+  Target,
+  TargetRepository
+} from '@famir/domain'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
 import { DatabaseError } from '../../database.errors.js'
@@ -6,6 +12,8 @@ import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import {
+  assertDisabledTarget,
+  assertEnabledTarget,
   buildTargetCollection,
   buildTargetModel,
   guardEnabledTarget,
@@ -18,6 +26,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   }
 
   async create(
+    campaignId: string,
     id: string,
     isLanding: boolean,
     donorSecure: boolean,
@@ -28,6 +37,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     mirrorSub: string,
     mirrorDomain: string,
     mirrorPort: number,
+    connectTimeout: number,
+    timeout: number,
     mainPage: string,
     notFoundPage: string,
     faviconIco: string,
@@ -35,37 +46,55 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     sitemapXml: string,
     successRedirectUrl: string,
     failureRedirectUrl: string
-  ): Promise<void> {
+  ): Promise<RepositoryContainer<DisabledTarget>> {
     try {
-      const status = await this.connection.target.create_target(
-        id,
-        isLanding,
-        donorSecure,
-        donorSub,
-        donorDomain,
-        donorPort,
-        mirrorSecure,
-        mirrorSub,
-        mirrorDomain,
-        mirrorPort,
-        mainPage,
-        notFoundPage,
-        faviconIco,
-        robotsTxt,
-        sitemapXml,
-        successRedirectUrl,
-        failureRedirectUrl
-      )
+      const [status, rawTarget] = await Promise.all([
+        this.connection.target.create_target(
+          campaignId,
+          id,
+          isLanding,
+          donorSecure,
+          donorSub,
+          donorDomain,
+          donorPort,
+          mirrorSecure,
+          mirrorSub,
+          mirrorDomain,
+          mirrorPort,
+          connectTimeout,
+          timeout,
+          mainPage,
+          notFoundPage,
+          faviconIco,
+          robotsTxt,
+          sitemapXml,
+          successRedirectUrl,
+          failureRedirectUrl
+        ),
+
+        this.connection.target.read_target(campaignId, id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const target = buildTargetModel(rawTarget)
+
+        assertDisabledTarget(target)
+
+        return [true, target, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND', 'CONFLICT'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
       this.exceptionFilter(error, 'create', {
+        campaignId,
         id,
         isLanding,
         donorSecure,
@@ -76,6 +105,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         mirrorSub,
         mirrorDomain,
         mirrorPort,
+        connectTimeout,
+        timeout,
         mainPage,
         notFoundPage,
         faviconIco,
@@ -87,32 +118,33 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async read(id: string): Promise<Target | null> {
+  async read(campaignId: string, id: string): Promise<Target | null> {
     try {
-      const rawTarget = await this.connection.target.read_target(id)
+      const rawTarget = await this.connection.target.read_target(campaignId, id)
 
-      const target = buildTargetModel(rawTarget)
-
-      return guardTarget(target) ? target : null
+      return buildTargetModel(rawTarget)
     } catch (error) {
-      this.exceptionFilter(error, 'read', { id })
+      this.exceptionFilter(error, 'read', { campaignId, id })
     }
   }
 
-  async readEnabled(id: string): Promise<EnabledTarget | null> {
+  async readEnabled(campaignId: string, id: string): Promise<EnabledTarget | null> {
     try {
-      const rawTarget = await this.connection.target.read_target(id)
+      const rawTarget = await this.connection.target.read_target(campaignId, id)
 
       const target = buildTargetModel(rawTarget)
 
       return guardEnabledTarget(target) ? target : null
     } catch (error) {
-      this.exceptionFilter(error, 'readEnabled', { id })
+      this.exceptionFilter(error, 'readEnabled', { campaignId, id })
     }
   }
 
   async update(
+    campaignId: string,
     id: string,
+    connectTimeout: number | null | undefined,
+    timeout: number | null | undefined,
     mainPage: string | null | undefined,
     notFoundPage: string | null | undefined,
     faviconIco: string | null | undefined,
@@ -120,29 +152,49 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     sitemapXml: string | null | undefined,
     successRedirectUrl: string | null | undefined,
     failureRedirectUrl: string | null | undefined
-  ): Promise<void> {
+  ): Promise<RepositoryContainer<DisabledTarget>> {
     try {
-      const status = await this.connection.target.update_target(
-        id,
-        mainPage,
-        notFoundPage,
-        faviconIco,
-        robotsTxt,
-        sitemapXml,
-        successRedirectUrl,
-        failureRedirectUrl
-      )
+      const [status, rawTarget] = await Promise.all([
+        this.connection.target.update_target(
+          campaignId,
+          id,
+          connectTimeout,
+          timeout,
+          mainPage,
+          notFoundPage,
+          faviconIco,
+          robotsTxt,
+          sitemapXml,
+          successRedirectUrl,
+          failureRedirectUrl
+        ),
+
+        this.connection.target.read_target(campaignId, id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const target = buildTargetModel(rawTarget)
+
+        assertDisabledTarget(target)
+
+        return [true, target, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
       this.exceptionFilter(error, 'update', {
+        campaignId,
         id,
+        connectTimeout,
+        timeout,
         mainPage,
         notFoundPage,
         faviconIco,
@@ -154,87 +206,129 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async enable(id: string): Promise<void> {
+  async enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledTarget>> {
     try {
-      const status = await this.connection.target.enable_target(id)
+      const [status, rawTarget] = await Promise.all([
+        this.connection.target.enable_target(campaignId, id),
+
+        this.connection.target.read_target(campaignId, id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const target = buildTargetModel(rawTarget)
+
+        assertEnabledTarget(target)
+
+        return [true, target, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
-      this.exceptionFilter(error, 'enable', { id })
+      this.exceptionFilter(error, 'enable', { campaignId, id })
     }
   }
 
-  async disable(id: string): Promise<void> {
+  async disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTarget>> {
     try {
-      const status = await this.connection.target.disable_target(id)
+      const [status, rawTarget] = await Promise.all([
+        this.connection.target.disable_target(campaignId, id),
+
+        this.connection.target.read_target(campaignId, id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const target = buildTargetModel(rawTarget)
+
+        assertDisabledTarget(target)
+
+        return [true, target, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
-      this.exceptionFilter(error, 'disable', { id })
+      this.exceptionFilter(error, 'disable', { campaignId, id })
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTarget>> {
     try {
-      const status = await this.connection.target.delete_target(id)
+      const [rawTarget, status] = await Promise.all([
+        this.connection.target.read_target(campaignId, id),
+
+        this.connection.target.delete_target(campaignId, id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const target = buildTargetModel(rawTarget)
+
+        assertDisabledTarget(target)
+
+        return [true, target, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
-      this.exceptionFilter(error, 'delete', { id })
+      this.exceptionFilter(error, 'delete', { campaignId, id })
     }
   }
 
-  async list(): Promise<Target[] | null> {
+  async list(campaignId: string): Promise<Target[] | null> {
     try {
-      const index = await this.connection.target.read_target_index()
+      const index = await this.connection.target.read_target_index(campaignId)
 
       if (index === null) {
         return null
       }
 
       const rawTargets = await Promise.all(
-        index.map((id) => this.connection.target.read_target(id))
+        index.map((id) => this.connection.target.read_target(campaignId, id))
       )
 
       return buildTargetCollection(rawTargets).filter(guardTarget)
     } catch (error) {
-      this.exceptionFilter(error, 'list')
+      this.exceptionFilter(error, 'list', { campaignId })
     }
   }
 
-  async listEnabled(): Promise<EnabledTarget[] | null> {
+  async listEnabled(campaignId: string): Promise<EnabledTarget[] | null> {
     try {
-      const index = await this.connection.target.read_target_index()
+      const index = await this.connection.target.read_target_index(campaignId)
 
       if (index === null) {
         return null
       }
 
       const rawTargets = await Promise.all(
-        index.map((id) => this.connection.target.read_target(id))
+        index.map((id) => this.connection.target.read_target(campaignId, id))
       )
 
       return buildTargetCollection(rawTargets).filter(guardEnabledTarget)
     } catch (error) {
-      this.exceptionFilter(error, 'list')
+      this.exceptionFilter(error, 'listEnabled', { campaignId })
     }
   }
 }

@@ -1,6 +1,11 @@
 import { MalformDataError } from '@famir/common'
-import { Ajv } from 'ajv'
-import { Validator, ValidatorAssertSchema, ValidatorSchemas } from './validator.js'
+import { Ajv, ValidateFunction } from 'ajv'
+import {
+  Validator,
+  ValidatorAssertSchema,
+  ValidatorGuardSchema,
+  ValidatorSchemas
+} from './validator.js'
 
 export class AjvValidator implements Validator {
   private readonly _ajv: Ajv
@@ -23,17 +28,39 @@ export class AjvValidator implements Validator {
     })
   }
 
+  private getSchema<T>(schemaName: string): ValidateFunction<T> {
+    const validate = this._ajv.getSchema<T>(schemaName)
+
+    if (validate == null) {
+      throw new Error(`JSON-Schema '${schemaName}' not known`)
+    }
+
+    return validate
+  }
+
+  get guardSchema(): ValidatorGuardSchema {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+    return <T>(schemaName: string, data: unknown): data is T => {
+      const validate = this.getSchema<T>(schemaName)
+
+      return validate(data) ? true : false
+    }
+  }
+
   get assertSchema(): ValidatorAssertSchema {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-    return <T>(schemaName: string, data: unknown, entry: string): asserts data is T => {
-      const validate = this._ajv.getSchema<T>(schemaName)
-
-      if (validate === undefined) {
-        throw new Error(`JSON-Schema '${schemaName}' not known`)
-      }
+    return <T>(schemaName: string, data: unknown): asserts data is T => {
+      const validate = this.getSchema<T>(schemaName)
 
       if (!validate(data)) {
-        throw new MalformDataError(entry, data, validate.errors)
+        throw new MalformDataError(
+          {
+            schemaName,
+            data,
+            reason: validate.errors
+          },
+          `JSON-Schema validation failed`
+        )
       }
     }
   }

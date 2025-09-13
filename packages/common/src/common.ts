@@ -19,28 +19,20 @@ process.on('uncaughtException', (error: unknown) => {
   process.exit(1)
 })
 
-export const isProduction = (): boolean => {
-  return process.env['NODE_ENV'] === 'production'
-}
+export { serializeError } from 'serialize-error'
 
 // https://oida.dev/typescript-array-includes/
 export const arrayIncludes = <T extends U, U>(coll: ReadonlyArray<T>, el: U): el is T => {
   return coll.includes(el as T)
 }
 
-export const objectProperty = <T, K extends keyof T>(
-  obj: T,
-  key: K,
-  defaultValue: NonNullable<T[K]>
-): NonNullable<T[K]> => {
-  return obj[key] ?? defaultValue
-}
-
 export const randomIdent = (): string => {
   return randomBytes(16).toString('hex')
 }
 
-export { serializeError } from 'serialize-error'
+export const randomSecret = (): string => {
+  return randomBytes(32).toString('hex')
+}
 
 export const filterSecrets = (data: object, fields: string[]): Record<string, unknown> => {
   const result: Record<string, unknown> = {}

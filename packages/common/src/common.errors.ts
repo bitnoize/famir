@@ -1,6 +1,6 @@
+/*
 export class MalformDataError extends Error {
   constructor(
-    readonly entry: string,
     readonly data: unknown,
     readonly reason: unknown
   ) {
@@ -9,6 +9,7 @@ export class MalformDataError extends Error {
     this.name = 'MalformDataError'
   }
 }
+*/
 
 export type ErrorContext = Record<string, unknown>
 
@@ -18,5 +19,13 @@ export abstract class CommonError extends Error {
     message: string
   ) {
     super(message)
+  }
+}
+
+export class MalformDataError extends CommonError {
+  constructor(context: ErrorContext, message: string) {
+    super(context, message)
+
+    this.name = 'MalformDataError'
   }
 }

@@ -8,11 +8,7 @@ export function buildOptions(
   try {
     const transportOptions: unknown = JSON.parse(data.LOGGER_TRANSPORT_OPTIONS)
 
-    assertSchema<LoggerTransportOptions>(
-      'logger-transport-options',
-      transportOptions,
-      'transportOptions'
-    )
+    assertSchema<LoggerTransportOptions>('logger-transport-options', transportOptions)
 
     return {
       logLevel: data.LOGGER_LOG_LEVEL,

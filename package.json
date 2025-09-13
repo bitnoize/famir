@@ -26,7 +26,6 @@
     "packages/repl-server",
     "packages/reverse-proxy",
     "packages/shell",
-    "packages/heartbeat",
     "packages/scan-session"
   ],
   "devDependencies": {

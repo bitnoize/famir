@@ -8,11 +8,12 @@ import {
 } from '../../database.keys.js'
 
 export interface RawLure {
+  campaign_id: string
   id: string
   path: string
   redirector_id: string
   is_enabled: number
-  auth_count: number
+  session_count: number
   created_at: number
   updated_at: number
 }
@@ -22,16 +23,23 @@ export const lureFunctions = {
     create_lure: {
       NUMBER_OF_KEYS: 5,
 
-      parseCommand(parser: CommandParser, id: string, path: string, redirector_id: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(lureKey(id))
-        parser.pushKey(lurePathKey(path))
-        parser.pushKey(lureIndexKey())
-        parser.pushKey(redirectorKey(redirector_id))
+      parseCommand(
+        parser: CommandParser,
+        campaignId: string,
+        id: string,
+        path: string,
+        redirectorId: string
+      ) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(lureKey(campaignId, id))
+        parser.pushKey(lurePathKey(campaignId, path))
+        parser.pushKey(lureIndexKey(campaignId))
+        parser.pushKey(redirectorKey(campaignId, redirectorId))
 
+        parser.push(campaignId)
         parser.push(id)
         parser.push(path)
-        parser.push(redirector_id)
+        parser.push(redirectorId)
         parser.push(Date.now().toString())
       },
 
@@ -41,9 +49,9 @@ export const lureFunctions = {
     read_lure: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, id: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(lureKey(id))
+      parseCommand(parser: CommandParser, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(lureKey(campaignId, id))
       },
 
       transformReply: undefined as unknown as () => RawLure | null
@@ -52,9 +60,9 @@ export const lureFunctions = {
     read_lure_path: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, path: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(lurePathKey(path))
+      parseCommand(parser: CommandParser, campaignId: string, path: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(lurePathKey(campaignId, path))
       },
 
       transformReply: undefined as unknown as () => string | null
@@ -63,9 +71,9 @@ export const lureFunctions = {
     read_lure_index: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(lureIndexKey())
+      parseCommand(parser: CommandParser, campaignId: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(lureIndexKey(campaignId))
       },
 
       transformReply: undefined as unknown as () => string[] | null
@@ -74,9 +82,11 @@ export const lureFunctions = {
     enable_lure: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, id: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(lureKey(id))
+      parseCommand(parser: CommandParser, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(lureKey(campaignId, id))
+
+        parser.push(Date.now().toString())
       },
 
       transformReply: undefined as unknown as () => string
@@ -85,9 +95,11 @@ export const lureFunctions = {
     disable_lure: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, id: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(lureKey(id))
+      parseCommand(parser: CommandParser, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(lureKey(campaignId, id))
+
+        parser.push(Date.now().toString())
       },
 
       transformReply: undefined as unknown as () => string
@@ -96,12 +108,18 @@ export const lureFunctions = {
     delete_lure: {
       NUMBER_OF_KEYS: 5,
 
-      parseCommand(parser: CommandParser, id: string, path: string, redirector_id: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(lureKey(id))
-        parser.pushKey(lurePathKey(path))
-        parser.pushKey(lureIndexKey())
-        parser.pushKey(redirectorKey(redirector_id))
+      parseCommand(
+        parser: CommandParser,
+        campaignId: string,
+        id: string,
+        path: string,
+        redirectorId: string
+      ) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(lureKey(campaignId, id))
+        parser.pushKey(lurePathKey(campaignId, path))
+        parser.pushKey(lureIndexKey(campaignId))
+        parser.pushKey(redirectorKey(campaignId, redirectorId))
       },
 
       transformReply: undefined as unknown as () => string

@@ -11,5 +11,5 @@ export type ScanMessageResult = number
 export type ScanMessageName = 'default'
 
 export interface ScanMessageQueue extends BaseQueue {
-  addTask(messageId: string): Promise<void>
+  addDefaultTask(messageId: string): Promise<void>
 }

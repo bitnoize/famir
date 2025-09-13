@@ -3,8 +3,8 @@ import { Logger } from '@famir/logger'
 import { Validator, ValidatorAssertSchema } from '@famir/validator'
 import { Queue } from 'bullmq'
 import { BullTaskQueueConnection } from '../../bull-task-queue-connector.js'
-import { BaseQueue } from './base.js'
 import { TaskQueueError } from '../../task-queue.errors.js'
+import { BaseQueue } from './base.js'
 
 export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue {
   protected readonly assertSchema: ValidatorAssertSchema
@@ -58,7 +58,6 @@ export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue
       throw error
     } else {
       throw new TaskQueueError(
-        'UNKNOWN_ERROR',
         {
           queue: this.queueName,
           method,

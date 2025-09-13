@@ -8,6 +8,7 @@ import {
 } from '../../database.keys.js'
 
 export interface RawTarget {
+  campaign_id: string
   id: string
   is_landing: number
   donor_secure: number
@@ -18,6 +19,8 @@ export interface RawTarget {
   mirror_sub: string
   mirror_domain: string
   mirror_port: number
+  connect_timeout: number
+  timeout: number
   main_page: string
   not_found_page: string
   favicon_ico: string
@@ -26,9 +29,7 @@ export interface RawTarget {
   success_redirect_url: string
   failure_redirect_url: string
   is_enabled: number
-  total_count: number
-  success_count: number
-  failure_count: number
+  message_count: number
   created_at: number
   updated_at: number
 }
@@ -40,47 +41,53 @@ export const targetFunctions = {
 
       parseCommand(
         parser: CommandParser,
+        campaignId: string,
         id: string,
-        is_landing: boolean,
-        donor_secure: boolean,
-        donor_sub: string,
-        donor_domain: string,
-        donor_port: number,
-        mirror_secure: boolean,
-        mirror_sub: string,
-        mirror_domain: string,
-        mirror_port: number,
-        main_page: string,
-        not_found_page: string,
-        favicon_ico: string,
-        robots_txt: string,
-        sitemap_xml: string,
-        success_redirect_url: string,
-        failure_redirect_url: string
+        isLanding: boolean,
+        donorSecure: boolean,
+        donorSub: string,
+        donorDomain: string,
+        donorPort: number,
+        mirrorSecure: boolean,
+        mirrorSub: string,
+        mirrorDomain: string,
+        mirrorPort: number,
+        connectTimeout: number,
+        timeout: number,
+        mainPage: string,
+        notFoundPage: string,
+        faviconIco: string,
+        robotsTxt: string,
+        sitemapXml: string,
+        successRedirectUrl: string,
+        failureRedirectUrl: string
       ) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(targetKey(id))
-        parser.pushKey(targetUniqueDonorKey())
-        parser.pushKey(targetUniqueMirrorKey())
-        parser.pushKey(targetIndexKey())
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(targetKey(campaignId, id))
+        parser.pushKey(targetUniqueDonorKey(campaignId))
+        parser.pushKey(targetUniqueMirrorKey(campaignId))
+        parser.pushKey(targetIndexKey(campaignId))
 
+        parser.push(campaignId)
         parser.push(id)
-        parser.push(is_landing ? '1' : '0')
-        parser.push(donor_secure ? '1' : '0')
-        parser.push(donor_sub)
-        parser.push(donor_domain)
-        parser.push(donor_port.toString())
-        parser.push(mirror_secure ? '1' : '0')
-        parser.push(mirror_sub)
-        parser.push(mirror_domain)
-        parser.push(mirror_port.toString())
-        parser.push(main_page)
-        parser.push(not_found_page)
-        parser.push(favicon_ico)
-        parser.push(robots_txt)
-        parser.push(sitemap_xml)
-        parser.push(success_redirect_url)
-        parser.push(failure_redirect_url)
+        parser.push(isLanding ? '1' : '0')
+        parser.push(donorSecure ? '1' : '0')
+        parser.push(donorSub)
+        parser.push(donorDomain)
+        parser.push(donorPort.toString())
+        parser.push(mirrorSecure ? '1' : '0')
+        parser.push(mirrorSub)
+        parser.push(mirrorDomain)
+        parser.push(mirrorPort.toString())
+        parser.push(connectTimeout.toString())
+        parser.push(timeout.toString())
+        parser.push(mainPage)
+        parser.push(notFoundPage)
+        parser.push(faviconIco)
+        parser.push(robotsTxt)
+        parser.push(sitemapXml)
+        parser.push(successRedirectUrl)
+        parser.push(failureRedirectUrl)
         parser.push(Date.now().toString())
       },
 
@@ -90,9 +97,9 @@ export const targetFunctions = {
     read_target: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, id: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(targetKey(id))
+      parseCommand(parser: CommandParser, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(targetKey(campaignId, id))
       },
 
       transformReply: undefined as unknown as () => RawTarget | null
@@ -101,9 +108,9 @@ export const targetFunctions = {
     read_target_index: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(targetIndexKey())
+      parseCommand(parser: CommandParser, campaignId: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(targetIndexKey(campaignId))
       },
 
       transformReply: undefined as unknown as () => string[] | null
@@ -114,51 +121,64 @@ export const targetFunctions = {
 
       parseCommand(
         parser: CommandParser,
+        campaignId: string,
         id: string,
-        main_page: string | null | undefined,
-        not_found_page: string | null | undefined,
-        favicon_ico: string | null | undefined,
-        robots_txt: string | null | undefined,
-        sitemap_xml: string | null | undefined,
-        success_redirect_url: string | null | undefined,
-        failure_redirect_url: string | null | undefined
+        connectTimeout: number | null | undefined,
+        timeout: number | null | undefined,
+        mainPage: string | null | undefined,
+        notFoundPage: string | null | undefined,
+        faviconIco: string | null | undefined,
+        robotsTxt: string | null | undefined,
+        sitemapXml: string | null | undefined,
+        successRedirectUrl: string | null | undefined,
+        failureRedirectUrl: string | null | undefined
       ) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(targetKey(id))
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(targetKey(campaignId, id))
 
-        if (main_page != null) {
+        if (connectTimeout != null) {
+          parser.push('connect_timeout')
+          parser.push(connectTimeout.toString())
+        }
+
+        if (timeout != null) {
+          parser.push('timeout')
+          parser.push(timeout.toString())
+        }
+
+        if (mainPage != null) {
           parser.push('main_page')
-          parser.push(main_page)
+          parser.push(mainPage)
         }
 
-        if (not_found_page != null) {
+        if (notFoundPage != null) {
           parser.push('not_found_page')
-          parser.push(not_found_page)
+          parser.push(notFoundPage)
         }
 
-        if (favicon_ico != null) {
+        if (faviconIco != null) {
           parser.push('favicon_ico')
-          parser.push(favicon_ico)
+          parser.push(faviconIco)
         }
 
-        if (robots_txt != null) {
+        if (robotsTxt != null) {
           parser.push('robots_txt')
-          parser.push(robots_txt)
+          parser.push(robotsTxt)
         }
 
-        if (sitemap_xml != null) {
+        if (sitemapXml != null) {
           parser.push('sitemap_xml')
-          parser.push(sitemap_xml)
+          parser.push(sitemapXml)
         }
 
-        if (success_redirect_url != null) {
+        if (successRedirectUrl != null) {
           parser.push('success_redirect_url')
-          parser.push(success_redirect_url)
+          parser.push(successRedirectUrl)
         }
 
-        if (failure_redirect_url != null) {
+        if (failureRedirectUrl != null) {
           parser.push('failure_redirect_url')
-          parser.push(failure_redirect_url)
+          parser.push(failureRedirectUrl)
         }
 
         parser.push('updated_at')
@@ -171,9 +191,9 @@ export const targetFunctions = {
     enable_target: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, id: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(targetKey(id))
+      parseCommand(parser: CommandParser, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(targetKey(campaignId, id))
 
         parser.push(Date.now().toString())
       },
@@ -184,9 +204,9 @@ export const targetFunctions = {
     disable_target: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, id: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(targetKey(id))
+      parseCommand(parser: CommandParser, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(targetKey(campaignId, id))
 
         parser.push(Date.now().toString())
       },
@@ -197,12 +217,12 @@ export const targetFunctions = {
     delete_target: {
       NUMBER_OF_KEYS: 5,
 
-      parseCommand(parser: CommandParser, id: string) {
-        parser.pushKey(campaignKey())
-        parser.pushKey(targetKey(id))
-        parser.pushKey(targetUniqueDonorKey())
-        parser.pushKey(targetUniqueMirrorKey())
-        parser.pushKey(targetIndexKey())
+      parseCommand(parser: CommandParser, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(campaignId))
+        parser.pushKey(targetKey(campaignId, id))
+        parser.pushKey(targetUniqueDonorKey(campaignId))
+        parser.pushKey(targetUniqueMirrorKey(campaignId))
+        parser.pushKey(targetIndexKey(campaignId))
       },
 
       transformReply: undefined as unknown as () => string

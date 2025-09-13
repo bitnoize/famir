@@ -1,11 +1,11 @@
-import { Campaign, CampaignRepository } from '@famir/domain'
+import { Campaign, CampaignRepository, RepositoryContainer } from '@famir/domain'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
 import { DatabaseError } from '../../database.errors.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { buildCampaignModel, guardCampaign } from './campaign.utils.js'
+import { assertCampaign, buildCampaignModel } from './campaign.utils.js'
 
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {
   constructor(validator: Validator, logger: Logger, connection: RedisDatabaseConnection) {
@@ -13,6 +13,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
   }
 
   async create(
+    id: string,
     description: string,
     landingSecret: string,
     landingAuthPath: string,
@@ -21,44 +22,46 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     sessionCookieName: string,
     sessionExpire: number,
     newSessionExpire: number,
-    sessionLimit: number,
-    sessionEmergeIdleTime: number,
-    sessionEmergeLimit: number,
-    messageExpire: number,
-    messageLimit: number,
-    messageEmergeIdleTime: number,
-    messageEmergeLimit: number,
-    messageLockExpire: number
-  ): Promise<void> {
+    messageExpire: number
+  ): Promise<RepositoryContainer<Campaign>> {
     try {
-      const status = await this.connection.campaign.create_campaign(
-        description,
-        landingSecret,
-        landingAuthPath,
-        landingAuthParam,
-        landingLureParam,
-        sessionCookieName,
-        sessionExpire,
-        newSessionExpire,
-        sessionLimit,
-        sessionEmergeIdleTime,
-        sessionEmergeLimit,
-        messageExpire,
-        messageLimit,
-        messageEmergeIdleTime,
-        messageEmergeLimit,
-        messageLockExpire
-      )
+      const [status, rawCampaign] = await Promise.all([
+        this.connection.campaign.create_campaign(
+          id,
+          description,
+          landingSecret,
+          landingAuthPath,
+          landingAuthParam,
+          landingLureParam,
+          sessionCookieName,
+          sessionExpire,
+          newSessionExpire,
+          messageExpire
+        ),
+
+        this.connection.campaign.read_campaign(id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const campaign = buildCampaignModel(rawCampaign)
+
+        assertCampaign(campaign)
+
+        return [true, campaign, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['CONFLICT'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
       this.exceptionFilter(error, 'create', {
+        id,
         description,
         landingSecret,
         landingAuthPath,
@@ -67,94 +70,96 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         sessionCookieName,
         sessionExpire,
         newSessionExpire,
-        sessionLimit,
-        sessionEmergeIdleTime,
-        sessionEmergeLimit,
-        messageExpire,
-        messageLimit,
-        messageEmergeIdleTime,
-        messageEmergeLimit,
-        messageLockExpire
+        messageExpire
       })
     }
   }
 
-  async read(): Promise<Campaign | null> {
+  async read(id: string): Promise<Campaign | null> {
     try {
-      const rawCampaign = await this.connection.campaign.read_campaign()
+      const rawCampaign = await this.connection.campaign.read_campaign(id)
 
-      const campaign = buildCampaignModel(rawCampaign)
-
-      return guardCampaign(campaign) ? campaign : null
+      return buildCampaignModel(rawCampaign)
     } catch (error) {
-      this.exceptionFilter(error, 'read')
+      this.exceptionFilter(error, 'read', { id })
     }
   }
 
   async update(
+    id: string,
     description: string | null | undefined,
     sessionExpire: number | null | undefined,
     newSessionExpire: number | null | undefined,
-    sessionLimit: number | null | undefined,
-    sessionEmergeIdleTime: number | null | undefined,
-    sessionEmergeLimit: number | null | undefined,
-    messageExpire: number | null | undefined,
-    messageLimit: number | null | undefined,
-    messageEmergeIdleTime: number | null | undefined,
-    messageEmergeLimit: number | null | undefined,
-    messageLockExpire: number | null | undefined
-  ): Promise<void> {
+    messageExpire: number | null | undefined
+  ): Promise<RepositoryContainer<Campaign>> {
     try {
-      const status = await this.connection.campaign.update_campaign(
-        description,
-        sessionExpire,
-        newSessionExpire,
-        sessionLimit,
-        sessionEmergeIdleTime,
-        sessionEmergeLimit,
-        messageExpire,
-        messageLimit,
-        messageEmergeIdleTime,
-        messageEmergeLimit,
-        messageLockExpire
-      )
+      const [status, rawCampaign] = await Promise.all([
+        this.connection.campaign.update_campaign(
+          id,
+          description,
+          sessionExpire,
+          newSessionExpire,
+          messageExpire
+        ),
+
+        this.connection.campaign.read_campaign(id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const campaign = buildCampaignModel(rawCampaign)
+
+        assertCampaign(campaign)
+
+        return [true, campaign, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
       this.exceptionFilter(error, 'update', {
+        id,
+        description,
         sessionExpire,
         newSessionExpire,
-        sessionLimit,
-        sessionEmergeIdleTime,
-        sessionEmergeLimit,
-        messageExpire,
-        messageLimit,
-        messageEmergeIdleTime,
-        messageEmergeLimit,
-        messageLockExpire
+        messageExpire
       })
     }
   }
 
-  async delete(): Promise<void> {
+  async delete(id: string): Promise<RepositoryContainer<Campaign>> {
     try {
-      const status = await this.connection.campaign.delete_campaign()
+      const [rawCampaign, status] = await Promise.all([
+        this.connection.campaign.read_campaign(id),
+
+        this.connection.campaign.delete_campaign(id)
+      ])
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        const campaign = buildCampaignModel(rawCampaign)
+
+        assertCampaign(campaign)
+
+        return [true, campaign, code, message]
       }
 
-      throw new DatabaseError(code, {}, message)
+      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
+
+      if (isKnownError) {
+        return [false, null, code, message]
+      }
+
+      throw new DatabaseError({ code }, message)
     } catch (error) {
-      this.exceptionFilter(error, 'delete')
+      this.exceptionFilter(error, 'delete', { id })
     }
   }
 }

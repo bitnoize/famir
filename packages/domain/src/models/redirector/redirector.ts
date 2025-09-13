@@ -1,5 +1,6 @@
 export class Redirector {
   constructor(
+    readonly campaignId: string,
     readonly id: string,
     readonly page: string,
     readonly lureCount: number,

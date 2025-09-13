@@ -1,6 +1,5 @@
-import { arrayIncludes, MalformDataError } from '@famir/common'
-import { ValidatorAssertSchema } from '@famir/validator'
-import { DATABASE_ERROR_CODES, DatabaseError } from './database.errors.js'
+import { arrayIncludes } from '@famir/common'
+import { REPOSITORY_STATUS_CODES, RepositoryStatusCode } from '@famir/domain'
 import { DatabaseConfig, DatabaseOptions } from './database.js'
 
 export function buildConnectorOptions(data: DatabaseConfig): DatabaseOptions {
@@ -9,18 +8,17 @@ export function buildConnectorOptions(data: DatabaseConfig): DatabaseOptions {
   }
 }
 
+/*
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 export function validateJson<T>(
   assertSchema: ValidatorAssertSchema,
   schema: string,
-  data: unknown,
-  entry: string
+  data: unknown
 ): asserts data is T {
   try {
-    assertSchema<T>(schema, data, entry)
+    assertSchema<T>(schema, data)
   } catch (error) {
     throw new DatabaseError(
-      'BAD_PARAMS',
       {
         cause: error
       },
@@ -28,34 +26,22 @@ export function validateJson<T>(
     )
   }
 }
+*/
 
-export const STATUS_CODES = [...DATABASE_ERROR_CODES, 'OK'] as const
+export function parseStatusReply(status: string): [RepositoryStatusCode, string] {
+  const [code, message] = status.split(/\s+(.*)/, 2)
 
-export type StatusCode = (typeof STATUS_CODES)[number]
-
-export function assertStatusCode(data: unknown, entry = 'code'): asserts data is StatusCode {
-  const test = data != null && typeof data === 'string' && arrayIncludes(STATUS_CODES, data)
-
-  if (!test) {
-    throw new MalformDataError(entry, data, `Unknown status code`)
+  if (code === undefined) {
+    throw new Error(`Status code not defined`)
   }
-}
 
-export function parseStatusReply(status: string): [StatusCode, string] {
-  try {
-    const [code, message] = status.split(/\s+(.*)/)
-
-    assertStatusCode(code)
-
-    return [code, message ?? '']
-  } catch (error) {
-    throw new DatabaseError(
-      'INTERNAL_ERROR',
-      {
-        status,
-        cause: error
-      },
-      `Parse status reply failed`
-    )
+  if (!arrayIncludes(REPOSITORY_STATUS_CODES, code)) {
+    throw new Error(`Unknown status code: "${code}"`)
   }
+
+  if (message === undefined) {
+    throw new Error(`Status message not defined`)
+  }
+
+  return [code, message]
 }

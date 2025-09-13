@@ -1,15 +1,8 @@
 import {
   campaignDescriptionSchema,
-  campaignMessageEmergeIdleTimeSchema,
-  campaignMessageEmergeLimitSchema,
   campaignMessageExpireSchema,
-  campaignMessageLimitSchema,
-  campaignMessageLockExpireSchema,
   campaignNewSessionExpireSchema,
-  campaignSessionEmergeIdleTimeSchema,
-  campaignSessionEmergeLimitSchema,
-  campaignSessionExpireSchema,
-  campaignSessionLimitSchema
+  campaignSessionExpireSchema
 } from '@famir/database'
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
 import { CreateCampaignDto, UpdateCampaignDto } from '../../use-cases/index.js'
@@ -18,6 +11,7 @@ export const createCampaignDtoSchema: JSONSchemaType<CreateCampaignDto> = {
   type: 'object',
   required: [],
   properties: {
+    id: customIdentSchema,
     description: {
       ...campaignDescriptionSchema,
       nullable: true
@@ -50,38 +44,10 @@ export const createCampaignDtoSchema: JSONSchemaType<CreateCampaignDto> = {
       ...campaignNewSessionExpireSchema,
       nullable: true
     },
-    sessionLimit: {
-      ...campaignSessionLimitSchema,
-      nullable: true
-    },
-    sessionEmergeIdleTime: {
-      ...campaignSessionEmergeIdleTimeSchema,
-      nullable: true
-    },
-    sessionEmergeLimit: {
-      ...campaignSessionEmergeLimitSchema,
-      nullable: true
-    },
     messageExpire: {
       ...campaignMessageExpireSchema,
       nullable: true
     },
-    messageLimit: {
-      ...campaignMessageLimitSchema,
-      nullable: true
-    },
-    messageEmergeIdleTime: {
-      ...campaignMessageEmergeIdleTimeSchema,
-      nullable: true
-    },
-    messageEmergeLimit: {
-      ...campaignMessageEmergeLimitSchema,
-      nullable: true
-    },
-    messageLockExpire: {
-      ...campaignMessageLockExpireSchema,
-      nullable: true
-    }
   },
   additionalProperties: false
 } as const
@@ -102,38 +68,10 @@ export const updateCampaignDtoSchema: JSONSchemaType<UpdateCampaignDto> = {
       ...campaignNewSessionExpireSchema,
       nullable: true
     },
-    sessionLimit: {
-      ...campaignSessionLimitSchema,
-      nullable: true
-    },
-    sessionEmergeIdleTime: {
-      ...campaignSessionEmergeIdleTimeSchema,
-      nullable: true
-    },
-    sessionEmergeLimit: {
-      ...campaignSessionEmergeLimitSchema,
-      nullable: true
-    },
     messageExpire: {
       ...campaignMessageExpireSchema,
       nullable: true
     },
-    messageLimit: {
-      ...campaignMessageLimitSchema,
-      nullable: true
-    },
-    messageEmergeIdleTime: {
-      ...campaignMessageEmergeIdleTimeSchema,
-      nullable: true
-    },
-    messageEmergeLimit: {
-      ...campaignMessageEmergeLimitSchema,
-      nullable: true
-    },
-    messageLockExpire: {
-      ...campaignMessageLockExpireSchema,
-      nullable: true
-    }
   },
   additionalProperties: false
 } as const

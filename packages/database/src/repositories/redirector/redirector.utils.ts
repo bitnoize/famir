@@ -7,6 +7,7 @@ export function buildRedirectorModel(rawRedirector: RawRedirector | null): Redir
   }
 
   return new Redirector(
+    rawRedirector.campaign_id,
     rawRedirector.id,
     rawRedirector.page,
     rawRedirector.lure_count,
@@ -21,6 +22,12 @@ export function buildRedirectorCollection(
   return rawRedirectors.map((rawRedirector) => buildRedirectorModel(rawRedirector))
 }
 
-export const guardRedirector = (redirector: Redirector | null): redirector is Redirector => {
+export function guardRedirector(redirector: Redirector | null): redirector is Redirector {
   return redirector !== null
+}
+
+export function assertRedirector(data: Redirector | null): asserts data is Redirector {
+  if (!guardRedirector(data)) {
+    throw new Error(`Redirector lost`)
+  }
 }

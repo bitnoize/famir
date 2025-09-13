@@ -2,6 +2,7 @@ export const TARGET_SUB_ROOT = '.'
 
 export class Target {
   constructor(
+    readonly campaignId: string,
     readonly id: string,
     readonly isLanding: boolean,
     readonly donorSecure: boolean,
@@ -12,6 +13,8 @@ export class Target {
     readonly mirrorSub: string,
     readonly mirrorDomain: string,
     readonly mirrorPort: number,
+    readonly connectTimeout: number,
+    readonly timeout: number,
     readonly mainPage: string,
     readonly notFoundPage: string,
     readonly faviconIco: string,
@@ -19,15 +22,15 @@ export class Target {
     readonly sitemapXml: string,
     readonly successRedirectUrl: string,
     readonly failureRedirectUrl: string,
-    //readonly connectTimeout: number,
-    //readonly responseTimeout: number,
     readonly isEnabled: boolean,
-    readonly totalCount: number,
-    readonly successCount: number,
-    readonly failureCount: number,
+    readonly messageCount: number,
     readonly createdAt: Date,
     readonly updatedAt: Date
   ) {}
+}
+
+export interface DisabledTarget extends Target {
+  isEnabled: true
 }
 
 export interface EnabledTarget extends Target {

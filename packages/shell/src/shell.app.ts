@@ -38,8 +38,6 @@ export class ShellApp {
 
       //await this.taskQueueConnector.connect()
 
-      //await this.taskWorkerConnector.connect()
-
       await this.replServer.listen()
     } catch (error) {
       console.error(`Shell start failed`, { error })

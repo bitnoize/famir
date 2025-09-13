@@ -5,11 +5,11 @@ export function buildConfig<T>(assertSchema: ValidatorAssertSchema): T {
   try {
     const data = { ...process.env }
 
-    assertSchema<T>('config', data, 'config')
+    assertSchema<T>('config', data)
 
     return data
   } catch (error) {
-    console.error(`Config validation failed`, { error })
+    console.error(`Build config error`, { error })
 
     process.exit(1)
   }

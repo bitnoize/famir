@@ -11,5 +11,5 @@ export type ScanSessionResult = number
 export type ScanSessionName = 'default'
 
 export interface ScanSessionQueue extends BaseQueue {
-  addTask(sessionId: string): Promise<void>
+  addDefaultTask(sessionId: string): Promise<void>
 }

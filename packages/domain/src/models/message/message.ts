@@ -9,7 +9,7 @@ export type MessageRequestCookie = string
 export type MessageRequestCookies = Record<string, MessageRequestCookie | null | undefined>
 
 export interface MessageResponseCookie {
-  name: string
+  name: string // FIXME
   value: string
   path?: string | null | undefined
   domain?: string | null | undefined
@@ -23,6 +23,7 @@ export type MessageResponseCookies = Record<string, MessageResponseCookie | null
 
 export class Message {
   constructor(
+    readonly campaignId: string,
     readonly id: string,
     readonly proxyId: string,
     readonly targetId: string,
@@ -40,9 +41,7 @@ export class Message {
     readonly responseBody: Buffer,
     readonly queryTime: number,
     readonly score: number,
-    readonly isComplete: boolean,
-    readonly createdAt: Date,
-    readonly updatedAt: Date
+    readonly createdAt: Date
   ) {}
 }
 

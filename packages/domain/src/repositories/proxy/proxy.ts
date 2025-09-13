@@ -1,11 +1,18 @@
-import { EnabledProxy, Proxy } from '../../models/index.js'
+import { RepositoryContainer } from '../../domain.js'
+import { DisabledProxy, EnabledProxy, Proxy } from '../../models/index.js'
 
 export interface ProxyRepository {
-  create(id: string, url: string): Promise<void>
-  read(id: string): Promise<Proxy | null>
-  readEnabled(id: string): Promise<EnabledProxy | null>
-  enable(id: string): Promise<void>
-  disable(id: string): Promise<void>
-  delete(id: string): Promise<void>
-  list(): Promise<Proxy[] | null>
+  create(campaignId: string, id: string, url: string): Promise<RepositoryContainer<Proxy>>
+
+  read(campaignId: string, id: string): Promise<Proxy | null>
+
+  readEnabled(campaignId: string, id: string): Promise<EnabledProxy | null>
+
+  enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledProxy>>
+
+  disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledProxy>>
+
+  delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledProxy>>
+
+  list(campaignId: string): Promise<Proxy[] | null>
 }

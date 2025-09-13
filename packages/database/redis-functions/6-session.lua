@@ -4,414 +4,289 @@
   Create session
 --]]
 local function create_session(keys, args)
-  if #keys ~= 4 or #args ~= 5 then
-    return redis.error_reply('BAD_PARAMS wrong function use')
+  if not (#keys == 3 and #args == 4) then
+    return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local session_key = keys[2]
-  local session_index_key = keys[3]
-  local session_loop_index_key = keys[4]
+  local enabled_proxy_index_key = keys[3]
 
-  local campaign_id = args[1]
-  if not (campaign_id and campaign_id ~= '') then
-    return redis.error_reply('BAD_PARAMS campaign_id wrong')
+  local model = {
+    campaign_id = args[1],
+    id = args[2],
+    proxy_id = nil,
+    secret = args[3],
+    is_landing = 0,
+    message_count = 0,
+    created_at = tonumber(args[4]),
+    last_auth_at = nil,
+  }
+
+  if not #model.campaign_id > 0 then
+    return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  local id = args[2]
-  if not (id and id ~= '') then
-    return redis.error_reply('BAD_PARAMS id wrong')
+  if not #model.id > 0 then
+    return redis.error_reply('ERR Wrong model.id')
   end
 
-  local proxy_id = args[3]
-  if not (proxy_id and proxy_id ~= '') then
-    return redis.error_reply('BAD_PARAMS proxy_id wrong')
+  if not #model.secret > 0 then
+    return redis.error_reply('ERR Wrong model.secret')
   end
 
-  local secret = args[4]
-  if not (secret and secret ~= '') then
-    return redis.error_reply('BAD_PARAMS secret wrong')
+  if not (model.created_at and model.created_at > 0) then
+    return redis.error_reply('ERR Wrong model.created_at')
   end
 
-  local current_time = tonumber(args[5])
-  if not (current_time and current_time > 0) then
-    return redis.error_reply('BAD_PARAMS current_time wrong')
+  model.last_auth_at = model.created_at
+
+  if not redis.call('EXISTS', campaign_key) == 1 then
+    return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('ENTITY_NOT_FOUND campaign not found')
+  if not redis.call('EXISTS', session_key) == 0 then
+    return redis.status_reply('CONFLICT Session allready exists')
   end
 
-  if redis.call('EXISTS', session_key) ~= 0 then
-    return redis.status_reply('ENTITY_EXISTS session allready exists')
+  if not redis.call('SCARD', enabled_proxy_index_key) > 0 then
+    return redis.status_reply('FORBIDDEN No enabled proxies found')
   end
 
-  local session_limit = tonumber(redis.call('HGET', campaign_key, 'session_limit'))
-  if not (session_limit and session_limit >= 0) then
-    return redis.error_reply('MALFORM_DATA campaign session_limit wrong')
+  model.proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key)
+
+  if not (model.proxy_id and #model.proxy_id > 0) then
+    return redis.error_reply('ERR Malform model.proxy_id')
   end
 
-  if redis.call('ZCARD', session_index_key) >= session_limit then
-    return redis.status_reply('LIMIT_EXCEED campaign session_limit exceeded')
+  local data = {
+    new_session_expire = tonumber(redis.call('HGET', campaign_key, 'new_session_expire')),
+  }
+
+  if not (data.new_session_expire and data.new_session_expire > 0) then
+    return redis.error_reply('ERR Malform data.new_session_expire')
   end
 
   -- Point of no return
 
-  -- stylua: ignore
-  redis.call(
-    'HSET', session_key,
-    'campaign_id', campaign_id,
-    'id', id,
-    'proxy_id', proxy_id,
-    'secret', secret,
-    'is_landing', 0,
-    'total_count', 0,
-    'success_count', 0,
-    'failure_count', 0,
-    'created_at', current_time,
-    'updated_at', current_time
-  )
+  local store = {}
 
-  redis.call('ZADD', session_index_key, current_time, id)
+  for field, value in pairs(model) do
+    table.insert(store, field)
+    table.insert(store, value)
+  end
 
-  redis.call('ZADD', session_loop_index_key, current_time, id)
+  redis.call('HSET', session_key, unpack(store))
 
-  return redis.status_reply('OK session created')
+  redis.call('PEXPIRE', session_key, data.new_session_expire)
+
+  return redis.status_reply('OK Session created')
 end
 
 redis.register_function({
   function_name = 'create_session',
   callback = create_session,
+  description = 'Create session',
 })
 
 --[[
   Read session
 --]]
 local function read_session(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('BAD_PARAMS wrong function use')
+  if not (#keys == 2 and #args == 0) then
+    return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local session_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if not redis.call('EXISTS', campaign_key) == 1 then
     return nil
   end
 
-  if redis.call('EXISTS', session_key) ~= 1 then
+  if not redis.call('EXISTS', session_key) == 1 then
     return nil
   end
 
   -- stylua: ignore
-  return redis.call(
+  local values = redis.call(
     'HMGET', session_key,
     'campaign_id',
     'id',
     'proxy_id',
     'secret',
     'is_landing',
-    'total_count',
-    'success_count',
-    'failure_count',
+    'message_count',
     'created_at',
-    'updated_at'
+    'last_auth_at'
   )
+
+  if not #values == 8 then
+    return redis.error_reply('ERR Malform values')
+  end
+
+  local model = {
+    campaign_id = values[1],
+    id = values[2],
+    proxy_id = values[3],
+    secret = values[4],
+    is_landing = tonumber(values[5]),
+    message_count = tonumber(values[6]),
+    created_at = tonumber(values[7]),
+    last_auth_at = tonumber(values[8]),
+  }
+
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Malform model.' .. field)
+    end
+  end
+
+  return { map = model }
 end
 
 redis.register_function({
   function_name = 'read_session',
   callback = read_session,
   flags = { 'no-writes' },
+  description = 'Read session',
 })
 
 --[[
-  Read session index
+  Auth session
 --]]
-local function read_session_index(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('BAD_PARAMS wrong function use')
+local function auth_session(keys, args)
+  if not (#keys == 3 and #args == 1) then
+    return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local session_index_key = keys[2]
+  local session_key = keys[2]
+  local enabled_proxy_index_key = keys[3]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return nil
+  local params = {
+    last_auth_at = tonumber(args[1]),
+  }
+
+  if not (params.last_auth_at and params.last_auth_at > 0) then
+    return redis.error_reply('ERR Wrong params.last_auth_at')
   end
 
-  return redis.call('ZRANGE', session_index_key, 0, -1)
+  if not redis.call('EXISTS', campaign_key) == 1 then
+    return redis.status_reply('NOT_FOUND Campaign not found')
+  end
+
+  if not redis.call('EXISTS', session_key) == 1 then
+    return redis.status_reply('NOT_FOUND Session not found')
+  end
+
+  if not redis.call('SCARD', enabled_proxy_index_key) > 0 then
+    return redis.status_reply('FORBIDDEN No enabled proxies found')
+  end
+
+  local data = {
+    proxy_id = redis.call('HGET', session_key, 'proxy_id'),
+    session_expire = tonumber(redis.call('HGET', campaign_key, 'session_expire')),
+  }
+
+  if not (data.proxy_id and #data.proxy_id > 0) then
+    return redis.error_reply('ERR Malform data.proxy_id')
+  end
+
+  if not (data.session_expire and data.session_expire > 0) then
+    return redis.error_reply('ERR Malform data.session_expire')
+  end
+
+  if redis.call('SISMEMBER', enabled_proxy_index_key, data.proxy_id) == 0 then
+    data.proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key)
+
+    if not (data.proxy_id and #data.proxy_id > 0) then
+      return redis.error_reply('ERR Malform data.proxy_id')
+    end
+  end
+
+  -- stylua: ignore
+  redis.call(
+    'HSET', session_key,
+    'proxy_id', data.proxy_id,
+    'last_auth_at', params.last_auth_at
+  )
+
+  redis.call('PEXPIRE', session_key, data.session_expire)
+
+  return redis.status_reply('OK Session authorized')
 end
 
 redis.register_function({
-  function_name = 'read_session_index',
-  callback = read_session_index,
-  flags = { 'no-writes' },
+  function_name = 'auth_session',
+  callback = auth_session,
+  description = 'Auth session',
 })
 
 --[[
-  Update session landing
+  Upgrade session
 --]]
-local function update_session_landing(keys, args)
-  if #keys ~= 3 or #args ~= 2 then
-    return redis.error_reply('BAD_PARAMS wrong function use')
+local function upgrade_session(keys, args)
+  if not (#keys == 3 and #args == 1) then
+    return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local lure_key = keys[2]
   local session_key = keys[3]
 
-  local secret = args[1]
-  if not (secret and secret ~= '') then
-    return redis.error_reply('BAD_PARAMS secret wrong')
+  local params = {
+    secret = args[1],
+  }
+
+  if not #params.secret > 0 then
+    return redis.error_reply('ERR Wrong params.secret')
   end
 
-  local current_time = tonumber(args[2])
-  if not (current_time and current_time > 0) then
-    return redis.error_reply('BAD_PARAMS current_time wrong')
+  if not redis.call('EXISTS', campaign_key) == 1 then
+    return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return nil
+  if not redis.call('EXISTS', lure_key) == 1 then
+    return redis.status_reply('NOT_FOUND Lure not found')
   end
 
-  if redis.call('EXISTS', lure_key) ~= 1 then
-    return nil
+  if not redis.call('EXISTS', session_key) == 1 then
+    return redis.status_reply('NOT_FOUND Session not found')
   end
 
-  if redis.call('EXISTS', session_key) ~= 1 then
-    return nil
+  local data = {
+    secret = redis.call('HGET', session_key, 'secret'),
+    is_landing = tonumber(redis.call('HGET', session_key, 'is_landing')),
+  }
+
+  if not (data.secret and #data.secret > 0) then
+    return redis.error_reply('ERR Malform data.secret')
   end
 
-  local orig_secret = redis.call('HGET', session_key, 'secret')
-  if not (orig_secret and orig_secret ~= '') then
-    return redis.error_reply('MALFORM_DATA session secret wrong')
+  if not data.is_landing then
+    return redis.error_reply('ERR Malform data.is_landing')
   end
 
-  if secret ~= orig_secret then
-    return nil
+  if params.secret ~= data.secret then
+    return redis.status_reply('FORBIDDEN Session secret not match')
   end
 
-  local is_landing = tonumber(redis.call('HGET', session_key, 'is_landing'))
-  if not (is_landing and (is_landing == 0 or is_landing == 1)) then
-    return redis.error_reply('MALFORM_DATA session is_landing wrong')
-  end
-
-  -- Point of no return
-
-  if is_landing ~= 1 then
-    -- stylua: ignore
-    redis.call(
-      'HSET', session_key,
-      'is_landing', 1,
-      'updated_at', current_time
-    )
-
-    redis.call('HINCRBY', lure_key, 'auth_count', 1)
-    -- stylua: ignore
-    redis.call(
-      'HSET', lure_key,
-      'updated_at', current_time
-    )
-  end
-
-  -- stylua: ignore
-  return redis.call(
-    'HMGET', session_key,
-    'campaign_id',
-    'id',
-    'proxy_id',
-    'secret',
-    'is_landing',
-    'total_count',
-    'success_count',
-    'failure_count',
-    'created_at',
-    'updated_at'
-  )
-end
-
-redis.register_function({
-  function_name = 'update_session_landing',
-  callback = update_session_landing,
-})
-
---[[
-  Emerge session loop
---]]
-local function emerge_session_loop(keys, args)
-  if #keys ~= 4 or #args ~= 1 then
-    return redis.error_reply('BAD_PARAMS wrong function use')
-  end
-
-  local campaign_key = keys[1]
-  local session_index_key = keys[2]
-  local session_loop_index_key = keys[3]
-  local session_drop_index_key = keys[4]
-
-  local current_time = tonumber(args[1])
-  if not (current_time and current_time > 0) then
-    return redis.error_reply('BAD_PARAMS current_time wrong')
-  end
-
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return nil
-  end
-
-  local session_limit = tonumber(redis.call('HGET', campaign_key, 'session_limit'))
-  if not (session_limit and session_limit >= 0) then
-    return redis.error_reply('MALFORM_DATA campaign session_limit wrong')
-  end
-
-  local session_spare = tonumber(redis.call('HGET', campaign_key, 'session_spare'))
-  if not (session_spare and session_spare >= 0) then
-    return redis.error_reply('MALFORM_DATA campaign session_spare wrong')
-  end
-
-  local emerge_idle_time = tonumber(redis.call('HGET', campaign_key, 'session_emerge_idle_time'))
-  if not (emerge_idle_time and emerge_idle_time > 0) then
-    return redis.error_reply('MALFORM_DATA campaign session_emerge_idle_time wrong')
-  end
-
-  local emerge_limit = tonumber(redis.call('HGET', campaign_key, 'session_emerge_limit'))
-  if not (emerge_limit and emerge_limit >= 0) then
-    return redis.error_reply('MALFORM_DATA campaign session_emerge_limit wrong')
-  end
-
-  local excess_count = redis.call('ZCARD', session_index_key) - session_limit - session_spare
-
-  -- Point of no return
-
-  -- stylua: ignore
-  local loop_index = redis.call(
-    'ZRANGE', session_loop_index_key,
-    '-Inf',
-    current_time - emerge_idle_time,
-    'BYSCORE',
-    'LIMIT',
-    0,
-    emerge_limit
-  )
-
-  for _, id in ipairs(loop_index) do
-    current_time = current_time + 1
-
-    redis.call('ZADD', session_loop_index_key, current_time, id)
-  end
-
-  if excess_count > 0 then
-    -- stylua: ignore
-    local drop_index = redis.call(
-      'ZRANGE', session_index_key,
-      0,
-      excess_count,
-      'LIMIT',
-      0,
-      emerge_limit
-    )
-
-    for _, id in ipairs(drop_index) do
-      redis.call('SADD', session_drop_index_key, id)
-    end
-  end
-
-  return loop_index
-end
-
-redis.register_function({
-  function_name = 'emerge_session_loop',
-  callback = emerge_session_loop,
-})
-
---[[
-  Cleanup session
---]]
-local function cleanup_session(keys, args)
-  if #keys ~= 5 or #args ~= 1 then
-    return redis.error_reply('BAD_PARAMS wrong function use')
-  end
-
-  local campaign_key = keys[1]
-  local session_key = keys[2]
-  local session_index_key = keys[3]
-  local session_loop_index_key = keys[4]
-  local session_drop_index_key = keys[5]
-
-  local current_time = tonumber(args[1])
-  if not (current_time and current_time > 0) then
-    return redis.error_reply('BAD_PARAMS current_time wrong')
-  end
-
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('ENTITY_NOT_FOUND campaign not found')
-  end
-
-  if redis.call('EXISTS', session_key) ~= 1 then
-    return redis.status_reply('ENTITY_NOT_FOUND session not found')
-  end
-
-  local session_expire = tonumber(redis.call('HGET', campaign_key, 'session_expire'))
-  if not (session_expire and session_expire > 0) then
-    return redis.error_reply('MALFORM_DATA campaign session_expire wrong')
-  end
-
-  local new_session_expire = tonumber(redis.call('HGET', campaign_key, 'new_session_expire'))
-  if not (new_session_expire and new_session_expire > 0) then
-    return redis.error_reply('MALFORM_DATA campaign new_session_expire wrong')
-  end
-
-  local id = redis.call('HGET', session_key, 'id')
-  if not (id and id ~= '') then
-    return redis.error_reply('MALFORM_DATA session id wrong')
-  end
-
-  local total_count = tonumber(redis.call('HGET', session_key, 'total_count'))
-  if not (total_count and total_count >= 0) then
-    return redis.error_reply('MALFORM_DATA session total_count wrong')
-  end
-
-  local created_at = tonumber(redis.call('HGET', session_key, 'created_at'))
-  if not (created_at and created_at > 0) then
-    return redis.error_reply('MALFORM_DATA session created_at wrong')
-  end
-
-  local updated_at = tonumber(redis.call('HGET', session_key, 'updated_at'))
-  if not (updated_at and updated_at > 0) then
-    return redis.error_reply('MALFORM_DATA session updated_at wrong')
-  end
-
-  local is_drop = redis.call('SISMEMBER', session_drop_index_key, id) ~= 0
-
-  if not is_drop then
-    if total_count == 0 then
-      if current_time > created_at + new_session_expire then
-        is_drop = true
-      end
-    else
-      if current_time > updated_at + session_expire then
-        is_drop = true
-      end
-    end
+  if data.is_landing ~= 0 then
+    return redis.status_reply('OK Session allready upgraded')
   end
 
   -- Point of no return
 
-  if is_drop then
-    redis.call('DEL', session_key)
+  redis.call('HSET', session_key, 'is_landing', 1)
 
-    redis.call('ZREM', session_index_key, id)
+  redis.call('HINCRBY', lure_key, 'session_count', 1)
 
-    redis.call('ZREM', session_loop_index_key, id)
-
-    redis.call('SREM', session_drop_index_key, id)
-
-    return redis.status_reply('OK session cleanup')
-  end
-
-  return redis.status_reply('OK session alive')
+  return redis.status_reply('OK Session upgraded')
 end
 
 redis.register_function({
-  function_name = 'cleanup_session',
-  callback = cleanup_session,
+  function_name = 'upgrade_session',
+  callback = upgrade_session,
+  description = 'Upgrade session',
 })

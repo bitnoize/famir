@@ -30,7 +30,7 @@ export class PinoLogger implements Logger {
 
     this.info(
       {
-        options: filterSecrets(this.options, [])
+        options: filterSecrets(this.options, ['transportOptions'])
       },
       `Logger initialized`
     )

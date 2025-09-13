@@ -1,9 +1,29 @@
-import { CampaignRepository } from '@famir/domain'
+import { SessionRepository } from '@famir/domain'
+import { HeartbeatResult, ScanSessionQueue } from '@famir/task-queue'
 
 export class ScanMessagesUseCase {
-  constructor(protected readonly campaignRepository: CampaignRepository) {}
+  constructor(
+    protected readonly sessionRepository: SessionRepository,
+    protected readonly scanSessionQueue: ScanSessionQueue
+  ) {}
 
-  async execute(): Promise<void> {
-    const campaign = await this.campaignRepository.read()
+  async execute(): Promise<HeartbeatResult> {
+    const taskCount = await this.scanSessionQueue.getTaskCount()
+
+    if (taskCount > 0) {
+      return 0
+    }
+
+    const sessionIndex = await this.sessionRepository.emergeLoopIndex()
+
+    if (sessionIndex === null) {
+      return 0
+    }
+
+    for (const sessionId of sessionIndex) {
+      await this.scanSessionQueue.addTask(sessionId)
+    }
+
+    return sessionIndex.length
   }
 }
