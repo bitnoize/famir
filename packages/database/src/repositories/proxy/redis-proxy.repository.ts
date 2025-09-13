@@ -1,3 +1,4 @@
+import { Config } from '@famir/config'
 import {
   DisabledProxy,
   EnabledProxy,
@@ -8,6 +9,7 @@ import {
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
 import { DatabaseError } from '../../database.errors.js'
+import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
@@ -21,8 +23,13 @@ import {
 } from './proxy.utils.js'
 
 export class RedisProxyRepository extends RedisBaseRepository implements ProxyRepository {
-  constructor(validator: Validator, logger: Logger, connection: RedisDatabaseConnection) {
-    super(validator, logger, connection, 'proxy')
+  constructor(
+    validator: Validator,
+    config: Config<DatabaseConfig>,
+    logger: Logger,
+    connection: RedisDatabaseConnection
+  ) {
+    super(validator, config, logger, connection, 'proxy')
   }
 
   async create(
@@ -32,9 +39,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   ): Promise<RepositoryContainer<DisabledProxy>> {
     try {
       const [status, rawProxy] = await Promise.all([
-        this.connection.proxy.create_proxy(campaignId, id, url),
+        this.connection.proxy.create_proxy(this.options.prefix, campaignId, id, url),
 
-        this.connection.proxy.read_proxy(campaignId, id)
+        this.connection.proxy.read_proxy(this.options.prefix, campaignId, id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -61,7 +68,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async read(campaignId: string, id: string): Promise<Proxy | null> {
     try {
-      const rawProxy = await this.connection.proxy.read_proxy(campaignId, id)
+      const rawProxy = await this.connection.proxy.read_proxy(this.options.prefix, campaignId, id)
 
       return buildProxyModel(rawProxy)
     } catch (error) {
@@ -71,7 +78,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async readEnabled(campaignId: string, id: string): Promise<EnabledProxy | null> {
     try {
-      const rawProxy = await this.connection.proxy.read_proxy(campaignId, id)
+      const rawProxy = await this.connection.proxy.read_proxy(this.options.prefix, campaignId, id)
 
       const proxy = buildProxyModel(rawProxy)
 
@@ -84,9 +91,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   async enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledProxy>> {
     try {
       const [status, rawProxy] = await Promise.all([
-        this.connection.proxy.enable_proxy(campaignId, id),
+        this.connection.proxy.enable_proxy(this.options.prefix, campaignId, id),
 
-        this.connection.proxy.read_proxy(campaignId, id)
+        this.connection.proxy.read_proxy(this.options.prefix, campaignId, id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -114,9 +121,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   async disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledProxy>> {
     try {
       const [status, rawProxy] = await Promise.all([
-        this.connection.proxy.disable_proxy(campaignId, id),
+        this.connection.proxy.disable_proxy(this.options.prefix, campaignId, id),
 
-        this.connection.proxy.read_proxy(campaignId, id)
+        this.connection.proxy.read_proxy(this.options.prefix, campaignId, id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -144,9 +151,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   async delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledProxy>> {
     try {
       const [rawProxy, status] = await Promise.all([
-        this.connection.proxy.read_proxy(campaignId, id),
+        this.connection.proxy.read_proxy(this.options.prefix, campaignId, id),
 
-        this.connection.proxy.delete_proxy(campaignId, id)
+        this.connection.proxy.delete_proxy(this.options.prefix, campaignId, id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -173,14 +180,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async list(campaignId: string): Promise<Proxy[] | null> {
     try {
-      const index = await this.connection.proxy.read_proxy_index(campaignId)
+      const index = await this.connection.proxy.read_proxy_index(this.options.prefix, campaignId)
 
       if (index === null) {
         return null
       }
 
       const rawProxies = await Promise.all(
-        index.map((id) => this.connection.proxy.read_proxy(campaignId, id))
+        index.map((id) => this.connection.proxy.read_proxy(this.options.prefix, campaignId, id))
       )
 
       return buildProxyCollection(rawProxies).filter(guardProxy)

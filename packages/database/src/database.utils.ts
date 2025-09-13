@@ -1,32 +1,18 @@
 import { arrayIncludes } from '@famir/common'
 import { REPOSITORY_STATUS_CODES, RepositoryStatusCode } from '@famir/domain'
-import { DatabaseConfig, DatabaseOptions } from './database.js'
+import { DatabaseConfig, DatabaseConnectorOptions, DatabaseRepositoryOptions } from './database.js'
 
-export function buildConnectorOptions(data: DatabaseConfig): DatabaseOptions {
+export function buildConnectorOptions(data: DatabaseConfig): DatabaseConnectorOptions {
   return {
     connectionUrl: data.DATABASE_CONNECTION_URL
   }
 }
 
-/*
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-export function validateJson<T>(
-  assertSchema: ValidatorAssertSchema,
-  schema: string,
-  data: unknown
-): asserts data is T {
-  try {
-    assertSchema<T>(schema, data)
-  } catch (error) {
-    throw new DatabaseError(
-      {
-        cause: error
-      },
-      `Validation JSON failed`
-    )
+export function buildRepositoryOptions(data: DatabaseConfig): DatabaseRepositoryOptions {
+  return {
+    prefix: data.DATABASE_PREFIX
   }
 }
-*/
 
 export function parseStatusReply(status: string): [RepositoryStatusCode, string] {
   const [code, message] = status.split(/\s+(.*)/, 2)

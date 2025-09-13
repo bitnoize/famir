@@ -15,10 +15,16 @@ export const redirectorFunctions = {
     create_redirector: {
       NUMBER_OF_KEYS: 3,
 
-      parseCommand(parser: CommandParser, campaignId: string, id: string, page: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(redirectorKey(campaignId, id))
-        parser.pushKey(redirectorIndexKey(campaignId))
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        id: string,
+        page: string
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(redirectorKey(prefix, campaignId, id))
+        parser.pushKey(redirectorIndexKey(prefix, campaignId))
 
         parser.push(campaignId)
         parser.push(id)
@@ -32,9 +38,9 @@ export const redirectorFunctions = {
     read_redirector: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, campaignId: string, id: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(redirectorKey(campaignId, id))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(redirectorKey(prefix, campaignId, id))
       },
 
       transformReply: undefined as unknown as () => RawRedirector | null
@@ -43,9 +49,9 @@ export const redirectorFunctions = {
     read_redirector_index: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, campaignId: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(redirectorIndexKey(campaignId))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(redirectorIndexKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => string[] | null
@@ -56,12 +62,13 @@ export const redirectorFunctions = {
 
       parseCommand(
         parser: CommandParser,
+        prefix: string,
         campaignId: string,
         id: string,
         page: string | null | undefined
       ) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(redirectorKey(campaignId, id))
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(redirectorKey(prefix, campaignId, id))
 
         if (page != null) {
           parser.push('page')
@@ -78,10 +85,10 @@ export const redirectorFunctions = {
     delete_redirector: {
       NUMBER_OF_KEYS: 3,
 
-      parseCommand(parser: CommandParser, campaignId: string, id: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(redirectorKey(campaignId, id))
-        parser.pushKey(redirectorIndexKey(campaignId))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(redirectorKey(prefix, campaignId, id))
+        parser.pushKey(redirectorIndexKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => string

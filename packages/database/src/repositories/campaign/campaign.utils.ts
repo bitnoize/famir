@@ -28,6 +28,12 @@ export function buildCampaignModel(rawCampaign: RawCampaign | null): Campaign | 
   )
 }
 
+export function buildCampaignCollection(
+  rawCampaigns: Array<RawCampaign | null>
+): Array<Campaign | null> {
+  return rawCampaigns.map((rawCampaign) => buildCampaignModel(rawCampaign))
+}
+
 export function guardCampaign(data: Campaign | null): data is Campaign {
   return data != null
 }

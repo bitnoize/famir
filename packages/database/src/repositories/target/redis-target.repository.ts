@@ -1,3 +1,4 @@
+import { Config } from '@famir/config'
 import {
   DisabledTarget,
   EnabledTarget,
@@ -8,6 +9,7 @@ import {
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
 import { DatabaseError } from '../../database.errors.js'
+import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
@@ -21,8 +23,13 @@ import {
 } from './target.utils.js'
 
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
-  constructor(validator: Validator, logger: Logger, connection: RedisDatabaseConnection) {
-    super(validator, logger, connection, 'target')
+  constructor(
+    validator: Validator,
+    config: Config<DatabaseConfig>,
+    logger: Logger,
+    connection: RedisDatabaseConnection
+  ) {
+    super(validator, config, logger, connection, 'target')
   }
 
   async create(
@@ -50,6 +57,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.create_target(
+          this.options.prefix,
           campaignId,
           id,
           isLanding,
@@ -72,7 +80,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           failureRedirectUrl
         ),
 
-        this.connection.target.read_target(campaignId, id)
+        this.connection.target.read_target(this.options.prefix, campaignId, id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -120,7 +128,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async read(campaignId: string, id: string): Promise<Target | null> {
     try {
-      const rawTarget = await this.connection.target.read_target(campaignId, id)
+      const rawTarget = await this.connection.target.read_target(
+        this.options.prefix,
+        campaignId,
+        id
+      )
 
       return buildTargetModel(rawTarget)
     } catch (error) {
@@ -130,7 +142,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async readEnabled(campaignId: string, id: string): Promise<EnabledTarget | null> {
     try {
-      const rawTarget = await this.connection.target.read_target(campaignId, id)
+      const rawTarget = await this.connection.target.read_target(
+        this.options.prefix,
+        campaignId,
+        id
+      )
 
       const target = buildTargetModel(rawTarget)
 
@@ -156,6 +172,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.update_target(
+          this.options.prefix,
           campaignId,
           id,
           connectTimeout,
@@ -169,7 +186,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           failureRedirectUrl
         ),
 
-        this.connection.target.read_target(campaignId, id)
+        this.connection.target.read_target(this.options.prefix, campaignId, id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -209,9 +226,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   async enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledTarget>> {
     try {
       const [status, rawTarget] = await Promise.all([
-        this.connection.target.enable_target(campaignId, id),
+        this.connection.target.enable_target(this.options.prefix, campaignId, id),
 
-        this.connection.target.read_target(campaignId, id)
+        this.connection.target.read_target(this.options.prefix, campaignId, id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -239,9 +256,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   async disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTarget>> {
     try {
       const [status, rawTarget] = await Promise.all([
-        this.connection.target.disable_target(campaignId, id),
+        this.connection.target.disable_target(this.options.prefix, campaignId, id),
 
-        this.connection.target.read_target(campaignId, id)
+        this.connection.target.read_target(this.options.prefix, campaignId, id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -269,9 +286,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   async delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTarget>> {
     try {
       const [rawTarget, status] = await Promise.all([
-        this.connection.target.read_target(campaignId, id),
+        this.connection.target.read_target(this.options.prefix, campaignId, id),
 
-        this.connection.target.delete_target(campaignId, id)
+        this.connection.target.delete_target(this.options.prefix, campaignId, id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -298,14 +315,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async list(campaignId: string): Promise<Target[] | null> {
     try {
-      const index = await this.connection.target.read_target_index(campaignId)
+      const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
 
       if (index === null) {
         return null
       }
 
       const rawTargets = await Promise.all(
-        index.map((id) => this.connection.target.read_target(campaignId, id))
+        index.map((id) => this.connection.target.read_target(this.options.prefix, campaignId, id))
       )
 
       return buildTargetCollection(rawTargets).filter(guardTarget)
@@ -316,14 +333,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async listEnabled(campaignId: string): Promise<EnabledTarget[] | null> {
     try {
-      const index = await this.connection.target.read_target_index(campaignId)
+      const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
 
       if (index === null) {
         return null
       }
 
       const rawTargets = await Promise.all(
-        index.map((id) => this.connection.target.read_target(campaignId, id))
+        index.map((id) => this.connection.target.read_target(this.options.prefix, campaignId, id))
       )
 
       return buildTargetCollection(rawTargets).filter(guardEnabledTarget)

@@ -1,3 +1,4 @@
+import { Config } from '@famir/config'
 import {
   Message,
   MessageHeaders,
@@ -10,14 +11,20 @@ import {
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
 import { DatabaseError } from '../../database.errors.js'
+import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { assertMessage, buildMessageModel } from './message.utils.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
-  constructor(validator: Validator, logger: Logger, connection: RedisDatabaseConnection) {
-    super(validator, logger, connection, 'message')
+  constructor(
+    validator: Validator,
+    config: Config<DatabaseConfig>,
+    logger: Logger,
+    connection: RedisDatabaseConnection
+  ) {
+    super(validator, config, logger, connection, 'message')
   }
 
   async create(
@@ -43,6 +50,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     try {
       const [status, rawMessage] = await Promise.all([
         this.connection.message.create_message(
+          this.options.prefix,
           campaignId,
           id,
           proxyId,
@@ -63,7 +71,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
           score
         ),
 
-        this.connection.message.read_message(campaignId, id)
+        this.connection.message.read_message(this.options.prefix, campaignId, id)
       ])
 
       const [code, reason] = parseStatusReply(status)
@@ -89,27 +97,18 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         id,
         proxyId,
         targetId,
-        sessionId,
-        clientIp,
-        method,
-        originUrl,
-        forwardUrl,
-        requestHeaders,
-        requestCookies,
-        requestBody: requestBody.length,
-        statusCode,
-        responseHeaders,
-        responseCookies,
-        responseBody: responseBody.length,
-        queryTime,
-        score
+        sessionId
       })
     }
   }
 
   async read(campaignId: string, id: string): Promise<Message | null> {
     try {
-      const rawMessage = await this.connection.message.read_message(campaignId, id)
+      const rawMessage = await this.connection.message.read_message(
+        this.options.prefix,
+        campaignId,
+        id
+      )
 
       return buildMessageModel(this.assertSchema, rawMessage)
     } catch (error) {

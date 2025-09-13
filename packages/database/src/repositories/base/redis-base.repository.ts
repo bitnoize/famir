@@ -1,18 +1,25 @@
+import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator, ValidatorAssertSchema } from '@famir/validator'
 import { DatabaseError } from '../../database.errors.js'
+import { DatabaseConfig, DatabaseRepositoryOptions } from '../../database.js'
+import { buildRepositoryOptions } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 
 export abstract class RedisBaseRepository {
+  protected readonly options: DatabaseRepositoryOptions
   protected readonly assertSchema: ValidatorAssertSchema
 
   constructor(
     validator: Validator,
+    config: Config<DatabaseConfig>,
     protected readonly logger: Logger,
     protected readonly connection: RedisDatabaseConnection,
     protected readonly repositoryName: string
   ) {
     this.assertSchema = validator.assertSchema
+
+    this.options = buildRepositoryOptions(config.data)
   }
 
   protected exceptionFilter(

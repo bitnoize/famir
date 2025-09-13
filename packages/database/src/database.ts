@@ -1,9 +1,14 @@
 export interface DatabaseConfig {
   DATABASE_CONNECTION_URL: string
+  DATABASE_PREFIX: string
 }
 
-export interface DatabaseOptions {
+export interface DatabaseConnectorOptions {
   connectionUrl: string
+}
+
+export interface DatabaseRepositoryOptions {
+  prefix: string
 }
 
 export interface DatabaseConnector {

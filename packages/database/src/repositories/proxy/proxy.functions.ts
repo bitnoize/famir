@@ -22,11 +22,17 @@ export const proxyFunctions = {
     create_proxy: {
       NUMBER_OF_KEYS: 4,
 
-      parseCommand(parser: CommandParser, campaignId: string, id: string, url: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(proxyKey(campaignId, id))
-        parser.pushKey(proxyUniqueUrlKey(campaignId))
-        parser.pushKey(proxyIndexKey(campaignId))
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        id: string,
+        url: string
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(proxyKey(prefix, campaignId, id))
+        parser.pushKey(proxyUniqueUrlKey(prefix, campaignId))
+        parser.pushKey(proxyIndexKey(prefix, campaignId))
 
         parser.push(campaignId)
         parser.push(id)
@@ -40,9 +46,9 @@ export const proxyFunctions = {
     read_proxy: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, campaignId: string, id: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(proxyKey(campaignId, id))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(proxyKey(prefix, campaignId, id))
       },
 
       transformReply: undefined as unknown as () => RawProxy | null
@@ -51,9 +57,9 @@ export const proxyFunctions = {
     read_proxy_index: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, campaignId: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(proxyIndexKey(campaignId))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(proxyIndexKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => string[] | null
@@ -62,10 +68,10 @@ export const proxyFunctions = {
     enable_proxy: {
       NUMBER_OF_KEYS: 3,
 
-      parseCommand(parser: CommandParser, campaignId: string, id: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(proxyKey(campaignId, id))
-        parser.pushKey(enabledProxyIndexKey(campaignId))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(proxyKey(prefix, campaignId, id))
+        parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
         parser.push(Date.now().toString())
       },
@@ -76,10 +82,10 @@ export const proxyFunctions = {
     disable_proxy: {
       NUMBER_OF_KEYS: 3,
 
-      parseCommand(parser: CommandParser, campaignId: string, id: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(proxyKey(campaignId, id))
-        parser.pushKey(enabledProxyIndexKey(campaignId))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(proxyKey(prefix, campaignId, id))
+        parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
         parser.push(Date.now().toString())
       },
@@ -90,11 +96,11 @@ export const proxyFunctions = {
     delete_proxy: {
       NUMBER_OF_KEYS: 4,
 
-      parseCommand(parser: CommandParser, campaignId: string, id: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(proxyKey(campaignId, id))
-        parser.pushKey(proxyUniqueUrlKey(campaignId))
-        parser.pushKey(proxyIndexKey(campaignId))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(proxyKey(prefix, campaignId, id))
+        parser.pushKey(proxyUniqueUrlKey(prefix, campaignId))
+        parser.pushKey(proxyIndexKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => string

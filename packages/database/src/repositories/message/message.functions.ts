@@ -36,6 +36,7 @@ export const messageFunctions = {
 
       parseCommand(
         parser: CommandParser,
+        prefix: string,
         campaignId: string,
         id: string,
         proxyId: string,
@@ -55,11 +56,11 @@ export const messageFunctions = {
         queryTime: number,
         score: number
       ) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(messageKey(campaignId, id))
-        parser.pushKey(proxyKey(campaignId, id))
-        parser.pushKey(targetKey(campaignId, id))
-        parser.pushKey(sessionKey(campaignId, id))
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(messageKey(prefix, campaignId, id))
+        parser.pushKey(proxyKey(prefix, campaignId, id))
+        parser.pushKey(targetKey(prefix, campaignId, id))
+        parser.pushKey(sessionKey(prefix, campaignId, id))
 
         parser.push(campaignId)
         parser.push(id)
@@ -88,9 +89,9 @@ export const messageFunctions = {
     read_message: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, campaignId: string, id: string) {
-        parser.pushKey(campaignKey(campaignId))
-        parser.pushKey(messageKey(campaignId, id))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(messageKey(prefix, campaignId, id))
       },
 
       transformReply: undefined as unknown as () => RawMessage | null

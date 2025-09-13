@@ -4,11 +4,12 @@
   Create campaign
 --]]
 local function create_campaign(keys, args)
-  if not (#keys == 1 and #args == 11) then
+  if not (#keys == 2 and #args == 11) then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
+  local campaign_index_key = keys[2]
 
   local model = {
     id = args[1],
@@ -79,6 +80,8 @@ local function create_campaign(keys, args)
   end
 
   redis.call('HSET', campaign_key, unpack(store))
+
+  redis.call('ZADD', campaign_index_key, model.created_at, model.id)
 
   return redis.status_reply('OK Campaign created')
 end
@@ -168,6 +171,26 @@ redis.register_function({
 })
 
 --[[
+  Read campaign index
+--]]
+local function read_campaign_index(keys, args)
+  if not (#keys == 1 and #args == 0) then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_index_key = keys[1]
+
+  return redis.call('ZRANGE', campaign_index_key, 0, -1)
+end
+
+redis.register_function({
+  function_name = 'read_campaign_index',
+  callback = read_campaign_index,
+  flags = { 'no-writes' },
+  description = 'Read campaign index',
+})
+
+--[[
   Update campaign
 --]]
 local function update_campaign(keys, args)
@@ -249,15 +272,16 @@ redis.register_function({
   Delete campaign
 --]]
 local function delete_campaign(keys, args)
-  if not (#keys == 5 and #args == 0) then
+  if not (#keys == 6 and #args == 0) then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local proxy_index_key = keys[2]
-  local target_index_key = keys[3]
-  local redirector_index_key = keys[4]
-  local lure_index_key = keys[5]
+  local campaign_index_key = keys[2]
+  local proxy_index_key = keys[3]
+  local target_index_key = keys[4]
+  local redirector_index_key = keys[5]
+  local lure_index_key = keys[6]
 
   if not redis.call('EXISTS', campaign_key) == 1 then
     return redis.status_reply('NOT_FOUND Campaign not found')
@@ -279,9 +303,19 @@ local function delete_campaign(keys, args)
     return redis.status_reply('FORBIDDEN Campaign lures exists')
   end
 
+  local data = {
+    id = redis.call('HGET', campaign_key, 'id'),
+  }
+
+  if not (data.id and #data.id > 0) then
+    return redis.error_reply('ERR Malform data.id')
+  end
+
   -- Point of no return
 
   redis.call('DEL', campaign_key)
+
+  redis.call('ZREM', campaign_index_key, data.id)
 
   return redis.status_reply('OK Campaign deleted')
 end

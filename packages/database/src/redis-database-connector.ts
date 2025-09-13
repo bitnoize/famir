@@ -4,7 +4,7 @@ import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
-import { DatabaseConfig, DatabaseConnector, DatabaseOptions } from './database.js'
+import { DatabaseConfig, DatabaseConnector, DatabaseConnectorOptions } from './database.js'
 import { databaseSchemas } from './database.schemas.js'
 import { buildConnectorOptions } from './database.utils.js'
 
@@ -16,7 +16,7 @@ export type RedisDatabaseConnection = RedisClientType<
 >
 
 export class RedisDatabaseConnector implements DatabaseConnector {
-  protected readonly options: DatabaseOptions
+  protected readonly options: DatabaseConnectorOptions
   private readonly _redis: RedisDatabaseConnection
 
   constructor(
