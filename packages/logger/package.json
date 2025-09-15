@@ -11,9 +11,8 @@
     "build": "tsc -b"
   },
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/config": "*",
-    "@famir/validator": "*",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
     "pino-socket": "^7.4.0"

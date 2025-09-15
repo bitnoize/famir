@@ -13,11 +13,8 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@famir/common": "*",
     "@famir/domain": "*",
-    "@famir/validator": "*",
-    "@famir/config": "*",
-    "@famir/logger": "*",
+    "@famir/common": "*",
     "redis": "^5.6.0"
   },
   "devDependencies": {

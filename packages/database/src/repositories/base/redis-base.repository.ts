@@ -1,7 +1,4 @@
-import { Config } from '@famir/config'
-import { Logger } from '@famir/logger'
-import { Validator, ValidatorAssertSchema } from '@famir/validator'
-import { DatabaseError } from '../../database.errors.js'
+import { Config, DatabaseError, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
 import { DatabaseConfig, DatabaseRepositoryOptions } from '../../database.js'
 import { buildRepositoryOptions } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'

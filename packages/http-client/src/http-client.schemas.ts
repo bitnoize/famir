@@ -1,4 +1,5 @@
-import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
+import { JSONSchemaType } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 
 export const configHttpClientBodyLimitSchema: JSONSchemaType<number> = {
   type: 'number',

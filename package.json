@@ -19,6 +19,7 @@
     "packages/config",
     "packages/logger",
     "packages/database",
+    "packages/storage",
     "packages/task-queue",
     "packages/task-worker",
     "packages/http-client",

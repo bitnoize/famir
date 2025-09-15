@@ -1,15 +1,14 @@
 import { filterSecrets } from '@famir/common'
-import { Config } from '@famir/config'
-import { Logger } from '@famir/logger'
-import { Validator } from '@famir/validator'
-import { Curl, CurlFeature } from 'node-libcurl'
 import {
-  ForwardRequest,
-  ForwardResponse,
+  Config,
   HttpClient,
-  HttpClientConfig,
-  HttpClientOptions
-} from './http-client.js'
+  HttpClientRequest,
+  HttpClientResponse,
+  Logger,
+  Validator
+} from '@famir/domain'
+import { Curl, CurlFeature } from 'node-libcurl'
+import { HttpClientConfig, HttpClientOptions } from './http-client.js'
 import { httpClientSchemas } from './http-client.schemas.js'
 import { buildOptions } from './http-client.utils.js'
 
@@ -33,15 +32,15 @@ export class CurlHttpClient implements HttpClient {
     )
   }
 
-  async forward(request: ForwardRequest): Promise<ForwardResponse> {
+  async forward(request: HttpClientRequest): Promise<HttpClientResponse> {
     return await this._forward(request)
   }
 
-  private _forward(request: ForwardRequest): Promise<ForwardResponse> {
-    return new Promise<ForwardResponse>((resolve) => {
+  private _forward(request: HttpClientRequest): Promise<HttpClientResponse> {
+    return new Promise<HttpClientResponse>((resolve) => {
       const startTime = Date.now()
 
-      const response: ForwardResponse = {
+      const response: HttpClientResponse = {
         statusCode: 0,
         headers: {},
         totalTime: 0,

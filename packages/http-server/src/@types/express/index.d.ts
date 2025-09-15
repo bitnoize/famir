@@ -1,7 +1,7 @@
-import { RequestLocals } from '../../http-server.js'
+import { HttpServerLocals } from '@famir/domain'
 
 declare module 'express-serve-static-core' {
   interface Request {
-    locals?: RequestLocals | undefined
+    locals?: HttpServerLocals | undefined
   }
 }

@@ -3,9 +3,9 @@ import {
   MessageHeaders,
   MessageMethod,
   MessageRequestCookies,
-  MessageResponseCookies
+  MessageResponseCookies,
+  ValidatorAssertSchema
 } from '@famir/domain'
-import { ValidatorAssertSchema } from '@famir/validator'
 import { RawMessage } from './message.functions.js'
 
 export function buildMessageModel(

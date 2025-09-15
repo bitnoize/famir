@@ -1,13 +1,18 @@
-import { ErrorContext, filterSecrets, serializeError } from '@famir/common'
-import { Config } from '@famir/config'
-import { Logger } from '@famir/logger'
-import { Validator } from '@famir/validator'
+import { filterSecrets, serializeError } from '@famir/common'
+import {
+  Config,
+  ErrorContext,
+  HttpServer,
+  HttpServerError,
+  HttpServerRouter,
+  Logger,
+  Validator
+} from '@famir/domain'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import express from 'express'
 import http from 'node:http'
-import { HttpServerError } from './http-server.errors.js'
-import { HttpServer, HttpServerConfig, HttpServerOptions, Router } from './http-server.js'
+import { HttpServerConfig, HttpServerOptions } from './http-server.js'
 import { httpServerSchemas } from './http-server.schemas.js'
 import { buildOptions } from './http-server.utils.js'
 
@@ -20,7 +25,7 @@ export class ExpressHttpServer implements HttpServer {
     validator: Validator,
     config: Config<HttpServerConfig>,
     protected readonly logger: Logger,
-    routers: Router[]
+    router: HttpServerRouter
   ) {
     validator.addSchemas(httpServerSchemas)
 
@@ -47,9 +52,7 @@ export class ExpressHttpServer implements HttpServer {
 
     this._express.use(this.configureHandler)
 
-    routers.forEach((router) => {
-      router.applyTo(this._express)
-    })
+    router.applyTo(this._express)
 
     this._express.use(this.notFoundHandler)
 

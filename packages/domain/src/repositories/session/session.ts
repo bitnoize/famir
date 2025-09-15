@@ -1,5 +1,5 @@
-import { RepositoryContainer } from '../../domain.js'
 import { Session } from '../../models/index.js'
+import { RepositoryContainer } from '../../services/index.js'
 
 export interface SessionRepository {
   create(campaignId: string, id: string, secret: string): Promise<RepositoryContainer<Session>>

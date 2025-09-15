@@ -11,8 +11,8 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@famir/common": "*",
-    "@famir/validator": "*"
+    "@famir/domain": "*",
+    "@famir/common": "*"
   },
   "devDependencies": {
     "@types/node": "^24.0.1"

@@ -1,4 +1,4 @@
-import { JSONSchemaType } from './validator.js'
+import { JSONSchemaType } from '@famir/common'
 
 export const customIdentSchema: JSONSchemaType<string> = {
   type: 'string',

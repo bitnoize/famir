@@ -11,10 +11,8 @@
     "build": "tsc -b"
   },
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/config": "*",
-    "@famir/logger": "*",
-    "@famir/validator": "*",
     "body-parser": "^2.2.0",
     "content-type": "^1.0.5",
     "cookie-parser": "^1.4.7",

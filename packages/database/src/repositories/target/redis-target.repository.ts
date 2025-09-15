@@ -1,14 +1,14 @@
-import { Config } from '@famir/config'
 import {
+  Config,
+  DatabaseError,
   DisabledTarget,
   EnabledTarget,
+  Logger,
   RepositoryContainer,
   Target,
-  TargetRepository
+  TargetRepository,
+  Validator
 } from '@famir/domain'
-import { Logger } from '@famir/logger'
-import { Validator } from '@famir/validator'
-import { DatabaseError } from '../../database.errors.js'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'

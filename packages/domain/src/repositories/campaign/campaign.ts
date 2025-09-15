@@ -1,5 +1,5 @@
-import { RepositoryContainer } from '../../domain.js'
 import { Campaign } from '../../models/index.js'
+import { RepositoryContainer } from '../../services/index.js'
 
 export interface CampaignRepository {
   create(

@@ -1,8 +1,7 @@
-import { ErrorContext, filterSecrets } from '@famir/common'
-import { Config } from '@famir/config'
-import { Validator, ValidatorAssertSchema } from '@famir/validator'
+import { filterSecrets } from '@famir/common'
+import { Config, Logger, LoggerContext, Validator, ValidatorAssertSchema } from '@famir/domain'
 import pino from 'pino'
-import { Logger, LoggerConfig, LoggerOptions } from './logger.js'
+import { LoggerConfig, LoggerOptions } from './logger.js'
 import { loggerSchemas } from './logger.schemas.js'
 import { buildOptions } from './logger.utils.js'
 
@@ -36,23 +35,23 @@ export class PinoLogger implements Logger {
     )
   }
 
-  debug(context: ErrorContext, message: string) {
+  debug(context: LoggerContext, message: string) {
     this._pino.debug({ context }, message)
   }
 
-  info(context: ErrorContext, message: string) {
+  info(context: LoggerContext, message: string) {
     this._pino.info({ context }, message)
   }
 
-  warn(context: ErrorContext, message: string) {
+  warn(context: LoggerContext, message: string) {
     this._pino.warn({ context }, message)
   }
 
-  error(context: ErrorContext, message: string) {
+  error(context: LoggerContext, message: string) {
     this._pino.error({ context }, message)
   }
 
-  fatal(context: ErrorContext, message: string) {
+  fatal(context: LoggerContext, message: string) {
     this._pino.fatal({ context }, message)
   }
 }

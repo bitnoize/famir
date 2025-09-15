@@ -1,3 +1,6 @@
-export * from './domain.js'
+export * from './domain.error.js'
 export * from './models/index.js'
+export * from './queues/index.js'
 export * from './repositories/index.js'
+export * from './services/index.js'
+export * from './workers/index.js'

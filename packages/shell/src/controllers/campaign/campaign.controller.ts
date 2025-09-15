@@ -30,7 +30,7 @@ export class CampaignController {
     context.setHandler('deleteCampaign', `Delete campaign`, this.deleteHandler)
   }
 
-  private readonly createHandler = async (dto: unknown): Promise<true> => {
+  private readonly createHandler = async (dto: unknown): Promise<Campaign> => {
     validateCreateCampaignDto(this.assertSchema, dto)
 
     return await this.createCampaignUseCase.execute(dto)

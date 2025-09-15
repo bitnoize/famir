@@ -1,10 +1,8 @@
 import { filterSecrets, serializeError } from '@famir/common'
-import { Config } from '@famir/config'
-import { Logger } from '@famir/logger'
-import { Validator } from '@famir/validator'
+import { Config, DatabaseConnector, Logger, Validator } from '@famir/domain'
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
-import { DatabaseConfig, DatabaseConnector, DatabaseConnectorOptions } from './database.js'
+import { DatabaseConfig, DatabaseConnectorOptions } from './database.js'
 import { databaseSchemas } from './database.schemas.js'
 import { buildConnectorOptions } from './database.utils.js'
 

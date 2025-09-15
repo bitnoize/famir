@@ -1,5 +1,4 @@
-import { Validator, ValidatorAssertSchema } from '@famir/validator'
-import { Config } from './config.js'
+import { Config, Validator, ValidatorAssertSchema } from '@famir/domain'
 import { buildConfig } from './config.utils.js'
 
 export class EnvConfig<C> implements Config<C> {

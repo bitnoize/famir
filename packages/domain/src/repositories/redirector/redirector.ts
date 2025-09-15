@@ -1,5 +1,5 @@
-import { RepositoryContainer } from '../../domain.js'
 import { Redirector } from '../../models/index.js'
+import { RepositoryContainer } from '../../services/index.js'
 
 export interface RedirectorRepository {
   create(campaignId: string, id: string, page: string): Promise<RepositoryContainer<Redirector>>

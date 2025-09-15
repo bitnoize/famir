@@ -15,16 +15,3 @@ export interface ReplServerOptions {
   prompt: string
   useColors: boolean
 }
-
-export interface ReplServer {
-  listen(): Promise<void>
-  close(): Promise<void>
-}
-
-export type ContextHandler = (dto: unknown) => Promise<unknown>
-
-export interface Context {
-  applyTo(replServer: unknown): void
-  setHandler(name: string, description: string, handler: ContextHandler): void
-  dump(): Record<string, unknown>
-}

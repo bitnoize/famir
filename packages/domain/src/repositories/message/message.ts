@@ -1,4 +1,3 @@
-import { RepositoryContainer } from '../../domain.js'
 import {
   Message,
   MessageHeaders,
@@ -6,6 +5,7 @@ import {
   MessageRequestCookies,
   MessageResponseCookies
 } from '../../models/index.js'
+import { RepositoryContainer } from '../../services/index.js'
 
 export interface MessageRepository {
   create(

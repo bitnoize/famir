@@ -1,4 +1,4 @@
-import { ValidatorAssertSchema } from '@famir/validator'
+import { ValidatorAssertSchema } from '@famir/domain'
 import { LoggerConfig, LoggerOptions, LoggerTransportOptions } from './logger.js'
 
 export function buildOptions(

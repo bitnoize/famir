@@ -1,5 +1,5 @@
-import { RepositoryContainer } from '../../domain.js'
 import { DisabledTarget, EnabledTarget, Target } from '../../models/index.js'
+import { RepositoryContainer } from '../../services/index.js'
 
 export interface TargetRepository {
   create(

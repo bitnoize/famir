@@ -1,4 +1,4 @@
-import { JSONSchemaType } from '@famir/validator'
+import { JSONSchemaType } from '@famir/common'
 
 export const proxyUrlSchema: JSONSchemaType<string> = {
   type: 'string',

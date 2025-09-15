@@ -11,10 +11,8 @@
     "build": "tsc -b"
   },
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/config": "*",
-    "@famir/logger": "*",
-    "@famir/validator": "*",
     "node-libcurl": "^4.1.0"
   },
   "devDependencies": {

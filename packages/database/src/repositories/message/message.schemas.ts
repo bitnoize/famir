@@ -1,3 +1,4 @@
+import { JSONSchemaType } from '@famir/common'
 import {
   MESSAGE_METHODS,
   MessageHeader,
@@ -8,7 +9,6 @@ import {
   MessageResponseCookie,
   MessageResponseCookies
 } from '@famir/domain'
-import { JSONSchemaType } from '@famir/validator'
 //import { randomIdentRegExp } from '../../database.utils.js'
 
 export const messageIdSchema: JSONSchemaType<string> = {

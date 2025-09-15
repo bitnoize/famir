@@ -1,11 +1,11 @@
-import { MalformDataError } from '@famir/common'
-import { Ajv, ValidateFunction } from 'ajv'
 import {
   Validator,
   ValidatorAssertSchema,
+  ValidatorError,
   ValidatorGuardSchema,
   ValidatorSchemas
-} from './validator.js'
+} from '@famir/domain'
+import { Ajv, ValidateFunction } from 'ajv'
 
 export class AjvValidator implements Validator {
   private readonly _ajv: Ajv
@@ -53,7 +53,7 @@ export class AjvValidator implements Validator {
       const validate = this.getSchema<T>(schemaName)
 
       if (!validate(data)) {
-        throw new MalformDataError(
+        throw new ValidatorError(
           {
             schemaName,
             data,

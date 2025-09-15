@@ -1,5 +1,3 @@
-import { ErrorContext } from '@famir/common'
-
 export const LOGGER_LOG_LEVELS = ['debug', 'info', 'warn', 'error', 'fatal'] as const
 
 export type LoggerLogLevel = (typeof LOGGER_LOG_LEVELS)[number]
@@ -22,12 +20,4 @@ export interface LoggerOptions {
   logLevel: LoggerLogLevel
   transportTarget: LoggerTransportTarget
   transportOptions: LoggerTransportOptions
-}
-
-export interface Logger {
-  debug(context: ErrorContext | null, message: string): void
-  info(context: ErrorContext | null, message: string): void
-  warn(context: ErrorContext | null, message: string): void
-  error(context: ErrorContext | null, message: string): void
-  fatal(context: ErrorContext | null, message: string): void
 }

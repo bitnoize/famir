@@ -7,6 +7,7 @@
     { "path": "packages/config" },
     { "path": "packages/logger" },
     { "path": "packages/database" },
+    { "path": "packages/storage" },
     { "path": "packages/task-queue" },
     { "path": "packages/task-worker" },
     { "path": "packages/http-client" },

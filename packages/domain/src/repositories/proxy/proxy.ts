@@ -1,5 +1,5 @@
-import { RepositoryContainer } from '../../domain.js'
 import { DisabledProxy, EnabledProxy, Proxy } from '../../models/index.js'
+import { RepositoryContainer } from '../../services/index.js'
 
 export interface ProxyRepository {
   create(campaignId: string, id: string, url: string): Promise<RepositoryContainer<Proxy>>

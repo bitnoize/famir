@@ -1,5 +1,5 @@
-import { RepositoryContainer } from '../../domain.js'
 import { DisabledLure, EnabledLure, Lure } from '../../models/index.js'
+import { RepositoryContainer } from '../../services/index.js'
 
 export interface LureRepository {
   create(
