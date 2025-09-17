@@ -2,7 +2,7 @@ import {
   Config,
   DatabaseError,
   Logger,
-  Redirector,
+  RedirectorModel,
   RedirectorRepository,
   RepositoryContainer,
   Validator
@@ -32,7 +32,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     campaignId: string,
     id: string,
     page: string
-  ): Promise<RepositoryContainer<Redirector>> {
+  ): Promise<RepositoryContainer<RedirectorModel>> {
     try {
       const [status, rawRedirector] = await Promise.all([
         this.connection.redirector.create_redirector(this.options.prefix, campaignId, id, page),
@@ -66,7 +66,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async read(campaignId: string, id: string): Promise<Redirector | null> {
+  async read(campaignId: string, id: string): Promise<RedirectorModel | null> {
     try {
       const rawRedirector = await this.connection.redirector.read_redirector(
         this.options.prefix,
@@ -84,7 +84,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     campaignId: string,
     id: string,
     page: string | null | undefined
-  ): Promise<RepositoryContainer<Redirector>> {
+  ): Promise<RepositoryContainer<RedirectorModel>> {
     try {
       const [status, rawRedirector] = await Promise.all([
         this.connection.redirector.update_redirector(this.options.prefix, campaignId, id, page),
@@ -118,7 +118,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async delete(campaignId: string, id: string): Promise<RepositoryContainer<Redirector>> {
+  async delete(campaignId: string, id: string): Promise<RepositoryContainer<RedirectorModel>> {
     try {
       const [rawRedirector, status] = await Promise.all([
         this.connection.redirector.read_redirector(this.options.prefix, campaignId, id),
@@ -148,7 +148,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async list(campaignId: string): Promise<Redirector[] | null> {
+  async list(campaignId: string): Promise<RedirectorModel[] | null> {
     try {
       const index = await this.connection.redirector.read_redirector_index(
         this.options.prefix,

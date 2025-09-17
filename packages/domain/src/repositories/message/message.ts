@@ -1,7 +1,6 @@
 import {
-  Message,
   MessageHeaders,
-  MessageMethod,
+  MessageModel,
   MessageRequestCookies,
   MessageResponseCookies
 } from '../../models/index.js'
@@ -15,7 +14,7 @@ export interface MessageRepository {
     targetId: string,
     sessionId: string,
     clientIp: string,
-    method: MessageMethod,
+    method: string,
     originUrl: string,
     forwardUrl: string,
     requestHeaders: MessageHeaders,
@@ -27,7 +26,7 @@ export interface MessageRepository {
     responseBody: Buffer,
     queryTime: number,
     score: number
-  ): Promise<RepositoryContainer<Message>>
+  ): Promise<RepositoryContainer<MessageModel>>
 
-  read(campaignId: string, id: string): Promise<Message | null>
+  read(campaignId: string, id: string): Promise<MessageModel | null>
 }

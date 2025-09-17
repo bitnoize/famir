@@ -1,12 +1,12 @@
-import { Session } from '@famir/domain'
+import { SessionModel } from '@famir/domain'
 import { RawSession } from './session.functions.js'
 
-export function buildSessionModel(rawSession: RawSession | null): Session | null {
+export function buildSessionModel(rawSession: RawSession | null): SessionModel | null {
   if (rawSession === null) {
     return null
   }
 
-  return new Session(
+  return new SessionModel(
     rawSession.campaign_id,
     rawSession.id,
     rawSession.proxy_id,
@@ -20,15 +20,15 @@ export function buildSessionModel(rawSession: RawSession | null): Session | null
 
 export function buildSessionCollection(
   rawSessions: Array<RawSession | null>
-): Array<Session | null> {
+): Array<SessionModel | null> {
   return rawSessions.map((rawSession) => buildSessionModel(rawSession))
 }
 
-export function guardSession(data: Session | null): data is Session {
+export function guardSession(data: SessionModel | null): data is SessionModel {
   return data !== null
 }
 
-export function assertSession(data: Session | null): asserts data is Session {
+export function assertSession(data: SessionModel | null): asserts data is SessionModel {
   if (!guardSession(data)) {
     throw new Error(`Session lost`)
   }

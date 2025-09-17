@@ -18,7 +18,9 @@
     "@famir/config": "*",
     "@famir/logger": "*",
     "@famir/database": "*",
-    "@famir/task-queue": "*",
+    "@famir/storage": "*",
+    "@famir/workflow": "*",
+    "@famir/executor": "*",
     "@famir/repl-server": "*"
   },
   "devDependencies": {

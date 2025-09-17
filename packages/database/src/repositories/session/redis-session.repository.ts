@@ -3,7 +3,7 @@ import {
   DatabaseError,
   Logger,
   RepositoryContainer,
-  Session,
+  SessionModel,
   SessionRepository,
   Validator
 } from '@famir/domain'
@@ -27,7 +27,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     campaignId: string,
     id: string,
     secret: string
-  ): Promise<RepositoryContainer<Session>> {
+  ): Promise<RepositoryContainer<SessionModel>> {
     try {
       const [status, rawSession] = await Promise.all([
         this.connection.session.create_session(this.options.prefix, campaignId, id, secret),
@@ -57,7 +57,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  async read(campaignId: string, id: string): Promise<Session | null> {
+  async read(campaignId: string, id: string): Promise<SessionModel | null> {
     try {
       const rawSession = await this.connection.session.read_session(
         this.options.prefix,
@@ -71,7 +71,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  async auth(campaignId: string, id: string): Promise<RepositoryContainer<Session>> {
+  async auth(campaignId: string, id: string): Promise<RepositoryContainer<SessionModel>> {
     try {
       const [status, rawSession] = await Promise.all([
         this.connection.session.auth_session(this.options.prefix, campaignId, id),
@@ -106,7 +106,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     lureId: string,
     id: string,
     secret: string
-  ): Promise<RepositoryContainer<Session>> {
+  ): Promise<RepositoryContainer<SessionModel>> {
     try {
       const [status, rawSession] = await Promise.all([
         this.connection.session.upgrade_session(

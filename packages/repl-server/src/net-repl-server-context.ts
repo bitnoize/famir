@@ -1,5 +1,6 @@
 import { ReplServerContext, ReplServerContextHandler } from '@famir/domain'
 import repl from 'node:repl'
+import net from 'node:net'
 
 export class NetReplServerContext implements ReplServerContext {
   private readonly _map = new Map<string, [string, ReplServerContextHandler]>()

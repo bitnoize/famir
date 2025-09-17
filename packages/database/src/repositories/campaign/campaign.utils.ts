@@ -1,12 +1,12 @@
-import { Campaign } from '@famir/domain'
+import { CampaignModel } from '@famir/domain'
 import { RawCampaign } from './campaign.functions.js'
 
-export function buildCampaignModel(rawCampaign: RawCampaign | null): Campaign | null {
+export function buildCampaignModel(rawCampaign: RawCampaign | null): CampaignModel | null {
   if (rawCampaign == null) {
     return null
   }
 
-  return new Campaign(
+  return new CampaignModel(
     rawCampaign.id,
     rawCampaign.description,
     rawCampaign.landing_secret,
@@ -30,15 +30,15 @@ export function buildCampaignModel(rawCampaign: RawCampaign | null): Campaign | 
 
 export function buildCampaignCollection(
   rawCampaigns: Array<RawCampaign | null>
-): Array<Campaign | null> {
+): Array<CampaignModel | null> {
   return rawCampaigns.map((rawCampaign) => buildCampaignModel(rawCampaign))
 }
 
-export function guardCampaign(data: Campaign | null): data is Campaign {
+export function guardCampaign(data: CampaignModel | null): data is CampaignModel {
   return data != null
 }
 
-export function assertCampaign(data: Campaign | null): asserts data is Campaign {
+export function assertCampaign(data: CampaignModel | null): asserts data is CampaignModel {
   if (!guardCampaign(data)) {
     throw new Error(`Campaign lost`)
   }

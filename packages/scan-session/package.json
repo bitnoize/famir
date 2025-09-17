@@ -16,7 +16,7 @@
     "@famir/validator": "*",
     "@famir/config": "*",
     "@famir/logger": "*",
-    "@famir/task-worker": "*"
+    "@famir/executor": "*"
   },
   "devDependencies": {
     "@types/node": "^24.0.1"

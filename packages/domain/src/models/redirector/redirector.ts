@@ -1,4 +1,4 @@
-export class Redirector {
+export class RedirectorModel {
   constructor(
     readonly campaignId: string,
     readonly id: string,

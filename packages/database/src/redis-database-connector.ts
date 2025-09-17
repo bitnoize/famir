@@ -46,7 +46,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
       {
         options: filterSecrets(this.options, ['connectionUrl'])
       },
-      `DatabaseConnector initialized`
+      `RedisDatabaseConnector initialized`
     )
   }
 
@@ -58,12 +58,12 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   async connect(): Promise<void> {
     await this._redis.connect()
 
-    this.logger.info({}, `DatabaseConnector connected`)
+    this.logger.info({}, `RedisDatabaseConnector connected`)
   }
 
   async close(): Promise<void> {
     await this._redis.close()
 
-    this.logger.info({}, `DatabaseConnector closed`)
+    this.logger.info({}, `RedisDatabaseConnector closed`)
   }
 }

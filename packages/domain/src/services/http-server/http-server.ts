@@ -5,7 +5,15 @@ export interface HttpServer {
 
 export type HttpServerLocals = Record<string, unknown>
 
-export type HttpServerRouteMethod = 'all' | 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options' | 'head'
+export type HttpServerRouteMethod =
+  | 'all'
+  | 'get'
+  | 'post'
+  | 'put'
+  | 'delete'
+  | 'patch'
+  | 'options'
+  | 'head'
 
 export interface HttpServerRequest {
   ip: string | undefined

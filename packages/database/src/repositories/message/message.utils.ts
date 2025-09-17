@@ -1,28 +1,134 @@
 import {
-  Message,
+  DatabaseError,
   MessageHeaders,
-  MessageMethod,
+  MessageModel,
   MessageRequestCookies,
   MessageResponseCookies,
   ValidatorAssertSchema
 } from '@famir/domain'
 import { RawMessage } from './message.functions.js'
 
+export function parseMessageRequestHeaders(
+  assertSchema: ValidatorAssertSchema,
+  data: string
+): MessageHeaders {
+  try {
+    const headers: unknown = JSON.parse(data)
+
+    assertSchema<MessageHeaders>('message-headers', headers)
+
+    return headers
+  } catch (error) {
+    throw new DatabaseError(
+      {
+        data: data,
+        cause: error
+      },
+      `Parse message request headers failed`
+    )
+  }
+}
+
+export function parseMessageRequestCookies(
+  assertSchema: ValidatorAssertSchema,
+  data: string
+): MessageRequestCookies {
+  try {
+    const cookies: unknown = JSON.parse(data)
+
+    assertSchema<MessageRequestCookies>('message-request-cookies', cookies)
+
+    return cookies
+  } catch (error) {
+    throw new DatabaseError(
+      {
+        data: data,
+        cause: error
+      },
+      `Parse message request cookies failed`
+    )
+  }
+}
+
+export function parseMessageRequestBody(data: string): Buffer {
+  try {
+    return Buffer.from(data, 'base64')
+  } catch (error) {
+    throw new DatabaseError(
+      {
+        data: data.length,
+        cause: error
+      },
+      `Parse message request body failed`
+    )
+  }
+}
+
+export function parseMessageResponseHeaders(
+  assertSchema: ValidatorAssertSchema,
+  data: string
+): MessageHeaders {
+  try {
+    const headers: unknown = JSON.parse(data)
+
+    assertSchema<MessageHeaders>('message-headers', headers)
+
+    return headers
+  } catch (error) {
+    throw new DatabaseError(
+      {
+        data: data,
+        cause: error
+      },
+      `Parse message response headers failed`
+    )
+  }
+}
+
+export function parseMessageResponseCookies(
+  assertSchema: ValidatorAssertSchema,
+  data: string
+): MessageResponseCookies {
+  try {
+    const cookies: unknown = JSON.parse(data)
+
+    assertSchema<MessageResponseCookies>('message-response-cookies', cookies)
+
+    return cookies
+  } catch (error) {
+    throw new DatabaseError(
+      {
+        data: data,
+        cause: error
+      },
+      `Parse message response cookies failed`
+    )
+  }
+}
+
+export function parseMessageResponseBody(data: string): Buffer {
+  try {
+    return Buffer.from(data, 'base64')
+  } catch (error) {
+    throw new DatabaseError(
+      {
+        data: data.length,
+        cause: error
+      },
+      `Parse message response body failed`
+    )
+  }
+}
+
 export function buildMessageModel(
   assertSchema: ValidatorAssertSchema,
   rawMessage: RawMessage | null
-): Message | null {
+): MessageModel | null {
   if (rawMessage === null) {
     return null
   }
 
-  assertSchema<MessageMethod>('message-method', rawMessage.method)
-  assertSchema<MessageHeaders>('message-headers', rawMessage.request_headers)
-  assertSchema<MessageRequestCookies>('message-request-cookies', rawMessage.request_cookies)
-  assertSchema<MessageHeaders>('message-headers', rawMessage.response_headers)
-  assertSchema<MessageResponseCookies>('message-response-cookies', rawMessage.response_cookies)
-
-  return new Message(
+  return new MessageModel(
     rawMessage.campaign_id,
     rawMessage.id,
     rawMessage.proxy_id,
@@ -32,13 +138,13 @@ export function buildMessageModel(
     rawMessage.method,
     rawMessage.origin_url,
     rawMessage.forward_url,
-    rawMessage.request_headers,
-    rawMessage.request_cookies,
-    Buffer.from(rawMessage.request_body, 'base64'),
+    parseMessageRequestHeaders(assertSchema, rawMessage.request_headers),
+    parseMessageRequestCookies(assertSchema, rawMessage.request_cookies),
+    parseMessageRequestBody(rawMessage.request_body),
     rawMessage.status_code,
-    rawMessage.response_headers,
-    rawMessage.response_cookies,
-    Buffer.from(rawMessage.response_body, 'base64'),
+    parseMessageResponseHeaders(assertSchema, rawMessage.response_headers),
+    parseMessageResponseCookies(assertSchema, rawMessage.response_cookies),
+    parseMessageResponseBody(rawMessage.response_body),
     rawMessage.query_time,
     rawMessage.score,
     new Date(rawMessage.created_at)
@@ -48,15 +154,15 @@ export function buildMessageModel(
 export function buildMessageCollection(
   assertSchema: ValidatorAssertSchema,
   rawMessages: Array<RawMessage | null>
-): Array<Message | null> {
+): Array<MessageModel | null> {
   return rawMessages.map((rawMessage) => buildMessageModel(assertSchema, rawMessage))
 }
 
-export function guardMessage(data: Message | null): data is Message {
+export function guardMessage(data: MessageModel | null): data is MessageModel {
   return data !== null
 }
 
-export function assertMessage(data: Message | null): asserts data is Message {
+export function assertMessage(data: MessageModel | null): asserts data is MessageModel {
   if (!guardMessage(data)) {
     throw new Error(`Message lost`)
   }

@@ -1,14 +1,12 @@
 import { SHUTDOWN_SIGNALS } from '@famir/common'
-import { DatabaseConnector } from '@famir/database'
-import { Logger } from '@famir/logger'
-import { ReplServer } from '@famir/repl-server'
 import {
-  HeartbeatQueue,
+  DatabaseConnector,
+  Logger,
+  ReplServer,
   ScanMessageQueue,
-  ScanSessionQueue,
-  TaskQueueConnector
-} from '@famir/task-queue'
-import { Validator } from '@famir/validator'
+  Validator,
+  WorkflowConnector
+} from '@famir/domain'
 import { shellSchemas } from './shell.schemas.js'
 
 export class ShellApp {
@@ -16,9 +14,7 @@ export class ShellApp {
     validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
-    protected readonly taskQueueConnector: TaskQueueConnector,
-    protected readonly heartbeatQueue: HeartbeatQueue,
-    protected readonly scanSessionQueue: ScanSessionQueue,
+    protected readonly workflowConnector: WorkflowConnector,
     protected readonly scanMessageQueue: ScanMessageQueue,
     protected readonly replServer: ReplServer
   ) {
@@ -36,8 +32,6 @@ export class ShellApp {
     try {
       await this.databaseConnector.connect()
 
-      //await this.taskQueueConnector.connect()
-
       await this.replServer.listen()
     } catch (error) {
       console.error(`Shell start failed`, { error })
@@ -50,10 +44,8 @@ export class ShellApp {
     try {
       await this.replServer.close()
 
-      await this.taskQueueConnector.close()
+      await this.workflowConnector.close()
 
-      await this.heartbeatQueue.close()
-      await this.scanSessionQueue.close()
       await this.scanMessageQueue.close()
 
       await this.databaseConnector.close()

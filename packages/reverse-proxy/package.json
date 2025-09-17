@@ -18,7 +18,7 @@
     "@famir/logger": "*",
     "@famir/validator": "*",
     "@famir/database": "*",
-    "@famir/task-queue": "*",
+    "@famir/workflow": "*",
     "@famir/http-client": "*",
     "@famir/http-server": "*"
   },

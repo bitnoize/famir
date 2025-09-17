@@ -1,4 +1,4 @@
-export class Lure {
+export class LureModel {
   constructor(
     readonly campaignId: string,
     readonly id: string,
@@ -11,10 +11,10 @@ export class Lure {
   ) {}
 }
 
-export interface DisabledLure extends Lure {
+export interface DisabledLureModel extends LureModel {
   isEnabled: false
 }
 
-export interface EnabledLure extends Lure {
+export interface EnabledLureModel extends LureModel {
   isEnabled: true
 }

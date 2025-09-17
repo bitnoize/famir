@@ -1,11 +1,12 @@
+import { JSONSchemaType } from '@famir/common'
 import {
   campaignDescriptionSchema,
   campaignMessageExpireSchema,
   campaignNewSessionExpireSchema,
   campaignSessionExpireSchema
 } from '@famir/database'
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
-import { CreateCampaignDto, UpdateCampaignDto } from '../../use-cases/index.js'
+import { customIdentSchema, randomIdentSchema } from '@famir/validator'
+import { CreateCampaignDto } from '../../use-cases/index.js'
 
 export const createCampaignDtoSchema: JSONSchemaType<CreateCampaignDto> = {
   type: 'object',
@@ -47,11 +48,12 @@ export const createCampaignDtoSchema: JSONSchemaType<CreateCampaignDto> = {
     messageExpire: {
       ...campaignMessageExpireSchema,
       nullable: true
-    },
+    }
   },
   additionalProperties: false
 } as const
 
+/*
 export const updateCampaignDtoSchema: JSONSchemaType<UpdateCampaignDto> = {
   type: 'object',
   required: [],
@@ -75,3 +77,4 @@ export const updateCampaignDtoSchema: JSONSchemaType<UpdateCampaignDto> = {
   },
   additionalProperties: false
 } as const
+  */

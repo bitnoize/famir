@@ -2,9 +2,8 @@ import {
   Config,
   DatabaseError,
   Logger,
-  Message,
   MessageHeaders,
-  MessageMethod,
+  MessageModel,
   MessageRepository,
   MessageRequestCookies,
   MessageResponseCookies,
@@ -34,7 +33,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     targetId: string,
     sessionId: string,
     clientIp: string,
-    method: MessageMethod,
+    method: string,
     originUrl: string,
     forwardUrl: string,
     requestHeaders: MessageHeaders,
@@ -46,7 +45,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     responseBody: Buffer,
     queryTime: number,
     score: number
-  ): Promise<RepositoryContainer<Message>> {
+  ): Promise<RepositoryContainer<MessageModel>> {
     try {
       const [status, rawMessage] = await Promise.all([
         this.connection.message.create_message(
@@ -102,7 +101,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  async read(campaignId: string, id: string): Promise<Message | null> {
+  async read(campaignId: string, id: string): Promise<MessageModel | null> {
     try {
       const rawMessage = await this.connection.message.read_message(
         this.options.prefix,

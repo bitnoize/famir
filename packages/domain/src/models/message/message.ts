@@ -1,7 +1,3 @@
-export const MESSAGE_METHODS = ['HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const
-
-export type MessageMethod = (typeof MESSAGE_METHODS)[number]
-
 export type MessageHeader = string | string[]
 export type MessageHeaders = Record<string, MessageHeader | null | undefined>
 
@@ -21,7 +17,7 @@ export interface MessageResponseCookie {
 }
 export type MessageResponseCookies = Record<string, MessageResponseCookie | null | undefined>
 
-export class Message {
+export class MessageModel {
   constructor(
     readonly campaignId: string,
     readonly id: string,
@@ -29,7 +25,7 @@ export class Message {
     readonly targetId: string,
     readonly sessionId: string,
     readonly clientIp: string,
-    readonly method: MessageMethod,
+    readonly method: string,
     readonly originUrl: string,
     readonly forwardUrl: string,
     readonly requestHeaders: MessageHeaders,

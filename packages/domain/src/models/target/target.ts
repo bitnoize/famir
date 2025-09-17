@@ -1,6 +1,6 @@
 export const TARGET_SUB_ROOT = '.'
 
-export class Target {
+export class TargetModel {
   constructor(
     readonly campaignId: string,
     readonly id: string,
@@ -29,10 +29,10 @@ export class Target {
   ) {}
 }
 
-export interface DisabledTarget extends Target {
+export interface DisabledTargetModel extends TargetModel {
   isEnabled: true
 }
 
-export interface EnabledTarget extends Target {
+export interface EnabledTargetModel extends TargetModel {
   isEnabled: true
 }

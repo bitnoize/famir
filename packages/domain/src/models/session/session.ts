@@ -1,4 +1,4 @@
-export class Session {
+export class SessionModel {
   constructor(
     readonly campaignId: string,
     readonly id: string,

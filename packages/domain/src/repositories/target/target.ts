@@ -1,4 +1,4 @@
-import { DisabledTarget, EnabledTarget, Target } from '../../models/index.js'
+import { DisabledTargetModel, EnabledTargetModel, TargetModel } from '../../models/index.js'
 import { RepositoryContainer } from '../../services/index.js'
 
 export interface TargetRepository {
@@ -23,11 +23,11 @@ export interface TargetRepository {
     sitemapXml: string,
     successRedirectUrl: string,
     failureRedirectUrl: string
-  ): Promise<RepositoryContainer<DisabledTarget>>
+  ): Promise<RepositoryContainer<DisabledTargetModel>>
 
-  read(campaignId: string, id: string): Promise<Target | null>
+  read(campaignId: string, id: string): Promise<TargetModel | null>
 
-  readEnabled(campaignId: string, id: string): Promise<EnabledTarget | null>
+  readEnabled(campaignId: string, id: string): Promise<EnabledTargetModel | null>
 
   update(
     campaignId: string,
@@ -41,15 +41,15 @@ export interface TargetRepository {
     sitemapXml: string | null | undefined,
     successRedirectUrl: string | null | undefined,
     failureRedirectUrl: string | null | undefined
-  ): Promise<RepositoryContainer<DisabledTarget>>
+  ): Promise<RepositoryContainer<DisabledTargetModel>>
 
-  enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledTarget>>
+  enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledTargetModel>>
 
-  disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTarget>>
+  disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTargetModel>>
 
-  delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTarget>>
+  delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTargetModel>>
 
-  list(campaignId: string): Promise<Target[] | null>
+  list(campaignId: string): Promise<TargetModel[] | null>
 
-  listEnabled(campaignId: string): Promise<EnabledTarget[] | null>
+  listEnabled(campaignId: string): Promise<EnabledTargetModel[] | null>
 }

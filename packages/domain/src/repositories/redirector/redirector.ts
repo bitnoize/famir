@@ -1,18 +1,22 @@
-import { Redirector } from '../../models/index.js'
+import { RedirectorModel } from '../../models/index.js'
 import { RepositoryContainer } from '../../services/index.js'
 
 export interface RedirectorRepository {
-  create(campaignId: string, id: string, page: string): Promise<RepositoryContainer<Redirector>>
+  create(
+    campaignId: string,
+    id: string,
+    page: string
+  ): Promise<RepositoryContainer<RedirectorModel>>
 
-  read(campaignId: string, id: string): Promise<Redirector | null>
+  read(campaignId: string, id: string): Promise<RedirectorModel | null>
 
   update(
     campaignId: string,
     id: string,
     page: string | null | undefined
-  ): Promise<RepositoryContainer<Redirector>>
+  ): Promise<RepositoryContainer<RedirectorModel>>
 
-  delete(campaignId: string, id: string): Promise<RepositoryContainer<Redirector>>
+  delete(campaignId: string, id: string): Promise<RepositoryContainer<RedirectorModel>>
 
-  list(campaignId: string): Promise<Redirector[] | null>
+  list(campaignId: string): Promise<RedirectorModel[] | null>
 }

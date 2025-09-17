@@ -1,4 +1,4 @@
-import { Campaign } from '../../models/index.js'
+import { CampaignModel } from '../../models/index.js'
 import { RepositoryContainer } from '../../services/index.js'
 
 export interface CampaignRepository {
@@ -13,9 +13,9 @@ export interface CampaignRepository {
     sessionExpire: number,
     newSessionExpire: number,
     messageExpire: number
-  ): Promise<RepositoryContainer<Campaign>>
+  ): Promise<RepositoryContainer<CampaignModel>>
 
-  read(id: string): Promise<Campaign | null>
+  read(id: string): Promise<CampaignModel | null>
 
   update(
     id: string,
@@ -23,7 +23,7 @@ export interface CampaignRepository {
     sessionExpire: number | null | undefined,
     newSessionExpire: number | null | undefined,
     messageExpire: number | null | undefined
-  ): Promise<RepositoryContainer<Campaign>>
+  ): Promise<RepositoryContainer<CampaignModel>>
 
-  delete(id: string): Promise<RepositoryContainer<Campaign>>
+  delete(id: string): Promise<RepositoryContainer<CampaignModel>>
 }

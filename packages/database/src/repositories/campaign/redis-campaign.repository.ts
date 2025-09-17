@@ -1,5 +1,5 @@
 import {
-  Campaign,
+  CampaignModel,
   CampaignRepository,
   Config,
   DatabaseError,
@@ -39,7 +39,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     sessionExpire: number,
     newSessionExpire: number,
     messageExpire: number
-  ): Promise<RepositoryContainer<Campaign>> {
+  ): Promise<RepositoryContainer<CampaignModel>> {
     try {
       const [status, rawCampaign] = await Promise.all([
         this.connection.campaign.create_campaign(
@@ -81,7 +81,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  async read(id: string): Promise<Campaign | null> {
+  async read(id: string): Promise<CampaignModel | null> {
     try {
       const rawCampaign = await this.connection.campaign.read_campaign(this.options.prefix, id)
 
@@ -97,7 +97,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     sessionExpire: number | null | undefined,
     newSessionExpire: number | null | undefined,
     messageExpire: number | null | undefined
-  ): Promise<RepositoryContainer<Campaign>> {
+  ): Promise<RepositoryContainer<CampaignModel>> {
     try {
       const [status, rawCampaign] = await Promise.all([
         this.connection.campaign.update_campaign(
@@ -134,7 +134,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  async delete(id: string): Promise<RepositoryContainer<Campaign>> {
+  async delete(id: string): Promise<RepositoryContainer<CampaignModel>> {
     try {
       const [rawCampaign, status] = await Promise.all([
         this.connection.campaign.read_campaign(this.options.prefix, id),
@@ -164,7 +164,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  async list(): Promise<Campaign[]> {
+  async list(): Promise<CampaignModel[]> {
     try {
       const index = await this.connection.campaign.read_campaign_index(this.options.prefix)
 

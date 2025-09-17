@@ -1,25 +1,12 @@
 import { JSONSchemaType } from '@famir/common'
 import {
-  MESSAGE_METHODS,
   MessageHeader,
   MessageHeaders,
-  MessageMethod,
   MessageRequestCookie,
   MessageRequestCookies,
   MessageResponseCookie,
   MessageResponseCookies
 } from '@famir/domain'
-//import { randomIdentRegExp } from '../../database.utils.js'
-
-export const messageIdSchema: JSONSchemaType<string> = {
-  type: 'string'
-  //pattern: randomIdentRegExp
-} as const
-
-export const messageMethodSchema: JSONSchemaType<MessageMethod> = {
-  type: 'string',
-  enum: MESSAGE_METHODS
-} as const
 
 export const messageHeaderSchema: JSONSchemaType<MessageHeader> = {
   type: ['string', 'array'],

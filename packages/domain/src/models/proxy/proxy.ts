@@ -1,4 +1,4 @@
-export class Proxy {
+export class ProxyModel {
   constructor(
     readonly campaignId: string,
     readonly id: string,
@@ -10,10 +10,10 @@ export class Proxy {
   ) {}
 }
 
-export interface DisabledProxy extends Proxy {
+export interface DisabledProxyModel extends ProxyModel {
   isEnabled: false
 }
 
-export interface EnabledProxy extends Proxy {
+export interface EnabledProxyModel extends ProxyModel {
   isEnabled: true
 }

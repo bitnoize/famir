@@ -1,4 +1,5 @@
 import {
+  ErrorContext,
   Validator,
   ValidatorAssertSchema,
   ValidatorError,
@@ -49,7 +50,10 @@ export class AjvValidator implements Validator {
 
   get assertSchema(): ValidatorAssertSchema {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-    return <T>(schemaName: string, data: unknown): asserts data is T => {
+    return <T>(
+      schemaName: string,
+      data: unknown,
+    ): asserts data is T => {
       const validate = this.getSchema<T>(schemaName)
 
       if (!validate(data)) {

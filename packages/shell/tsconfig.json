@@ -12,7 +12,9 @@
     { "path": "../config" },
     { "path": "../logger" },
     { "path": "../database" },
-    { "path": "../task-queue" },
+    { "path": "../storage" },
+    { "path": "../workflow" },
+    { "path": "../executor" },
     { "path": "../repl-server" }
   ]
 }

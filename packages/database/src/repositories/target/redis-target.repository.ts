@@ -1,11 +1,11 @@
 import {
   Config,
   DatabaseError,
-  DisabledTarget,
-  EnabledTarget,
+  DisabledTargetModel,
+  EnabledTargetModel,
   Logger,
   RepositoryContainer,
-  Target,
+  TargetModel,
   TargetRepository,
   Validator
 } from '@famir/domain'
@@ -53,7 +53,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     sitemapXml: string,
     successRedirectUrl: string,
     failureRedirectUrl: string
-  ): Promise<RepositoryContainer<DisabledTarget>> {
+  ): Promise<RepositoryContainer<DisabledTargetModel>> {
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.create_target(
@@ -126,7 +126,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async read(campaignId: string, id: string): Promise<Target | null> {
+  async read(campaignId: string, id: string): Promise<TargetModel | null> {
     try {
       const rawTarget = await this.connection.target.read_target(
         this.options.prefix,
@@ -140,7 +140,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async readEnabled(campaignId: string, id: string): Promise<EnabledTarget | null> {
+  async readEnabled(campaignId: string, id: string): Promise<EnabledTargetModel | null> {
     try {
       const rawTarget = await this.connection.target.read_target(
         this.options.prefix,
@@ -168,7 +168,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     sitemapXml: string | null | undefined,
     successRedirectUrl: string | null | undefined,
     failureRedirectUrl: string | null | undefined
-  ): Promise<RepositoryContainer<DisabledTarget>> {
+  ): Promise<RepositoryContainer<DisabledTargetModel>> {
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.update_target(
@@ -223,7 +223,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledTarget>> {
+  async enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledTargetModel>> {
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.enable_target(this.options.prefix, campaignId, id),
@@ -253,7 +253,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTarget>> {
+  async disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTargetModel>> {
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.disable_target(this.options.prefix, campaignId, id),
@@ -283,7 +283,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTarget>> {
+  async delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTargetModel>> {
     try {
       const [rawTarget, status] = await Promise.all([
         this.connection.target.read_target(this.options.prefix, campaignId, id),
@@ -313,7 +313,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async list(campaignId: string): Promise<Target[] | null> {
+  async list(campaignId: string): Promise<TargetModel[] | null> {
     try {
       const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
 
@@ -331,7 +331,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async listEnabled(campaignId: string): Promise<EnabledTarget[] | null> {
+  async listEnabled(campaignId: string): Promise<EnabledTargetModel[] | null> {
     try {
       const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
 

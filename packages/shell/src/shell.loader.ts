@@ -1,36 +1,41 @@
 import { DIContainer } from '@famir/common'
-import { Config, EnvConfig } from '@famir/config'
+import { EnvConfig } from '@famir/config'
 import {
-  DatabaseConnector,
   RedisCampaignRepository,
   RedisDatabaseConnection,
   RedisDatabaseConnector,
   RedisLureRepository,
+  RedisMessageRepository,
   RedisProxyRepository,
   RedisRedirectorRepository,
+  RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
 import {
   CampaignRepository,
+  Config,
+  DatabaseConnector,
+  Logger,
   LureRepository,
+  MessageRepository,
   ProxyRepository,
   RedirectorRepository,
-  TargetRepository
-} from '@famir/domain'
-import { Logger, PinoLogger } from '@famir/logger'
-import { Context, BuiltinContext, BuiltinReplServer, ReplServer } from '@famir/repl-server'
-import {
-  BullHeartbeatQueue,
-  BullScanMessageQueue,
-  BullScanSessionQueue,
-  BullTaskQueueConnection,
-  BullTaskQueueConnector,
-  HeartbeatQueue,
+  ReplServer,
+  ReplServerContext,
   ScanMessageQueue,
-  ScanSessionQueue,
-  TaskQueueConnector
-} from '@famir/task-queue'
-import { AjvValidator, Validator } from '@famir/validator'
+  SessionRepository,
+  TargetRepository,
+  Validator,
+  WorkflowConnector
+} from '@famir/domain'
+import { PinoLogger } from '@famir/logger'
+import { NetReplServer, NetReplServerContext } from '@famir/repl-server'
+import { AjvValidator } from '@famir/validator'
+import {
+  BullScanMessageQueue,
+  BullWorkflowConnection,
+  BullWorkflowConnector
+} from '@famir/workflow'
 import { ShellApp } from './shell.app.js'
 import { ShellConfig } from './shell.js'
 import { configShellSchema } from './shell.schemas.js'
@@ -82,6 +87,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisCampaignRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ShellConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -92,6 +98,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisProxyRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ShellConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -102,6 +109,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisTargetRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ShellConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -112,6 +120,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisRedirectorRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ShellConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -122,6 +131,29 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisLureRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Logger>('Logger'),
+        c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+      )
+  )
+
+  container.registerSingleton<SessionRepository>(
+    'SessionRepository',
+    (c) =>
+      new RedisSessionRepository(
+        c.resolve<Validator>('Validator'),
+        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Logger>('Logger'),
+        c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+      )
+  )
+
+  container.registerSingleton<MessageRepository>(
+    'MessageRepository',
+    (c) =>
+      new RedisMessageRepository(
+        c.resolve<Validator>('Validator'),
+        c.resolve<Config<ShellConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -131,33 +163,13 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   // Queues
   //
 
-  container.registerSingleton<TaskQueueConnector>(
-    'TaskQueueConnector',
+  container.registerSingleton<WorkflowConnector>(
+    'WorkflowConnector',
     (c) =>
-      new BullTaskQueueConnector(
+      new BullWorkflowConnector(
         c.resolve<Validator>('Validator'),
         c.resolve<Config<ShellConfig>>('Config'),
         c.resolve<Logger>('Logger')
-      )
-  )
-
-  container.registerSingleton<HeartbeatQueue>(
-    'HeartbeatQueue',
-    (c) =>
-      new BullHeartbeatQueue(
-        c.resolve<Validator>('Validator'),
-        c.resolve<Logger>('Logger'),
-        c.resolve<TaskQueueConnector>('TaskQueueConnector').connection<BullTaskQueueConnection>()
-      )
-  )
-
-  container.registerSingleton<ScanSessionQueue>(
-    'ScanSessionQueue',
-    (c) =>
-      new BullScanSessionQueue(
-        c.resolve<Validator>('Validator'),
-        c.resolve<Logger>('Logger'),
-        c.resolve<TaskQueueConnector>('TaskQueueConnector').connection<BullTaskQueueConnection>()
       )
   )
 
@@ -167,7 +179,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
       new BullScanMessageQueue(
         c.resolve<Validator>('Validator'),
         c.resolve<Logger>('Logger'),
-        c.resolve<TaskQueueConnector>('TaskQueueConnector').connection<BullTaskQueueConnection>()
+        c.resolve<WorkflowConnector>('WorkflowConnector').connection<BullWorkflowConnection>()
       )
   )
 
@@ -175,16 +187,19 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   // ReplServer
   //
 
-  container.registerSingleton<Context>('Context', () => new BuiltinContext())
+  container.registerSingleton<ReplServerContext>(
+    'ReplServerContext',
+    () => new NetReplServerContext()
+  )
 
   container.registerSingleton<ReplServer>(
     'ReplServer',
     (c) =>
-      new BuiltinReplServer(
+      new NetReplServer(
         c.resolve<Validator>('Validator'),
         c.resolve<Config<ShellConfig>>('Config'),
         c.resolve<Logger>('Logger'),
-        c.resolve<Context>('Context')
+        c.resolve<ReplServerContext>('ReplServerContext')
       )
   )
 
@@ -205,9 +220,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
         c.resolve<Validator>('Validator'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector'),
-        c.resolve<TaskQueueConnector>('TaskQueueConnector'),
-        c.resolve<HeartbeatQueue>('HeartbeatQueue'),
-        c.resolve<ScanSessionQueue>('ScanSessionQueue'),
+        c.resolve<WorkflowConnector>('WorkflowConnector'),
         c.resolve<ScanMessageQueue>('ScanMessageQueue'),
         c.resolve<ReplServer>('ReplServer')
       )

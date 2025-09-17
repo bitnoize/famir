@@ -1,4 +1,6 @@
-import { configDatabaseConnectionUrlSchema } from '@famir/database'
+import { JSONSchemaType } from '@famir/common'
+import { configDatabaseConnectionUrlSchema, configDatabasePrefixSchema } from '@famir/database'
+import { ValidatorSchemas } from '@famir/domain'
 import {
   configLoggerAppNameSchema,
   configLoggerLogLevelSchema,
@@ -13,8 +15,8 @@ import {
   configReplServerSocketTimeoutSchema,
   configReplServerUseColorsSchema
 } from '@famir/repl-server'
-import { configTaskQueueConnectionUrlSchema } from '@famir/task-queue'
-import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
+import { configWorkflowConnectionUrlSchema } from '@famir/workflow'
+/*
 import {
   createCampaignDtoSchema,
   createProxyDtoSchema,
@@ -30,6 +32,7 @@ import {
   updateCampaignDtoSchema,
   updateTargetDtoSchema
 } from './controllers/index.js'
+*/
 import { ShellConfig } from './shell.js'
 
 export const configShellSchema: JSONSchemaType<ShellConfig> = {
@@ -40,7 +43,8 @@ export const configShellSchema: JSONSchemaType<ShellConfig> = {
     'LOGGER_TRANSPORT_TARGET',
     'LOGGER_TRANSPORT_OPTIONS',
     'DATABASE_CONNECTION_URL',
-    'TASK_QUEUE_CONNECTION_URL',
+    'DATABASE_PREFIX',
+    'WORKFLOW_CONNECTION_URL',
     'REPL_SERVER_ADDRESS',
     'REPL_SERVER_PORT',
     'REPL_SERVER_MAX_CONNECTIONS',
@@ -57,7 +61,8 @@ export const configShellSchema: JSONSchemaType<ShellConfig> = {
     LOGGER_TRANSPORT_TARGET: configLoggerTransportTargetSchema,
     LOGGER_TRANSPORT_OPTIONS: configLoggerTransportOptionsSchema,
     DATABASE_CONNECTION_URL: configDatabaseConnectionUrlSchema,
-    TASK_QUEUE_CONNECTION_URL: configTaskQueueConnectionUrlSchema,
+    DATABASE_PREFIX: configDatabasePrefixSchema,
+    WORKFLOW_CONNECTION_URL: configWorkflowConnectionUrlSchema,
     REPL_SERVER_ADDRESS: {
       ...configReplServerAddressSchema,
       default: '127.0.0.1'
@@ -75,17 +80,17 @@ export const configShellSchema: JSONSchemaType<ShellConfig> = {
 } as const
 
 export const shellSchemas: ValidatorSchemas = {
-  'create-campaign-dto': createCampaignDtoSchema,
-  'update-campaign-dto': updateCampaignDtoSchema,
-  'create-proxy-dto': createProxyDtoSchema,
-  'read-proxy-dto': readProxyDtoSchema,
-  'enable-proxy-dto': enableProxyDtoSchema,
-  'disable-proxy-dto': disableProxyDtoSchema,
-  'delete-proxy-dto': deleteProxyDtoSchema,
-  'create-target-dto': createTargetDtoSchema,
-  'read-target-dto': readTargetDtoSchema,
-  'update-target-dto': updateTargetDtoSchema,
-  'enable-target-dto': enableTargetDtoSchema,
-  'disable-target-dto': disableTargetDtoSchema,
-  'delete-target-dto': deleteTargetDtoSchema
+  //  'create-campaign-dto': createCampaignDtoSchema,
+  //  'update-campaign-dto': updateCampaignDtoSchema,
+  //  'create-proxy-dto': createProxyDtoSchema,
+  //  'read-proxy-dto': readProxyDtoSchema,
+  //  'enable-proxy-dto': enableProxyDtoSchema,
+  //  'disable-proxy-dto': disableProxyDtoSchema,
+  //  'delete-proxy-dto': deleteProxyDtoSchema,
+  //  'create-target-dto': createTargetDtoSchema,
+  //  'read-target-dto': readTargetDtoSchema,
+  //  'update-target-dto': updateTargetDtoSchema,
+  //  'enable-target-dto': enableTargetDtoSchema,
+  //  'disable-target-dto': disableTargetDtoSchema,
+  //  'delete-target-dto': deleteTargetDtoSchema
 }

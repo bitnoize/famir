@@ -1,4 +1,4 @@
-export class Campaign {
+export class CampaignModel {
   constructor(
     readonly id: string,
     readonly description: string,

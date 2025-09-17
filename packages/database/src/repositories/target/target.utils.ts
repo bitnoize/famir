@@ -1,12 +1,12 @@
-import { DisabledTarget, EnabledTarget, Target } from '@famir/domain'
+import { DisabledTargetModel, EnabledTargetModel, TargetModel } from '@famir/domain'
 import { RawTarget } from './target.functions.js'
 
-export function buildTargetModel(rawTarget: RawTarget | null): Target | null {
+export function buildTargetModel(rawTarget: RawTarget | null): TargetModel | null {
   if (rawTarget === null) {
     return null
   }
 
-  return new Target(
+  return new TargetModel(
     rawTarget.campaign_id,
     rawTarget.id,
     !!rawTarget.is_landing,
@@ -34,35 +34,39 @@ export function buildTargetModel(rawTarget: RawTarget | null): Target | null {
   )
 }
 
-export function buildTargetCollection(rawTargets: Array<RawTarget | null>): Array<Target | null> {
+export function buildTargetCollection(
+  rawTargets: Array<RawTarget | null>
+): Array<TargetModel | null> {
   return rawTargets.map((rawTarget) => buildTargetModel(rawTarget))
 }
 
-export function guardTarget(data: Target | null): data is Target {
+export function guardTarget(data: TargetModel | null): data is TargetModel {
   return data != null
 }
 
-export function guardEnabledTarget(data: Target | null): data is EnabledTarget {
+export function guardEnabledTarget(data: TargetModel | null): data is EnabledTargetModel {
   return guardTarget(data) && data.isEnabled
 }
 
-export function guardDisabledTarget(data: Target | null): data is DisabledTarget {
+export function guardDisabledTarget(data: TargetModel | null): data is DisabledTargetModel {
   return guardTarget(data) && !data.isEnabled
 }
 
-export function assertTarget(data: Target | null): asserts data is Target {
+export function assertTarget(data: TargetModel | null): asserts data is TargetModel {
   if (!guardTarget(data)) {
     throw new Error(`Target lost`)
   }
 }
 
-export function assertEnabledTarget(data: Target | null): asserts data is EnabledTarget {
+export function assertEnabledTarget(data: TargetModel | null): asserts data is EnabledTargetModel {
   if (!guardEnabledTarget(data)) {
     throw new Error(`EnabledTarget lost`)
   }
 }
 
-export function assertDisabledTarget(data: Target | null): asserts data is DisabledTarget {
+export function assertDisabledTarget(
+  data: TargetModel | null
+): asserts data is DisabledTargetModel {
   if (!guardDisabledTarget(data)) {
     throw new Error(`DisabledTarget lost`)
   }

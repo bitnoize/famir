@@ -12,7 +12,7 @@
     { "path": "../config" },
     { "path": "../logger" },
     { "path": "../database" },
-    { "path": "../task-queue" },
+    { "path": "../workflow" },
     { "path": "../http-client" },
     { "path": "../http-server" }
   ]

@@ -1,9 +1,4 @@
-import {
-  MessageHeaders,
-  MessageMethod,
-  MessageRequestCookies,
-  MessageResponseCookies
-} from '@famir/domain'
+import { MessageHeaders, MessageRequestCookies, MessageResponseCookies } from '@famir/domain'
 import { CommandParser } from '@redis/client'
 import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../database.keys.js'
 
@@ -17,12 +12,12 @@ export interface RawMessage {
   method: string
   origin_url: string
   forward_url: string
-  request_headers: unknown
-  request_cookies: unknown
+  request_headers: string
+  request_cookies: string
   request_body: string
   status_code: number
-  response_headers: unknown
-  response_cookies: unknown
+  response_headers: string
+  response_cookies: string
   response_body: string
   query_time: number
   score: number
@@ -43,7 +38,7 @@ export const messageFunctions = {
         targetId: string,
         sessionId: string,
         clientIp: string,
-        method: MessageMethod,
+        method: string,
         originUrl: string,
         forwardUrl: string,
         requestHeaders: MessageHeaders,

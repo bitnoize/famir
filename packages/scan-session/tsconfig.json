@@ -11,6 +11,6 @@
     { "path": "../validator" },
     { "path": "../config" },
     { "path": "../logger" },
-    { "path": "../task-worker" }
+    { "path": "../executor" }
   ]
 }
