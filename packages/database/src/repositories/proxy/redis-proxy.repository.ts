@@ -6,7 +6,6 @@ import {
   Logger,
   ProxyModel,
   ProxyRepository,
-  RepositoryContainer,
   Validator
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
@@ -32,11 +31,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     super(validator, config, logger, connection, 'proxy')
   }
 
-  async create(
-    campaignId: string,
-    id: string,
-    url: string
-  ): Promise<RepositoryContainer<DisabledProxyModel>> {
+  async create(campaignId: string, id: string, url: string): Promise<DisabledProxyModel> {
     try {
       const [status, rawProxy] = await Promise.all([
         this.connection.proxy.create_proxy(this.options.prefix, campaignId, id, url),
@@ -51,16 +46,10 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
         assertDisabledProxy(proxy)
 
-        return [true, proxy, code, message]
+        return proxy
       }
 
-      const isKnownError = ['NOT_FOUND', 'CONFLICT'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'create', { campaignId, id, url })
     }
@@ -88,7 +77,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledProxyModel>> {
+  async enable(campaignId: string, id: string): Promise<EnabledProxyModel> {
     try {
       const [status, rawProxy] = await Promise.all([
         this.connection.proxy.enable_proxy(this.options.prefix, campaignId, id),
@@ -103,22 +92,16 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
         assertEnabledProxy(proxy)
 
-        return [true, proxy, code, message]
+        return proxy
       }
 
-      const isKnownError = ['NOT_FOUND'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'enable', { campaignId, id })
     }
   }
 
-  async disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledProxyModel>> {
+  async disable(campaignId: string, id: string): Promise<DisabledProxyModel> {
     try {
       const [status, rawProxy] = await Promise.all([
         this.connection.proxy.disable_proxy(this.options.prefix, campaignId, id),
@@ -133,22 +116,16 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
         assertDisabledProxy(proxy)
 
-        return [true, proxy, code, message]
+        return proxy
       }
 
-      const isKnownError = ['NOT_FOUND'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'disable', { campaignId, id })
     }
   }
 
-  async delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledProxyModel>> {
+  async delete(campaignId: string, id: string): Promise<DisabledProxyModel> {
     try {
       const [rawProxy, status] = await Promise.all([
         this.connection.proxy.read_proxy(this.options.prefix, campaignId, id),
@@ -163,16 +140,10 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
         assertDisabledProxy(proxy)
 
-        return [true, proxy, code, message]
+        return proxy
       }
 
-      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'delete', { campaignId, id })
     }

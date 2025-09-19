@@ -1,9 +1,17 @@
-import { ReplServerContext, ReplServerContextHandler } from '@famir/domain'
+import { Logger, ReplServerContext, ReplServerContextHandler } from '@famir/domain'
 import repl from 'node:repl'
-import net from 'node:net'
 
 export class NetReplServerContext implements ReplServerContext {
   private readonly _map = new Map<string, [string, ReplServerContextHandler]>()
+
+  constructor(protected readonly logger: Logger) {
+    this.logger.debug(
+      {
+        module: 'repl-server'
+      },
+      `ReplServerContext initialized`
+    )
+  }
 
   applyTo(replServer: repl.REPLServer) {
     this._map.forEach(([, handler], name) => {
@@ -27,6 +35,16 @@ export class NetReplServerContext implements ReplServerContext {
     }
 
     this._map.set(name, [description, handler])
+
+    this.logger.debug(
+      {
+        module: 'repl-server',
+        handler: {
+          name
+        }
+      },
+      `ReplServerContext register handler`
+    )
   }
 
   dump(): Record<string, string> {

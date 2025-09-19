@@ -1,9 +1,21 @@
-import { DomainError, ErrorContext } from '../../domain.error.js'
+import { DomainError, DomainErrorOptions } from '../../domain.error.js'
+
+export type ReplServerErrorCode = 'UNKNOWN'
+
+export type ReplServerErrorOptions = DomainErrorOptions & {
+  code: ReplServerErrorCode
+}
 
 export class ReplServerError extends DomainError {
-  constructor(context: ErrorContext, message: string) {
-    super(context, message)
+  code: ReplServerErrorCode
+
+  constructor(message: string, options: ReplServerErrorOptions) {
+    super(message, {
+      cause: options.cause,
+      context: options.context
+    })
 
     this.name = 'ReplServerError'
+    this.code = options.code
   }
 }

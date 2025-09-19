@@ -1,9 +1,9 @@
-import { filterSecrets, serializeError } from '@famir/common'
+import { serializeError } from '@famir/common'
 import { Config, ExecutorConnector, Logger, Validator } from '@famir/domain'
 import { Redis } from 'ioredis'
 import { ExecutorConfig, ExecutorConnectorOptions } from './executor.js'
 import { executorSchemas } from './executor.schemas.js'
-import { buildConnectorOptions } from './executor.utils.js'
+import { buildConnectorOptions, filterOptionsSecrets } from './executor.utils.js'
 
 export type BullExecutorConnection = Redis
 
@@ -29,17 +29,19 @@ export class BullExecutorConnector implements ExecutorConnector {
     this._redis.on('error', (error) => {
       this.logger.error(
         {
+          module: 'executor',
           error: serializeError(error)
         },
         `Redis error event`
       )
     })
 
-    this.logger.info(
+    this.logger.debug(
       {
-        options: filterSecrets(this.options, ['connectionUrl'])
+        module: 'executor',
+        options: filterOptionsSecrets(this.options)
       },
-      `BullExecutorConnector initialized`
+      `ExecutorConnector initialized`
     )
   }
 
@@ -51,12 +53,22 @@ export class BullExecutorConnector implements ExecutorConnector {
   //async connect(): Promise<void> {
   //  await this._redis.connect()
   //
-  //  this.logger.info({}, `ExecutorConnector connected`)
+  //  this.logger.debug(
+  //    {
+  //      module: 'executor'
+  //    },
+  //    `ExecutorConnector connected`
+  //  )
   //}
 
   async close(): Promise<void> {
     await this._redis.quit()
 
-    this.logger.info({}, `BullExecutorConnector closed`)
+    this.logger.debug(
+      {
+        module: 'executor'
+      },
+      `ExecutorConnector closed`
+    )
   }
 }

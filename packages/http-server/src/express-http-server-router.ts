@@ -1,13 +1,27 @@
-import { HttpServerRouteHandler, HttpServerRouteMethod, HttpServerRouter } from '@famir/domain'
+import {
+  HttpServerRouteHandler,
+  HttpServerRouteMethod,
+  HttpServerRouter,
+  Logger
+} from '@famir/domain'
 import express from 'express'
 
 export class ExpressHttpServerRouter implements HttpServerRouter {
   private readonly _router = express.Router()
 
-  constructor(private readonly basePath = '/') {}
+  constructor(
+    protected readonly logger: Logger,
+  ) {
+    this.logger.debug(
+      {
+        module: 'http-server',
+      },
+      `HttpServerRouter initialized`
+    )
+  }
 
   applyTo(express: express.Express) {
-    express.use(this.basePath, this._router)
+    express.use('/', this._router)
   }
 
   addRoute(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandler) {
@@ -63,6 +77,17 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
           next(error)
         }
       }
+    )
+
+    this.logger.debug(
+      {
+        module: 'http-server',
+        handler: {
+          method,
+          path
+        }
+      },
+      `HttpServerRouter register handler`
     )
   }
 }

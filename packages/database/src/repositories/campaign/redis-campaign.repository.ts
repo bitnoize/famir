@@ -4,7 +4,6 @@ import {
   Config,
   DatabaseError,
   Logger,
-  RepositoryContainer,
   Validator
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
@@ -39,7 +38,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     sessionExpire: number,
     newSessionExpire: number,
     messageExpire: number
-  ): Promise<RepositoryContainer<CampaignModel>> {
+  ): Promise<CampaignModel> {
     try {
       const [status, rawCampaign] = await Promise.all([
         this.connection.campaign.create_campaign(
@@ -66,16 +65,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
         assertCampaign(campaign)
 
-        return [true, campaign, code, message]
+        return campaign
       }
 
-      const isKnownError = ['CONFLICT'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'create', { id })
     }
@@ -97,7 +90,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     sessionExpire: number | null | undefined,
     newSessionExpire: number | null | undefined,
     messageExpire: number | null | undefined
-  ): Promise<RepositoryContainer<CampaignModel>> {
+  ): Promise<CampaignModel> {
     try {
       const [status, rawCampaign] = await Promise.all([
         this.connection.campaign.update_campaign(
@@ -119,22 +112,16 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
         assertCampaign(campaign)
 
-        return [true, campaign, code, message]
+        return campaign
       }
 
-      const isKnownError = ['NOT_FOUND'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'update', { id })
     }
   }
 
-  async delete(id: string): Promise<RepositoryContainer<CampaignModel>> {
+  async delete(id: string): Promise<CampaignModel> {
     try {
       const [rawCampaign, status] = await Promise.all([
         this.connection.campaign.read_campaign(this.options.prefix, id),
@@ -149,16 +136,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
         assertCampaign(campaign)
 
-        return [true, campaign, code, message]
+        return campaign
       }
 
-      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'delete', { id })
     }

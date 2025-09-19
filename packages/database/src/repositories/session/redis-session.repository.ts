@@ -2,7 +2,6 @@ import {
   Config,
   DatabaseError,
   Logger,
-  RepositoryContainer,
   SessionModel,
   SessionRepository,
   Validator
@@ -23,11 +22,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     super(validator, config, logger, connection, 'session')
   }
 
-  async create(
-    campaignId: string,
-    id: string,
-    secret: string
-  ): Promise<RepositoryContainer<SessionModel>> {
+  async create(campaignId: string, id: string, secret: string): Promise<SessionModel> {
     try {
       const [status, rawSession] = await Promise.all([
         this.connection.session.create_session(this.options.prefix, campaignId, id, secret),
@@ -42,16 +37,10 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
         assertSession(session)
 
-        return [true, session, code, message]
+        return session
       }
 
-      const isKnownError = ['NOT_FOUND', 'CONFLICT'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'create', { campaignId, id, secret })
     }
@@ -71,7 +60,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  async auth(campaignId: string, id: string): Promise<RepositoryContainer<SessionModel>> {
+  async auth(campaignId: string, id: string): Promise<SessionModel> {
     try {
       const [status, rawSession] = await Promise.all([
         this.connection.session.auth_session(this.options.prefix, campaignId, id),
@@ -86,16 +75,10 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
         assertSession(session)
 
-        return [true, session, code, message]
+        return session
       }
 
-      const isKnownError = ['NOT_FOUND'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'auth', { campaignId, id })
     }
@@ -106,7 +89,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     lureId: string,
     id: string,
     secret: string
-  ): Promise<RepositoryContainer<SessionModel>> {
+  ): Promise<SessionModel> {
     try {
       const [status, rawSession] = await Promise.all([
         this.connection.session.upgrade_session(
@@ -127,16 +110,10 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
         assertSession(session)
 
-        return [true, session, code, message]
+        return session
       }
 
-      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'upgrade', {
         campaignId,

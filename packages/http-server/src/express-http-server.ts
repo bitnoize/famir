@@ -1,7 +1,6 @@
-import { filterSecrets, serializeError } from '@famir/common'
+import { serializeError } from '@famir/common'
 import {
   Config,
-  ErrorContext,
   HttpServer,
   HttpServerError,
   HttpServerRouter,
@@ -14,7 +13,7 @@ import express from 'express'
 import http from 'node:http'
 import { HttpServerConfig, HttpServerOptions } from './http-server.js'
 import { httpServerSchemas } from './http-server.schemas.js'
-import { buildOptions } from './http-server.utils.js'
+import { buildOptions, filterOptionsSecrets } from './http-server.utils.js'
 
 export class ExpressHttpServer implements HttpServer {
   protected readonly options: HttpServerOptions
@@ -58,9 +57,10 @@ export class ExpressHttpServer implements HttpServer {
 
     this._express.use(this.exceptionHandler)
 
-    this.logger.info(
+    this.logger.debug(
       {
-        options: filterSecrets(this.options, [])
+        module: 'http-server',
+        options: filterOptionsSecrets(this.options)
       },
       `HttpServer initialized`
     )
@@ -69,13 +69,23 @@ export class ExpressHttpServer implements HttpServer {
   async listen(): Promise<void> {
     await this._listen()
 
-    this.logger.info({}, `HttpServer listening`)
+    this.logger.debug(
+      {
+        module: 'http-server'
+      },
+      `HttpServer listening`
+    )
   }
 
   async close(): Promise<void> {
     await this._close()
 
-    this.logger.info({}, `HttpServer closed`)
+    this.logger.info(
+      {
+        module: 'http-server'
+      },
+      `HttpServer closed`
+    )
   }
 
   private _listen(): Promise<void> {
@@ -138,17 +148,13 @@ export class ExpressHttpServer implements HttpServer {
     next: express.NextFunction
   ) => {
     next(
-      new HttpServerError(
-        500,
-        {
-          request: {
-            method: req.method,
-            url: req.originalUrl,
-            headers: req.headers
-          }
+      new HttpServerError(`Unhandled request`, {
+        context: {
+          module: 'http-server'
         },
-        `Unhandled request`
-      )
+        code: 'UNKNOWN',
+        status: 500
+      })
     )
   }
 
@@ -164,31 +170,37 @@ export class ExpressHttpServer implements HttpServer {
       return
     }
 
-    const renderException = (status: number, context: ErrorContext, message: string) => {
-      if (status >= 500) {
-        this.logger.error(context, message)
-      } else {
-        this.logger.warn(context, message)
+    if (error instanceof HttpServerError) {
+      error.context['request'] = {
+        method: req.method,
+        url: req.originalUrl,
+        headers: req.headers
       }
 
-      res.type('text').status(status).send(message)
-    }
+      const logLevel = error.status >= 500 ? 'error' : 'warn'
 
-    if (error instanceof HttpServerError) {
-      renderException(error.status, error.context, error.message)
+      this.logger[logLevel](
+        {
+          error: serializeError(error)
+        },
+        `Server handle error`
+      )
+
+      res.type('text').status(error.status).send(error.message)
     } else {
-      renderException(
-        500,
+      this.logger.error(
         {
           request: {
             method: req.method,
             url: req.originalUrl,
             headers: req.headers
           },
-          cause: serializeError(error)
+          error: serializeError(error)
         },
-        `HttpServer internal error`
+        `Server handle error`
       )
+
+      res.type('text').status(500).send(`Server internal error`)
     }
   }
 }

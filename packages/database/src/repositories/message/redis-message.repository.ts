@@ -7,7 +7,6 @@ import {
   MessageRepository,
   MessageRequestCookies,
   MessageResponseCookies,
-  RepositoryContainer,
   Validator
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
@@ -45,7 +44,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     responseBody: Buffer,
     queryTime: number,
     score: number
-  ): Promise<RepositoryContainer<MessageModel>> {
+  ): Promise<MessageModel> {
     try {
       const [status, rawMessage] = await Promise.all([
         this.connection.message.create_message(
@@ -80,16 +79,10 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
         assertMessage(message)
 
-        return [true, message, code, reason]
+        return message
       }
 
-      const isKnownError = ['NOT_FOUND', 'CONFLICT'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, reason]
-      }
-
-      throw new DatabaseError({ code }, reason)
+      throw new DatabaseError(reason, { code })
     } catch (error) {
       this.exceptionFilter(error, 'create', {
         campaignId,

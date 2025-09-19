@@ -10,7 +10,7 @@ import {
 import { Queue } from 'bullmq'
 import { BullWorkflowConnection } from '../../bull-workflow-connector.js'
 import { WorkflowConfig, WorkflowQueueOptions } from '../../workflow.js'
-import { buildQueueOptions } from '../../workflow.utils.js'
+import { buildQueueOptions, filterOptionsSecrets } from '../../workflow.utils.js'
 
 export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue {
   protected readonly assertSchema: ValidatorAssertSchema
@@ -36,16 +36,34 @@ export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue
     this._queue.on('error', (error: unknown) => {
       this.logger.error(
         {
+          module: 'workflow',
           queue: this.queueName,
           error: serializeError(error)
         },
         `Queue error event`
       )
     })
+
+    this.logger.debug(
+      {
+        module: 'workflow',
+        queue: this.queueName,
+        options: filterOptionsSecrets(this.options)
+      },
+      `Queue initialized`
+    )
   }
 
   async close(): Promise<void> {
     await this._queue.close()
+
+    this.logger.debug(
+      {
+        module: 'workflow',
+        queue: this.queueName
+      },
+      `Queue closed`
+    )
   }
 
   async getJobCount(): Promise<number> {
@@ -62,21 +80,23 @@ export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue
     params: Record<string, unknown> = {}
   ): never {
     if (error instanceof WorkflowError) {
+      error.context['module'] = 'workflow'
       error.context['queue'] = this.queueName
       error.context['method'] = method
       error.context['params'] = params
 
       throw error
     } else {
-      throw new WorkflowError(
-        {
+      throw new WorkflowError(`Queue internal error`, {
+        cause: error,
+        context: {
+          module: 'workflow',
           queue: this.queueName,
           method,
-          params,
-          cause: error
+          params
         },
-        `Workflow internal error`
-      )
+        code: 'UNKNOWN'
+      })
     }
   }
 }

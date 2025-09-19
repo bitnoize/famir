@@ -1,5 +1,4 @@
 import { DisabledTargetModel, EnabledTargetModel, TargetModel } from '../../models/index.js'
-import { RepositoryContainer } from '../../services/index.js'
 
 export interface TargetRepository {
   create(
@@ -23,7 +22,7 @@ export interface TargetRepository {
     sitemapXml: string,
     successRedirectUrl: string,
     failureRedirectUrl: string
-  ): Promise<RepositoryContainer<DisabledTargetModel>>
+  ): Promise<DisabledTargetModel>
 
   read(campaignId: string, id: string): Promise<TargetModel | null>
 
@@ -41,13 +40,13 @@ export interface TargetRepository {
     sitemapXml: string | null | undefined,
     successRedirectUrl: string | null | undefined,
     failureRedirectUrl: string | null | undefined
-  ): Promise<RepositoryContainer<DisabledTargetModel>>
+  ): Promise<DisabledTargetModel>
 
-  enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledTargetModel>>
+  enable(campaignId: string, id: string): Promise<EnabledTargetModel>
 
-  disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTargetModel>>
+  disable(campaignId: string, id: string): Promise<DisabledTargetModel>
 
-  delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTargetModel>>
+  delete(campaignId: string, id: string): Promise<DisabledTargetModel>
 
   list(campaignId: string): Promise<TargetModel[] | null>
 

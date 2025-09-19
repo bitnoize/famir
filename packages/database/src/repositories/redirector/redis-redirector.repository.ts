@@ -4,7 +4,6 @@ import {
   Logger,
   RedirectorModel,
   RedirectorRepository,
-  RepositoryContainer,
   Validator
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
@@ -28,11 +27,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     super(validator, config, logger, connection, 'redirector')
   }
 
-  async create(
-    campaignId: string,
-    id: string,
-    page: string
-  ): Promise<RepositoryContainer<RedirectorModel>> {
+  async create(campaignId: string, id: string, page: string): Promise<RedirectorModel> {
     try {
       const [status, rawRedirector] = await Promise.all([
         this.connection.redirector.create_redirector(this.options.prefix, campaignId, id, page),
@@ -47,16 +42,10 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
         assertRedirector(redirector)
 
-        return [true, redirector, code, message]
+        return redirector
       }
 
-      const isKnownError = ['NOT_FOUND', 'CONFLICT'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'create', {
         campaignId,
@@ -84,7 +73,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     campaignId: string,
     id: string,
     page: string | null | undefined
-  ): Promise<RepositoryContainer<RedirectorModel>> {
+  ): Promise<RedirectorModel> {
     try {
       const [status, rawRedirector] = await Promise.all([
         this.connection.redirector.update_redirector(this.options.prefix, campaignId, id, page),
@@ -99,16 +88,10 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
         assertRedirector(redirector)
 
-        return [true, redirector, code, message]
+        return redirector
       }
 
-      const isKnownError = ['NOT_FOUND'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'update', {
         campaignId,
@@ -118,7 +101,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async delete(campaignId: string, id: string): Promise<RepositoryContainer<RedirectorModel>> {
+  async delete(campaignId: string, id: string): Promise<RedirectorModel> {
     try {
       const [rawRedirector, status] = await Promise.all([
         this.connection.redirector.read_redirector(this.options.prefix, campaignId, id),
@@ -133,16 +116,10 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
         assertRedirector(redirector)
 
-        return [true, redirector, code, message]
+        return redirector
       }
 
-      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'delete', { campaignId, id })
     }

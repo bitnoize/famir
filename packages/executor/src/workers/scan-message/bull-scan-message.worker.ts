@@ -5,12 +5,13 @@ import {
   ScanMessageJobData,
   ScanMessageJobName,
   ScanMessageJobResult,
+  ScanMessageManager,
+  ScanMessageWorker,
   Validator
 } from '@famir/domain'
 import { BullExecutorConnection } from '../../bull-executor-connector.js'
 import { ExecutorConfig } from '../../executor.js'
 import { BullBaseWorker } from '../base/index.js'
-import { ScanMessageManager, ScanMessageWorker } from './scan-message.js'
 
 export class BullScanMessageWorker
   extends BullBaseWorker<ScanMessageJobData, ScanMessageJobResult, ScanMessageJobName>

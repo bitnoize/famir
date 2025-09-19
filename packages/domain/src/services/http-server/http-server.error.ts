@@ -1,15 +1,24 @@
-import { DomainError, ErrorContext } from '../../domain.error.js'
+import { DomainError, DomainErrorOptions } from '../../domain.error.js'
+
+export type HttpServerErrorCode = 'NOT_FOUND' | 'CONFLICT' | 'FORBIDDEN' | 'UNKNOWN'
+
+export type HttpServerErrorOptions = DomainErrorOptions & {
+  code: HttpServerErrorCode
+  status: number
+}
 
 export class HttpServerError extends DomainError {
-  constructor(
-    readonly status: number,
-    context: ErrorContext,
-    message: string
-  ) {
-    context['status'] = status
+  code: HttpServerErrorCode
+  status: number
 
-    super(context, message)
+  constructor(message: string, options: HttpServerErrorOptions) {
+    super(message, {
+      cause: options.cause,
+      context: options.context
+    })
 
     this.name = 'HttpServerError'
+    this.code = options.code
+    this.status = options.status
   }
 }

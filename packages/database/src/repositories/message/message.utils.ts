@@ -19,13 +19,13 @@ export function parseMessageRequestHeaders(
 
     return headers
   } catch (error) {
-    throw new DatabaseError(
-      {
-        data: data,
-        cause: error
+    throw new DatabaseError(`Parse message request headers failed`, {
+      cause: error,
+      context: {
+        data: data
       },
-      `Parse message request headers failed`
-    )
+      code: 'UNKNOWN'
+    })
   }
 }
 
@@ -40,13 +40,13 @@ export function parseMessageRequestCookies(
 
     return cookies
   } catch (error) {
-    throw new DatabaseError(
-      {
-        data: data,
-        cause: error
+    throw new DatabaseError(`Parse message request cookies failed`, {
+      cause: error,
+      context: {
+        data: data
       },
-      `Parse message request cookies failed`
-    )
+      code: 'UNKNOWN'
+    })
   }
 }
 
@@ -54,13 +54,13 @@ export function parseMessageRequestBody(data: string): Buffer {
   try {
     return Buffer.from(data, 'base64')
   } catch (error) {
-    throw new DatabaseError(
-      {
-        data: data.length,
-        cause: error
+    throw new DatabaseError(`Parse message request body failed`, {
+      cause: error,
+      context: {
+        data: data.length
       },
-      `Parse message request body failed`
-    )
+      code: 'UNKNOWN'
+    })
   }
 }
 
@@ -75,13 +75,13 @@ export function parseMessageResponseHeaders(
 
     return headers
   } catch (error) {
-    throw new DatabaseError(
-      {
-        data: data,
-        cause: error
+    throw new DatabaseError(`Parse message response headers failed`, {
+      cause: error,
+      context: {
+        data: data
       },
-      `Parse message response headers failed`
-    )
+      code: 'UNKNOWN'
+    })
   }
 }
 
@@ -96,13 +96,13 @@ export function parseMessageResponseCookies(
 
     return cookies
   } catch (error) {
-    throw new DatabaseError(
-      {
-        data: data,
-        cause: error
+    throw new DatabaseError(`Parse message response cookies failed`, {
+      cause: error,
+      context: {
+        data: data
       },
-      `Parse message response cookies failed`
-    )
+      code: 'UNKNOWN'
+    })
   }
 }
 
@@ -110,13 +110,13 @@ export function parseMessageResponseBody(data: string): Buffer {
   try {
     return Buffer.from(data, 'base64')
   } catch (error) {
-    throw new DatabaseError(
-      {
-        data: data.length,
-        cause: error
+    throw new DatabaseError(`Parse message response body failed`, {
+      cause: error,
+      context: {
+        data: data.length
       },
-      `Parse message response body failed`
-    )
+      code: 'UNKNOWN'
+    })
   }
 }
 

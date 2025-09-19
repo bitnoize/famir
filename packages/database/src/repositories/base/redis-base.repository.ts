@@ -1,11 +1,11 @@
 import { Config, DatabaseError, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
 import { DatabaseConfig, DatabaseRepositoryOptions } from '../../database.js'
-import { buildRepositoryOptions } from '../../database.utils.js'
+import { buildRepositoryOptions, filterOptionsSecrets } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 
 export abstract class RedisBaseRepository {
-  protected readonly options: DatabaseRepositoryOptions
   protected readonly assertSchema: ValidatorAssertSchema
+  protected readonly options: DatabaseRepositoryOptions
 
   constructor(
     validator: Validator,
@@ -17,6 +17,15 @@ export abstract class RedisBaseRepository {
     this.assertSchema = validator.assertSchema
 
     this.options = buildRepositoryOptions(config.data)
+
+    this.logger.debug(
+      {
+        module: 'database',
+        repository: this.repositoryName,
+        options: filterOptionsSecrets(this.options)
+      },
+      `Repository initialized`
+    )
   }
 
   protected exceptionFilter(
@@ -31,15 +40,15 @@ export abstract class RedisBaseRepository {
 
       throw error
     } else {
-      throw new DatabaseError(
-        {
+      throw new DatabaseError(`Repository internal error`, {
+        cause: error,
+        context: {
           repository: this.repositoryName,
           method,
-          params,
-          cause: error
+          params
         },
-        `Database internal error`
-      )
+        code: 'UNKNOWN'
+      })
     }
   }
 }

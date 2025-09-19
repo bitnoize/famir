@@ -4,7 +4,6 @@ import {
   DisabledTargetModel,
   EnabledTargetModel,
   Logger,
-  RepositoryContainer,
   TargetModel,
   TargetRepository,
   Validator
@@ -53,7 +52,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     sitemapXml: string,
     successRedirectUrl: string,
     failureRedirectUrl: string
-  ): Promise<RepositoryContainer<DisabledTargetModel>> {
+  ): Promise<DisabledTargetModel> {
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.create_target(
@@ -90,16 +89,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
         assertDisabledTarget(target)
 
-        return [true, target, code, message]
+        return target
       }
 
-      const isKnownError = ['NOT_FOUND', 'CONFLICT'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'create', {
         campaignId,
@@ -168,7 +161,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     sitemapXml: string | null | undefined,
     successRedirectUrl: string | null | undefined,
     failureRedirectUrl: string | null | undefined
-  ): Promise<RepositoryContainer<DisabledTargetModel>> {
+  ): Promise<DisabledTargetModel> {
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.update_target(
@@ -196,16 +189,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
         assertDisabledTarget(target)
 
-        return [true, target, code, message]
+        return target
       }
 
-      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'update', {
         campaignId,
@@ -223,7 +210,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledTargetModel>> {
+  async enable(campaignId: string, id: string): Promise<EnabledTargetModel> {
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.enable_target(this.options.prefix, campaignId, id),
@@ -238,22 +225,16 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
         assertEnabledTarget(target)
 
-        return [true, target, code, message]
+        return target
       }
 
-      const isKnownError = ['NOT_FOUND'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'enable', { campaignId, id })
     }
   }
 
-  async disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTargetModel>> {
+  async disable(campaignId: string, id: string): Promise<DisabledTargetModel> {
     try {
       const [status, rawTarget] = await Promise.all([
         this.connection.target.disable_target(this.options.prefix, campaignId, id),
@@ -268,22 +249,16 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
         assertDisabledTarget(target)
 
-        return [true, target, code, message]
+        return target
       }
 
-      const isKnownError = ['NOT_FOUND'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'disable', { campaignId, id })
     }
   }
 
-  async delete(campaignId: string, id: string): Promise<RepositoryContainer<DisabledTargetModel>> {
+  async delete(campaignId: string, id: string): Promise<DisabledTargetModel> {
     try {
       const [rawTarget, status] = await Promise.all([
         this.connection.target.read_target(this.options.prefix, campaignId, id),
@@ -298,16 +273,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
         assertDisabledTarget(target)
 
-        return [true, target, code, message]
+        return target
       }
 
-      const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(code)
-
-      if (isKnownError) {
-        return [false, null, code, message]
-      }
-
-      throw new DatabaseError({ code }, message)
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'delete', { campaignId, id })
     }

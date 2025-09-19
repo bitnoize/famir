@@ -1,5 +1,5 @@
-import { arrayIncludes } from '@famir/common'
-import { REPOSITORY_STATUS_CODES, RepositoryStatusCode } from '@famir/domain'
+import { arrayIncludes, filterSecrets } from '@famir/common'
+import { DATABASE_STATUS_CODES, DatabaseStatusCode } from '@famir/domain'
 import { DatabaseConfig, DatabaseConnectorOptions, DatabaseRepositoryOptions } from './database.js'
 
 export function buildConnectorOptions(data: DatabaseConfig): DatabaseConnectorOptions {
@@ -14,14 +14,18 @@ export function buildRepositoryOptions(data: DatabaseConfig): DatabaseRepository
   }
 }
 
-export function parseStatusReply(status: string): [RepositoryStatusCode, string] {
+export function filterOptionsSecrets(data: object) {
+  return filterSecrets(data, ['connectionUrl'])
+}
+
+export function parseStatusReply(status: string): [DatabaseStatusCode, string] {
   const [code, message] = status.split(/\s+(.*)/, 2)
 
   if (code === undefined) {
     throw new Error(`Status code not defined`)
   }
 
-  if (!arrayIncludes(REPOSITORY_STATUS_CODES, code)) {
+  if (!arrayIncludes(DATABASE_STATUS_CODES, code)) {
     throw new Error(`Unknown status code: "${code}"`)
   }
 

@@ -1,9 +1,9 @@
-export type LoggerContext = Record<string, unknown>
+export type LoggerData = Record<string, unknown>
 
 export interface Logger {
-  debug(context: LoggerContext, message: string): void
-  info(context: LoggerContext, message: string): void
-  warn(context: LoggerContext, message: string): void
-  error(context: LoggerContext, message: string): void
-  fatal(context: LoggerContext, message: string): void
+  debug(data: LoggerData, msg: string): void
+  info(data: LoggerData, msg: string): void
+  warn(data: LoggerData, msg: string): void
+  error(data: LoggerData, msg: string): void
+  fatal(data: LoggerData, msg: string): void
 }

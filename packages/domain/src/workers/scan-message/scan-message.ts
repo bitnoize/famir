@@ -1,4 +1,4 @@
-import { ScanMessageJobData, ScanMessageJobName, ScanMessageJobResult } from '@famir/domain'
+import { ScanMessageJobData, ScanMessageJobName, ScanMessageJobResult } from '../../jobs/index.js'
 import { BaseManager, BaseWorker } from '../base/index.js'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

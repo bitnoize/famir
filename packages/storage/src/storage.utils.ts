@@ -1,3 +1,4 @@
+import { filterSecrets } from '@famir/common'
 import { StorageConfig, StorageOptions } from './storage.js'
 
 export function buildOptions(data: StorageConfig): StorageOptions {
@@ -8,4 +9,8 @@ export function buildOptions(data: StorageConfig): StorageOptions {
     accessKey: data.STORAGE_ACCESS_KEY,
     secretKey: data.STORAGE_SECRET_KEY
   }
+}
+
+export function filterOptionsSecrets(data: object) {
+  return filterSecrets(data, ['secretKey'])
 }

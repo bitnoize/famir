@@ -1,9 +1,9 @@
-import { filterSecrets, serializeError } from '@famir/common'
+import { serializeError } from '@famir/common'
 import { Config, Logger, Validator, WorkflowConnector } from '@famir/domain'
 import { Redis } from 'ioredis'
 import { WorkflowConfig, WorkflowConnectorOptions } from './workflow.js'
 import { workflowSchemas } from './workflow.schemas.js'
-import { buildConnectorOptions } from './workflow.utils.js'
+import { buildConnectorOptions, filterOptionsSecrets } from './workflow.utils.js'
 
 export type BullWorkflowConnection = Redis
 
@@ -28,17 +28,19 @@ export class BullWorkflowConnector implements WorkflowConnector {
     this._redis.on('error', (error) => {
       this.logger.error(
         {
+          module: 'workflow',
           error: serializeError(error)
         },
         `Redis error event`
       )
     })
 
-    this.logger.info(
+    this.logger.debug(
       {
-        options: filterSecrets(this.options, ['connectionUrl'])
+        module: 'workflow',
+        options: filterOptionsSecrets(this.options)
       },
-      `BullWorkflowConnector initialized`
+      `WorkflowConnector initialized`
     )
   }
 
@@ -50,12 +52,22 @@ export class BullWorkflowConnector implements WorkflowConnector {
   //async connect(): Promise<void> {
   //  await this._redis.connect()
   //
-  //  this.logger.info({}, `WorkflowConnector connected`)
+  //  this.logger.debug(
+  //    {
+  //      module: 'workflow'
+  //    },
+  //    `WorkflowConnector connected`
+  //  )
   //}
 
   async close(): Promise<void> {
     await this._redis.quit()
 
-    this.logger.info({}, `BullWorkflowConnector closed`)
+    this.logger.debug(
+      {
+        module: 'workflow'
+      },
+      `WorkflowConnector closed`
+    )
   }
 }

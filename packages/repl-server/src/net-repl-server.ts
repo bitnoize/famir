@@ -1,11 +1,11 @@
-import { filterSecrets, serializeError } from '@famir/common'
+import { serializeError } from '@famir/common'
 import { Config, Logger, ReplServer, ReplServerContext, Validator } from '@famir/domain'
 import net from 'node:net'
 import repl from 'node:repl'
 import util from 'node:util'
 import { ReplServerConfig, ReplServerOptions } from './repl-server.js'
 import { replServerSchemas } from './repl-server.schemas.js'
-import { buildOptions } from './repl-server.utils.js'
+import { buildOptions, filterOptionsSecrets } from './repl-server.utils.js'
 
 export class NetReplServer implements ReplServer {
   protected readonly options: ReplServerOptions
@@ -27,6 +27,7 @@ export class NetReplServer implements ReplServer {
     this._server.on('connection', (socket) => {
       this.logger.debug(
         {
+          module: 'repl-server',
           socket: socket.address()
         },
         `Server connect event`
@@ -36,6 +37,7 @@ export class NetReplServer implements ReplServer {
     this._server.on('drop', (data) => {
       this.logger.debug(
         {
+          module: 'repl-server',
           socket:
             data !== undefined
               ? {
@@ -51,9 +53,10 @@ export class NetReplServer implements ReplServer {
 
     this._server.maxConnections = this.options.maxConnections
 
-    this.logger.info(
+    this.logger.debug(
       {
-        options: filterSecrets(this.options, [])
+        module: 'repl-server',
+        options: filterOptionsSecrets(this.options)
       },
       `ReplServer initialized`
     )
@@ -67,6 +70,7 @@ export class NetReplServer implements ReplServer {
     socket.on('close', (hadError) => {
       this.logger.debug(
         {
+          module: 'repl-server',
           socket: socket.address(),
           hadError
         },
@@ -79,6 +83,7 @@ export class NetReplServer implements ReplServer {
     socket.on('error', (error) => {
       this.logger.error(
         {
+          module: 'repl-server',
           socket: socket.address(),
           error: serializeError(error)
         },
@@ -91,6 +96,7 @@ export class NetReplServer implements ReplServer {
     socket.on('timeout', () => {
       this.logger.debug(
         {
+          module: 'repl-server',
           socket: socket.address()
         },
         `Socket timeout event`
@@ -177,13 +183,23 @@ export class NetReplServer implements ReplServer {
   async listen(): Promise<void> {
     await this._listen()
 
-    this.logger.info({}, `ReplServer listening`)
+    this.logger.debug(
+      {
+        module: 'repl-server'
+      },
+      `ReplServer listening`
+    )
   }
 
   async close(): Promise<void> {
     await this._close()
 
-    this.logger.info({}, `ReplServer closed`)
+    this.logger.info(
+      {
+        module: 'repl-server'
+      },
+      `ReplServer closed`
+    )
   }
 
   private _listen(): Promise<void> {

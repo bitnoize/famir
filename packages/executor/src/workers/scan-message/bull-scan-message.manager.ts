@@ -1,7 +1,18 @@
-import { ScanMessageJobData, ScanMessageJobName, ScanMessageJobResult } from '@famir/domain'
+import {
+  Logger,
+  SCAN_MESSAGE_QUEUE_NAME,
+  ScanMessageJobData,
+  ScanMessageJobName,
+  ScanMessageJobResult,
+  ScanMessageManager
+} from '@famir/domain'
 import { BullBaseManager } from '../base/index.js'
-import { ScanMessageManager } from './scan-message.js'
 
 export class BullScanMessageManager
   extends BullBaseManager<ScanMessageJobData, ScanMessageJobResult, ScanMessageJobName>
-  implements ScanMessageManager {}
+  implements ScanMessageManager
+{
+  constructor(logger: Logger) {
+    super(logger, SCAN_MESSAGE_QUEUE_NAME)
+  }
+}

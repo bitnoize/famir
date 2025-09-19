@@ -1,9 +1,21 @@
-import { DomainError, ErrorContext } from '../../domain.error.js'
+import { DomainError, DomainErrorOptions } from '../../domain.error.js'
+
+export type DatabaseErrorCode = 'NOT_FOUND' | 'CONFLICT' | 'FORBIDDEN' | 'UNKNOWN'
+
+export type DatabaseErrorOptions = DomainErrorOptions & {
+  code: DatabaseErrorCode
+}
 
 export class DatabaseError extends DomainError {
-  constructor(context: ErrorContext, message: string) {
-    super(context, message)
+  code: DatabaseErrorCode
+
+  constructor(message: string, options: DatabaseErrorOptions) {
+    super(message, {
+      cause: options.cause,
+      context: options.context
+    })
 
     this.name = 'DatabaseError'
+    this.code = options.code
   }
 }

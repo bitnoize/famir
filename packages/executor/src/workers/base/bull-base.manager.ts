@@ -1,8 +1,21 @@
+import { BaseManager, Logger } from '@famir/domain'
 import { Job } from 'bullmq'
-import { BaseManager } from './base.js'
 
 export abstract class BullBaseManager<D, R, N extends string> implements BaseManager<D, R, N> {
   protected readonly _map = new Map<N, (data: D) => Promise<R>>()
+
+  constructor(
+    protected readonly logger: Logger,
+    protected readonly queueName: string
+  ) {
+    this.logger.debug(
+      {
+        module: 'executor',
+        queue: this.queueName
+      },
+      `Manager initialized`
+    )
+  }
 
   async applyTo(job: Job<D, R, N>): Promise<R> {
     const handler = this._map.get(job.name)
@@ -20,5 +33,16 @@ export abstract class BullBaseManager<D, R, N extends string> implements BaseMan
     }
 
     this._map.set(name, handler)
+
+    this.logger.debug(
+      {
+        module: 'executor',
+        queue: this.queueName,
+        handler: {
+          name
+        }
+      },
+      `Manager register handler`
+    )
   }
 }

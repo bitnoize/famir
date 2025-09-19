@@ -4,7 +4,6 @@ import {
   MessageRequestCookies,
   MessageResponseCookies
 } from '../../models/index.js'
-import { RepositoryContainer } from '../../services/index.js'
 
 export interface MessageRepository {
   create(
@@ -26,7 +25,7 @@ export interface MessageRepository {
     responseBody: Buffer,
     queryTime: number,
     score: number
-  ): Promise<RepositoryContainer<MessageModel>>
+  ): Promise<MessageModel>
 
   read(campaignId: string, id: string): Promise<MessageModel | null>
 }

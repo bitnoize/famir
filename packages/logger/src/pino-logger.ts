@@ -1,9 +1,8 @@
-import { filterSecrets } from '@famir/common'
-import { Config, Logger, LoggerContext, Validator, ValidatorAssertSchema } from '@famir/domain'
+import { Config, Logger, LoggerData, Validator, ValidatorAssertSchema } from '@famir/domain'
 import pino from 'pino'
 import { LoggerConfig, LoggerOptions } from './logger.js'
 import { loggerSchemas } from './logger.schemas.js'
-import { buildOptions } from './logger.utils.js'
+import { buildOptions, filterOptionsSecrets } from './logger.utils.js'
 
 export class PinoLogger implements Logger {
   protected readonly assertSchema: ValidatorAssertSchema
@@ -27,31 +26,32 @@ export class PinoLogger implements Logger {
       }
     })
 
-    this.info(
+    this.debug(
       {
-        options: filterSecrets(this.options, ['transportOptions'])
+        module: 'logger',
+        options: filterOptionsSecrets(this.options)
       },
-      `PinoLogger initialized`
+      `Logger initialized`
     )
   }
 
-  debug(context: LoggerContext, message: string) {
-    this._pino.debug({ context }, message)
+  debug(data: LoggerData, msg: string) {
+    this._pino.debug(data, msg)
   }
 
-  info(context: LoggerContext, message: string) {
-    this._pino.info({ context }, message)
+  info(data: LoggerData, msg: string) {
+    this._pino.info(data, msg)
   }
 
-  warn(context: LoggerContext, message: string) {
-    this._pino.warn({ context }, message)
+  warn(data: LoggerData, msg: string) {
+    this._pino.warn(data, msg)
   }
 
-  error(context: LoggerContext, message: string) {
-    this._pino.error({ context }, message)
+  error(data: LoggerData, msg: string) {
+    this._pino.error(data, msg)
   }
 
-  fatal(context: LoggerContext, message: string) {
-    this._pino.fatal({ context }, message)
+  fatal(data: LoggerData, msg: string) {
+    this._pino.fatal(data, msg)
   }
 }

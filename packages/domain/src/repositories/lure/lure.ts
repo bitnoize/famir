@@ -1,5 +1,4 @@
 import { DisabledLureModel, EnabledLureModel, LureModel } from '../../models/index.js'
-import { RepositoryContainer } from '../../services/index.js'
 
 export interface LureRepository {
   create(
@@ -7,22 +6,22 @@ export interface LureRepository {
     id: string,
     path: string,
     redirectorId: string
-  ): Promise<RepositoryContainer<DisabledLureModel>>
+  ): Promise<DisabledLureModel>
 
   read(campaignId: string, id: string): Promise<LureModel | null>
 
   readPath(campaignId: string, path: string): Promise<EnabledLureModel | null>
 
-  enable(campaignId: string, id: string): Promise<RepositoryContainer<EnabledLureModel>>
+  enable(campaignId: string, id: string): Promise<EnabledLureModel>
 
-  disable(campaignId: string, id: string): Promise<RepositoryContainer<DisabledLureModel>>
+  disable(campaignId: string, id: string): Promise<DisabledLureModel>
 
   delete(
     campaignId: string,
     id: string,
     path: string,
     redirectorId: string
-  ): Promise<RepositoryContainer<DisabledLureModel>>
+  ): Promise<DisabledLureModel>
 
   list(campaignId: string): Promise<LureModel[] | null>
 }

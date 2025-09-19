@@ -1,5 +1,6 @@
 export * from './controllers/index.js'
 export * from './modules/index.js'
+export * from './shell.error.js'
 export * from './shell.app.js'
 export * from './shell.js'
 export * from './shell.loader.js'

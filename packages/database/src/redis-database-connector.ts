@@ -1,10 +1,10 @@
-import { filterSecrets, serializeError } from '@famir/common'
+import { serializeError } from '@famir/common'
 import { Config, DatabaseConnector, Logger, Validator } from '@famir/domain'
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
 import { DatabaseConfig, DatabaseConnectorOptions } from './database.js'
 import { databaseSchemas } from './database.schemas.js'
-import { buildConnectorOptions } from './database.utils.js'
+import { buildConnectorOptions, filterOptionsSecrets } from './database.utils.js'
 
 export type RedisDatabaseConnection = RedisClientType<
   Record<string, never>, // Modules
@@ -36,17 +36,19 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     this._redis.on('error', (error) => {
       this.logger.error(
         {
+          module: 'database',
           error: serializeError(error)
         },
         `Redis error event`
       )
     })
 
-    this.logger.info(
+    this.logger.debug(
       {
-        options: filterSecrets(this.options, ['connectionUrl'])
+        module: 'database',
+        options: filterOptionsSecrets(this.options)
       },
-      `RedisDatabaseConnector initialized`
+      `DatabaseConnector initialized`
     )
   }
 
@@ -58,12 +60,22 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   async connect(): Promise<void> {
     await this._redis.connect()
 
-    this.logger.info({}, `RedisDatabaseConnector connected`)
+    this.logger.debug(
+      {
+        module: 'database'
+      },
+      `DatabaseConnector connected`
+    )
   }
 
   async close(): Promise<void> {
     await this._redis.close()
 
-    this.logger.info({}, `RedisDatabaseConnector closed`)
+    this.logger.debug(
+      {
+        module: 'database'
+      },
+      `DatabaseConnector closed`
+    )
   }
 }

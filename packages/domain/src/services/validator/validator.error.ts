@@ -1,9 +1,28 @@
-import { DomainError, ErrorContext } from '../../domain.error.js'
+import { DomainError, DomainErrorOptions } from '../../domain.error.js'
+
+export interface ValidatorValidateError {
+  keyword: string
+  instancePath: string
+  schemaPath: string
+  params: object
+  propertyName: string | undefined
+  message: string | undefined
+}
+
+export type ValidatorErrorOptions = DomainErrorOptions & {
+  validateErrors: ValidatorValidateError[]
+}
 
 export class ValidatorError extends DomainError {
-  constructor(context: ErrorContext, message: string) {
-    super(context, message)
+  validateErrors: ValidatorValidateError[]
+
+  constructor(message: string, options: ValidatorErrorOptions) {
+    super(message, {
+      cause: options.cause,
+      context: options.context
+    })
 
     this.name = 'ValidatorError'
+    this.validateErrors = options.validateErrors
   }
 }

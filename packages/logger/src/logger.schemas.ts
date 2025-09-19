@@ -1,5 +1,5 @@
-import { ValidatorSchemas } from '@famir/domain'
 import { JSONSchemaType } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import {
   LOGGER_LOG_LEVELS,
   LOGGER_TRANSPORT_TARGETS,

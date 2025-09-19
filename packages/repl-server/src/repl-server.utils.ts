@@ -1,3 +1,4 @@
+import { filterSecrets } from '@famir/common'
 import { ReplServerConfig, ReplServerOptions } from './repl-server.js'
 
 export function buildOptions(data: ReplServerConfig): ReplServerOptions {
@@ -9,4 +10,8 @@ export function buildOptions(data: ReplServerConfig): ReplServerOptions {
     prompt: data.REPL_SERVER_PROMPT,
     useColors: data.REPL_SERVER_USE_COLORS
   }
+}
+
+export function filterOptionsSecrets(data: object) {
+  return filterSecrets(data, [])
 }

@@ -1,8 +1,7 @@
-import { filterSecrets } from '@famir/common'
 import { Config, Logger, Storage, Validator } from '@famir/domain'
 import * as Minio from 'minio'
 import { StorageConfig, StorageOptions } from './storage.js'
-import { buildOptions } from './storage.utils.js'
+import { buildOptions, filterOptionsSecrets } from './storage.utils.js'
 
 export class MinioStorage implements Storage {
   protected readonly options: StorageOptions
@@ -23,11 +22,12 @@ export class MinioStorage implements Storage {
       secretKey: this.options.secretKey
     })
 
-    this.logger.info(
+    this.logger.debug(
       {
-        options: filterSecrets(this.options, ['accessKey', 'secretKey'])
+        module: 'storage',
+        options: filterOptionsSecrets(this.options)
       },
-      `MinioStorage initialized`
+      `Storage initialized`
     )
   }
 }
