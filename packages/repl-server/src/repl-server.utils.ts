@@ -1,5 +1,8 @@
+import { ValidatorSchemas } from '@famir/domain'
 import { filterSecrets } from '@famir/common'
 import { ReplServerConfig, ReplServerOptions } from './repl-server.js'
+
+export const internalSchemas: ValidatorSchemas = {}
 
 export function buildOptions(data: ReplServerConfig): ReplServerOptions {
   return {

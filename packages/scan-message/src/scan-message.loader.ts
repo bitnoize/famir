@@ -23,7 +23,7 @@ import {
   BullScanMessageWorker,
   BullExecutorConnection,
   BullExecutorConnector,
-} from '@famir/task-worker'
+} from '@famir/executor'
 import { AjvValidator } from '@famir/validator'
 import { ScanMessageApp } from './scan-message.app.js'
 import { ScanMessageConfig } from './scan-message.js'
@@ -80,6 +80,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisCampaignRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ScanMessageConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -90,7 +91,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisMessageRepository(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ScanMessageConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )

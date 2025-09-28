@@ -1,11 +1,14 @@
 import { Logger, ScanMessageManager, Validator } from '@famir/domain'
+import { BaseController } from '../base/index.js'
 
-export class ScanMessageController {
+export class ScanMessageController extends BaseController {
   constructor(
     validator: Validator,
-    protected readonly logger: Logger,
+    logger: Logger,
     manager: ScanMessageManager
   ) {
+    super(validator, logger, context, 'campaign')
+
     manager.setHandler('default', this.defaultHandler)
   }
 

@@ -1,33 +1,31 @@
 import { RedirectorModel } from '@famir/domain'
 import { RawRedirector } from './redirector.functions.js'
 
-export function buildRedirectorModel(rawRedirector: RawRedirector | null): RedirectorModel | null {
-  if (rawRedirector === null) {
+export function buildModel(raw: RawRedirector | null): RedirectorModel | null {
+  if (raw === null) {
     return null
   }
 
   return new RedirectorModel(
-    rawRedirector.campaign_id,
-    rawRedirector.id,
-    rawRedirector.page,
-    rawRedirector.lure_count,
-    new Date(rawRedirector.created_at),
-    new Date(rawRedirector.updated_at)
+    raw.campaign_id,
+    raw.id,
+    raw.page,
+    raw.lure_count,
+    new Date(raw.created_at),
+    new Date(raw.updated_at)
   )
 }
 
-export function buildRedirectorCollection(
-  rawRedirectors: Array<RawRedirector | null>
-): Array<RedirectorModel | null> {
-  return rawRedirectors.map((rawRedirector) => buildRedirectorModel(rawRedirector))
+export function buildCollection(raws: Array<RawRedirector | null>): Array<RedirectorModel | null> {
+  return raws.map((raw) => buildModel(raw))
 }
 
-export function guardRedirector(data: RedirectorModel | null): data is RedirectorModel {
+export function guardModel(data: RedirectorModel | null): data is RedirectorModel {
   return data !== null
 }
 
-export function assertRedirector(data: RedirectorModel | null): asserts data is RedirectorModel {
-  if (!guardRedirector(data)) {
+export function assertModel(data: RedirectorModel | null): asserts data is RedirectorModel {
+  if (!guardModel(data)) {
     throw new Error(`Redirector lost`)
   }
 }

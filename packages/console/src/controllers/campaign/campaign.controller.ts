@@ -25,13 +25,13 @@ export class CampaignController extends BaseController {
     protected readonly deleteCampaignUseCase: DeleteCampaignUseCase,
     protected readonly listCampaignsUseCase: ListCampaignsUseCase
   ) {
-    super(validator, logger, context, 'campaign')
+    super(validator, logger, 'campaign')
 
-    this.context.setHandler('createCampaign', `Create campaign`, this.createHandler)
-    this.context.setHandler('readCampaign', `Read campaign`, this.readHandler)
-    this.context.setHandler('updateCampaign', `Update campaign`, this.updateHandler)
-    this.context.setHandler('deleteCampaign', `Delete campaign`, this.deleteHandler)
-    this.context.setHandler('listCampaigns', `List campaigns`, this.listHandler)
+    context.setHandler('createCampaign', `Create campaign`, this.createHandler)
+    context.setHandler('readCampaign', `Read campaign`, this.readHandler)
+    context.setHandler('updateCampaign', `Update campaign`, this.updateHandler)
+    context.setHandler('deleteCampaign', `Delete campaign`, this.deleteHandler)
+    context.setHandler('listCampaigns', `List campaigns`, this.listHandler)
   }
 
   private readonly createHandler = async (data: unknown): Promise<CampaignModel> => {

@@ -1,5 +1,4 @@
 import { JSONSchemaType } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
 
 export const configWorkflowConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -15,4 +14,3 @@ export const configWorkflowPrefixSchema: JSONSchemaType<string> = {
   default: 'bull'
 } as const
 
-export const workflowSchemas: ValidatorSchemas = {}

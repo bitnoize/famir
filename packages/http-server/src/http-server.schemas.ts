@@ -1,5 +1,4 @@
 import { JSONSchemaType } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
 
 export const configHttpServerAddressSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -19,5 +18,3 @@ export const configHttpServerBodyLimitSchema: JSONSchemaType<number> = {
   maximum: 1024 * 1024 * 1024,
   default: 10 * 1024 * 1024
 } as const
-
-export const httpServerSchemas: ValidatorSchemas = {}

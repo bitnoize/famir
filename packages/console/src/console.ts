@@ -3,4 +3,4 @@ import { LoggerConfig } from '@famir/logger'
 import { ReplServerConfig } from '@famir/repl-server'
 import { WorkflowConfig } from '@famir/workflow'
 
-export type ShellConfig = LoggerConfig & DatabaseConfig & WorkflowConfig & ReplServerConfig
+export type ConsoleConfig = LoggerConfig & DatabaseConfig & WorkflowConfig & ReplServerConfig

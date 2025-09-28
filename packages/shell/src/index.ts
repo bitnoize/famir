@@ -1,7 +1,0 @@
-export * from './controllers/index.js'
-export * from './modules/index.js'
-export * from './shell.app.js'
-export * from './shell.js'
-export * from './shell.loader.js'
-export * from './shell.schemas.js'
-export * from './use-cases/index.js'

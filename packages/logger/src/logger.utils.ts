@@ -1,6 +1,11 @@
 import { filterSecrets } from '@famir/common'
-import { ValidatorAssertSchema } from '@famir/domain'
+import { ValidatorAssertSchema, ValidatorSchemas } from '@famir/domain'
 import { LoggerConfig, LoggerOptions, LoggerTransportOptions } from './logger.js'
+import { loggerTransportOptionsSchema } from './logger.schemas.js'
+
+export const internalSchemas: ValidatorSchemas = {
+  'logger-transport-options': loggerTransportOptionsSchema
+}
 
 export function buildOptions(
   assertSchema: ValidatorAssertSchema,

@@ -33,9 +33,9 @@ import {
   updateTargetDtoSchema
 } from './controllers/index.js'
 */
-import { ShellConfig } from './shell.js'
+import { ConsoleConfig } from './console.js'
 
-export const configShellSchema: JSONSchemaType<ShellConfig> = {
+export const configConsoleSchema: JSONSchemaType<ConsoleConfig> = {
   type: 'object',
   required: [
     'LOGGER_APP_NAME',
@@ -56,7 +56,7 @@ export const configShellSchema: JSONSchemaType<ShellConfig> = {
   properties: {
     LOGGER_APP_NAME: {
       ...configLoggerAppNameSchema,
-      default: 'shell'
+      default: 'console'
     },
     LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
     LOGGER_TRANSPORT_TARGET: configLoggerTransportTargetSchema,
@@ -81,7 +81,7 @@ export const configShellSchema: JSONSchemaType<ShellConfig> = {
   additionalProperties: false
 } as const
 
-export const shellSchemas: ValidatorSchemas = {
+export const consoleSchemas: ValidatorSchemas = {
   //  'create-campaign-dto': createCampaignDtoSchema,
   //  'update-campaign-dto': updateCampaignDtoSchema,
   //  'create-proxy-dto': createProxyDtoSchema,

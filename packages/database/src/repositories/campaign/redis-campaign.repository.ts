@@ -10,12 +10,7 @@ import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import {
-  assertCampaign,
-  buildCampaignCollection,
-  buildCampaignModel,
-  guardCampaign
-} from './campaign.utils.js'
+import { assertModel, buildCollection, buildModel, guardModel } from './campaign.utils.js'
 
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {
   constructor(
@@ -40,7 +35,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     messageExpire: number
   ): Promise<CampaignModel> {
     try {
-      const [status, rawCampaign] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.campaign.create_campaign(
           this.options.prefix,
           id,
@@ -61,11 +56,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const campaign = buildCampaignModel(rawCampaign)
+        const model = buildModel(raw)
 
-        assertCampaign(campaign)
+        assertModel(model)
 
-        return campaign
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -76,9 +71,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async read(id: string): Promise<CampaignModel | null> {
     try {
-      const rawCampaign = await this.connection.campaign.read_campaign(this.options.prefix, id)
+      const raw = await this.connection.campaign.read_campaign(this.options.prefix, id)
 
-      return buildCampaignModel(rawCampaign)
+      return buildModel(raw)
     } catch (error) {
       this.exceptionFilter(error, 'read', { id })
     }
@@ -92,7 +87,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     messageExpire: number | null | undefined
   ): Promise<CampaignModel> {
     try {
-      const [status, rawCampaign] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.campaign.update_campaign(
           this.options.prefix,
           id,
@@ -108,11 +103,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const campaign = buildCampaignModel(rawCampaign)
+        const model = buildModel(raw)
 
-        assertCampaign(campaign)
+        assertModel(model)
 
-        return campaign
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -123,7 +118,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async delete(id: string): Promise<CampaignModel> {
     try {
-      const [rawCampaign, status] = await Promise.all([
+      const [raw, status] = await Promise.all([
         this.connection.campaign.read_campaign(this.options.prefix, id),
 
         this.connection.campaign.delete_campaign(this.options.prefix, id)
@@ -132,11 +127,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const campaign = buildCampaignModel(rawCampaign)
+        const model = buildModel(raw)
 
-        assertCampaign(campaign)
+        assertModel(model)
 
-        return campaign
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -149,11 +144,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     try {
       const index = await this.connection.campaign.read_campaign_index(this.options.prefix)
 
-      const rawCampaigns = await Promise.all(
+      const raws = await Promise.all(
         index.map((id) => this.connection.campaign.read_campaign(this.options.prefix, id))
       )
 
-      return buildCampaignCollection(rawCampaigns).filter(guardCampaign)
+      return buildCollection(raws).filter(guardModel)
     } catch (error) {
       this.exceptionFilter(error, 'list', {})
     }

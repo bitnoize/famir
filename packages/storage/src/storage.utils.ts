@@ -1,5 +1,8 @@
+import { ValidatorSchemas } from '@famir/domain'
 import { filterSecrets } from '@famir/common'
 import { StorageConfig, StorageOptions } from './storage.js'
+
+export const internalSchemas: ValidatorSchemas = {}
 
 export function buildOptions(data: StorageConfig): StorageOptions {
   return {

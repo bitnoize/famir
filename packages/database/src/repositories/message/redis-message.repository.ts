@@ -13,7 +13,7 @@ import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { assertMessage, buildMessageModel } from './message.utils.js'
+import { assertModel, buildModel } from './message.utils.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
   constructor(
@@ -46,7 +46,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     score: number
   ): Promise<MessageModel> {
     try {
-      const [status, rawMessage] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.message.create_message(
           this.options.prefix,
           campaignId,
@@ -72,17 +72,17 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         this.connection.message.read_message(this.options.prefix, campaignId, id)
       ])
 
-      const [code, reason] = parseStatusReply(status)
+      const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const message = buildMessageModel(this.assertSchema, rawMessage)
+        const model = buildModel(this.assertSchema, raw)
 
-        assertMessage(message)
+        assertModel(model)
 
-        return message
+        return model
       }
 
-      throw new DatabaseError(reason, { code })
+      throw new DatabaseError(message, { code })
     } catch (error) {
       this.exceptionFilter(error, 'create', {
         campaignId,
@@ -96,13 +96,9 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
   async read(campaignId: string, id: string): Promise<MessageModel | null> {
     try {
-      const rawMessage = await this.connection.message.read_message(
-        this.options.prefix,
-        campaignId,
-        id
-      )
+      const raw = await this.connection.message.read_message(this.options.prefix, campaignId, id)
 
-      return buildMessageModel(this.assertSchema, rawMessage)
+      return buildModel(this.assertSchema, raw)
     } catch (error) {
       this.exceptionFilter(error, 'read', { campaignId, id })
     }

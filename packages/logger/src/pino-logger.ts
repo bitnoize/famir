@@ -1,8 +1,7 @@
 import { Config, Logger, LoggerData, Validator, ValidatorAssertSchema } from '@famir/domain'
 import pino from 'pino'
 import { LoggerConfig, LoggerOptions } from './logger.js'
-import { loggerSchemas } from './logger.schemas.js'
-import { buildOptions, filterOptionsSecrets } from './logger.utils.js'
+import { buildOptions, filterOptionsSecrets, internalSchemas } from './logger.utils.js'
 
 export class PinoLogger implements Logger {
   protected readonly assertSchema: ValidatorAssertSchema
@@ -12,7 +11,7 @@ export class PinoLogger implements Logger {
   constructor(validator: Validator, config: Config<LoggerConfig>) {
     this.assertSchema = validator.assertSchema
 
-    validator.addSchemas(loggerSchemas)
+    validator.addSchemas(internalSchemas)
 
     this.options = buildOptions(this.assertSchema, config.data)
 

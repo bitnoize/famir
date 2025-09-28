@@ -1,7 +1,7 @@
 import {
   Logger,
   ReplServerContext,
-  ReplServerError,
+  ExecutorError,
   Validator,
   ValidatorAssertSchema
 } from '@famir/domain'
@@ -19,7 +19,7 @@ export abstract class BaseController {
 
     this.logger.debug(
       {
-        module: 'shell',
+        module: 'scan-message',
         controller: this.controllerName
       },
       `Controller initialized`
@@ -27,18 +27,18 @@ export abstract class BaseController {
   }
 
   protected exceptionFilter(error: unknown, handler: string, data: unknown): never {
-    if (error instanceof ReplServerError) {
-      error.context['module'] = 'shell'
+    if (error instanceof ExecutorError) {
+      error.context['module'] = 'scan-message'
       error.context['controller'] = this.controllerName
       error.context['handler'] = handler
       error.context['data'] = data
 
       throw error
     } else {
-      throw new ReplServerError(`Controller internal error`, {
+      throw new ExecutorError(`Controller internal error`, {
         cause: error,
         context: {
-          module: 'shell',
+          module: 'scan-message',
           controller: this.controllerName,
           handler,
           data

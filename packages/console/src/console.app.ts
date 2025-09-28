@@ -7,9 +7,9 @@ import {
   Validator,
   WorkflowConnector
 } from '@famir/domain'
-import { shellSchemas } from './shell.schemas.js'
+import { consoleSchemas } from './console.schemas.js'
 
-export class ShellApp {
+export class ConsoleApp {
   constructor(
     validator: Validator,
     protected readonly logger: Logger,
@@ -25,7 +25,7 @@ export class ShellApp {
       })
     })
 
-    validator.addSchemas(shellSchemas)
+    validator.addSchemas(consoleSchemas)
   }
 
   async start(): Promise<void> {
@@ -34,7 +34,7 @@ export class ShellApp {
 
       await this.replServer.listen()
     } catch (error) {
-      console.error(`Shell start failed`, { error })
+      console.error(`Console start failed`, { error })
 
       process.exit(1)
     }
@@ -50,7 +50,7 @@ export class ShellApp {
 
       await this.databaseConnector.close()
     } catch (error) {
-      console.error(`Shell stop failed`, { error })
+      console.error(`Console stop failed`, { error })
 
       process.exit(1)
     }

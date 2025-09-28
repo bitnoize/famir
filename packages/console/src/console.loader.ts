@@ -36,9 +36,9 @@ import {
   BullWorkflowConnection,
   BullWorkflowConnector
 } from '@famir/workflow'
-import { ShellApp } from './shell.app.js'
-import { ShellConfig } from './shell.js'
-import { configShellSchema } from './shell.schemas.js'
+import { ConsoleApp } from './console.app.js'
+import { ConsoleConfig } from './console.js'
+import { configConsoleSchema } from './console.schemas.js'
 
 export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {
   const container = new DIContainer()
@@ -53,9 +53,9 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   // Config
   //
 
-  container.registerSingleton<Config<ShellConfig>>(
+  container.registerSingleton<Config<ConsoleConfig>>(
     'Config',
-    (c) => new EnvConfig<ShellConfig>(c.resolve<Validator>('Validator'), configShellSchema)
+    (c) => new EnvConfig<ConsoleConfig>(c.resolve<Validator>('Validator'), configConsoleSchema)
   )
 
   //
@@ -65,7 +65,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   container.registerSingleton<Logger>(
     'Logger',
     (c) =>
-      new PinoLogger(c.resolve<Validator>('Validator'), c.resolve<Config<ShellConfig>>('Config'))
+      new PinoLogger(c.resolve<Validator>('Validator'), c.resolve<Config<ConsoleConfig>>('Config'))
   )
 
   //
@@ -77,7 +77,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisDatabaseConnector(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger')
       )
   )
@@ -87,7 +87,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisCampaignRepository(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -98,7 +98,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisProxyRepository(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -109,7 +109,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisTargetRepository(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -120,7 +120,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisRedirectorRepository(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -131,7 +131,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisLureRepository(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -142,7 +142,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisSessionRepository(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -153,7 +153,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisMessageRepository(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -168,7 +168,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new BullWorkflowConnector(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger')
       )
   )
@@ -178,7 +178,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new BullScanMessageQueue(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<WorkflowConnector>('WorkflowConnector').connection<BullWorkflowConnection>()
       )
@@ -198,7 +198,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new NetReplServer(
         c.resolve<Validator>('Validator'),
-        c.resolve<Config<ShellConfig>>('Config'),
+        c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<ReplServerContext>('ReplServerContext')
       )
@@ -214,10 +214,10 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   // Application
   //
 
-  container.registerSingleton<ShellApp>(
-    'ShellApp',
+  container.registerSingleton<ConsoleApp>(
+    'ConsoleApp',
     (c) =>
-      new ShellApp(
+      new ConsoleApp(
         c.resolve<Validator>('Validator'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector'),
@@ -227,7 +227,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
       )
   )
 
-  const shellApp = container.resolve<ShellApp>('ShellApp')
+  const consoleApp = container.resolve<ConsoleApp>('ConsoleApp')
 
-  await shellApp.start()
+  await consoleApp.start()
 }

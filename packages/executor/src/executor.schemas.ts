@@ -1,5 +1,4 @@
 import { JSONSchemaType } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
 
 export const configExecutorConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -32,5 +31,3 @@ export const configExecutorLimiterDurationSchema: JSONSchemaType<number> = {
   minimum: 1,
   maximum: 3600 * 1000
 } as const
-
-export const executorSchemas: ValidatorSchemas = {}

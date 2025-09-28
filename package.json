@@ -26,7 +26,7 @@
     "packages/http-server",
     "packages/repl-server",
     "packages/reverse-proxy",
-    "packages/shell",
+    "packages/console",
     "packages/scan-message"
   ],
   "devDependencies": {

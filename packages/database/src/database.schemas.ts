@@ -1,10 +1,4 @@
 import { JSONSchemaType } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
-import {
-  messageHeadersSchema,
-  messageRequestCookiesSchema,
-  messageResponseCookiesSchema
-} from './repositories/index.js'
 
 export const configDatabaseConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -20,8 +14,4 @@ export const configDatabasePrefixSchema: JSONSchemaType<string> = {
   default: 'famir'
 } as const
 
-export const databaseSchemas: ValidatorSchemas = {
-  'message-headers': messageHeadersSchema,
-  'message-request-cookies': messageRequestCookiesSchema,
-  'message-response-cookies': messageResponseCookiesSchema
-}
+

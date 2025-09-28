@@ -13,12 +13,12 @@ import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import {
-  assertDisabledLure,
-  assertEnabledLure,
-  buildLureCollection,
-  buildLureModel,
-  guardEnabledLure,
-  guardLure
+  assertDisabledModel,
+  assertEnabledModel,
+  buildCollection,
+  buildModel,
+  guardEnabledModel,
+  guardModel
 } from './lure.utils.js'
 
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {
@@ -38,7 +38,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     redirectorId: string
   ): Promise<DisabledLureModel> {
     try {
-      const [status, rawLure] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.lure.create_lure(this.options.prefix, campaignId, id, path, redirectorId),
 
         this.connection.lure.read_lure(this.options.prefix, campaignId, id)
@@ -47,11 +47,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const lure = buildLureModel(rawLure)
+        const model = buildModel(raw)
 
-        assertDisabledLure(lure)
+        assertDisabledModel(model)
 
-        return lure
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -67,9 +67,9 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
   async read(campaignId: string, id: string): Promise<LureModel | null> {
     try {
-      const rawLure = await this.connection.lure.read_lure(this.options.prefix, campaignId, id)
+      const raw = await this.connection.lure.read_lure(this.options.prefix, campaignId, id)
 
-      return buildLureModel(rawLure)
+      return buildModel(raw)
     } catch (error) {
       this.exceptionFilter(error, 'read', { campaignId, id })
     }
@@ -83,11 +83,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         return null
       }
 
-      const rawLure = await this.connection.lure.read_lure(this.options.prefix, campaignId, id)
+      const raw = await this.connection.lure.read_lure(this.options.prefix, campaignId, id)
 
-      const lure = buildLureModel(rawLure)
+      const model = buildModel(raw)
 
-      return guardEnabledLure(lure) ? lure : null
+      return guardEnabledModel(model) ? model : null
     } catch (error) {
       this.exceptionFilter(error, 'readPath', { campaignId, path })
     }
@@ -95,7 +95,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
   async enable(campaignId: string, id: string): Promise<EnabledLureModel> {
     try {
-      const [status, rawLure] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.lure.enable_lure(this.options.prefix, campaignId, id),
 
         this.connection.lure.read_lure(this.options.prefix, campaignId, id)
@@ -104,11 +104,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const lure = buildLureModel(rawLure)
+        const model = buildModel(raw)
 
-        assertEnabledLure(lure)
+        assertEnabledModel(model)
 
-        return lure
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -119,7 +119,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
   async disable(campaignId: string, id: string): Promise<DisabledLureModel> {
     try {
-      const [status, rawLure] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.lure.disable_lure(this.options.prefix, campaignId, id),
 
         this.connection.lure.read_lure(this.options.prefix, campaignId, id)
@@ -128,11 +128,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const lure = buildLureModel(rawLure)
+        const model = buildModel(raw)
 
-        assertDisabledLure(lure)
+        assertDisabledModel(model)
 
-        return lure
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -148,7 +148,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     redirectorId: string
   ): Promise<DisabledLureModel> {
     try {
-      const [rawLure, status] = await Promise.all([
+      const [raw, status] = await Promise.all([
         this.connection.lure.read_lure(this.options.prefix, campaignId, id),
 
         this.connection.lure.delete_lure(this.options.prefix, campaignId, id, path, redirectorId)
@@ -157,11 +157,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const lure = buildLureModel(rawLure)
+        const model = buildModel(raw)
 
-        assertDisabledLure(lure)
+        assertDisabledModel(model)
 
-        return lure
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -183,11 +183,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         return null
       }
 
-      const rawLures = await Promise.all(
+      const raws = await Promise.all(
         index.map((id) => this.connection.lure.read_lure(this.options.prefix, campaignId, id))
       )
 
-      return buildLureCollection(rawLures).filter(guardLure)
+      return buildCollection(raws).filter(guardModel)
     } catch (error) {
       this.exceptionFilter(error, 'list', { campaignId })
     }

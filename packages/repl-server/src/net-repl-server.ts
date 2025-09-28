@@ -4,8 +4,7 @@ import net from 'node:net'
 import repl from 'node:repl'
 import util from 'node:util'
 import { ReplServerConfig, ReplServerOptions } from './repl-server.js'
-import { replServerSchemas } from './repl-server.schemas.js'
-import { buildOptions, filterOptionsSecrets } from './repl-server.utils.js'
+import { buildOptions, filterOptionsSecrets, internalSchemas } from './repl-server.utils.js'
 
 export class NetReplServer implements ReplServer {
   protected readonly options: ReplServerOptions
@@ -18,7 +17,7 @@ export class NetReplServer implements ReplServer {
     protected readonly logger: Logger,
     protected readonly context: ReplServerContext
   ) {
-    validator.addSchemas(replServerSchemas)
+    validator.addSchemas(internalSchemas)
 
     this.options = buildOptions(config.data)
 

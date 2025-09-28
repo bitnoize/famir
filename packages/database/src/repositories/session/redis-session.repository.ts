@@ -10,7 +10,7 @@ import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { assertSession, buildSessionModel } from './session.utils.js'
+import { assertModel, buildModel } from './session.utils.js'
 
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {
   constructor(
@@ -24,7 +24,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
   async create(campaignId: string, id: string, secret: string): Promise<SessionModel> {
     try {
-      const [status, rawSession] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.session.create_session(this.options.prefix, campaignId, id, secret),
 
         this.connection.session.read_session(this.options.prefix, campaignId, id)
@@ -33,11 +33,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const session = buildSessionModel(rawSession)
+        const model = buildModel(raw)
 
-        assertSession(session)
+        assertModel(model)
 
-        return session
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -48,13 +48,9 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
   async read(campaignId: string, id: string): Promise<SessionModel | null> {
     try {
-      const rawSession = await this.connection.session.read_session(
-        this.options.prefix,
-        campaignId,
-        id
-      )
+      const raw = await this.connection.session.read_session(this.options.prefix, campaignId, id)
 
-      return buildSessionModel(rawSession)
+      return buildModel(raw)
     } catch (error) {
       this.exceptionFilter(error, 'read', { campaignId, id })
     }
@@ -62,7 +58,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
   async auth(campaignId: string, id: string): Promise<SessionModel> {
     try {
-      const [status, rawSession] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.session.auth_session(this.options.prefix, campaignId, id),
 
         this.connection.session.read_session(this.options.prefix, campaignId, id)
@@ -71,11 +67,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const session = buildSessionModel(rawSession)
+        const model = buildModel(raw)
 
-        assertSession(session)
+        assertModel(model)
 
-        return session
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -91,7 +87,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     secret: string
   ): Promise<SessionModel> {
     try {
-      const [status, rawSession] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.session.upgrade_session(
           this.options.prefix,
           campaignId,
@@ -106,11 +102,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const session = buildSessionModel(rawSession)
+        const model = buildModel(raw)
 
-        assertSession(session)
+        assertModel(model)
 
-        return session
+        return model
       }
 
       throw new DatabaseError(message, { code })

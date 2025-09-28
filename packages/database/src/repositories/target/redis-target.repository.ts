@@ -13,12 +13,12 @@ import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import {
-  assertDisabledTarget,
-  assertEnabledTarget,
-  buildTargetCollection,
-  buildTargetModel,
-  guardEnabledTarget,
-  guardTarget
+  assertDisabledModel,
+  assertEnabledModel,
+  buildCollection,
+  buildModel,
+  guardEnabledModel,
+  guardModel
 } from './target.utils.js'
 
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
@@ -54,7 +54,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     failureRedirectUrl: string
   ): Promise<DisabledTargetModel> {
     try {
-      const [status, rawTarget] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.target.create_target(
           this.options.prefix,
           campaignId,
@@ -85,11 +85,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const target = buildTargetModel(rawTarget)
+        const model = buildModel(raw)
 
-        assertDisabledTarget(target)
+        assertDisabledModel(model)
 
-        return target
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -121,13 +121,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async read(campaignId: string, id: string): Promise<TargetModel | null> {
     try {
-      const rawTarget = await this.connection.target.read_target(
-        this.options.prefix,
-        campaignId,
-        id
-      )
+      const raw = await this.connection.target.read_target(this.options.prefix, campaignId, id)
 
-      return buildTargetModel(rawTarget)
+      return buildModel(raw)
     } catch (error) {
       this.exceptionFilter(error, 'read', { campaignId, id })
     }
@@ -135,15 +131,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async readEnabled(campaignId: string, id: string): Promise<EnabledTargetModel | null> {
     try {
-      const rawTarget = await this.connection.target.read_target(
-        this.options.prefix,
-        campaignId,
-        id
-      )
+      const raw = await this.connection.target.read_target(this.options.prefix, campaignId, id)
 
-      const target = buildTargetModel(rawTarget)
+      const model = buildModel(raw)
 
-      return guardEnabledTarget(target) ? target : null
+      return guardEnabledModel(model) ? model : null
     } catch (error) {
       this.exceptionFilter(error, 'readEnabled', { campaignId, id })
     }
@@ -163,7 +155,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     failureRedirectUrl: string | null | undefined
   ): Promise<DisabledTargetModel> {
     try {
-      const [status, rawTarget] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.target.update_target(
           this.options.prefix,
           campaignId,
@@ -185,11 +177,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const target = buildTargetModel(rawTarget)
+        const model = buildModel(raw)
 
-        assertDisabledTarget(target)
+        assertDisabledModel(model)
 
-        return target
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -212,7 +204,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async enable(campaignId: string, id: string): Promise<EnabledTargetModel> {
     try {
-      const [status, rawTarget] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.target.enable_target(this.options.prefix, campaignId, id),
 
         this.connection.target.read_target(this.options.prefix, campaignId, id)
@@ -221,11 +213,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const target = buildTargetModel(rawTarget)
+        const model = buildModel(raw)
 
-        assertEnabledTarget(target)
+        assertEnabledModel(model)
 
-        return target
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -236,7 +228,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async disable(campaignId: string, id: string): Promise<DisabledTargetModel> {
     try {
-      const [status, rawTarget] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.target.disable_target(this.options.prefix, campaignId, id),
 
         this.connection.target.read_target(this.options.prefix, campaignId, id)
@@ -245,11 +237,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const target = buildTargetModel(rawTarget)
+        const model = buildModel(raw)
 
-        assertDisabledTarget(target)
+        assertDisabledModel(model)
 
-        return target
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -260,7 +252,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async delete(campaignId: string, id: string): Promise<DisabledTargetModel> {
     try {
-      const [rawTarget, status] = await Promise.all([
+      const [raw, status] = await Promise.all([
         this.connection.target.read_target(this.options.prefix, campaignId, id),
 
         this.connection.target.delete_target(this.options.prefix, campaignId, id)
@@ -269,11 +261,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const target = buildTargetModel(rawTarget)
+        const model = buildModel(raw)
 
-        assertDisabledTarget(target)
+        assertDisabledModel(model)
 
-        return target
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -290,11 +282,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         return null
       }
 
-      const rawTargets = await Promise.all(
+      const raws = await Promise.all(
         index.map((id) => this.connection.target.read_target(this.options.prefix, campaignId, id))
       )
 
-      return buildTargetCollection(rawTargets).filter(guardTarget)
+      return buildCollection(raws).filter(guardModel)
     } catch (error) {
       this.exceptionFilter(error, 'list', { campaignId })
     }
@@ -308,11 +300,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         return null
       }
 
-      const rawTargets = await Promise.all(
+      const raws = await Promise.all(
         index.map((id) => this.connection.target.read_target(this.options.prefix, campaignId, id))
       )
 
-      return buildTargetCollection(rawTargets).filter(guardEnabledTarget)
+      return buildCollection(raws).filter(guardEnabledModel)
     } catch (error) {
       this.exceptionFilter(error, 'listEnabled', { campaignId })
     }

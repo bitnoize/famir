@@ -1,5 +1,8 @@
+import { ValidatorSchemas } from '@famir/domain'
 import { filterSecrets } from '@famir/common'
 import { WorkflowConfig, WorkflowConnectorOptions, WorkflowQueueOptions } from './workflow.js'
+
+export const internalSchemas: ValidatorSchemas = {}
 
 export function buildConnectorOptions(data: WorkflowConfig): WorkflowConnectorOptions {
   return {

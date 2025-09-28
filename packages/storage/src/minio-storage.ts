@@ -1,7 +1,7 @@
 import { Config, Logger, Storage, Validator } from '@famir/domain'
 import * as Minio from 'minio'
 import { StorageConfig, StorageOptions } from './storage.js'
-import { buildOptions, filterOptionsSecrets } from './storage.utils.js'
+import { buildOptions, filterOptionsSecrets, internalSchemas } from './storage.utils.js'
 
 export class MinioStorage implements Storage {
   protected readonly options: StorageOptions
@@ -12,6 +12,8 @@ export class MinioStorage implements Storage {
     config: Config<StorageConfig>,
     protected readonly logger: Logger
   ) {
+    validator.addSchemas(internalSchemas)
+
     this.options = buildOptions(config.data)
 
     this._minio = new Minio.Client({

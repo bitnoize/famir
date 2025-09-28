@@ -8,7 +8,7 @@ import {
 } from '@famir/domain'
 import { RawMessage } from './message.functions.js'
 
-export function parseMessageRequestHeaders(
+export function parseRequestHeaders(
   assertSchema: ValidatorAssertSchema,
   data: string
 ): MessageHeaders {
@@ -26,7 +26,7 @@ export function parseMessageRequestHeaders(
   }
 }
 
-export function parseMessageRequestCookies(
+export function parseRequestCookies(
   assertSchema: ValidatorAssertSchema,
   data: string
 ): MessageRequestCookies {
@@ -44,7 +44,7 @@ export function parseMessageRequestCookies(
   }
 }
 
-export function parseMessageRequestBody(data: string): Buffer {
+export function parseRequestBody(data: string): Buffer {
   try {
     return Buffer.from(data, 'base64')
   } catch (error) {
@@ -55,7 +55,7 @@ export function parseMessageRequestBody(data: string): Buffer {
   }
 }
 
-export function parseMessageResponseHeaders(
+export function parseResponseHeaders(
   assertSchema: ValidatorAssertSchema,
   data: string
 ): MessageHeaders {
@@ -73,7 +73,7 @@ export function parseMessageResponseHeaders(
   }
 }
 
-export function parseMessageResponseCookies(
+export function parseResponseCookies(
   assertSchema: ValidatorAssertSchema,
   data: string
 ): MessageResponseCookies {
@@ -91,7 +91,7 @@ export function parseMessageResponseCookies(
   }
 }
 
-export function parseMessageResponseBody(data: string): Buffer {
+export function parseResponseBody(data: string): Buffer {
   try {
     return Buffer.from(data, 'base64')
   } catch (error) {
@@ -102,50 +102,50 @@ export function parseMessageResponseBody(data: string): Buffer {
   }
 }
 
-export function buildMessageModel(
+export function buildModel(
   assertSchema: ValidatorAssertSchema,
-  rawMessage: RawMessage | null
+  raw: RawMessage | null
 ): MessageModel | null {
-  if (rawMessage === null) {
+  if (raw === null) {
     return null
   }
 
   return new MessageModel(
-    rawMessage.campaign_id,
-    rawMessage.id,
-    rawMessage.proxy_id,
-    rawMessage.target_id,
-    rawMessage.session_id,
-    rawMessage.client_ip,
-    rawMessage.method,
-    rawMessage.origin_url,
-    rawMessage.forward_url,
-    parseMessageRequestHeaders(assertSchema, rawMessage.request_headers),
-    parseMessageRequestCookies(assertSchema, rawMessage.request_cookies),
-    parseMessageRequestBody(rawMessage.request_body),
-    rawMessage.status_code,
-    parseMessageResponseHeaders(assertSchema, rawMessage.response_headers),
-    parseMessageResponseCookies(assertSchema, rawMessage.response_cookies),
-    parseMessageResponseBody(rawMessage.response_body),
-    rawMessage.query_time,
-    rawMessage.score,
-    new Date(rawMessage.created_at)
+    raw.campaign_id,
+    raw.id,
+    raw.proxy_id,
+    raw.target_id,
+    raw.session_id,
+    raw.client_ip,
+    raw.method,
+    raw.origin_url,
+    raw.forward_url,
+    parseRequestHeaders(assertSchema, raw.request_headers),
+    parseRequestCookies(assertSchema, raw.request_cookies),
+    parseRequestBody(raw.request_body),
+    raw.status_code,
+    parseResponseHeaders(assertSchema, raw.response_headers),
+    parseResponseCookies(assertSchema, raw.response_cookies),
+    parseResponseBody(raw.response_body),
+    raw.query_time,
+    raw.score,
+    new Date(raw.created_at)
   )
 }
 
-export function buildMessageCollection(
+export function buildCollection(
   assertSchema: ValidatorAssertSchema,
-  rawMessages: Array<RawMessage | null>
+  raws: Array<RawMessage | null>
 ): Array<MessageModel | null> {
-  return rawMessages.map((rawMessage) => buildMessageModel(assertSchema, rawMessage))
+  return raws.map((raw) => buildModel(assertSchema, raw))
 }
 
-export function guardMessage(data: MessageModel | null): data is MessageModel {
+export function guardModel(data: MessageModel | null): data is MessageModel {
   return data !== null
 }
 
-export function assertMessage(data: MessageModel | null): asserts data is MessageModel {
-  if (!guardMessage(data)) {
+export function assertModel(data: MessageModel | null): asserts data is MessageModel {
+  if (!guardModel(data)) {
     throw new Error(`Message lost`)
   }
 }

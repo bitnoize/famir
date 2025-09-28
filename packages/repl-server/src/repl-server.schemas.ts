@@ -1,5 +1,4 @@
 import { JSONSchemaType } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
 
 export const configReplServerAddressSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -38,5 +37,3 @@ export const configReplServerUseColorsSchema: JSONSchemaType<boolean> = {
   type: 'boolean',
   default: true
 } as const
-
-export const replServerSchemas: ValidatorSchemas = {}

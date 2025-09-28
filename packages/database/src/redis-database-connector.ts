@@ -3,8 +3,7 @@ import { Config, DatabaseConnector, Logger, Validator } from '@famir/domain'
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
 import { DatabaseConfig, DatabaseConnectorOptions } from './database.js'
-import { databaseSchemas } from './database.schemas.js'
-import { buildConnectorOptions, filterOptionsSecrets } from './database.utils.js'
+import { buildConnectorOptions, filterOptionsSecrets, internalSchemas } from './database.utils.js'
 
 export type RedisDatabaseConnection = RedisClientType<
   Record<string, never>, // Modules
@@ -22,7 +21,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     config: Config<DatabaseConfig>,
     protected readonly logger: Logger
   ) {
-    validator.addSchemas(databaseSchemas)
+    validator.addSchemas(internalSchemas)
 
     this.options = buildConnectorOptions(config.data)
 

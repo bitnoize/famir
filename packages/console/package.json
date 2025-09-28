@@ -1,8 +1,8 @@
 {
-  "name": "@famir/shell",
+  "name": "@famir/console",
   "type": "module",
   "version": "0.3.3",
-  "description": "Shell module",
+  "description": "Console module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

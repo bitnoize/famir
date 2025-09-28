@@ -1,45 +1,43 @@
 import { CampaignModel } from '@famir/domain'
 import { RawCampaign } from './campaign.functions.js'
 
-export function buildCampaignModel(rawCampaign: RawCampaign | null): CampaignModel | null {
-  if (rawCampaign == null) {
+export function buildModel(raw: RawCampaign | null): CampaignModel | null {
+  if (raw == null) {
     return null
   }
 
   return new CampaignModel(
-    rawCampaign.id,
-    rawCampaign.description,
-    rawCampaign.landing_secret,
-    rawCampaign.landing_auth_path,
-    rawCampaign.landing_auth_param,
-    rawCampaign.landing_lure_param,
-    rawCampaign.session_cookie_name,
-    rawCampaign.session_expire,
-    rawCampaign.new_session_expire,
-    rawCampaign.message_expire,
-    rawCampaign.proxy_count,
-    rawCampaign.target_count,
-    rawCampaign.redirector_count,
-    rawCampaign.lure_count,
-    rawCampaign.session_count,
-    rawCampaign.message_count,
-    new Date(rawCampaign.created_at),
-    new Date(rawCampaign.updated_at)
+    raw.id,
+    raw.description,
+    raw.landing_secret,
+    raw.landing_auth_path,
+    raw.landing_auth_param,
+    raw.landing_lure_param,
+    raw.session_cookie_name,
+    raw.session_expire,
+    raw.new_session_expire,
+    raw.message_expire,
+    raw.proxy_count,
+    raw.target_count,
+    raw.redirector_count,
+    raw.lure_count,
+    raw.session_count,
+    raw.message_count,
+    new Date(raw.created_at),
+    new Date(raw.updated_at)
   )
 }
 
-export function buildCampaignCollection(
-  rawCampaigns: Array<RawCampaign | null>
-): Array<CampaignModel | null> {
-  return rawCampaigns.map((rawCampaign) => buildCampaignModel(rawCampaign))
+export function buildCollection(raws: Array<RawCampaign | null>): Array<CampaignModel | null> {
+  return raws.map((raw) => buildModel(raw))
 }
 
-export function guardCampaign(data: CampaignModel | null): data is CampaignModel {
+export function guardModel(data: CampaignModel | null): data is CampaignModel {
   return data != null
 }
 
-export function assertCampaign(data: CampaignModel | null): asserts data is CampaignModel {
-  if (!guardCampaign(data)) {
+export function assertModel(data: CampaignModel | null): asserts data is CampaignModel {
+  if (!guardModel(data)) {
     throw new Error(`Campaign lost`)
   }
 }

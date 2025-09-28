@@ -1,4 +1,3 @@
-import { filterSecrets } from '@famir/common'
 import {
   Config,
   HttpClient,
@@ -9,8 +8,7 @@ import {
 } from '@famir/domain'
 import { Curl, CurlFeature } from 'node-libcurl'
 import { HttpClientConfig, HttpClientOptions } from './http-client.js'
-import { httpClientSchemas } from './http-client.schemas.js'
-import { buildOptions } from './http-client.utils.js'
+import { buildOptions, filterOptionsSecrets, internalSchemas } from './http-client.utils.js'
 
 export class CurlHttpClient implements HttpClient {
   protected readonly options: HttpClientOptions
@@ -20,13 +18,14 @@ export class CurlHttpClient implements HttpClient {
     config: Config<HttpClientConfig>,
     protected readonly logger: Logger
   ) {
-    validator.addSchemas(httpClientSchemas)
+    validator.addSchemas(internalSchemas)
 
     this.options = buildOptions(config.data)
 
-    this.logger.info(
+    this.logger.debug(
       {
-        options: filterSecrets(this.options, [])
+        module: 'http-client',
+        options: filterOptionsSecrets(this.options)
       },
       `HttpClient initialized`
     )

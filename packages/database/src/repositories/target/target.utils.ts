@@ -1,73 +1,69 @@
 import { DisabledTargetModel, EnabledTargetModel, TargetModel } from '@famir/domain'
 import { RawTarget } from './target.functions.js'
 
-export function buildTargetModel(rawTarget: RawTarget | null): TargetModel | null {
-  if (rawTarget === null) {
+export function buildModel(raw: RawTarget | null): TargetModel | null {
+  if (raw === null) {
     return null
   }
 
   return new TargetModel(
-    rawTarget.campaign_id,
-    rawTarget.id,
-    !!rawTarget.is_landing,
-    !!rawTarget.donor_secure,
-    rawTarget.donor_sub,
-    rawTarget.donor_domain,
-    rawTarget.donor_port,
-    !!rawTarget.mirror_secure,
-    rawTarget.mirror_sub,
-    rawTarget.mirror_domain,
-    rawTarget.mirror_port,
-    rawTarget.connect_timeout,
-    rawTarget.timeout,
-    rawTarget.main_page,
-    rawTarget.not_found_page,
-    rawTarget.favicon_ico,
-    rawTarget.robots_txt,
-    rawTarget.sitemap_xml,
-    rawTarget.success_redirect_url,
-    rawTarget.failure_redirect_url,
-    !!rawTarget.is_enabled,
-    rawTarget.message_count,
-    new Date(rawTarget.created_at),
-    new Date(rawTarget.updated_at)
+    raw.campaign_id,
+    raw.id,
+    !!raw.is_landing,
+    !!raw.donor_secure,
+    raw.donor_sub,
+    raw.donor_domain,
+    raw.donor_port,
+    !!raw.mirror_secure,
+    raw.mirror_sub,
+    raw.mirror_domain,
+    raw.mirror_port,
+    raw.connect_timeout,
+    raw.timeout,
+    raw.main_page,
+    raw.not_found_page,
+    raw.favicon_ico,
+    raw.robots_txt,
+    raw.sitemap_xml,
+    raw.success_redirect_url,
+    raw.failure_redirect_url,
+    !!raw.is_enabled,
+    raw.message_count,
+    new Date(raw.created_at),
+    new Date(raw.updated_at)
   )
 }
 
-export function buildTargetCollection(
-  rawTargets: Array<RawTarget | null>
-): Array<TargetModel | null> {
-  return rawTargets.map((rawTarget) => buildTargetModel(rawTarget))
+export function buildCollection(raws: Array<RawTarget | null>): Array<TargetModel | null> {
+  return raws.map((raw) => buildModel(raw))
 }
 
-export function guardTarget(data: TargetModel | null): data is TargetModel {
+export function guardModel(data: TargetModel | null): data is TargetModel {
   return data != null
 }
 
-export function guardEnabledTarget(data: TargetModel | null): data is EnabledTargetModel {
-  return guardTarget(data) && data.isEnabled
+export function guardEnabledModel(data: TargetModel | null): data is EnabledTargetModel {
+  return guardModel(data) && data.isEnabled
 }
 
-export function guardDisabledTarget(data: TargetModel | null): data is DisabledTargetModel {
-  return guardTarget(data) && !data.isEnabled
+export function guardDisabledModel(data: TargetModel | null): data is DisabledTargetModel {
+  return guardModel(data) && !data.isEnabled
 }
 
-export function assertTarget(data: TargetModel | null): asserts data is TargetModel {
-  if (!guardTarget(data)) {
+export function assertModel(data: TargetModel | null): asserts data is TargetModel {
+  if (!guardModel(data)) {
     throw new Error(`Target lost`)
   }
 }
 
-export function assertEnabledTarget(data: TargetModel | null): asserts data is EnabledTargetModel {
-  if (!guardEnabledTarget(data)) {
+export function assertEnabledModel(data: TargetModel | null): asserts data is EnabledTargetModel {
+  if (!guardEnabledModel(data)) {
     throw new Error(`EnabledTarget lost`)
   }
 }
 
-export function assertDisabledTarget(
-  data: TargetModel | null
-): asserts data is DisabledTargetModel {
-  if (!guardDisabledTarget(data)) {
+export function assertDisabledModel(data: TargetModel | null): asserts data is DisabledTargetModel {
+  if (!guardDisabledModel(data)) {
     throw new Error(`DisabledTarget lost`)
   }
 }

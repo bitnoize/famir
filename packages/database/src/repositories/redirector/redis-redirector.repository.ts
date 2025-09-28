@@ -10,12 +10,7 @@ import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import {
-  assertRedirector,
-  buildRedirectorCollection,
-  buildRedirectorModel,
-  guardRedirector
-} from './redirector.utils.js'
+import { assertModel, buildCollection, buildModel, guardModel } from './redirector.utils.js'
 
 export class RedisRedirectorRepository extends RedisBaseRepository implements RedirectorRepository {
   constructor(
@@ -29,7 +24,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
   async create(campaignId: string, id: string, page: string): Promise<RedirectorModel> {
     try {
-      const [status, rawRedirector] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.redirector.create_redirector(this.options.prefix, campaignId, id, page),
 
         this.connection.redirector.read_redirector(this.options.prefix, campaignId, id)
@@ -38,11 +33,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const redirector = buildRedirectorModel(rawRedirector)
+        const model = buildModel(raw)
 
-        assertRedirector(redirector)
+        assertModel(model)
 
-        return redirector
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -57,13 +52,13 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
   async read(campaignId: string, id: string): Promise<RedirectorModel | null> {
     try {
-      const rawRedirector = await this.connection.redirector.read_redirector(
+      const raw = await this.connection.redirector.read_redirector(
         this.options.prefix,
         campaignId,
         id
       )
 
-      return buildRedirectorModel(rawRedirector)
+      return buildModel(raw)
     } catch (error) {
       this.exceptionFilter(error, 'read', { campaignId, id })
     }
@@ -75,7 +70,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     page: string | null | undefined
   ): Promise<RedirectorModel> {
     try {
-      const [status, rawRedirector] = await Promise.all([
+      const [status, raw] = await Promise.all([
         this.connection.redirector.update_redirector(this.options.prefix, campaignId, id, page),
 
         this.connection.redirector.read_redirector(this.options.prefix, campaignId, id)
@@ -84,11 +79,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const redirector = buildRedirectorModel(rawRedirector)
+        const model = buildModel(raw)
 
-        assertRedirector(redirector)
+        assertModel(model)
 
-        return redirector
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -103,7 +98,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
   async delete(campaignId: string, id: string): Promise<RedirectorModel> {
     try {
-      const [rawRedirector, status] = await Promise.all([
+      const [raw, status] = await Promise.all([
         this.connection.redirector.read_redirector(this.options.prefix, campaignId, id),
 
         this.connection.redirector.delete_redirector(this.options.prefix, campaignId, id)
@@ -112,11 +107,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const redirector = buildRedirectorModel(rawRedirector)
+        const model = buildModel(raw)
 
-        assertRedirector(redirector)
+        assertModel(model)
 
-        return redirector
+        return model
       }
 
       throw new DatabaseError(message, { code })
@@ -136,13 +131,13 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         return null
       }
 
-      const rawRedirectors = await Promise.all(
+      const raws = await Promise.all(
         index.map((id) =>
           this.connection.redirector.read_redirector(this.options.prefix, campaignId, id)
         )
       )
 
-      return buildRedirectorCollection(rawRedirectors).filter(guardRedirector)
+      return buildCollection(raws).filter(guardModel)
     } catch (error) {
       this.exceptionFilter(error, 'list', { campaignId })
     }
