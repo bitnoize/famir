@@ -44,9 +44,9 @@ export class ShellApp {
     try {
       await this.replServer.close()
 
-      await this.workflowConnector.close()
-
       await this.scanMessageQueue.close()
+
+      await this.workflowConnector.close()
 
       await this.databaseConnector.close()
     } catch (error) {

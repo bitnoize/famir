@@ -11,6 +11,8 @@
     { "path": "../validator" },
     { "path": "../config" },
     { "path": "../logger" },
+    { "path": "../database" },
+    { "path": "../storage" },
     { "path": "../executor" }
   ]
 }

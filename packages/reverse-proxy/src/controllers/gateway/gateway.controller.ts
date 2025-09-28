@@ -1,18 +1,17 @@
 import {
-  HttpServerError,
-  RequestLocals,
-  Router,
-  WrapRequest,
-  WrapResponse
-} from '@famir/http-server'
-import { Validator } from '@famir/validator'
+  HttpServerLocals,
+  HttpServerRouter,
+  HttpServerRequest,
+  HttpServerResponse,
+  Validator
+} from '@famir/domain'
 import { GatewayUseCase } from '../../use-cases/index.js'
-import { validateRequestTargetId } from './gateway.utils.js'
+import { validateRequestTarget } from './gateway.utils.js'
 
 export class GatewayController {
   constructor(
     validator: Validator,
-    router: Router,
+    router: HttpServerRouter,
     protected readonly gatewayUseCase: GatewayUseCase
   ) {
     router.addRoute('all', '{*splat}', this.defaultHandler)

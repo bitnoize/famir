@@ -178,6 +178,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new BullScanMessageQueue(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ShellConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<WorkflowConnector>('WorkflowConnector').connection<BullWorkflowConnection>()
       )
@@ -189,7 +190,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   container.registerSingleton<ReplServerContext>(
     'ReplServerContext',
-    () => new NetReplServerContext()
+    (c) => new NetReplServerContext(c.resolve<Logger>('Logger'))
   )
 
   container.registerSingleton<ReplServer>(

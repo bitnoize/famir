@@ -1,4 +1,5 @@
-import { JSONSchemaType, randomIdentSchema } from '@famir/validator'
+import { JSONSchemaType } from '@famir/common'
+import { randomIdentSchema } from '@famir/validator'
 import { ScanSessionDto } from '../../use-cases/index.js'
 
 export const scanSessionDtoSchema: JSONSchemaType<ScanSessionDto> = {

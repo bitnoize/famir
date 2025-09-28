@@ -21,9 +21,6 @@ export function parseMessageRequestHeaders(
   } catch (error) {
     throw new DatabaseError(`Parse message request headers failed`, {
       cause: error,
-      context: {
-        data: data
-      },
       code: 'UNKNOWN'
     })
   }
@@ -42,9 +39,6 @@ export function parseMessageRequestCookies(
   } catch (error) {
     throw new DatabaseError(`Parse message request cookies failed`, {
       cause: error,
-      context: {
-        data: data
-      },
       code: 'UNKNOWN'
     })
   }
@@ -56,9 +50,6 @@ export function parseMessageRequestBody(data: string): Buffer {
   } catch (error) {
     throw new DatabaseError(`Parse message request body failed`, {
       cause: error,
-      context: {
-        data: data.length
-      },
       code: 'UNKNOWN'
     })
   }
@@ -77,9 +68,6 @@ export function parseMessageResponseHeaders(
   } catch (error) {
     throw new DatabaseError(`Parse message response headers failed`, {
       cause: error,
-      context: {
-        data: data
-      },
       code: 'UNKNOWN'
     })
   }
@@ -98,9 +86,6 @@ export function parseMessageResponseCookies(
   } catch (error) {
     throw new DatabaseError(`Parse message response cookies failed`, {
       cause: error,
-      context: {
-        data: data
-      },
       code: 'UNKNOWN'
     })
   }
@@ -112,9 +97,6 @@ export function parseMessageResponseBody(data: string): Buffer {
   } catch (error) {
     throw new DatabaseError(`Parse message response body failed`, {
       cause: error,
-      context: {
-        data: data.length
-      },
       code: 'UNKNOWN'
     })
   }

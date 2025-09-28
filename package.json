@@ -27,7 +27,7 @@
     "packages/repl-server",
     "packages/reverse-proxy",
     "packages/shell",
-    "packages/scan-session"
+    "packages/scan-message"
   ],
   "devDependencies": {
     "@eslint/js": "^9.19.0",

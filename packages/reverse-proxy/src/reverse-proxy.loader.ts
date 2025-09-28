@@ -1,7 +1,21 @@
 import { DIContainer } from '@famir/common'
-import { Config, EnvConfig } from '@famir/config'
 import {
   DatabaseConnector,
+  CampaignRepository,
+  LureRepository,
+  ProxyRepository,
+  RedirectorRepository,
+  TargetRepository,
+  Config,
+  ScanMessageQueue,
+  WorkflowConnector,
+  Validator,
+  HttpServerRouter,
+  HttpServer,
+  Logger,
+} from '@famir/domain'
+import { EnvConfig } from '@famir/config'
+import {
   RedisCampaignRepository,
   RedisDatabaseConnection,
   RedisDatabaseConnector,
@@ -10,25 +24,14 @@ import {
   RedisRedirectorRepository,
   RedisTargetRepository
 } from '@famir/database'
-import {
-  CampaignRepository,
-  LureRepository,
-  ProxyRepository,
-  RedirectorRepository,
-  TargetRepository
-} from '@famir/domain'
-import { ExpressHttpServer, ExpressRouter, HttpServer, Router } from '@famir/http-server'
-import { Logger, PinoLogger } from '@famir/logger'
+import { ExpressHttpServer, ExpressHttpServerRouter } from '@famir/http-server'
+import { PinoLogger } from '@famir/logger'
 import {
   BullScanMessageQueue,
-  BullScanSessionQueue,
-  BullTaskQueueConnection,
-  BullTaskQueueConnector,
-  ScanMessageQueue,
-  ScanSessionQueue,
-  TaskQueueConnector
-} from '@famir/task-queue'
-import { AjvValidator, Validator } from '@famir/validator'
+  BullWorkflowConnection,
+  BullWorkflowConnector,
+} from '@famir/workflow'
+import { AjvValidator } from '@famir/validator'
 import { ReverseProxyApp } from './reverse-proxy.app.js'
 import { ReverseProxyConfig } from './reverse-proxy.js'
 import { configReverseProxySchema } from './reverse-proxy.schemas.js'
@@ -84,6 +87,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisCampaignRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ReverseProxyConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -94,6 +98,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisProxyRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ReverseProxyConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -104,6 +109,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisTargetRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ReverseProxyConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -114,6 +120,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisRedirectorRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ReverseProxyConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
@@ -124,32 +131,23 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new RedisLureRepository(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ReverseProxyConfig>>('Config'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
       )
   )
 
   //
-  // TaskQueue
+  // Workflow
   //
 
-  container.registerSingleton<TaskQueueConnector>(
-    'TaskQueueConnector',
+  container.registerSingleton<WorkflowConnector>(
+    'WorkflowConnector',
     (c) =>
-      new BullTaskQueueConnector(
+      new BullWorkflowConnector(
         c.resolve<Validator>('Validator'),
         c.resolve<Config<ReverseProxyConfig>>('Config'),
         c.resolve<Logger>('Logger')
-      )
-  )
-
-  container.registerSingleton<ScanSessionQueue>(
-    'ScanSessionQueue',
-    (c) =>
-      new BullScanSessionQueue(
-        c.resolve<Validator>('Validator'),
-        c.resolve<Logger>('Logger'),
-        c.resolve<TaskQueueConnector>('TaskQueueConnector').connection<BullTaskQueueConnection>()
       )
   )
 
@@ -158,8 +156,9 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
     (c) =>
       new BullScanMessageQueue(
         c.resolve<Validator>('Validator'),
+        c.resolve<Config<ReverseProxyConfig>>('Config'),
         c.resolve<Logger>('Logger'),
-        c.resolve<TaskQueueConnector>('TaskQueueConnector').connection<BullTaskQueueConnection>()
+        c.resolve<WorkflowConnector>('WorkflowConnector').connection<BullWorkflowConnection>()
       )
   )
 
@@ -167,7 +166,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   // HttpServer
   //
 
-  container.registerSingleton<Router>('MainRouter', () => new ExpressRouter())
+  container.registerSingleton<HttpServerRouter>('HttpServerRouter', (c) => new ExpressHttpServerRouter(c.resolve<Logger>('Logger')))
 
   container.registerSingleton<HttpServer>(
     'HttpServer',
@@ -176,7 +175,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
         c.resolve<Validator>('Validator'),
         c.resolve<Config<ReverseProxyConfig>>('Config'),
         c.resolve<Logger>('Logger'),
-        [c.resolve<Router>('MainRouter')]
+        c.resolve<HttpServerRouter>('HttpServerRouter')
       )
   )
 
@@ -197,7 +196,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
         c.resolve<Validator>('Validator'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector'),
-        c.resolve<TaskQueueConnector>('TaskQueueConnector'),
+        c.resolve<WorkflowConnector>('WorkflowConnector'),
         c.resolve<HttpServer>('HttpServer')
       )
   )

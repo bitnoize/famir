@@ -1,10 +1,11 @@
-import { Campaign, EnabledTarget } from '@famir/domain'
+import { CampaignModel, EnabledTargetModel } from '@famir/domain'
 
-export interface GatewayDto {
+export interface GatewayData {
+  campaignId: string
   targetId: string
 }
 
 export interface GatewayResult {
-  campaign: Campaign
-  target: EnabledTarget
+  campaign: CampaignModel
+  target: EnabledTargetModel
 }

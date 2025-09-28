@@ -8,6 +8,13 @@ export const configExecutorConnectionUrlSchema: JSONSchemaType<string> = {
   default: 'redis://localhost:6379/1'
 } as const
 
+export const configExecutorPrefixSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 1,
+  maxLength: 128,
+  default: 'bull'
+} as const
+
 export const configExecutorConcurrencySchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,

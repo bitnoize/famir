@@ -12,11 +12,11 @@
     "start": "node --env-file=../../.env ."
   },
   "dependencies": {
-    "@famir/common": "*",
-    "@famir/config": "*",
     "@famir/domain": "*",
-    "@famir/logger": "*",
+    "@famir/common": "*",
     "@famir/validator": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
     "@famir/database": "*",
     "@famir/workflow": "*",
     "@famir/http-client": "*",

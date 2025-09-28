@@ -1,5 +1,5 @@
 import { CampaignRepository, TargetRepository } from '@famir/domain'
-import { GatewayDto, GatewayResult } from './gateway.js'
+import { GatewayData, GatewayResult } from './gateway.js'
 
 export class GatewayUseCase {
   constructor(
@@ -7,9 +7,9 @@ export class GatewayUseCase {
     private readonly targetRepository: TargetRepository
   ) {}
 
-  async execute(dto: GatewayDto): Promise<GatewayResult | null> {
-    const campaign = await this.campaignRepository.read()
-    const target = await this.targetRepository.readEnabled(dto.targetId)
+  async execute(data: GatewayData): Promise<GatewayResult | null> {
+    const campaign = await this.campaignRepository.read(data.campaignId)
+    const target = await this.targetRepository.readEnabled(data.campaignId, data.targetId)
 
     if (campaign === null || target === null) {
       return null

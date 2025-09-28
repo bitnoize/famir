@@ -1,4 +1,4 @@
-import { configDatabaseConnectionUrlSchema } from '@famir/database'
+import { configDatabaseConnectionUrlSchema, configDatabasePrefixSchema } from '@famir/database'
 import { configHttpClientBodyLimitSchema } from '@famir/http-client'
 import {
   configHttpServerAddressSchema,
@@ -11,8 +11,9 @@ import {
   configLoggerTransportOptionsSchema,
   configLoggerTransportTargetSchema
 } from '@famir/logger'
-import { configTaskQueueConnectionUrlSchema } from '@famir/task-queue'
-import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
+import { configWorkflowConnectionUrlSchema, configWorkflowPrefixSchema } from '@famir/workflow'
+import { ValidatorSchemas } from '@famir/domain'
+import { JSONSchemaType } from '@famir/common'
 import { ReverseProxyConfig } from './reverse-proxy.js'
 
 export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
@@ -23,7 +24,9 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
     'LOGGER_TRANSPORT_TARGET',
     'LOGGER_TRANSPORT_OPTIONS',
     'DATABASE_CONNECTION_URL',
-    'TASK_QUEUE_CONNECTION_URL',
+    'DATABASE_PREFIX',
+    'WORKFLOW_CONNECTION_URL',
+    'WORKFLOW_PREFIX',
     'HTTP_CLIENT_BODY_LIMIT',
     'HTTP_SERVER_ADDRESS',
     'HTTP_SERVER_PORT',
@@ -38,7 +41,9 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
     LOGGER_TRANSPORT_TARGET: configLoggerTransportTargetSchema,
     LOGGER_TRANSPORT_OPTIONS: configLoggerTransportOptionsSchema,
     DATABASE_CONNECTION_URL: configDatabaseConnectionUrlSchema,
-    TASK_QUEUE_CONNECTION_URL: configTaskQueueConnectionUrlSchema,
+    DATABASE_PREFIX: configDatabasePrefixSchema,
+    WORKFLOW_CONNECTION_URL: configWorkflowConnectionUrlSchema,
+    WORKFLOW_PREFIX: configWorkflowPrefixSchema,
     HTTP_CLIENT_BODY_LIMIT: configHttpClientBodyLimitSchema,
     HTTP_SERVER_ADDRESS: {
       ...configHttpServerAddressSchema,

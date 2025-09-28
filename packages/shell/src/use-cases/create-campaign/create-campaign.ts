@@ -1,4 +1,4 @@
-export interface CreateCampaignDto {
+export interface CreateCampaignData {
   id: string
   description: string | null | undefined
   landingSecret: string | null | undefined

@@ -1,13 +1,11 @@
 import { DomainError, DomainErrorOptions } from '../../domain.error.js'
 
-export type ReplServerErrorCode = 'UNKNOWN'
-
 export type ReplServerErrorOptions = DomainErrorOptions & {
-  code: ReplServerErrorCode
+  code: string
 }
 
 export class ReplServerError extends DomainError {
-  code: ReplServerErrorCode
+  code: string
 
   constructor(message: string, options: ReplServerErrorOptions) {
     super(message, {

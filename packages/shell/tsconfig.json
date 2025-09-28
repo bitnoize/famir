@@ -14,7 +14,6 @@
     { "path": "../database" },
     { "path": "../storage" },
     { "path": "../workflow" },
-    { "path": "../executor" },
     { "path": "../repl-server" }
   ]
 }

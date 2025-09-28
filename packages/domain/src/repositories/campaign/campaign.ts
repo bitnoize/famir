@@ -25,4 +25,6 @@ export interface CampaignRepository {
   ): Promise<CampaignModel>
 
   delete(id: string): Promise<CampaignModel>
+
+  list(): Promise<CampaignModel[]>
 }

@@ -2,10 +2,10 @@ import { DatabaseConfig } from '@famir/database'
 import { HttpClientConfig } from '@famir/http-client'
 import { HttpServerConfig } from '@famir/http-server'
 import { LoggerConfig } from '@famir/logger'
-import { TaskQueueConfig } from '@famir/task-queue'
+import { WorkflowConfig } from '@famir/workflow'
 
 export type ReverseProxyConfig = LoggerConfig &
   DatabaseConfig &
-  TaskQueueConfig &
+  WorkflowConfig &
   HttpClientConfig &
   HttpServerConfig

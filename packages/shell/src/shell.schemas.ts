@@ -15,7 +15,7 @@ import {
   configReplServerSocketTimeoutSchema,
   configReplServerUseColorsSchema
 } from '@famir/repl-server'
-import { configWorkflowConnectionUrlSchema } from '@famir/workflow'
+import { configWorkflowConnectionUrlSchema, configWorkflowPrefixSchema } from '@famir/workflow'
 /*
 import {
   createCampaignDtoSchema,
@@ -45,6 +45,7 @@ export const configShellSchema: JSONSchemaType<ShellConfig> = {
     'DATABASE_CONNECTION_URL',
     'DATABASE_PREFIX',
     'WORKFLOW_CONNECTION_URL',
+    'WORKFLOW_PREFIX',
     'REPL_SERVER_ADDRESS',
     'REPL_SERVER_PORT',
     'REPL_SERVER_MAX_CONNECTIONS',
@@ -63,6 +64,7 @@ export const configShellSchema: JSONSchemaType<ShellConfig> = {
     DATABASE_CONNECTION_URL: configDatabaseConnectionUrlSchema,
     DATABASE_PREFIX: configDatabasePrefixSchema,
     WORKFLOW_CONNECTION_URL: configWorkflowConnectionUrlSchema,
+    WORKFLOW_PREFIX: configWorkflowPrefixSchema,
     REPL_SERVER_ADDRESS: {
       ...configReplServerAddressSchema,
       default: '127.0.0.1'

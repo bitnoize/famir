@@ -1,7 +1,10 @@
 import { DIContainer } from '@famir/common'
-import { CampaignRepository, TargetRepository } from '@famir/domain'
-import { Router } from '@famir/http-server'
-import { Validator } from '@famir/validator'
+import {
+  CampaignRepository,
+  TargetRepository,
+  HttpServerRouter,
+  Validator,
+} from '@famir/domain'
 import { GatewayController } from '../controllers/index.js'
 import { GatewayUseCase } from '../use-cases/index.js'
 
@@ -20,7 +23,7 @@ export const composeGateway = (container: DIContainer) => {
     (c) =>
       new GatewayController(
         c.resolve<Validator>('Validator'),
-        c.resolve<Router>('MainRouter'),
+        c.resolve<HttpServerRouter>('HttpServerRouter'),
         c.resolve<GatewayUseCase>('GatewayUseCase')
       )
   )

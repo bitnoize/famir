@@ -1,11 +1,11 @@
 import { DIContainer } from '@famir/common'
-import { Router } from '@famir/http-server'
+import { HttpServerRouter } from '@famir/domain'
 import { PreflightCorsController } from '../controllers/index.js'
 
 export const composePreflightCors = (container: DIContainer) => {
   container.registerSingleton<PreflightCorsController>(
     'PreflightCorsController',
-    (c) => new PreflightCorsController(c.resolve<Router>('MainRouter'))
+    (c) => new PreflightCorsController(c.resolve<HttpServerRouter>('HttpServerRouter'))
   )
 
   container.resolve<PreflightCorsController>('PreflightCorsController')

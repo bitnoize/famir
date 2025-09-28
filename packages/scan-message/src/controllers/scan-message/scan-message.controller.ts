@@ -1,12 +1,10 @@
-import { Logger } from '@famir/logger'
-import { ScanSessionManager } from '@famir/task-worker'
-import { Validator } from '@famir/validator'
+import { Logger, ScanMessageManager, Validator } from '@famir/domain'
 
-export class ScanSessionController {
+export class ScanMessageController {
   constructor(
     validator: Validator,
     protected readonly logger: Logger,
-    manager: ScanSessionManager
+    manager: ScanMessageManager
   ) {
     manager.setHandler('default', this.defaultHandler)
   }

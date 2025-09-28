@@ -1,8 +1,8 @@
 {
-  "name": "@famir/scan-session",
+  "name": "@famir/scan-message",
   "type": "module",
   "version": "0.3.3",
-  "description": "ScanSession module",
+  "description": "ScanMessage module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -16,6 +16,8 @@
     "@famir/validator": "*",
     "@famir/config": "*",
     "@famir/logger": "*",
+    "@famir/database": "*",
+    "@famir/storage": "*",
     "@famir/executor": "*"
   },
   "devDependencies": {

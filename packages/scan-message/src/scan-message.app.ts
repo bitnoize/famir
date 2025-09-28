@@ -1,20 +1,20 @@
 import { SHUTDOWN_SIGNALS } from '@famir/common'
 import {
   DatabaseConnector,
-  HttpServer,
   Logger,
-  WorkflowConnector,
+  ScanMessageWorker,
+  ExecutorConnector,
   Validator
 } from '@famir/domain'
-import { reverseProxySchemas } from './reverse-proxy.schemas.js'
+import { scanMessageSchemas } from './scan-message.schemas.js'
 
-export class ReverseProxyApp {
+export class ScanMessageApp {
   constructor(
     validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
-    protected readonly workflowConnector: WorkflowConnector,
-    protected readonly httpServer: HttpServer
+    protected readonly executorConnector: ExecutorConnector,
+    protected readonly scanMessageWorker: ScanMessageWorker
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -23,16 +23,16 @@ export class ReverseProxyApp {
       })
     })
 
-    validator.addSchemas(reverseProxySchemas)
+    validator.addSchemas(scanMessageSchemas)
   }
 
   async start(): Promise<void> {
     try {
       await this.databaseConnector.connect()
 
-      await this.httpServer.listen()
+      await this.scanMessageWorker.run()
     } catch (error) {
-      console.error(`ReverseProxy start failed`, { error })
+      console.error(`ScanMessage start failed`, { error })
 
       process.exit(1)
     }
@@ -40,13 +40,13 @@ export class ReverseProxyApp {
 
   protected async stop(): Promise<void> {
     try {
-      await this.httpServer.close()
+      await this.scanMessageWorker.close()
 
-      await this.workflowConnector.close()
+      await this.executorConnector.close()
 
       await this.databaseConnector.close()
     } catch (error) {
-      console.error(`ReverseProxy stop failed`, { error })
+      console.error(`ScanMessage stop failed`, { error })
 
       process.exit(1)
     }
