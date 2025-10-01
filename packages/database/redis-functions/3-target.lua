@@ -41,11 +41,11 @@ local function create_target(keys, args)
     updated_at = nil,
   }
 
-  if not #model.campaign_id > 0 then
+  if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not #model.id > 0 then
+  if not (#model.id > 0) then
     return redis.error_reply('ERR Wrong model.id')
   end
 
@@ -57,15 +57,15 @@ local function create_target(keys, args)
     return redis.error_reply('ERR Wrong model.donor_secure')
   end
 
-  if not #model.donor_sub > 0 then
+  if not (#model.donor_sub > 0) then
     return redis.error_reply('Wrong model.donor_sub')
   end
 
-  if not #model.donor_domain > 0 then
+  if not (#model.donor_domain > 0) then
     return redis.error_reply('ERR Wrong model.donor_domain')
   end
 
-  if not model.donor_port >= 0 then
+  if not (model.donor_port >= 0) then
     return redis.error_reply('ERR Wrong model.donor_port')
   end
 
@@ -73,15 +73,15 @@ local function create_target(keys, args)
     return redis.error_reply('ERR Wrong model.mirror_secure')
   end
 
-  if not #model.mirror_sub > 0 then
+  if not (#model.mirror_sub > 0) then
     return redis.error_reply('ERR Wrong model.mirror_sub')
   end
 
-  if not #model.mirror_domain > 0 then
+  if not (#model.mirror_domain > 0) then
     return redis.error_reply('ERR Wrong model.mirror_domain')
   end
 
-  if not model.mirror_port >= 0 then
+  if not (model.mirror_port >= 0) then
     return redis.error_reply('ERR Wrong model.mirror_port')
   end
 
@@ -99,11 +99,11 @@ local function create_target(keys, args)
 
   model.updated_at = model.created_at
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', target_key) == 0 then
+  if not (redis.call('EXISTS', target_key) == 0) then
     return redis.status_reply('CONFLICT Target allready exists')
   end
 
@@ -117,11 +117,11 @@ local function create_target(keys, args)
     .. '\t' .. model.mirror_domain
     .. '\t' .. tostring(model.mirror_port)
 
-  if not redis.call('SISMEMBER', target_unique_donor_key, donor) == 0 then
+  if not (redis.call('SISMEMBER', target_unique_donor_key, donor) == 0) then
     return redis.status_reply('CONFLICT Target donor allready taken')
   end
 
-  if not redis.call('SISMEMBER', target_unique_mirror_key, mirror) == 0 then
+  if not (redis.call('SISMEMBER', target_unique_mirror_key, mirror) == 0) then
     return redis.status_reply('CONFLICT Target mirror allready taken')
   end
 
@@ -161,11 +161,11 @@ local function read_target(keys, args)
   local campaign_key = keys[1]
   local target_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
-  if not redis.call('EXISTS', target_key) == 1 then
+  if not (redis.call('EXISTS', target_key) == 1) then
     return nil
   end
 
@@ -198,7 +198,7 @@ local function read_target(keys, args)
     'updated_at'
   )
 
-  if not #values == 24 then
+  if not (#values == 24) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -256,7 +256,7 @@ local function read_target_index(keys, args)
   local campaign_key = keys[1]
   local target_index_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
@@ -327,15 +327,15 @@ local function update_target(keys, args)
     end
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', target_key) == 1 then
+  if not (redis.call('EXISTS', target_key) == 1) then
     return redis.status_reply('NOT_FOUND Target not found')
   end
 
-  if not #model > 0 then
+  if not (#model > 0) then
     return redis.status_reply('OK Nothing to update')
   end
 
@@ -378,11 +378,11 @@ local function enable_target(keys, args)
     return redis.error_reply('ERR Wrong params.updated_at')
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND campaign not found')
   end
 
-  if not redis.call('EXISTS', target_key) == 1 then
+  if not (redis.call('EXISTS', target_key) == 1) then
     return redis.status_reply('NOT_FOUND target not found')
   end
 
@@ -435,11 +435,11 @@ local function disable_target(keys, args)
     return redis.error_reply('ERR Wrong params.updated_at')
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND campaign not found')
   end
 
-  if not redis.call('EXISTS', target_key) == 1 then
+  if not (redis.call('EXISTS', target_key) == 1) then
     return redis.status_reply('NOT_FOUND target not found')
   end
 
@@ -487,11 +487,11 @@ local function delete_target(keys, args)
   local target_unique_mirror_key = keys[4]
   local target_index_key = keys[5]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', target_key) == 1 then
+  if not (redis.call('EXISTS', target_key) == 1) then
     return redis.status_reply('NOT_FOUND Target not found')
   end
 

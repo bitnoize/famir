@@ -23,15 +23,15 @@ local function create_proxy(keys, args)
     updated_at = nil,
   }
 
-  if not #model.campaign_id > 0 then
+  if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not #model.id > 0 then
+  if not (#model.id > 0) then
     return redis.error_reply('ERR Wrong model.id')
   end
 
-  if not #model.url > 0 then
+  if not (#model.url > 0) then
     return redis.error_reply('ERR Wrong model.url')
   end
 
@@ -41,15 +41,15 @@ local function create_proxy(keys, args)
 
   model.updated_at = model.created_at
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', proxy_key) == 0 then
+  if not (redis.call('EXISTS', proxy_key) == 0) then
     return redis.status_reply('CONFLICT Proxy allready exists')
   end
 
-  if not redis.call('SISMEMBER', proxy_unique_url_key, model.url) == 0 then
+  if not (redis.call('SISMEMBER', proxy_unique_url_key, model.url) == 0) then
     return redis.status_reply('CONFLICT Proxy url allready taken')
   end
 
@@ -88,11 +88,11 @@ local function read_proxy(keys, args)
   local campaign_key = keys[1]
   local proxy_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
-  if not redis.call('EXISTS', proxy_key) == 1 then
+  if not (redis.call('EXISTS', proxy_key) == 1) then
     return nil
   end
 
@@ -108,7 +108,7 @@ local function read_proxy(keys, args)
     'updated_at'
   )
 
-  if not #values == 7 then
+  if not (#values == 7) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -149,7 +149,7 @@ local function read_proxy_index(keys, args)
   local campaign_key = keys[1]
   local proxy_index_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
@@ -183,11 +183,11 @@ local function enable_proxy(keys, args)
     return redis.error_reply('ERR Wrong params.updated_at')
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', proxy_key) == 1 then
+  if not (redis.call('EXISTS', proxy_key) == 1) then
     return redis.status_reply('NOT_FOUND Proxy not found')
   end
 
@@ -248,11 +248,11 @@ local function disable_proxy(keys, args)
     return redis.error_reply('ERR Wrong params.updated_at')
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', proxy_key) == 1 then
+  if not (redis.call('EXISTS', proxy_key) == 1) then
     return redis.status_reply('NOT_FOUND Proxy not found')
   end
 
@@ -306,11 +306,11 @@ local function delete_proxy(keys, args)
   local proxy_unique_url_key = keys[3]
   local proxy_index_key = keys[4]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', proxy_key) == 1 then
+  if not (redis.call('EXISTS', proxy_key) == 1) then
     return redis.status_reply('NOT_FOUND Proxy not found')
   end
 

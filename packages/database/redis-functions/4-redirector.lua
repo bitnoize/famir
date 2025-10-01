@@ -21,11 +21,11 @@ local function create_redirector(keys, args)
     updated_at = nil,
   }
 
-  if not #model.campaign_id > 0 then
+  if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not #model.id > 0 then
+  if not (#model.id > 0) then
     return redis.error_reply('ERR Wrong model.id')
   end
 
@@ -35,11 +35,11 @@ local function create_redirector(keys, args)
 
   model.updated_at = model.created_at
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', redirector_key) == 0 then
+  if not (redis.call('EXISTS', redirector_key) == 0) then
     return redis.status_reply('CONFLICT Redirector allready exists')
   end
 
@@ -76,11 +76,11 @@ local function read_redirector(keys, args)
   local campaign_key = keys[1]
   local redirector_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
-  if not redis.call('EXISTS', redirector_key) == 1 then
+  if not (redis.call('EXISTS', redirector_key) == 1) then
     return nil
   end
 
@@ -95,7 +95,7 @@ local function read_redirector(keys, args)
     'updated_at'
   )
 
-  if not #values == 6 then
+  if not (#values == 6) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -135,7 +135,7 @@ local function read_redirector_index(keys, args)
   local campaign_key = keys[1]
   local redirector_index_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
@@ -182,15 +182,15 @@ local function update_redirector(keys, args)
     end
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', redirector_key) == 1 then
+  if not (redis.call('EXISTS', redirector_key) == 1) then
     return redis.status_reply('NOT_FOUND Redirector not found')
   end
 
-  if not #model > 0 then
+  if not (#model > 0) then
     return redis.status_reply('OK Nothing to update')
   end
 
@@ -226,11 +226,11 @@ local function delete_redirector(keys, args)
   local redirector_key = keys[2]
   local redirector_index_key = keys[3]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND campaign not found')
   end
 
-  if not redis.call('EXISTS', redirector_key) == 1 then
+  if not (redis.call('EXISTS', redirector_key) == 1) then
     return redis.status_reply('NOT_FOUND redirector not found')
   end
 

@@ -23,15 +23,15 @@ local function create_session(keys, args)
     last_auth_at = nil,
   }
 
-  if not #model.campaign_id > 0 then
+  if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not #model.id > 0 then
+  if not (#model.id > 0) then
     return redis.error_reply('ERR Wrong model.id')
   end
 
-  if not #model.secret > 0 then
+  if not (#model.secret > 0) then
     return redis.error_reply('ERR Wrong model.secret')
   end
 
@@ -41,15 +41,15 @@ local function create_session(keys, args)
 
   model.last_auth_at = model.created_at
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', session_key) == 0 then
+  if not (redis.call('EXISTS', session_key) == 0) then
     return redis.status_reply('CONFLICT Session allready exists')
   end
 
-  if not redis.call('SCARD', enabled_proxy_index_key) > 0 then
+  if not (redis.call('SCARD', enabled_proxy_index_key) > 0) then
     return redis.status_reply('FORBIDDEN No enabled proxies found')
   end
 
@@ -100,11 +100,11 @@ local function read_session(keys, args)
   local campaign_key = keys[1]
   local session_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
-  if not redis.call('EXISTS', session_key) == 1 then
+  if not (redis.call('EXISTS', session_key) == 1) then
     return nil
   end
 
@@ -121,7 +121,7 @@ local function read_session(keys, args)
     'last_auth_at'
   )
 
-  if not #values == 8 then
+  if not (#values == 8) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -172,15 +172,15 @@ local function auth_session(keys, args)
     return redis.error_reply('ERR Wrong params.last_auth_at')
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', session_key) == 1 then
+  if not (redis.call('EXISTS', session_key) == 1) then
     return redis.status_reply('NOT_FOUND Session not found')
   end
 
-  if not redis.call('SCARD', enabled_proxy_index_key) > 0 then
+  if not (redis.call('SCARD', enabled_proxy_index_key) > 0) then
     return redis.status_reply('FORBIDDEN No enabled proxies found')
   end
 
@@ -239,19 +239,19 @@ local function upgrade_session(keys, args)
     secret = args[1],
   }
 
-  if not #params.secret > 0 then
+  if not (#params.secret > 0) then
     return redis.error_reply('ERR Wrong params.secret')
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', lure_key) == 1 then
+  if not (redis.call('EXISTS', lure_key) == 1) then
     return redis.status_reply('NOT_FOUND Lure not found')
   end
 
-  if not redis.call('EXISTS', session_key) == 1 then
+  if not (redis.call('EXISTS', session_key) == 1) then
     return redis.status_reply('NOT_FOUND Session not found')
   end
 

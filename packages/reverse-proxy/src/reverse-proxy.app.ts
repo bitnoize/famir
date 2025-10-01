@@ -3,10 +3,11 @@ import {
   DatabaseConnector,
   HttpServer,
   Logger,
-  WorkflowConnector,
-  Validator
+  PersistLogQueue,
+  Validator,
+  WorkflowConnector
 } from '@famir/domain'
-import { reverseProxySchemas } from './reverse-proxy.schemas.js'
+import { internalSchemas } from './reverse-proxy.utils.js'
 
 export class ReverseProxyApp {
   constructor(
@@ -14,6 +15,7 @@ export class ReverseProxyApp {
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
+    protected readonly persistLogQueue: PersistLogQueue,
     protected readonly httpServer: HttpServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
@@ -23,7 +25,7 @@ export class ReverseProxyApp {
       })
     })
 
-    validator.addSchemas(reverseProxySchemas)
+    validator.addSchemas(internalSchemas)
   }
 
   async start(): Promise<void> {
@@ -41,6 +43,8 @@ export class ReverseProxyApp {
   protected async stop(): Promise<void> {
     try {
       await this.httpServer.close()
+
+      await this.persistLogQueue.close()
 
       await this.workflowConnector.close()
 

@@ -36,35 +36,35 @@ local function create_message(keys, args)
     created_at = tonumber(args[19]),
   }
 
-  if not #model.campaign_id > 0 then
+  if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not #model.id > 0 then
+  if not (#model.id > 0) then
     return redis.error_reply('ERR Wrong model.id')
   end
 
-  if not #model.proxy_id > 0 then
+  if not (#model.proxy_id > 0) then
     return redis.error_reply('ERR Wrong model.proxy_id')
   end
 
-  if not #model.target_id > 0 then
+  if not (#model.target_id > 0) then
     return redis.error_reply('ERR Wrong model.target_id')
   end
 
-  if not #model.session_id > 0 then
+  if not (#model.session_id > 0) then
     return redis.error_reply('ERR Wrong model.session_id')
   end
 
-  if not #model.method > 0 then
+  if not (#model.method > 0) then
     return redis.error_reply('ERR Wrong model.method')
   end
 
-  if not #model.origin_url > 0 then
+  if not (#model.origin_url > 0) then
     return redis.error_reply('ERR Wrong model.origin_url')
   end
 
-  if not #model.forward_url > 0 then
+  if not (#model.forward_url > 0) then
     return redis.error_reply('ERR Wrong model.forward_url')
   end
 
@@ -84,23 +84,23 @@ local function create_message(keys, args)
     return redis.error_reply('ERR Wrong model.created_at')
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', message_key) == 0 then
+  if not (redis.call('EXISTS', message_key) == 0) then
     return redis.status_reply('CONFLICT Message allready exists')
   end
 
-  if not redis.call('EXISTS', proxy_key) == 1 then
+  if not (redis.call('EXISTS', proxy_key) == 1) then
     return redis.status_reply('NOT_FOUND Proxy not found')
   end
 
-  if not redis.call('EXISTS', target_key) == 1 then
+  if not (redis.call('EXISTS', target_key) == 1) then
     return redis.status_reply('NOT_FOUND Target not found')
   end
 
-  if not redis.call('EXISTS', session_key) == 1 then
+  if not (redis.call('EXISTS', session_key) == 1) then
     return redis.status_reply('NOT_FOUND Session not found')
   end
 
@@ -149,11 +149,11 @@ local function read_message(keys, args)
   local campaign_key = keys[1]
   local message_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
-  if not redis.call('EXISTS', message_key) == 1 then
+  if not (redis.call('EXISTS', message_key) == 1) then
     return nil
   end
 
@@ -181,7 +181,7 @@ local function read_message(keys, args)
     'created_at'
   )
 
-  if not #values == 19 then
+  if not (#values == 19) then
     return redis.error_reply('ERR Malform values')
   end
 

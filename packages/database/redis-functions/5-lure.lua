@@ -25,19 +25,19 @@ local function create_lure(keys, args)
     updated_at = nil,
   }
 
-  if not #model.campaign_id > 0 then
+  if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not #model.id > 0 then
+  if not (#model.id > 0) then
     return redis.error_reply('ERR Wrong model.id')
   end
 
-  if not #model.path > 0 then
+  if not (#model.path > 0) then
     return redis.error_reply('ERR Wrong model.path')
   end
 
-  if not #model.redirector_id > 0 then
+  if not (#model.redirector_id > 0) then
     return redis.error_reply('ERR Wrong model.redirector_id')
   end
 
@@ -47,19 +47,19 @@ local function create_lure(keys, args)
 
   model.updated_at = model.created_at
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', lure_key) == 0 then
+  if not (redis.call('EXISTS', lure_key) == 0) then
     return redis.status_reply('CONFLICT Lure allready exists')
   end
 
-  if not redis.call('EXISTS', lure_path_key) == 0 then
+  if not (redis.call('EXISTS', lure_path_key) == 0) then
     return redis.status_reply('CONFLICT Lure path allready taken')
   end
 
-  if not redis.call('EXISTS', redirector_key) == 1 then
+  if not (redis.call('EXISTS', redirector_key) == 1) then
     return redis.status_reply('NOT_FOUND Redirector not found')
   end
 
@@ -100,11 +100,11 @@ local function read_lure(keys, args)
   local campaign_key = keys[1]
   local lure_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
-  if not redis.call('EXISTS', lure_key) == 1 then
+  if not (redis.call('EXISTS', lure_key) == 1) then
     return nil
   end
 
@@ -121,7 +121,7 @@ local function read_lure(keys, args)
     'updated_at'
   )
 
-  if not #values == 8 then
+  if not (#values == 8) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -163,11 +163,11 @@ local function read_lure_path(keys, args)
   local campaign_key = keys[1]
   local lure_path_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
-  if not redis.call('EXISTS', lure_path_key) == 1 then
+  if not (redis.call('EXISTS', lure_path_key) == 1) then
     return nil
   end
 
@@ -192,7 +192,7 @@ local function read_lure_index(keys, args)
   local campaign_key = keys[1]
   local lure_index_key = keys[2]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
@@ -225,11 +225,11 @@ local function enable_lure(keys, args)
     return redis.error_reply('ERR Wrong params.updated_at')
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', lure_key) == 1 then
+  if not (redis.call('EXISTS', lure_key) == 1) then
     return redis.status_reply('NOT_FOUND Lure not found')
   end
 
@@ -282,11 +282,11 @@ local function disable_lure(keys, args)
     return redis.error_reply('ERR Wrong params.updated_at')
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', lure_key) == 1 then
+  if not (redis.call('EXISTS', lure_key) == 1) then
     return redis.status_reply('NOT_FOUND Lure not found')
   end
 
@@ -334,15 +334,15 @@ local function delete_lure(keys, args)
   local lure_index_key = keys[4]
   local redirector_key = keys[5]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('EXISTS', lure_key) == 1 then
+  if not (redis.call('EXISTS', lure_key) == 1) then
     return redis.status_reply('NOT_FOUND Lure not found')
   end
 
-  if not redis.call('EXISTS', redirector_key) == 1 then
+  if not (redis.call('EXISTS', redirector_key) == 1) then
     return redis.status_reply('NOT_FOUND Redirector not found')
   end
 
@@ -366,7 +366,7 @@ local function delete_lure(keys, args)
     return redis.error_reply('ERR Malform data.orig_path_id')
   end
 
-  if not data.id == data.orig_path_id then
+  if not (data.id == data.orig_path_id) then
     return redis.status_reply('FORBIDDEN Lure path not match')
   end
 
@@ -374,7 +374,7 @@ local function delete_lure(keys, args)
     return redis.error_reply('ERR Malform data.orig_redirector_id')
   end
 
-  if not data.redirector_id == data.orig_redirector_id then
+  if not (data.redirector_id == data.orig_redirector_id) then
     return redis.status_reply('FORBIDDEN Lure redirector not match')
   end
 

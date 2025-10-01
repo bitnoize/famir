@@ -1,11 +1,15 @@
-import { Router, WrapResponse } from '@famir/http-server'
+import { HttpServerResponse, HttpServerRouter, Logger, Validator } from '@famir/domain'
+import { BaseController } from '../base/index.js'
 
-export class PreflightCorsController {
-  constructor(router: Router) {
-    router.addRoute('options', '{*splat}', this.defaultHandler)
+export class PreflightCorsController extends BaseController {
+  constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
+    super(validator, logger, 'preflight-cors')
+
+    router.setHandler('options', '{*splat}', this.defaultHandler)
   }
 
-  private readonly defaultHandler = async (): Promise<WrapResponse | undefined> => {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  private readonly defaultHandler = async (): Promise<HttpServerResponse | undefined> => {
     return {
       status: 204,
       headers: {

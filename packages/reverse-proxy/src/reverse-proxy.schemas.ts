@@ -1,3 +1,4 @@
+import { JSONSchemaType } from '@famir/common'
 import { configDatabaseConnectionUrlSchema, configDatabasePrefixSchema } from '@famir/database'
 import { configHttpClientBodyLimitSchema } from '@famir/http-client'
 import {
@@ -12,8 +13,6 @@ import {
   configLoggerTransportTargetSchema
 } from '@famir/logger'
 import { configWorkflowConnectionUrlSchema, configWorkflowPrefixSchema } from '@famir/workflow'
-import { ValidatorSchemas } from '@famir/domain'
-import { JSONSchemaType } from '@famir/common'
 import { ReverseProxyConfig } from './reverse-proxy.js'
 
 export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
@@ -57,5 +56,3 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
   },
   additionalProperties: false
 } as const
-
-export const reverseProxySchemas: ValidatorSchemas = {}

@@ -28,23 +28,23 @@ local function create_campaign(keys, args)
     updated_at = nil,
   }
 
-  if not #model.landing_secret > 0 then
+  if not (#model.landing_secret > 0) then
     return redis.error_reply('ERR Wrong model.landing_secret')
   end
 
-  if not #model.landing_auth_path > 0 then
+  if not (#model.landing_auth_path > 0) then
     return redis.error_reply('ERR Wrong model.landing_auth_path')
   end
 
-  if not #model.landing_auth_param > 0 then
+  if not (#model.landing_auth_param > 0) then
     return redis.error_reply('ERR Wrong model.landing_auth_param')
   end
 
-  if not #model.landing_lure_param > 0 then
+  if not (#model.landing_lure_param > 0) then
     return redis.error_reply('ERR Wrong model.landing_lure_param')
   end
 
-  if not #model.session_cookie_name > 0 then
+  if not (#model.session_cookie_name > 0) then
     return redis.error_reply('ERR Wrong model.session_cookie_name')
   end
 
@@ -66,7 +66,7 @@ local function create_campaign(keys, args)
 
   model.updated_at = model.created_at
 
-  if not redis.call('EXISTS', campaign_key) == 0 then
+  if not (redis.call('EXISTS', campaign_key) == 0) then
     return redis.status_reply('CONFLICT Campaign allready exists')
   end
 
@@ -106,7 +106,7 @@ local function read_campaign(keys, args)
   local redirector_index_key = keys[4]
   local lure_index_key = keys[5]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return nil
   end
 
@@ -129,7 +129,7 @@ local function read_campaign(keys, args)
     'updated_at'
   )
 
-  if not #values == 14 then
+  if not (#values == 14) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -240,11 +240,11 @@ local function update_campaign(keys, args)
     end
   end
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not #model > 0 then
+  if #model == 0 then
     return redis.status_reply('OK Nothing to update')
   end
 
@@ -283,23 +283,23 @@ local function delete_campaign(keys, args)
   local redirector_index_key = keys[5]
   local lure_index_key = keys[6]
 
-  if not redis.call('EXISTS', campaign_key) == 1 then
+  if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if not redis.call('ZCARD', proxy_index_key) == 0 then
+  if not (redis.call('ZCARD', proxy_index_key) == 0) then
     return redis.status_reply('FORBIDDEN Campaign proxies exists')
   end
 
-  if not redis.call('ZCARD', target_index_key) == 0 then
+  if not (redis.call('ZCARD', target_index_key) == 0) then
     return redis.status_reply('FORBIDDEN Campaign targets exists')
   end
 
-  if not redis.call('ZCARD', redirector_index_key) == 0 then
+  if not (redis.call('ZCARD', redirector_index_key) == 0) then
     return redis.status_reply('FORBIDDEN Campaign redirectors exists')
   end
 
-  if not redis.call('ZCARD', lure_index_key) == 0 then
+  if not (redis.call('ZCARD', lure_index_key) == 0) then
     return redis.status_reply('FORBIDDEN Campaign lures exists')
   end
 
