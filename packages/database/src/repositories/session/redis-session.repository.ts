@@ -1,9 +1,13 @@
 import {
+  AuthSessionData,
   Config,
+  CreateSessionData,
   DatabaseError,
   Logger,
+  ReadSessionData,
   SessionModel,
   SessionRepository,
+  UpgradeSessionData,
   Validator
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
@@ -22,12 +26,17 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     super(validator, config, logger, connection, 'session')
   }
 
-  async create(campaignId: string, id: string, secret: string): Promise<SessionModel> {
+  async create(data: CreateSessionData): Promise<SessionModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.session.create_session(this.options.prefix, campaignId, id, secret),
+        this.connection.session.create_session(
+          this.options.prefix,
+          data.campaignId,
+          data.id,
+          data.secret
+        ),
 
-        this.connection.session.read_session(this.options.prefix, campaignId, id)
+        this.connection.session.read_session(this.options.prefix, data.campaignId, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -42,26 +51,30 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', { campaignId, id, secret })
+      this.exceptionFilter(error, 'create', data)
     }
   }
 
-  async read(campaignId: string, id: string): Promise<SessionModel | null> {
+  async read(data: ReadSessionData): Promise<SessionModel | null> {
     try {
-      const raw = await this.connection.session.read_session(this.options.prefix, campaignId, id)
+      const raw = await this.connection.session.read_session(
+        this.options.prefix,
+        data.campaignId,
+        data.id
+      )
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', { campaignId, id })
+      this.exceptionFilter(error, 'read', data)
     }
   }
 
-  async auth(campaignId: string, id: string): Promise<SessionModel> {
+  async auth(data: AuthSessionData): Promise<SessionModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.session.auth_session(this.options.prefix, campaignId, id),
+        this.connection.session.auth_session(this.options.prefix, data.campaignId, data.id),
 
-        this.connection.session.read_session(this.options.prefix, campaignId, id)
+        this.connection.session.read_session(this.options.prefix, data.campaignId, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -76,27 +89,22 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'auth', { campaignId, id })
+      this.exceptionFilter(error, 'auth', data)
     }
   }
 
-  async upgrade(
-    campaignId: string,
-    lureId: string,
-    id: string,
-    secret: string
-  ): Promise<SessionModel> {
+  async upgrade(data: UpgradeSessionData): Promise<SessionModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.session.upgrade_session(
           this.options.prefix,
-          campaignId,
-          lureId,
-          id,
-          secret
+          data.campaignId,
+          data.lureId,
+          data.id,
+          data.secret
         ),
 
-        this.connection.session.read_session(this.options.prefix, campaignId, id)
+        this.connection.session.read_session(this.options.prefix, data.campaignId, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -111,12 +119,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'upgrade', {
-        campaignId,
-        lureId,
-        id,
-        secret
-      })
+      this.exceptionFilter(error, 'upgrade', data)
     }
   }
 }

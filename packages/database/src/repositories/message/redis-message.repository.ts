@@ -1,12 +1,11 @@
 import {
   Config,
+  CreateMessageData,
   DatabaseError,
   Logger,
-  MessageHeaders,
   MessageModel,
   MessageRepository,
-  MessageRequestCookies,
-  MessageResponseCookies,
+  ReadMessageData,
   Validator
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
@@ -25,51 +24,32 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     super(validator, config, logger, connection, 'message')
   }
 
-  async create(
-    campaignId: string,
-    id: string,
-    proxyId: string,
-    targetId: string,
-    sessionId: string,
-    clientIp: string,
-    method: string,
-    originUrl: string,
-    forwardUrl: string,
-    requestHeaders: MessageHeaders,
-    requestCookies: MessageRequestCookies,
-    requestBody: Buffer,
-    statusCode: number,
-    responseHeaders: MessageHeaders,
-    responseCookies: MessageResponseCookies,
-    responseBody: Buffer,
-    queryTime: number,
-    score: number
-  ): Promise<MessageModel> {
+  async create(data: CreateMessageData): Promise<MessageModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.message.create_message(
           this.options.prefix,
-          campaignId,
-          id,
-          proxyId,
-          targetId,
-          sessionId,
-          clientIp,
-          method,
-          originUrl,
-          forwardUrl,
-          requestHeaders,
-          requestCookies,
-          requestBody,
-          statusCode,
-          responseHeaders,
-          responseCookies,
-          responseBody,
-          queryTime,
-          score
+          data.campaignId,
+          data.id,
+          data.proxyId,
+          data.targetId,
+          data.sessionId,
+          data.clientIp,
+          data.method,
+          data.originUrl,
+          data.forwardUrl,
+          data.requestHeaders,
+          data.requestCookies,
+          data.requestBody,
+          data.statusCode,
+          data.responseHeaders,
+          data.responseCookies,
+          data.responseBody,
+          data.queryTime,
+          data.score
         ),
 
-        this.connection.message.read_message(this.options.prefix, campaignId, id)
+        this.connection.message.read_message(this.options.prefix, data.campaignId, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -84,23 +64,21 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', {
-        campaignId,
-        id,
-        proxyId,
-        targetId,
-        sessionId
-      })
+      this.exceptionFilter(error, 'create', data)
     }
   }
 
-  async read(campaignId: string, id: string): Promise<MessageModel | null> {
+  async read(data: ReadMessageData): Promise<MessageModel | null> {
     try {
-      const raw = await this.connection.message.read_message(this.options.prefix, campaignId, id)
+      const raw = await this.connection.message.read_message(
+        this.options.prefix,
+        data.campaignId,
+        data.id
+      )
 
       return buildModel(this.assertSchema, raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', { campaignId, id })
+      this.exceptionFilter(error, 'read', data)
     }
   }
 }

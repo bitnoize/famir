@@ -1,13 +1,11 @@
 import { DomainError, DomainErrorOptions } from '../../domain.error.js'
 
-export type ExecutorErrorCode = 'UNKNOWN'
-
 export type ExecutorErrorOptions = DomainErrorOptions & {
-  code: ExecutorErrorCode
+  code: string
 }
 
 export class ExecutorError extends DomainError {
-  code: ExecutorErrorCode
+  code: string
 
   constructor(message: string, options: ExecutorErrorOptions) {
     super(message, {

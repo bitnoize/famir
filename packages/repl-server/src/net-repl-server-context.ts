@@ -2,7 +2,7 @@ import { Logger, ReplServerContext, ReplServerContextHandler } from '@famir/doma
 import repl from 'node:repl'
 
 export class NetReplServerContext implements ReplServerContext {
-  private readonly _map = new Map<string, [string, ReplServerContextHandler]>()
+  private readonly _map = new Map<string, ReplServerContextHandler>()
 
   constructor(protected readonly logger: Logger) {
     this.logger.debug(
@@ -14,13 +14,13 @@ export class NetReplServerContext implements ReplServerContext {
   }
 
   applyTo(replServer: repl.REPLServer) {
-    this._map.forEach(([, handler], name) => {
+    this._map.forEach((handler, name) => {
       Object.defineProperty(replServer.context, name, {
         configurable: false,
         enumerable: true,
-        value: async (dto: unknown): Promise<unknown> => {
+        value: async (data: unknown): Promise<unknown> => {
           try {
-            return await handler(dto)
+            return await handler(data)
           } catch (error) {
             return error
           }
@@ -29,12 +29,12 @@ export class NetReplServerContext implements ReplServerContext {
     })
   }
 
-  setHandler(name: string, description: string, handler: ReplServerContextHandler) {
+  setHandler(name: string, handler: ReplServerContextHandler) {
     if (this._map.has(name)) {
-      throw new Error(`Handler '${name}' allready exists`)
+      throw new Error(`Context handler '${name}' allready exists`)
     }
 
-    this._map.set(name, [description, handler])
+    this._map.set(name, handler)
 
     this.logger.debug(
       {
@@ -47,13 +47,7 @@ export class NetReplServerContext implements ReplServerContext {
     )
   }
 
-  dump(): Record<string, string> {
-    const res: Record<string, string> = {}
-
-    this._map.forEach(([description], name) => {
-      res[name] = description
-    })
-
-    return res
+  dump(): string[] {
+    return [...this._map.keys()]
   }
 }

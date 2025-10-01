@@ -22,6 +22,7 @@ export class TargetModel {
     readonly sitemapXml: string,
     readonly successRedirectUrl: string,
     readonly failureRedirectUrl: string,
+    //readonly analyzeHandler: string,
     readonly isEnabled: boolean,
     readonly messageCount: number,
     readonly createdAt: Date,

@@ -13,5 +13,3 @@ export const configDatabasePrefixSchema: JSONSchemaType<string> = {
   maxLength: 128,
   default: 'famir'
 } as const
-
-

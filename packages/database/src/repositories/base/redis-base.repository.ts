@@ -28,15 +28,11 @@ export abstract class RedisBaseRepository {
     )
   }
 
-  protected exceptionFilter(
-    error: unknown,
-    method: string,
-    params: Record<string, unknown>
-  ): never {
+  protected exceptionFilter(error: unknown, method: string, data: object | null): never {
     if (error instanceof DatabaseError) {
       error.context['repository'] = this.repositoryName
       error.context['method'] = method
-      error.context['params'] = params
+      error.context['data'] = data
 
       throw error
     } else {
@@ -45,7 +41,7 @@ export abstract class RedisBaseRepository {
         context: {
           repository: this.repositoryName,
           method,
-          params
+          data
         },
         code: 'UNKNOWN'
       })

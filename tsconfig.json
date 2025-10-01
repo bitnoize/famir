@@ -8,8 +8,8 @@
     { "path": "packages/logger" },
     { "path": "packages/database" },
     { "path": "packages/storage" },
-    { "path": "packages/task-queue" },
-    { "path": "packages/task-worker" },
+    { "path": "packages/workflow" },
+    { "path": "packages/executor" },
     { "path": "packages/http-client" },
     { "path": "packages/http-server" },
     { "path": "packages/repl-server" }

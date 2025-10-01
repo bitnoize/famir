@@ -79,7 +79,7 @@ export class ExpressHttpServer implements HttpServer {
   async close(): Promise<void> {
     await this._close()
 
-    this.logger.info(
+    this.logger.debug(
       {
         module: 'http-server'
       },
@@ -170,16 +170,16 @@ export class ExpressHttpServer implements HttpServer {
     }
 
     if (error instanceof HttpServerError) {
-      error.context['request'] = {
-        method: req.method,
-        url: req.originalUrl,
-        headers: req.headers
-      }
-
       const logLevel = error.status >= 500 ? 'error' : 'warn'
 
       this.logger[logLevel](
         {
+          module: 'http-server',
+          request: {
+            method: req.method,
+            url: req.originalUrl,
+            headers: req.headers
+          },
           error: serializeError(error)
         },
         `Server handle error`
@@ -189,6 +189,7 @@ export class ExpressHttpServer implements HttpServer {
     } else {
       this.logger.error(
         {
+          module: 'http-server',
           request: {
             method: req.method,
             url: req.originalUrl,

@@ -1,9 +1,14 @@
+import { randomSecret } from '@famir/common'
 import {
   CampaignModel,
   CampaignRepository,
   Config,
+  CreateCampaignData,
   DatabaseError,
+  DeleteCampaignData,
   Logger,
+  ReadCampaignData,
+  UpdateCampaignData,
   Validator
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
@@ -22,35 +27,24 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     super(validator, config, logger, connection, 'campaign')
   }
 
-  async create(
-    id: string,
-    description: string,
-    landingSecret: string,
-    landingAuthPath: string,
-    landingAuthParam: string,
-    landingLureParam: string,
-    sessionCookieName: string,
-    sessionExpire: number,
-    newSessionExpire: number,
-    messageExpire: number
-  ): Promise<CampaignModel> {
+  async create(data: CreateCampaignData): Promise<CampaignModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.campaign.create_campaign(
           this.options.prefix,
-          id,
-          description,
-          landingSecret,
-          landingAuthPath,
-          landingAuthParam,
-          landingLureParam,
-          sessionCookieName,
-          sessionExpire,
-          newSessionExpire,
-          messageExpire
+          data.id,
+          data.description ?? 'Default campaign',
+          data.landingSecret ?? randomSecret(),
+          data.landingAuthPath ?? '/fake-auth',
+          data.landingAuthParam ?? 'data',
+          data.landingLureParam ?? 'data',
+          data.sessionCookieName ?? 'fake-sess',
+          data.sessionExpire ?? 24 * 3600 * 1000,
+          data.newSessionExpire ?? 300 * 1000,
+          data.messageExpire ?? 3600 * 1000
         ),
 
-        this.connection.campaign.read_campaign(this.options.prefix, id)
+        this.connection.campaign.read_campaign(this.options.prefix, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -65,39 +59,33 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', { id })
+      this.exceptionFilter(error, 'create', data)
     }
   }
 
-  async read(id: string): Promise<CampaignModel | null> {
+  async read(data: ReadCampaignData): Promise<CampaignModel | null> {
     try {
-      const raw = await this.connection.campaign.read_campaign(this.options.prefix, id)
+      const raw = await this.connection.campaign.read_campaign(this.options.prefix, data.id)
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', { id })
+      this.exceptionFilter(error, 'read', data)
     }
   }
 
-  async update(
-    id: string,
-    description: string | null | undefined,
-    sessionExpire: number | null | undefined,
-    newSessionExpire: number | null | undefined,
-    messageExpire: number | null | undefined
-  ): Promise<CampaignModel> {
+  async update(data: UpdateCampaignData): Promise<CampaignModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.campaign.update_campaign(
           this.options.prefix,
-          id,
-          description,
-          sessionExpire,
-          newSessionExpire,
-          messageExpire
+          data.id,
+          data.description,
+          data.sessionExpire,
+          data.newSessionExpire,
+          data.messageExpire
         ),
 
-        this.connection.campaign.read_campaign(this.options.prefix, id)
+        this.connection.campaign.read_campaign(this.options.prefix, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -112,16 +100,16 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'update', { id })
+      this.exceptionFilter(error, 'update', data)
     }
   }
 
-  async delete(id: string): Promise<CampaignModel> {
+  async delete(data: DeleteCampaignData): Promise<CampaignModel> {
     try {
       const [raw, status] = await Promise.all([
-        this.connection.campaign.read_campaign(this.options.prefix, id),
+        this.connection.campaign.read_campaign(this.options.prefix, data.id),
 
-        this.connection.campaign.delete_campaign(this.options.prefix, id)
+        this.connection.campaign.delete_campaign(this.options.prefix, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -136,7 +124,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'delete', { id })
+      this.exceptionFilter(error, 'delete', data)
     }
   }
 
@@ -150,7 +138,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionFilter(error, 'list', {})
+      this.exceptionFilter(error, 'list', null)
     }
   }
 }

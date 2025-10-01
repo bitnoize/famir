@@ -9,12 +9,10 @@ import express from 'express'
 export class ExpressHttpServerRouter implements HttpServerRouter {
   private readonly _router = express.Router()
 
-  constructor(
-    protected readonly logger: Logger,
-  ) {
+  constructor(protected readonly logger: Logger) {
     this.logger.debug(
       {
-        module: 'http-server',
+        module: 'http-server'
       },
       `HttpServerRouter initialized`
     )
@@ -24,7 +22,7 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
     express.use('/', this._router)
   }
 
-  addRoute(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandler) {
+  setHandler(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandler) {
     this._router[method](
       path,
       async (

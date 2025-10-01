@@ -4,3 +4,10 @@ export interface ExecutorConnector {
   //connect(): Promise<void>
   close(): Promise<void>
 }
+
+export type ExecutorDispatchHandler = (data: unknown) => Promise<unknown>
+
+export interface ExecutorDispatcher {
+  applyTo(job: unknown): Promise<unknown>
+  setHandler(name: string, handler: ExecutorDispatchHandler): void
+}

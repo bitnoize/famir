@@ -1,9 +1,14 @@
 import {
   Config,
+  CreateRedirectorData,
   DatabaseError,
+  DeleteRedirectorData,
+  ListRedirectorsData,
   Logger,
+  ReadRedirectorData,
   RedirectorModel,
   RedirectorRepository,
+  UpdateRedirectorData,
   Validator
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
@@ -22,12 +27,17 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     super(validator, config, logger, connection, 'redirector')
   }
 
-  async create(campaignId: string, id: string, page: string): Promise<RedirectorModel> {
+  async create(data: CreateRedirectorData): Promise<RedirectorModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.redirector.create_redirector(this.options.prefix, campaignId, id, page),
+        this.connection.redirector.create_redirector(
+          this.options.prefix,
+          data.campaignId,
+          data.id,
+          data.page
+        ),
 
-        this.connection.redirector.read_redirector(this.options.prefix, campaignId, id)
+        this.connection.redirector.read_redirector(this.options.prefix, data.campaignId, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -42,38 +52,35 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', {
-        campaignId,
-        id,
-        page
-      })
+      this.exceptionFilter(error, 'create', data)
     }
   }
 
-  async read(campaignId: string, id: string): Promise<RedirectorModel | null> {
+  async read(data: ReadRedirectorData): Promise<RedirectorModel | null> {
     try {
       const raw = await this.connection.redirector.read_redirector(
         this.options.prefix,
-        campaignId,
-        id
+        data.campaignId,
+        data.id
       )
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', { campaignId, id })
+      this.exceptionFilter(error, 'read', data)
     }
   }
 
-  async update(
-    campaignId: string,
-    id: string,
-    page: string | null | undefined
-  ): Promise<RedirectorModel> {
+  async update(data: UpdateRedirectorData): Promise<RedirectorModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.redirector.update_redirector(this.options.prefix, campaignId, id, page),
+        this.connection.redirector.update_redirector(
+          this.options.prefix,
+          data.campaignId,
+          data.id,
+          data.page
+        ),
 
-        this.connection.redirector.read_redirector(this.options.prefix, campaignId, id)
+        this.connection.redirector.read_redirector(this.options.prefix, data.campaignId, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -88,20 +95,16 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'update', {
-        campaignId,
-        id,
-        page
-      })
+      this.exceptionFilter(error, 'update', data)
     }
   }
 
-  async delete(campaignId: string, id: string): Promise<RedirectorModel> {
+  async delete(data: DeleteRedirectorData): Promise<RedirectorModel> {
     try {
       const [raw, status] = await Promise.all([
-        this.connection.redirector.read_redirector(this.options.prefix, campaignId, id),
+        this.connection.redirector.read_redirector(this.options.prefix, data.campaignId, data.id),
 
-        this.connection.redirector.delete_redirector(this.options.prefix, campaignId, id)
+        this.connection.redirector.delete_redirector(this.options.prefix, data.campaignId, data.id)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -116,15 +119,15 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'delete', { campaignId, id })
+      this.exceptionFilter(error, 'delete', data)
     }
   }
 
-  async list(campaignId: string): Promise<RedirectorModel[] | null> {
+  async list(data: ListRedirectorsData): Promise<RedirectorModel[] | null> {
     try {
       const index = await this.connection.redirector.read_redirector_index(
         this.options.prefix,
-        campaignId
+        data.campaignId
       )
 
       if (index === null) {
@@ -133,13 +136,13 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       const raws = await Promise.all(
         index.map((id) =>
-          this.connection.redirector.read_redirector(this.options.prefix, campaignId, id)
+          this.connection.redirector.read_redirector(this.options.prefix, data.campaignId, id)
         )
       )
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionFilter(error, 'list', { campaignId })
+      this.exceptionFilter(error, 'list', data)
     }
   }
 }

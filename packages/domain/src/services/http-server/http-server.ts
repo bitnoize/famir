@@ -54,6 +54,6 @@ export type HttpServerRouteHandler = (
 ) => Promise<HttpServerResponse | null | undefined>
 
 export interface HttpServerRouter {
-  addRoute(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandler): void
   applyTo(express: unknown): void
+  setHandler(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandler): void
 }

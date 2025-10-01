@@ -25,9 +25,10 @@
     "packages/http-client",
     "packages/http-server",
     "packages/repl-server",
-    "packages/reverse-proxy",
     "packages/console",
-    "packages/scan-message"
+    "packages/reverse-proxy",
+    "packages/persist-log",
+    "packages/analyze-log"
   ],
   "devDependencies": {
     "@eslint/js": "^9.19.0",

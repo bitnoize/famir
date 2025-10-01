@@ -12,10 +12,10 @@ import { BullWorkflowConnection } from '../../bull-workflow-connector.js'
 import { WorkflowConfig, WorkflowQueueOptions } from '../../workflow.js'
 import { buildQueueOptions, filterOptionsSecrets } from '../../workflow.utils.js'
 
-export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue {
+export abstract class BullBaseQueue implements BaseQueue {
   protected readonly assertSchema: ValidatorAssertSchema
   protected readonly options: WorkflowQueueOptions
-  protected readonly _queue: Queue<D, R, N>
+  protected readonly _queue: Queue<unknown, unknown>
 
   constructor(
     validator: Validator,
@@ -28,7 +28,7 @@ export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue
 
     this.options = buildQueueOptions(config.data)
 
-    this._queue = new Queue<D, R, N>(this.queueName, {
+    this._queue = new Queue<unknown, unknown>(this.queueName, {
       connection: this.connection,
       prefix: this.options.prefix
     })
@@ -74,16 +74,12 @@ export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue
     return await this._queue.getJobCounts()
   }
 
-  protected exceptionFilter(
-    error: unknown,
-    method: string,
-    params: Record<string, unknown> = {}
-  ): never {
+  protected exceptionFilter(error: unknown, method: string, data: object | null): never {
     if (error instanceof WorkflowError) {
       error.context['module'] = 'workflow'
       error.context['queue'] = this.queueName
       error.context['method'] = method
-      error.context['params'] = params
+      error.context['data'] = data
 
       throw error
     } else {
@@ -93,7 +89,7 @@ export abstract class BullBaseQueue<D, R, N extends string> implements BaseQueue
           module: 'workflow',
           queue: this.queueName,
           method,
-          params
+          data
         },
         code: 'UNKNOWN'
       })

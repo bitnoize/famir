@@ -1,5 +1,5 @@
-import { ValidatorSchemas } from '@famir/domain'
 import { filterSecrets } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import { HttpServerConfig, HttpServerOptions } from './http-server.js'
 
 export const internalSchemas: ValidatorSchemas = {}

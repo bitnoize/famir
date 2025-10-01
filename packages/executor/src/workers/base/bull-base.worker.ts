@@ -1,36 +1,29 @@
 import { serializeError } from '@famir/common'
-import {
-  BaseManager,
-  BaseWorker,
-  Config,
-  ExecutorError,
-  Logger,
-  Validator,
-  ValidatorAssertSchema
-} from '@famir/domain'
+import { BaseWorker, Config, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
 import { Job, MetricsTime, Processor, Worker } from 'bullmq'
 import { BullExecutorConnection } from '../../bull-executor-connector.js'
+import { BullExecutorDispatcher } from '../../bull-executor-dispatcher.js'
 import { ExecutorConfig, ExecutorWorkerOptions } from '../../executor.js'
 import { buildWorkerOptions, filterOptionsSecrets } from '../../executor.utils.js'
 
-export abstract class BullBaseWorker<D, R, N extends string> implements BaseWorker {
+export abstract class BullBaseWorker implements BaseWorker {
   protected readonly assertSchema: ValidatorAssertSchema
   protected readonly options: ExecutorWorkerOptions
-  protected readonly _worker: Worker<D, R, N>
+  protected readonly _worker: Worker<unknown, unknown>
 
   constructor(
     validator: Validator,
     config: Config<ExecutorConfig>,
     protected readonly logger: Logger,
     protected readonly connection: BullExecutorConnection,
-    protected readonly manager: BaseManager<D, R, N>,
+    protected readonly dispatcher: BullExecutorDispatcher,
     protected readonly queueName: string
   ) {
     this.assertSchema = validator.assertSchema
 
     this.options = buildWorkerOptions(config.data)
 
-    this._worker = new Worker<D, R, N>(this.queueName, this.processorHandler, {
+    this._worker = new Worker<unknown, unknown>(this.queueName, this.processorHandler, {
       connection: this.connection,
       prefix: this.options.prefix,
       concurrency: this.options.concurrency,
@@ -50,7 +43,7 @@ export abstract class BullBaseWorker<D, R, N extends string> implements BaseWork
       }
     })
 
-    this._worker.on('completed', (job: Job<D, R, N>) => {
+    this._worker.on('completed', (job: Job<unknown, unknown>) => {
       this.logger.info(
         {
           module: 'executor',
@@ -66,7 +59,7 @@ export abstract class BullBaseWorker<D, R, N extends string> implements BaseWork
       )
     })
 
-    this._worker.on('failed', (job: Job<D, R, N> | undefined) => {
+    this._worker.on('failed', (job: Job<unknown, unknown> | undefined) => {
       this.logger.error(
         {
           module: 'executor',
@@ -105,12 +98,8 @@ export abstract class BullBaseWorker<D, R, N extends string> implements BaseWork
     )
   }
 
-  protected processorHandler: Processor<D, R, N> = async (job) => {
-    try {
-      return await this.manager.applyTo(job)
-    } catch (error) {
-      return this.exceptionFilter(error, job)
-    }
+  protected processorHandler: Processor<unknown, unknown> = async (job) => {
+    return await this.dispatcher.applyTo(job)
   }
 
   async run(): Promise<void> {
@@ -135,33 +124,5 @@ export abstract class BullBaseWorker<D, R, N extends string> implements BaseWork
       },
       `Worker closed`
     )
-  }
-
-  protected exceptionFilter(error: unknown, job: Job<D, R, N>): never {
-    if (error instanceof ExecutorError) {
-      error.context['module'] = 'executor'
-      error.context['queue'] = this.queueName
-      error.context['job'] = {
-        id: job.id,
-        name: job.name,
-        data: job.data
-      }
-
-      throw error
-    } else {
-      throw new ExecutorError(`Worker internal error`, {
-        cause: error,
-        context: {
-          module: 'executor',
-          queue: this.queueName,
-          job: {
-            id: job.id,
-            name: job.name,
-            data: job.data
-          }
-        },
-        code: 'UNKNOWN'
-      })
-    }
   }
 }

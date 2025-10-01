@@ -13,4 +13,3 @@ export const configWorkflowPrefixSchema: JSONSchemaType<string> = {
   maxLength: 128,
   default: 'bull'
 } as const
-
