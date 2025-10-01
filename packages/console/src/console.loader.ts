@@ -12,6 +12,7 @@ import {
   RedisTargetRepository
 } from '@famir/database'
 import {
+  AnalyzeLogQueue,
   CampaignRepository,
   Config,
   DatabaseConnector,
@@ -22,7 +23,6 @@ import {
   RedirectorRepository,
   ReplServer,
   ReplServerContext,
-  ScanMessageQueue,
   SessionRepository,
   TargetRepository,
   Validator,
@@ -31,11 +31,7 @@ import {
 import { PinoLogger } from '@famir/logger'
 import { NetReplServer, NetReplServerContext } from '@famir/repl-server'
 import { AjvValidator } from '@famir/validator'
-import {
-  BullScanMessageQueue,
-  BullWorkflowConnection,
-  BullWorkflowConnector
-} from '@famir/workflow'
+import { BullAnalyzeLogQueue, BullWorkflowConnection, BullWorkflowConnector } from '@famir/workflow'
 import { ConsoleApp } from './console.app.js'
 import { ConsoleConfig } from './console.js'
 import { configConsoleSchema } from './console.schemas.js'
@@ -173,10 +169,10 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
       )
   )
 
-  container.registerSingleton<ScanMessageQueue>(
-    'ScanMessageQueue',
+  container.registerSingleton<AnalyzeLogQueue>(
+    'AnalyzeLogQueue',
     (c) =>
-      new BullScanMessageQueue(
+      new BullAnalyzeLogQueue(
         c.resolve<Validator>('Validator'),
         c.resolve<Config<ConsoleConfig>>('Config'),
         c.resolve<Logger>('Logger'),
@@ -222,7 +218,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector'),
         c.resolve<WorkflowConnector>('WorkflowConnector'),
-        c.resolve<ScanMessageQueue>('ScanMessageQueue'),
+        c.resolve<AnalyzeLogQueue>('AnalyzeLogQueue'),
         c.resolve<ReplServer>('ReplServer')
       )
   )

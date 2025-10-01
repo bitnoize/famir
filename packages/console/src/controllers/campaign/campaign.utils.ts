@@ -1,10 +1,11 @@
-import { ReplServerError, ValidatorAssertSchema } from '@famir/domain'
 import {
   CreateCampaignData,
   DeleteCampaignData,
   ReadCampaignData,
-  UpdateCampaignData
-} from '../../use-cases/index.js'
+  ReplServerError,
+  UpdateCampaignData,
+  ValidatorAssertSchema
+} from '@famir/domain'
 
 export function validateCreateCampaignData(
   assertSchema: ValidatorAssertSchema,

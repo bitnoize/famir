@@ -1,19 +1,20 @@
 import { SHUTDOWN_SIGNALS } from '@famir/common'
 import {
-  DatabaseConnector,
-  Logger,
   AnalyzeLogWorker,
-  WorkflowConnector,
+  DatabaseConnector,
   ExecutorConnector,
-  Validator
+  Logger,
+  Validator,
+  WorkflowConnector
 } from '@famir/domain'
-import { internalSchemas } from './scan-message.utils.js'
+import { internalSchemas } from './analyze-log.utils.js'
 
 export class AnalyzeLogApp {
   constructor(
     validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
+    protected readonly workflowConnector: WorkflowConnector,
     protected readonly executorConnector: ExecutorConnector,
     protected readonly analyzeLogWorker: AnalyzeLogWorker
   ) {

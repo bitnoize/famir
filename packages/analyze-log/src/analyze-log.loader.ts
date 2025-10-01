@@ -1,42 +1,39 @@
 import { DIContainer } from '@famir/common'
-import {
-  Config,
-  DatabaseConnector,
-  CampaignRepository,
-  SessionRepository,
-  TargetRepository,
-  MessageRepository,
-  Logger,
-  Storage,
-  ExecutorDispatcher,
-  AnalyzeLogWorker,
-  ExecutorConnector,
-  WorkflowConnector,
-  Validator
-} from '@famir/domain'
 import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
-  RedisSessionRepository,
-  RedisTargetRepository,
-  RedisMessageRepository,
   RedisDatabaseConnection,
-  RedisDatabaseConnector
+  RedisDatabaseConnector,
+  RedisMessageRepository,
+  RedisSessionRepository,
+  RedisTargetRepository
 } from '@famir/database'
-import { PinoLogger } from '@famir/logger'
 import {
-  BullExecutorDispatcher,
+  AnalyzeLogQueue,
+  AnalyzeLogWorker,
+  CampaignRepository,
+  Config,
+  DatabaseConnector,
+  ExecutorConnector,
+  ExecutorDispatcher,
+  Logger,
+  MessageRepository,
+  SessionRepository,
+  Storage,
+  TargetRepository,
+  Validator,
+  WorkflowConnector
+} from '@famir/domain'
+import {
   BullAnalyzeLogWorker,
   BullExecutorConnection,
   BullExecutorConnector,
+  BullExecutorDispatcher
 } from '@famir/executor'
-import {
-  BullAnalyzeLogQueue,
-  BullWorkflowConnection,
-  BullWorkflowConnector,
-} from '@famir/workflow'
-import { AjvValidator } from '@famir/validator'
+import { PinoLogger } from '@famir/logger'
 import { MinioStorage } from '@famir/storage'
+import { AjvValidator } from '@famir/validator'
+import { BullAnalyzeLogQueue, BullWorkflowConnection, BullWorkflowConnector } from '@famir/workflow'
 import { AnalyzeLogApp } from './analyze-log.app.js'
 import { AnalyzeLogConfig } from './analyze-log.js'
 import { configAnalyzeLogSchema } from './analyze-log.schemas.js'
@@ -57,7 +54,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   container.registerSingleton<Config<AnalyzeLogConfig>>(
     'Config',
     (c) =>
-      new EnvConfig<AnalyzeLogConfig>(c.resolve<Validator>('Validator'), configScanMessageSchema)
+      new EnvConfig<AnalyzeLogConfig>(c.resolve<Validator>('Validator'), configAnalyzeLogSchema)
   )
 
   //
@@ -166,9 +163,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
         c.resolve<Validator>('Validator'),
         c.resolve<Config<AnalyzeLogConfig>>('Config'),
         c.resolve<Logger>('Logger'),
-        c
-          .resolve<WorkflowConnector>('WorkflowConnector')
-          .connection<BullWorkflowConnection>(),
+        c.resolve<WorkflowConnector>('WorkflowConnector').connection<BullWorkflowConnection>()
       )
   )
 
@@ -188,10 +183,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   container.registerSingleton<ExecutorDispatcher>(
     'ExecutorDispatcher',
-    (c) =>
-      new BullExecutorRouter(
-        c.resolve<Logger>('Logger')
-      )
+    (c) => new BullExecutorDispatcher(c.resolve<Logger>('Logger'))
   )
 
   container.registerSingleton<AnalyzeLogWorker>(
@@ -201,10 +193,8 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
         c.resolve<Validator>('Validator'),
         c.resolve<Config<AnalyzeLogConfig>>('Config'),
         c.resolve<Logger>('Logger'),
-        c
-          .resolve<ExecutorConnector>('ExecutorConnector')
-          .connection<BullExecutorConnection>(),
-        c.resolve<ExecutorRouter>('ExecutorRouter')
+        c.resolve<ExecutorConnector>('ExecutorConnector').connection<BullExecutorConnection>(),
+        c.resolve<ExecutorDispatcher>('ExecutorDispatcher')
       )
   )
 
@@ -225,6 +215,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
         c.resolve<Validator>('Validator'),
         c.resolve<Logger>('Logger'),
         c.resolve<DatabaseConnector>('DatabaseConnector'),
+        c.resolve<WorkflowConnector>('WorkflowConnector'),
         c.resolve<ExecutorConnector>('ExecutorConnector'),
         c.resolve<AnalyzeLogWorker>('AnalyzeLogWorker')
       )

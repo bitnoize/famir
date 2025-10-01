@@ -4,14 +4,10 @@ import { Job } from 'bullmq'
 export class BullExecutorDispatcher implements ExecutorDispatcher {
   private readonly _map = new Map<string, ExecutorDispatchHandler>()
 
-  constructor(
-    protected readonly logger: Logger,
-    protected readonly queueName: string
-  ) {
+  constructor(protected readonly logger: Logger) {
     this.logger.debug(
       {
         module: 'executor',
-        queue: this.queueName
       },
       `ExecutorDispatcher initialized`
     )
@@ -37,7 +33,6 @@ export class BullExecutorDispatcher implements ExecutorDispatcher {
     this.logger.debug(
       {
         module: 'executor',
-        queue: this.queueName,
         handler: {
           name
         }

@@ -1,8 +1,7 @@
 import { serializeError } from '@famir/common'
-import { BaseWorker, Config, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
+import { BaseWorker, Config, Logger, Validator, ValidatorAssertSchema, ExecutorDispatcher } from '@famir/domain'
 import { Job, MetricsTime, Processor, Worker } from 'bullmq'
 import { BullExecutorConnection } from '../../bull-executor-connector.js'
-import { BullExecutorDispatcher } from '../../bull-executor-dispatcher.js'
 import { ExecutorConfig, ExecutorWorkerOptions } from '../../executor.js'
 import { buildWorkerOptions, filterOptionsSecrets } from '../../executor.utils.js'
 
@@ -16,7 +15,7 @@ export abstract class BullBaseWorker implements BaseWorker {
     config: Config<ExecutorConfig>,
     protected readonly logger: Logger,
     protected readonly connection: BullExecutorConnection,
-    protected readonly dispatcher: BullExecutorDispatcher,
+    protected readonly dispatcher: ExecutorDispatcher,
     protected readonly queueName: string
   ) {
     this.assertSchema = validator.assertSchema

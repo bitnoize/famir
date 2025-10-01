@@ -1,9 +1,4 @@
-import {
-  Logger,
-  ExecutorError,
-  Validator,
-  ValidatorAssertSchema
-} from '@famir/domain'
+import { ExecutorError, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
 
 export abstract class BaseController {
   protected readonly assertSchema: ValidatorAssertSchema

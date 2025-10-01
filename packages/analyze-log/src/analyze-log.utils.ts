@@ -1,6 +1,10 @@
-import { ValidatorSchemas, AnalyzeLogJobData } from '@famir/domain'
+import {
+  AnalyzeLogJobData,
+  ExecutorError,
+  ValidatorAssertSchema,
+  ValidatorSchemas
+} from '@famir/domain'
 import { analyzeLogJobDataSchema } from './analyze-log.schemas.js'
-import { ValidatorAssertSchema, ExecutorError } from '@famir/validator'
 
 export const internalSchemas: ValidatorSchemas = {
   'analyze-log-job-data': analyzeLogJobDataSchema

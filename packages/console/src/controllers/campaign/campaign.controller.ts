@@ -27,11 +27,11 @@ export class CampaignController extends BaseController {
   ) {
     super(validator, logger, 'campaign')
 
-    context.setHandler('createCampaign', `Create campaign`, this.createHandler)
-    context.setHandler('readCampaign', `Read campaign`, this.readHandler)
-    context.setHandler('updateCampaign', `Update campaign`, this.updateHandler)
-    context.setHandler('deleteCampaign', `Delete campaign`, this.deleteHandler)
-    context.setHandler('listCampaigns', `List campaigns`, this.listHandler)
+    context.setHandler('createCampaign', this.createHandler)
+    context.setHandler('readCampaign', this.readHandler)
+    context.setHandler('updateCampaign', this.updateHandler)
+    context.setHandler('deleteCampaign', this.deleteHandler)
+    context.setHandler('listCampaigns', this.listHandler)
   }
 
   private readonly createHandler = async (data: unknown): Promise<CampaignModel> => {
@@ -74,7 +74,7 @@ export class CampaignController extends BaseController {
     }
   }
 
-  private readonly listHandler = async (data: unknown): Promise<CampaignModel[]> => {
+  private readonly listHandler = async (): Promise<CampaignModel[]> => {
     try {
       return await this.listCampaignsUseCase.execute()
     } catch (error) {

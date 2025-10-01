@@ -1,14 +1,14 @@
-import { Logger, ExecutorDispatcher, Validator, AnalyzeLogJobResult } from '@famir/domain'
-import { BaseController } from '../base/index.js'
-import { DummyExampleUseCase } from '../../use-cases/index.js'
+import { AnalyzeLogJobResult, ExecutorDispatcher, Logger, Validator } from '@famir/domain'
 import { validateAnalyzeLogJobData } from '../../analyze-log.utils.js'
+import { DummyExampleUseCase } from '../../use-cases/index.js'
+import { BaseController } from '../base/index.js'
 
 export class DummyController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
     dispatcher: ExecutorDispatcher,
-    dummyExampleUseCase: DummyExampleUseCase,
+    protected readonly dummyExampleUseCase: DummyExampleUseCase
   ) {
     super(validator, logger, 'analyze')
 
@@ -19,7 +19,7 @@ export class DummyController extends BaseController {
     try {
       validateAnalyzeLogJobData(this.assertSchema, data)
 
-      await this.dummyExampleUseCase(data)
+      return await this.dummyExampleUseCase.execute(data)
     } catch (error) {
       this.exceptionFilter(error, 'example', data)
     }

@@ -1,10 +1,5 @@
 import { DIContainer } from '@famir/common'
-import {
-  Logger,
-  ReplServerContext,
-  Validator,
-  CampaignRepository
-} from '@famir/domain'
+import { CampaignRepository, Logger, ReplServerContext, Validator } from '@famir/domain'
 import { CampaignController } from '../controllers/index.js'
 import {
   CreateCampaignUseCase,
@@ -17,34 +12,28 @@ import {
 export const composeCampaign = (container: DIContainer) => {
   container.registerSingleton<CreateCampaignUseCase>(
     'CreateCampaignUseCase',
-    (c) =>
-      new CreateCampaignUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
+    (c) => new CreateCampaignUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
   )
 
   container.registerSingleton<ReadCampaignUseCase>(
     'ReadCampaignUseCase',
-    (c) =>
-      new ReadCampaignUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
+    (c) => new ReadCampaignUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
   )
 
   container.registerSingleton<UpdateCampaignUseCase>(
     'UpdateCampaignUseCase',
-    (c) =>
-      new UpdateCampaignUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
+    (c) => new UpdateCampaignUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
   )
 
   container.registerSingleton<DeleteCampaignUseCase>(
     'DeleteCampaignUseCase',
-    (c) =>
-      new DeleteCampaignUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
+    (c) => new DeleteCampaignUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
   )
 
   container.registerSingleton<ListCampaignsUseCase>(
     'ListCampaignsUseCase',
-    (c) =>
-      new ListCampaignsUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
+    (c) => new ListCampaignsUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
   )
-
 
   container.registerSingleton<CampaignController>(
     'CampaignController',
@@ -57,7 +46,7 @@ export const composeCampaign = (container: DIContainer) => {
         c.resolve<ReadCampaignUseCase>('ReadCampaignUseCase'),
         c.resolve<UpdateCampaignUseCase>('UpdateCampaignUseCase'),
         c.resolve<DeleteCampaignUseCase>('DeleteCampaignUseCase'),
-        c.resolve<ListCampaignsUseCase>('ListCampaignsUseCase'),
+        c.resolve<ListCampaignsUseCase>('ListCampaignsUseCase')
       )
   )
 

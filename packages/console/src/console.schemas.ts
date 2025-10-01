@@ -1,6 +1,5 @@
 import { JSONSchemaType } from '@famir/common'
 import { configDatabaseConnectionUrlSchema, configDatabasePrefixSchema } from '@famir/database'
-import { ValidatorSchemas } from '@famir/domain'
 import {
   configLoggerAppNameSchema,
   configLoggerLogLevelSchema,
@@ -15,24 +14,14 @@ import {
   configReplServerSocketTimeoutSchema,
   configReplServerUseColorsSchema
 } from '@famir/repl-server'
-import { configWorkflowConnectionUrlSchema, configWorkflowPrefixSchema } from '@famir/workflow'
-/*
 import {
-  createCampaignDtoSchema,
-  createProxyDtoSchema,
-  createTargetDtoSchema,
-  deleteProxyDtoSchema,
-  deleteTargetDtoSchema,
-  disableProxyDtoSchema,
-  disableTargetDtoSchema,
-  enableProxyDtoSchema,
-  enableTargetDtoSchema,
-  readProxyDtoSchema,
-  readTargetDtoSchema,
-  updateCampaignDtoSchema,
-  updateTargetDtoSchema
-} from './controllers/index.js'
-*/
+  configStorageAccessKeySchema,
+  configStorageEndPointSchema,
+  configStoragePortSchema,
+  configStorageSecretKeySchema,
+  configStorageUseSSLSchema
+} from '@famir/storage'
+import { configWorkflowConnectionUrlSchema, configWorkflowPrefixSchema } from '@famir/workflow'
 import { ConsoleConfig } from './console.js'
 
 export const configConsoleSchema: JSONSchemaType<ConsoleConfig> = {
@@ -44,6 +33,11 @@ export const configConsoleSchema: JSONSchemaType<ConsoleConfig> = {
     'LOGGER_TRANSPORT_OPTIONS',
     'DATABASE_CONNECTION_URL',
     'DATABASE_PREFIX',
+    'STORAGE_END_POINT',
+    'STORAGE_PORT',
+    'STORAGE_USE_SSL',
+    'STORAGE_ACCESS_KEY',
+    'STORAGE_SECRET_KEY',
     'WORKFLOW_CONNECTION_URL',
     'WORKFLOW_PREFIX',
     'REPL_SERVER_ADDRESS',
@@ -63,6 +57,11 @@ export const configConsoleSchema: JSONSchemaType<ConsoleConfig> = {
     LOGGER_TRANSPORT_OPTIONS: configLoggerTransportOptionsSchema,
     DATABASE_CONNECTION_URL: configDatabaseConnectionUrlSchema,
     DATABASE_PREFIX: configDatabasePrefixSchema,
+    STORAGE_END_POINT: configStorageEndPointSchema,
+    STORAGE_PORT: configStoragePortSchema,
+    STORAGE_USE_SSL: configStorageUseSSLSchema,
+    STORAGE_ACCESS_KEY: configStorageAccessKeySchema,
+    STORAGE_SECRET_KEY: configStorageSecretKeySchema,
     WORKFLOW_CONNECTION_URL: configWorkflowConnectionUrlSchema,
     WORKFLOW_PREFIX: configWorkflowPrefixSchema,
     REPL_SERVER_ADDRESS: {
@@ -80,19 +79,3 @@ export const configConsoleSchema: JSONSchemaType<ConsoleConfig> = {
   },
   additionalProperties: false
 } as const
-
-export const consoleSchemas: ValidatorSchemas = {
-  //  'create-campaign-dto': createCampaignDtoSchema,
-  //  'update-campaign-dto': updateCampaignDtoSchema,
-  //  'create-proxy-dto': createProxyDtoSchema,
-  //  'read-proxy-dto': readProxyDtoSchema,
-  //  'enable-proxy-dto': enableProxyDtoSchema,
-  //  'disable-proxy-dto': disableProxyDtoSchema,
-  //  'delete-proxy-dto': deleteProxyDtoSchema,
-  //  'create-target-dto': createTargetDtoSchema,
-  //  'read-target-dto': readTargetDtoSchema,
-  //  'update-target-dto': updateTargetDtoSchema,
-  //  'enable-target-dto': enableTargetDtoSchema,
-  //  'disable-target-dto': disableTargetDtoSchema,
-  //  'delete-target-dto': deleteTargetDtoSchema
-}

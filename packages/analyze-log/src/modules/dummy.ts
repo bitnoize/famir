@@ -1,21 +1,24 @@
 import { DIContainer } from '@famir/common'
-import {
-  Logger,
-  ExecutorRouter,
-  Validator,
-} from '@famir/domain'
-import { SaveLogController } from '../controllers/index.js'
+import { CampaignRepository, ExecutorDispatcher, Logger, Validator } from '@famir/domain'
+import { DummyController } from '../controllers/index.js'
+import { DummyExampleUseCase } from '../use-cases/index.js'
 
-export const composeLogSave = (container: DIContainer) => {
-  container.registerSingleton<SaveLogController>(
-    'SaveLogController',
+export const composeDummy = (container: DIContainer) => {
+  container.registerSingleton<DummyExampleUseCase>(
+    'DummyExampleUseCase',
+    (c) => new DummyExampleUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
+  )
+
+  container.registerSingleton<DummyController>(
+    'DummyController',
     (c) =>
-      new SaveLogController(
+      new DummyController(
         c.resolve<Validator>('Validator'),
         c.resolve<Logger>('Logger'),
-        c.resolve<ExecutorRouter>('ExecutorRouter')
+        c.resolve<ExecutorDispatcher>('ExecutorDispatcher'),
+        c.resolve<DummyExampleUseCase>('DummyExampleUseCase')
       )
   )
 
-  container.resolve<SaveLogController>('SaveLogController')
+  container.resolve<DummyController>('DummyController')
 }

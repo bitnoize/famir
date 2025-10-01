@@ -1,13 +1,13 @@
 import { SHUTDOWN_SIGNALS } from '@famir/common'
 import {
+  AnalyzeLogQueue,
   DatabaseConnector,
   Logger,
   ReplServer,
-  ScanMessageQueue,
   Validator,
   WorkflowConnector
 } from '@famir/domain'
-import { consoleSchemas } from './console.schemas.js'
+import { internalSchemas } from './console.utils.js'
 
 export class ConsoleApp {
   constructor(
@@ -15,7 +15,7 @@ export class ConsoleApp {
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
-    protected readonly scanMessageQueue: ScanMessageQueue,
+    protected readonly analyzeLogQueue: AnalyzeLogQueue,
     protected readonly replServer: ReplServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
@@ -25,7 +25,7 @@ export class ConsoleApp {
       })
     })
 
-    validator.addSchemas(consoleSchemas)
+    validator.addSchemas(internalSchemas)
   }
 
   async start(): Promise<void> {
@@ -44,7 +44,7 @@ export class ConsoleApp {
     try {
       await this.replServer.close()
 
-      await this.scanMessageQueue.close()
+      await this.analyzeLogQueue.close()
 
       await this.workflowConnector.close()
 

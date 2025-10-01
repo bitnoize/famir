@@ -1,5 +1,13 @@
-import { AnalyzeLogJobData } from '@famir/domain'
+import { JSONSchemaType } from '@famir/common'
 import { configDatabaseConnectionUrlSchema, configDatabasePrefixSchema } from '@famir/database'
+import { AnalyzeLogJobData } from '@famir/domain'
+import {
+  configExecutorConcurrencySchema,
+  configExecutorConnectionUrlSchema,
+  configExecutorLimiterDurationSchema,
+  configExecutorLimiterMaxSchema,
+  configExecutorPrefixSchema
+} from '@famir/executor'
 import {
   configLoggerAppNameSchema,
   configLoggerLogLevelSchema,
@@ -7,22 +15,14 @@ import {
   configLoggerTransportTargetSchema
 } from '@famir/logger'
 import {
-  configExecutorPrefixSchema,
-  configExecutorConcurrencySchema,
-  configExecutorConnectionUrlSchema,
-  configExecutorLimiterDurationSchema,
-  configExecutorLimiterMaxSchema
-} from '@famir/executor'
-import {
+  configStorageAccessKeySchema,
   configStorageEndPointSchema,
   configStoragePortSchema,
-  configStorageUseSSLSchema,
-  configStorageAccessKeySchema,
-  configStorageSecretKeySchema
+  configStorageSecretKeySchema,
+  configStorageUseSSLSchema
 } from '@famir/storage'
+import { customIdentSchema, randomIdentSchema } from '@famir/validator'
 import { configWorkflowConnectionUrlSchema, configWorkflowPrefixSchema } from '@famir/workflow'
-import { randomIdentSchema, customIdentSchema } from '@famir/validator'
-import { JSONSchemaType } from '@famir/common'
 import { AnalyzeLogConfig } from './analyze-log.js'
 
 export const configAnalyzeLogSchema: JSONSchemaType<AnalyzeLogConfig> = {
@@ -87,7 +87,7 @@ export const analyzeLogJobDataSchema: JSONSchemaType<AnalyzeLogJobData> = {
   required: ['campaignId', 'messageId'],
   properties: {
     campaignId: customIdentSchema,
-    messageId: randomIdentSchema,
+    messageId: randomIdentSchema
   },
   additionalProperties: false
 } as const
