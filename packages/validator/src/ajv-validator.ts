@@ -1,3 +1,4 @@
+import { DIContainer } from '@famir/common'
 import {
   Validator,
   ValidatorAssertSchema,
@@ -8,6 +9,10 @@ import {
 import { Ajv, ValidateFunction } from 'ajv'
 
 export class AjvValidator implements Validator {
+  static inject(container: DIContainer) {
+    container.registerSingleton<Validator>('Validator', () => new AjvValidator())
+  }
+
   private readonly _ajv: Ajv
 
   constructor() {

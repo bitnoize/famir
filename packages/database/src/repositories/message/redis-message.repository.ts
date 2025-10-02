@@ -1,6 +1,8 @@
+import { DIContainer } from '@famir/common'
 import {
   Config,
   CreateMessageData,
+  DatabaseConnector,
   DatabaseError,
   Logger,
   MessageModel,
@@ -15,6 +17,19 @@ import { RedisBaseRepository } from '../base/index.js'
 import { assertModel, buildModel } from './message.utils.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
+  static inject<C extends DatabaseConfig>(container: DIContainer) {
+    container.registerSingleton<MessageRepository>(
+      'MessageRepository',
+      (c) =>
+        new RedisMessageRepository(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+        )
+    )
+  }
+
   constructor(
     validator: Validator,
     config: Config<DatabaseConfig>,

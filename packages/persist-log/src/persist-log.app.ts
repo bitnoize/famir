@@ -1,6 +1,5 @@
-import { SHUTDOWN_SIGNALS } from '@famir/common'
+import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
-  AnalyzeLogQueue,
   DatabaseConnector,
   ExecutorConnector,
   Logger,
@@ -11,12 +10,28 @@ import {
 import { internalSchemas } from './persist-log.utils.js'
 
 export class PersistLogApp {
+  static inject(container: DIContainer): PersistLogApp {
+    container.registerSingleton<PersistLogApp>(
+      'PersistLogApp',
+      (c) =>
+        new PersistLogApp(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector'),
+          c.resolve<WorkflowConnector>('WorkflowConnector'),
+          c.resolve<ExecutorConnector>('ExecutorConnector'),
+          c.resolve<PersistLogWorker>('PersistLogWorker')
+        )
+    )
+
+    return container.resolve<PersistLogApp>('PersistLogApp')
+  }
+
   constructor(
     validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
-    protected readonly analyzeLogQueue: AnalyzeLogQueue,
     protected readonly executorConnector: ExecutorConnector,
     protected readonly persistLogWorker: PersistLogWorker
   ) {
@@ -47,7 +62,6 @@ export class PersistLogApp {
       await this.persistLogWorker.close()
       await this.executorConnector.close()
 
-      await this.analyzeLogQueue.close()
       await this.workflowConnector.close()
 
       await this.databaseConnector.close()

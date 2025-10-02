@@ -1,8 +1,9 @@
-import { SHUTDOWN_SIGNALS } from '@famir/common'
+import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
   AnalyzeLogQueue,
   DatabaseConnector,
   Logger,
+  PersistLogQueue,
   ReplServer,
   Validator,
   WorkflowConnector
@@ -10,12 +11,31 @@ import {
 import { internalSchemas } from './console.utils.js'
 
 export class ConsoleApp {
+  static inject(container: DIContainer): ConsoleApp {
+    container.registerSingleton<ConsoleApp>(
+      'ConsoleApp',
+      (c) =>
+        new ConsoleApp(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector'),
+          c.resolve<WorkflowConnector>('WorkflowConnector'),
+          c.resolve<AnalyzeLogQueue>('AnalyzeLogQueue'),
+          c.resolve<PersistLogQueue>('PersistLogQueue'),
+          c.resolve<ReplServer>('ReplServer')
+        )
+    )
+
+    return container.resolve<ConsoleApp>('ConsoleApp')
+  }
+
   constructor(
     validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
     protected readonly analyzeLogQueue: AnalyzeLogQueue,
+    protected readonly persistLogQueue: PersistLogQueue,
     protected readonly replServer: ReplServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
@@ -45,6 +65,7 @@ export class ConsoleApp {
       await this.replServer.close()
 
       await this.analyzeLogQueue.close()
+      await this.persistLogQueue.close()
 
       await this.workflowConnector.close()
 

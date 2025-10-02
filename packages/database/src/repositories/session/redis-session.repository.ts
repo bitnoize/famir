@@ -1,7 +1,9 @@
+import { DIContainer } from '@famir/common'
 import {
   AuthSessionData,
   Config,
   CreateSessionData,
+  DatabaseConnector,
   DatabaseError,
   Logger,
   ReadSessionData,
@@ -17,6 +19,19 @@ import { RedisBaseRepository } from '../base/index.js'
 import { assertModel, buildModel } from './session.utils.js'
 
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {
+  static inject<C extends DatabaseConfig>(container: DIContainer) {
+    container.registerSingleton<SessionRepository>(
+      'SessionRepository',
+      (c) =>
+        new RedisSessionRepository(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+        )
+    )
+  }
+
   constructor(
     validator: Validator,
     config: Config<DatabaseConfig>,

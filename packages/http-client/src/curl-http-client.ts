@@ -1,3 +1,4 @@
+import { DIContainer } from '@famir/common'
 import {
   Config,
   HttpClient,
@@ -11,6 +12,18 @@ import { HttpClientConfig, HttpClientOptions } from './http-client.js'
 import { buildOptions, filterOptionsSecrets, internalSchemas } from './http-client.utils.js'
 
 export class CurlHttpClient implements HttpClient {
+  static inject<C extends HttpClientConfig>(container: DIContainer) {
+    container.registerSingleton<HttpClient>(
+      'HttpClient',
+      (c) =>
+        new CurlHttpClient(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger')
+        )
+    )
+  }
+
   protected readonly options: HttpClientOptions
 
   constructor(

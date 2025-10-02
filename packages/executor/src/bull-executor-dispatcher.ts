@@ -1,7 +1,15 @@
+import { DIContainer } from '@famir/common'
 import { ExecutorDispatcher, ExecutorDispatchHandler, Logger } from '@famir/domain'
 import { Job } from 'bullmq'
 
 export class BullExecutorDispatcher implements ExecutorDispatcher {
+  static inject(container: DIContainer) {
+    container.registerSingleton<ExecutorDispatcher>(
+      'ExecutorDispatcher',
+      (c) => new BullExecutorDispatcher(c.resolve<Logger>('Logger'))
+    )
+  }
+
   private readonly _map = new Map<string, ExecutorDispatchHandler>()
 
   constructor(protected readonly logger: Logger) {

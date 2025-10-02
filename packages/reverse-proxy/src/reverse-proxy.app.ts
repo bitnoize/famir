@@ -1,4 +1,4 @@
-import { SHUTDOWN_SIGNALS } from '@famir/common'
+import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
   DatabaseConnector,
   HttpServer,
@@ -10,6 +10,23 @@ import {
 import { internalSchemas } from './reverse-proxy.utils.js'
 
 export class ReverseProxyApp {
+  static inject(container: DIContainer): ReverseProxyApp {
+    container.registerSingleton<ReverseProxyApp>(
+      'ReverseProxyApp',
+      (c) =>
+        new ReverseProxyApp(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector'),
+          c.resolve<WorkflowConnector>('WorkflowConnector'),
+          c.resolve<PersistLogQueue>('PersistLogQueue'),
+          c.resolve<HttpServer>('HttpServer')
+        )
+    )
+
+    return container.resolve<ReverseProxyApp>('ReverseProxyApp')
+  }
+
   constructor(
     validator: Validator,
     protected readonly logger: Logger,

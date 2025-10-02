@@ -1,6 +1,8 @@
+import { DIContainer } from '@famir/common'
 import {
   Config,
   CreateLureData,
+  DatabaseConnector,
   DatabaseError,
   DeleteLureData,
   DisabledLureModel,
@@ -28,6 +30,19 @@ import {
 } from './lure.utils.js'
 
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {
+  static inject<C extends DatabaseConfig>(container: DIContainer) {
+    container.registerSingleton<LureRepository>(
+      'LureRepository',
+      (c) =>
+        new RedisLureRepository(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+        )
+    )
+  }
+
   constructor(
     validator: Validator,
     config: Config<DatabaseConfig>,

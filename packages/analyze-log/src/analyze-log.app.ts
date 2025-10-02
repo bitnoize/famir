@@ -1,4 +1,4 @@
-import { SHUTDOWN_SIGNALS } from '@famir/common'
+import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
   AnalyzeLogWorker,
   DatabaseConnector,
@@ -10,6 +10,23 @@ import {
 import { internalSchemas } from './analyze-log.utils.js'
 
 export class AnalyzeLogApp {
+  static inject(container: DIContainer): AnalyzeLogApp {
+    container.registerSingleton<AnalyzeLogApp>(
+      'AnalyzeLogApp',
+      (c) =>
+        new AnalyzeLogApp(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector'),
+          c.resolve<WorkflowConnector>('WorkflowConnector'),
+          c.resolve<ExecutorConnector>('ExecutorConnector'),
+          c.resolve<AnalyzeLogWorker>('AnalyzeLogWorker')
+        )
+    )
+
+    return container.resolve<AnalyzeLogApp>('AnalyzeLogApp')
+  }
+
   constructor(
     validator: Validator,
     protected readonly logger: Logger,

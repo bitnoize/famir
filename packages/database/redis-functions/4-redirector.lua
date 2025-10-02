@@ -190,7 +190,7 @@ local function update_redirector(keys, args)
     return redis.status_reply('NOT_FOUND Redirector not found')
   end
 
-  if not (#model > 0) then
+  if next(model) == nil then
     return redis.status_reply('OK Nothing to update')
   end
 

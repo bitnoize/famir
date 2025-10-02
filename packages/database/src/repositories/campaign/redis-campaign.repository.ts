@@ -1,9 +1,10 @@
-import { randomSecret } from '@famir/common'
+import { DIContainer, randomSecret } from '@famir/common'
 import {
   CampaignModel,
   CampaignRepository,
   Config,
   CreateCampaignData,
+  DatabaseConnector,
   DatabaseError,
   DeleteCampaignData,
   Logger,
@@ -18,6 +19,19 @@ import { RedisBaseRepository } from '../base/index.js'
 import { assertModel, buildCollection, buildModel, guardModel } from './campaign.utils.js'
 
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {
+  static inject<C extends DatabaseConfig>(container: DIContainer) {
+    container.registerSingleton<CampaignRepository>(
+      'CampaignRepository',
+      (c) =>
+        new RedisCampaignRepository(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+        )
+    )
+  }
+
   constructor(
     validator: Validator,
     config: Config<DatabaseConfig>,

@@ -1,6 +1,8 @@
+import { DIContainer } from '@famir/common'
 import {
   Config,
   CreateProxyData,
+  DatabaseConnector,
   DatabaseError,
   DeleteProxyData,
   DisabledProxyModel,
@@ -27,6 +29,19 @@ import {
 } from './proxy.utils.js'
 
 export class RedisProxyRepository extends RedisBaseRepository implements ProxyRepository {
+  static inject<C extends DatabaseConfig>(container: DIContainer) {
+    container.registerSingleton<ProxyRepository>(
+      'ProxyRepository',
+      (c) =>
+        new RedisProxyRepository(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+        )
+    )
+  }
+
   constructor(
     validator: Validator,
     config: Config<DatabaseConfig>,

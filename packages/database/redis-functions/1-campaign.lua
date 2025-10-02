@@ -244,7 +244,7 @@ local function update_campaign(keys, args)
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
-  if #model == 0 then
+  if next(model) == nil then
     return redis.status_reply('OK Nothing to update')
   end
 

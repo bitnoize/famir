@@ -1,4 +1,4 @@
-import { serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import { Config, Logger, Validator, WorkflowConnector } from '@famir/domain'
 import { Redis } from 'ioredis'
 import { WorkflowConfig, WorkflowConnectorOptions } from './workflow.js'
@@ -7,6 +7,18 @@ import { buildConnectorOptions, filterOptionsSecrets, internalSchemas } from './
 export type BullWorkflowConnection = Redis
 
 export class BullWorkflowConnector implements WorkflowConnector {
+  static inject<C extends WorkflowConfig>(container: DIContainer) {
+    container.registerSingleton<WorkflowConnector>(
+      'WorkflowConnector',
+      (c) =>
+        new BullWorkflowConnector(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger')
+        )
+    )
+  }
+
   protected readonly options: WorkflowConnectorOptions
   private readonly _redis: BullWorkflowConnection
 

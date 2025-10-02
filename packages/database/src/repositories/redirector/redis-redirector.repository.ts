@@ -1,6 +1,8 @@
+import { DIContainer } from '@famir/common'
 import {
   Config,
   CreateRedirectorData,
+  DatabaseConnector,
   DatabaseError,
   DeleteRedirectorData,
   ListRedirectorsData,
@@ -18,6 +20,19 @@ import { RedisBaseRepository } from '../base/index.js'
 import { assertModel, buildCollection, buildModel, guardModel } from './redirector.utils.js'
 
 export class RedisRedirectorRepository extends RedisBaseRepository implements RedirectorRepository {
+  static inject<C extends DatabaseConfig>(container: DIContainer) {
+    container.registerSingleton<RedirectorRepository>(
+      'RedirectorRepository',
+      (c) =>
+        new RedisRedirectorRepository(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+        )
+    )
+  }
+
   constructor(
     validator: Validator,
     config: Config<DatabaseConfig>,

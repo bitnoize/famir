@@ -1,4 +1,4 @@
-import { serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   HttpServer,
@@ -15,6 +15,19 @@ import { HttpServerConfig, HttpServerOptions } from './http-server.js'
 import { buildOptions, filterOptionsSecrets, internalSchemas } from './http-server.utils.js'
 
 export class ExpressHttpServer implements HttpServer {
+  static inject<C extends HttpServerConfig>(container: DIContainer) {
+    container.registerSingleton<HttpServer>(
+      'HttpServer',
+      (c) =>
+        new ExpressHttpServer(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<HttpServerRouter>('HttpServerRouter')
+        )
+    )
+  }
+
   protected readonly options: HttpServerOptions
   private readonly _express: express.Express
   private readonly _server: http.Server

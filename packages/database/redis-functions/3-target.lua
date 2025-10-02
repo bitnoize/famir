@@ -335,7 +335,7 @@ local function update_target(keys, args)
     return redis.status_reply('NOT_FOUND Target not found')
   end
 
-  if not (#model > 0) then
+  if next(model) == nil then
     return redis.status_reply('OK Nothing to update')
   end
 

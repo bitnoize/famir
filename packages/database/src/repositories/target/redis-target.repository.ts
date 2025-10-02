@@ -1,6 +1,8 @@
+import { DIContainer } from '@famir/common'
 import {
   Config,
   CreateTargetData,
+  DatabaseConnector,
   DatabaseError,
   DeleteTargetData,
   DisabledTargetModel,
@@ -28,6 +30,19 @@ import {
 } from './target.utils.js'
 
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
+  static inject<C extends DatabaseConfig>(container: DIContainer) {
+    container.registerSingleton<TargetRepository>(
+      'TargetRepository',
+      (c) =>
+        new RedisTargetRepository(
+          c.resolve<Validator>('Validator'),
+          c.resolve<Config<C>>('Config'),
+          c.resolve<Logger>('Logger'),
+          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+        )
+    )
+  }
+
   constructor(
     validator: Validator,
     config: Config<DatabaseConfig>,

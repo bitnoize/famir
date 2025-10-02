@@ -1,7 +1,15 @@
+import { DIContainer } from '@famir/common'
 import { Logger, ReplServerContext, ReplServerContextHandler } from '@famir/domain'
 import repl from 'node:repl'
 
 export class NetReplServerContext implements ReplServerContext {
+  static inject(container: DIContainer) {
+    container.registerSingleton<ReplServerContext>(
+      'ReplServerContext',
+      (c) => new NetReplServerContext(c.resolve<Logger>('Logger'))
+    )
+  }
+
   private readonly _map = new Map<string, ReplServerContextHandler>()
 
   constructor(protected readonly logger: Logger) {
