@@ -31,17 +31,16 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
         next: express.NextFunction
       ): Promise<void> => {
         try {
-          const locals = req.locals
-          if (locals === undefined) {
+          if (req.locals === undefined) {
             throw new Error(`Request locals is not defined`)
           }
 
-          const body: unknown = req.body
-          if (!(body === undefined || Buffer.isBuffer(body))) {
+          if (!(req.body === undefined || Buffer.isBuffer(req.body))) {
             throw new Error(`Request body is not a buffer`)
           }
 
-          const response = await handler(locals, {
+          const response = await handler({
+            locals: req.locals,
             ip: req.ip,
             host: req.host,
             method: req.method.toUpperCase(),
@@ -51,7 +50,7 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
             query: req.query,
             headers: req.headers,
             cookies: req.cookies,
-            body
+            body: req.body
           })
 
           if (response == null) {

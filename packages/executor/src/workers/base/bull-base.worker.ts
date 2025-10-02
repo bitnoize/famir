@@ -1,5 +1,12 @@
 import { serializeError } from '@famir/common'
-import { BaseWorker, Config, Logger, Validator, ValidatorAssertSchema, ExecutorDispatcher } from '@famir/domain'
+import {
+  BaseWorker,
+  Config,
+  ExecutorDispatcher,
+  Logger,
+  Validator,
+  ValidatorAssertSchema
+} from '@famir/domain'
 import { Job, MetricsTime, Processor, Worker } from 'bullmq'
 import { BullExecutorConnection } from '../../bull-executor-connector.js'
 import { ExecutorConfig, ExecutorWorkerOptions } from '../../executor.js'

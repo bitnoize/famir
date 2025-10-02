@@ -1,4 +1,4 @@
-import { HttpServerError, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
+import { ExecutorError, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
 
 export abstract class BaseController {
   protected readonly assertSchema: ValidatorAssertSchema
@@ -12,32 +12,31 @@ export abstract class BaseController {
 
     this.logger.debug(
       {
-        module: 'reverse-proxy',
+        module: 'persist-log',
         controller: this.controllerName
       },
       `Controller initialized`
     )
   }
 
-  protected exceptionFilter(error: unknown, handler: string, data: object | null): never {
-    if (error instanceof HttpServerError) {
-      error.context['module'] = 'reverse-proxy'
+  protected exceptionFilter(error: unknown, handler: string, data: unknown): never {
+    if (error instanceof ExecutorError) {
+      error.context['module'] = 'persist-log'
       error.context['controller'] = this.controllerName
       error.context['handler'] = handler
       error.context['data'] = data
 
       throw error
     } else {
-      throw new HttpServerError(`Controller internal error`, {
+      throw new ExecutorError(`Controller internal error`, {
         cause: error,
         context: {
-          module: 'reverse-proxy',
+          module: 'persist-log',
           controller: this.controllerName,
           handler,
           data
         },
-        code: 'UNKNOWN',
-        status: 500
+        code: 'UNKNOWN'
       })
     }
   }

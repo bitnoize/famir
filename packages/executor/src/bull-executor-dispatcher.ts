@@ -7,7 +7,7 @@ export class BullExecutorDispatcher implements ExecutorDispatcher {
   constructor(protected readonly logger: Logger) {
     this.logger.debug(
       {
-        module: 'executor',
+        module: 'executor'
       },
       `ExecutorDispatcher initialized`
     )

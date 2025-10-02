@@ -19,8 +19,8 @@ process.on('uncaughtException', (error: unknown) => {
   process.exit(1)
 })
 
-export { serializeError } from 'serialize-error'
 export { JSONSchemaType } from 'ajv'
+export { serializeError } from 'serialize-error'
 
 // https://oida.dev/typescript-array-includes/
 export const arrayIncludes = <T extends U, U>(coll: ReadonlyArray<T>, el: U): el is T => {

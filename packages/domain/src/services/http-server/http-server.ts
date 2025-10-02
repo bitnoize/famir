@@ -1,9 +1,16 @@
+import { CampaignModel, MessageModel, SessionModel, TargetModel } from '../../models/index.js'
+
 export interface HttpServer {
   listen(): Promise<void>
   close(): Promise<void>
 }
 
-export type HttpServerLocals = Record<string, unknown>
+export interface HttpServerRequestLocals {
+  campaign?: CampaignModel | undefined
+  target?: TargetModel | undefined
+  message?: MessageModel | undefined
+  session?: SessionModel | undefined
+}
 
 export type HttpServerRouteMethod =
   | 'all'
@@ -16,6 +23,7 @@ export type HttpServerRouteMethod =
   | 'head'
 
 export interface HttpServerRequest {
+  locals: HttpServerRequestLocals
   ip: string | undefined
   host: string
   method: string
@@ -49,7 +57,6 @@ export interface HttpServerResponse {
 }
 
 export type HttpServerRouteHandler = (
-  locals: HttpServerLocals,
   request: HttpServerRequest
 ) => Promise<HttpServerResponse | null | undefined>
 

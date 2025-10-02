@@ -1,6 +1,12 @@
 import { DomainError, DomainErrorOptions } from '../../domain.error.js'
 
-export type HttpServerErrorCode = 'NOT_FOUND' | 'CONFLICT' | 'FORBIDDEN' | 'UNKNOWN'
+export type HttpServerErrorCode =
+  | 'BAD_REQUEST'
+  | 'NOT_FOUND'
+  | 'CONFLICT'
+  | 'FORBIDDEN'
+  | 'SERVICE_UNAVAILABLE'
+  | 'UNKNOWN'
 
 export type HttpServerErrorOptions = DomainErrorOptions & {
   code: HttpServerErrorCode

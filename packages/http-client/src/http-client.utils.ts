@@ -1,6 +1,6 @@
+import { filterSecrets } from '@famir/common'
 import { ValidatorSchemas } from '@famir/domain'
 import { HttpClientConfig, HttpClientOptions } from './http-client.js'
-import { filterSecrets } from '@famir/common'
 
 export const internalSchemas: ValidatorSchemas = {}
 
