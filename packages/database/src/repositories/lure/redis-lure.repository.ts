@@ -14,7 +14,12 @@ import {
   ReadLureData,
   ReadLurePathData,
   SwitchLureData,
-  Validator
+  Validator,
+  VALIDATOR,
+  CONFIG,
+  LOGGER,
+  DATABASE_CONNECTOR,
+  LURE_REPOSITORY
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
@@ -30,15 +35,15 @@ import {
 } from './lure.utils.js'
 
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {
-  static inject<C extends DatabaseConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<LureRepository>(
-      'LureRepository',
+      LURE_REPOSITORY,
       (c) =>
         new RedisLureRepository(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<DatabaseConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
         )
     )
   }

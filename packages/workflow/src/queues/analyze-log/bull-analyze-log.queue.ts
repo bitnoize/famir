@@ -1,11 +1,16 @@
 import { DIContainer } from '@famir/common'
 import {
   ANALYZE_LOG_QUEUE_NAME,
+  ANALYZE_LOG_QUEUE,
   AnalyzeLogJobData,
   AnalyzeLogQueue,
   Config,
+  CONFIG,
   Logger,
+  LOGGER,
   Validator,
+  VALIDATOR,
+  WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
 import { BullWorkflowConnection } from '../../bull-workflow-connector.js'
@@ -13,15 +18,17 @@ import { WorkflowConfig } from '../../workflow.js'
 import { BullBaseQueue } from '../base/index.js'
 
 export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueue {
-  static inject<C extends WorkflowConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<AnalyzeLogQueue>(
-      'AnalyzeLogQueue',
+      ANALYZE_LOG_QUEUE,
       (c) =>
         new BullAnalyzeLogQueue(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<WorkflowConnector>('WorkflowConnector').connection<BullWorkflowConnection>()
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<WorkflowConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c
+            .resolve<WorkflowConnector>(WORKFLOW_CONNECTOR)
+            .connection<BullWorkflowConnection>()
         )
     )
   }

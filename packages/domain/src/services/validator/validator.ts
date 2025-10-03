@@ -17,3 +17,5 @@ export interface Validator {
   readonly guardSchema: ValidatorGuardSchema
   readonly assertSchema: ValidatorAssertSchema
 }
+
+export const VALIDATOR = Symbol('Validator')

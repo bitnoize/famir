@@ -10,7 +10,12 @@ import {
   Logger,
   ReadCampaignData,
   UpdateCampaignData,
-  Validator
+  Validator,
+  VALIDATOR,
+  CONFIG,
+  LOGGER,
+  DATABASE_CONNECTOR,
+  CAMPAIGN_REPOSITORY
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
@@ -19,15 +24,15 @@ import { RedisBaseRepository } from '../base/index.js'
 import { assertModel, buildCollection, buildModel, guardModel } from './campaign.utils.js'
 
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {
-  static inject<C extends DatabaseConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<CampaignRepository>(
-      'CampaignRepository',
+      CAMPAIGN_REPOSITORY,
       (c) =>
         new RedisCampaignRepository(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<DatabaseConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
         )
     )
   }

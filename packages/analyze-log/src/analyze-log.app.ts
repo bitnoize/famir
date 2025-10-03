@@ -10,7 +10,7 @@ import {
 import { internalSchemas } from './analyze-log.utils.js'
 
 export class AnalyzeLogApp {
-  static inject(container: DIContainer): AnalyzeLogApp {
+  static inject(container: DIContainer) {
     container.registerSingleton<AnalyzeLogApp>(
       'AnalyzeLogApp',
       (c) =>
@@ -23,7 +23,9 @@ export class AnalyzeLogApp {
           c.resolve<AnalyzeLogWorker>('AnalyzeLogWorker')
         )
     )
+  }
 
+  static resolve(container: DIContainer): AnalyzeLogApp {
     return container.resolve<AnalyzeLogApp>('AnalyzeLogApp')
   }
 

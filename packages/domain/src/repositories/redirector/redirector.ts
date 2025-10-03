@@ -33,3 +33,6 @@ export interface RedirectorRepository {
   delete(data: DeleteRedirectorData): Promise<RedirectorModel>
   list(data: ListRedirectorsData): Promise<RedirectorModel[] | null>
 }
+
+export const REDIRECTOR_REPOSITORY = Symbol('RedirectorRepository')
+

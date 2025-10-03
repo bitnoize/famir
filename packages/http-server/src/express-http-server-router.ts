@@ -1,17 +1,19 @@
 import { DIContainer } from '@famir/common'
 import {
+  HTTP_SERVER_ROUTER,
   HttpServerRouteHandler,
   HttpServerRouteMethod,
   HttpServerRouter,
-  Logger
+  Logger,
+  LOGGER
 } from '@famir/domain'
 import express from 'express'
 
 export class ExpressHttpServerRouter implements HttpServerRouter {
   static inject(container: DIContainer) {
     container.registerSingleton<HttpServerRouter>(
-      'HttpServerRouter',
-      (c) => new ExpressHttpServerRouter(c.resolve<Logger>('Logger'))
+      HTTP_SERVER_ROUTER,
+      (c) => new ExpressHttpServerRouter(c.resolve<Logger>(LOGGER))
     )
   }
 

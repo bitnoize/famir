@@ -12,3 +12,5 @@ export type AnalyzeLogJobResult = boolean
 export interface AnalyzeLogQueue extends BaseQueue {
   addJob(data: AnalyzeLogJobData, name: string): Promise<string>
 }
+
+export const ANALYZE_LOG_QUEUE = Symbol('AnalyzeLogQueue')

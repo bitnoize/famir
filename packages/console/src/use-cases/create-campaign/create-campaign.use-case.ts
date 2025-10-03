@@ -1,4 +1,6 @@
+import { DIContainer } from '@famir/common'
 import {
+  CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
   CreateCampaignData,
@@ -6,7 +8,16 @@ import {
   ReplServerError
 } from '@famir/domain'
 
+export const CREATE_CAMPAIGN_USE_CASE = Symbol('CreateCampaignUseCase')
+
 export class CreateCampaignUseCase {
+  static inject(container: DIContainer) {
+    container.registerSingleton<CreateCampaignUseCase>(
+      CREATE_CAMPAIGN_USE_CASE,
+      (c) => new CreateCampaignUseCase(c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY))
+    )
+  }
+
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
   async execute(data: CreateCampaignData): Promise<CampaignModel> {

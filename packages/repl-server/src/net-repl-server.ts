@@ -1,5 +1,16 @@
 import { DIContainer, serializeError } from '@famir/common'
-import { Config, Logger, ReplServer, ReplServerContext, Validator } from '@famir/domain'
+import {
+  Config,
+  CONFIG,
+  Logger,
+  LOGGER,
+  REPL_SERVER_CONTEXT,
+  REPL_SERVER,
+  ReplServer,
+  ReplServerContext,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
 import net from 'node:net'
 import repl from 'node:repl'
 import util from 'node:util'
@@ -7,15 +18,15 @@ import { ReplServerConfig, ReplServerOptions } from './repl-server.js'
 import { buildOptions, filterOptionsSecrets, internalSchemas } from './repl-server.utils.js'
 
 export class NetReplServer implements ReplServer {
-  static inject<C extends ReplServerConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<ReplServer>(
-      'ReplServer',
+      REPL_SERVER,
       (c) =>
         new NetReplServer(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<ReplServerContext>('ReplServerContext')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<ReplServerConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT)
         )
     )
   }

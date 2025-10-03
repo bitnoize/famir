@@ -35,3 +35,5 @@ export interface MessageRepository {
   create(data: CreateMessageData): Promise<MessageModel>
   read(data: ReadMessageData): Promise<MessageModel | null>
 }
+
+export const MESSAGE_REPOSITORY = Symbol('MessageRepository')

@@ -19,3 +19,5 @@ export interface HttpClientResponse {
 export interface HttpClient {
   forward(request: HttpClientRequest): Promise<HttpClientResponse>
 }
+
+export const HTTP_CLIENT = Symbol('HttpClient')

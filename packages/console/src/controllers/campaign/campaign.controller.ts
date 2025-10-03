@@ -1,9 +1,23 @@
-import { CampaignModel, Logger, ReplServerContext, Validator } from '@famir/domain'
+import { DIContainer } from '@famir/common'
 import {
+  CampaignModel,
+  Logger,
+  LOGGER,
+  REPL_SERVER_CONTEXT,
+  ReplServerContext,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
+import {
+  CREATE_CAMPAIGN_USE_CASE,
   CreateCampaignUseCase,
+  DELETE_CAMPAIGN_USE_CASE,
   DeleteCampaignUseCase,
+  LIST_CAMPAIGNS_USE_CASE,
   ListCampaignsUseCase,
+  READ_CAMPAIGN_USE_CASE,
   ReadCampaignUseCase,
+  UPDATE_CAMPAIGN_USE_CASE,
   UpdateCampaignUseCase
 } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
@@ -14,7 +28,30 @@ import {
   validateUpdateCampaignData
 } from './campaign.utils.js'
 
+export const CAMPAIGN_CONTROLLER = Symbol('CampaignController')
+
 export class CampaignController extends BaseController {
+  static inject(container: DIContainer) {
+    container.registerSingleton<CampaignController>(
+      CAMPAIGN_CONTROLLER,
+      (c) =>
+        new CampaignController(
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT),
+          c.resolve<CreateCampaignUseCase>(CREATE_CAMPAIGN_USE_CASE),
+          c.resolve<ReadCampaignUseCase>(READ_CAMPAIGN_USE_CASE),
+          c.resolve<UpdateCampaignUseCase>(UPDATE_CAMPAIGN_USE_CASE),
+          c.resolve<DeleteCampaignUseCase>(DELETE_CAMPAIGN_USE_CASE),
+          c.resolve<ListCampaignsUseCase>(LIST_CAMPAIGNS_USE_CASE)
+        )
+    )
+  }
+
+  static resolve(container: DIContainer): CampaignController {
+    return container.resolve<CampaignController>(CAMPAIGN_CONTROLLER)
+  }
+
   constructor(
     validator: Validator,
     logger: Logger,
@@ -27,58 +64,58 @@ export class CampaignController extends BaseController {
   ) {
     super(validator, logger, 'campaign')
 
-    context.setHandler('createCampaign', this.createHandler)
-    context.setHandler('readCampaign', this.readHandler)
-    context.setHandler('updateCampaign', this.updateHandler)
-    context.setHandler('deleteCampaign', this.deleteHandler)
-    context.setHandler('listCampaigns', this.listHandler)
+    context.setHandler('createCampaign', this.createCampaignHandler)
+    context.setHandler('readCampaign', this.readCampaignHandler)
+    context.setHandler('updateCampaign', this.updateCampaignHandler)
+    context.setHandler('deleteCampaign', this.deleteCampaignHandler)
+    context.setHandler('listCampaigns', this.listCampaignsHandler)
   }
 
-  private readonly createHandler = async (data: unknown): Promise<CampaignModel> => {
+  private readonly createCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
     try {
       validateCreateCampaignData(this.assertSchema, data)
 
       return await this.createCampaignUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'create', data)
+      this.exceptionFilter(error, 'createCampaign', data)
     }
   }
 
-  private readonly readHandler = async (data: unknown): Promise<CampaignModel | null> => {
+  private readonly readCampaignHandler = async (data: unknown): Promise<CampaignModel | null> => {
     try {
       validateReadCampaignData(this.assertSchema, data)
 
       return await this.readCampaignUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'read', data)
+      this.exceptionFilter(error, 'readCampaign', data)
     }
   }
 
-  private readonly updateHandler = async (data: unknown): Promise<CampaignModel> => {
+  private readonly updateCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
     try {
       validateUpdateCampaignData(this.assertSchema, data)
 
       return await this.updateCampaignUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'update', data)
+      this.exceptionFilter(error, 'updateCampaign', data)
     }
   }
 
-  private readonly deleteHandler = async (data: unknown): Promise<CampaignModel> => {
+  private readonly deleteCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
     try {
       validateDeleteCampaignData(this.assertSchema, data)
 
       return await this.deleteCampaignUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'delete', data)
+      this.exceptionFilter(error, 'deleteCampaign', data)
     }
   }
 
-  private readonly listHandler = async (): Promise<CampaignModel[]> => {
+  private readonly listCampaignsHandler = async (): Promise<CampaignModel[]> => {
     try {
       return await this.listCampaignsUseCase.execute()
     } catch (error) {
-      this.exceptionFilter(error, 'list', undefined)
+      this.exceptionFilter(error, 'listCampaigns', undefined)
     }
   }
 }

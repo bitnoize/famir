@@ -1,14 +1,14 @@
 import { DIContainer } from '@famir/common'
-import { Config, Logger, LoggerData, Validator, ValidatorAssertSchema } from '@famir/domain'
+import { Config, Logger, LoggerData, Validator, ValidatorAssertSchema, VALIDATOR, CONFIG, LOGGER } from '@famir/domain'
 import pino from 'pino'
 import { LoggerConfig, LoggerOptions } from './logger.js'
 import { buildOptions, filterOptionsSecrets, internalSchemas } from './logger.utils.js'
 
 export class PinoLogger implements Logger {
-  static inject<C extends LoggerConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<Logger>(
-      'Logger',
-      (c) => new PinoLogger(c.resolve<Validator>('Validator'), c.resolve<Config<C>>('Config'))
+      LOGGER,
+      (c) => new PinoLogger(c.resolve<Validator>(VALIDATOR), c.resolve<Config<LoggerConfig>>(CONFIG))
     )
   }
 

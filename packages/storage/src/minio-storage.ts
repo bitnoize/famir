@@ -1,18 +1,27 @@
 import { DIContainer } from '@famir/common'
-import { Config, Logger, Storage, Validator } from '@famir/domain'
+import {
+  Config,
+  CONFIG,
+  Logger,
+  LOGGER,
+  Storage,
+  STORAGE,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
 import * as Minio from 'minio'
 import { StorageConfig, StorageOptions } from './storage.js'
 import { buildOptions, filterOptionsSecrets, internalSchemas } from './storage.utils.js'
 
 export class MinioStorage implements Storage {
-  static inject<C extends StorageConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<Storage>(
-      'Storage',
+      STORAGE,
       (c) =>
         new MinioStorage(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<StorageConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER)
         )
     )
   }

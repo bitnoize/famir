@@ -1,4 +1,6 @@
+import { DIContainer } from '@famir/common'
 import {
+  CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
   DatabaseError,
@@ -6,7 +8,16 @@ import {
   ReplServerError
 } from '@famir/domain'
 
+export const DELETE_CAMPAIGN_USE_CASE = Symbol('DeleteCampaignUseCase')
+
 export class DeleteCampaignUseCase {
+  static inject(container: DIContainer) {
+    container.registerSingleton<DeleteCampaignUseCase>(
+      DELETE_CAMPAIGN_USE_CASE,
+      (c) => new DeleteCampaignUseCase(c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY))
+    )
+  }
+
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
   async execute(data: DeleteCampaignData): Promise<CampaignModel> {

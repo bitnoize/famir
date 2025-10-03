@@ -67,3 +67,5 @@ export interface TargetRepository {
   list(data: ListTargetsData): Promise<TargetModel[] | null>
   listEnabled(data: ListTargetsData): Promise<EnabledTargetModel[] | null>
 }
+
+export const TARGET_REPOSITORY = Symbol('TargetRepository')

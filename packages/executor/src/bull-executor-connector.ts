@@ -1,5 +1,14 @@
 import { DIContainer, serializeError } from '@famir/common'
-import { Config, ExecutorConnector, Logger, Validator } from '@famir/domain'
+import {
+  Config,
+  CONFIG,
+  EXECUTOR_CONNECTOR,
+  ExecutorConnector,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
 import { Redis } from 'ioredis'
 import { ExecutorConfig, ExecutorConnectorOptions } from './executor.js'
 import { buildConnectorOptions, filterOptionsSecrets, internalSchemas } from './executor.utils.js'
@@ -7,14 +16,14 @@ import { buildConnectorOptions, filterOptionsSecrets, internalSchemas } from './
 export type BullExecutorConnection = Redis
 
 export class BullExecutorConnector implements ExecutorConnector {
-  static inject<C extends ExecutorConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<ExecutorConnector>(
-      'ExecutorConnector',
+      EXECUTOR_CONNECTOR,
       (c) =>
         new BullExecutorConnector(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<ExecutorConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER)
         )
     )
   }

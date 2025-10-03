@@ -1,12 +1,18 @@
 import { DIContainer } from '@famir/common'
-import { Logger, ReplServerContext, ReplServerContextHandler } from '@famir/domain'
+import {
+  Logger,
+  LOGGER,
+  REPL_SERVER_CONTEXT,
+  ReplServerContext,
+  ReplServerContextHandler
+} from '@famir/domain'
 import repl from 'node:repl'
 
 export class NetReplServerContext implements ReplServerContext {
   static inject(container: DIContainer) {
     container.registerSingleton<ReplServerContext>(
-      'ReplServerContext',
-      (c) => new NetReplServerContext(c.resolve<Logger>('Logger'))
+      REPL_SERVER_CONTEXT,
+      (c) => new NetReplServerContext(c.resolve<Logger>(LOGGER))
     )
   }
 

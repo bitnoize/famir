@@ -8,3 +8,6 @@ export interface DatabaseConnector {
   connect(): Promise<void>
   close(): Promise<void>
 }
+
+export const DATABASE_CONNECTOR = Symbol('DatabaseConnector')
+

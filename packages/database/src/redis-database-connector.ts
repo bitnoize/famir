@@ -1,5 +1,14 @@
 import { DIContainer, serializeError } from '@famir/common'
-import { Config, DatabaseConnector, Logger, Validator } from '@famir/domain'
+import {
+  Config,
+  DatabaseConnector,
+  Logger,
+  Validator,
+  VALIDATOR,
+  CONFIG,
+  LOGGER,
+  DATABASE_CONNECTOR
+} from '@famir/domain'
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
 import { DatabaseConfig, DatabaseConnectorOptions } from './database.js'
@@ -13,14 +22,14 @@ export type RedisDatabaseConnection = RedisClientType<
 >
 
 export class RedisDatabaseConnector implements DatabaseConnector {
-  static inject<C extends DatabaseConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<DatabaseConnector>(
-      'DatabaseConnector',
+      DATABASE_CONNECTOR,
       (c) =>
         new RedisDatabaseConnector(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<DatabaseConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER)
         )
     )
   }

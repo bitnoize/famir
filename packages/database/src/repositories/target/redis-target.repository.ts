@@ -14,7 +14,12 @@ import {
   TargetModel,
   TargetRepository,
   UpdateTargetData,
-  Validator
+  Validator,
+  VALIDATOR,
+  CONFIG,
+  LOGGER,
+  DATABASE_CONNECTOR,
+  TARGET_REPOSITORY
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
@@ -30,15 +35,15 @@ import {
 } from './target.utils.js'
 
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
-  static inject<C extends DatabaseConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<TargetRepository>(
-      'TargetRepository',
+      TARGET_REPOSITORY,
       (c) =>
         new RedisTargetRepository(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<DatabaseConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
         )
     )
   }

@@ -1,11 +1,16 @@
 import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
+  CONFIG,
+  HTTP_SERVER_ROUTER,
+  HTTP_SERVER,
   HttpServer,
   HttpServerError,
   HttpServerRouter,
   Logger,
-  Validator
+  LOGGER,
+  Validator,
+  VALIDATOR
 } from '@famir/domain'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
@@ -15,15 +20,15 @@ import { HttpServerConfig, HttpServerOptions } from './http-server.js'
 import { buildOptions, filterOptionsSecrets, internalSchemas } from './http-server.utils.js'
 
 export class ExpressHttpServer implements HttpServer {
-  static inject<C extends HttpServerConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<HttpServer>(
-      'HttpServer',
+      HTTP_SERVER,
       (c) =>
         new ExpressHttpServer(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<HttpServerRouter>('HttpServerRouter')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<HttpServerConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )
   }

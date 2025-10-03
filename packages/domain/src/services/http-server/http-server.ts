@@ -5,6 +5,8 @@ export interface HttpServer {
   close(): Promise<void>
 }
 
+export const HTTP_SERVER = Symbol('HttpServer')
+
 export interface HttpServerRequestLocals {
   campaign?: CampaignModel | undefined
   target?: TargetModel | undefined
@@ -64,3 +66,5 @@ export interface HttpServerRouter {
   applyTo(express: unknown): void
   setHandler(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandler): void
 }
+
+export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')

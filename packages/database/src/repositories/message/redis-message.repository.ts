@@ -8,7 +8,12 @@ import {
   MessageModel,
   MessageRepository,
   ReadMessageData,
-  Validator
+  Validator,
+  VALIDATOR,
+  CONFIG,
+  LOGGER,
+  DATABASE_CONNECTOR,
+  MESSAGE_REPOSITORY
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
@@ -17,15 +22,15 @@ import { RedisBaseRepository } from '../base/index.js'
 import { assertModel, buildModel } from './message.utils.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
-  static inject<C extends DatabaseConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<MessageRepository>(
-      'MessageRepository',
+      MESSAGE_REPOSITORY,
       (c) =>
         new RedisMessageRepository(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<DatabaseConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
         )
     )
   }

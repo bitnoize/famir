@@ -10,7 +10,12 @@ import {
   SessionModel,
   SessionRepository,
   UpgradeSessionData,
-  Validator
+  Validator,
+  VALIDATOR,
+  CONFIG,
+  LOGGER,
+  DATABASE_CONNECTOR,
+  SESSION_REPOSITORY
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
@@ -19,15 +24,15 @@ import { RedisBaseRepository } from '../base/index.js'
 import { assertModel, buildModel } from './session.utils.js'
 
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {
-  static inject<C extends DatabaseConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<SessionRepository>(
-      'SessionRepository',
+      SESSION_REPOSITORY,
       (c) =>
         new RedisSessionRepository(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<DatabaseConnector>('DatabaseConnector').connection<RedisDatabaseConnection>()
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<DatabaseConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
         )
     )
   }

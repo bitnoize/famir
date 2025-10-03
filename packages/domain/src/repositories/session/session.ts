@@ -29,3 +29,6 @@ export interface SessionRepository {
   auth(data: AuthSessionData): Promise<SessionModel>
   upgrade(data: UpgradeSessionData): Promise<SessionModel>
 }
+
+export const SESSION_REPOSITORY = Symbol('SessionRepository')
+

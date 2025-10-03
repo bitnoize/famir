@@ -7,3 +7,6 @@ export interface Logger {
   error(data: LoggerData, msg: string): void
   fatal(data: LoggerData, msg: string): void
 }
+
+export const LOGGER = Symbol('Logger')
+

@@ -42,3 +42,5 @@ export interface LureRepository {
   delete(data: DeleteLureData): Promise<DisabledLureModel>
   list(data: ListLuresData): Promise<LureModel[] | null>
 }
+
+export const LURE_REPOSITORY = Symbol('LureRepository')

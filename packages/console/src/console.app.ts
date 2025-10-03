@@ -1,32 +1,43 @@
 import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
+  ANALYZE_LOG_QUEUE,
   AnalyzeLogQueue,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
   Logger,
+  LOGGER,
+  PERSIST_LOG_QUEUE,
   PersistLogQueue,
+  REPL_SERVER,
   ReplServer,
   Validator,
+  VALIDATOR,
+  WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
 import { internalSchemas } from './console.utils.js'
 
+export const CONSOLE_APP = Symbol('ConsoleApp')
+
 export class ConsoleApp {
-  static inject(container: DIContainer): ConsoleApp {
+  static inject(container: DIContainer) {
     container.registerSingleton<ConsoleApp>(
-      'ConsoleApp',
+      CONSOLE_APP,
       (c) =>
         new ConsoleApp(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<DatabaseConnector>('DatabaseConnector'),
-          c.resolve<WorkflowConnector>('WorkflowConnector'),
-          c.resolve<AnalyzeLogQueue>('AnalyzeLogQueue'),
-          c.resolve<PersistLogQueue>('PersistLogQueue'),
-          c.resolve<ReplServer>('ReplServer')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
+          c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
+          c.resolve<AnalyzeLogQueue>(ANALYZE_LOG_QUEUE),
+          c.resolve<PersistLogQueue>(PERSIST_LOG_QUEUE),
+          c.resolve<ReplServer>(REPL_SERVER)
         )
     )
+  }
 
-    return container.resolve<ConsoleApp>('ConsoleApp')
+  static resolve(container: DIContainer): ConsoleApp {
+    return container.resolve<ConsoleApp>(CONSOLE_APP)
   }
 
   constructor(

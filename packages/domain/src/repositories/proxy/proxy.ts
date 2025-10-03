@@ -34,3 +34,6 @@ export interface ProxyRepository {
   delete(data: DeleteProxyData): Promise<DisabledProxyModel>
   list(data: ListProxiesData): Promise<ProxyModel[] | null>
 }
+
+export const PROXY_REPOSITORY = Symbol('ProxyRepository')
+

@@ -5,21 +5,25 @@ import {
   HttpClientRequest,
   HttpClientResponse,
   Logger,
-  Validator
+  Validator,
+  VALIDATOR,
+  CONFIG,
+  LOGGER,
+  HTTP_CLIENT,
 } from '@famir/domain'
 import { Curl, CurlFeature } from 'node-libcurl'
 import { HttpClientConfig, HttpClientOptions } from './http-client.js'
 import { buildOptions, filterOptionsSecrets, internalSchemas } from './http-client.utils.js'
 
 export class CurlHttpClient implements HttpClient {
-  static inject<C extends HttpClientConfig>(container: DIContainer) {
+  static inject(container: DIContainer) {
     container.registerSingleton<HttpClient>(
-      'HttpClient',
+      HTTP_CLIENT,
       (c) =>
         new CurlHttpClient(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Config<C>>('Config'),
-          c.resolve<Logger>('Logger')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<HttpClientConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER)
         )
     )
   }

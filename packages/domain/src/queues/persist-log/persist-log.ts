@@ -12,3 +12,6 @@ export type PersistLogJobResult = boolean
 export interface PersistLogQueue extends BaseQueue {
   addJob(data: PersistLogJobData): Promise<string>
 }
+
+export const PERSIST_LOG_QUEUE = Symbol('PersistLogQueue')
+

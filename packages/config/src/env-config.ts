@@ -1,18 +1,24 @@
-import { DIContainer } from '@famir/common'
-import { Config, Validator, ValidatorAssertSchema } from '@famir/domain'
+import { DIContainer, JSONSchemaType } from '@famir/common'
+import {
+  Config,
+  CONFIG,
+  Validator,
+  VALIDATOR,
+  ValidatorAssertSchema
+} from '@famir/domain'
 import { buildConfig } from './config.utils.js'
 
 export class EnvConfig<T> implements Config<T> {
-  static inject<C>(container: DIContainer, configSchema: object) {
+  static inject<C>(container: DIContainer, configSchema: JSONSchemaType<C>) {
     container.registerSingleton<Config<C>>(
-      'Config',
-      (c) => new EnvConfig<C>(c.resolve<Validator>('Validator'), configSchema)
+      CONFIG,
+      (c) => new EnvConfig<C>(c.resolve<Validator>(VALIDATOR), configSchema)
     )
   }
 
   protected readonly assertSchema: ValidatorAssertSchema
 
-  constructor(validator: Validator, configSchema: object) {
+  constructor(validator: Validator, configSchema: JSONSchemaType<T>) {
     this.assertSchema = validator.assertSchema
 
     validator.addSchemas({

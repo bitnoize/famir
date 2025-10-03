@@ -4,12 +4,12 @@ import {
   CONFIG,
   Logger,
   LOGGER,
-  PERSIST_LOG_QUEUE_NAME,
-  PERSIST_LOG_QUEUE,
-  PersistLogJobData,
-  PersistLogQueue,
   Validator,
   VALIDATOR,
+  WEBHOOK_QUEUE_NAME,
+  WEBHOOK_QUEUE,
+  WebhookJobData,
+  WebhookQueue,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
@@ -17,12 +17,12 @@ import { BullWorkflowConnection } from '../../bull-workflow-connector.js'
 import { WorkflowConfig } from '../../workflow.js'
 import { BullBaseQueue } from '../base/index.js'
 
-export class BullPersistLogQueue extends BullBaseQueue implements PersistLogQueue {
+export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
   static inject(container: DIContainer) {
-    container.registerSingleton<PersistLogQueue>(
-      PERSIST_LOG_QUEUE,
+    container.registerSingleton<WebhookQueue>(
+      WEBHOOK_QUEUE,
       (c) =>
-        new BullPersistLogQueue(
+        new BullWebhookQueue(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<WorkflowConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
@@ -39,20 +39,10 @@ export class BullPersistLogQueue extends BullBaseQueue implements PersistLogQueu
     logger: Logger,
     connection: BullWorkflowConnection
   ) {
-    super(validator, config, logger, connection, PERSIST_LOG_QUEUE_NAME)
+    super(validator, config, logger, connection, WEBHOOK_QUEUE_NAME)
   }
 
-  async addJob(data: PersistLogJobData): Promise<string> {
-    const jobId = [data.campaignId, data.messageId].join('-')
-
-    try {
-      await this._queue.add('default', data, {
-        jobId
-      })
-
-      return jobId
-    } catch (error) {
-      this.exceptionFilter(error, 'addJob', data)
-    }
+  async addJob(data: WebhookJobData): Promise<string> {
+    return ''
   }
 }

@@ -1,4 +1,5 @@
 import { DIContainer } from '@famir/common'
+import { CurlHttpClient } from '@famir/http-client'
 import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
@@ -39,6 +40,8 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   BullWorkflowConnector.inject(container)
 
   BullPersistLogQueue.inject(container)
+
+  CurlHttpClient.inject(container)
 
   ExpressHttpServerRouter.inject(container)
 

@@ -36,3 +36,5 @@ export interface CampaignRepository {
   delete(data: DeleteCampaignData): Promise<CampaignModel>
   list(): Promise<CampaignModel[]>
 }
+
+export const CAMPAIGN_REPOSITORY = Symbol('CampaignRepository')

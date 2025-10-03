@@ -1,4 +1,6 @@
+import { DIContainer } from '@famir/common'
 import {
+  CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
   DatabaseError,
@@ -6,7 +8,16 @@ import {
   UpdateCampaignData
 } from '@famir/domain'
 
+export const UPDATE_CAMPAIGN_USE_CASE = Symbol('UpdateCampaignUseCase')
+
 export class UpdateCampaignUseCase {
+  static inject(container: DIContainer) {
+    container.registerSingleton<UpdateCampaignUseCase>(
+      UPDATE_CAMPAIGN_USE_CASE,
+      (c) => new UpdateCampaignUseCase(c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY))
+    )
+  }
+
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
   async execute(data: UpdateCampaignData): Promise<CampaignModel> {

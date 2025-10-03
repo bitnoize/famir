@@ -4,3 +4,5 @@ export interface WorkflowConnector {
   //connect(): Promise<void>
   close(): Promise<void>
 }
+
+export const WORKFLOW_CONNECTOR = Symbol('WorkflowConnector')

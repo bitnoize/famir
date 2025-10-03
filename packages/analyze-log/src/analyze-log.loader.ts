@@ -39,17 +39,15 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   BullWorkflowConnector.inject(container)
 
-  // Queues..
-
   BullExecutorConnector.inject(container)
 
   BullExecutorDispatcher.inject(container)
 
   BullAnalyzeLogWorker.inject(container)
 
+  AnalyzeLogApp.inject(container)
+
   composer(container)
 
-  const app = AnalyzeLogApp.inject(container)
-
-  await app.start()
+  await AnalyzeLogApp.resolve(container).start()
 }
