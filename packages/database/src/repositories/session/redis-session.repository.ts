@@ -2,20 +2,20 @@ import { DIContainer } from '@famir/common'
 import {
   AuthSessionData,
   Config,
+  CONFIG,
   CreateSessionData,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   Logger,
+  LOGGER,
   ReadSessionData,
+  SESSION_REPOSITORY,
   SessionModel,
   SessionRepository,
   UpgradeSessionData,
   Validator,
-  VALIDATOR,
-  CONFIG,
-  LOGGER,
-  DATABASE_CONNECTOR,
-  SESSION_REPOSITORY
+  VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'

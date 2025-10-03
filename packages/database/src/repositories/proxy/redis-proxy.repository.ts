@@ -1,7 +1,9 @@
 import { DIContainer } from '@famir/common'
 import {
   Config,
+  CONFIG,
   CreateProxyData,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   DeleteProxyData,
@@ -9,16 +11,14 @@ import {
   EnabledProxyModel,
   ListProxiesData,
   Logger,
+  LOGGER,
+  PROXY_REPOSITORY,
   ProxyModel,
   ProxyRepository,
   ReadProxyData,
   SwitchProxyData,
   Validator,
-  VALIDATOR,
-  CONFIG,
-  LOGGER,
-  DATABASE_CONNECTOR,
-  PROXY_REPOSITORY
+  VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'

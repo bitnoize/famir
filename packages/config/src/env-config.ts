@@ -1,11 +1,5 @@
 import { DIContainer, JSONSchemaType } from '@famir/common'
-import {
-  Config,
-  CONFIG,
-  Validator,
-  VALIDATOR,
-  ValidatorAssertSchema
-} from '@famir/domain'
+import { Config, CONFIG, Validator, VALIDATOR, ValidatorAssertSchema } from '@famir/domain'
 import { buildConfig } from './config.utils.js'
 
 export class EnvConfig<T> implements Config<T> {

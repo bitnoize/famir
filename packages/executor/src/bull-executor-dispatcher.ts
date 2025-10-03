@@ -47,9 +47,7 @@ export class BullExecutorDispatcher implements ExecutorDispatcher {
     this.logger.debug(
       {
         module: 'executor',
-        handler: {
-          name
-        }
+        handler: name
       },
       `ExecutorDispatcher register handler`
     )

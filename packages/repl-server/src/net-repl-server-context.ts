@@ -36,7 +36,7 @@ export class NetReplServerContext implements ReplServerContext {
           try {
             return await handler(data)
           } catch (error) {
-            return error
+            return error // FIXME
           }
         }
       })
@@ -53,9 +53,7 @@ export class NetReplServerContext implements ReplServerContext {
     this.logger.debug(
       {
         module: 'repl-server',
-        handler: {
-          name
-        }
+        handler: name
       },
       `ReplServerContext register handler`
     )

@@ -1,11 +1,18 @@
 import { DIContainer } from '@famir/common'
-import { AnalyzeLogJobData, AnalyzeLogJobResult, CampaignRepository } from '@famir/domain'
+import {
+  AnalyzeLogJobData,
+  AnalyzeLogJobResult,
+  CAMPAIGN_REPOSITORY,
+  CampaignRepository
+} from '@famir/domain'
+
+export const DUMMY_EXAMPLE_USE_CASE = Symbol('DummyExampleUseCase')
 
 export class DummyExampleUseCase {
   static inject(container: DIContainer) {
     container.registerSingleton<DummyExampleUseCase>(
-      'DummyExampleUseCase',
-      (c) => new DummyExampleUseCase(c.resolve<CampaignRepository>('CampaignRepository'))
+      DUMMY_EXAMPLE_USE_CASE,
+      (c) => new DummyExampleUseCase(c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY))
     )
   }
 

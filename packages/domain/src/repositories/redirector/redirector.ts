@@ -35,4 +35,3 @@ export interface RedirectorRepository {
 }
 
 export const REDIRECTOR_REPOSITORY = Symbol('RedirectorRepository')
-

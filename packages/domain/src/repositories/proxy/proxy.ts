@@ -36,4 +36,3 @@ export interface ProxyRepository {
 }
 
 export const PROXY_REPOSITORY = Symbol('ProxyRepository')
-

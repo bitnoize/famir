@@ -14,4 +14,3 @@ export interface PersistLogQueue extends BaseQueue {
 }
 
 export const PERSIST_LOG_QUEUE = Symbol('PersistLogQueue')
-

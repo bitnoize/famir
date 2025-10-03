@@ -1,19 +1,19 @@
 import { DIContainer } from '@famir/common'
 import {
   Config,
+  CONFIG,
   CreateMessageData,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   Logger,
+  LOGGER,
+  MESSAGE_REPOSITORY,
   MessageModel,
   MessageRepository,
   ReadMessageData,
   Validator,
-  VALIDATOR,
-  CONFIG,
-  LOGGER,
-  DATABASE_CONNECTOR,
-  MESSAGE_REPOSITORY
+  VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'

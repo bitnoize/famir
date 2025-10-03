@@ -1,32 +1,40 @@
 import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
+  ANALYZE_LOG_WORKER,
   AnalyzeLogWorker,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
+  EXECUTOR_CONNECTOR,
   ExecutorConnector,
   Logger,
+  LOGGER,
   Validator,
+  VALIDATOR,
+  WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
 import { internalSchemas } from './analyze-log.utils.js'
 
+export const ANALYZE_LOG_APP = Symbol('AnalyzeLogApp')
+
 export class AnalyzeLogApp {
   static inject(container: DIContainer) {
     container.registerSingleton<AnalyzeLogApp>(
-      'AnalyzeLogApp',
+      ANALYZE_LOG_APP,
       (c) =>
         new AnalyzeLogApp(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<DatabaseConnector>('DatabaseConnector'),
-          c.resolve<WorkflowConnector>('WorkflowConnector'),
-          c.resolve<ExecutorConnector>('ExecutorConnector'),
-          c.resolve<AnalyzeLogWorker>('AnalyzeLogWorker')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
+          c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
+          c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR),
+          c.resolve<AnalyzeLogWorker>(ANALYZE_LOG_WORKER)
         )
     )
   }
 
   static resolve(container: DIContainer): AnalyzeLogApp {
-    return container.resolve<AnalyzeLogApp>('AnalyzeLogApp')
+    return container.resolve<AnalyzeLogApp>(ANALYZE_LOG_APP)
   }
 
   constructor(

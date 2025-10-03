@@ -1,7 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
-  ANALYZE_LOG_QUEUE_NAME,
   ANALYZE_LOG_QUEUE,
+  ANALYZE_LOG_QUEUE_NAME,
   AnalyzeLogJobData,
   AnalyzeLogQueue,
   Config,
@@ -26,9 +26,7 @@ export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueu
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<WorkflowConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c
-            .resolve<WorkflowConnector>(WORKFLOW_CONNECTOR)
-            .connection<BullWorkflowConnection>()
+          c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR).connection<BullWorkflowConnection>()
         )
     )
   }

@@ -1,25 +1,35 @@
 import { DIContainer } from '@famir/common'
-import { AnalyzeLogJobResult, ExecutorDispatcher, Logger, Validator } from '@famir/domain'
+import {
+  AnalyzeLogJobResult,
+  EXECUTOR_DISPATCHER,
+  ExecutorDispatcher,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
 import { validateAnalyzeLogJobData } from '../../analyze-log.utils.js'
-import { DummyExampleUseCase } from '../../use-cases/index.js'
+import { DUMMY_EXAMPLE_USE_CASE, DummyExampleUseCase } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
+
+export const DUMMY_CONTROLLER = Symbol('DummyController')
 
 export class DummyController extends BaseController {
   static inject(container: DIContainer) {
     container.registerSingleton<DummyController>(
-      'DummyController',
+      DUMMY_CONTROLLER,
       (c) =>
         new DummyController(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<ExecutorDispatcher>('ExecutorDispatcher'),
-          c.resolve<DummyExampleUseCase>('DummyExampleUseCase')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<ExecutorDispatcher>(EXECUTOR_DISPATCHER),
+          c.resolve<DummyExampleUseCase>(DUMMY_EXAMPLE_USE_CASE)
         )
     )
   }
 
   static resolve(container: DIContainer): DummyController {
-    return container.resolve<DummyController>('DummyController')
+    return container.resolve<DummyController>(DUMMY_CONTROLLER)
   }
 
   constructor(

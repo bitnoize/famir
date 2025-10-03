@@ -6,8 +6,8 @@ import {
   LOGGER,
   Validator,
   VALIDATOR,
-  WEBHOOK_QUEUE_NAME,
   WEBHOOK_QUEUE,
+  WEBHOOK_QUEUE_NAME,
   WebhookJobData,
   WebhookQueue,
   WORKFLOW_CONNECTOR,
@@ -26,9 +26,7 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<WorkflowConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c
-            .resolve<WorkflowConnector>(WORKFLOW_CONNECTOR)
-            .connection<BullWorkflowConnection>()
+          c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR).connection<BullWorkflowConnection>()
         )
     )
   }

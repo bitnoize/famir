@@ -4,8 +4,8 @@ import {
   CONFIG,
   Logger,
   LOGGER,
-  PERSIST_LOG_QUEUE_NAME,
   PERSIST_LOG_QUEUE,
+  PERSIST_LOG_QUEUE_NAME,
   PersistLogJobData,
   PersistLogQueue,
   Validator,
@@ -26,9 +26,7 @@ export class BullPersistLogQueue extends BullBaseQueue implements PersistLogQueu
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<WorkflowConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c
-            .resolve<WorkflowConnector>(WORKFLOW_CONNECTOR)
-            .connection<BullWorkflowConnection>()
+          c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR).connection<BullWorkflowConnection>()
         )
     )
   }

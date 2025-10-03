@@ -89,10 +89,7 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
     this.logger.debug(
       {
         module: 'http-server',
-        handler: {
-          method,
-          path
-        }
+        handler: [method, path]
       },
       `HttpServerRouter register handler`
     )

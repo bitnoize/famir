@@ -1,15 +1,38 @@
+import { DIContainer } from '@famir/common'
 import {
+  HTTP_SERVER_ROUTER,
   HttpServerRequest,
   HttpServerResponse,
   HttpServerRouter,
   Logger,
-  Validator
+  LOGGER,
+  Validator,
+  VALIDATOR
 } from '@famir/domain'
-import { ConfigurationUseCase } from '../../use-cases/index.js'
+import { CONFIGURATION_USE_CASE, ConfigurationUseCase } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
 import { validateConfigurationData } from './configuration.utils.js'
 
+export const CONFIGURATION_CONTROLLER = Symbol('ConfigurationController')
+
 export class ConfigurationController extends BaseController {
+  static inject(container: DIContainer) {
+    container.registerSingleton<ConfigurationController>(
+      CONFIGURATION_CONTROLLER,
+      (c) =>
+        new ConfigurationController(
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<ConfigurationUseCase>(CONFIGURATION_USE_CASE)
+        )
+    )
+  }
+
+  static resolve(container: DIContainer): ConfigurationController {
+    return container.resolve<ConfigurationController>(CONFIGURATION_CONTROLLER)
+  }
+
   constructor(
     validator: Validator,
     logger: Logger,

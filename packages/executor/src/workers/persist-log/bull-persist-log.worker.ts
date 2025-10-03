@@ -27,9 +27,7 @@ export class BullPersistLogWorker extends BullBaseWorker implements PersistLogWo
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<ExecutorConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c
-            .resolve<ExecutorConnector>(EXECUTOR_CONNECTOR)
-            .connection<BullExecutorConnection>(),
+          c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR).connection<BullExecutorConnection>(),
           c.resolve<ExecutorDispatcher>(EXECUTOR_DISPATCHER)
         )
     )

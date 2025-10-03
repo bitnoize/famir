@@ -1,13 +1,13 @@
 import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
+  CONFIG,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
   Logger,
-  Validator,
-  VALIDATOR,
-  CONFIG,
   LOGGER,
-  DATABASE_CONNECTOR
+  Validator,
+  VALIDATOR
 } from '@famir/domain'
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'

@@ -1,5 +1,4 @@
 import { DIContainer } from '@famir/common'
-import { CurlHttpClient } from '@famir/http-client'
 import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
@@ -11,6 +10,7 @@ import {
   RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
+import { CurlHttpClient } from '@famir/http-client'
 import { ExpressHttpServer, ExpressHttpServerRouter } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
 import { AjvValidator } from '@famir/validator'
@@ -47,9 +47,9 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   ExpressHttpServer.inject(container)
 
+  ReverseProxyApp.inject(container)
+
   composer(container)
 
-  const app = ReverseProxyApp.inject(container)
-
-  await app.start()
+  await ReverseProxyApp.resolve(container).start()
 }

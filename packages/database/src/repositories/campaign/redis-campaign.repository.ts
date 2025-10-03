@@ -1,21 +1,21 @@
 import { DIContainer, randomSecret } from '@famir/common'
 import {
+  CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
   Config,
+  CONFIG,
   CreateCampaignData,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   DeleteCampaignData,
   Logger,
+  LOGGER,
   ReadCampaignData,
   UpdateCampaignData,
   Validator,
-  VALIDATOR,
-  CONFIG,
-  LOGGER,
-  DATABASE_CONNECTOR,
-  CAMPAIGN_REPOSITORY
+  VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'

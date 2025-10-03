@@ -2,8 +2,8 @@ import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
-  HTTP_SERVER_ROUTER,
   HTTP_SERVER,
+  HTTP_SERVER_ROUTER,
   HttpServer,
   HttpServerError,
   HttpServerRouter,

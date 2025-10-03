@@ -1,22 +1,22 @@
 import { DIContainer } from '@famir/common'
 import {
   Config,
+  CONFIG,
   CreateRedirectorData,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   DeleteRedirectorData,
   ListRedirectorsData,
   Logger,
+  LOGGER,
   ReadRedirectorData,
+  REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository,
   UpdateRedirectorData,
   Validator,
-  VALIDATOR,
-  CONFIG,
-  LOGGER,
-  DATABASE_CONNECTOR,
-  REDIRECTOR_REPOSITORY
+  VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'

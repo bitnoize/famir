@@ -10,4 +10,3 @@ export interface DatabaseConnector {
 }
 
 export const DATABASE_CONNECTOR = Symbol('DatabaseConnector')
-

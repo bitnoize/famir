@@ -1,7 +1,34 @@
-import { HttpServerResponse, HttpServerRouter, Logger, Validator } from '@famir/domain'
+import { DIContainer } from '@famir/common'
+import {
+  HTTP_SERVER_ROUTER,
+  HttpServerResponse,
+  HttpServerRouter,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
 import { BaseController } from '../base/index.js'
 
+export const PREFLIGHT_CORS_CONTROLLER = Symbol('PreflightCorsController')
+
 export class PreflightCorsController extends BaseController {
+  static inject(container: DIContainer) {
+    container.registerSingleton<PreflightCorsController>(
+      PREFLIGHT_CORS_CONTROLLER,
+      (c) =>
+        new PreflightCorsController(
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
+        )
+    )
+  }
+
+  static resolve(container: DIContainer): PreflightCorsController {
+    return container.resolve<PreflightCorsController>(PREFLIGHT_CORS_CONTROLLER)
+  }
+
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
     super(validator, logger, 'preflight-cors')
 

@@ -1,7 +1,9 @@
 import { DIContainer } from '@famir/common'
 import {
   Config,
+  CONFIG,
   CreateLureData,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   DeleteLureData,
@@ -9,17 +11,15 @@ import {
   EnabledLureModel,
   ListLuresData,
   Logger,
+  LOGGER,
+  LURE_REPOSITORY,
   LureModel,
   LureRepository,
   ReadLureData,
   ReadLurePathData,
   SwitchLureData,
   Validator,
-  VALIDATOR,
-  CONFIG,
-  LOGGER,
-  DATABASE_CONNECTOR,
-  LURE_REPOSITORY
+  VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'

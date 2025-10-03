@@ -31,4 +31,3 @@ export interface SessionRepository {
 }
 
 export const SESSION_REPOSITORY = Symbol('SessionRepository')
-

@@ -1,30 +1,40 @@
 import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
+  DATABASE_CONNECTOR,
   DatabaseConnector,
+  EXECUTOR_CONNECTOR,
   ExecutorConnector,
   Logger,
+  LOGGER,
+  PERSIST_LOG_WORKER,
   PersistLogWorker,
   Validator,
+  VALIDATOR,
+  WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
 import { internalSchemas } from './persist-log.utils.js'
 
+export const PERSIST_LOG_APP = Symbol('PersistLogApp')
+
 export class PersistLogApp {
-  static inject(container: DIContainer): PersistLogApp {
+  static inject(container: DIContainer) {
     container.registerSingleton<PersistLogApp>(
-      'PersistLogApp',
+      PERSIST_LOG_APP,
       (c) =>
         new PersistLogApp(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<DatabaseConnector>('DatabaseConnector'),
-          c.resolve<WorkflowConnector>('WorkflowConnector'),
-          c.resolve<ExecutorConnector>('ExecutorConnector'),
-          c.resolve<PersistLogWorker>('PersistLogWorker')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
+          c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
+          c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR),
+          c.resolve<PersistLogWorker>(PERSIST_LOG_WORKER)
         )
     )
+  }
 
-    return container.resolve<PersistLogApp>('PersistLogApp')
+  static resolve(container: DIContainer): PersistLogApp {
+    return container.resolve<PersistLogApp>(PERSIST_LOG_APP)
   }
 
   constructor(

@@ -4,4 +4,3 @@ export interface Config<C> {
 }
 
 export const CONFIG = Symbol('Config')
-

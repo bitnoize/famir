@@ -47,9 +47,9 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   BullPersistLogWorker.inject(container)
 
+  PersistLogApp.inject(container)
+
   composer(container)
 
-  const app = PersistLogApp.inject(container)
-
-  await app.start()
+  await PersistLogApp.resolve(container).start()
 }

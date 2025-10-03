@@ -1,15 +1,15 @@
 import { DIContainer } from '@famir/common'
 import {
   Config,
+  CONFIG,
+  HTTP_CLIENT,
   HttpClient,
   HttpClientRequest,
   HttpClientResponse,
   Logger,
-  Validator,
-  VALIDATOR,
-  CONFIG,
   LOGGER,
-  HTTP_CLIENT,
+  Validator,
+  VALIDATOR
 } from '@famir/domain'
 import { Curl, CurlFeature } from 'node-libcurl'
 import { HttpClientConfig, HttpClientOptions } from './http-client.js'

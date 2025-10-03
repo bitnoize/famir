@@ -27,9 +27,7 @@ export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWo
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<ExecutorConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c
-            .resolve<ExecutorConnector>(EXECUTOR_CONNECTOR)
-            .connection<BullExecutorConnection>(),
+          c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR).connection<BullExecutorConnection>(),
           c.resolve<ExecutorDispatcher>(EXECUTOR_DISPATCHER)
         )
     )

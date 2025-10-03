@@ -9,4 +9,3 @@ export interface Logger {
 }
 
 export const LOGGER = Symbol('Logger')
-

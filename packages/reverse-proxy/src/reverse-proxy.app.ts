@@ -1,30 +1,40 @@
 import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
+  DATABASE_CONNECTOR,
   DatabaseConnector,
+  HTTP_SERVER,
   HttpServer,
   Logger,
+  LOGGER,
+  PERSIST_LOG_QUEUE,
   PersistLogQueue,
   Validator,
+  VALIDATOR,
+  WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
 import { internalSchemas } from './reverse-proxy.utils.js'
 
+export const REVERSE_PROXY_APP = Symbol('ReverseProxyApp')
+
 export class ReverseProxyApp {
-  static inject(container: DIContainer): ReverseProxyApp {
+  static inject(container: DIContainer) {
     container.registerSingleton<ReverseProxyApp>(
-      'ReverseProxyApp',
+      REVERSE_PROXY_APP,
       (c) =>
         new ReverseProxyApp(
-          c.resolve<Validator>('Validator'),
-          c.resolve<Logger>('Logger'),
-          c.resolve<DatabaseConnector>('DatabaseConnector'),
-          c.resolve<WorkflowConnector>('WorkflowConnector'),
-          c.resolve<PersistLogQueue>('PersistLogQueue'),
-          c.resolve<HttpServer>('HttpServer')
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
+          c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
+          c.resolve<PersistLogQueue>(PERSIST_LOG_QUEUE),
+          c.resolve<HttpServer>(HTTP_SERVER)
         )
     )
+  }
 
-    return container.resolve<ReverseProxyApp>('ReverseProxyApp')
+  static resolve(container: DIContainer): ReverseProxyApp {
+    return container.resolve<ReverseProxyApp>(REVERSE_PROXY_APP)
   }
 
   constructor(

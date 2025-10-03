@@ -1,7 +1,27 @@
-import { CampaignRepository, HttpServerError, TargetRepository } from '@famir/domain'
+import { DIContainer } from '@famir/common'
+import {
+  CAMPAIGN_REPOSITORY,
+  CampaignRepository,
+  HttpServerError,
+  TARGET_REPOSITORY,
+  TargetRepository
+} from '@famir/domain'
 import { ConfigurationData, ConfigurationResult } from './configuration.js'
 
+export const CONFIGURATION_USE_CASE = Symbol('ConfigurationUseCase')
+
 export class ConfigurationUseCase {
+  static inject(container: DIContainer) {
+    container.registerSingleton<ConfigurationUseCase>(
+      CONFIGURATION_USE_CASE,
+      (c) =>
+        new ConfigurationUseCase(
+          c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
+          c.resolve<TargetRepository>(TARGET_REPOSITORY)
+        )
+    )
+  }
+
   constructor(
     protected readonly campaignRepository: CampaignRepository,
     protected readonly targetRepository: TargetRepository

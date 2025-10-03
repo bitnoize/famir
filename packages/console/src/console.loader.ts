@@ -14,8 +14,8 @@ import { PinoLogger } from '@famir/logger'
 import { NetReplServer, NetReplServerContext } from '@famir/repl-server'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeLogQueue, BullPersistLogQueue, BullWorkflowConnector } from '@famir/workflow'
-import { ConsoleConfig } from './console.js'
 import { ConsoleApp } from './console.app.js'
+import { ConsoleConfig } from './console.js'
 import { configConsoleSchema } from './console.schemas.js'
 
 export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {

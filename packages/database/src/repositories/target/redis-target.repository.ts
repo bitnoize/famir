@@ -1,7 +1,9 @@
 import { DIContainer } from '@famir/common'
 import {
   Config,
+  CONFIG,
   CreateTargetData,
+  DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   DeleteTargetData,
@@ -9,17 +11,15 @@ import {
   EnabledTargetModel,
   ListTargetsData,
   Logger,
+  LOGGER,
   ReadTargetData,
   SwitchTargetData,
+  TARGET_REPOSITORY,
   TargetModel,
   TargetRepository,
   UpdateTargetData,
   Validator,
-  VALIDATOR,
-  CONFIG,
-  LOGGER,
-  DATABASE_CONNECTOR,
-  TARGET_REPOSITORY
+  VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
