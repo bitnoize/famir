@@ -1,6 +1,16 @@
 # Famir
 
-A framework for building multiple reverse proxies grouped into "campaigns".
+A framework for building complex infrastructure for HTTP traffic security research.
+See [demo](https://github.com/bitnoize/famir-demo) for example usage.
+
+Features
+--------
+
+- Clean architecture, modular design
+- Works as distributed cluster
+
+Packages
+--------
 
 | Package | Description |
 | --- | --- |
@@ -9,7 +19,7 @@ A framework for building multiple reverse proxies grouped into "campaigns".
 | [validator](packages/validator/) | Validate data with JSON-Schema |
 | [config](packages/config) | Config infrastructure service |
 | [logger](packages/logger/) | Logger with multiple transports |
-| [database](packages/database/) | Database with repositories |
+| [database](packages/database/) | Database repositories |
 | [storage](packages/storage/) | S3 compatable client |
 | [workflow](packages/workflow/) | Workflow queues |
 | [executor](packages/executor/) | Executor workers |
@@ -21,12 +31,6 @@ A framework for building multiple reverse proxies grouped into "campaigns".
 | [persist-log](packages/persist-log/) | Persist log application |
 | [analyze-log](packages/analyze-log/) | Analyze log application |
 
-
-Features
---------
-
-- Clean architecture, modular design
-- Works as distributed cluster
 
 Disclaimer
 ----------
