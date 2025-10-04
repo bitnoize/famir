@@ -1,13 +1,18 @@
 import {
   createCampaignDataSchema,
-  deleteCampaignDataSchema,
-  readCampaignDataSchema,
-  updateCampaignDataSchema,
   createProxyDataSchema,
+  createTargetDataSchema,
+  deleteCampaignDataSchema,
   deleteProxyDataSchema,
+  deleteTargetDataSchema,
+  listProxiesDataSchema,
+  listTargetsDataSchema,
+  readCampaignDataSchema,
   readProxyDataSchema,
+  readTargetDataSchema,
   switchProxyDataSchema,
-  listProxiesDataSchema
+  switchTargetDataSchema,
+  updateCampaignDataSchema
 } from '@famir/database'
 import { ValidatorSchemas } from '@famir/domain'
 
@@ -20,5 +25,10 @@ export const internalSchemas: ValidatorSchemas = {
   'read-proxy-data': readProxyDataSchema,
   'switch-proxy-data': switchProxyDataSchema,
   'delete-proxy-data': deleteProxyDataSchema,
-  'list-proxies-data': listProxiesDataSchema
+  'list-proxies-data': listProxiesDataSchema,
+  'create-target-data': createTargetDataSchema,
+  'read-target-data': readTargetDataSchema,
+  'switch-target-data': switchTargetDataSchema,
+  'delete-target-data': deleteTargetDataSchema,
+  'list-targets-data': listTargetsDataSchema
 }
