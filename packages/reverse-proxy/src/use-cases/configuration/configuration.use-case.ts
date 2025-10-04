@@ -29,7 +29,7 @@ export class ConfigurationUseCase {
 
   async execute(data: ConfigurationData): Promise<ConfigurationResult> {
     const campaign = await this.campaignRepository.read({
-      id: data.campaignId
+      campaignId: data.campaignId
     })
 
     if (campaign === null) {
@@ -44,7 +44,7 @@ export class ConfigurationUseCase {
 
     const target = await this.targetRepository.read({
       campaignId: data.campaignId,
-      id: data.targetId
+      targetId: data.targetId
     })
 
     if (target === null) {

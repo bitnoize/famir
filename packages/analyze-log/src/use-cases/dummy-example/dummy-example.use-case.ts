@@ -20,7 +20,7 @@ export class DummyExampleUseCase {
 
   async execute(data: AnalyzeLogJobData): Promise<AnalyzeLogJobResult> {
     const campaign = await this.campaignRepository.read({
-      id: data.campaignId
+      campaignId: data.campaignId
     })
 
     return true

@@ -1,7 +1,7 @@
 export class SessionModel {
   constructor(
     readonly campaignId: string,
-    readonly id: string,
+    readonly sessionId: string,
     readonly proxyId: string,
     readonly secret: string,
     readonly isLanding: boolean,

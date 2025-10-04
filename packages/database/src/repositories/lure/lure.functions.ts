@@ -9,7 +9,7 @@ import {
 
 export interface RawLure {
   campaign_id: string
-  id: string
+  lure_id: string
   path: string
   redirector_id: string
   is_enabled: number
@@ -27,18 +27,18 @@ export const lureFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        id: string,
+        lureId: string,
         path: string,
         redirectorId: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, id))
+        parser.pushKey(lureKey(prefix, campaignId, lureId))
         parser.pushKey(lurePathKey(prefix, campaignId, path))
         parser.pushKey(lureIndexKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
 
         parser.push(campaignId)
-        parser.push(id)
+        parser.push(lureId)
         parser.push(path)
         parser.push(redirectorId)
         parser.push(Date.now().toString())
@@ -50,9 +50,9 @@ export const lureFunctions = {
     read_lure: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lureId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, id))
+        parser.pushKey(lureKey(prefix, campaignId, lureId))
       },
 
       transformReply: undefined as unknown as () => RawLure | null
@@ -83,9 +83,9 @@ export const lureFunctions = {
     enable_lure: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lureId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, id))
+        parser.pushKey(lureKey(prefix, campaignId, lureId))
 
         parser.push(Date.now().toString())
       },
@@ -96,9 +96,9 @@ export const lureFunctions = {
     disable_lure: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lureId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, id))
+        parser.pushKey(lureKey(prefix, campaignId, lureId))
 
         parser.push(Date.now().toString())
       },
@@ -113,12 +113,12 @@ export const lureFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        id: string,
+        lureId: string,
         path: string,
         redirectorId: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, id))
+        parser.pushKey(lureKey(prefix, campaignId, lureId))
         parser.pushKey(lurePathKey(prefix, campaignId, path))
         parser.pushKey(lureIndexKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))

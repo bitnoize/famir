@@ -1,6 +1,6 @@
 export class CampaignModel {
   constructor(
-    readonly id: string,
+    readonly campaignId: string,
     readonly description: string,
     readonly landingSecret: string,
     readonly landingAuthPath: string,

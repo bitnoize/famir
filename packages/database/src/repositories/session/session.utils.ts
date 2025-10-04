@@ -8,7 +8,7 @@ export function buildModel(raw: RawSession | null): SessionModel | null {
 
   return new SessionModel(
     raw.campaign_id,
-    raw.id,
+    raw.session_id,
     raw.proxy_id,
     raw.secret,
     !!raw.is_landing,

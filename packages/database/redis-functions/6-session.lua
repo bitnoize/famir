@@ -14,7 +14,7 @@ local function create_session(keys, args)
 
   local model = {
     campaign_id = args[1],
-    id = args[2],
+    session_id = args[2],
     proxy_id = nil,
     secret = args[3],
     is_landing = 0,
@@ -27,8 +27,8 @@ local function create_session(keys, args)
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not (#model.id > 0) then
-    return redis.error_reply('ERR Wrong model.id')
+  if not (#model.session_id > 0) then
+    return redis.error_reply('ERR Wrong model.session_id')
   end
 
   if not (#model.secret > 0) then
@@ -112,7 +112,7 @@ local function read_session(keys, args)
   local values = redis.call(
     'HMGET', session_key,
     'campaign_id',
-    'id',
+    'session_id',
     'proxy_id',
     'secret',
     'is_landing',
@@ -127,7 +127,7 @@ local function read_session(keys, args)
 
   local model = {
     campaign_id = values[1],
-    id = values[2],
+    session_id = values[2],
     proxy_id = values[3],
     secret = values[4],
     is_landing = tonumber(values[5]),

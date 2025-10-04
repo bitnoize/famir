@@ -12,7 +12,7 @@ local function create_campaign(keys, args)
   local campaign_index_key = keys[2]
 
   local model = {
-    id = args[1],
+    campaign_id = args[1],
     description = args[2],
     landing_secret = args[3],
     landing_auth_path = args[4],
@@ -27,6 +27,10 @@ local function create_campaign(keys, args)
     created_at = tonumber(args[11]),
     updated_at = nil,
   }
+
+  if not (#model.campaign_id > 0) then
+    return redis.error_reply('ERR Wrong model.campaign_id')
+  end
 
   if not (#model.landing_secret > 0) then
     return redis.error_reply('ERR Wrong model.landing_secret')
@@ -81,7 +85,7 @@ local function create_campaign(keys, args)
 
   redis.call('HSET', campaign_key, unpack(store))
 
-  redis.call('ZADD', campaign_index_key, model.created_at, model.id)
+  redis.call('ZADD', campaign_index_key, model.created_at, model.campaign_id)
 
   return redis.status_reply('OK Campaign created')
 end
@@ -113,7 +117,7 @@ local function read_campaign(keys, args)
   -- stylua: ignore
   local values = redis.call(
     'HMGET', campaign_key,
-    'id',
+    'campaign_id',
     'description',
     'landing_secret',
     'landing_auth_path',
@@ -134,7 +138,7 @@ local function read_campaign(keys, args)
   end
 
   local model = {
-    id = values[1],
+    campaign_id = values[1],
     description = values[2],
     landing_secret = values[3],
     landing_auth_path = values[4],
@@ -304,10 +308,10 @@ local function delete_campaign(keys, args)
   end
 
   local data = {
-    id = redis.call('HGET', campaign_key, 'id'),
+    campaign_id = redis.call('HGET', campaign_key, 'campaign_id'),
   }
 
-  if not (data.id and #data.id > 0) then
+  if not (data.campaign_id and #data.campaign_id > 0) then
     return redis.error_reply('ERR Malform data.id')
   end
 
@@ -315,7 +319,7 @@ local function delete_campaign(keys, args)
 
   redis.call('DEL', campaign_key)
 
-  redis.call('ZREM', campaign_index_key, data.id)
+  redis.call('ZREM', campaign_index_key, data.campaign_id)
 
   return redis.status_reply('OK Campaign deleted')
 end

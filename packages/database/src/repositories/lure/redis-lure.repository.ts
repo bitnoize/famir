@@ -63,12 +63,12 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         this.connection.lure.create_lure(
           this.options.prefix,
           data.campaignId,
-          data.id,
+          data.lureId,
           data.path,
           data.redirectorId
         ),
 
-        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.id)
+        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.lureId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -92,7 +92,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       const raw = await this.connection.lure.read_lure(
         this.options.prefix,
         data.campaignId,
-        data.id
+        data.lureId
       )
 
       return buildModel(raw)
@@ -103,17 +103,17 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
   async readPath(data: ReadLurePathData): Promise<EnabledLureModel | null> {
     try {
-      const id = await this.connection.lure.read_lure_path(
+      const lureId = await this.connection.lure.read_lure_path(
         this.options.prefix,
         data.campaignId,
         data.path
       )
 
-      if (id === null) {
+      if (lureId === null) {
         return null
       }
 
-      const raw = await this.connection.lure.read_lure(this.options.prefix, data.campaignId, id)
+      const raw = await this.connection.lure.read_lure(this.options.prefix, data.campaignId, lureId)
 
       const model = buildModel(raw)
 
@@ -126,9 +126,9 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
   async enable(data: SwitchLureData): Promise<EnabledLureModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.lure.enable_lure(this.options.prefix, data.campaignId, data.id),
+        this.connection.lure.enable_lure(this.options.prefix, data.campaignId, data.lureId),
 
-        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.id)
+        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.lureId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -150,9 +150,9 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
   async disable(data: SwitchLureData): Promise<DisabledLureModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.lure.disable_lure(this.options.prefix, data.campaignId, data.id),
+        this.connection.lure.disable_lure(this.options.prefix, data.campaignId, data.lureId),
 
-        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.id)
+        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.lureId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -174,12 +174,12 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
   async delete(data: DeleteLureData): Promise<DisabledLureModel> {
     try {
       const [raw, status] = await Promise.all([
-        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.id),
+        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.lureId),
 
         this.connection.lure.delete_lure(
           this.options.prefix,
           data.campaignId,
-          data.id,
+          data.lureId,
           data.path,
           data.redirectorId
         )
@@ -210,7 +210,9 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       }
 
       const raws = await Promise.all(
-        index.map((id) => this.connection.lure.read_lure(this.options.prefix, data.campaignId, id))
+        index.map((lureId) =>
+          this.connection.lure.read_lure(this.options.prefix, data.campaignId, lureId)
+        )
       )
 
       return buildCollection(raws).filter(guardModel)

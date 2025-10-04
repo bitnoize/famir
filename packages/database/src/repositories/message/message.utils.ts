@@ -112,7 +112,7 @@ export function buildModel(
 
   return new MessageModel(
     raw.campaign_id,
-    raw.id,
+    raw.message_id,
     raw.proxy_id,
     raw.target_id,
     raw.session_id,

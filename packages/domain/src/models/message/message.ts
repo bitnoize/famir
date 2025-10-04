@@ -20,7 +20,7 @@ export type MessageResponseCookies = Record<string, MessageResponseCookie | null
 export class MessageModel {
   constructor(
     readonly campaignId: string,
-    readonly id: string,
+    readonly messageId: string,
     readonly proxyId: string,
     readonly targetId: string,
     readonly sessionId: string,

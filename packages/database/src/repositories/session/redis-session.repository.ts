@@ -52,11 +52,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.create_session(
           this.options.prefix,
           data.campaignId,
-          data.id,
+          data.sessionId,
           data.secret
         ),
 
-        this.connection.session.read_session(this.options.prefix, data.campaignId, data.id)
+        this.connection.session.read_session(this.options.prefix, data.campaignId, data.sessionId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -80,7 +80,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       const raw = await this.connection.session.read_session(
         this.options.prefix,
         data.campaignId,
-        data.id
+        data.sessionId
       )
 
       return buildModel(raw)
@@ -92,9 +92,9 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
   async auth(data: AuthSessionData): Promise<SessionModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.session.auth_session(this.options.prefix, data.campaignId, data.id),
+        this.connection.session.auth_session(this.options.prefix, data.campaignId, data.sessionId),
 
-        this.connection.session.read_session(this.options.prefix, data.campaignId, data.id)
+        this.connection.session.read_session(this.options.prefix, data.campaignId, data.sessionId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -120,11 +120,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
           this.options.prefix,
           data.campaignId,
           data.lureId,
-          data.id,
+          data.sessionId,
           data.secret
         ),
 
-        this.connection.session.read_session(this.options.prefix, data.campaignId, data.id)
+        this.connection.session.read_session(this.options.prefix, data.campaignId, data.sessionId)
       ])
 
       const [code, message] = parseStatusReply(status)

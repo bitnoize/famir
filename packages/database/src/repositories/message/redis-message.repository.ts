@@ -50,7 +50,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         this.connection.message.create_message(
           this.options.prefix,
           data.campaignId,
-          data.id,
+          data.messageId,
           data.proxyId,
           data.targetId,
           data.sessionId,
@@ -69,7 +69,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
           data.score
         ),
 
-        this.connection.message.read_message(this.options.prefix, data.campaignId, data.id)
+        this.connection.message.read_message(this.options.prefix, data.campaignId, data.messageId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -93,7 +93,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       const raw = await this.connection.message.read_message(
         this.options.prefix,
         data.campaignId,
-        data.id
+        data.messageId
       )
 
       return buildModel(this.assertSchema, raw)

@@ -63,7 +63,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.connection.target.create_target(
           this.options.prefix,
           data.campaignId,
-          data.id,
+          data.targetId,
           data.isLanding,
           data.donorSecure,
           data.donorSub,
@@ -84,7 +84,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           data.failureRedirectUrl
         ),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.id)
+        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -108,7 +108,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       const raw = await this.connection.target.read_target(
         this.options.prefix,
         data.campaignId,
-        data.id
+        data.targetId
       )
 
       return buildModel(raw)
@@ -122,7 +122,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       const raw = await this.connection.target.read_target(
         this.options.prefix,
         data.campaignId,
-        data.id
+        data.targetId
       )
 
       const model = buildModel(raw)
@@ -139,7 +139,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.connection.target.update_target(
           this.options.prefix,
           data.campaignId,
-          data.id,
+          data.targetId,
           data.connectTimeout,
           data.timeout,
           data.mainPage,
@@ -151,7 +151,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           data.failureRedirectUrl
         ),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.id)
+        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -173,9 +173,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   async enable(data: SwitchTargetData): Promise<EnabledTargetModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.target.enable_target(this.options.prefix, data.campaignId, data.id),
+        this.connection.target.enable_target(this.options.prefix, data.campaignId, data.targetId),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.id)
+        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -197,9 +197,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   async disable(data: SwitchTargetData): Promise<DisabledTargetModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.target.disable_target(this.options.prefix, data.campaignId, data.id),
+        this.connection.target.disable_target(this.options.prefix, data.campaignId, data.targetId),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.id)
+        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -221,9 +221,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   async delete(data: DeleteTargetData): Promise<DisabledTargetModel> {
     try {
       const [raw, status] = await Promise.all([
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.id),
+        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId),
 
-        this.connection.target.delete_target(this.options.prefix, data.campaignId, data.id)
+        this.connection.target.delete_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -254,8 +254,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       }
 
       const raws = await Promise.all(
-        index.map((id) =>
-          this.connection.target.read_target(this.options.prefix, data.campaignId, id)
+        index.map((targetId) =>
+          this.connection.target.read_target(this.options.prefix, data.campaignId, targetId)
         )
       )
 
@@ -277,8 +277,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       }
 
       const raws = await Promise.all(
-        index.map((id) =>
-          this.connection.target.read_target(this.options.prefix, data.campaignId, id)
+        index.map((targetId) =>
+          this.connection.target.read_target(this.options.prefix, data.campaignId, targetId)
         )
       )
 

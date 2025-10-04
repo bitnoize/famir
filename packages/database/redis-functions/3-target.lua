@@ -16,7 +16,7 @@ local function create_target(keys, args)
 
   local model = {
     campaign_id = args[1],
-    id = args[2],
+    target_id = args[2],
     is_landing = tonumber(args[3]),
     donor_secure = tonumber(args[4]),
     donor_sub = args[5],
@@ -45,8 +45,8 @@ local function create_target(keys, args)
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not (#model.id > 0) then
-    return redis.error_reply('ERR Wrong model.id')
+  if not (#model.target_id > 0) then
+    return redis.error_reply('ERR Wrong model.target_id')
   end
 
   if not model.is_landing then
@@ -139,7 +139,7 @@ local function create_target(keys, args)
   redis.call('SADD', target_unique_donor_key, donor)
   redis.call('SADD', target_unique_mirror_key, mirror)
 
-  redis.call('ZADD', target_index_key, model.created_at, model.id)
+  redis.call('ZADD', target_index_key, model.created_at, model.target_id)
 
   return redis.status_reply('OK Target created')
 end
@@ -173,7 +173,7 @@ local function read_target(keys, args)
   local values = redis.call(
     'HMGET', target_key,
     'campaign_id',
-    'id',
+    'target_id',
     'is_landing',
     'donor_secure',
     'donor_sub',
@@ -204,7 +204,7 @@ local function read_target(keys, args)
 
   local model = {
     campaign_id = values[1],
-    id = values[2],
+    target_id = values[2],
     is_landing = tonumber(values[3]),
     donor_secure = tonumber(values[4]),
     donor_sub = values[5],
@@ -496,7 +496,7 @@ local function delete_target(keys, args)
   end
 
   local data = {
-    id = redis.call('HGET', target_key, 'id'),
+    target_id = redis.call('HGET', target_key, 'target_id'),
     donor_sub = redis.call('HGET', target_key, 'donor_sub'),
     donor_domain = redis.call('HGET', target_key, 'donor_domain'),
     donor_port = tonumber(redis.call('HGET', target_key, 'donor_port')),
@@ -506,8 +506,8 @@ local function delete_target(keys, args)
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
-  if not (data.id and #data.id > 0) then
-    return redis.error_reply('ERR Malform data.id')
+  if not (data.target_id and #data.target_id > 0) then
+    return redis.error_reply('ERR Malform data.target_id')
   end
 
   if not (data.donor_sub and #data.donor_sub > 0) then
@@ -559,7 +559,7 @@ local function delete_target(keys, args)
   redis.call('SREM', target_unique_donor_key, donor)
   redis.call('SREM', target_unique_mirror_key, mirror)
 
-  redis.call('ZREM', target_index_key, data.id)
+  redis.call('ZREM', target_index_key, data.target_id)
 
   return redis.status_reply('OK Target deleted')
 end

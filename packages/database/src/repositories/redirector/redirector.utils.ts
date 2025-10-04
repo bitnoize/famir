@@ -8,7 +8,7 @@ export function buildModel(raw: RawRedirector | null): RedirectorModel | null {
 
   return new RedirectorModel(
     raw.campaign_id,
-    raw.id,
+    raw.redirector_id,
     raw.page,
     raw.lure_count,
     new Date(raw.created_at),

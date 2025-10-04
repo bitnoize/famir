@@ -1,7 +1,7 @@
 export class LureModel {
   constructor(
     readonly campaignId: string,
-    readonly id: string,
+    readonly lureId: string,
     readonly path: string,
     readonly redirectorId: string,
     readonly isEnabled: boolean,

@@ -16,7 +16,7 @@ local function create_message(keys, args)
 
   local model = {
     campaign_id = args[1],
-    id = args[2],
+    message_id = args[2],
     proxy_id = args[3],
     target_id = args[4],
     session_id = args[5],
@@ -40,8 +40,8 @@ local function create_message(keys, args)
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not (#model.id > 0) then
-    return redis.error_reply('ERR Wrong model.id')
+  if not (#model.message_id > 0) then
+    return redis.error_reply('ERR Wrong model.message_id')
   end
 
   if not (#model.proxy_id > 0) then
@@ -161,7 +161,7 @@ local function read_message(keys, args)
   local values = redis.call(
     'HMGET', message_key,
     'campaign_id',
-    'id',
+    'message_id',
     'proxy_id',
     'target_id',
     'session_id',
@@ -187,7 +187,7 @@ local function read_message(keys, args)
 
   local model = {
     campaign_id = values[1],
-    id = values[2],
+    message_id = values[2],
     proxy_id = values[3],
     target_id = values[4],
     session_id = values[5],

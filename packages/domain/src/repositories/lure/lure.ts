@@ -2,14 +2,14 @@ import { DisabledLureModel, EnabledLureModel, LureModel } from '../../models/ind
 
 export interface CreateLureData {
   campaignId: string
-  id: string
+  lureId: string
   path: string
   redirectorId: string
 }
 
 export interface ReadLureData {
   campaignId: string
-  id: string
+  lureId: string
 }
 
 export interface ReadLurePathData {
@@ -19,12 +19,12 @@ export interface ReadLurePathData {
 
 export interface SwitchLureData {
   campaignId: string
-  id: string
+  lureId: string
 }
 
 export interface DeleteLureData {
   campaignId: string
-  id: string
+  lureId: string
   path: string
   redirectorId: string
 }

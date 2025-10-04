@@ -9,7 +9,7 @@ import {
 
 export interface RawTarget {
   campaign_id: string
-  id: string
+  target_id: string
   is_landing: number
   donor_secure: number
   donor_sub: string
@@ -43,7 +43,7 @@ export const targetFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        id: string,
+        targetId: string,
         isLanding: boolean,
         donorSecure: boolean,
         donorSub: string,
@@ -64,13 +64,13 @@ export const targetFunctions = {
         failureRedirectUrl: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, id))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
         parser.pushKey(targetUniqueDonorKey(prefix, campaignId))
         parser.pushKey(targetUniqueMirrorKey(prefix, campaignId))
         parser.pushKey(targetIndexKey(prefix, campaignId))
 
         parser.push(campaignId)
-        parser.push(id)
+        parser.push(targetId)
         parser.push(isLanding ? '1' : '0')
         parser.push(donorSecure ? '1' : '0')
         parser.push(donorSub)
@@ -98,9 +98,9 @@ export const targetFunctions = {
     read_target: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, id))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
       },
 
       transformReply: undefined as unknown as () => RawTarget | null
@@ -124,7 +124,7 @@ export const targetFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        id: string,
+        targetId: string,
         connectTimeout: number | null | undefined,
         timeout: number | null | undefined,
         mainPage: string | null | undefined,
@@ -136,7 +136,7 @@ export const targetFunctions = {
         failureRedirectUrl: string | null | undefined
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, id))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
 
         if (connectTimeout != null) {
           parser.push('connect_timeout')
@@ -193,9 +193,9 @@ export const targetFunctions = {
     enable_target: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, id))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
 
         parser.push(Date.now().toString())
       },
@@ -206,9 +206,9 @@ export const targetFunctions = {
     disable_target: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, id))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
 
         parser.push(Date.now().toString())
       },
@@ -219,9 +219,9 @@ export const targetFunctions = {
     delete_target: {
       NUMBER_OF_KEYS: 5,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, id))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
         parser.pushKey(targetUniqueDonorKey(prefix, campaignId))
         parser.pushKey(targetUniqueMirrorKey(prefix, campaignId))
         parser.pushKey(targetIndexKey(prefix, campaignId))

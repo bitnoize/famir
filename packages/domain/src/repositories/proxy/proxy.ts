@@ -2,23 +2,23 @@ import { DisabledProxyModel, EnabledProxyModel, ProxyModel } from '../../models/
 
 export interface CreateProxyData {
   campaignId: string
-  id: string
+  proxyId: string
   url: string
 }
 
 export interface ReadProxyData {
   campaignId: string
-  id: string
+  proxyId: string
 }
 
 export interface SwitchProxyData {
   campaignId: string
-  id: string
+  proxyId: string
 }
 
 export interface DeleteProxyData {
   campaignId: string
-  id: string
+  proxyId: string
 }
 
 export interface ListProxiesData {

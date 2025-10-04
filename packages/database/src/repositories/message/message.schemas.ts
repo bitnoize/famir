@@ -5,8 +5,10 @@ import {
   MessageRequestCookie,
   MessageRequestCookies,
   MessageResponseCookie,
-  MessageResponseCookies
+  MessageResponseCookies,
+  ReadMessageData
 } from '@famir/domain'
+import { customIdentSchema } from '@famir/validator'
 
 export const messageHeaderSchema: JSONSchemaType<MessageHeader> = {
   type: ['string', 'array'],
@@ -94,4 +96,14 @@ export const messageResponseCookiesSchema: JSONSchemaType<MessageResponseCookies
     ...messageResponseCookieSchema,
     nullable: true
   }
+} as const
+
+export const readMessageDataSchema: JSONSchemaType<ReadMessageData> = {
+  type: 'object',
+  required: ['campaignId', 'messageId'],
+  properties: {
+    campaignId: customIdentSchema,
+    messageId: customIdentSchema
+  },
+  additionalProperties: false
 } as const

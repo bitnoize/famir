@@ -8,7 +8,7 @@ export function buildModel(raw: RawLure | null): LureModel | null {
 
   return new LureModel(
     raw.campaign_id,
-    raw.id,
+    raw.lure_id,
     raw.path,
     raw.redirector_id,
     !!raw.is_enabled,

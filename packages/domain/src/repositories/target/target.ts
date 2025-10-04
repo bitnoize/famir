@@ -2,7 +2,7 @@ import { DisabledTargetModel, EnabledTargetModel, TargetModel } from '../../mode
 
 export interface CreateTargetData {
   campaignId: string
-  id: string
+  targetId: string
   isLanding: boolean
   donorSecure: boolean
   donorSub: string
@@ -25,12 +25,12 @@ export interface CreateTargetData {
 
 export interface ReadTargetData {
   campaignId: string
-  id: string
+  targetId: string
 }
 
 export interface UpdateTargetData {
   campaignId: string
-  id: string
+  targetId: string
   connectTimeout: number | null | undefined
   timeout: number | null | undefined
   mainPage: string | null | undefined
@@ -44,12 +44,12 @@ export interface UpdateTargetData {
 
 export interface SwitchTargetData {
   campaignId: string
-  id: string
+  targetId: string
 }
 
 export interface DeleteTargetData {
   campaignId: string
-  id: string
+  targetId: string
 }
 
 export interface ListTargetsData {

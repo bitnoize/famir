@@ -10,8 +10,8 @@ export const campaignIndexKey = (prefix: string) => {
   return buildKey(prefix, 'campaign-index')
 }
 
-export const proxyKey = (prefix: string, campaignId: string, id: string) => {
-  return buildKey(prefix, 'proxy', campaignId, id)
+export const proxyKey = (prefix: string, campaignId: string, proxyId: string) => {
+  return buildKey(prefix, 'proxy', campaignId, proxyId)
 }
 
 export const proxyUniqueUrlKey = (prefix: string, campaignId: string) => {
@@ -26,8 +26,8 @@ export const enabledProxyIndexKey = (prefix: string, campaignId: string) => {
   return buildKey(prefix, 'enabled-proxy-index', campaignId)
 }
 
-export const targetKey = (prefix: string, campaignId: string, id: string) => {
-  return buildKey(prefix, 'target', campaignId, id)
+export const targetKey = (prefix: string, campaignId: string, targetId: string) => {
+  return buildKey(prefix, 'target', campaignId, targetId)
 }
 
 export const targetUniqueDonorKey = (prefix: string, campaignId: string) => {
@@ -42,16 +42,16 @@ export const targetIndexKey = (prefix: string, campaignId: string) => {
   return buildKey(prefix, 'target-index', campaignId)
 }
 
-export const redirectorKey = (prefix: string, campaignId: string, id: string) => {
-  return buildKey(prefix, 'redirector', campaignId, id)
+export const redirectorKey = (prefix: string, campaignId: string, redirectorId: string) => {
+  return buildKey(prefix, 'redirector', campaignId, redirectorId)
 }
 
 export const redirectorIndexKey = (prefix: string, campaignId: string) => {
   return buildKey(prefix, 'redirector-index', campaignId)
 }
 
-export const lureKey = (prefix: string, campaignId: string, id: string) => {
-  return buildKey(prefix, 'lure', campaignId, id)
+export const lureKey = (prefix: string, campaignId: string, lureId: string) => {
+  return buildKey(prefix, 'lure', campaignId, lureId)
 }
 
 export const lurePathKey = (prefix: string, campaignId: string, path: string) => {
@@ -62,10 +62,10 @@ export const lureIndexKey = (prefix: string, campaignId: string) => {
   return buildKey(prefix, 'lure-index', campaignId)
 }
 
-export const sessionKey = (prefix: string, campaignId: string, id: string) => {
-  return buildKey(prefix, 'session', campaignId, id)
+export const sessionKey = (prefix: string, campaignId: string, sessionId: string) => {
+  return buildKey(prefix, 'session', campaignId, sessionId)
 }
 
-export const messageKey = (prefix: string, campaignId: string, id: string) => {
-  return buildKey(prefix, 'message', campaignId, id)
+export const messageKey = (prefix: string, campaignId: string, messageId: string) => {
+  return buildKey(prefix, 'message', campaignId, messageId)
 }

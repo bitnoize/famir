@@ -1,7 +1,7 @@
 export class ProxyModel {
   constructor(
     readonly campaignId: string,
-    readonly id: string,
+    readonly proxyId: string,
     readonly url: string,
     readonly isEnabled: boolean,
     readonly messageCount: number,

@@ -8,7 +8,7 @@ export function buildModel(raw: RawProxy | null): ProxyModel | null {
 
   return new ProxyModel(
     raw.campaign_id,
-    raw.id,
+    raw.proxy_id,
     raw.url,
     !!raw.is_enabled,
     raw.message_count,

@@ -2,24 +2,24 @@ import { SessionModel } from '../../models/index.js'
 
 export interface CreateSessionData {
   campaignId: string
-  id: string
+  sessionId: string
   secret: string
 }
 
 export interface ReadSessionData {
   campaignId: string
-  id: string
+  sessionId: string
 }
 
 export interface AuthSessionData {
   campaignId: string
-  id: string
+  sessionId: string
 }
 
 export interface UpgradeSessionData {
   campaignId: string
   lureId: string
-  id: string
+  sessionId: string
   secret: string
 }
 

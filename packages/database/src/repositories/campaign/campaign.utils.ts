@@ -7,7 +7,7 @@ export function buildModel(raw: RawCampaign | null): CampaignModel | null {
   }
 
   return new CampaignModel(
-    raw.id,
+    raw.campaign_id,
     raw.description,
     raw.landing_secret,
     raw.landing_auth_path,

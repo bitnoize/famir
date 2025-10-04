@@ -7,7 +7,7 @@ import {
 
 export interface CreateMessageData {
   campaignId: string
-  id: string
+  messageId: string
   proxyId: string
   targetId: string
   sessionId: string
@@ -28,7 +28,7 @@ export interface CreateMessageData {
 
 export interface ReadMessageData {
   campaignId: string
-  id: string
+  messageId: string
 }
 
 export interface MessageRepository {

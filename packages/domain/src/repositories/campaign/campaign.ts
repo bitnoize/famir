@@ -1,24 +1,24 @@
 import { CampaignModel } from '../../models/index.js'
 
 export interface CreateCampaignData {
-  id: string
-  description: string | null | undefined
+  campaignId: string
+  description: string
   landingSecret: string | null | undefined
-  landingAuthPath: string | null | undefined
-  landingAuthParam: string | null | undefined
-  landingLureParam: string | null | undefined
-  sessionCookieName: string | null | undefined
-  sessionExpire: number | null | undefined
-  newSessionExpire: number | null | undefined
-  messageExpire: number | null | undefined
+  landingAuthPath: string
+  landingAuthParam: string
+  landingLureParam: string
+  sessionCookieName: string
+  sessionExpire: number
+  newSessionExpire: number
+  messageExpire: number
 }
 
 export interface ReadCampaignData {
-  id: string
+  campaignId: string
 }
 
 export interface UpdateCampaignData {
-  id: string
+  campaignId: string
   description: string | null | undefined
   sessionExpire: number | null | undefined
   newSessionExpire: number | null | undefined
@@ -26,7 +26,7 @@ export interface UpdateCampaignData {
 }
 
 export interface DeleteCampaignData {
-  id: string
+  campaignId: string
 }
 
 export interface CampaignRepository {

@@ -8,7 +8,7 @@ export function buildModel(raw: RawTarget | null): TargetModel | null {
 
   return new TargetModel(
     raw.campaign_id,
-    raw.id,
+    raw.target_id,
     !!raw.is_landing,
     !!raw.donor_secure,
     raw.donor_sub,

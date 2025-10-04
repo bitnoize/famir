@@ -16,7 +16,7 @@ local function create_lure(keys, args)
 
   local model = {
     campaign_id = args[1],
-    id = args[2],
+    lure_id = args[2],
     path = args[3],
     redirector_id = args[4],
     is_enabled = 0,
@@ -29,8 +29,8 @@ local function create_lure(keys, args)
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not (#model.id > 0) then
-    return redis.error_reply('ERR Wrong model.id')
+  if not (#model.lure_id > 0) then
+    return redis.error_reply('ERR Wrong model.lure_id')
   end
 
   if not (#model.path > 0) then
@@ -74,9 +74,9 @@ local function create_lure(keys, args)
 
   redis.call('HSET', lure_key, unpack(store))
 
-  redis.call('SET', lure_path_key, model.id)
+  redis.call('SET', lure_path_key, model.lure_id)
 
-  redis.call('ZADD', lure_index_key, model.created_at, model.id)
+  redis.call('ZADD', lure_index_key, model.created_at, model.lure_id)
 
   redis.call('HINCRBY', redirector_key, 'lure_count', 1)
 
@@ -112,7 +112,7 @@ local function read_lure(keys, args)
   local values =  redis.call(
     'HMGET', lure_key,
     'campaign_id',
-    'id',
+    'lure_id',
     'path',
     'redirector_id',
     'is_enabled',
@@ -127,7 +127,7 @@ local function read_lure(keys, args)
 
   local model = {
     campaign_id = values[1],
-    id = values[2],
+    lure_id = values[2],
     path = values[3],
     redirector_id = values[4],
     is_enabled = tonumber(values[5]),
@@ -347,15 +347,15 @@ local function delete_lure(keys, args)
   end
 
   local data = {
-    id = redis.call('HGET', lure_key, 'id'),
+    lure_id = redis.call('HGET', lure_key, 'lure_id'),
     redirector_id = redis.call('HGET', lure_key, 'redirector_id'),
     orig_path_id = redis.call('GET', lure_path_key),
-    orig_redirector_id = redis.call('HGET', redirector_key, 'id'),
+    orig_redirector_id = redis.call('HGET', redirector_key, 'redirector_id'),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
-  if not (data.id and #data.id > 0) then
-    return redis.error_reply('ERR Malform data.id')
+  if not (data.lure_id and #data.lure_id > 0) then
+    return redis.error_reply('ERR Malform data.lure_id')
   end
 
   if not (data.redirector_id and #data.redirector_id > 0) then
@@ -366,7 +366,7 @@ local function delete_lure(keys, args)
     return redis.error_reply('ERR Malform data.orig_path_id')
   end
 
-  if not (data.id == data.orig_path_id) then
+  if not (data.lure_id == data.orig_path_id) then
     return redis.status_reply('FORBIDDEN Lure path not match')
   end
 
@@ -392,7 +392,7 @@ local function delete_lure(keys, args)
 
   redis.call('DEL', lure_path_key)
 
-  redis.call('ZREM', lure_index_key, data.id)
+  redis.call('ZREM', lure_index_key, data.lure_id)
 
   redis.call('HINCRBY', redirector_key, 'lure_count', -1)
 

@@ -3,7 +3,7 @@ export const TARGET_SUB_ROOT = '.'
 export class TargetModel {
   constructor(
     readonly campaignId: string,
-    readonly id: string,
+    readonly targetId: string,
     readonly isLanding: boolean,
     readonly donorSecure: boolean,
     readonly donorSub: string,

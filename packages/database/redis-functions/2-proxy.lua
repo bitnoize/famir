@@ -15,7 +15,7 @@ local function create_proxy(keys, args)
 
   local model = {
     campaign_id = args[1],
-    id = args[2],
+    proxy_id = args[2],
     url = args[3],
     is_enabled = 0,
     message_count = 0,
@@ -27,8 +27,8 @@ local function create_proxy(keys, args)
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not (#model.id > 0) then
-    return redis.error_reply('ERR Wrong model.id')
+  if not (#model.proxy_id > 0) then
+    return redis.error_reply('ERR Wrong model.proxy_id')
   end
 
   if not (#model.url > 0) then
@@ -66,7 +66,7 @@ local function create_proxy(keys, args)
 
   redis.call('SADD', proxy_unique_url_key, model.url)
 
-  redis.call('ZADD', proxy_index_key, model.created_at, model.id)
+  redis.call('ZADD', proxy_index_key, model.created_at, model.proxy_id)
 
   return redis.status_reply('OK Proxy created')
 end
@@ -100,7 +100,7 @@ local function read_proxy(keys, args)
   local values = redis.call(
     'HMGET', proxy_key,
     'campaign_id',
-    'id',
+    'proxy_id',
     'url',
     'is_enabled',
     'message_count',
@@ -114,7 +114,7 @@ local function read_proxy(keys, args)
 
   local model = {
     campaign_id = values[1],
-    id = values[2],
+    proxy_id = values[2],
     url = values[3],
     is_enabled = tonumber(values[4]),
     message_count = tonumber(values[5]),
@@ -192,12 +192,12 @@ local function enable_proxy(keys, args)
   end
 
   local data = {
-    id = redis.call('HGET', proxy_key, 'id'),
+    proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
 
-  if not (data.id and #data.id > 0) then
-    return redis.error_reply('ERR Malform data.id')
+  if not (data.proxy_id and #data.proxy_id > 0) then
+    return redis.error_reply('ERR Malform data.proxy_id')
   end
 
   if not data.is_enabled then
@@ -217,7 +217,7 @@ local function enable_proxy(keys, args)
     'updated_at', params.updated_at
   )
 
-  redis.call('SADD', enabled_proxy_index_key, data.id)
+  redis.call('SADD', enabled_proxy_index_key, data.proxy_id)
 
   return redis.status_reply('OK Proxy enabled')
 end
@@ -257,12 +257,12 @@ local function disable_proxy(keys, args)
   end
 
   local data = {
-    id = redis.call('HGET', proxy_key, 'id'),
+    proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
 
-  if not (data.id and #data.id > 0) then
-    return redis.error_reply('ERR Malform data.id')
+  if not (data.proxy_id and #data.proxy_id > 0) then
+    return redis.error_reply('ERR Malform data.proxy_id')
   end
 
   if not data.is_enabled then
@@ -282,7 +282,7 @@ local function disable_proxy(keys, args)
     'updated_at', params.updated_at
   )
 
-  redis.call('SREM', enabled_proxy_index_key, data.id)
+  redis.call('SREM', enabled_proxy_index_key, data.proxy_id)
 
   return redis.status_reply('OK Proxy disabled')
 end
@@ -315,13 +315,13 @@ local function delete_proxy(keys, args)
   end
 
   local data = {
-    id = redis.call('HGET', proxy_key, 'id'),
+    proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     url = redis.call('HGET', proxy_key, 'url'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
 
-  if not (data.id and #data.id > 0) then
-    return redis.error_reply('ERR Malform data.id')
+  if not (data.proxy_id and #data.proxy_id > 0) then
+    return redis.error_reply('ERR Malform data.proxy_id')
   end
 
   if not (data.url and #data.url > 0) then
@@ -342,7 +342,7 @@ local function delete_proxy(keys, args)
 
   redis.call('SREM', proxy_unique_url_key, data.url)
 
-  redis.call('ZREM', proxy_index_key, data.id)
+  redis.call('ZREM', proxy_index_key, data.proxy_id)
 
   return redis.status_reply('OK Proxy deleted')
 end

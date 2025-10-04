@@ -33,44 +33,44 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
 
 export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
   type: 'object',
-  required: ['id'],
+  required: ['campaignId'],
   properties: {
-    id: customIdentSchema,
+    campaignId: customIdentSchema,
     description: {
       ...campaignDescriptionSchema,
-      nullable: true
+      default: ''
     },
     landingSecret: {
       ...randomIdentSchema,
       nullable: true
     },
     landingAuthPath: {
-      ...customIdentSchema,
-      nullable: true
+      type: 'string',
+      default: '/fake-auth'
     },
     landingAuthParam: {
       ...customIdentSchema,
-      nullable: true
+      default: 'data'
     },
     landingLureParam: {
       ...customIdentSchema,
-      nullable: true
+      default: 'data'
     },
     sessionCookieName: {
-      ...customIdentSchema,
-      nullable: true
+      type: 'string',
+      default: 'fake-sess'
     },
     sessionExpire: {
       ...campaignSessionExpireSchema,
-      nullable: true
+      default: 24 * 3600 * 1000
     },
     newSessionExpire: {
       ...campaignNewSessionExpireSchema,
-      nullable: true
+      default: 300 * 1000
     },
     messageExpire: {
       ...campaignMessageExpireSchema,
-      nullable: true
+      default: 3600 * 1000
     }
   },
   additionalProperties: false
@@ -78,17 +78,17 @@ export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
 
 export const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
   type: 'object',
-  required: ['id'],
+  required: ['campaignId'],
   properties: {
-    id: customIdentSchema
+    campaignId: customIdentSchema
   }
 }
 
 export const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
   type: 'object',
-  required: ['id'],
+  required: ['campaignId'],
   properties: {
-    id: customIdentSchema,
+    campaignId: customIdentSchema,
     description: {
       ...campaignDescriptionSchema,
       nullable: true
@@ -111,8 +111,8 @@ export const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
 
 export const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
   type: 'object',
-  required: ['id'],
+  required: ['campaignId'],
   properties: {
-    id: customIdentSchema
+    campaignId: customIdentSchema
   }
 }

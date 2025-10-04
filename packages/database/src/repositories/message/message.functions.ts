@@ -4,7 +4,7 @@ import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../
 
 export interface RawMessage {
   campaign_id: string
-  id: string
+  message_id: string
   proxy_id: string
   target_id: string
   session_id: string
@@ -33,7 +33,7 @@ export const messageFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        id: string,
+        messageId: string,
         proxyId: string,
         targetId: string,
         sessionId: string,
@@ -52,13 +52,13 @@ export const messageFunctions = {
         score: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(messageKey(prefix, campaignId, id))
-        parser.pushKey(proxyKey(prefix, campaignId, id))
-        parser.pushKey(targetKey(prefix, campaignId, id))
-        parser.pushKey(sessionKey(prefix, campaignId, id))
+        parser.pushKey(messageKey(prefix, campaignId, messageId))
+        parser.pushKey(proxyKey(prefix, campaignId, messageId))
+        parser.pushKey(targetKey(prefix, campaignId, messageId))
+        parser.pushKey(sessionKey(prefix, campaignId, messageId))
 
         parser.push(campaignId)
-        parser.push(id)
+        parser.push(messageId)
         parser.push(proxyId)
         parser.push(targetId)
         parser.push(sessionId)
@@ -84,9 +84,9 @@ export const messageFunctions = {
     read_message: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(messageKey(prefix, campaignId, id))
+        parser.pushKey(messageKey(prefix, campaignId, messageId))
       },
 
       transformReply: undefined as unknown as () => RawMessage | null

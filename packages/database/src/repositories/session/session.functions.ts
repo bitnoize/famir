@@ -3,7 +3,7 @@ import { campaignKey, enabledProxyIndexKey, lureKey, sessionKey } from '../../da
 
 export interface RawSession {
   campaign_id: string
-  id: string
+  session_id: string
   proxy_id: string
   secret: string
   is_landing: number
@@ -21,15 +21,15 @@ export const sessionFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        id: string,
+        sessionId: string,
         secret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(sessionKey(prefix, campaignId, id))
+        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
         parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
         parser.push(campaignId)
-        parser.push(id)
+        parser.push(sessionId)
         parser.push(secret)
         parser.push(Date.now().toString())
       },
@@ -40,9 +40,9 @@ export const sessionFunctions = {
     read_session: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, sessionId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(sessionKey(prefix, campaignId, id))
+        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
       },
 
       transformReply: undefined as unknown as () => RawSession | null
@@ -51,9 +51,9 @@ export const sessionFunctions = {
     auth_session: {
       NUMBER_OF_KEYS: 3,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, id: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, sessionId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(sessionKey(prefix, campaignId, id))
+        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
         parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
         parser.push(Date.now().toString())
@@ -70,12 +70,12 @@ export const sessionFunctions = {
         prefix: string,
         campaignId: string,
         lureId: string,
-        id: string,
+        sessionId: string,
         secret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
-        parser.pushKey(sessionKey(prefix, campaignId, id))
+        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
 
         parser.push(secret)
       },

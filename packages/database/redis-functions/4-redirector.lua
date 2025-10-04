@@ -14,7 +14,7 @@ local function create_redirector(keys, args)
 
   local model = {
     campaign_id = args[1],
-    id = args[2],
+    redirector_id = args[2],
     page = args[3],
     lure_count = 0,
     created_at = tonumber(args[4]),
@@ -25,8 +25,8 @@ local function create_redirector(keys, args)
     return redis.error_reply('ERR Wrong model.campaign_id')
   end
 
-  if not (#model.id > 0) then
-    return redis.error_reply('ERR Wrong model.id')
+  if not (#model.redirector_id > 0) then
+    return redis.error_reply('ERR Wrong model.redirector_id')
   end
 
   if not (model.created_at and model.created_at > 0) then
@@ -54,7 +54,7 @@ local function create_redirector(keys, args)
 
   redis.call('HSET', redirector_key, unpack(store))
 
-  redis.call('ZADD', redirector_index_key, model.created_at, model.id)
+  redis.call('ZADD', redirector_index_key, model.created_at, model.redirector_id)
 
   return redis.status_reply('OK Redirector created')
 end
@@ -88,7 +88,7 @@ local function read_redirector(keys, args)
   local values = redis.call(
     'HMGET', redirector_key,
     'campaign_id',
-    'id',
+    'redirector_id',
     'page',
     'lure_count',
     'created_at',
@@ -101,7 +101,7 @@ local function read_redirector(keys, args)
 
   local model = {
     campaign_id = values[1],
-    id = values[2],
+    redirector_id = values[2],
     page = values[3],
     lure_count = tonumber(values[4]),
     created_at = tonumber(values[5]),
@@ -235,12 +235,12 @@ local function delete_redirector(keys, args)
   end
 
   local data = {
-    id = redis.call('HGET', redirector_key, 'id'),
+    redirector_id = redis.call('HGET', redirector_key, 'redirector_id'),
     lure_count = tonumber(redis.call('HGET', redirector_key, 'lure_count')),
   }
 
-  if not (data.id and #data.id > 0) then
-    return redis.error_reply('ERR Malform data.id')
+  if not (data.redirector_id and #data.redirector_id > 0) then
+    return redis.error_reply('ERR Malform data.redirector_id')
   end
 
   if not (data.lure_count and data.lure_count >= 0) then
@@ -255,7 +255,7 @@ local function delete_redirector(keys, args)
 
   redis.call('DEL', redirector_key)
 
-  redis.call('ZREM', redirector_index_key, data.id)
+  redis.call('ZREM', redirector_index_key, data.redirector_id)
 
   return redis.status_reply('OK Redirector deleted')
 end

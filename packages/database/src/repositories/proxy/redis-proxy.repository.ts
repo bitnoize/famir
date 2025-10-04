@@ -59,9 +59,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   async create(data: CreateProxyData): Promise<DisabledProxyModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.proxy.create_proxy(this.options.prefix, data.campaignId, data.id, data.url),
+        this.connection.proxy.create_proxy(
+          this.options.prefix,
+          data.campaignId,
+          data.proxyId,
+          data.url
+        ),
 
-        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.id)
+        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -85,7 +90,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       const raw = await this.connection.proxy.read_proxy(
         this.options.prefix,
         data.campaignId,
-        data.id
+        data.proxyId
       )
 
       return buildModel(raw)
@@ -99,7 +104,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       const raw = await this.connection.proxy.read_proxy(
         this.options.prefix,
         data.campaignId,
-        data.id
+        data.proxyId
       )
 
       const model = buildModel(raw)
@@ -113,9 +118,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   async enable(data: SwitchProxyData): Promise<EnabledProxyModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.proxy.enable_proxy(this.options.prefix, data.campaignId, data.id),
+        this.connection.proxy.enable_proxy(this.options.prefix, data.campaignId, data.proxyId),
 
-        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.id)
+        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -137,9 +142,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   async disable(data: SwitchProxyData): Promise<DisabledProxyModel> {
     try {
       const [status, raw] = await Promise.all([
-        this.connection.proxy.disable_proxy(this.options.prefix, data.campaignId, data.id),
+        this.connection.proxy.disable_proxy(this.options.prefix, data.campaignId, data.proxyId),
 
-        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.id)
+        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -161,9 +166,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   async delete(data: DeleteProxyData): Promise<DisabledProxyModel> {
     try {
       const [raw, status] = await Promise.all([
-        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.id),
+        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId),
 
-        this.connection.proxy.delete_proxy(this.options.prefix, data.campaignId, data.id)
+        this.connection.proxy.delete_proxy(this.options.prefix, data.campaignId, data.proxyId)
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -194,8 +199,8 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       }
 
       const raws = await Promise.all(
-        index.map((id) =>
-          this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, id)
+        index.map((proxyId) =>
+          this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, proxyId)
         )
       )
 

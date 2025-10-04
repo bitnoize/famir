@@ -53,11 +53,15 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         this.connection.redirector.create_redirector(
           this.options.prefix,
           data.campaignId,
-          data.id,
+          data.redirectorId,
           data.page
         ),
 
-        this.connection.redirector.read_redirector(this.options.prefix, data.campaignId, data.id)
+        this.connection.redirector.read_redirector(
+          this.options.prefix,
+          data.campaignId,
+          data.redirectorId
+        )
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -81,7 +85,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       const raw = await this.connection.redirector.read_redirector(
         this.options.prefix,
         data.campaignId,
-        data.id
+        data.redirectorId
       )
 
       return buildModel(raw)
@@ -96,11 +100,15 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         this.connection.redirector.update_redirector(
           this.options.prefix,
           data.campaignId,
-          data.id,
+          data.redirectorId,
           data.page
         ),
 
-        this.connection.redirector.read_redirector(this.options.prefix, data.campaignId, data.id)
+        this.connection.redirector.read_redirector(
+          this.options.prefix,
+          data.campaignId,
+          data.redirectorId
+        )
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -122,9 +130,17 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
   async delete(data: DeleteRedirectorData): Promise<RedirectorModel> {
     try {
       const [raw, status] = await Promise.all([
-        this.connection.redirector.read_redirector(this.options.prefix, data.campaignId, data.id),
+        this.connection.redirector.read_redirector(
+          this.options.prefix,
+          data.campaignId,
+          data.redirectorId
+        ),
 
-        this.connection.redirector.delete_redirector(this.options.prefix, data.campaignId, data.id)
+        this.connection.redirector.delete_redirector(
+          this.options.prefix,
+          data.campaignId,
+          data.redirectorId
+        )
       ])
 
       const [code, message] = parseStatusReply(status)
@@ -155,8 +171,12 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       }
 
       const raws = await Promise.all(
-        index.map((id) =>
-          this.connection.redirector.read_redirector(this.options.prefix, data.campaignId, id)
+        index.map((redirectorId) =>
+          this.connection.redirector.read_redirector(
+            this.options.prefix,
+            data.campaignId,
+            redirectorId
+          )
         )
       )
 

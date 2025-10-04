@@ -9,7 +9,7 @@ import {
 } from '../../database.keys.js'
 
 export interface RawCampaign {
-  id: string
+  campaign_id: string
   description: string
   landing_secret: string
   landing_auth_path: string
@@ -37,7 +37,7 @@ export const campaignFunctions = {
       parseCommand(
         parser: CommandParser,
         prefix: string,
-        id: string,
+        campaignId: string,
         description: string,
         landingSecret: string,
         landingAuthPath: string,
@@ -48,10 +48,10 @@ export const campaignFunctions = {
         newSessionExpire: number,
         messageExpire: number
       ) {
-        parser.pushKey(campaignKey(prefix, id))
+        parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignIndexKey(prefix))
 
-        parser.push(id)
+        parser.push(campaignId)
         parser.push(description)
         parser.push(landingSecret)
         parser.push(landingAuthPath)
@@ -70,12 +70,12 @@ export const campaignFunctions = {
     read_campaign: {
       NUMBER_OF_KEYS: 5,
 
-      parseCommand(parser: CommandParser, prefix: string, id: string) {
-        parser.pushKey(campaignKey(prefix, id))
-        parser.pushKey(proxyIndexKey(prefix, id))
-        parser.pushKey(targetIndexKey(prefix, id))
-        parser.pushKey(redirectorIndexKey(prefix, id))
-        parser.pushKey(lureIndexKey(prefix, id))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(proxyIndexKey(prefix, campaignId))
+        parser.pushKey(targetIndexKey(prefix, campaignId))
+        parser.pushKey(redirectorIndexKey(prefix, campaignId))
+        parser.pushKey(lureIndexKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => RawCampaign | null
@@ -97,13 +97,13 @@ export const campaignFunctions = {
       parseCommand(
         parser: CommandParser,
         prefix: string,
-        id: string,
+        campaignId: string,
         description: string | null | undefined,
         sessionExpire: number | null | undefined,
         newSessionExpire: number | null | undefined,
         messageExpire: number | null | undefined
       ) {
-        parser.pushKey(campaignKey(prefix, id))
+        parser.pushKey(campaignKey(prefix, campaignId))
 
         if (description != null) {
           parser.push('description')
@@ -135,13 +135,13 @@ export const campaignFunctions = {
     delete_campaign: {
       NUMBER_OF_KEYS: 6,
 
-      parseCommand(parser: CommandParser, prefix: string, id: string) {
-        parser.pushKey(campaignKey(prefix, id))
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignIndexKey(prefix))
-        parser.pushKey(proxyIndexKey(prefix, id))
-        parser.pushKey(targetIndexKey(prefix, id))
-        parser.pushKey(redirectorIndexKey(prefix, id))
-        parser.pushKey(lureIndexKey(prefix, id))
+        parser.pushKey(proxyIndexKey(prefix, campaignId))
+        parser.pushKey(targetIndexKey(prefix, campaignId))
+        parser.pushKey(redirectorIndexKey(prefix, campaignId))
+        parser.pushKey(lureIndexKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => string
