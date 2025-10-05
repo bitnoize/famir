@@ -13,7 +13,7 @@ import {
 } from '@famir/domain'
 import { Curl, CurlFeature } from 'node-libcurl'
 import { HttpClientConfig, HttpClientOptions } from './http-client.js'
-import { buildOptions, filterOptionsSecrets, internalSchemas } from './http-client.utils.js'
+import { buildOptions, filterOptionsSecrets } from './http-client.utils.js'
 
 export class CurlHttpClient implements HttpClient {
   static inject(container: DIContainer) {
@@ -35,8 +35,6 @@ export class CurlHttpClient implements HttpClient {
     config: Config<HttpClientConfig>,
     protected readonly logger: Logger
   ) {
-    validator.addSchemas(internalSchemas)
-
     this.options = buildOptions(config.data)
 
     this.logger.debug(

@@ -13,7 +13,6 @@ import {
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
-import { internalSchemas } from './reverse-proxy.utils.js'
 
 export const REVERSE_PROXY_APP = Symbol('ReverseProxyApp')
 
@@ -51,8 +50,6 @@ export class ReverseProxyApp {
         await this.stop()
       })
     })
-
-    validator.addSchemas(internalSchemas)
   }
 
   async start(): Promise<void> {

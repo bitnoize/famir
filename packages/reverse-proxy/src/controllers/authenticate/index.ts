@@ -1,2 +1,2 @@
 export * from './authenticate.controller.js'
-export * from './authenticate.schemas.js'
+export * from './authenticate.module.js'

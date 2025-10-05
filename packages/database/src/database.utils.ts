@@ -1,17 +1,6 @@
 import { arrayIncludes, filterSecrets } from '@famir/common'
-import { DATABASE_STATUS_CODES, DatabaseStatusCode, ValidatorSchemas } from '@famir/domain'
+import { DATABASE_STATUS_CODES, DatabaseStatusCode } from '@famir/domain'
 import { DatabaseConfig, DatabaseConnectorOptions, DatabaseRepositoryOptions } from './database.js'
-import {
-  messageHeadersSchema,
-  messageRequestCookiesSchema,
-  messageResponseCookiesSchema
-} from './repositories/index.js'
-
-export const internalSchemas: ValidatorSchemas = {
-  'message-headers': messageHeadersSchema,
-  'message-request-cookies': messageRequestCookiesSchema,
-  'message-response-cookies': messageResponseCookiesSchema
-}
 
 export function buildConnectorOptions(data: DatabaseConfig): DatabaseConnectorOptions {
   return {

@@ -4,9 +4,9 @@ import {
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
-import { analyzeLogJobDataSchema } from './analyze-log.schemas.js'
+import { analyzeLogJobDataSchema } from '@famir/workflow'
 
-export const internalSchemas: ValidatorSchemas = {
+export const addSchemas: ValidatorSchemas = {
   'analyze-log-job-data': analyzeLogJobDataSchema
 }
 

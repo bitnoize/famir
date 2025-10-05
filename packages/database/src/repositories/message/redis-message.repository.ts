@@ -19,7 +19,7 @@ import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { assertModel, buildModel } from './message.utils.js'
+import { addSchemas, assertModel, buildModel } from './message.utils.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
   static inject(container: DIContainer) {
@@ -42,6 +42,8 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     connection: RedisDatabaseConnection
   ) {
     super(validator, config, logger, connection, 'message')
+
+    validator.addSchemas(addSchemas)
   }
 
   async create(data: CreateMessageData): Promise<MessageModel> {

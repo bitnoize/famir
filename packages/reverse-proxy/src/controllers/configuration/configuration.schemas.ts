@@ -1,6 +1,6 @@
 import { JSONSchemaType } from '@famir/common'
 import { customIdentSchema } from '@famir/validator'
-import { ConfigurationData } from '../../use-cases/index.js'
+import { ConfigurationData } from './use-cases/index.js'
 
 export const configurationDataSchema: JSONSchemaType<ConfigurationData> = {
   type: 'object',

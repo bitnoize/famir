@@ -12,7 +12,7 @@ import {
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
 import { DatabaseConfig, DatabaseConnectorOptions } from './database.js'
-import { buildConnectorOptions, filterOptionsSecrets, internalSchemas } from './database.utils.js'
+import { buildConnectorOptions, filterOptionsSecrets } from './database.utils.js'
 
 export type RedisDatabaseConnection = RedisClientType<
   Record<string, never>, // Modules
@@ -42,8 +42,6 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     config: Config<DatabaseConfig>,
     protected readonly logger: Logger
   ) {
-    validator.addSchemas(internalSchemas)
-
     this.options = buildConnectorOptions(config.data)
 
     this._redis = createClient({

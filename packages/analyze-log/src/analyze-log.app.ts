@@ -13,7 +13,7 @@ import {
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
-import { internalSchemas } from './analyze-log.utils.js'
+import { addSchemas } from './analyze-log.utils.js'
 
 export const ANALYZE_LOG_APP = Symbol('AnalyzeLogApp')
 
@@ -52,7 +52,7 @@ export class AnalyzeLogApp {
       })
     })
 
-    validator.addSchemas(internalSchemas)
+    validator.addSchemas(addSchemas)
   }
 
   async start(): Promise<void> {

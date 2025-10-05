@@ -1,5 +1,14 @@
-import { ReadSessionData, ReplServerError, ValidatorAssertSchema } from '@famir/domain'
+import { readSessionDataSchema } from '@famir/database'
+import {
+  ReadSessionData,
+  ReplServerError,
+  ValidatorAssertSchema,
+  ValidatorSchemas
+} from '@famir/domain'
 
+export const addSchemas: ValidatorSchemas = {
+  'read-session-data': readSessionDataSchema
+}
 export function validateReadSessionData(
   assertSchema: ValidatorAssertSchema,
   data: unknown

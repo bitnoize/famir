@@ -8,6 +8,15 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { BaseController } from '../base/index.js'
+import {
+  addSchemas,
+  validateCreateLureData,
+  validateDeleteLureData,
+  validateListLuresData,
+  validateReadLureData,
+  validateSwitchLureData
+} from './lure.utils.js'
 import {
   CREATE_LURE_USE_CASE,
   CreateLureUseCase,
@@ -21,15 +30,7 @@ import {
   ListLuresUseCase,
   READ_LURE_USE_CASE,
   ReadLureUseCase
-} from '../../use-cases/index.js'
-import { BaseController } from '../base/index.js'
-import {
-  validateCreateLureData,
-  validateDeleteLureData,
-  validateListLuresData,
-  validateReadLureData,
-  validateSwitchLureData
-} from './lure.utils.js'
+} from './use-cases/index.js'
 
 export const LURE_CONTROLLER = Symbol('LureController')
 
@@ -68,6 +69,8 @@ export class LureController extends BaseController {
     protected readonly listLuresUseCase: ListLuresUseCase
   ) {
     super(validator, logger, 'lure')
+
+    validator.addSchemas(addSchemas)
 
     context.setHandler('createLure', this.createLureHandler)
     context.setHandler('readLure', this.readLureHandler)

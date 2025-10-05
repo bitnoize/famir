@@ -9,9 +9,9 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { CONFIGURATION_USE_CASE, ConfigurationUseCase } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
-import { validateConfigurationData } from './configuration.utils.js'
+import { addSchemas, validateConfigurationData } from './configuration.utils.js'
+import { CONFIGURATION_USE_CASE, ConfigurationUseCase } from './use-cases/index.js'
 
 export const CONFIGURATION_CONTROLLER = Symbol('ConfigurationController')
 
@@ -40,6 +40,8 @@ export class ConfigurationController extends BaseController {
     protected readonly configurationUseCase: ConfigurationUseCase
   ) {
     super(validator, logger, 'configuration')
+
+    validator.addSchemas(addSchemas)
 
     router.setHandler('all', '{*splat}', this.defaultHandler)
   }

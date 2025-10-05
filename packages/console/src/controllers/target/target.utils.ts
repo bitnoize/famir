@@ -1,4 +1,12 @@
 import {
+  createTargetDataSchema,
+  deleteTargetDataSchema,
+  listTargetsDataSchema,
+  readTargetDataSchema,
+  switchTargetDataSchema,
+  updateTargetDataSchema
+} from '@famir/database'
+import {
   CreateTargetData,
   DeleteTargetData,
   ListTargetsData,
@@ -6,9 +14,18 @@ import {
   ReplServerError,
   SwitchTargetData,
   UpdateTargetData,
-  ValidatorAssertSchema
+  ValidatorAssertSchema,
+  ValidatorSchemas
 } from '@famir/domain'
 
+export const addSchemas: ValidatorSchemas = {
+  'create-target-data': createTargetDataSchema,
+  'read-target-data': readTargetDataSchema,
+  'update-target-data': updateTargetDataSchema,
+  'switch-target-data': switchTargetDataSchema,
+  'delete-target-data': deleteTargetDataSchema,
+  'list-targets-data': listTargetsDataSchema
+}
 export function validateCreateTargetData(
   assertSchema: ValidatorAssertSchema,
   data: unknown

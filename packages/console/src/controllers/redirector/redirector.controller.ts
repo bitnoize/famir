@@ -8,6 +8,15 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { BaseController } from '../base/index.js'
+import {
+  addSchemas,
+  validateCreateRedirectorData,
+  validateDeleteRedirectorData,
+  validateListRedirectorsData,
+  validateReadRedirectorData,
+  validateUpdateRedirectorData
+} from './redirector.utils.js'
 import {
   CREATE_REDIRECTOR_USE_CASE,
   CreateRedirectorUseCase,
@@ -19,15 +28,7 @@ import {
   ReadRedirectorUseCase,
   UPDATE_REDIRECTOR_USE_CASE,
   UpdateRedirectorUseCase
-} from '../../use-cases/index.js'
-import { BaseController } from '../base/index.js'
-import {
-  validateCreateRedirectorData,
-  validateDeleteRedirectorData,
-  validateListRedirectorsData,
-  validateReadRedirectorData,
-  validateUpdateRedirectorData
-} from './redirector.utils.js'
+} from './use-cases/index.js'
 
 export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')
 
@@ -64,6 +65,8 @@ export class RedirectorController extends BaseController {
     protected readonly listRedirectorsUseCase: ListRedirectorsUseCase
   ) {
     super(validator, logger, 'redirector')
+
+    validator.addSchemas(addSchemas)
 
     context.setHandler('createRedirector', this.createRedirectorHandler)
     context.setHandler('readRedirector', this.readRedirectorHandler)

@@ -1,5 +1,14 @@
-import { ReadMessageData, ReplServerError, ValidatorAssertSchema } from '@famir/domain'
+import { readMessageDataSchema } from '@famir/database'
+import {
+  ReadMessageData,
+  ReplServerError,
+  ValidatorAssertSchema,
+  ValidatorSchemas
+} from '@famir/domain'
 
+export const addSchemas: ValidatorSchemas = {
+  'read-message-data': readMessageDataSchema
+}
 export function validateReadMessageData(
   assertSchema: ValidatorAssertSchema,
   data: unknown

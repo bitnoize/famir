@@ -1,13 +1,28 @@
 import {
+  createRedirectorDataSchema,
+  deleteRedirectorDataSchema,
+  listRedirectorsDataSchema,
+  readRedirectorDataSchema,
+  updateRedirectorDataSchema
+} from '@famir/database'
+import {
   CreateRedirectorData,
   DeleteRedirectorData,
   ListRedirectorsData,
   ReadRedirectorData,
   ReplServerError,
   UpdateRedirectorData,
-  ValidatorAssertSchema
+  ValidatorAssertSchema,
+  ValidatorSchemas
 } from '@famir/domain'
 
+export const addSchemas: ValidatorSchemas = {
+  'create-redirector-data': createRedirectorDataSchema,
+  'read-redirector-data': readRedirectorDataSchema,
+  'update-redirector-data': updateRedirectorDataSchema,
+  'delete-redirector-data': deleteRedirectorDataSchema,
+  'list-redirectors-data': listRedirectorsDataSchema
+}
 export function validateCreateRedirectorData(
   assertSchema: ValidatorAssertSchema,
   data: unknown

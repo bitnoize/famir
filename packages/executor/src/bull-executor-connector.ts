@@ -11,7 +11,7 @@ import {
 } from '@famir/domain'
 import { Redis } from 'ioredis'
 import { ExecutorConfig, ExecutorConnectorOptions } from './executor.js'
-import { buildConnectorOptions, filterOptionsSecrets, internalSchemas } from './executor.utils.js'
+import { buildConnectorOptions, filterOptionsSecrets } from './executor.utils.js'
 
 export type BullExecutorConnection = Redis
 
@@ -36,8 +36,6 @@ export class BullExecutorConnector implements ExecutorConnector {
     config: Config<ExecutorConfig>,
     protected readonly logger: Logger
   ) {
-    validator.addSchemas(internalSchemas)
-
     this.options = buildConnectorOptions(config.data)
 
     this._redis = new Redis(this.options.connectionUrl, {

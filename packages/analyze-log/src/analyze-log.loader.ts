@@ -17,6 +17,7 @@ import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
 import { BullWorkflowConnector } from '@famir/workflow'
 import { AnalyzeLogApp } from './analyze-log.app.js'
+import { AnalyzeLogConfig } from './analyze-log.js'
 import { configAnalyzeLogSchema } from './analyze-log.schemas.js'
 
 export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {
@@ -24,7 +25,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   AjvValidator.inject(container)
 
-  EnvConfig.inject(container, configAnalyzeLogSchema)
+  EnvConfig.inject<AnalyzeLogConfig>(container, configAnalyzeLogSchema)
 
   PinoLogger.inject(container)
 

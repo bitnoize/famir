@@ -1,12 +1,25 @@
 import {
+  createCampaignDataSchema,
+  deleteCampaignDataSchema,
+  readCampaignDataSchema,
+  updateCampaignDataSchema
+} from '@famir/database'
+import {
   CreateCampaignData,
   DeleteCampaignData,
   ReadCampaignData,
   ReplServerError,
   UpdateCampaignData,
-  ValidatorAssertSchema
+  ValidatorAssertSchema,
+  ValidatorSchemas
 } from '@famir/domain'
 
+export const addSchemas: ValidatorSchemas = {
+  'create-campaign-data': createCampaignDataSchema,
+  'read-campaign-data': readCampaignDataSchema,
+  'update-campaign-data': updateCampaignDataSchema,
+  'delete-campaign-data': deleteCampaignDataSchema
+}
 export function validateCreateCampaignData(
   assertSchema: ValidatorAssertSchema,
   data: unknown

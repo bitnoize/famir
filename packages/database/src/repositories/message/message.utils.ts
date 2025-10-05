@@ -4,9 +4,21 @@ import {
   MessageModel,
   MessageRequestCookies,
   MessageResponseCookies,
-  ValidatorAssertSchema
+  ValidatorAssertSchema,
+  ValidatorSchemas
 } from '@famir/domain'
 import { RawMessage } from './message.functions.js'
+import {
+  messageHeadersSchema,
+  messageRequestCookiesSchema,
+  messageResponseCookiesSchema
+} from './message.schemas.js'
+
+export const addSchemas: ValidatorSchemas = {
+  'message-headers': messageHeadersSchema,
+  'message-request-cookies': messageRequestCookiesSchema,
+  'message-response-cookies': messageResponseCookiesSchema
+}
 
 export function parseRequestHeaders(
   assertSchema: ValidatorAssertSchema,

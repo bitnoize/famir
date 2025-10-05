@@ -9,8 +9,8 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { validateAnalyzeLogJobData } from '../../analyze-log.utils.js'
-import { DUMMY_EXAMPLE_USE_CASE, DummyExampleUseCase } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
+import { DUMMY_USE_CASE, DummyUseCase } from './use-cases/index.js'
 
 export const DUMMY_CONTROLLER = Symbol('DummyController')
 
@@ -23,7 +23,7 @@ export class DummyController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<ExecutorDispatcher>(EXECUTOR_DISPATCHER),
-          c.resolve<DummyExampleUseCase>(DUMMY_EXAMPLE_USE_CASE)
+          c.resolve<DummyUseCase>(DUMMY_USE_CASE)
         )
     )
   }
@@ -36,7 +36,7 @@ export class DummyController extends BaseController {
     validator: Validator,
     logger: Logger,
     dispatcher: ExecutorDispatcher,
-    protected readonly dummyExampleUseCase: DummyExampleUseCase
+    protected readonly dummyUseCase: DummyUseCase
   ) {
     super(validator, logger, 'analyze')
 
@@ -47,7 +47,7 @@ export class DummyController extends BaseController {
     try {
       validateAnalyzeLogJobData(this.assertSchema, data)
 
-      return await this.dummyExampleUseCase.execute(data)
+      return await this.dummyUseCase.execute(data)
     } catch (error) {
       this.exceptionFilter(error, 'example', data)
     }

@@ -11,7 +11,7 @@ import {
 } from '@famir/domain'
 import pino from 'pino'
 import { LoggerConfig, LoggerOptions } from './logger.js'
-import { buildOptions, filterOptionsSecrets, internalSchemas } from './logger.utils.js'
+import { addSchemas, buildOptions, filterOptionsSecrets } from './logger.utils.js'
 
 export class PinoLogger implements Logger {
   static inject(container: DIContainer) {
@@ -29,7 +29,7 @@ export class PinoLogger implements Logger {
   constructor(validator: Validator, config: Config<LoggerConfig>) {
     this.assertSchema = validator.assertSchema
 
-    validator.addSchemas(internalSchemas)
+    validator.addSchemas(addSchemas)
 
     this.options = buildOptions(this.assertSchema, config.data)
 

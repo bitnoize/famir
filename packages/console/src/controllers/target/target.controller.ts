@@ -8,6 +8,16 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { BaseController } from '../base/index.js'
+import {
+  addSchemas,
+  validateCreateTargetData,
+  validateDeleteTargetData,
+  validateListTargetsData,
+  validateReadTargetData,
+  validateSwitchTargetData,
+  validateUpdateTargetData
+} from './target.utils.js'
 import {
   CREATE_TARGET_USE_CASE,
   CreateTargetUseCase,
@@ -23,16 +33,7 @@ import {
   ReadTargetUseCase,
   UPDATE_TARGET_USE_CASE,
   UpdateTargetUseCase
-} from '../../use-cases/index.js'
-import { BaseController } from '../base/index.js'
-import {
-  validateCreateTargetData,
-  validateDeleteTargetData,
-  validateListTargetsData,
-  validateReadTargetData,
-  validateSwitchTargetData,
-  validateUpdateTargetData
-} from './target.utils.js'
+} from './use-cases/index.js'
 
 export const TARGET_CONTROLLER = Symbol('TargetController')
 
@@ -73,6 +74,8 @@ export class TargetController extends BaseController {
     protected readonly listTargetsUseCase: ListTargetsUseCase
   ) {
     super(validator, logger, 'target')
+
+    validator.addSchemas(addSchemas)
 
     context.setHandler('createTarget', this.createTargetHandler)
     context.setHandler('readTarget', this.readTargetHandler)

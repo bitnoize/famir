@@ -1,13 +1,28 @@
 import {
+  createLureDataSchema,
+  deleteLureDataSchema,
+  listLuresDataSchema,
+  readLureDataSchema,
+  switchLureDataSchema
+} from '@famir/database'
+import {
   CreateLureData,
   DeleteLureData,
   ListLuresData,
   ReadLureData,
   ReplServerError,
   SwitchLureData,
-  ValidatorAssertSchema
+  ValidatorAssertSchema,
+  ValidatorSchemas
 } from '@famir/domain'
 
+export const addSchemas: ValidatorSchemas = {
+  'create-lure-data': createLureDataSchema,
+  'read-lure-data': readLureDataSchema,
+  'switch-lure-data': switchLureDataSchema,
+  'delete-lure-data': deleteLureDataSchema,
+  'list-lures-data': listLuresDataSchema
+}
 export function validateCreateLureData(
   assertSchema: ValidatorAssertSchema,
   data: unknown

@@ -1,6 +1,5 @@
 import { JSONSchemaType } from '@famir/common'
 import { configDatabaseConnectionUrlSchema, configDatabasePrefixSchema } from '@famir/database'
-import { PersistLogJobData } from '@famir/domain'
 import {
   configExecutorConcurrencySchema,
   configExecutorConnectionUrlSchema,
@@ -21,7 +20,6 @@ import {
   configStorageSecretKeySchema,
   configStorageUseSSLSchema
 } from '@famir/storage'
-import { customIdentSchema, randomIdentSchema } from '@famir/validator'
 import { configWorkflowConnectionUrlSchema, configWorkflowPrefixSchema } from '@famir/workflow'
 import { PersistLogConfig } from './persist-log.js'
 
@@ -78,16 +76,6 @@ export const configPersistLogSchema: JSONSchemaType<PersistLogConfig> = {
       ...configExecutorLimiterDurationSchema,
       default: 1000
     }
-  },
-  additionalProperties: false
-} as const
-
-export const persistLogJobDataSchema: JSONSchemaType<PersistLogJobData> = {
-  type: 'object',
-  required: ['campaignId', 'messageId'],
-  properties: {
-    campaignId: customIdentSchema,
-    messageId: randomIdentSchema
   },
   additionalProperties: false
 } as const

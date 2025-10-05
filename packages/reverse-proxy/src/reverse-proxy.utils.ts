@@ -1,9 +1,4 @@
-import { CampaignModel, HttpServerRequest, TargetModel, ValidatorSchemas } from '@famir/domain'
-import { configurationDataSchema } from './controllers/index.js'
-
-export const internalSchemas: ValidatorSchemas = {
-  'configuration-data': configurationDataSchema
-}
+import { CampaignModel, HttpServerRequest, TargetModel } from '@famir/domain'
 
 type HttpRequestLocalsCampaign = HttpServerRequest & {
   locals: {

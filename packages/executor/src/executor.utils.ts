@@ -1,8 +1,5 @@
 import { filterSecrets } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
 import { ExecutorConfig, ExecutorConnectorOptions, ExecutorWorkerOptions } from './executor.js'
-
-export const internalSchemas: ValidatorSchemas = {}
 
 export function buildConnectorOptions(data: ExecutorConfig): ExecutorConnectorOptions {
   return {

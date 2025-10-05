@@ -3,7 +3,7 @@ import { ValidatorAssertSchema, ValidatorSchemas } from '@famir/domain'
 import { LoggerConfig, LoggerOptions, LoggerTransportOptions } from './logger.js'
 import { loggerTransportOptionsSchema } from './logger.schemas.js'
 
-export const internalSchemas: ValidatorSchemas = {
+export const addSchemas: ValidatorSchemas = {
   'logger-transport-options': loggerTransportOptionsSchema
 }
 

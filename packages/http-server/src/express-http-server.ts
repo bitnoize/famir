@@ -17,7 +17,7 @@ import cookieParser from 'cookie-parser'
 import express from 'express'
 import http from 'node:http'
 import { HttpServerConfig, HttpServerOptions } from './http-server.js'
-import { buildOptions, filterOptionsSecrets, internalSchemas } from './http-server.utils.js'
+import { buildOptions, filterOptionsSecrets } from './http-server.utils.js'
 
 export class ExpressHttpServer implements HttpServer {
   static inject(container: DIContainer) {
@@ -43,8 +43,6 @@ export class ExpressHttpServer implements HttpServer {
     protected readonly logger: Logger,
     router: HttpServerRouter
   ) {
-    validator.addSchemas(internalSchemas)
-
     this.options = buildOptions(config.data)
 
     this._express = express()

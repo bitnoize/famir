@@ -17,6 +17,7 @@ import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeLogQueue, BullWorkflowConnector } from '@famir/workflow'
 import { PersistLogApp } from './persist-log.app.js'
+import { PersistLogConfig } from './persist-log.js'
 import { configPersistLogSchema } from './persist-log.schemas.js'
 
 export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {
@@ -24,7 +25,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   AjvValidator.inject(container)
 
-  EnvConfig.inject(container, configPersistLogSchema)
+  EnvConfig.inject<PersistLogConfig>(container, configPersistLogSchema)
 
   PinoLogger.inject(container)
 

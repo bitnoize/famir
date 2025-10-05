@@ -8,6 +8,15 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { BaseController } from '../base/index.js'
+import {
+  addSchemas,
+  validateCreateProxyData,
+  validateDeleteProxyData,
+  validateListProxiesData,
+  validateReadProxyData,
+  validateSwitchProxyData
+} from './proxy.utils.js'
 import {
   CREATE_PROXY_USE_CASE,
   CreateProxyUseCase,
@@ -21,15 +30,7 @@ import {
   ListProxiesUseCase,
   READ_PROXY_USE_CASE,
   ReadProxyUseCase
-} from '../../use-cases/index.js'
-import { BaseController } from '../base/index.js'
-import {
-  validateCreateProxyData,
-  validateDeleteProxyData,
-  validateListProxiesData,
-  validateReadProxyData,
-  validateSwitchProxyData
-} from './proxy.utils.js'
+} from './use-cases/index.js'
 
 export const PROXY_CONTROLLER = Symbol('ProxyController')
 
@@ -68,6 +69,8 @@ export class ProxyController extends BaseController {
     protected readonly listProxiesUseCase: ListProxiesUseCase
   ) {
     super(validator, logger, 'proxy')
+
+    validator.addSchemas(addSchemas)
 
     context.setHandler('createProxy', this.createProxyHandler)
     context.setHandler('readProxy', this.readProxyHandler)

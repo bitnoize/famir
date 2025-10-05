@@ -37,10 +37,13 @@ export class PreflightCorsController extends BaseController {
 
   // eslint-disable-next-line @typescript-eslint/require-await
   private readonly defaultHandler = async (): Promise<HttpServerResponse | undefined> => {
+    const body = Buffer.from('')
+
     return {
       status: 204,
       headers: {
         'content-type': 'text/plain',
+        'content-length': body.length.toString(),
         'access-control-allow-origin': '*',
         'access-control-allow-methods': '*',
         'access-control-allow-headers': '*',
@@ -49,7 +52,7 @@ export class PreflightCorsController extends BaseController {
         'access-control-max-age': '86400'
       },
       cookies: {},
-      body: Buffer.from('')
+      body
     }
   }
 }

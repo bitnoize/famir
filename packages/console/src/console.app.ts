@@ -15,7 +15,6 @@ import {
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
-import { internalSchemas } from './console.utils.js'
 
 export const CONSOLE_APP = Symbol('ConsoleApp')
 
@@ -55,8 +54,6 @@ export class ConsoleApp {
         await this.stop()
       })
     })
-
-    validator.addSchemas(internalSchemas)
   }
 
   async start(): Promise<void> {

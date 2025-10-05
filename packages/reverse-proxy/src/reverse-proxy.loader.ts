@@ -16,6 +16,7 @@ import { PinoLogger } from '@famir/logger'
 import { AjvValidator } from '@famir/validator'
 import { BullPersistLogQueue, BullWorkflowConnector } from '@famir/workflow'
 import { ReverseProxyApp } from './reverse-proxy.app.js'
+import { ReverseProxyConfig } from './reverse-proxy.js'
 import { configReverseProxySchema } from './reverse-proxy.schemas.js'
 
 export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {
@@ -23,7 +24,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   AjvValidator.inject(container)
 
-  EnvConfig.inject(container, configReverseProxySchema)
+  EnvConfig.inject<ReverseProxyConfig>(container, configReverseProxySchema)
 
   PinoLogger.inject(container)
 

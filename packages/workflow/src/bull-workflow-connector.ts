@@ -11,7 +11,7 @@ import {
 } from '@famir/domain'
 import { Redis } from 'ioredis'
 import { WorkflowConfig, WorkflowConnectorOptions } from './workflow.js'
-import { buildConnectorOptions, filterOptionsSecrets, internalSchemas } from './workflow.utils.js'
+import { buildConnectorOptions, filterOptionsSecrets } from './workflow.utils.js'
 
 export type BullWorkflowConnection = Redis
 
@@ -36,8 +36,6 @@ export class BullWorkflowConnector implements WorkflowConnector {
     config: Config<WorkflowConfig>,
     protected readonly logger: Logger
   ) {
-    validator.addSchemas(internalSchemas)
-
     this.options = buildConnectorOptions(config.data)
 
     this._redis = new Redis(this.options.connectionUrl, {

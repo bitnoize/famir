@@ -13,7 +13,7 @@ import {
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
-import { internalSchemas } from './persist-log.utils.js'
+import { addSchemas } from './persist-log.utils.js'
 
 export const PERSIST_LOG_APP = Symbol('PersistLogApp')
 
@@ -52,7 +52,7 @@ export class PersistLogApp {
       })
     })
 
-    validator.addSchemas(internalSchemas)
+    validator.addSchemas(addSchemas)
   }
 
   async start(): Promise<void> {

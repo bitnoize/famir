@@ -1,5 +1,10 @@
-import { HttpServerError, ValidatorAssertSchema } from '@famir/domain'
-import { ConfigurationData } from '../../use-cases/index.js'
+import { HttpServerError, ValidatorAssertSchema, ValidatorSchemas } from '@famir/domain'
+import { configurationDataSchema } from './configuration.schemas.js'
+import { ConfigurationData } from './use-cases/index.js'
+
+export const addSchemas: ValidatorSchemas = {
+  'configuration-data': configurationDataSchema
+}
 
 export function validateConfigurationData(
   assertSchema: ValidatorAssertSchema,

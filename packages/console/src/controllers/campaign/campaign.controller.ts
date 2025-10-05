@@ -8,6 +8,14 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { BaseController } from '../base/index.js'
+import {
+  addSchemas,
+  validateCreateCampaignData,
+  validateDeleteCampaignData,
+  validateReadCampaignData,
+  validateUpdateCampaignData
+} from './campaign.utils.js'
 import {
   CREATE_CAMPAIGN_USE_CASE,
   CreateCampaignUseCase,
@@ -19,14 +27,7 @@ import {
   ReadCampaignUseCase,
   UPDATE_CAMPAIGN_USE_CASE,
   UpdateCampaignUseCase
-} from '../../use-cases/index.js'
-import { BaseController } from '../base/index.js'
-import {
-  validateCreateCampaignData,
-  validateDeleteCampaignData,
-  validateReadCampaignData,
-  validateUpdateCampaignData
-} from './campaign.utils.js'
+} from './use-cases/index.js'
 
 export const CAMPAIGN_CONTROLLER = Symbol('CampaignController')
 
@@ -63,6 +64,8 @@ export class CampaignController extends BaseController {
     protected readonly listCampaignsUseCase: ListCampaignsUseCase
   ) {
     super(validator, logger, 'campaign')
+
+    validator.addSchemas(addSchemas)
 
     context.setHandler('createCampaign', this.createCampaignHandler)
     context.setHandler('readCampaign', this.readCampaignHandler)

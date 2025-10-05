@@ -9,8 +9,8 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { validatePersistLogJobData } from '../../persist-log.utils.js'
-import { DUMMY_USE_CASE, DummyUseCase } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
+import { DUMMY_USE_CASE, DummyUseCase } from './use-cases/index.js'
 
 export const DUMMY_CONTROLLER = Symbol('DummyController')
 

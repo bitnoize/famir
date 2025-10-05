@@ -4,9 +4,9 @@ import {
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
-import { persistLogJobDataSchema } from './persist-log.schemas.js'
+import { persistLogJobDataSchema } from '@famir/workflow'
 
-export const internalSchemas: ValidatorSchemas = {
+export const addSchemas: ValidatorSchemas = {
   'persist-log-job-data': persistLogJobDataSchema
 }
 

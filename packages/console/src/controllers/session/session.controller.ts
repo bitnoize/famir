@@ -8,9 +8,9 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { READ_SESSION_USE_CASE, ReadSessionUseCase } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
-import { validateReadSessionData } from './session.utils.js'
+import { addSchemas, validateReadSessionData } from './session.utils.js'
+import { READ_SESSION_USE_CASE, ReadSessionUseCase } from './use-cases/index.js'
 
 export const SESSION_CONTROLLER = Symbol('SessionController')
 
@@ -39,6 +39,8 @@ export class SessionController extends BaseController {
     protected readonly readSessionUseCase: ReadSessionUseCase
   ) {
     super(validator, logger, 'session')
+
+    validator.addSchemas(addSchemas)
 
     context.setHandler('readSession', this.readSessionHandler)
   }

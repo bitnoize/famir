@@ -29,7 +29,7 @@ import {
 } from '@famir/database'
 import { ValidatorSchemas } from '@famir/domain'
 
-export const internalSchemas: ValidatorSchemas = {
+export const addSchemas: ValidatorSchemas = {
   'create-campaign-data': createCampaignDataSchema,
   'read-campaign-data': readCampaignDataSchema,
   'update-campaign-data': updateCampaignDataSchema,

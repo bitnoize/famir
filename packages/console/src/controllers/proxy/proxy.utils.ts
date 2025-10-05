@@ -1,13 +1,26 @@
 import {
+  createProxyDataSchema,
+  deleteProxyDataSchema,
+  readProxyDataSchema,
+  switchProxyDataSchema
+} from '@famir/database'
+import {
   CreateProxyData,
   DeleteProxyData,
   ListProxiesData,
   ReadProxyData,
   ReplServerError,
   SwitchProxyData,
-  ValidatorAssertSchema
+  ValidatorAssertSchema,
+  ValidatorSchemas
 } from '@famir/domain'
 
+export const addSchemas: ValidatorSchemas = {
+  'create-proxy-data': createProxyDataSchema,
+  'read-proxy-data': readProxyDataSchema,
+  'switch-proxy-data': switchProxyDataSchema,
+  'delete-proxy-data': deleteProxyDataSchema
+}
 export function validateCreateProxyData(
   assertSchema: ValidatorAssertSchema,
   data: unknown
