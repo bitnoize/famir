@@ -1,18 +1,31 @@
 import {
   createCampaignDataSchema,
+  createLureDataSchema,
   createProxyDataSchema,
+  createRedirectorDataSchema,
   createTargetDataSchema,
   deleteCampaignDataSchema,
+  deleteLureDataSchema,
   deleteProxyDataSchema,
+  deleteRedirectorDataSchema,
   deleteTargetDataSchema,
+  listLuresDataSchema,
   listProxiesDataSchema,
+  listRedirectorsDataSchema,
   listTargetsDataSchema,
   readCampaignDataSchema,
+  readLureDataSchema,
+  readMessageDataSchema,
   readProxyDataSchema,
+  readRedirectorDataSchema,
+  readSessionDataSchema,
   readTargetDataSchema,
+  switchLureDataSchema,
   switchProxyDataSchema,
   switchTargetDataSchema,
-  updateCampaignDataSchema
+  updateCampaignDataSchema,
+  updateRedirectorDataSchema,
+  updateTargetDataSchema
 } from '@famir/database'
 import { ValidatorSchemas } from '@famir/domain'
 
@@ -28,7 +41,20 @@ export const internalSchemas: ValidatorSchemas = {
   'list-proxies-data': listProxiesDataSchema,
   'create-target-data': createTargetDataSchema,
   'read-target-data': readTargetDataSchema,
+  'update-target-data': updateTargetDataSchema,
   'switch-target-data': switchTargetDataSchema,
   'delete-target-data': deleteTargetDataSchema,
-  'list-targets-data': listTargetsDataSchema
+  'list-targets-data': listTargetsDataSchema,
+  'create-lure-data': createLureDataSchema,
+  'read-lure-data': readLureDataSchema,
+  'switch-lure-data': switchLureDataSchema,
+  'delete-lure-data': deleteLureDataSchema,
+  'list-lures-data': listLuresDataSchema,
+  'create-redirector-data': createRedirectorDataSchema,
+  'read-redirector-data': readRedirectorDataSchema,
+  'update-redirector-data': updateRedirectorDataSchema,
+  'delete-redirector-data': deleteRedirectorDataSchema,
+  'list-redirectors-data': listRedirectorsDataSchema,
+  'read-session-data': readSessionDataSchema,
+  'read-message-data': readMessageDataSchema
 }

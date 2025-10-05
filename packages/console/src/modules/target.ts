@@ -4,10 +4,10 @@ import {
   CreateTargetUseCase,
   DeleteTargetUseCase,
   DisableTargetUseCase,
-  UpdateTargetUseCase,
   EnableTargetUseCase,
   ListTargetsUseCase,
-  ReadTargetUseCase
+  ReadTargetUseCase,
+  UpdateTargetUseCase
 } from '../use-cases/index.js'
 
 export const composeTarget = (container: DIContainer) => {
