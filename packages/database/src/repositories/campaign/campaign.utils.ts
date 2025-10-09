@@ -6,38 +6,39 @@ export function buildModel(raw: RawCampaign | null): CampaignModel | null {
     return null
   }
 
-  return new CampaignModel(
-    raw.campaign_id,
-    raw.description,
-    raw.landing_secret,
-    raw.landing_auth_path,
-    raw.landing_auth_param,
-    raw.landing_lure_param,
-    raw.session_cookie_name,
-    raw.session_expire,
-    raw.new_session_expire,
-    raw.message_expire,
-    raw.proxy_count,
-    raw.target_count,
-    raw.redirector_count,
-    raw.lure_count,
-    raw.session_count,
-    raw.message_count,
-    new Date(raw.created_at),
-    new Date(raw.updated_at)
-  )
+  return {
+    campaignId: raw.campaign_id,
+    mirrorDomain: raw.mirror_domain,
+    description: raw.description,
+    landingSecret: raw.landing_secret,
+    landingAuthPath: raw.landing_auth_path,
+    landingAuthParam: raw.landing_auth_param,
+    landingLureParam: raw.landing_lure_param,
+    sessionCookieName: raw.session_cookie_name,
+    sessionExpire: raw.session_expire,
+    newSessionExpire: raw.new_session_expire,
+    messageExpire: raw.message_expire,
+    proxyCount: raw.proxy_count,
+    targetCount: raw.target_count,
+    redirectorCount: raw.redirector_count,
+    lureCount: raw.lure_count,
+    sessionCount: raw.session_count,
+    messageCount: raw.message_count,
+    createdAt: new Date(raw.created_at),
+    updatedAt: new Date(raw.updated_at)
+  }
 }
 
 export function buildCollection(raws: Array<RawCampaign | null>): Array<CampaignModel | null> {
   return raws.map((raw) => buildModel(raw))
 }
 
-export function guardModel(data: CampaignModel | null): data is CampaignModel {
-  return data != null
+export function guardModel(model: CampaignModel | null): model is CampaignModel {
+  return model != null
 }
 
-export function assertModel(data: CampaignModel | null): asserts data is CampaignModel {
-  if (!guardModel(data)) {
+export function assertModel(model: CampaignModel | null): asserts model is CampaignModel {
+  if (!guardModel(model)) {
     throw new Error(`Campaign lost`)
   }
 }

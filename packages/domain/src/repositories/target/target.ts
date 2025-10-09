@@ -1,6 +1,6 @@
 import { DisabledTargetModel, EnabledTargetModel, TargetModel } from '../../models/index.js'
 
-export interface CreateTargetData {
+export interface CreateTargetModel {
   campaignId: string
   targetId: string
   isLanding: boolean
@@ -10,7 +10,6 @@ export interface CreateTargetData {
   donorPort: number
   mirrorSecure: boolean
   mirrorSub: string
-  mirrorDomain: string
   mirrorPort: number
   connectTimeout: number
   timeout: number
@@ -23,12 +22,12 @@ export interface CreateTargetData {
   failureRedirectUrl: string
 }
 
-export interface ReadTargetData {
+export interface ReadTargetModel {
   campaignId: string
   targetId: string
 }
 
-export interface UpdateTargetData {
+export interface UpdateTargetModel {
   campaignId: string
   targetId: string
   connectTimeout: number | null | undefined
@@ -42,30 +41,30 @@ export interface UpdateTargetData {
   failureRedirectUrl: string | null | undefined
 }
 
-export interface SwitchTargetData {
+export interface SwitchTargetModel {
   campaignId: string
   targetId: string
 }
 
-export interface DeleteTargetData {
+export interface DeleteTargetModel {
   campaignId: string
   targetId: string
 }
 
-export interface ListTargetsData {
+export interface ListTargetModels {
   campaignId: string
 }
 
 export interface TargetRepository {
-  create(data: CreateTargetData): Promise<DisabledTargetModel>
-  read(data: ReadTargetData): Promise<TargetModel | null>
-  readEnabled(data: ReadTargetData): Promise<EnabledTargetModel | null>
-  update(data: UpdateTargetData): Promise<DisabledTargetModel>
-  enable(data: SwitchTargetData): Promise<EnabledTargetModel>
-  disable(data: SwitchTargetData): Promise<DisabledTargetModel>
-  delete(data: DeleteTargetData): Promise<DisabledTargetModel>
-  list(data: ListTargetsData): Promise<TargetModel[] | null>
-  listEnabled(data: ListTargetsData): Promise<EnabledTargetModel[] | null>
+  create(data: CreateTargetModel): Promise<DisabledTargetModel>
+  read(data: ReadTargetModel): Promise<TargetModel | null>
+  readEnabled(data: ReadTargetModel): Promise<EnabledTargetModel | null>
+  update(data: UpdateTargetModel): Promise<DisabledTargetModel>
+  enable(data: SwitchTargetModel): Promise<EnabledTargetModel>
+  disable(data: SwitchTargetModel): Promise<DisabledTargetModel>
+  delete(data: DeleteTargetModel): Promise<DisabledTargetModel>
+  list(data: ListTargetModels): Promise<TargetModel[] | null>
+  listEnabled(data: ListTargetModels): Promise<EnabledTargetModel[] | null>
 }
 
 export const TARGET_REPOSITORY = Symbol('TargetRepository')

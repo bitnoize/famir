@@ -10,36 +10,36 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import { addSchemas, validateConfigurationData } from './configuration.utils.js'
-import { CONFIGURATION_USE_CASE, ConfigurationUseCase } from './use-cases/index.js'
+import { addSchemas, validateReadCampaignTargetData } from './build-mirror.utils.js'
+import { READ_CAMPAIGN_TARGET_USE_CASE, ReadCampaignTargetUseCase } from './use-cases/index.js'
 
-export const CONFIGURATION_CONTROLLER = Symbol('ConfigurationController')
+export const BUILD_MIRROR_CONTROLLER = Symbol('BuildMirrorController')
 
-export class ConfigurationController extends BaseController {
+export class BuildMirrorController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<ConfigurationController>(
-      CONFIGURATION_CONTROLLER,
+    container.registerSingleton<BuildMirrorController>(
+      BUILD_MIRROR_CONTROLLER,
       (c) =>
-        new ConfigurationController(
+        new BuildMirrorController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<ConfigurationUseCase>(CONFIGURATION_USE_CASE)
+          c.resolve<ReadCampaignTargetUseCase>(READ_CAMPAIGN_TARGET_USE_CASE)
         )
     )
   }
 
-  static resolve(container: DIContainer): ConfigurationController {
-    return container.resolve<ConfigurationController>(CONFIGURATION_CONTROLLER)
+  static resolve(container: DIContainer): BuildMirrorController {
+    return container.resolve<BuildMirrorController>(BUILD_MIRROR_CONTROLLER)
   }
 
   constructor(
     validator: Validator,
     logger: Logger,
     router: HttpServerRouter,
-    protected readonly configurationUseCase: ConfigurationUseCase
+    protected readonly readCampaignTargetUseCase: ReadCampaignTargetUseCase
   ) {
-    super(validator, logger, 'configuration')
+    super(validator, logger, 'build-mirror')
 
     validator.addSchemas(addSchemas)
 
@@ -50,21 +50,24 @@ export class ConfigurationController extends BaseController {
     request: HttpServerRequest
   ): Promise<HttpServerResponse | undefined> => {
     try {
+      this.absentLocalsCampaign(request.locals)
+      this.absentLocalsTarget(request.locals)
+
       const data = {
         campaignId: request.headers['x-famir-campaign-id'],
         targetId: request.headers['x-famir-target-id']
       }
 
-      validateConfigurationData(this.assertSchema, data)
+      validateReadCampaignTargetData(this.assertSchema, data)
 
-      const { campaign, target } = await this.configurationUseCase.execute(data)
+      const { campaign, target } = await this.readCampaignTargetUseCase.execute(data)
 
       request.locals.campaign = campaign
       request.locals.target = target
 
       return undefined
     } catch (error) {
-      this.exceptionFilter(error, 'default', null)
+      this.exceptionFilter(error, 'default', request)
     }
   }
 }

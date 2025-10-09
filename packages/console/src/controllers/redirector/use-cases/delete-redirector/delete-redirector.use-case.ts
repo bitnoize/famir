@@ -1,7 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
   DatabaseError,
-  DeleteRedirectorData,
+  DeleteRedirectorModel,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository,
@@ -20,7 +20,7 @@ export class DeleteRedirectorUseCase {
 
   constructor(private readonly redirectorRepository: RedirectorRepository) {}
 
-  async execute(data: DeleteRedirectorData): Promise<RedirectorModel> {
+  async execute(data: DeleteRedirectorModel): Promise<RedirectorModel> {
     try {
       return await this.redirectorRepository.delete(data)
     } catch (error) {

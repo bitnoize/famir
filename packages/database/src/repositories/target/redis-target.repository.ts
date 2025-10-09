@@ -2,22 +2,22 @@ import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
-  CreateTargetData,
+  CreateTargetModel,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteTargetData,
+  DeleteTargetModel,
   DisabledTargetModel,
   EnabledTargetModel,
-  ListTargetsData,
+  ListTargetModels,
   Logger,
   LOGGER,
-  ReadTargetData,
-  SwitchTargetData,
+  ReadTargetModel,
+  SwitchTargetModel,
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository,
-  UpdateTargetData,
+  UpdateTargetModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -57,7 +57,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     super(validator, config, logger, connection, 'target')
   }
 
-  async create(data: CreateTargetData): Promise<DisabledTargetModel> {
+  async create(data: CreateTargetModel): Promise<DisabledTargetModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.target.create_target(
@@ -71,7 +71,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           data.donorPort,
           data.mirrorSecure,
           data.mirrorSub,
-          data.mirrorDomain,
           data.mirrorPort,
           data.connectTimeout,
           data.timeout,
@@ -103,7 +102,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async read(data: ReadTargetData): Promise<TargetModel | null> {
+  async read(data: ReadTargetModel): Promise<TargetModel | null> {
     try {
       const raw = await this.connection.target.read_target(
         this.options.prefix,
@@ -117,7 +116,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async readEnabled(data: ReadTargetData): Promise<EnabledTargetModel | null> {
+  async readEnabled(data: ReadTargetModel): Promise<EnabledTargetModel | null> {
     try {
       const raw = await this.connection.target.read_target(
         this.options.prefix,
@@ -133,7 +132,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async update(data: UpdateTargetData): Promise<DisabledTargetModel> {
+  async update(data: UpdateTargetModel): Promise<DisabledTargetModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.target.update_target(
@@ -170,7 +169,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async enable(data: SwitchTargetData): Promise<EnabledTargetModel> {
+  async enable(data: SwitchTargetModel): Promise<EnabledTargetModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.target.enable_target(this.options.prefix, data.campaignId, data.targetId),
@@ -194,7 +193,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async disable(data: SwitchTargetData): Promise<DisabledTargetModel> {
+  async disable(data: SwitchTargetModel): Promise<DisabledTargetModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.target.disable_target(this.options.prefix, data.campaignId, data.targetId),
@@ -218,7 +217,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async delete(data: DeleteTargetData): Promise<DisabledTargetModel> {
+  async delete(data: DeleteTargetModel): Promise<DisabledTargetModel> {
     try {
       const [raw, status] = await Promise.all([
         this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId),
@@ -242,7 +241,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async list(data: ListTargetsData): Promise<TargetModel[] | null> {
+  async list(data: ListTargetModels): Promise<TargetModel[] | null> {
     try {
       const index = await this.connection.target.read_target_index(
         this.options.prefix,
@@ -265,7 +264,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async listEnabled(data: ListTargetsData): Promise<EnabledTargetModel[] | null> {
+  async listEnabled(data: ListTargetModels): Promise<EnabledTargetModel[] | null> {
     try {
       const index = await this.connection.target.read_target_index(
         this.options.prefix,

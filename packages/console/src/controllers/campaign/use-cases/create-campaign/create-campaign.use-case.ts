@@ -3,7 +3,7 @@ import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
-  CreateCampaignData,
+  CreateCampaignModel,
   DatabaseError,
   ReplServerError
 } from '@famir/domain'
@@ -20,7 +20,7 @@ export class CreateCampaignUseCase {
 
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
-  async execute(data: CreateCampaignData): Promise<CampaignModel> {
+  async execute(data: CreateCampaignModel): Promise<CampaignModel> {
     try {
       return await this.campaignRepository.create(data)
     } catch (error) {

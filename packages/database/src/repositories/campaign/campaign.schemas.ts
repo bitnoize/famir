@@ -1,11 +1,17 @@
 import { JSONSchemaType } from '@famir/common'
 import {
-  CreateCampaignData,
-  DeleteCampaignData,
-  ReadCampaignData,
-  UpdateCampaignData
+  CreateCampaignModel,
+  DeleteCampaignModel,
+  ReadCampaignModel,
+  UpdateCampaignModel
 } from '@famir/domain'
 import { customIdentSchema, randomIdentSchema } from '@famir/validator'
+
+export const campaignMirrorDomainSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 1,
+  maxLength: 256
+} as const
 
 export const campaignDescriptionSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -31,11 +37,12 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
   maximum: 24 * 3600 * 1000
 } as const
 
-export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
+export const createCampaignModelSchema: JSONSchemaType<CreateCampaignModel> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
     campaignId: customIdentSchema,
+    mirrorDomain: campaignMirrorDomainSchema,
     description: {
       ...campaignDescriptionSchema,
       default: ''
@@ -76,7 +83,7 @@ export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
   additionalProperties: false
 } as const
 
-export const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
+export const readCampaignModelSchema: JSONSchemaType<ReadCampaignModel> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
@@ -84,7 +91,7 @@ export const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
   }
 }
 
-export const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
+export const updateCampaignModelSchema: JSONSchemaType<UpdateCampaignModel> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
@@ -109,7 +116,7 @@ export const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
   additionalProperties: false
 } as const
 
-export const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
+export const deleteCampaignModelSchema: JSONSchemaType<DeleteCampaignModel> = {
   type: 'object',
   required: ['campaignId'],
   properties: {

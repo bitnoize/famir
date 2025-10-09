@@ -1,5 +1,10 @@
 import { DIContainer } from '@famir/common'
-import { ReadSessionData, SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/domain'
+import {
+  ReadSessionModel,
+  SESSION_REPOSITORY,
+  SessionModel,
+  SessionRepository
+} from '@famir/domain'
 
 export const READ_SESSION_USE_CASE = Symbol('ReadSessionUseCase')
 
@@ -13,7 +18,7 @@ export class ReadSessionUseCase {
 
   constructor(private readonly sessionRepository: SessionRepository) {}
 
-  async execute(data: ReadSessionData): Promise<SessionModel | null> {
+  async execute(data: ReadSessionModel): Promise<SessionModel | null> {
     return await this.sessionRepository.read(data)
   }
 }

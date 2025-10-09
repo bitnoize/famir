@@ -2,19 +2,19 @@ import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
-  CreateRedirectorData,
+  CreateRedirectorModel,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteRedirectorData,
-  ListRedirectorsData,
+  DeleteRedirectorModel,
+  ListRedirectorModels,
   Logger,
   LOGGER,
-  ReadRedirectorData,
+  ReadRedirectorModel,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository,
-  UpdateRedirectorData,
+  UpdateRedirectorModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -47,7 +47,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     super(validator, config, logger, connection, 'redirector')
   }
 
-  async create(data: CreateRedirectorData): Promise<RedirectorModel> {
+  async create(data: CreateRedirectorModel): Promise<RedirectorModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.redirector.create_redirector(
@@ -80,7 +80,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async read(data: ReadRedirectorData): Promise<RedirectorModel | null> {
+  async read(data: ReadRedirectorModel): Promise<RedirectorModel | null> {
     try {
       const raw = await this.connection.redirector.read_redirector(
         this.options.prefix,
@@ -94,7 +94,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async update(data: UpdateRedirectorData): Promise<RedirectorModel> {
+  async update(data: UpdateRedirectorModel): Promise<RedirectorModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.redirector.update_redirector(
@@ -127,7 +127,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async delete(data: DeleteRedirectorData): Promise<RedirectorModel> {
+  async delete(data: DeleteRedirectorModel): Promise<RedirectorModel> {
     try {
       const [raw, status] = await Promise.all([
         this.connection.redirector.read_redirector(
@@ -159,7 +159,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async list(data: ListRedirectorsData): Promise<RedirectorModel[] | null> {
+  async list(data: ListRedirectorModels): Promise<RedirectorModel[] | null> {
     try {
       const index = await this.connection.redirector.read_redirector_index(
         this.options.prefix,

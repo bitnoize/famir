@@ -11,10 +11,10 @@ import {
 import { BaseController } from '../base/index.js'
 import {
   addSchemas,
-  validateCreateCampaignData,
-  validateDeleteCampaignData,
-  validateReadCampaignData,
-  validateUpdateCampaignData
+  validateCreateCampaignModel,
+  validateDeleteCampaignModel,
+  validateReadCampaignModel,
+  validateUpdateCampaignModel
 } from './campaign.utils.js'
 import {
   CREATE_CAMPAIGN_USE_CASE,
@@ -76,7 +76,7 @@ export class CampaignController extends BaseController {
 
   private readonly createCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
     try {
-      validateCreateCampaignData(this.assertSchema, data)
+      validateCreateCampaignModel(this.assertSchema, data)
 
       return await this.createCampaignUseCase.execute(data)
     } catch (error) {
@@ -86,7 +86,7 @@ export class CampaignController extends BaseController {
 
   private readonly readCampaignHandler = async (data: unknown): Promise<CampaignModel | null> => {
     try {
-      validateReadCampaignData(this.assertSchema, data)
+      validateReadCampaignModel(this.assertSchema, data)
 
       return await this.readCampaignUseCase.execute(data)
     } catch (error) {
@@ -96,7 +96,7 @@ export class CampaignController extends BaseController {
 
   private readonly updateCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
     try {
-      validateUpdateCampaignData(this.assertSchema, data)
+      validateUpdateCampaignModel(this.assertSchema, data)
 
       return await this.updateCampaignUseCase.execute(data)
     } catch (error) {
@@ -106,7 +106,7 @@ export class CampaignController extends BaseController {
 
   private readonly deleteCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
     try {
-      validateDeleteCampaignData(this.assertSchema, data)
+      validateDeleteCampaignModel(this.assertSchema, data)
 
       return await this.deleteCampaignUseCase.execute(data)
     } catch (error) {

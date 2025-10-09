@@ -2,21 +2,21 @@ import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
-  CreateProxyData,
+  CreateProxyModel,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteProxyData,
+  DeleteProxyModel,
   DisabledProxyModel,
   EnabledProxyModel,
-  ListProxiesData,
+  ListProxyModels,
   Logger,
   LOGGER,
   PROXY_REPOSITORY,
   ProxyModel,
   ProxyRepository,
-  ReadProxyData,
-  SwitchProxyData,
+  ReadProxyModel,
+  SwitchProxyModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -56,7 +56,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     super(validator, config, logger, connection, 'proxy')
   }
 
-  async create(data: CreateProxyData): Promise<DisabledProxyModel> {
+  async create(data: CreateProxyModel): Promise<DisabledProxyModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.proxy.create_proxy(
@@ -85,7 +85,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async read(data: ReadProxyData): Promise<ProxyModel | null> {
+  async read(data: ReadProxyModel): Promise<ProxyModel | null> {
     try {
       const raw = await this.connection.proxy.read_proxy(
         this.options.prefix,
@@ -99,7 +99,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async readEnabled(data: ReadProxyData): Promise<EnabledProxyModel | null> {
+  async readEnabled(data: ReadProxyModel): Promise<EnabledProxyModel | null> {
     try {
       const raw = await this.connection.proxy.read_proxy(
         this.options.prefix,
@@ -115,7 +115,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async enable(data: SwitchProxyData): Promise<EnabledProxyModel> {
+  async enable(data: SwitchProxyModel): Promise<EnabledProxyModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.proxy.enable_proxy(this.options.prefix, data.campaignId, data.proxyId),
@@ -139,7 +139,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async disable(data: SwitchProxyData): Promise<DisabledProxyModel> {
+  async disable(data: SwitchProxyModel): Promise<DisabledProxyModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.proxy.disable_proxy(this.options.prefix, data.campaignId, data.proxyId),
@@ -163,7 +163,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async delete(data: DeleteProxyData): Promise<DisabledProxyModel> {
+  async delete(data: DeleteProxyModel): Promise<DisabledProxyModel> {
     try {
       const [raw, status] = await Promise.all([
         this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId),
@@ -187,7 +187,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async list(data: ListProxiesData): Promise<ProxyModel[] | null> {
+  async list(data: ListProxyModels): Promise<ProxyModel[] | null> {
     try {
       const index = await this.connection.proxy.read_proxy_index(
         this.options.prefix,

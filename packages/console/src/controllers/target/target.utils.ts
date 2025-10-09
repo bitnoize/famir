@@ -1,109 +1,109 @@
 import {
-  createTargetDataSchema,
-  deleteTargetDataSchema,
-  listTargetsDataSchema,
-  readTargetDataSchema,
-  switchTargetDataSchema,
-  updateTargetDataSchema
+  createTargetModelSchema,
+  deleteTargetModelSchema,
+  listTargetModelsSchema,
+  readTargetModelSchema,
+  switchTargetModelSchema,
+  updateTargetModelSchema
 } from '@famir/database'
 import {
-  CreateTargetData,
-  DeleteTargetData,
-  ListTargetsData,
-  ReadTargetData,
+  CreateTargetModel,
+  DeleteTargetModel,
+  ListTargetModels,
+  ReadTargetModel,
   ReplServerError,
-  SwitchTargetData,
-  UpdateTargetData,
+  SwitchTargetModel,
+  UpdateTargetModel,
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
 
 export const addSchemas: ValidatorSchemas = {
-  'create-target-data': createTargetDataSchema,
-  'read-target-data': readTargetDataSchema,
-  'update-target-data': updateTargetDataSchema,
-  'switch-target-data': switchTargetDataSchema,
-  'delete-target-data': deleteTargetDataSchema,
-  'list-targets-data': listTargetsDataSchema
+  'create-target-model': createTargetModelSchema,
+  'read-target-model': readTargetModelSchema,
+  'update-target-model': updateTargetModelSchema,
+  'switch-target-model': switchTargetModelSchema,
+  'delete-target-model': deleteTargetModelSchema,
+  'list-target-models': listTargetModelsSchema
 }
-export function validateCreateTargetData(
+export function validateCreateTargetModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is CreateTargetData {
+): asserts data is CreateTargetModel {
   try {
-    assertSchema<CreateTargetData>('create-target-data', data)
+    assertSchema<CreateTargetModel>('create-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`CreateTargetData validation failed`, {
+    throw new ReplServerError(`CreateTargetModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateReadTargetData(
+export function validateReadTargetModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ReadTargetData {
+): asserts data is ReadTargetModel {
   try {
-    assertSchema<ReadTargetData>('read-target-data', data)
+    assertSchema<ReadTargetModel>('read-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadTargetData validation failed`, {
+    throw new ReplServerError(`ReadTargetModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateUpdateTargetData(
+export function validateUpdateTargetModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is UpdateTargetData {
+): asserts data is UpdateTargetModel {
   try {
-    assertSchema<UpdateTargetData>('update-target-data', data)
+    assertSchema<UpdateTargetModel>('update-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`UpdateTargetData validation failed`, {
+    throw new ReplServerError(`UpdateTargetModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateSwitchTargetData(
+export function validateSwitchTargetModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is SwitchTargetData {
+): asserts data is SwitchTargetModel {
   try {
-    assertSchema<SwitchTargetData>('switch-target-data', data)
+    assertSchema<SwitchTargetModel>('switch-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`SwitchTargetData validation failed`, {
+    throw new ReplServerError(`SwitchTargetModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateDeleteTargetData(
+export function validateDeleteTargetModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is DeleteTargetData {
+): asserts data is DeleteTargetModel {
   try {
-    assertSchema<DeleteTargetData>('delete-target-data', data)
+    assertSchema<DeleteTargetModel>('delete-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`DeleteTargetData validation failed`, {
+    throw new ReplServerError(`DeleteTargetModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateListTargetsData(
+export function validateListTargetModels(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ListTargetsData {
+): asserts data is ListTargetModels {
   try {
-    assertSchema<ListTargetsData>('list-targets-data', data)
+    assertSchema<ListTargetModels>('list-target-models', data)
   } catch (error) {
-    throw new ReplServerError(`ListTargetsData validation failed`, {
+    throw new ReplServerError(`ListTargetModels validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })

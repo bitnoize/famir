@@ -11,11 +11,11 @@ import {
 import { BaseController } from '../base/index.js'
 import {
   addSchemas,
-  validateCreateRedirectorData,
-  validateDeleteRedirectorData,
-  validateListRedirectorsData,
-  validateReadRedirectorData,
-  validateUpdateRedirectorData
+  validateCreateRedirectorModel,
+  validateDeleteRedirectorModel,
+  validateListRedirectorModels,
+  validateReadRedirectorModel,
+  validateUpdateRedirectorModel
 } from './redirector.utils.js'
 import {
   CREATE_REDIRECTOR_USE_CASE,
@@ -77,7 +77,7 @@ export class RedirectorController extends BaseController {
 
   private readonly createRedirectorHandler = async (data: unknown): Promise<RedirectorModel> => {
     try {
-      validateCreateRedirectorData(this.assertSchema, data)
+      validateCreateRedirectorModel(this.assertSchema, data)
 
       return await this.createRedirectorUseCase.execute(data)
     } catch (error) {
@@ -89,7 +89,7 @@ export class RedirectorController extends BaseController {
     data: unknown
   ): Promise<RedirectorModel | null> => {
     try {
-      validateReadRedirectorData(this.assertSchema, data)
+      validateReadRedirectorModel(this.assertSchema, data)
 
       return await this.readRedirectorUseCase.execute(data)
     } catch (error) {
@@ -99,7 +99,7 @@ export class RedirectorController extends BaseController {
 
   private readonly updateRedirectorHandler = async (data: unknown): Promise<RedirectorModel> => {
     try {
-      validateUpdateRedirectorData(this.assertSchema, data)
+      validateUpdateRedirectorModel(this.assertSchema, data)
 
       return await this.updateRedirectorUseCase.execute(data)
     } catch (error) {
@@ -109,7 +109,7 @@ export class RedirectorController extends BaseController {
 
   private readonly deleteRedirectorHandler = async (data: unknown): Promise<RedirectorModel> => {
     try {
-      validateDeleteRedirectorData(this.assertSchema, data)
+      validateDeleteRedirectorModel(this.assertSchema, data)
 
       return await this.deleteRedirectorUseCase.execute(data)
     } catch (error) {
@@ -121,7 +121,7 @@ export class RedirectorController extends BaseController {
     data: unknown
   ): Promise<RedirectorModel[] | null> => {
     try {
-      validateListRedirectorsData(this.assertSchema, data)
+      validateListRedirectorModels(this.assertSchema, data)
 
       return await this.listRedirectorsUseCase.execute(data)
     } catch (error) {

@@ -2,7 +2,7 @@ import { DIContainer } from '@famir/common'
 import {
   DatabaseError,
   ReplServerError,
-  SwitchTargetData,
+  SwitchTargetModel,
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository
@@ -20,7 +20,7 @@ export class DisableTargetUseCase {
 
   constructor(private readonly targetRepository: TargetRepository) {}
 
-  async execute(data: SwitchTargetData): Promise<TargetModel> {
+  async execute(data: SwitchTargetModel): Promise<TargetModel> {
     try {
       return await this.targetRepository.disable(data)
     } catch (error) {

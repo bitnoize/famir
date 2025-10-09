@@ -1,19 +1,19 @@
 import { DIContainer } from '@famir/common'
 import {
-  AuthSessionData,
+  AuthSessionModel,
   Config,
   CONFIG,
-  CreateSessionData,
+  CreateSessionModel,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   Logger,
   LOGGER,
-  ReadSessionData,
+  ReadSessionModel,
   SESSION_REPOSITORY,
   SessionModel,
   SessionRepository,
-  UpgradeSessionData,
+  UpgradeSessionModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -46,7 +46,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     super(validator, config, logger, connection, 'session')
   }
 
-  async create(data: CreateSessionData): Promise<SessionModel> {
+  async create(data: CreateSessionModel): Promise<SessionModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.session.create_session(
@@ -75,7 +75,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  async read(data: ReadSessionData): Promise<SessionModel | null> {
+  async read(data: ReadSessionModel): Promise<SessionModel | null> {
     try {
       const raw = await this.connection.session.read_session(
         this.options.prefix,
@@ -89,7 +89,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  async auth(data: AuthSessionData): Promise<SessionModel> {
+  async auth(data: AuthSessionModel): Promise<SessionModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.session.auth_session(this.options.prefix, data.campaignId, data.sessionId),
@@ -113,7 +113,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  async upgrade(data: UpgradeSessionData): Promise<SessionModel> {
+  async upgrade(data: UpgradeSessionModel): Promise<SessionModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.session.upgrade_session(

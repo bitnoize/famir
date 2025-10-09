@@ -1,7 +1,8 @@
 import { CampaignModel } from '../../models/index.js'
 
-export interface CreateCampaignData {
+export interface CreateCampaignModel {
   campaignId: string
+  mirrorDomain: string
   description: string
   landingSecret: string | null | undefined
   landingAuthPath: string
@@ -13,11 +14,11 @@ export interface CreateCampaignData {
   messageExpire: number
 }
 
-export interface ReadCampaignData {
+export interface ReadCampaignModel {
   campaignId: string
 }
 
-export interface UpdateCampaignData {
+export interface UpdateCampaignModel {
   campaignId: string
   description: string | null | undefined
   sessionExpire: number | null | undefined
@@ -25,15 +26,15 @@ export interface UpdateCampaignData {
   messageExpire: number | null | undefined
 }
 
-export interface DeleteCampaignData {
+export interface DeleteCampaignModel {
   campaignId: string
 }
 
 export interface CampaignRepository {
-  create(data: CreateCampaignData): Promise<CampaignModel>
-  read(data: ReadCampaignData): Promise<CampaignModel | null>
-  update(data: UpdateCampaignData): Promise<CampaignModel>
-  delete(data: DeleteCampaignData): Promise<CampaignModel>
+  create(data: CreateCampaignModel): Promise<CampaignModel>
+  read(data: ReadCampaignModel): Promise<CampaignModel | null>
+  update(data: UpdateCampaignModel): Promise<CampaignModel>
+  delete(data: DeleteCampaignModel): Promise<CampaignModel>
   list(): Promise<CampaignModel[]>
 }
 

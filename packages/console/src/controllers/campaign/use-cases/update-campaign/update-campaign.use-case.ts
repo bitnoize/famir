@@ -5,7 +5,7 @@ import {
   CampaignRepository,
   DatabaseError,
   ReplServerError,
-  UpdateCampaignData
+  UpdateCampaignModel
 } from '@famir/domain'
 
 export const UPDATE_CAMPAIGN_USE_CASE = Symbol('UpdateCampaignUseCase')
@@ -20,7 +20,7 @@ export class UpdateCampaignUseCase {
 
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
-  async execute(data: UpdateCampaignData): Promise<CampaignModel> {
+  async execute(data: UpdateCampaignModel): Promise<CampaignModel> {
     try {
       return await this.campaignRepository.update(data)
     } catch (error) {

@@ -1,5 +1,10 @@
 import { DIContainer } from '@famir/common'
-import { MESSAGE_REPOSITORY, MessageModel, MessageRepository, ReadMessageData } from '@famir/domain'
+import {
+  MESSAGE_REPOSITORY,
+  MessageModel,
+  MessageRepository,
+  ReadMessageModel
+} from '@famir/domain'
 
 export const READ_MESSAGE_USE_CASE = Symbol('ReadMessageUseCase')
 
@@ -13,7 +18,7 @@ export class ReadMessageUseCase {
 
   constructor(private readonly messageRepository: MessageRepository) {}
 
-  async execute(data: ReadMessageData): Promise<MessageModel | null> {
+  async execute(data: ReadMessageModel): Promise<MessageModel | null> {
     return await this.messageRepository.read(data)
   }
 }

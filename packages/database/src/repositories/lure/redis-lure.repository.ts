@@ -2,22 +2,22 @@ import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
-  CreateLureData,
+  CreateLureModel,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteLureData,
+  DeleteLureModel,
   DisabledLureModel,
   EnabledLureModel,
-  ListLuresData,
+  ListLureModels,
   Logger,
   LOGGER,
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
-  ReadLureData,
-  ReadLurePathData,
-  SwitchLureData,
+  ReadLureModel,
+  ReadLurePathModel,
+  SwitchLureModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -57,7 +57,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     super(validator, config, logger, connection, 'lure')
   }
 
-  async create(data: CreateLureData): Promise<DisabledLureModel> {
+  async create(data: CreateLureModel): Promise<DisabledLureModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.lure.create_lure(
@@ -87,7 +87,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async read(data: ReadLureData): Promise<LureModel | null> {
+  async read(data: ReadLureModel): Promise<LureModel | null> {
     try {
       const raw = await this.connection.lure.read_lure(
         this.options.prefix,
@@ -101,7 +101,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async readPath(data: ReadLurePathData): Promise<EnabledLureModel | null> {
+  async readPath(data: ReadLurePathModel): Promise<EnabledLureModel | null> {
     try {
       const lureId = await this.connection.lure.read_lure_path(
         this.options.prefix,
@@ -123,7 +123,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async enable(data: SwitchLureData): Promise<EnabledLureModel> {
+  async enable(data: SwitchLureModel): Promise<EnabledLureModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.lure.enable_lure(this.options.prefix, data.campaignId, data.lureId),
@@ -147,7 +147,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async disable(data: SwitchLureData): Promise<DisabledLureModel> {
+  async disable(data: SwitchLureModel): Promise<DisabledLureModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.lure.disable_lure(this.options.prefix, data.campaignId, data.lureId),
@@ -171,7 +171,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async delete(data: DeleteLureData): Promise<DisabledLureModel> {
+  async delete(data: DeleteLureModel): Promise<DisabledLureModel> {
     try {
       const [raw, status] = await Promise.all([
         this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.lureId),
@@ -201,7 +201,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async list(data: ListLuresData): Promise<LureModel[] | null> {
+  async list(data: ListLureModels): Promise<LureModel[] | null> {
     try {
       const index = await this.connection.lure.read_lure_index(this.options.prefix, data.campaignId)
 

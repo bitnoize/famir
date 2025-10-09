@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
-  CreateTargetData,
+  CreateTargetModel,
   DatabaseError,
   ReplServerError,
   TARGET_REPOSITORY,
@@ -20,7 +20,7 @@ export class CreateTargetUseCase {
 
   constructor(private readonly targetRepository: TargetRepository) {}
 
-  async execute(data: CreateTargetData): Promise<TargetModel> {
+  async execute(data: CreateTargetModel): Promise<TargetModel> {
     try {
       return await this.targetRepository.create(data)
     } catch (error) {

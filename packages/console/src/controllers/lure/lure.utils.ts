@@ -1,92 +1,92 @@
 import {
-  createLureDataSchema,
-  deleteLureDataSchema,
-  listLuresDataSchema,
-  readLureDataSchema,
-  switchLureDataSchema
+  createLureModelSchema,
+  deleteLureModelSchema,
+  listLureModelsSchema,
+  readLureModelSchema,
+  switchLureModelSchema
 } from '@famir/database'
 import {
-  CreateLureData,
-  DeleteLureData,
-  ListLuresData,
-  ReadLureData,
+  CreateLureModel,
+  DeleteLureModel,
+  ListLureModels,
+  ReadLureModel,
   ReplServerError,
-  SwitchLureData,
+  SwitchLureModel,
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
 
 export const addSchemas: ValidatorSchemas = {
-  'create-lure-data': createLureDataSchema,
-  'read-lure-data': readLureDataSchema,
-  'switch-lure-data': switchLureDataSchema,
-  'delete-lure-data': deleteLureDataSchema,
-  'list-lures-data': listLuresDataSchema
+  'create-lure-model': createLureModelSchema,
+  'read-lure-model': readLureModelSchema,
+  'switch-lure-model': switchLureModelSchema,
+  'delete-lure-model': deleteLureModelSchema,
+  'list-lure-models': listLureModelsSchema
 }
-export function validateCreateLureData(
+export function validateCreateLureModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is CreateLureData {
+): asserts data is CreateLureModel {
   try {
-    assertSchema<CreateLureData>('create-lure-data', data)
+    assertSchema<CreateLureModel>('create-lure-model', data)
   } catch (error) {
-    throw new ReplServerError(`CreateLureData validation failed`, {
+    throw new ReplServerError(`CreateLureModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateReadLureData(
+export function validateReadLureModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ReadLureData {
+): asserts data is ReadLureModel {
   try {
-    assertSchema<ReadLureData>('read-lure-data', data)
+    assertSchema<ReadLureModel>('read-lure-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadLureData validation failed`, {
+    throw new ReplServerError(`ReadLureModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateSwitchLureData(
+export function validateSwitchLureModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is SwitchLureData {
+): asserts data is SwitchLureModel {
   try {
-    assertSchema<SwitchLureData>('switch-lure-data', data)
+    assertSchema<SwitchLureModel>('switch-lure-model', data)
   } catch (error) {
-    throw new ReplServerError(`SwitchLureData validation failed`, {
+    throw new ReplServerError(`SwitchLureModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateDeleteLureData(
+export function validateDeleteLureModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is DeleteLureData {
+): asserts data is DeleteLureModel {
   try {
-    assertSchema<DeleteLureData>('delete-lure-data', data)
+    assertSchema<DeleteLureModel>('delete-lure-model', data)
   } catch (error) {
-    throw new ReplServerError(`DeleteLureData validation failed`, {
+    throw new ReplServerError(`DeleteLureModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateListLuresData(
+export function validateListLureModels(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ListLuresData {
+): asserts data is ListLureModels {
   try {
-    assertSchema<ListLuresData>('list-lures-data', data)
+    assertSchema<ListLureModels>('list-lure-models', data)
   } catch (error) {
-    throw new ReplServerError(`ListLuresData validation failed`, {
+    throw new ReplServerError(`ListLureModels validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })

@@ -6,16 +6,16 @@ import {
   TARGET_REPOSITORY,
   TargetRepository
 } from '@famir/domain'
-import { ConfigurationData, ConfigurationResult } from './configuration.js'
+import { ReadCampaignTargetData, ReadCampaignTargetResult } from './read-campaign-target.js'
 
-export const CONFIGURATION_USE_CASE = Symbol('ConfigurationUseCase')
+export const READ_CAMPAIGN_TARGET_USE_CASE = Symbol('ReadCampaignTargetUseCase')
 
-export class ConfigurationUseCase {
+export class ReadCampaignTargetUseCase {
   static inject(container: DIContainer) {
-    container.registerSingleton<ConfigurationUseCase>(
-      CONFIGURATION_USE_CASE,
+    container.registerSingleton<ReadCampaignTargetUseCase>(
+      READ_CAMPAIGN_TARGET_USE_CASE,
       (c) =>
-        new ConfigurationUseCase(
+        new ReadCampaignTargetUseCase(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY)
         )
@@ -27,7 +27,7 @@ export class ConfigurationUseCase {
     protected readonly targetRepository: TargetRepository
   ) {}
 
-  async execute(data: ConfigurationData): Promise<ConfigurationResult> {
+  async execute(data: ReadCampaignTargetData): Promise<ReadCampaignTargetResult> {
     const campaign = await this.campaignRepository.read({
       campaignId: data.campaignId
     })
@@ -35,14 +35,14 @@ export class ConfigurationUseCase {
     if (campaign === null) {
       throw new HttpServerError(`Campaign not found`, {
         context: {
-          useCase: 'configuration'
+          useCase: 'read-campaign-target'
         },
         code: 'SERVICE_UNAVAILABLE',
         status: 503
       })
     }
 
-    const target = await this.targetRepository.read({
+    const target = await this.targetRepository.readEnabled({
       campaignId: data.campaignId,
       targetId: data.targetId
     })
@@ -50,7 +50,7 @@ export class ConfigurationUseCase {
     if (target === null) {
       throw new HttpServerError(`Target not found`, {
         context: {
-          useCase: 'configuration'
+          useCase: 'read-campaign-target'
         },
         code: 'SERVICE_UNAVAILABLE',
         status: 503

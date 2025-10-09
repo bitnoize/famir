@@ -1,6 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
+  HttpServerError,
   HttpServerRequest,
   HttpServerResponse,
   HttpServerRouter,
@@ -9,7 +10,7 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { assertRequestLocalsTarget } from '../../reverse-proxy.utils.js'
+import { commonResponseHeaders } from '../../reverse-proxy.utils.js'
 import { BaseController } from '../base/index.js'
 
 export const WELL_KNOWN_URLS_CONTROLLER = Symbol('WellKnownUrlsController')
@@ -34,30 +35,67 @@ export class WellKnownUrlsController extends BaseController {
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
     super(validator, logger, 'well-known-urls')
 
-    router.setHandler('get', '/favicon.ico', this.faviconIcoHandler)
-    router.setHandler('get', '/robots.txt', this.robotsTxtHandler)
-    router.setHandler('get', '/sitemap.xml', this.sitemapXmlHandler)
+    router.setHandler('options', '{*splat}', this.preflightCorsHandler)
+    router.setHandler('all', '/favicon.ico', this.faviconIcoHandler)
+    router.setHandler('all', '/robots.txt', this.robotsTxtHandler)
+    router.setHandler('all', '/sitemap.xml', this.sitemapXmlHandler)
+  }
+
+  private readonly preflightCorsHandler = async (): Promise<HttpServerResponse> => {
+    return {
+      status: 204,
+      headers: {
+        ...commonResponseHeaders,
+        'content-type': 'text/plain',
+        'access-control-allow-origin': '*',
+        'access-control-allow-methods': '*',
+        'access-control-allow-headers': '*',
+        'access-control-expose-headers': '*',
+        'access-control-allow-credentials': 'true',
+        'access-control-max-age': '86400'
+      },
+      cookies: {},
+      body: Buffer.alloc(0)
+    }
   }
 
   private readonly faviconIcoHandler = async (
     request: HttpServerRequest
   ): Promise<HttpServerResponse> => {
     try {
-      assertRequestLocalsTarget(request)
+      this.existsLocalsTarget(request.locals)
 
       const { target } = request.locals
 
       const body = Buffer.from(target.faviconIco, 'base64')
 
-      return {
+      const response: HttpServerResponse = {
         status: 200,
         headers: {
+          ...commonResponseHeaders,
           'content-type': 'image/x-icon',
-          'content-length': body.length.toString()
+          'content-length': body.length.toString(),
+          'last-modified': target.updatedAt.toUTCString(),
+          'cache-control': 'public, max-age=691200'
         },
         cookies: {},
-        body
+        body: Buffer.alloc(0)
       }
+
+      if (request.method === 'HEAD') {
+        return response
+      }
+
+      if (request.method === 'GET') {
+        response.body = body
+
+        return response
+      }
+
+      throw new HttpServerError(`Not found`, {
+        code: 'NOT_FOUND',
+        status: 404
+      })
     } catch (error) {
       this.exceptionFilter(error, 'faviconIco', request)
     }
@@ -67,21 +105,39 @@ export class WellKnownUrlsController extends BaseController {
     request: HttpServerRequest
   ): Promise<HttpServerResponse> => {
     try {
-      assertRequestLocalsTarget(request)
+      this.existsLocalsTarget(request.locals)
 
       const { target } = request.locals
 
       const body = Buffer.from(target.robotsTxt)
 
-      return {
+      const response: HttpServerResponse = {
         status: 200,
         headers: {
+          ...commonResponseHeaders,
           'content-type': 'text/plain',
-          'content-length': body.length.toString()
+          'content-length': body.length.toString(),
+          'last-modified': target.updatedAt.toUTCString(),
+          'cache-control': 'public, max-age=691200'
         },
         cookies: {},
-        body
+        body: Buffer.alloc(0)
       }
+
+      if (request.method === 'HEAD') {
+        return response
+      }
+
+      if (request.method === 'GET') {
+        response.body = body
+
+        return response
+      }
+
+      throw new HttpServerError(`Not found`, {
+        code: 'NOT_FOUND',
+        status: 404
+      })
     } catch (error) {
       this.exceptionFilter(error, 'robotsTxt', request)
     }
@@ -91,21 +147,39 @@ export class WellKnownUrlsController extends BaseController {
     request: HttpServerRequest
   ): Promise<HttpServerResponse> => {
     try {
-      assertRequestLocalsTarget(request)
+      this.existsLocalsTarget(request.locals)
 
       const { target } = request.locals
 
       const body = Buffer.from(target.sitemapXml)
 
-      return {
+      const response: HttpServerResponse = {
         status: 200,
         headers: {
-          'content-type': 'text/plain',
-          'content-length': body.length.toString()
+          ...commonResponseHeaders,
+          'content-type': 'application/xml',
+          'content-length': body.length.toString(),
+          'last-modified': target.updatedAt.toUTCString(),
+          'cache-control': 'public, max-age=691200'
         },
         cookies: {},
-        body
+        body: Buffer.alloc(0)
       }
+
+      if (request.method === 'HEAD') {
+        return response
+      }
+
+      if (request.method === 'GET') {
+        response.body = body
+
+        return response
+      }
+
+      throw new HttpServerError(`Not found`, {
+        code: 'NOT_FOUND',
+        status: 404
+      })
     } catch (error) {
       this.exceptionFilter(error, 'sitemapXml', request)
     }

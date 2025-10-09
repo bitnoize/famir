@@ -1,46 +1,46 @@
 import { DisabledLureModel, EnabledLureModel, LureModel } from '../../models/index.js'
 
-export interface CreateLureData {
+export interface CreateLureModel {
   campaignId: string
   lureId: string
   path: string
   redirectorId: string
 }
 
-export interface ReadLureData {
+export interface ReadLureModel {
   campaignId: string
   lureId: string
 }
 
-export interface ReadLurePathData {
+export interface ReadLurePathModel {
   campaignId: string
   path: string
 }
 
-export interface SwitchLureData {
+export interface SwitchLureModel {
   campaignId: string
   lureId: string
 }
 
-export interface DeleteLureData {
+export interface DeleteLureModel {
   campaignId: string
   lureId: string
   path: string
   redirectorId: string
 }
 
-export interface ListLuresData {
+export interface ListLureModels {
   campaignId: string
 }
 
 export interface LureRepository {
-  create(data: CreateLureData): Promise<DisabledLureModel>
-  read(data: ReadLureData): Promise<LureModel | null>
-  readPath(data: ReadLurePathData): Promise<EnabledLureModel | null>
-  enable(data: SwitchLureData): Promise<EnabledLureModel>
-  disable(data: SwitchLureData): Promise<DisabledLureModel>
-  delete(data: DeleteLureData): Promise<DisabledLureModel>
-  list(data: ListLuresData): Promise<LureModel[] | null>
+  create(data: CreateLureModel): Promise<DisabledLureModel>
+  read(data: ReadLureModel): Promise<LureModel | null>
+  readPath(data: ReadLurePathModel): Promise<EnabledLureModel | null>
+  enable(data: SwitchLureModel): Promise<EnabledLureModel>
+  disable(data: SwitchLureModel): Promise<DisabledLureModel>
+  delete(data: DeleteLureModel): Promise<DisabledLureModel>
+  list(data: ListLureModels): Promise<LureModel[] | null>
 }
 
 export const LURE_REPOSITORY = Symbol('LureRepository')

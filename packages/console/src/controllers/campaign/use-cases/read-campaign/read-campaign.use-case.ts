@@ -3,7 +3,7 @@ import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
-  ReadCampaignData
+  ReadCampaignModel
 } from '@famir/domain'
 
 export const READ_CAMPAIGN_USE_CASE = Symbol('ReadCampaignUseCase')
@@ -18,7 +18,7 @@ export class ReadCampaignUseCase {
 
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
-  async execute(data: ReadCampaignData): Promise<CampaignModel | null> {
+  async execute(data: ReadCampaignModel): Promise<CampaignModel | null> {
     return await this.campaignRepository.read(data)
   }
 }

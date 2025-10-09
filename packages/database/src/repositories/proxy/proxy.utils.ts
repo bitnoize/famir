@@ -6,47 +6,47 @@ export function buildModel(raw: RawProxy | null): ProxyModel | null {
     return null
   }
 
-  return new ProxyModel(
-    raw.campaign_id,
-    raw.proxy_id,
-    raw.url,
-    !!raw.is_enabled,
-    raw.message_count,
-    new Date(raw.created_at),
-    new Date(raw.updated_at)
-  )
+  return {
+    campaignId: raw.campaign_id,
+    proxyId: raw.proxy_id,
+    url: raw.url,
+    isEnabled: !!raw.is_enabled,
+    messageCount: raw.message_count,
+    createdAt: new Date(raw.created_at),
+    updatedAt: new Date(raw.updated_at)
+  }
 }
 
 export function buildCollection(raws: Array<RawProxy | null>): Array<ProxyModel | null> {
   return raws.map((raw) => buildModel(raw))
 }
 
-export function guardModel(data: ProxyModel | null): data is ProxyModel {
-  return data != null
+export function guardModel(model: ProxyModel | null): model is ProxyModel {
+  return model != null
 }
 
-export function guardEnabledModel(data: ProxyModel | null): data is EnabledProxyModel {
-  return guardModel(data) && data.isEnabled
+export function guardEnabledModel(model: ProxyModel | null): model is EnabledProxyModel {
+  return guardModel(model) && model.isEnabled
 }
 
-export function guardDisabledModel(data: ProxyModel | null): data is DisabledProxyModel {
-  return guardModel(data) && !data.isEnabled
+export function guardDisabledModel(model: ProxyModel | null): model is DisabledProxyModel {
+  return guardModel(model) && !model.isEnabled
 }
 
-export function assertModel(data: ProxyModel | null): asserts data is ProxyModel {
-  if (!guardModel(data)) {
+export function assertModel(model: ProxyModel | null): asserts model is ProxyModel {
+  if (!guardModel(model)) {
     throw new Error(`Proxy lost`)
   }
 }
 
-export function assertEnabledModel(data: ProxyModel | null): asserts data is EnabledProxyModel {
-  if (!guardEnabledModel(data)) {
+export function assertEnabledModel(model: ProxyModel | null): asserts model is EnabledProxyModel {
+  if (!guardEnabledModel(model)) {
     throw new Error(`EnabledProxy lost`)
   }
 }
 
-export function assertDisabledModel(data: ProxyModel | null): asserts data is DisabledProxyModel {
-  if (!guardDisabledModel(data)) {
+export function assertDisabledModel(model: ProxyModel | null): asserts model is DisabledProxyModel {
+  if (!guardDisabledModel(model)) {
     throw new Error(`DisabledProxy lost`)
   }
 }

@@ -2,6 +2,7 @@ import { CommandParser } from '@redis/client'
 import {
   campaignIndexKey,
   campaignKey,
+  campaignUniqueMirrorDomainKey,
   lureIndexKey,
   proxyIndexKey,
   redirectorIndexKey,
@@ -10,6 +11,7 @@ import {
 
 export interface RawCampaign {
   campaign_id: string
+  mirror_domain: string
   description: string
   landing_secret: string
   landing_auth_path: string
@@ -32,12 +34,13 @@ export interface RawCampaign {
 export const campaignFunctions = {
   campaign: {
     create_campaign: {
-      NUMBER_OF_KEYS: 2,
+      NUMBER_OF_KEYS: 3,
 
       parseCommand(
         parser: CommandParser,
         prefix: string,
         campaignId: string,
+        mirrorDomain: string,
         description: string,
         landingSecret: string,
         landingAuthPath: string,
@@ -49,9 +52,11 @@ export const campaignFunctions = {
         messageExpire: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignUniqueMirrorDomainKey(prefix))
         parser.pushKey(campaignIndexKey(prefix))
 
         parser.push(campaignId)
+        parser.push(mirrorDomain)
         parser.push(description)
         parser.push(landingSecret)
         parser.push(landingAuthPath)
@@ -133,10 +138,11 @@ export const campaignFunctions = {
     },
 
     delete_campaign: {
-      NUMBER_OF_KEYS: 6,
+      NUMBER_OF_KEYS: 7,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignUniqueMirrorDomainKey(prefix))
         parser.pushKey(campaignIndexKey(prefix))
         parser.pushKey(proxyIndexKey(prefix, campaignId))
         parser.pushKey(targetIndexKey(prefix, campaignId))

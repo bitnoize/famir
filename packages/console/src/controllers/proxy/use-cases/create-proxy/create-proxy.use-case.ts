@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
-  CreateProxyData,
+  CreateProxyModel,
   DatabaseError,
   PROXY_REPOSITORY,
   ProxyModel,
@@ -20,7 +20,7 @@ export class CreateProxyUseCase {
 
   constructor(private readonly proxyRepository: ProxyRepository) {}
 
-  async execute(data: CreateProxyData): Promise<ProxyModel> {
+  async execute(data: CreateProxyModel): Promise<ProxyModel> {
     try {
       return await this.proxyRepository.create(data)
     } catch (error) {

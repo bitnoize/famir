@@ -5,15 +5,15 @@ import {
   CampaignRepository,
   Config,
   CONFIG,
-  CreateCampaignData,
+  CreateCampaignModel,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteCampaignData,
+  DeleteCampaignModel,
   Logger,
   LOGGER,
-  ReadCampaignData,
-  UpdateCampaignData,
+  ReadCampaignModel,
+  UpdateCampaignModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -46,12 +46,13 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     super(validator, config, logger, connection, 'campaign')
   }
 
-  async create(data: CreateCampaignData): Promise<CampaignModel> {
+  async create(data: CreateCampaignModel): Promise<CampaignModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.campaign.create_campaign(
           this.options.prefix,
           data.campaignId,
+          data.mirrorDomain,
           data.description,
           data.landingSecret ?? randomSecret(),
           data.landingAuthPath,
@@ -82,7 +83,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  async read(data: ReadCampaignData): Promise<CampaignModel | null> {
+  async read(data: ReadCampaignModel): Promise<CampaignModel | null> {
     try {
       const raw = await this.connection.campaign.read_campaign(this.options.prefix, data.campaignId)
 
@@ -92,7 +93,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  async update(data: UpdateCampaignData): Promise<CampaignModel> {
+  async update(data: UpdateCampaignModel): Promise<CampaignModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.campaign.update_campaign(
@@ -123,7 +124,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  async delete(data: DeleteCampaignData): Promise<CampaignModel> {
+  async delete(data: DeleteCampaignModel): Promise<CampaignModel> {
     try {
       const [raw, status] = await Promise.all([
         this.connection.campaign.read_campaign(this.options.prefix, data.campaignId),

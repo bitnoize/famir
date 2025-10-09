@@ -1,5 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { ReadTargetData, TARGET_REPOSITORY, TargetModel, TargetRepository } from '@famir/domain'
+import { ReadTargetModel, TARGET_REPOSITORY, TargetModel, TargetRepository } from '@famir/domain'
 
 export const READ_TARGET_USE_CASE = Symbol('ReadTargetUseCase')
 
@@ -13,7 +13,7 @@ export class ReadTargetUseCase {
 
   constructor(private readonly targetRepository: TargetRepository) {}
 
-  async execute(data: ReadTargetData): Promise<TargetModel | null> {
+  async execute(data: ReadTargetModel): Promise<TargetModel | null> {
     return await this.targetRepository.read(data)
   }
 }

@@ -1,75 +1,75 @@
 import {
-  createCampaignDataSchema,
-  deleteCampaignDataSchema,
-  readCampaignDataSchema,
-  updateCampaignDataSchema
+  createCampaignModelSchema,
+  deleteCampaignModelSchema,
+  readCampaignModelSchema,
+  updateCampaignModelSchema
 } from '@famir/database'
 import {
-  CreateCampaignData,
-  DeleteCampaignData,
-  ReadCampaignData,
+  CreateCampaignModel,
+  DeleteCampaignModel,
+  ReadCampaignModel,
   ReplServerError,
-  UpdateCampaignData,
+  UpdateCampaignModel,
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
 
 export const addSchemas: ValidatorSchemas = {
-  'create-campaign-data': createCampaignDataSchema,
-  'read-campaign-data': readCampaignDataSchema,
-  'update-campaign-data': updateCampaignDataSchema,
-  'delete-campaign-data': deleteCampaignDataSchema
+  'create-campaign-model': createCampaignModelSchema,
+  'read-campaign-model': readCampaignModelSchema,
+  'update-campaign-model': updateCampaignModelSchema,
+  'delete-campaign-model': deleteCampaignModelSchema
 }
-export function validateCreateCampaignData(
+export function validateCreateCampaignModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is CreateCampaignData {
+): asserts data is CreateCampaignModel {
   try {
-    assertSchema<CreateCampaignData>('create-campaign-data', data)
+    assertSchema<CreateCampaignModel>('create-campaign-model', data)
   } catch (error) {
-    throw new ReplServerError(`CreateCampaignData validation failed`, {
+    throw new ReplServerError(`CreateCampaignModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateReadCampaignData(
+export function validateReadCampaignModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ReadCampaignData {
+): asserts data is ReadCampaignModel {
   try {
-    assertSchema<ReadCampaignData>('read-campaign-data', data)
+    assertSchema<ReadCampaignModel>('read-campaign-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadCampaignData validation failed`, {
+    throw new ReplServerError(`ReadCampaignModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateUpdateCampaignData(
+export function validateUpdateCampaignModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is UpdateCampaignData {
+): asserts data is UpdateCampaignModel {
   try {
-    assertSchema<UpdateCampaignData>('update-campaign-data', data)
+    assertSchema<UpdateCampaignModel>('update-campaign-model', data)
   } catch (error) {
-    throw new ReplServerError(`UpdateCampaignData validation failed`, {
+    throw new ReplServerError(`UpdateCampaignModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateDeleteCampaignData(
+export function validateDeleteCampaignModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is DeleteCampaignData {
+): asserts data is DeleteCampaignModel {
   try {
-    assertSchema<DeleteCampaignData>('delete-campaign-data', data)
+    assertSchema<DeleteCampaignModel>('delete-campaign-model', data)
   } catch (error) {
-    throw new ReplServerError(`DeleteCampaignData validation failed`, {
+    throw new ReplServerError(`DeleteCampaignModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })

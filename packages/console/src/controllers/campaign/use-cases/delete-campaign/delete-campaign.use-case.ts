@@ -4,7 +4,7 @@ import {
   CampaignModel,
   CampaignRepository,
   DatabaseError,
-  DeleteCampaignData,
+  DeleteCampaignModel,
   ReplServerError
 } from '@famir/domain'
 
@@ -20,7 +20,7 @@ export class DeleteCampaignUseCase {
 
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
-  async execute(data: DeleteCampaignData): Promise<CampaignModel> {
+  async execute(data: DeleteCampaignModel): Promise<CampaignModel> {
     try {
       return await this.campaignRepository.delete(data)
     } catch (error) {

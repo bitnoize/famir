@@ -1,8 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
-import { ReadSessionData } from '@famir/domain'
+import { ReadSessionModel } from '@famir/domain'
 import { customIdentSchema } from '@famir/validator'
 
-export const readSessionDataSchema: JSONSchemaType<ReadSessionData> = {
+export const readSessionModelSchema: JSONSchemaType<ReadSessionModel> = {
   type: 'object',
   required: ['campaignId', 'sessionId'],
   properties: {

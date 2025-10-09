@@ -1,7 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
   DatabaseError,
-  DeleteProxyData,
+  DeleteProxyModel,
   PROXY_REPOSITORY,
   ProxyModel,
   ProxyRepository,
@@ -20,7 +20,7 @@ export class DeleteProxyUseCase {
 
   constructor(private readonly proxyRepository: ProxyRepository) {}
 
-  async execute(data: DeleteProxyData): Promise<ProxyModel> {
+  async execute(data: DeleteProxyModel): Promise<ProxyModel> {
     try {
       return await this.proxyRepository.delete(data)
     } catch (error) {

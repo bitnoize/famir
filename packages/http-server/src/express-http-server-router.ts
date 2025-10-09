@@ -45,13 +45,8 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
             throw new Error(`Request locals is not defined`)
           }
 
-          if (!(req.body === undefined || Buffer.isBuffer(req.body))) {
-            throw new Error(`Request body is not a buffer`)
-          }
-
           const response = await handler({
-            locals: req.locals,
-            ip: req.ip,
+            ip: req.ip ?? '',
             host: req.host,
             method: req.method.toUpperCase(),
             url: req.originalUrl,
@@ -60,10 +55,11 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
             query: req.query,
             headers: req.headers,
             cookies: req.cookies,
-            body: req.body
+            body: Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0),
+            locals: req.locals
           })
 
-          if (response == null) {
+          if (response === undefined) {
             next()
 
             return
@@ -71,9 +67,21 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
 
           res.set(response.headers)
 
-          Object.entries(response.cookies).forEach(([name, [value, options]]) => {
-            if (value !== undefined) {
-              res.cookie(name, value, options)
+          Object.entries(response.cookies).forEach(([name, cookie]) => {
+            const options: express.CookieOptions = {
+              maxAge: cookie.maxAge,
+              expires: cookie.expires,
+              httpOnly: cookie.httpOnly,
+              path: cookie.path,
+              domain: cookie.domain,
+              secure: cookie.secure,
+              sameSite: cookie.sameSite
+              //priority: cookie.priority,
+              //partitioned: cookie.partitioned,
+            }
+
+            if (cookie.value !== undefined) {
+              res.cookie(name, cookie.value, options)
             } else {
               res.clearCookie(name, options)
             }

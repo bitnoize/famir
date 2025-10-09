@@ -1,10 +1,10 @@
 import { JSONSchemaType } from '@famir/common'
 import {
-  CreateRedirectorData,
-  DeleteRedirectorData,
-  ListRedirectorsData,
-  ReadRedirectorData,
-  UpdateRedirectorData
+  CreateRedirectorModel,
+  DeleteRedirectorModel,
+  ListRedirectorModels,
+  ReadRedirectorModel,
+  UpdateRedirectorModel
 } from '@famir/domain'
 import { customIdentSchema } from '@famir/validator'
 
@@ -14,7 +14,7 @@ export const redirectorPageSchema: JSONSchemaType<string> = {
   maxLength: 10485760
 } as const
 
-export const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = {
+export const createRedirectorModelSchema: JSONSchemaType<CreateRedirectorModel> = {
   type: 'object',
   required: ['campaignId', 'redirectorId', 'page'],
   properties: {
@@ -28,7 +28,7 @@ export const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = 
   additionalProperties: false
 } as const
 
-export const readRedirectorDataSchema: JSONSchemaType<ReadRedirectorData> = {
+export const readRedirectorModelSchema: JSONSchemaType<ReadRedirectorModel> = {
   type: 'object',
   required: ['campaignId', 'redirectorId'],
   properties: {
@@ -38,7 +38,7 @@ export const readRedirectorDataSchema: JSONSchemaType<ReadRedirectorData> = {
   additionalProperties: false
 } as const
 
-export const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
+export const updateRedirectorModelSchema: JSONSchemaType<UpdateRedirectorModel> = {
   type: 'object',
   required: ['campaignId', 'redirectorId'],
   properties: {
@@ -52,7 +52,7 @@ export const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = 
   additionalProperties: false
 } as const
 
-export const deleteRedirectorDataSchema: JSONSchemaType<DeleteRedirectorData> = {
+export const deleteRedirectorModelSchema: JSONSchemaType<DeleteRedirectorModel> = {
   type: 'object',
   required: ['campaignId', 'redirectorId'],
   properties: {
@@ -62,7 +62,7 @@ export const deleteRedirectorDataSchema: JSONSchemaType<DeleteRedirectorData> = 
   additionalProperties: false
 } as const
 
-export const listRedirectorsDataSchema: JSONSchemaType<ListRedirectorsData> = {
+export const listRedirectorModelsSchema: JSONSchemaType<ListRedirectorModels> = {
   type: 'object',
   required: ['campaignId'],
   properties: {

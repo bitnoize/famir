@@ -5,7 +5,7 @@ import {
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository,
-  UpdateTargetData
+  UpdateTargetModel
 } from '@famir/domain'
 
 export const UPDATE_TARGET_USE_CASE = Symbol('UpdateTargetUseCase')
@@ -20,7 +20,7 @@ export class UpdateTargetUseCase {
 
   constructor(private readonly targetRepository: TargetRepository) {}
 
-  async execute(data: UpdateTargetData): Promise<TargetModel> {
+  async execute(data: UpdateTargetModel): Promise<TargetModel> {
     try {
       return await this.targetRepository.update(data)
     } catch (error) {

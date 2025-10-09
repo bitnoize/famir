@@ -6,6 +6,10 @@ export const campaignKey = (prefix: string, campaignId: string) => {
   return buildKey(prefix, 'campaign', campaignId)
 }
 
+export const campaignUniqueMirrorDomainKey = (prefix: string) => {
+  return buildKey(prefix, 'campaign-unique-mirror-domain')
+}
+
 export const campaignIndexKey = (prefix: string) => {
   return buildKey(prefix, 'campaign-index')
 }

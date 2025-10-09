@@ -5,7 +5,7 @@ import {
   ProxyModel,
   ProxyRepository,
   ReplServerError,
-  SwitchProxyData
+  SwitchProxyModel
 } from '@famir/domain'
 
 export const ENABLE_PROXY_USE_CASE = Symbol('EnableProxyUseCase')
@@ -20,7 +20,7 @@ export class EnableProxyUseCase {
 
   constructor(private readonly proxyRepository: ProxyRepository) {}
 
-  async execute(data: SwitchProxyData): Promise<ProxyModel> {
+  async execute(data: SwitchProxyModel): Promise<ProxyModel> {
     try {
       return await this.proxyRepository.enable(data)
     } catch (error) {

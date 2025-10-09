@@ -1,92 +1,92 @@
 import {
-  createRedirectorDataSchema,
-  deleteRedirectorDataSchema,
-  listRedirectorsDataSchema,
-  readRedirectorDataSchema,
-  updateRedirectorDataSchema
+  createRedirectorModelSchema,
+  deleteRedirectorModelSchema,
+  listRedirectorModelsSchema,
+  readRedirectorModelSchema,
+  updateRedirectorModelSchema
 } from '@famir/database'
 import {
-  CreateRedirectorData,
-  DeleteRedirectorData,
-  ListRedirectorsData,
-  ReadRedirectorData,
+  CreateRedirectorModel,
+  DeleteRedirectorModel,
+  ListRedirectorModels,
+  ReadRedirectorModel,
   ReplServerError,
-  UpdateRedirectorData,
+  UpdateRedirectorModel,
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
 
 export const addSchemas: ValidatorSchemas = {
-  'create-redirector-data': createRedirectorDataSchema,
-  'read-redirector-data': readRedirectorDataSchema,
-  'update-redirector-data': updateRedirectorDataSchema,
-  'delete-redirector-data': deleteRedirectorDataSchema,
-  'list-redirectors-data': listRedirectorsDataSchema
+  'create-redirector-model': createRedirectorModelSchema,
+  'read-redirector-model': readRedirectorModelSchema,
+  'update-redirector-model': updateRedirectorModelSchema,
+  'delete-redirector-model': deleteRedirectorModelSchema,
+  'list-redirector-models': listRedirectorModelsSchema
 }
-export function validateCreateRedirectorData(
+export function validateCreateRedirectorModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is CreateRedirectorData {
+): asserts data is CreateRedirectorModel {
   try {
-    assertSchema<CreateRedirectorData>('create-redirector-data', data)
+    assertSchema<CreateRedirectorModel>('create-redirector-model', data)
   } catch (error) {
-    throw new ReplServerError(`CreateRedirectorData validation failed`, {
+    throw new ReplServerError(`CreateRedirectorModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateReadRedirectorData(
+export function validateReadRedirectorModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ReadRedirectorData {
+): asserts data is ReadRedirectorModel {
   try {
-    assertSchema<ReadRedirectorData>('read-redirector-data', data)
+    assertSchema<ReadRedirectorModel>('read-redirector-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadRedirectorData validation failed`, {
+    throw new ReplServerError(`ReadRedirectorModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateUpdateRedirectorData(
+export function validateUpdateRedirectorModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is UpdateRedirectorData {
+): asserts data is UpdateRedirectorModel {
   try {
-    assertSchema<UpdateRedirectorData>('update-redirector-data', data)
+    assertSchema<UpdateRedirectorModel>('update-redirector-model', data)
   } catch (error) {
-    throw new ReplServerError(`UpdateRedirectorData validation failed`, {
+    throw new ReplServerError(`UpdateRedirectorModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateDeleteRedirectorData(
+export function validateDeleteRedirectorModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is DeleteRedirectorData {
+): asserts data is DeleteRedirectorModel {
   try {
-    assertSchema<DeleteRedirectorData>('delete-redirector-data', data)
+    assertSchema<DeleteRedirectorModel>('delete-redirector-model', data)
   } catch (error) {
-    throw new ReplServerError(`DeleteRedirectorData validation failed`, {
+    throw new ReplServerError(`DeleteRedirectorModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateListRedirectorsData(
+export function validateListRedirectorModels(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ListRedirectorsData {
+): asserts data is ListRedirectorModels {
   try {
-    assertSchema<ListRedirectorsData>('list-redirectors-data', data)
+    assertSchema<ListRedirectorModels>('list-redirector-models', data)
   } catch (error) {
-    throw new ReplServerError(`ListRedirectorsData validation failed`, {
+    throw new ReplServerError(`ListRedirectorModels validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })

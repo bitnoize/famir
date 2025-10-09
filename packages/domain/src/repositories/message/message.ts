@@ -5,7 +5,7 @@ import {
   MessageResponseCookies
 } from '../../models/index.js'
 
-export interface CreateMessageData {
+export interface CreateMessageModel {
   campaignId: string
   messageId: string
   proxyId: string
@@ -26,14 +26,14 @@ export interface CreateMessageData {
   score: number
 }
 
-export interface ReadMessageData {
+export interface ReadMessageModel {
   campaignId: string
   messageId: string
 }
 
 export interface MessageRepository {
-  create(data: CreateMessageData): Promise<MessageModel>
-  read(data: ReadMessageData): Promise<MessageModel | null>
+  create(data: CreateMessageModel): Promise<MessageModel>
+  read(data: ReadMessageModel): Promise<MessageModel | null>
 }
 
 export const MESSAGE_REPOSITORY = Symbol('MessageRepository')

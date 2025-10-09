@@ -1,22 +1,22 @@
-import { readSessionDataSchema } from '@famir/database'
+import { readSessionModelSchema } from '@famir/database'
 import {
-  ReadSessionData,
+  ReadSessionModel,
   ReplServerError,
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
 
 export const addSchemas: ValidatorSchemas = {
-  'read-session-data': readSessionDataSchema
+  'read-session-model': readSessionModelSchema
 }
-export function validateReadSessionData(
+export function validateReadSessionModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ReadSessionData {
+): asserts data is ReadSessionModel {
   try {
-    assertSchema<ReadSessionData>('read-session-data', data)
+    assertSchema<ReadSessionModel>('read-session-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadSessionData validation failed`, {
+    throw new ReplServerError(`ReadSessionModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })

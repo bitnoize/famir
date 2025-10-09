@@ -1,10 +1,10 @@
 import { JSONSchemaType } from '@famir/common'
 import {
-  CreateLureData,
-  DeleteLureData,
-  ListLuresData,
-  ReadLureData,
-  SwitchLureData
+  CreateLureModel,
+  DeleteLureModel,
+  ListLureModels,
+  ReadLureModel,
+  SwitchLureModel
 } from '@famir/domain'
 import { customIdentSchema } from '@famir/validator'
 
@@ -14,7 +14,7 @@ export const lurePathSchema: JSONSchemaType<string> = {
   maxLength: 128
 } as const
 
-export const createLureDataSchema: JSONSchemaType<CreateLureData> = {
+export const createLureModelSchema: JSONSchemaType<CreateLureModel> = {
   type: 'object',
   required: ['campaignId', 'lureId', 'path', 'redirectorId'],
   properties: {
@@ -26,7 +26,7 @@ export const createLureDataSchema: JSONSchemaType<CreateLureData> = {
   additionalProperties: false
 } as const
 
-export const readLureDataSchema: JSONSchemaType<ReadLureData> = {
+export const readLureModelSchema: JSONSchemaType<ReadLureModel> = {
   type: 'object',
   required: ['campaignId', 'lureId'],
   properties: {
@@ -36,7 +36,7 @@ export const readLureDataSchema: JSONSchemaType<ReadLureData> = {
   additionalProperties: false
 } as const
 
-export const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
+export const switchLureModelSchema: JSONSchemaType<SwitchLureModel> = {
   type: 'object',
   required: ['campaignId', 'lureId'],
   properties: {
@@ -46,7 +46,7 @@ export const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
   additionalProperties: false
 } as const
 
-export const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
+export const deleteLureModelSchema: JSONSchemaType<DeleteLureModel> = {
   type: 'object',
   required: ['campaignId', 'lureId', 'path', 'redirectorId'],
   properties: {
@@ -58,7 +58,7 @@ export const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
   additionalProperties: false
 } as const
 
-export const listLuresDataSchema: JSONSchemaType<ListLuresData> = {
+export const listLureModelsSchema: JSONSchemaType<ListLureModels> = {
   type: 'object',
   required: ['campaignId'],
   properties: {

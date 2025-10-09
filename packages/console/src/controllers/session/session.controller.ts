@@ -9,7 +9,7 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import { addSchemas, validateReadSessionData } from './session.utils.js'
+import { addSchemas, validateReadSessionModel } from './session.utils.js'
 import { READ_SESSION_USE_CASE, ReadSessionUseCase } from './use-cases/index.js'
 
 export const SESSION_CONTROLLER = Symbol('SessionController')
@@ -47,7 +47,7 @@ export class SessionController extends BaseController {
 
   private readonly readSessionHandler = async (data: unknown): Promise<SessionModel | null> => {
     try {
-      validateReadSessionData(this.assertSchema, data)
+      validateReadSessionModel(this.assertSchema, data)
 
       return await this.readSessionUseCase.execute(data)
     } catch (error) {

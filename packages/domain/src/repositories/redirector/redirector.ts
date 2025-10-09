@@ -1,37 +1,37 @@
 import { RedirectorModel } from '../../models/index.js'
 
-export interface CreateRedirectorData {
+export interface CreateRedirectorModel {
   campaignId: string
   redirectorId: string
   page: string
 }
 
-export interface ReadRedirectorData {
+export interface ReadRedirectorModel {
   campaignId: string
   redirectorId: string
 }
 
-export interface UpdateRedirectorData {
+export interface UpdateRedirectorModel {
   campaignId: string
   redirectorId: string
   page: string | null | undefined
 }
 
-export interface DeleteRedirectorData {
+export interface DeleteRedirectorModel {
   campaignId: string
   redirectorId: string
 }
 
-export interface ListRedirectorsData {
+export interface ListRedirectorModels {
   campaignId: string
 }
 
 export interface RedirectorRepository {
-  create(data: CreateRedirectorData): Promise<RedirectorModel>
-  read(data: ReadRedirectorData): Promise<RedirectorModel | null>
-  update(data: UpdateRedirectorData): Promise<RedirectorModel>
-  delete(data: DeleteRedirectorData): Promise<RedirectorModel>
-  list(data: ListRedirectorsData): Promise<RedirectorModel[] | null>
+  create(data: CreateRedirectorModel): Promise<RedirectorModel>
+  read(data: ReadRedirectorModel): Promise<RedirectorModel | null>
+  update(data: UpdateRedirectorModel): Promise<RedirectorModel>
+  delete(data: DeleteRedirectorModel): Promise<RedirectorModel>
+  list(data: ListRedirectorModels): Promise<RedirectorModel[] | null>
 }
 
 export const REDIRECTOR_REPOSITORY = Symbol('RedirectorRepository')

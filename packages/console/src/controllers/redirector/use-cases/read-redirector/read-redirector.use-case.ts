@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
-  ReadRedirectorData,
+  ReadRedirectorModel,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository
@@ -18,7 +18,7 @@ export class ReadRedirectorUseCase {
 
   constructor(private readonly redirectorRepository: RedirectorRepository) {}
 
-  async execute(data: ReadRedirectorData): Promise<RedirectorModel | null> {
+  async execute(data: ReadRedirectorModel): Promise<RedirectorModel | null> {
     return await this.redirectorRepository.read(data)
   }
 }

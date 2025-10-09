@@ -1,5 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { ListLuresData, LURE_REPOSITORY, LureModel, LureRepository } from '@famir/domain'
+import { ListLureModels, LURE_REPOSITORY, LureModel, LureRepository } from '@famir/domain'
 
 export const LIST_LURES_USE_CASE = Symbol('ListLuresUseCase')
 
@@ -13,7 +13,7 @@ export class ListLuresUseCase {
 
   constructor(private readonly lureRepository: LureRepository) {}
 
-  async execute(data: ListLuresData): Promise<LureModel[] | null> {
+  async execute(data: ListLureModels): Promise<LureModel[] | null> {
     return await this.lureRepository.list(data)
   }
 }

@@ -1,22 +1,22 @@
-import { readMessageDataSchema } from '@famir/database'
+import { readMessageModelSchema } from '@famir/database'
 import {
-  ReadMessageData,
+  ReadMessageModel,
   ReplServerError,
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
 
 export const addSchemas: ValidatorSchemas = {
-  'read-message-data': readMessageDataSchema
+  'read-message-model': readMessageModelSchema
 }
-export function validateReadMessageData(
+export function validateReadMessageModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ReadMessageData {
+): asserts data is ReadMessageModel {
   try {
-    assertSchema<ReadMessageData>('read-message-data', data)
+    assertSchema<ReadMessageModel>('read-message-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadMessageData validation failed`, {
+    throw new ReplServerError(`ReadMessageModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })

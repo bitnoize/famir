@@ -11,12 +11,12 @@ import {
 import { BaseController } from '../base/index.js'
 import {
   addSchemas,
-  validateCreateTargetData,
-  validateDeleteTargetData,
-  validateListTargetsData,
-  validateReadTargetData,
-  validateSwitchTargetData,
-  validateUpdateTargetData
+  validateCreateTargetModel,
+  validateDeleteTargetModel,
+  validateListTargetModels,
+  validateReadTargetModel,
+  validateSwitchTargetModel,
+  validateUpdateTargetModel
 } from './target.utils.js'
 import {
   CREATE_TARGET_USE_CASE,
@@ -88,7 +88,7 @@ export class TargetController extends BaseController {
 
   private readonly createTargetHandler = async (data: unknown): Promise<TargetModel> => {
     try {
-      validateCreateTargetData(this.assertSchema, data)
+      validateCreateTargetModel(this.assertSchema, data)
 
       return await this.createTargetUseCase.execute(data)
     } catch (error) {
@@ -98,7 +98,7 @@ export class TargetController extends BaseController {
 
   private readonly readTargetHandler = async (data: unknown): Promise<TargetModel | null> => {
     try {
-      validateReadTargetData(this.assertSchema, data)
+      validateReadTargetModel(this.assertSchema, data)
 
       return await this.readTargetUseCase.execute(data)
     } catch (error) {
@@ -108,7 +108,7 @@ export class TargetController extends BaseController {
 
   private readonly updateTargetHandler = async (data: unknown): Promise<TargetModel> => {
     try {
-      validateUpdateTargetData(this.assertSchema, data)
+      validateUpdateTargetModel(this.assertSchema, data)
 
       return await this.updateTargetUseCase.execute(data)
     } catch (error) {
@@ -118,7 +118,7 @@ export class TargetController extends BaseController {
 
   private readonly enableTargetHandler = async (data: unknown): Promise<TargetModel> => {
     try {
-      validateSwitchTargetData(this.assertSchema, data)
+      validateSwitchTargetModel(this.assertSchema, data)
 
       return await this.enableTargetUseCase.execute(data)
     } catch (error) {
@@ -128,7 +128,7 @@ export class TargetController extends BaseController {
 
   private readonly disableTargetHandler = async (data: unknown): Promise<TargetModel> => {
     try {
-      validateSwitchTargetData(this.assertSchema, data)
+      validateSwitchTargetModel(this.assertSchema, data)
 
       return await this.disableTargetUseCase.execute(data)
     } catch (error) {
@@ -138,7 +138,7 @@ export class TargetController extends BaseController {
 
   private readonly deleteTargetHandler = async (data: unknown): Promise<TargetModel> => {
     try {
-      validateDeleteTargetData(this.assertSchema, data)
+      validateDeleteTargetModel(this.assertSchema, data)
 
       return await this.deleteTargetUseCase.execute(data)
     } catch (error) {
@@ -148,7 +148,7 @@ export class TargetController extends BaseController {
 
   private readonly listTargetsHandler = async (data: unknown): Promise<TargetModel[] | null> => {
     try {
-      validateListTargetsData(this.assertSchema, data)
+      validateListTargetModels(this.assertSchema, data)
 
       return await this.listTargetsUseCase.execute(data)
     } catch (error) {

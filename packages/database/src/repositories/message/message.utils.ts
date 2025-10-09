@@ -122,27 +122,27 @@ export function buildModel(
     return null
   }
 
-  return new MessageModel(
-    raw.campaign_id,
-    raw.message_id,
-    raw.proxy_id,
-    raw.target_id,
-    raw.session_id,
-    raw.client_ip,
-    raw.method,
-    raw.origin_url,
-    raw.forward_url,
-    parseRequestHeaders(assertSchema, raw.request_headers),
-    parseRequestCookies(assertSchema, raw.request_cookies),
-    parseRequestBody(raw.request_body),
-    raw.status_code,
-    parseResponseHeaders(assertSchema, raw.response_headers),
-    parseResponseCookies(assertSchema, raw.response_cookies),
-    parseResponseBody(raw.response_body),
-    raw.query_time,
-    raw.score,
-    new Date(raw.created_at)
-  )
+  return {
+    campaignId: raw.campaign_id,
+    messageId: raw.message_id,
+    proxyId: raw.proxy_id,
+    targetId: raw.target_id,
+    sessionId: raw.session_id,
+    clientIp: raw.client_ip,
+    method: raw.method,
+    originUrl: raw.origin_url,
+    forwardUrl: raw.forward_url,
+    requestHeaders: parseRequestHeaders(assertSchema, raw.request_headers),
+    requestCookies: parseRequestCookies(assertSchema, raw.request_cookies),
+    requestBody: parseRequestBody(raw.request_body),
+    statusCode: raw.status_code,
+    responseHeaders: parseResponseHeaders(assertSchema, raw.response_headers),
+    responseCookies: parseResponseCookies(assertSchema, raw.response_cookies),
+    responseBody: parseResponseBody(raw.response_body),
+    queryTime: raw.query_time,
+    score: raw.score,
+    createdAt: new Date(raw.created_at)
+  }
 }
 
 export function buildCollection(
@@ -152,12 +152,12 @@ export function buildCollection(
   return raws.map((raw) => buildModel(assertSchema, raw))
 }
 
-export function guardModel(data: MessageModel | null): data is MessageModel {
-  return data !== null
+export function guardModel(model: MessageModel | null): model is MessageModel {
+  return model !== null
 }
 
-export function assertModel(data: MessageModel | null): asserts data is MessageModel {
-  if (!guardModel(data)) {
+export function assertModel(model: MessageModel | null): asserts model is MessageModel {
+  if (!guardModel(model)) {
     throw new Error(`Message lost`)
   }
 }

@@ -4,7 +4,7 @@
   Create target
 --]]
 local function create_target(keys, args)
-  if not (#keys == 5 and #args == 21) then
+  if not (#keys == 5 and #args == 20) then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -24,20 +24,19 @@ local function create_target(keys, args)
     donor_port = tonumber(args[7]),
     mirror_secure = tonumber(args[8]),
     mirror_sub = args[9],
-    mirror_domain = args[10],
-    mirror_port = tonumber(args[11]),
-    connect_timeout = tonumber(args[12]),
-    timeout = tonumber(args[13]),
-    main_page = args[14],
-    not_found_page = args[15],
-    favicon_ico = args[16],
-    robots_txt = args[17],
-    sitemap_xml = args[18],
-    success_redirect_url = args[19],
-    failure_redirect_url = args[20],
+    mirror_port = tonumber(args[10]),
+    connect_timeout = tonumber(args[11]),
+    timeout = tonumber(args[12]),
+    main_page = args[13],
+    not_found_page = args[14],
+    favicon_ico = args[15],
+    robots_txt = args[16],
+    sitemap_xml = args[17],
+    success_redirect_url = args[18],
+    failure_redirect_url = args[19],
     is_enabled = 0,
     message_count = 0,
-    created_at = tonumber(args[21]),
+    created_at = tonumber(args[20]),
     updated_at = nil,
   }
 
@@ -77,10 +76,6 @@ local function create_target(keys, args)
     return redis.error_reply('ERR Wrong model.mirror_sub')
   end
 
-  if not (#model.mirror_domain > 0) then
-    return redis.error_reply('ERR Wrong model.mirror_domain')
-  end
-
   if not (model.mirror_port >= 0) then
     return redis.error_reply('ERR Wrong model.mirror_port')
   end
@@ -114,7 +109,6 @@ local function create_target(keys, args)
 
   -- stylua: ignore
   local mirror = model.mirror_sub
-    .. '\t' .. model.mirror_domain
     .. '\t' .. tostring(model.mirror_port)
 
   if not (redis.call('SISMEMBER', target_unique_donor_key, donor) == 0) then
@@ -181,7 +175,6 @@ local function read_target(keys, args)
     'donor_port',
     'mirror_secure',
     'mirror_sub',
-    'mirror_domain',
     'mirror_port',
     'connect_timeout',
     'timeout',
@@ -198,7 +191,7 @@ local function read_target(keys, args)
     'updated_at'
   )
 
-  if not (#values == 24) then
+  if not (#values == 23) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -212,21 +205,20 @@ local function read_target(keys, args)
     donor_port = tonumber(values[7]),
     mirror_secure = tonumber(values[8]),
     mirror_sub = values[9],
-    mirror_domain = values[10],
-    mirror_port = tonumber(values[11]),
-    connect_timeout = tonumber(values[12]),
-    timeout = tonumber(values[13]),
-    main_page = values[14],
-    not_found_page = values[15],
-    favicon_ico = values[16],
-    robots_txt = values[17],
-    sitemap_xml = values[18],
-    success_redirect_url = values[19],
-    failure_redirect_url = values[20],
-    is_enabled = tonumber(values[21]),
-    message_count = tonumber(values[22]),
-    created_at = tonumber(values[23]),
-    updated_at = tonumber(values[24]),
+    mirror_port = tonumber(values[10]),
+    connect_timeout = tonumber(values[11]),
+    timeout = tonumber(values[12]),
+    main_page = values[13],
+    not_found_page = values[14],
+    favicon_ico = values[15],
+    robots_txt = values[16],
+    sitemap_xml = values[17],
+    success_redirect_url = values[18],
+    failure_redirect_url = values[19],
+    is_enabled = tonumber(values[20]),
+    message_count = tonumber(values[21]),
+    created_at = tonumber(values[22]),
+    updated_at = tonumber(values[23]),
   }
 
   for field, value in pairs(model) do
@@ -501,7 +493,6 @@ local function delete_target(keys, args)
     donor_domain = redis.call('HGET', target_key, 'donor_domain'),
     donor_port = tonumber(redis.call('HGET', target_key, 'donor_port')),
     mirror_sub = redis.call('HGET', target_key, 'mirror_sub'),
-    mirror_domain = redis.call('HGET', target_key, 'mirror_domain'),
     mirror_port = tonumber(redis.call('HGET', target_key, 'mirror_port')),
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
@@ -526,10 +517,6 @@ local function delete_target(keys, args)
     return redis.error_reply('ERR Malform data.mirror_sub')
   end
 
-  if not (data.mirror_domain and #data.mirror_domain > 0) then
-    return redis.error_reply('ERR Malform data.mirror_domain')
-  end
-
   if not (data.mirror_port and data.mirror_port >= 0) then
     return redis.error_reply('ERR Malform data.mirror_port')
   end
@@ -549,7 +536,6 @@ local function delete_target(keys, args)
 
   -- stylua: ignore
   local mirror = data.mirror_sub
-    .. '\t' .. data.mirror_domain
     .. '\t' .. tostring(data.mirror_port)
 
   -- Point of no return

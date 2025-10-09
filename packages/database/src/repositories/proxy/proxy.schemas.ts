@@ -1,10 +1,10 @@
 import { JSONSchemaType } from '@famir/common'
 import {
-  CreateProxyData,
-  DeleteProxyData,
-  ListProxiesData,
-  ReadProxyData,
-  SwitchProxyData
+  CreateProxyModel,
+  DeleteProxyModel,
+  ListProxyModels,
+  ReadProxyModel,
+  SwitchProxyModel
 } from '@famir/domain'
 import { customIdentSchema } from '@famir/validator'
 
@@ -14,7 +14,7 @@ export const proxyUrlSchema: JSONSchemaType<string> = {
   maxLength: 128
 } as const
 
-export const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
+export const createProxyModelSchema: JSONSchemaType<CreateProxyModel> = {
   type: 'object',
   required: ['campaignId', 'proxyId', 'url'],
   properties: {
@@ -25,7 +25,7 @@ export const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
   additionalProperties: false
 } as const
 
-export const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
+export const readProxyModelSchema: JSONSchemaType<ReadProxyModel> = {
   type: 'object',
   required: ['campaignId', 'proxyId'],
   properties: {
@@ -35,7 +35,7 @@ export const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
   additionalProperties: false
 } as const
 
-export const switchProxyDataSchema: JSONSchemaType<SwitchProxyData> = {
+export const switchProxyModelSchema: JSONSchemaType<SwitchProxyModel> = {
   type: 'object',
   required: ['campaignId', 'proxyId'],
   properties: {
@@ -45,7 +45,7 @@ export const switchProxyDataSchema: JSONSchemaType<SwitchProxyData> = {
   additionalProperties: false
 } as const
 
-export const deleteProxyDataSchema: JSONSchemaType<DeleteProxyData> = {
+export const deleteProxyModelSchema: JSONSchemaType<DeleteProxyModel> = {
   type: 'object',
   required: ['campaignId', 'proxyId'],
   properties: {
@@ -55,7 +55,7 @@ export const deleteProxyDataSchema: JSONSchemaType<DeleteProxyData> = {
   additionalProperties: false
 } as const
 
-export const listProxiesDataSchema: JSONSchemaType<ListProxiesData> = {
+export const listProxyModelsSchema: JSONSchemaType<ListProxyModels> = {
   type: 'object',
   required: ['campaignId'],
   properties: {

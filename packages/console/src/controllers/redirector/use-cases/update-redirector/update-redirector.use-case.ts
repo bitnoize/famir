@@ -5,7 +5,7 @@ import {
   RedirectorModel,
   RedirectorRepository,
   ReplServerError,
-  UpdateRedirectorData
+  UpdateRedirectorModel
 } from '@famir/domain'
 
 export const UPDATE_REDIRECTOR_USE_CASE = Symbol('UpdateRedirectorUseCase')
@@ -20,7 +20,7 @@ export class UpdateRedirectorUseCase {
 
   constructor(private readonly redirectorRepository: RedirectorRepository) {}
 
-  async execute(data: UpdateRedirectorData): Promise<RedirectorModel> {
+  async execute(data: UpdateRedirectorModel): Promise<RedirectorModel> {
     try {
       return await this.redirectorRepository.update(data)
     } catch (error) {

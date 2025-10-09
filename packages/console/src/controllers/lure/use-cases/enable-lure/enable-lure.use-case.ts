@@ -5,7 +5,7 @@ import {
   LureModel,
   LureRepository,
   ReplServerError,
-  SwitchLureData
+  SwitchLureModel
 } from '@famir/domain'
 
 export const ENABLE_LURE_USE_CASE = Symbol('EnableLureUseCase')
@@ -20,7 +20,7 @@ export class EnableLureUseCase {
 
   constructor(private readonly lureRepository: LureRepository) {}
 
-  async execute(data: SwitchLureData): Promise<LureModel> {
+  async execute(data: SwitchLureModel): Promise<LureModel> {
     try {
       return await this.lureRepository.enable(data)
     } catch (error) {

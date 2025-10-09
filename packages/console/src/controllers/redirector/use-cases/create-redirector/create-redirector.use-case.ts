@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
-  CreateRedirectorData,
+  CreateRedirectorModel,
   DatabaseError,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
@@ -20,7 +20,7 @@ export class CreateRedirectorUseCase {
 
   constructor(private readonly redirectorRepository: RedirectorRepository) {}
 
-  async execute(data: CreateRedirectorData): Promise<RedirectorModel> {
+  async execute(data: CreateRedirectorModel): Promise<RedirectorModel> {
     try {
       return await this.redirectorRepository.create(data)
     } catch (error) {

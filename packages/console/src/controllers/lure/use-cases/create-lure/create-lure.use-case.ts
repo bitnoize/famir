@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
-  CreateLureData,
+  CreateLureModel,
   DatabaseError,
   LURE_REPOSITORY,
   LureModel,
@@ -20,7 +20,7 @@ export class CreateLureUseCase {
 
   constructor(private readonly lureRepository: LureRepository) {}
 
-  async execute(data: CreateLureData): Promise<LureModel> {
+  async execute(data: CreateLureModel): Promise<LureModel> {
     try {
       return await this.lureRepository.create(data)
     } catch (error) {

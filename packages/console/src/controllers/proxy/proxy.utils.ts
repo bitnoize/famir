@@ -1,90 +1,92 @@
 import {
-  createProxyDataSchema,
-  deleteProxyDataSchema,
-  readProxyDataSchema,
-  switchProxyDataSchema
+  createProxyModelSchema,
+  deleteProxyModelSchema,
+  listProxyModelsSchema,
+  readProxyModelSchema,
+  switchProxyModelSchema
 } from '@famir/database'
 import {
-  CreateProxyData,
-  DeleteProxyData,
-  ListProxiesData,
-  ReadProxyData,
+  CreateProxyModel,
+  DeleteProxyModel,
+  ListProxyModels,
+  ReadProxyModel,
   ReplServerError,
-  SwitchProxyData,
+  SwitchProxyModel,
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
 
 export const addSchemas: ValidatorSchemas = {
-  'create-proxy-data': createProxyDataSchema,
-  'read-proxy-data': readProxyDataSchema,
-  'switch-proxy-data': switchProxyDataSchema,
-  'delete-proxy-data': deleteProxyDataSchema
+  'create-proxy-model': createProxyModelSchema,
+  'read-proxy-model': readProxyModelSchema,
+  'switch-proxy-model': switchProxyModelSchema,
+  'delete-proxy-model': deleteProxyModelSchema,
+  'list-proxy-models': listProxyModelsSchema
 }
-export function validateCreateProxyData(
+export function validateCreateProxyModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is CreateProxyData {
+): asserts data is CreateProxyModel {
   try {
-    assertSchema<CreateProxyData>('create-proxy-data', data)
+    assertSchema<CreateProxyModel>('create-proxy-model', data)
   } catch (error) {
-    throw new ReplServerError(`CreateProxyData validation failed`, {
+    throw new ReplServerError(`CreateProxyModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateReadProxyData(
+export function validateReadProxyModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ReadProxyData {
+): asserts data is ReadProxyModel {
   try {
-    assertSchema<ReadProxyData>('read-proxy-data', data)
+    assertSchema<ReadProxyModel>('read-proxy-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadProxyData validation failed`, {
+    throw new ReplServerError(`ReadProxyModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateSwitchProxyData(
+export function validateSwitchProxyModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is SwitchProxyData {
+): asserts data is SwitchProxyModel {
   try {
-    assertSchema<SwitchProxyData>('switch-proxy-data', data)
+    assertSchema<SwitchProxyModel>('switch-proxy-model', data)
   } catch (error) {
-    throw new ReplServerError(`SwitchProxyData validation failed`, {
+    throw new ReplServerError(`SwitchProxyModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateDeleteProxyData(
+export function validateDeleteProxyModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is DeleteProxyData {
+): asserts data is DeleteProxyModel {
   try {
-    assertSchema<DeleteProxyData>('delete-proxy-data', data)
+    assertSchema<DeleteProxyModel>('delete-proxy-model', data)
   } catch (error) {
-    throw new ReplServerError(`DeleteProxyData validation failed`, {
+    throw new ReplServerError(`DeleteProxyModel validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })
   }
 }
 
-export function validateListProxiesData(
+export function validateListProxyModels(
   assertSchema: ValidatorAssertSchema,
   data: unknown
-): asserts data is ListProxiesData {
+): asserts data is ListProxyModels {
   try {
-    assertSchema<ListProxiesData>('list-proxies-data', data)
+    assertSchema<ListProxyModels>('list-proxy-models', data)
   } catch (error) {
-    throw new ReplServerError(`ListProxiesData validation failed`, {
+    throw new ReplServerError(`ListProxyModels validation failed`, {
       cause: error,
       code: 'BAD_PARAMS'
     })

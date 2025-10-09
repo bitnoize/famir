@@ -9,7 +9,7 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import { addSchemas, validateReadMessageData } from './message.utils.js'
+import { addSchemas, validateReadMessageModel } from './message.utils.js'
 import { READ_MESSAGE_USE_CASE, ReadMessageUseCase } from './use-cases/index.js'
 
 export const MESSAGE_CONTROLLER = Symbol('MessageController')
@@ -47,7 +47,7 @@ export class MessageController extends BaseController {
 
   private readonly readMessageHandler = async (data: unknown): Promise<MessageModel | null> => {
     try {
-      validateReadMessageData(this.assertSchema, data)
+      validateReadMessageModel(this.assertSchema, data)
 
       return await this.readMessageUseCase.execute(data)
     } catch (error) {

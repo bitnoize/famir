@@ -1,7 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
   DatabaseError,
-  DeleteTargetData,
+  DeleteTargetModel,
   ReplServerError,
   TARGET_REPOSITORY,
   TargetModel,
@@ -20,7 +20,7 @@ export class DeleteTargetUseCase {
 
   constructor(private readonly targetRepository: TargetRepository) {}
 
-  async execute(data: DeleteTargetData): Promise<TargetModel> {
+  async execute(data: DeleteTargetModel): Promise<TargetModel> {
     try {
       return await this.targetRepository.delete(data)
     } catch (error) {

@@ -17,28 +17,26 @@ export interface MessageResponseCookie {
 }
 export type MessageResponseCookies = Record<string, MessageResponseCookie | null | undefined>
 
-export class MessageModel {
-  constructor(
-    readonly campaignId: string,
-    readonly messageId: string,
-    readonly proxyId: string,
-    readonly targetId: string,
-    readonly sessionId: string,
-    readonly clientIp: string,
-    readonly method: string,
-    readonly originUrl: string,
-    readonly forwardUrl: string,
-    readonly requestHeaders: MessageHeaders,
-    readonly requestCookies: MessageRequestCookies,
-    readonly requestBody: Buffer,
-    readonly statusCode: number,
-    readonly responseHeaders: MessageHeaders,
-    readonly responseCookies: MessageResponseCookies,
-    readonly responseBody: Buffer,
-    readonly queryTime: number,
-    readonly score: number,
-    readonly createdAt: Date
-  ) {}
+export interface MessageModel {
+  readonly campaignId: string
+  readonly messageId: string
+  readonly proxyId: string
+  readonly targetId: string
+  readonly sessionId: string
+  readonly clientIp: string
+  readonly method: string
+  readonly originUrl: string
+  readonly forwardUrl: string
+  readonly requestHeaders: MessageHeaders
+  readonly requestCookies: MessageRequestCookies
+  readonly requestBody: Buffer
+  readonly statusCode: number
+  readonly responseHeaders: MessageHeaders
+  readonly responseCookies: MessageResponseCookies
+  readonly responseBody: Buffer
+  readonly queryTime: number
+  readonly score: number
+  readonly createdAt: Date
 }
 
 export type MessageHeadersDirection = 'requestHeaders' | 'responseHeaders'

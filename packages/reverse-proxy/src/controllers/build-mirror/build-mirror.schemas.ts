@@ -1,8 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
 import { customIdentSchema } from '@famir/validator'
-import { ConfigurationData } from './use-cases/index.js'
+import { ReadCampaignTargetData } from './use-cases/index.js'
 
-export const configurationDataSchema: JSONSchemaType<ConfigurationData> = {
+export const readCampaignTargetDataSchema: JSONSchemaType<ReadCampaignTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {

@@ -2,7 +2,7 @@ import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
-  CreateMessageData,
+  CreateMessageModel,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
@@ -11,7 +11,7 @@ import {
   MESSAGE_REPOSITORY,
   MessageModel,
   MessageRepository,
-  ReadMessageData,
+  ReadMessageModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -46,7 +46,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     validator.addSchemas(addSchemas)
   }
 
-  async create(data: CreateMessageData): Promise<MessageModel> {
+  async create(data: CreateMessageModel): Promise<MessageModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.message.create_message(
@@ -90,7 +90,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  async read(data: ReadMessageData): Promise<MessageModel | null> {
+  async read(data: ReadMessageModel): Promise<MessageModel | null> {
     try {
       const raw = await this.connection.message.read_message(
         this.options.prefix,

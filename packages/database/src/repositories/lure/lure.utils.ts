@@ -6,48 +6,48 @@ export function buildModel(raw: RawLure | null): LureModel | null {
     return null
   }
 
-  return new LureModel(
-    raw.campaign_id,
-    raw.lure_id,
-    raw.path,
-    raw.redirector_id,
-    !!raw.is_enabled,
-    raw.session_count,
-    new Date(raw.created_at),
-    new Date(raw.updated_at)
-  )
+  return {
+    campaignId: raw.campaign_id,
+    lureId: raw.lure_id,
+    path: raw.path,
+    redirectorId: raw.redirector_id,
+    isEnabled: !!raw.is_enabled,
+    sessionCount: raw.session_count,
+    createdAt: new Date(raw.created_at),
+    updatedAt: new Date(raw.updated_at)
+  }
 }
 
 export function buildCollection(raws: Array<RawLure | null>): Array<LureModel | null> {
   return raws.map((raw) => buildModel(raw))
 }
 
-export function guardModel(data: LureModel | null): data is LureModel {
-  return data !== null
+export function guardModel(model: LureModel | null): model is LureModel {
+  return model !== null
 }
 
-export function guardEnabledModel(data: LureModel | null): data is EnabledLureModel {
-  return guardModel(data) && data.isEnabled
+export function guardEnabledModel(model: LureModel | null): model is EnabledLureModel {
+  return guardModel(model) && model.isEnabled
 }
 
-export function guardDisabledModel(data: LureModel | null): data is DisabledLureModel {
-  return guardModel(data) && !data.isEnabled
+export function guardDisabledModel(model: LureModel | null): model is DisabledLureModel {
+  return guardModel(model) && !model.isEnabled
 }
 
-export function assertModel(data: LureModel | null): asserts data is LureModel {
-  if (!guardModel(data)) {
+export function assertModel(model: LureModel | null): asserts model is LureModel {
+  if (!guardModel(model)) {
     throw new Error(`Lure lost`)
   }
 }
 
-export function assertEnabledModel(data: LureModel | null): asserts data is EnabledLureModel {
-  if (!guardEnabledModel(data)) {
+export function assertEnabledModel(model: LureModel | null): asserts model is EnabledLureModel {
+  if (!guardEnabledModel(model)) {
     throw new Error(`EnabledLure lost`)
   }
 }
 
-export function assertDisabledModel(data: LureModel | null): asserts data is DisabledLureModel {
-  if (!guardDisabledModel(data)) {
+export function assertDisabledModel(model: LureModel | null): asserts model is DisabledLureModel {
+  if (!guardDisabledModel(model)) {
     throw new Error(`DisabledLure lost`)
   }
 }

@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
-  ListRedirectorsData,
+  ListRedirectorModels,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository
@@ -18,7 +18,7 @@ export class ListRedirectorsUseCase {
 
   constructor(private readonly proxyRepository: RedirectorRepository) {}
 
-  async execute(data: ListRedirectorsData): Promise<RedirectorModel[] | null> {
+  async execute(data: ListRedirectorModels): Promise<RedirectorModel[] | null> {
     return await this.proxyRepository.list(data)
   }
 }

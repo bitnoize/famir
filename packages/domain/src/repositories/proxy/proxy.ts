@@ -1,38 +1,38 @@
 import { DisabledProxyModel, EnabledProxyModel, ProxyModel } from '../../models/index.js'
 
-export interface CreateProxyData {
+export interface CreateProxyModel {
   campaignId: string
   proxyId: string
   url: string
 }
 
-export interface ReadProxyData {
+export interface ReadProxyModel {
   campaignId: string
   proxyId: string
 }
 
-export interface SwitchProxyData {
+export interface SwitchProxyModel {
   campaignId: string
   proxyId: string
 }
 
-export interface DeleteProxyData {
+export interface DeleteProxyModel {
   campaignId: string
   proxyId: string
 }
 
-export interface ListProxiesData {
+export interface ListProxyModels {
   campaignId: string
 }
 
 export interface ProxyRepository {
-  create(data: CreateProxyData): Promise<DisabledProxyModel>
-  read(data: ReadProxyData): Promise<ProxyModel | null>
-  readEnabled(data: ReadProxyData): Promise<EnabledProxyModel | null>
-  enable(data: SwitchProxyData): Promise<EnabledProxyModel>
-  disable(data: SwitchProxyData): Promise<DisabledProxyModel>
-  delete(data: DeleteProxyData): Promise<DisabledProxyModel>
-  list(data: ListProxiesData): Promise<ProxyModel[] | null>
+  create(data: CreateProxyModel): Promise<DisabledProxyModel>
+  read(data: ReadProxyModel): Promise<ProxyModel | null>
+  readEnabled(data: ReadProxyModel): Promise<EnabledProxyModel | null>
+  enable(data: SwitchProxyModel): Promise<EnabledProxyModel>
+  disable(data: SwitchProxyModel): Promise<DisabledProxyModel>
+  delete(data: DeleteProxyModel): Promise<DisabledProxyModel>
+  list(data: ListProxyModels): Promise<ProxyModel[] | null>
 }
 
 export const PROXY_REPOSITORY = Symbol('ProxyRepository')

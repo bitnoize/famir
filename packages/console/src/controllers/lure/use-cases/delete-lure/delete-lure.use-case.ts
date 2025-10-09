@@ -1,7 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
   DatabaseError,
-  DeleteLureData,
+  DeleteLureModel,
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
@@ -20,7 +20,7 @@ export class DeleteLureUseCase {
 
   constructor(private readonly lureRepository: LureRepository) {}
 
-  async execute(data: DeleteLureData): Promise<LureModel> {
+  async execute(data: DeleteLureModel): Promise<LureModel> {
     try {
       return await this.lureRepository.delete(data)
     } catch (error) {

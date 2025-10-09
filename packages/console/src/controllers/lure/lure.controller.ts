@@ -11,11 +11,11 @@ import {
 import { BaseController } from '../base/index.js'
 import {
   addSchemas,
-  validateCreateLureData,
-  validateDeleteLureData,
-  validateListLuresData,
-  validateReadLureData,
-  validateSwitchLureData
+  validateCreateLureModel,
+  validateDeleteLureModel,
+  validateListLureModels,
+  validateReadLureModel,
+  validateSwitchLureModel
 } from './lure.utils.js'
 import {
   CREATE_LURE_USE_CASE,
@@ -82,7 +82,7 @@ export class LureController extends BaseController {
 
   private readonly createLureHandler = async (data: unknown): Promise<LureModel> => {
     try {
-      validateCreateLureData(this.assertSchema, data)
+      validateCreateLureModel(this.assertSchema, data)
 
       return await this.createLureUseCase.execute(data)
     } catch (error) {
@@ -92,7 +92,7 @@ export class LureController extends BaseController {
 
   private readonly readLureHandler = async (data: unknown): Promise<LureModel | null> => {
     try {
-      validateReadLureData(this.assertSchema, data)
+      validateReadLureModel(this.assertSchema, data)
 
       return await this.readLureUseCase.execute(data)
     } catch (error) {
@@ -102,7 +102,7 @@ export class LureController extends BaseController {
 
   private readonly enableLureHandler = async (data: unknown): Promise<LureModel> => {
     try {
-      validateSwitchLureData(this.assertSchema, data)
+      validateSwitchLureModel(this.assertSchema, data)
 
       return await this.enableLureUseCase.execute(data)
     } catch (error) {
@@ -112,7 +112,7 @@ export class LureController extends BaseController {
 
   private readonly disableLureHandler = async (data: unknown): Promise<LureModel> => {
     try {
-      validateSwitchLureData(this.assertSchema, data)
+      validateSwitchLureModel(this.assertSchema, data)
 
       return await this.disableLureUseCase.execute(data)
     } catch (error) {
@@ -122,7 +122,7 @@ export class LureController extends BaseController {
 
   private readonly deleteLureHandler = async (data: unknown): Promise<LureModel> => {
     try {
-      validateDeleteLureData(this.assertSchema, data)
+      validateDeleteLureModel(this.assertSchema, data)
 
       return await this.deleteLureUseCase.execute(data)
     } catch (error) {
@@ -132,7 +132,7 @@ export class LureController extends BaseController {
 
   private readonly listLuresHandler = async (data: unknown): Promise<LureModel[] | null> => {
     try {
-      validateListLuresData(this.assertSchema, data)
+      validateListLureModels(this.assertSchema, data)
 
       return await this.listLuresUseCase.execute(data)
     } catch (error) {

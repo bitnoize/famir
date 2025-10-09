@@ -1,4 +1,13 @@
-import { CampaignModel, MessageModel, SessionModel, TargetModel } from '../../models/index.js'
+import { ParsedQs } from 'qs'
+import {
+  CampaignModel,
+  EnabledLureModel,
+  EnabledProxyModel,
+  EnabledTargetModel,
+  RedirectorModel,
+  SessionModel
+} from '../../models/index.js'
+import { CreateMessageModel } from '../../repositories/index.js'
 
 export interface HttpServer {
   listen(): Promise<void>
@@ -6,13 +15,6 @@ export interface HttpServer {
 }
 
 export const HTTP_SERVER = Symbol('HttpServer')
-
-export interface HttpServerRequestLocals {
-  campaign?: CampaignModel | undefined
-  target?: TargetModel | undefined
-  message?: MessageModel | undefined
-  session?: SessionModel | undefined
-}
 
 export type HttpServerRouteMethod =
   | 'all'
@@ -24,22 +26,39 @@ export type HttpServerRouteMethod =
   | 'options'
   | 'head'
 
+export type HttpServerReqResHeaders = Record<string, string | string[] | undefined>
+
+export type HttpServerRequestParams = Record<string, string>
+export type HttpServerRequestQuery = ParsedQs
+export type HttpServerRequestCookies = Record<string, string>
+
+export interface HttpServerRequestLocals {
+  campaign?: CampaignModel
+  proxy?: EnabledProxyModel
+  target?: EnabledTargetModel
+  targets?: EnabledTargetModel[]
+  redirector?: RedirectorModel
+  lure?: EnabledLureModel
+  session?: SessionModel
+  message?: CreateMessageModel
+}
+
 export interface HttpServerRequest {
-  locals: HttpServerRequestLocals
-  ip: string | undefined
+  ip: string
   host: string
   method: string
   url: string
   path: string
-  params: Record<string, string> | string[]
-  query: Record<string, unknown>
-  headers: Record<string, string | string[] | undefined>
-  cookies: Record<string, string>
-  body: Buffer | undefined
+  params: HttpServerRequestParams
+  query: HttpServerRequestQuery
+  headers: HttpServerReqResHeaders
+  cookies: HttpServerRequestCookies
+  body: Buffer
+  locals: HttpServerRequestLocals
 }
 
-// FIXME
-export interface ResponseCookieOptions {
+export interface HttpServerResponseCookie {
+  value: string | undefined
   maxAge?: number | undefined
   expires?: Date | undefined
   httpOnly?: boolean | undefined
@@ -47,20 +66,22 @@ export interface ResponseCookieOptions {
   domain?: string | undefined
   secure?: boolean | undefined
   sameSite?: boolean | 'lax' | 'strict' | 'none' | undefined
-  priority?: 'low' | 'medium' | 'high'
-  partitioned?: boolean | undefined
+  //priority?: 'low' | 'medium' | 'high'
+  //partitioned?: boolean | undefined
 }
+
+export type HttpServerResponseCookies = Record<string, HttpServerResponseCookie>
 
 export interface HttpServerResponse {
   status: number
-  headers: Record<string, string | string[] | undefined>
-  cookies: Record<string, [string | undefined, ResponseCookieOptions]>
-  body: Buffer | undefined
+  headers: HttpServerReqResHeaders
+  cookies: HttpServerResponseCookies
+  body: Buffer
 }
 
 export type HttpServerRouteHandler = (
   request: HttpServerRequest
-) => Promise<HttpServerResponse | null | undefined>
+) => Promise<HttpServerResponse | undefined>
 
 export interface HttpServerRouter {
   applyTo(express: unknown): void

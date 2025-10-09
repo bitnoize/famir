@@ -1,5 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { ListProxiesData, PROXY_REPOSITORY, ProxyModel, ProxyRepository } from '@famir/domain'
+import { ListProxyModels, PROXY_REPOSITORY, ProxyModel, ProxyRepository } from '@famir/domain'
 
 export const LIST_PROXIES_USE_CASE = Symbol('ListProxiesUseCase')
 
@@ -13,7 +13,7 @@ export class ListProxiesUseCase {
 
   constructor(private readonly proxyRepository: ProxyRepository) {}
 
-  async execute(data: ListProxiesData): Promise<ProxyModel[] | null> {
+  async execute(data: ListProxyModels): Promise<ProxyModel[] | null> {
     return await this.proxyRepository.list(data)
   }
 }
