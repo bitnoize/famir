@@ -83,7 +83,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', data)
+      this.exceptionWrapper(error, 'create', data)
     }
   }
 
@@ -97,7 +97,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', data)
+      this.exceptionWrapper(error, 'read', data)
     }
   }
 
@@ -109,7 +109,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         data.path
       )
 
-      if (lureId === null) {
+      if (!lureId) {
         return null
       }
 
@@ -119,7 +119,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return guardEnabledModel(model) ? model : null
     } catch (error) {
-      this.exceptionFilter(error, 'readPath', data)
+      this.exceptionWrapper(error, 'readPath', data)
     }
   }
 
@@ -143,7 +143,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'enable', data)
+      this.exceptionWrapper(error, 'enable', data)
     }
   }
 
@@ -167,7 +167,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'disable', data)
+      this.exceptionWrapper(error, 'disable', data)
     }
   }
 
@@ -197,7 +197,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'delete', data)
+      this.exceptionWrapper(error, 'delete', data)
     }
   }
 
@@ -205,7 +205,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     try {
       const index = await this.connection.lure.read_lure_index(this.options.prefix, data.campaignId)
 
-      if (index === null) {
+      if (!index) {
         return null
       }
 
@@ -217,7 +217,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionFilter(error, 'list', data)
+      this.exceptionWrapper(error, 'list', data)
     }
   }
 }

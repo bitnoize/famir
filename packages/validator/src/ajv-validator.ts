@@ -37,7 +37,7 @@ export class AjvValidator implements Validator {
   private getSchema<T>(schemaName: string): ValidateFunction<T> {
     const validate = this._ajv.getSchema<T>(schemaName)
 
-    if (validate == null) {
+    if (!validate) {
       throw new Error(`JSON-Schema '${schemaName}' not known`)
     }
 

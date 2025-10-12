@@ -11,11 +11,13 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@famir/domain": "*",
     "@famir/common": "*",
-    "node-libcurl": "^4.1.0"
+    "@famir/domain": "*",
+    "node-libcurl": "^4.1.0",
+    "set-cookie-parser": "^2.7.1"
   },
   "devDependencies": {
-    "@types/node": "^24.0.1"
+    "@types/node": "^24.0.1",
+    "@types/set-cookie-parser": "^2.4.10"
   }
 }

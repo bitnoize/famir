@@ -2,16 +2,18 @@ import {
   CampaignModel,
   CreateMessageModel,
   EnabledLureModel,
+  EnabledProxyModel,
   EnabledTargetModel,
   HttpServerError,
+  HttpServerLocals,
   HttpServerRequest,
-  HttpServerRequestLocals,
   Logger,
   RedirectorModel,
   SessionModel,
   Validator,
   ValidatorAssertSchema
 } from '@famir/domain'
+import { REVERSE_PROXY_NAME } from '../../reverse-proxy.js'
 
 export abstract class BaseController {
   protected readonly assertSchema: ValidatorAssertSchema
@@ -25,143 +27,163 @@ export abstract class BaseController {
 
     this.logger.debug(
       {
-        module: 'reverse-proxy',
+        module: REVERSE_PROXY_NAME,
         controller: this.controllerName
       },
       `Controller initialized`
     )
   }
 
-  protected absentLocalsCampaign(locals: HttpServerRequestLocals) {
-    if (locals.campaign !== undefined) {
+  protected absentLocalsCampaign(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+    campaign: CampaignModel | undefined
+  } {
+    if (locals['campaign']) {
       throw new Error(`Locals campaign exists`)
     }
   }
 
-  protected existsLocalsCampaign(
-    locals: HttpServerRequestLocals
-  ): asserts locals is HttpServerRequestLocals & {
+  protected existsLocalsCampaign(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
     readonly campaign: CampaignModel
   } {
-    if (locals.campaign === undefined) {
+    if (!locals['campaign']) {
       throw new Error(`Locals campaign absent`)
     }
   }
 
-  protected absentLocalsTarget(locals: HttpServerRequestLocals) {
-    if (locals.target !== undefined) {
+  protected absentLocalsProxy(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+    proxy: EnabledProxyModel | undefined
+  } {
+    if (locals['proxy']) {
+      throw new Error(`Locals proxy exists`)
+    }
+  }
+
+  protected existsLocalsProxy(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+    readonly proxy: EnabledProxyModel
+  } {
+    if (!locals['proxy']) {
+      throw new Error(`Locals proxy absent`)
+    }
+  }
+
+  protected absentLocalsTarget(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+    target: EnabledTargetModel | undefined
+  } {
+    if (locals['target']) {
       throw new Error(`Locals target exists`)
     }
   }
 
-  protected existsLocalsTarget(
-    locals: HttpServerRequestLocals
-  ): asserts locals is HttpServerRequestLocals & {
+  protected existsLocalsTarget(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
     readonly target: EnabledTargetModel
   } {
-    if (locals.target === undefined) {
+    if (!locals['target']) {
       throw new Error(`Locals target absent`)
     }
   }
 
-  protected absentLocalsTargets(locals: HttpServerRequestLocals) {
-    if (locals.targets !== undefined) {
+  protected absentLocalsTargets(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+    targets: EnabledTargetModel[] | undefined
+  } {
+    if (locals['targets']) {
       throw new Error(`Locals targets exists`)
     }
   }
 
-  protected existsLocalsTargets(
-    locals: HttpServerRequestLocals
-  ): asserts locals is HttpServerRequestLocals & {
+  protected existsLocalsTargets(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
     readonly targets: EnabledTargetModel[]
   } {
-    if (locals.targets === undefined) {
+    if (!locals['targets']) {
       throw new Error(`Locals targets absent`)
     }
   }
 
-  protected absentLocalsRedirector(locals: HttpServerRequestLocals) {
-    if (locals.redirector !== undefined) {
+  protected absentLocalsRedirector(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+    redirector: RedirectorModel | undefined
+  } {
+    if (locals['redirector']) {
       throw new Error(`Locals redirector exists`)
     }
   }
 
-  protected existsLocalsRedirector(
-    locals: HttpServerRequestLocals
-  ): asserts locals is HttpServerRequestLocals & {
+  protected existsLocalsRedirector(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
     readonly redirector: RedirectorModel
   } {
-    if (locals.redirector === undefined) {
+    if (!locals['redirector']) {
       throw new Error(`Locals redirector absent`)
     }
   }
 
-  protected absentLocalsLure(locals: HttpServerRequestLocals) {
-    if (locals.lure !== undefined) {
+  protected absentLocalsLure(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+    lure: EnabledLureModel | undefined
+  } {
+    if (locals['lure']) {
       throw new Error(`Locals lure exists`)
     }
   }
 
-  protected existsLocalsLure(
-    locals: HttpServerRequestLocals
-  ): asserts locals is HttpServerRequestLocals & {
+  protected existsLocalsLure(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
     readonly lure: EnabledLureModel
   } {
-    if (locals.lure === undefined) {
+    if (!locals['lure']) {
       throw new Error(`Locals lure absent`)
     }
   }
 
-  protected absentLocalsSession(locals: HttpServerRequestLocals) {
-    if (locals.session !== undefined) {
+  protected absentLocalsSession(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+    session: SessionModel | undefined
+  } {
+    if (locals['session']) {
       throw new Error(`Locals session exists`)
     }
   }
 
-  protected existsLocalsSession(
-    locals: HttpServerRequestLocals
-  ): asserts locals is HttpServerRequestLocals & {
+  protected existsLocalsSession(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
     readonly session: SessionModel
   } {
-    if (locals.session === undefined) {
+    if (!locals['session'] === undefined) {
       throw new Error(`Locals session absent`)
     }
   }
 
-  protected absentLocalsMessage(locals: HttpServerRequestLocals) {
-    if (locals.message !== undefined) {
-      throw new Error(`Locals message exists`)
+  protected absentLocalsCreateMessage(
+    locals: HttpServerLocals
+  ): asserts locals is HttpServerLocals & {
+    createMessage: CreateMessageModel | undefined
+  } {
+    if (locals['createMessage']) {
+      throw new Error(`Locals createMessage exists`)
     }
   }
 
-  protected existsLocalsMessage(
-    locals: HttpServerRequestLocals
-  ): asserts locals is HttpServerRequestLocals & {
-    readonly message: CreateMessageModel
+  protected existsLocalsCreateMessage(
+    locals: HttpServerLocals
+  ): asserts locals is HttpServerLocals & {
+    readonly createMessage: CreateMessageModel
   } {
-    if (locals.message === undefined) {
-      throw new Error(`Locals message absent`)
+    if (!locals['createMessage']) {
+      throw new Error(`Locals createMessage absent`)
     }
   }
 
   protected exceptionFilter(error: unknown, handler: string, request: HttpServerRequest): never {
     if (error instanceof HttpServerError) {
-      error.context['module'] = 'reverse-proxy'
+      error.context['module'] = REVERSE_PROXY_NAME
       error.context['controller'] = this.controllerName
       error.context['handler'] = handler
       error.context['request'] = request
 
       throw error
     } else {
-      throw new HttpServerError(`Controller internal error`, {
+      throw new HttpServerError(`Internal error`, {
         cause: error,
         context: {
-          module: 'reverse-proxy',
+          module: REVERSE_PROXY_NAME,
           controller: this.controllerName,
           handler,
           request
         },
-        code: 'UNKNOWN',
+        code: 'INTERNAL_ERROR',
         status: 500
       })
     }

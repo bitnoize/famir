@@ -54,7 +54,6 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     this._redis.on('error', (error) => {
       this.logger.error(
         {
-          module: 'database',
           error: serializeError(error)
         },
         `Redis error event`
@@ -63,7 +62,6 @@ export class RedisDatabaseConnector implements DatabaseConnector {
 
     this.logger.debug(
       {
-        module: 'database',
         options: filterOptionsSecrets(this.options)
       },
       `DatabaseConnector initialized`
@@ -78,22 +76,12 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   async connect(): Promise<void> {
     await this._redis.connect()
 
-    this.logger.debug(
-      {
-        module: 'database'
-      },
-      `DatabaseConnector connected`
-    )
+    this.logger.debug({}, `DatabaseConnector connected`)
   }
 
   async close(): Promise<void> {
     await this._redis.close()
 
-    this.logger.debug(
-      {
-        module: 'database'
-      },
-      `DatabaseConnector closed`
-    )
+    this.logger.debug({}, `DatabaseConnector closed`)
   }
 }

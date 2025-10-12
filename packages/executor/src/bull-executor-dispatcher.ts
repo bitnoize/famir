@@ -30,7 +30,7 @@ export class BullExecutorDispatcher implements ExecutorDispatcher {
   async applyTo(job: Job<unknown, unknown>): Promise<unknown> {
     const handler = this._map.get(job.name)
 
-    if (handler === undefined) {
+    if (!handler) {
       throw new Error(`Dispatch handler '${job.name}' not exists`)
     }
 

@@ -118,7 +118,7 @@ export function buildModel(
   assertSchema: ValidatorAssertSchema,
   raw: RawMessage | null
 ): MessageModel | null {
-  if (raw === null) {
+  if (!raw) {
     return null
   }
 
@@ -135,7 +135,7 @@ export function buildModel(
     requestHeaders: parseRequestHeaders(assertSchema, raw.request_headers),
     requestCookies: parseRequestCookies(assertSchema, raw.request_cookies),
     requestBody: parseRequestBody(raw.request_body),
-    statusCode: raw.status_code,
+    status: raw.status,
     responseHeaders: parseResponseHeaders(assertSchema, raw.response_headers),
     responseCookies: parseResponseCookies(assertSchema, raw.response_cookies),
     responseBody: parseResponseBody(raw.response_body),

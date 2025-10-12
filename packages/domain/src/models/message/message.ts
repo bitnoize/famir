@@ -5,15 +5,14 @@ export type MessageRequestCookie = string
 export type MessageRequestCookies = Record<string, MessageRequestCookie | null | undefined>
 
 export interface MessageResponseCookie {
-  name: string // FIXME
-  value: string
+  value: string | null | undefined
+  maxAge?: number | null | undefined
+  expires?: number | null | undefined
+  httpOnly?: boolean | null | undefined
   path?: string | null | undefined
   domain?: string | null | undefined
-  expires?: number | null | undefined
-  maxAge?: number | null | undefined
   secure?: boolean | null | undefined
-  httpOnly?: boolean | null | undefined
-  sameSite?: string | null | undefined
+  sameSite?: 'strict' | 'lax' | 'none' | null | undefined
 }
 export type MessageResponseCookies = Record<string, MessageResponseCookie | null | undefined>
 
@@ -30,7 +29,7 @@ export interface MessageModel {
   readonly requestHeaders: MessageHeaders
   readonly requestCookies: MessageRequestCookies
   readonly requestBody: Buffer
-  readonly statusCode: number
+  readonly status: number
   readonly responseHeaders: MessageHeaders
   readonly responseCookies: MessageResponseCookies
   readonly responseBody: Buffer

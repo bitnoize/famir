@@ -49,7 +49,7 @@ export class DummyController extends BaseController {
 
       return await this.dummyUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'example', data)
+      this.exceptionWrapper(error, 'example')
     }
   }
 }

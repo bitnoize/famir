@@ -9,3 +9,5 @@ export type ReverseProxyConfig = LoggerConfig &
   WorkflowConfig &
   HttpClientConfig &
   HttpServerConfig
+
+export const REVERSE_PROXY_NAME = 'reverse-proxy'

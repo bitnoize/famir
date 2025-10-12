@@ -2,7 +2,7 @@ import { DisabledLureModel, EnabledLureModel, LureModel } from '@famir/domain'
 import { RawLure } from './lure.functions.js'
 
 export function buildModel(raw: RawLure | null): LureModel | null {
-  if (raw === null) {
+  if (!raw) {
     return null
   }
 

@@ -3,6 +3,7 @@ import {
   BaseWorker,
   Config,
   ExecutorDispatcher,
+  ExecutorError,
   Logger,
   Validator,
   ValidatorAssertSchema
@@ -52,14 +53,8 @@ export abstract class BullBaseWorker implements BaseWorker {
     this._worker.on('completed', (job: Job<unknown, unknown>) => {
       this.logger.info(
         {
-          module: 'executor',
           queue: this.queueName,
-          job: {
-            id: job.id,
-            name: job.name,
-            data: job.data,
-            result: job.returnvalue
-          }
+          job: this.dumpJob(job)
         },
         `Worker completed event`
       )
@@ -68,16 +63,8 @@ export abstract class BullBaseWorker implements BaseWorker {
     this._worker.on('failed', (job: Job<unknown, unknown> | undefined) => {
       this.logger.error(
         {
-          module: 'executor',
           queue: this.queueName,
-          job:
-            job !== undefined
-              ? {
-                  id: job.id,
-                  name: job.name,
-                  data: job.data
-                }
-              : null
+          job: job !== undefined ? this.dumpJob(job) : null
         },
         `Worker failed event`
       )
@@ -86,7 +73,6 @@ export abstract class BullBaseWorker implements BaseWorker {
     this._worker.on('error', (error: unknown) => {
       this.logger.error(
         {
-          module: 'executor',
           queue: this.queueName,
           error: serializeError(error)
         },
@@ -96,7 +82,6 @@ export abstract class BullBaseWorker implements BaseWorker {
 
     this.logger.debug(
       {
-        module: 'executor',
         queue: this.queueName,
         options: filterOptionsSecrets(this.options)
       },
@@ -104,8 +89,37 @@ export abstract class BullBaseWorker implements BaseWorker {
     )
   }
 
+  private dumpJob(job: Job<unknown, unknown>): unknown {
+    return {
+      id: job.id,
+      name: job.name,
+      data: job.data,
+      result: job.returnvalue
+    }
+  }
+
   protected processorHandler: Processor<unknown, unknown> = async (job) => {
-    return await this.dispatcher.applyTo(job)
+    try {
+      return await this.dispatcher.applyTo(job)
+    } catch (error) {
+      if (error instanceof ExecutorError) {
+        error.context['module'] = 'executor'
+        error.context['queue'] = this.queueName
+        error.context['job'] = this.dumpJob(job)
+
+        throw error
+      } else {
+        throw new ExecutorError(`Worker unhandled error`, {
+          cause: error,
+          context: {
+            module: 'executor',
+            queue: this.queueName,
+            job: this.dumpJob(job)
+          },
+          code: 'INTERNAL_ERROR'
+        })
+      }
+    }
   }
 
   async run(): Promise<void> {
@@ -113,7 +127,6 @@ export abstract class BullBaseWorker implements BaseWorker {
 
     this.logger.debug(
       {
-        module: 'executor',
         queue: this.queueName
       },
       `Worker running`
@@ -125,7 +138,6 @@ export abstract class BullBaseWorker implements BaseWorker {
 
     this.logger.debug(
       {
-        module: 'executor',
         queue: this.queueName
       },
       `Worker closed`

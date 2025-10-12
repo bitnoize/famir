@@ -27,7 +27,7 @@ local function create_message(keys, args)
     request_headers = args[10],
     request_cookies = args[11],
     request_body = args[12],
-    status_code = tonumber(args[13]),
+    status = tonumber(args[13]),
     response_headers = args[14],
     response_cookies = args[15],
     response_body = args[16],
@@ -68,8 +68,8 @@ local function create_message(keys, args)
     return redis.error_reply('ERR Wrong model.forward_url')
   end
 
-  if not model.status_code then
-    return redis.error_reply('ERR Wrong model.status_code')
+  if not model.status then
+    return redis.error_reply('ERR Wrong model.status')
   end
 
   if not model.query_time then
@@ -172,7 +172,7 @@ local function read_message(keys, args)
     'request_headers',
     'request_cookies',
     'request_body',
-    'status_code',
+    'status',
     'response_headers',
     'response_cookies',
     'response_body',
@@ -198,7 +198,7 @@ local function read_message(keys, args)
     request_headers = values[10],
     request_cookies = values[11],
     request_body = values[12],
-    status_code = tonumber(values[13]),
+    status = tonumber(values[13]),
     response_headers = values[14],
     response_cookies = values[15],
     response_body = values[16],

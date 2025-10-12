@@ -46,47 +46,39 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     validator.addSchemas(addSchemas)
   }
 
-  async create(data: CreateMessageModel): Promise<MessageModel> {
+  async create(data: CreateMessageModel): Promise<void> {
     try {
-      const [status, raw] = await Promise.all([
-        this.connection.message.create_message(
-          this.options.prefix,
-          data.campaignId,
-          data.messageId,
-          data.proxyId,
-          data.targetId,
-          data.sessionId,
-          data.clientIp,
-          data.method,
-          data.originUrl,
-          data.forwardUrl,
-          data.requestHeaders,
-          data.requestCookies,
-          data.requestBody,
-          data.statusCode,
-          data.responseHeaders,
-          data.responseCookies,
-          data.responseBody,
-          data.queryTime,
-          data.score
-        ),
-
-        this.connection.message.read_message(this.options.prefix, data.campaignId, data.messageId)
-      ])
+      const status = await this.connection.message.create_message(
+        this.options.prefix,
+        data.campaignId,
+        data.messageId,
+        data.proxyId,
+        data.targetId,
+        data.sessionId,
+        data.clientIp,
+        data.method,
+        data.originUrl,
+        data.forwardUrl,
+        data.requestHeaders,
+        data.requestCookies,
+        data.requestBody,
+        data.status,
+        data.responseHeaders,
+        data.responseCookies,
+        data.responseBody,
+        data.queryTime,
+        data.score
+      )
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const model = buildModel(this.assertSchema, raw)
-
-        assertModel(model)
-
-        return model
+        return
       }
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', data)
+      this.exceptionWrapper(error, 'create', data)
     }
   }
 
@@ -100,7 +92,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return buildModel(this.assertSchema, raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', data)
+      this.exceptionWrapper(error, 'read', data)
     }
   }
 }

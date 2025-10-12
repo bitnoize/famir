@@ -30,7 +30,7 @@ export class DIContainer {
   resolve<T>(token: Token): T {
     const registration = this.registry.get(token)
 
-    if (registration === undefined) {
+    if (!registration) {
       throw new Error(`Dependency not registered: ${token.toString()}`)
     }
 

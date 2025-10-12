@@ -6,8 +6,6 @@ import {
   DatabaseConnector,
   Logger,
   LOGGER,
-  PERSIST_LOG_QUEUE,
-  PersistLogQueue,
   REPL_SERVER,
   ReplServer,
   Validator,
@@ -29,7 +27,6 @@ export class ConsoleApp {
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
           c.resolve<AnalyzeLogQueue>(ANALYZE_LOG_QUEUE),
-          c.resolve<PersistLogQueue>(PERSIST_LOG_QUEUE),
           c.resolve<ReplServer>(REPL_SERVER)
         )
     )
@@ -45,7 +42,6 @@ export class ConsoleApp {
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
     protected readonly analyzeLogQueue: AnalyzeLogQueue,
-    protected readonly persistLogQueue: PersistLogQueue,
     protected readonly replServer: ReplServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
@@ -73,7 +69,6 @@ export class ConsoleApp {
       await this.replServer.close()
 
       await this.analyzeLogQueue.close()
-      await this.persistLogQueue.close()
 
       await this.workflowConnector.close()
 

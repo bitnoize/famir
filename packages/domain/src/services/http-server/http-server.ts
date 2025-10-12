@@ -1,4 +1,3 @@
-import { ParsedQs } from 'qs'
 import {
   CampaignModel,
   EnabledLureModel,
@@ -7,6 +6,12 @@ import {
   RedirectorModel,
   SessionModel
 } from '../../models/index.js'
+import {
+  HttpHeaders,
+  HttpRequestCookies,
+  HttpResponseCookies,
+  HttpBody
+} from '../../domain.js'
 import { CreateMessageModel } from '../../repositories/index.js'
 
 export interface HttpServer {
@@ -26,66 +31,40 @@ export type HttpServerRouteMethod =
   | 'options'
   | 'head'
 
-export type HttpServerReqResHeaders = Record<string, string | string[] | undefined>
-
-export type HttpServerRequestParams = Record<string, string>
-export type HttpServerRequestQuery = ParsedQs
-export type HttpServerRequestCookies = Record<string, string>
-
-export interface HttpServerRequestLocals {
-  campaign?: CampaignModel
-  proxy?: EnabledProxyModel
-  target?: EnabledTargetModel
-  targets?: EnabledTargetModel[]
-  redirector?: RedirectorModel
-  lure?: EnabledLureModel
-  session?: SessionModel
-  message?: CreateMessageModel
-}
-
 export interface HttpServerRequest {
   ip: string
-  host: string
   method: string
   url: string
   path: string
-  params: HttpServerRequestParams
-  query: HttpServerRequestQuery
-  headers: HttpServerReqResHeaders
-  cookies: HttpServerRequestCookies
-  body: Buffer
-  locals: HttpServerRequestLocals
+  params: Record<string, string>
+  headers: HttpHeaders
+  cookies: HttpRequestCookies
+  body: HttpBody
 }
 
-export interface HttpServerResponseCookie {
-  value: string | undefined
-  maxAge?: number | undefined
-  expires?: Date | undefined
-  httpOnly?: boolean | undefined
-  path?: string | undefined
-  domain?: string | undefined
-  secure?: boolean | undefined
-  sameSite?: boolean | 'lax' | 'strict' | 'none' | undefined
-  //priority?: 'low' | 'medium' | 'high'
-  //partitioned?: boolean | undefined
-}
-
-export type HttpServerResponseCookies = Record<string, HttpServerResponseCookie>
+export type HttpServerLocals = Record<string, unknown>
 
 export interface HttpServerResponse {
   status: number
-  headers: HttpServerReqResHeaders
-  cookies: HttpServerResponseCookies
-  body: Buffer
+  headers: HttpHeaders
+  cookies: HttpResponseCookies
+  body: HttpBody
 }
 
 export type HttpServerRouteHandler = (
-  request: HttpServerRequest
+  request: HttpServerRequest,
+  locals: HttpServerLocals
 ) => Promise<HttpServerResponse | undefined>
+
+export type HttpServerRouteHandlerSync = (
+  request: HttpServerRequest,
+  locals: HttpServerLocals
+) => HttpServerResponse | undefined
 
 export interface HttpServerRouter {
   applyTo(express: unknown): void
   setHandler(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandler): void
+  setHandlerSync(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandlerSync): void
 }
 
 export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')

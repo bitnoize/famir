@@ -46,7 +46,6 @@ export class BullWorkflowConnector implements WorkflowConnector {
     this._redis.on('error', (error) => {
       this.logger.error(
         {
-          module: 'workflow',
           error: serializeError(error)
         },
         `Redis error event`
@@ -55,7 +54,6 @@ export class BullWorkflowConnector implements WorkflowConnector {
 
     this.logger.debug(
       {
-        module: 'workflow',
         options: filterOptionsSecrets(this.options)
       },
       `WorkflowConnector initialized`
@@ -70,22 +68,12 @@ export class BullWorkflowConnector implements WorkflowConnector {
   //async connect(): Promise<void> {
   //  await this._redis.connect()
   //
-  //  this.logger.debug(
-  //    {
-  //      module: 'workflow'
-  //    },
-  //    `WorkflowConnector connected`
-  //  )
+  //  this.logger.debug({}, `WorkflowConnector connected`)
   //}
 
   async close(): Promise<void> {
     await this._redis.quit()
 
-    this.logger.debug(
-      {
-        module: 'workflow'
-      },
-      `WorkflowConnector closed`
-    )
+    this.logger.debug({}, `WorkflowConnector closed`)
   }
 }

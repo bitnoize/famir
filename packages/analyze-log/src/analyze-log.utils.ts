@@ -19,7 +19,7 @@ export function validateAnalyzeLogJobData(
   } catch (error) {
     throw new ExecutorError(`AnalyzeLogJobData validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'INTERNAL_ERROR'
     })
   }
 }

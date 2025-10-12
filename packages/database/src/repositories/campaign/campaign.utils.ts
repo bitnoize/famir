@@ -2,7 +2,7 @@ import { CampaignModel } from '@famir/domain'
 import { RawCampaign } from './campaign.functions.js'
 
 export function buildModel(raw: RawCampaign | null): CampaignModel | null {
-  if (raw == null) {
+  if (!raw) {
     return null
   }
 

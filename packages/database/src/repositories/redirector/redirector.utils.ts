@@ -2,7 +2,7 @@ import { RedirectorModel } from '@famir/domain'
 import { RawRedirector } from './redirector.functions.js'
 
 export function buildModel(raw: RawRedirector | null): RedirectorModel | null {
-  if (raw === null) {
+  if (!raw) {
     return null
   }
 

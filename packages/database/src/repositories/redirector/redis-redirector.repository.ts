@@ -76,7 +76,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', data)
+      this.exceptionWrapper(error, 'create', data)
     }
   }
 
@@ -90,7 +90,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', data)
+      this.exceptionWrapper(error, 'read', data)
     }
   }
 
@@ -123,7 +123,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'update', data)
+      this.exceptionWrapper(error, 'update', data)
     }
   }
 
@@ -155,7 +155,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'delete', data)
+      this.exceptionWrapper(error, 'delete', data)
     }
   }
 
@@ -166,7 +166,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         data.campaignId
       )
 
-      if (index === null) {
+      if (!index) {
         return null
       }
 
@@ -182,7 +182,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionFilter(error, 'list', data)
+      this.exceptionWrapper(error, 'list', data)
     }
   }
 }

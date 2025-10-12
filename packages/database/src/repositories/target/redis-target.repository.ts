@@ -98,7 +98,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', data)
+      this.exceptionWrapper(error, 'create', data)
     }
   }
 
@@ -112,7 +112,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', data)
+      this.exceptionWrapper(error, 'read', data)
     }
   }
 
@@ -128,7 +128,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return guardEnabledModel(model) ? model : null
     } catch (error) {
-      this.exceptionFilter(error, 'readEnabled', data)
+      this.exceptionWrapper(error, 'readEnabled', data)
     }
   }
 
@@ -165,7 +165,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'update', data)
+      this.exceptionWrapper(error, 'update', data)
     }
   }
 
@@ -189,7 +189,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'enable', data)
+      this.exceptionWrapper(error, 'enable', data)
     }
   }
 
@@ -213,7 +213,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'disable', data)
+      this.exceptionWrapper(error, 'disable', data)
     }
   }
 
@@ -237,7 +237,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'delete', data)
+      this.exceptionWrapper(error, 'delete', data)
     }
   }
 
@@ -248,7 +248,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         data.campaignId
       )
 
-      if (index === null) {
+      if (!index) {
         return null
       }
 
@@ -260,7 +260,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionFilter(error, 'list', data)
+      this.exceptionWrapper(error, 'list', data)
     }
   }
 
@@ -271,7 +271,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         data.campaignId
       )
 
-      if (index === null) {
+      if (!index) {
         return null
       }
 
@@ -283,7 +283,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return buildCollection(raws).filter(guardEnabledModel)
     } catch (error) {
-      this.exceptionFilter(error, 'listEnabled', data)
+      this.exceptionWrapper(error, 'listEnabled', data)
     }
   }
 }

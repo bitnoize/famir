@@ -2,7 +2,7 @@ import { SessionModel } from '@famir/domain'
 import { RawSession } from './session.functions.js'
 
 export function buildModel(raw: RawSession | null): SessionModel | null {
-  if (raw === null) {
+  if (!raw) {
     return null
   }
 

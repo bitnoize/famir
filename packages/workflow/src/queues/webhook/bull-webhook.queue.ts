@@ -41,6 +41,10 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
   }
 
   async addJob(data: WebhookJobData): Promise<string> {
-    return ''
+    try {
+      return ''
+    } catch (error) {
+      this.exceptionWrapper(error, 'addJob', data)
+    }
   }
 }

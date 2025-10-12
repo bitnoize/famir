@@ -49,13 +49,11 @@ export const messageRequestCookiesSchema: JSONSchemaType<MessageRequestCookies> 
 
 export const messageResponseCookieSchema: JSONSchemaType<MessageResponseCookie> = {
   type: 'object',
-  required: ['name', 'value'],
+  required: [],
   properties: {
-    name: {
-      type: 'string'
-    },
     value: {
-      type: 'string'
+      type: 'string',
+      nullable: true
     },
     path: {
       type: 'string',
@@ -83,6 +81,7 @@ export const messageResponseCookieSchema: JSONSchemaType<MessageResponseCookie> 
     },
     sameSite: {
       type: 'string',
+      enum: ['strict', 'lax', 'none'],
       nullable: true
     }
   },

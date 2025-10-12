@@ -1,6 +1,6 @@
 import { DomainError, DomainErrorOptions } from '../../domain.error.js'
 
-export type WorkflowErrorCode = 'UNKNOWN'
+export type WorkflowErrorCode = 'INTERNAL_ERROR'
 
 export type WorkflowErrorOptions = DomainErrorOptions & {
   code: WorkflowErrorCode

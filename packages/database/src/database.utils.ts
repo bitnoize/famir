@@ -21,7 +21,7 @@ export function filterOptionsSecrets(data: object) {
 export function parseStatusReply(status: string): [DatabaseStatusCode, string] {
   const [code, message] = status.split(/\s+(.*)/, 2)
 
-  if (code === undefined) {
+  if (!code) {
     throw new Error(`Status code not defined`)
   }
 
@@ -29,7 +29,7 @@ export function parseStatusReply(status: string): [DatabaseStatusCode, string] {
     throw new Error(`Unknown status code: "${code}"`)
   }
 
-  if (message === undefined) {
+  if (!message) {
     throw new Error(`Status message not defined`)
   }
 

@@ -14,7 +14,7 @@ import { CurlHttpClient } from '@famir/http-client'
 import { ExpressHttpServer, ExpressHttpServerRouter } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
 import { AjvValidator } from '@famir/validator'
-import { BullPersistLogQueue, BullWorkflowConnector } from '@famir/workflow'
+import { BullAnalyzeLogQueue, BullWorkflowConnector } from '@famir/workflow'
 import { ReverseProxyApp } from './reverse-proxy.app.js'
 import { ReverseProxyConfig } from './reverse-proxy.js'
 import { configReverseProxySchema } from './reverse-proxy.schemas.js'
@@ -40,7 +40,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   BullWorkflowConnector.inject(container)
 
-  BullPersistLogQueue.inject(container)
+  BullAnalyzeLogQueue.inject(container)
 
   CurlHttpClient.inject(container)
 

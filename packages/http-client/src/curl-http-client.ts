@@ -12,6 +12,7 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { Curl, CurlFeature } from 'node-libcurl'
+import setCookie from 'set-cookie-parser'
 import { HttpClientConfig, HttpClientOptions } from './http-client.js'
 import { buildOptions, filterOptionsSecrets } from './http-client.utils.js'
 
@@ -46,18 +47,65 @@ export class CurlHttpClient implements HttpClient {
     )
   }
 
-  async forward(request: HttpClientRequest): Promise<HttpClientResponse> {
-    return await this._forward(request)
+  async query(request: HttpClientRequest): Promise<HttpClientResponse> {
+    if (Object.keys(request.cookies).length > 0) {
+      request.headers['cookie'] = Object.entries(request.cookies)
+        .map(([name, value]) => `${name}=${value}`)
+        .join('; ')
+    }
+
+    const response = await this._query(request)
+
+    const setCookieHeader = response.headers['set-cookie'] || ''
+
+    const cookies = setCookie.parse(setCookieHeader, {
+      decodeValues: false,
+      map: true
+    })
+
+    const parseCookieSameSite = (
+      sameSite: string | undefined
+    ): 'strict' | 'lax' | 'none' | undefined => {
+      if (!sameSite) {
+        return undefined
+      }
+
+      sameSite = sameSite.toLowerCase()
+
+      const allowValues = ['strict', 'lax', 'none']
+
+      if (!allowValues.includes(sameSite)) {
+        return undefined
+      }
+
+      return sameSite as 'strict' | 'lax' | 'none'
+    }
+
+    Object.entries(cookies).forEach(([name, cookie]) => {
+      response.cookies[name] = {
+        value: cookie.value,
+        maxAge: cookie.maxAge,
+        expires: cookie.expires,
+        httpOnly: cookie.httpOnly,
+        path: cookie.path,
+        domain: cookie.domain,
+        secure: cookie.secure,
+        sameSite: parseCookieSameSite(cookie.sameSite)
+      }
+    })
+
+    return response
   }
 
-  private _forward(request: HttpClientRequest): Promise<HttpClientResponse> {
+  private _query(request: HttpClientRequest): Promise<HttpClientResponse> {
     return new Promise<HttpClientResponse>((resolve) => {
       const startTime = Date.now()
 
       const response: HttpClientResponse = {
-        statusCode: 0,
+        status: 0,
         headers: {},
-        totalTime: 0,
+        cookies: {},
+        queryTime: 0,
         body: Buffer.alloc(0)
       }
 
@@ -116,8 +164,8 @@ export class CurlHttpClient implements HttpClient {
         curl.setOpt(Curl.option.CONNECTTIMEOUT_MS, request.connectTimeout)
         curl.setOpt(Curl.option.TIMEOUT_MS, request.timeout)
 
-        curl.on('end', (statusCode: number, body: Buffer, headers: Buffer[]) => {
-          response.statusCode = statusCode
+        curl.on('end', (status: number, body: Buffer, headers: Buffer[]) => {
+          response.status = status
           response.body = body
 
           headers.forEach((header) => {
@@ -131,11 +179,11 @@ export class CurlHttpClient implements HttpClient {
             const name = headerStr.substring(0, colonIdx).trim().toLowerCase()
             const value = headerStr.substring(colonIdx + 1).trim()
 
-            if (name === '' || value === '') {
+            if (!name || !value) {
               return
             }
 
-            if (response.headers[name] !== undefined) {
+            if (response.headers[name]) {
               if (Array.isArray(response.headers[name])) {
                 response.headers[name].push(value)
               } else {
@@ -148,15 +196,12 @@ export class CurlHttpClient implements HttpClient {
 
           curl.close()
 
-          response.totalTime = Date.now() - startTime
-
           resolve(response)
         })
 
         curl.on('error', (error) => {
           curl.close()
 
-          response.totalTime = Date.now() - startTime
           response.error = error
 
           resolve(response)
@@ -166,11 +211,12 @@ export class CurlHttpClient implements HttpClient {
       } catch (error) {
         curl.close()
 
-        response.statusCode = -1
-        response.totalTime = Date.now() - startTime
+        response.status = -1
         response.error = error
 
         resolve(response)
+      } finally {
+        response.queryTime = Date.now() - startTime
       }
     })
   }

@@ -18,7 +18,7 @@ export interface CreateMessageModel {
   requestHeaders: MessageHeaders
   requestCookies: MessageRequestCookies
   requestBody: Buffer
-  statusCode: number
+  status: number
   responseHeaders: MessageHeaders
   responseCookies: MessageResponseCookies
   responseBody: Buffer
@@ -32,7 +32,7 @@ export interface ReadMessageModel {
 }
 
 export interface MessageRepository {
-  create(data: CreateMessageModel): Promise<MessageModel>
+  create(data: CreateMessageModel): Promise<void>
   read(data: ReadMessageModel): Promise<MessageModel | null>
 }
 

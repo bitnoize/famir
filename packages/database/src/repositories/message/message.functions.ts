@@ -15,7 +15,7 @@ export interface RawMessage {
   request_headers: string
   request_cookies: string
   request_body: string
-  status_code: number
+  status: number
   response_headers: string
   response_cookies: string
   response_body: string
@@ -44,7 +44,7 @@ export const messageFunctions = {
         requestHeaders: MessageHeaders,
         requestCookies: MessageRequestCookies,
         requestBody: Buffer,
-        statusCode: number,
+        status: number,
         responseHeaders: MessageHeaders,
         responseCookies: MessageResponseCookies,
         responseBody: Buffer,
@@ -69,7 +69,7 @@ export const messageFunctions = {
         parser.push(JSON.stringify(requestHeaders))
         parser.push(JSON.stringify(requestCookies))
         parser.push(requestBody.toString('base64'))
-        parser.push(statusCode.toString())
+        parser.push(status.toString())
         parser.push(JSON.stringify(responseHeaders))
         parser.push(JSON.stringify(responseCookies))
         parser.push(responseBody.toString('base64'))

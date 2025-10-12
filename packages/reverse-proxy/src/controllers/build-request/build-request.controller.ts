@@ -1,8 +1,8 @@
 import { DIContainer } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
+  HttpServerLocals,
   HttpServerRequest,
-  HttpServerResponse,
   HttpServerRouter,
   Logger,
   LOGGER,
@@ -10,10 +10,7 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import {
-  PREPARE_MESSAGE_REQUEST_USE_CASE,
-  PrepareMessageRequestUseCase
-} from './use-cases/index.js'
+import { BUILD_REQUEST_USE_CASE, BuildRequestUseCase } from './use-cases/index.js'
 
 export const BUILD_REQUEST_CONTROLLER = Symbol('BuildRequestController')
 
@@ -26,7 +23,7 @@ export class BuildRequestController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<PrepareMessageRequestUseCase>(PREPARE_MESSAGE_REQUEST_USE_CASE)
+          c.resolve<BuildRequestUseCase>(BUILD_REQUEST_USE_CASE)
         )
     )
   }
@@ -39,7 +36,7 @@ export class BuildRequestController extends BaseController {
     validator: Validator,
     logger: Logger,
     router: HttpServerRouter,
-    protected readonly prepareMessageRequestUseCase: PrepareMessageRequestUseCase
+    protected readonly buildRequestUseCase: BuildRequestUseCase
   ) {
     super(validator, logger, 'build-request')
 
@@ -47,31 +44,30 @@ export class BuildRequestController extends BaseController {
   }
 
   private readonly defaultHandler = async (
-    request: HttpServerRequest
-  ): Promise<HttpServerResponse | undefined> => {
+    request: HttpServerRequest,
+    locals: HttpServerLocals
+  ): Promise<undefined> => {
     try {
-      this.absentLocalsMessage(request.locals)
-      this.existsLocalsCampaign(request.locals)
-      this.existsLocalsTarget(request.locals)
-      this.existsLocalsSession(request.locals)
+      this.absentLocalsTargets(locals)
+      this.absentLocalsCreateMessage(locals)
 
-      const { campaign, target, session } = request.locals
+      this.existsLocalsCampaign(locals)
+      this.existsLocalsProxy(locals)
+      this.existsLocalsTarget(locals)
+      this.existsLocalsSession(locals)
 
-      const { message } = this.prepareMessageRequestUseCase.execute({
+      const { campaign, proxy, target, session } = locals
+
+      const { targets, createMessage } = await this.buildRequestUseCase.execute({
         campaign,
+        proxy,
         target,
         session,
-        request: {
-          ip: request.ip,
-          method: request.method,
-          url: request.url,
-          headers: request.headers,
-          cookies: request.cookies,
-          body: request.body
-        }
+        request
       })
 
-      request.locals.message = message
+      locals.targets = targets
+      locals.createMessage = createMessage
 
       return undefined
     } catch (error) {

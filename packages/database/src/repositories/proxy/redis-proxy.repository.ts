@@ -81,7 +81,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', data)
+      this.exceptionWrapper(error, 'create', data)
     }
   }
 
@@ -95,7 +95,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', data)
+      this.exceptionWrapper(error, 'read', data)
     }
   }
 
@@ -111,7 +111,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return guardEnabledModel(model) ? model : null
     } catch (error) {
-      this.exceptionFilter(error, 'readEnabled', data)
+      this.exceptionWrapper(error, 'readEnabled', data)
     }
   }
 
@@ -135,7 +135,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'enable', data)
+      this.exceptionWrapper(error, 'enable', data)
     }
   }
 
@@ -159,7 +159,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'disable', data)
+      this.exceptionWrapper(error, 'disable', data)
     }
   }
 
@@ -183,7 +183,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'delete', data)
+      this.exceptionWrapper(error, 'delete', data)
     }
   }
 
@@ -194,7 +194,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         data.campaignId
       )
 
-      if (index === null) {
+      if (!index) {
         return null
       }
 
@@ -206,7 +206,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionFilter(error, 'list', data)
+      this.exceptionWrapper(error, 'list', data)
     }
   }
 }

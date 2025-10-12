@@ -23,7 +23,7 @@ export class EnvConfig<T> implements Config<T> {
   private _data: T | null = null
 
   get data(): T {
-    if (this._data !== null) {
+    if (this._data) {
       return this._data
     }
 

@@ -36,7 +36,6 @@ export abstract class BullBaseQueue implements BaseQueue {
     this._queue.on('error', (error: unknown) => {
       this.logger.error(
         {
-          module: 'workflow',
           queue: this.queueName,
           error: serializeError(error)
         },
@@ -46,7 +45,6 @@ export abstract class BullBaseQueue implements BaseQueue {
 
     this.logger.debug(
       {
-        module: 'workflow',
         queue: this.queueName,
         options: filterOptionsSecrets(this.options)
       },
@@ -59,7 +57,6 @@ export abstract class BullBaseQueue implements BaseQueue {
 
     this.logger.debug(
       {
-        module: 'workflow',
         queue: this.queueName
       },
       `Queue closed`
@@ -67,14 +64,22 @@ export abstract class BullBaseQueue implements BaseQueue {
   }
 
   async getJobCount(): Promise<number> {
-    return await this._queue.count()
+    try {
+      return await this._queue.count()
+    } catch (error) {
+      this.exceptionWrapper(error, 'getJobCount', undefined)
+    }
   }
 
   async getJobCounts(): Promise<Record<string, number>> {
-    return await this._queue.getJobCounts()
+    try {
+      return await this._queue.getJobCounts()
+    } catch (error) {
+      this.exceptionWrapper(error, 'getJobCounts', undefined)
+    }
   }
 
-  protected exceptionFilter(error: unknown, method: string, data: object | null): never {
+  protected exceptionWrapper(error: unknown, method: string, data: unknown): never {
     if (error instanceof WorkflowError) {
       error.context['module'] = 'workflow'
       error.context['queue'] = this.queueName
@@ -83,7 +88,7 @@ export abstract class BullBaseQueue implements BaseQueue {
 
       throw error
     } else {
-      throw new WorkflowError(`Queue internal error`, {
+      throw new WorkflowError(`Queue unhandled error`, {
         cause: error,
         context: {
           module: 'workflow',
@@ -91,7 +96,7 @@ export abstract class BullBaseQueue implements BaseQueue {
           method,
           data
         },
-        code: 'UNKNOWN'
+        code: 'INTERNAL_ERROR'
       })
     }
   }

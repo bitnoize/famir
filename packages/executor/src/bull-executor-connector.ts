@@ -47,7 +47,6 @@ export class BullExecutorConnector implements ExecutorConnector {
     this._redis.on('error', (error) => {
       this.logger.error(
         {
-          module: 'executor',
           error: serializeError(error)
         },
         `Redis error event`
@@ -56,7 +55,6 @@ export class BullExecutorConnector implements ExecutorConnector {
 
     this.logger.debug(
       {
-        module: 'executor',
         options: filterOptionsSecrets(this.options)
       },
       `ExecutorConnector initialized`
@@ -71,22 +69,12 @@ export class BullExecutorConnector implements ExecutorConnector {
   //async connect(): Promise<void> {
   //  await this._redis.connect()
   //
-  //  this.logger.debug(
-  //    {
-  //      module: 'executor'
-  //    },
-  //    `ExecutorConnector connected`
-  //  )
+  //  this.logger.debug({}, `ExecutorConnector connected`)
   //}
 
   async close(): Promise<void> {
     await this._redis.quit()
 
-    this.logger.debug(
-      {
-        module: 'executor'
-      },
-      `ExecutorConnector closed`
-    )
+    this.logger.debug({}, `ExecutorConnector closed`)
   }
 }

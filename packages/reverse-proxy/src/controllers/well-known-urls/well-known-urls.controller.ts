@@ -2,6 +2,7 @@ import { DIContainer } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
   HttpServerError,
+  HttpServerLocals,
   HttpServerRequest,
   HttpServerResponse,
   HttpServerRouter,
@@ -35,39 +36,47 @@ export class WellKnownUrlsController extends BaseController {
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
     super(validator, logger, 'well-known-urls')
 
-    router.setHandler('options', '{*splat}', this.preflightCorsHandler)
-    router.setHandler('all', '/favicon.ico', this.faviconIcoHandler)
-    router.setHandler('all', '/robots.txt', this.robotsTxtHandler)
-    router.setHandler('all', '/sitemap.xml', this.sitemapXmlHandler)
+    router.setHandlerSync('options', '{*splat}', this.preflightCorsHandler)
+    router.setHandlerSync('all', '/favicon.ico', this.faviconIcoHandler)
+    router.setHandlerSync('all', '/robots.txt', this.robotsTxtHandler)
+    router.setHandlerSync('all', '/sitemap.xml', this.sitemapXmlHandler)
   }
 
-  private readonly preflightCorsHandler = async (): Promise<HttpServerResponse> => {
-    return {
-      status: 204,
-      headers: {
-        ...commonResponseHeaders,
-        'content-type': 'text/plain',
-        'access-control-allow-origin': '*',
-        'access-control-allow-methods': '*',
-        'access-control-allow-headers': '*',
-        'access-control-expose-headers': '*',
-        'access-control-allow-credentials': 'true',
-        'access-control-max-age': '86400'
-      },
-      cookies: {},
-      body: Buffer.alloc(0)
+  private readonly preflightCorsHandler = (
+    request: HttpServerRequest,
+    locals: HttpServerLocals
+  ): HttpServerResponse => {
+    try {
+      this.existsLocalsCampaign(locals)
+
+      return {
+        status: 204,
+        headers: {
+          ...commonResponseHeaders,
+          'content-type': 'text/plain',
+          'access-control-allow-origin': locals.campaign.mirrorDomain,
+          'access-control-allow-methods': '*',
+          'access-control-allow-headers': '*',
+          'access-control-expose-headers': '*',
+          'access-control-allow-credentials': 'true',
+          'access-control-max-age': '86400'
+        },
+        cookies: {},
+        body: Buffer.alloc(0)
+      }
+    } catch (error) {
+      this.exceptionFilter(error, 'preflight-cors', request)
     }
   }
 
-  private readonly faviconIcoHandler = async (
-    request: HttpServerRequest
-  ): Promise<HttpServerResponse> => {
+  private readonly faviconIcoHandler = (
+    request: HttpServerRequest,
+    locals: HttpServerLocals
+  ): HttpServerResponse => {
     try {
-      this.existsLocalsTarget(request.locals)
+      this.existsLocalsTarget(locals)
 
-      const { target } = request.locals
-
-      const body = Buffer.from(target.faviconIco, 'base64')
+      const body = Buffer.from(locals.target.faviconIco, 'base64')
 
       const response: HttpServerResponse = {
         status: 200,
@@ -75,7 +84,7 @@ export class WellKnownUrlsController extends BaseController {
           ...commonResponseHeaders,
           'content-type': 'image/x-icon',
           'content-length': body.length.toString(),
-          'last-modified': target.updatedAt.toUTCString(),
+          'last-modified': locals.target.updatedAt.toUTCString(),
           'cache-control': 'public, max-age=691200'
         },
         cookies: {},
@@ -101,15 +110,14 @@ export class WellKnownUrlsController extends BaseController {
     }
   }
 
-  private readonly robotsTxtHandler = async (
-    request: HttpServerRequest
-  ): Promise<HttpServerResponse> => {
+  private readonly robotsTxtHandler = (
+    request: HttpServerRequest,
+    locals: HttpServerLocals
+  ): HttpServerResponse => {
     try {
-      this.existsLocalsTarget(request.locals)
+      this.existsLocalsTarget(locals)
 
-      const { target } = request.locals
-
-      const body = Buffer.from(target.robotsTxt)
+      const body = Buffer.from(locals.target.robotsTxt)
 
       const response: HttpServerResponse = {
         status: 200,
@@ -117,7 +125,7 @@ export class WellKnownUrlsController extends BaseController {
           ...commonResponseHeaders,
           'content-type': 'text/plain',
           'content-length': body.length.toString(),
-          'last-modified': target.updatedAt.toUTCString(),
+          'last-modified': locals.target.updatedAt.toUTCString(),
           'cache-control': 'public, max-age=691200'
         },
         cookies: {},
@@ -143,15 +151,14 @@ export class WellKnownUrlsController extends BaseController {
     }
   }
 
-  private readonly sitemapXmlHandler = async (
-    request: HttpServerRequest
-  ): Promise<HttpServerResponse> => {
+  private readonly sitemapXmlHandler = (
+    request: HttpServerRequest,
+    locals: HttpServerLocals
+  ): HttpServerResponse => {
     try {
-      this.existsLocalsTarget(request.locals)
+      this.existsLocalsTarget(locals)
 
-      const { target } = request.locals
-
-      const body = Buffer.from(target.sitemapXml)
+      const body = Buffer.from(locals.target.sitemapXml)
 
       const response: HttpServerResponse = {
         status: 200,
@@ -159,7 +166,7 @@ export class WellKnownUrlsController extends BaseController {
           ...commonResponseHeaders,
           'content-type': 'application/xml',
           'content-length': body.length.toString(),
-          'last-modified': target.updatedAt.toUTCString(),
+          'last-modified': locals.target.updatedAt.toUTCString(),
           'cache-control': 'public, max-age=691200'
         },
         cookies: {},

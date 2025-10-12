@@ -71,7 +71,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'create', data)
+      this.exceptionWrapper(error, 'create', data)
     }
   }
 
@@ -85,7 +85,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionFilter(error, 'read', data)
+      this.exceptionWrapper(error, 'read', data)
     }
   }
 
@@ -109,7 +109,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'auth', data)
+      this.exceptionWrapper(error, 'auth', data)
     }
   }
 
@@ -139,7 +139,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionFilter(error, 'upgrade', data)
+      this.exceptionWrapper(error, 'upgrade', data)
     }
   }
 }

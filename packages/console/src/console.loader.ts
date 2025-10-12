@@ -13,7 +13,7 @@ import {
 import { PinoLogger } from '@famir/logger'
 import { NetReplServer, NetReplServerContext } from '@famir/repl-server'
 import { AjvValidator } from '@famir/validator'
-import { BullAnalyzeLogQueue, BullPersistLogQueue, BullWorkflowConnector } from '@famir/workflow'
+import { BullAnalyzeLogQueue, BullWorkflowConnector } from '@famir/workflow'
 import { ConsoleApp } from './console.app.js'
 import { ConsoleConfig } from './console.js'
 import { configConsoleSchema } from './console.schemas.js'
@@ -39,7 +39,6 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   BullWorkflowConnector.inject(container)
 
-  BullPersistLogQueue.inject(container)
   BullAnalyzeLogQueue.inject(container)
 
   NetReplServerContext.inject(container)

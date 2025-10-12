@@ -30,5 +30,5 @@ export function buildOptions(
 }
 
 export function filterOptionsSecrets(data: object) {
-  return filterSecrets(data, ['transportOptions'])
+  return filterSecrets(data, [])
 }

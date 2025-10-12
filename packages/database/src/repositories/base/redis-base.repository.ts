@@ -20,7 +20,6 @@ export abstract class RedisBaseRepository {
 
     this.logger.debug(
       {
-        module: 'database',
         repository: this.repositoryName,
         options: filterOptionsSecrets(this.options)
       },
@@ -28,7 +27,7 @@ export abstract class RedisBaseRepository {
     )
   }
 
-  protected exceptionFilter(error: unknown, method: string, data: object | null): never {
+  protected exceptionWrapper(error: unknown, method: string, data: unknown): never {
     if (error instanceof DatabaseError) {
       error.context['repository'] = this.repositoryName
       error.context['method'] = method
@@ -36,14 +35,14 @@ export abstract class RedisBaseRepository {
 
       throw error
     } else {
-      throw new DatabaseError(`Repository internal error`, {
+      throw new DatabaseError(`Repository unhandled error`, {
         cause: error,
         context: {
           repository: this.repositoryName,
           method,
           data
         },
-        code: 'UNKNOWN'
+        code: 'INTERNAL_ERROR'
       })
     }
   }

@@ -45,7 +45,6 @@ export class PinoLogger implements Logger {
 
     this.debug(
       {
-        module: 'logger',
         options: filterOptionsSecrets(this.options)
       },
       `Logger initialized`

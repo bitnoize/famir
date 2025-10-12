@@ -2,7 +2,7 @@ import { DisabledProxyModel, EnabledProxyModel, ProxyModel } from '@famir/domain
 import { RawProxy } from './proxy.functions.js'
 
 export function buildModel(raw: RawProxy | null): ProxyModel | null {
-  if (raw == null) {
+  if (!raw) {
     return null
   }
 

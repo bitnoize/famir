@@ -6,8 +6,8 @@ import {
   HttpServer,
   Logger,
   LOGGER,
-  PERSIST_LOG_QUEUE,
-  PersistLogQueue,
+  ANALYZE_LOG_QUEUE,
+  AnalyzeLogQueue,
   Validator,
   VALIDATOR,
   WORKFLOW_CONNECTOR,
@@ -26,7 +26,7 @@ export class ReverseProxyApp {
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
-          c.resolve<PersistLogQueue>(PERSIST_LOG_QUEUE),
+          c.resolve<AnalyzeLogQueue>(ANALYZE_LOG_QUEUE),
           c.resolve<HttpServer>(HTTP_SERVER)
         )
     )
@@ -41,7 +41,7 @@ export class ReverseProxyApp {
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
-    protected readonly persistLogQueue: PersistLogQueue,
+    protected readonly analyzeLogQueue: AnalyzeLogQueue,
     protected readonly httpServer: HttpServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
@@ -68,7 +68,7 @@ export class ReverseProxyApp {
     try {
       await this.httpServer.close()
 
-      await this.persistLogQueue.close()
+      await this.analyzeLogQueue.close()
 
       await this.workflowConnector.close()
 

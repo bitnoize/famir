@@ -12,31 +12,26 @@ export abstract class BaseController {
 
     this.logger.debug(
       {
-        module: 'analyze-log',
         controller: this.controllerName
       },
       `Controller initialized`
     )
   }
 
-  protected exceptionFilter(error: unknown, handler: string, data: unknown): never {
+  protected exceptionWrapper(error: unknown, handler: string): never {
     if (error instanceof ExecutorError) {
-      error.context['module'] = 'analyze-log'
       error.context['controller'] = this.controllerName
       error.context['handler'] = handler
-      error.context['data'] = data
 
       throw error
     } else {
-      throw new ExecutorError(`Controller internal error`, {
+      throw new ExecutorError(`Controller unhandled error`, {
         cause: error,
         context: {
-          module: 'analyze-log',
           controller: this.controllerName,
           handler,
-          data
         },
-        code: 'UNKNOWN'
+        code: 'INTERNAL_ERROR'
       })
     }
   }

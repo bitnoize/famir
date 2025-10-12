@@ -27,7 +27,6 @@
     "packages/repl-server",
     "packages/console",
     "packages/reverse-proxy",
-    "packages/persist-log",
     "packages/analyze-log"
   ],
   "devDependencies": {

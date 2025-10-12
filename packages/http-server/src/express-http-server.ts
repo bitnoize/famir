@@ -74,7 +74,6 @@ export class ExpressHttpServer implements HttpServer {
 
     this.logger.debug(
       {
-        module: 'http-server',
         options: filterOptionsSecrets(this.options)
       },
       `HttpServer initialized`
@@ -84,23 +83,13 @@ export class ExpressHttpServer implements HttpServer {
   async listen(): Promise<void> {
     await this._listen()
 
-    this.logger.debug(
-      {
-        module: 'http-server'
-      },
-      `HttpServer listening`
-    )
+    this.logger.debug({}, `HttpServer listening`)
   }
 
   async close(): Promise<void> {
     await this._close()
 
-    this.logger.debug(
-      {
-        module: 'http-server'
-      },
-      `HttpServer closed`
-    )
+    this.logger.debug({}, `HttpServer closed`)
   }
 
   private _listen(): Promise<void> {
@@ -163,11 +152,8 @@ export class ExpressHttpServer implements HttpServer {
     next: express.NextFunction
   ) => {
     next(
-      new HttpServerError(`Unhandled request`, {
-        context: {
-          module: 'http-server'
-        },
-        code: 'UNKNOWN',
+      new HttpServerError(`Unhandled route`, {
+        code: 'INTERNAL_ERROR',
         status: 500
       })
     )
@@ -186,37 +172,51 @@ export class ExpressHttpServer implements HttpServer {
     }
 
     if (error instanceof HttpServerError) {
+      error.context['module'] = 'http-server'
+      error.context['request'] = this.dumpRequest(req)
+
       const logLevel = error.status >= 500 ? 'error' : 'warn'
 
       this.logger[logLevel](
         {
-          module: 'http-server',
-          request: {
-            method: req.method,
-            url: req.originalUrl,
-            headers: req.headers
-          },
           error: serializeError(error)
         },
-        `Server handle error`
+        `HttpServer request error`
       )
 
       res.type('text').status(error.status).send(error.message)
     } else {
-      this.logger.error(
-        {
+      const unknownError = new HttpServerError(`Server unknown error`, {
+        cause: error,
+        context: {
           module: 'http-server',
-          request: {
-            method: req.method,
-            url: req.originalUrl,
-            headers: req.headers
-          },
-          error: serializeError(error)
+          request: this.dumpRequest(req)
         },
-        `Server handle error`
+        code: 'INTERNAL_ERROR',
+        status: 500
+      })
+
+      this.logger.fatal(
+        {
+          error: serializeError(unknownError)
+        },
+        `HttpServer request error`
       )
 
-      res.type('text').status(500).send(`Server internal error`)
+      res.type('text').status(unknownError.status).send(unknownError.message)
+    }
+  }
+
+  private dumpRequest(req: express.Request): unknown {
+    return {
+      ip: req.ip,
+      method: req.method,
+      url: req.originalUrl,
+      path: req.path,
+      params: req.params,
+      headers: req.headers,
+      cookies: req.cookies,
+      body: Buffer.isBuffer(req.body) ? req.body.length : 0
     }
   }
 }

@@ -6,7 +6,7 @@ export type HttpServerErrorCode =
   | 'CONFLICT'
   | 'FORBIDDEN'
   | 'SERVICE_UNAVAILABLE'
-  | 'UNKNOWN'
+  | 'INTERNAL_ERROR'
 
 export type HttpServerErrorOptions = DomainErrorOptions & {
   code: HttpServerErrorCode
