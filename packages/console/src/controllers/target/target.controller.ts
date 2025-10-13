@@ -92,17 +92,17 @@ export class TargetController extends BaseController {
 
       return await this.createTargetUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'createTarget', data)
+      this.exceptionWrapper(error, 'createTarget')
     }
   }
 
-  private readonly readTargetHandler = async (data: unknown): Promise<TargetModel | null> => {
+  private readonly readTargetHandler = async (data: unknown): Promise<TargetModel> => {
     try {
       validateReadTargetModel(this.assertSchema, data)
 
       return await this.readTargetUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'readTarget', data)
+      this.exceptionWrapper(error, 'readTarget')
     }
   }
 
@@ -112,7 +112,7 @@ export class TargetController extends BaseController {
 
       return await this.updateTargetUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'updateTarget', data)
+      this.exceptionWrapper(error, 'updateTarget')
     }
   }
 
@@ -122,7 +122,7 @@ export class TargetController extends BaseController {
 
       return await this.enableTargetUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'enableTarget', data)
+      this.exceptionWrapper(error, 'enableTarget')
     }
   }
 
@@ -132,7 +132,7 @@ export class TargetController extends BaseController {
 
       return await this.disableTargetUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'disableTarget', data)
+      this.exceptionWrapper(error, 'disableTarget')
     }
   }
 
@@ -142,17 +142,17 @@ export class TargetController extends BaseController {
 
       return await this.deleteTargetUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'deleteTarget', data)
+      this.exceptionWrapper(error, 'deleteTarget')
     }
   }
 
-  private readonly listTargetsHandler = async (data: unknown): Promise<TargetModel[] | null> => {
+  private readonly listTargetsHandler = async (data: unknown): Promise<TargetModel[]> => {
     try {
       validateListTargetModels(this.assertSchema, data)
 
       return await this.listTargetsUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'listTargets', data)
+      this.exceptionWrapper(error, 'listTargets')
     }
   }
 }

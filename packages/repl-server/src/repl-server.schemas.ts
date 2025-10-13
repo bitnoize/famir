@@ -23,7 +23,7 @@ export const configReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 1000,
   maximum: 3600 * 1000,
-  default: 60 * 1000
+  default: 15 * 60 * 1000
 } as const
 
 export const configReplServerPromptSchema: JSONSchemaType<string> = {

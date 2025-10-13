@@ -16,6 +16,7 @@
     "@famir/validator": "*",
     "@famir/config": "*",
     "@famir/logger": "*",
+    "@famir/templater": "*",
     "@famir/database": "*",
     "@famir/workflow": "*",
     "@famir/http-client": "*",

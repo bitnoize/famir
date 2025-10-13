@@ -10,7 +10,6 @@ export function buildModel(raw: RawCampaign | null): CampaignModel | null {
     campaignId: raw.campaign_id,
     mirrorDomain: raw.mirror_domain,
     description: raw.description,
-    landingSecret: raw.landing_secret,
     landingAuthPath: raw.landing_auth_path,
     landingAuthParam: raw.landing_auth_param,
     landingLureParam: raw.landing_lure_param,

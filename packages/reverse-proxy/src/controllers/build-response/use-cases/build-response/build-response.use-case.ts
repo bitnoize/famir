@@ -46,49 +46,45 @@ export class BuildResponseUseCase {
       timeout: target.timeout
     }
 
-    Object.entries(createMessage.requestHeaders)
-      .forEach(([name, value]) => {
-        if (!value) {
-          return
-        }
+    Object.entries(createMessage.requestHeaders).forEach(([name, value]) => {
+      if (!value) {
+        return
+      }
 
-        request.headers[name] = value
-      })
+      request.headers[name] = value
+    })
 
-    Object.entries(createMessage.requestCookies)
-      .forEach(([name, cookie]) => {
-        if (!cookie) {
-          return
-        }
+    Object.entries(createMessage.requestCookies).forEach(([name, cookie]) => {
+      if (!cookie) {
+        return
+      }
 
-        request.cookies[name] = cookie
-      })
+      request.cookies[name] = cookie
+    })
 
     const response = await this.httpClient.query(request)
 
     createMessage.status = response.status
 
-    Object.entries(response.headers)
-      .forEach(([name, value]) => {
-        if (this.obsoleteResponseHeaders.some((regexp) => regexp.test(name))) {
-          return
-        }
+    Object.entries(response.headers).forEach(([name, value]) => {
+      if (this.obsoleteResponseHeaders.some((regexp) => regexp.test(name))) {
+        return
+      }
 
-        createMessage.responseHeaders[name] = value
-      })
+      createMessage.responseHeaders[name] = value
+    })
 
-    Object.entries(response.cookies)
-      .forEach(([name, cookie]) => {
-        createMessage.responseCookies[name] = {
-          value: cookie.value ?? undefined,
-          maxAge: cookie.maxAge ?? undefined,
-          expires: cookie.expires ? cookie.expires.getTime() : undefined,
-          httpOnly: cookie.httpOnly ?? undefined,
-          path: cookie.path ?? undefined,
-          domain: cookie.domain ?? undefined,
-          secure: cookie.secure ?? undefined,
-          sameSite: cookie.sameSite ?? undefined
-        }
-      })
+    Object.entries(response.cookies).forEach(([name, cookie]) => {
+      createMessage.responseCookies[name] = {
+        value: cookie.value ?? undefined,
+        maxAge: cookie.maxAge ?? undefined,
+        expires: cookie.expires ? cookie.expires.getTime() : undefined,
+        httpOnly: cookie.httpOnly ?? undefined,
+        path: cookie.path ?? undefined,
+        domain: cookie.domain ?? undefined,
+        secure: cookie.secure ?? undefined,
+        sameSite: cookie.sameSite ?? undefined
+      }
+    })
   }
 }

@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   DatabaseError,
   REDIRECTOR_REPOSITORY,
@@ -20,18 +20,17 @@ export class UpdateRedirectorUseCase {
 
   constructor(private readonly redirectorRepository: RedirectorRepository) {}
 
+  private readonly knownErrorCodes = ['NOT_FOUND', 'FORBIDDEN'] as const
+
   async execute(data: UpdateRedirectorModel): Promise<RedirectorModel> {
     try {
       return await this.redirectorRepository.update(data)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(error.code)
+        const isKnownError = arrayIncludes(this.knownErrorCodes, error.code)
 
         if (isKnownError) {
           throw new ReplServerError(error.message, {
-            context: {
-              useCase: 'update-redirector'
-            },
             code: error.code
           })
         }

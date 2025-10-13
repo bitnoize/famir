@@ -19,7 +19,7 @@ import { DatabaseConfig } from '../../database.js'
 import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { addSchemas, assertModel, buildModel } from './message.utils.js'
+import { addSchemas, buildModel } from './message.utils.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
   static inject(container: DIContainer) {

@@ -21,32 +21,30 @@ export class CompleteUseCase {
 
     response.status = createMessage.status
 
-    Object.entries(createMessage.responseHeaders)
-      .forEach(([name, value]) => {
-        if (!value) {
-          return
-        }
+    Object.entries(createMessage.responseHeaders).forEach(([name, value]) => {
+      if (!value) {
+        return
+      }
 
-        response.headers[name] = value
-      })
+      response.headers[name] = value
+    })
 
-    Object.entries(createMessage.responseCookies)
-      .forEach(([name, cookie]) => {
-        if (!cookie) {
-          return
-        }
+    Object.entries(createMessage.responseCookies).forEach(([name, cookie]) => {
+      if (!cookie) {
+        return
+      }
 
-        response.cookies[name] = {
-          value: cookie.value ?? undefined,
-          maxAge: cookie.maxAge ?? undefined,
-          expires: cookie.expires != null ? new Date(cookie.expires) : undefined,
-          httpOnly: cookie.httpOnly ?? undefined,
-          path: cookie.path ?? undefined,
-          domain: cookie.domain ?? undefined,
-          secure: cookie.secure ?? undefined,
-          sameSite: cookie.sameSite ?? undefined
-        }
-      })
+      response.cookies[name] = {
+        value: cookie.value ?? undefined,
+        maxAge: cookie.maxAge ?? undefined,
+        expires: cookie.expires != null ? new Date(cookie.expires) : undefined,
+        httpOnly: cookie.httpOnly ?? undefined,
+        path: cookie.path ?? undefined,
+        domain: cookie.domain ?? undefined,
+        secure: cookie.secure ?? undefined,
+        sameSite: cookie.sameSite ?? undefined
+      }
+    })
 
     response.body = createMessage.responseBody
   }

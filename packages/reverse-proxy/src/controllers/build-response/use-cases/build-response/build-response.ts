@@ -1,4 +1,4 @@
-import { EnabledTargetModel, EnabledProxyModel, CreateMessageModel } from '@famir/domain'
+import { CreateMessageModel, EnabledProxyModel, EnabledTargetModel } from '@famir/domain'
 
 export interface BuildResponseData {
   proxy: EnabledProxyModel

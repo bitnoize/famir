@@ -86,17 +86,17 @@ export class ProxyController extends BaseController {
 
       return await this.createProxyUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'createProxy', data)
+      this.exceptionWrapper(error, 'createProxy')
     }
   }
 
-  private readonly readProxyHandler = async (data: unknown): Promise<ProxyModel | null> => {
+  private readonly readProxyHandler = async (data: unknown): Promise<ProxyModel> => {
     try {
       validateReadProxyModel(this.assertSchema, data)
 
       return await this.readProxyUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'readProxy', data)
+      this.exceptionWrapper(error, 'readProxy')
     }
   }
 
@@ -106,7 +106,7 @@ export class ProxyController extends BaseController {
 
       return await this.enableProxyUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'enableProxy', data)
+      this.exceptionWrapper(error, 'enableProxy')
     }
   }
 
@@ -116,7 +116,7 @@ export class ProxyController extends BaseController {
 
       return await this.disableProxyUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'disableProxy', data)
+      this.exceptionWrapper(error, 'disableProxy')
     }
   }
 
@@ -126,17 +126,17 @@ export class ProxyController extends BaseController {
 
       return await this.deleteProxyUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'deleteProxy', data)
+      this.exceptionWrapper(error, 'deleteProxy')
     }
   }
 
-  private readonly listProxiesHandler = async (data: unknown): Promise<ProxyModel[] | null> => {
+  private readonly listProxiesHandler = async (data: unknown): Promise<ProxyModel[]> => {
     try {
       validateListProxyModels(this.assertSchema, data)
 
       return await this.listProxiesUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'listProxies', data)
+      this.exceptionWrapper(error, 'listProxies')
     }
   }
 }

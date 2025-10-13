@@ -7,6 +7,8 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
+  Templater,
+  TEMPLATER,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -23,6 +25,7 @@ export class CompleteController extends BaseController {
         new CompleteController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<CompleteUseCase>(COMPLETE_USE_CASE)
         )
@@ -36,10 +39,11 @@ export class CompleteController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
     router: HttpServerRouter,
     protected readonly completeUseCase: CompleteUseCase
   ) {
-    super(validator, logger, 'complete')
+    super(validator, logger, templater, 'complete')
 
     router.setHandler('all', '{*splat}', this.defaultHandler)
   }
@@ -48,20 +52,24 @@ export class CompleteController extends BaseController {
     request: HttpServerRequest,
     locals: HttpServerLocals
   ): Promise<HttpServerResponse> => {
-    this.existsLocalsTarget(locals)
-    this.existsLocalsCreateMessage(locals)
+    try {
+      this.existsLocalsTarget(locals)
+      this.existsLocalsCreateMessage(locals)
 
-    const { target, createMessage } = locals
+      const { target, createMessage } = locals
 
-    const response: HttpServerResponse = {
-      status: 0,
-      headers: {},
-      cookies: {},
-      body: Buffer.alloc(0)
+      const response: HttpServerResponse = {
+        status: 0,
+        headers: {},
+        cookies: {},
+        body: Buffer.alloc(0)
+      }
+
+      await this.completeUseCase.execute({ target, createMessage, response })
+
+      return response
+    } catch (error) {
+      this.exceptionWrapper(error, 'default')
     }
-
-    await this.completeUseCase.execute({ target, createMessage, response })
-
-    return response
   }
 }

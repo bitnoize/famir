@@ -1,4 +1,4 @@
-import { JSONSchemaType } from '@famir/common'
+import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import {
   CreateLureModel,
   DeleteLureModel,
@@ -6,7 +6,6 @@ import {
   ReadLureModel,
   SwitchLureModel
 } from '@famir/domain'
-import { customIdentSchema } from '@famir/validator'
 
 export const lurePathSchema: JSONSchemaType<string> = {
   type: 'string',

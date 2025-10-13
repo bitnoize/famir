@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
@@ -20,18 +20,17 @@ export class UpdateCampaignUseCase {
 
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
+  private readonly knownErrorCodes = ['NOT_FOUND'] as const
+
   async execute(data: UpdateCampaignModel): Promise<CampaignModel> {
     try {
       return await this.campaignRepository.update(data)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const isKnownError = ['NOT_FOUND'].includes(error.code)
+        const isKnownError = arrayIncludes(this.knownErrorCodes, error.code)
 
         if (isKnownError) {
           throw new ReplServerError(error.message, {
-            context: {
-              useCase: 'update-campaign'
-            },
             code: error.code
           })
         }

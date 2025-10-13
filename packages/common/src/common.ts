@@ -19,6 +19,11 @@ process.on('uncaughtException', (error: unknown) => {
   process.exit(1)
 })
 
+const nodeEnv = process.env['NODE_ENV'] || 'development'
+
+export const isProduction = nodeEnv === 'production'
+export const isDevelopment = nodeEnv === 'development'
+
 export { JSONSchemaType } from 'ajv'
 export { serializeError } from 'serialize-error'
 
@@ -29,21 +34,6 @@ export const arrayIncludes = <T extends U, U>(coll: ReadonlyArray<T>, el: U): el
 
 export const randomIdent = (): string => {
   return randomBytes(16).toString('hex')
-}
-
-export const randomSecret = (): string => {
-  return randomBytes(32).toString('hex')
-}
-
-export const filterSecrets = (data: object, fields: string[]): Record<string, unknown> => {
-  const result: Record<string, unknown> = {}
-
-  Object.entries(data).forEach(([name, value]) => {
-    const isSecret = fields.some((field) => field === name)
-    result[name] = isSecret ? '<SECRET>' : value
-  })
-
-  return result
 }
 
 export const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const

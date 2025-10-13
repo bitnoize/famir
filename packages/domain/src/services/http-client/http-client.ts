@@ -1,9 +1,4 @@
-import {
-  HttpHeaders,
-  HttpRequestCookies,
-  HttpResponseCookies,
-  HttpBody
-} from '../../domain.js'
+import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '../../domain.js'
 
 export interface HttpClientRequest {
   proxy: string

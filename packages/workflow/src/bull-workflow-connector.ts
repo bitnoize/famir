@@ -1,17 +1,15 @@
-import { DIContainer, serializeError } from '@famir/common'
+import { DIContainer, isDevelopment, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
   Logger,
   LOGGER,
-  Validator,
-  VALIDATOR,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
 import { Redis } from 'ioredis'
 import { WorkflowConfig, WorkflowConnectorOptions } from './workflow.js'
-import { buildConnectorOptions, filterOptionsSecrets } from './workflow.utils.js'
+import { buildConnectorOptions } from './workflow.utils.js'
 
 export type BullWorkflowConnection = Redis
 
@@ -21,7 +19,6 @@ export class BullWorkflowConnector implements WorkflowConnector {
       WORKFLOW_CONNECTOR,
       (c) =>
         new BullWorkflowConnector(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<WorkflowConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER)
         )
@@ -32,7 +29,6 @@ export class BullWorkflowConnector implements WorkflowConnector {
   private readonly _redis: BullWorkflowConnection
 
   constructor(
-    validator: Validator,
     config: Config<WorkflowConfig>,
     protected readonly logger: Logger
   ) {
@@ -44,20 +40,14 @@ export class BullWorkflowConnector implements WorkflowConnector {
     })
 
     this._redis.on('error', (error) => {
-      this.logger.error(
-        {
-          error: serializeError(error)
-        },
-        `Redis error event`
-      )
+      this.logger.error(`Redis error event`, {
+        error: serializeError(error)
+      })
     })
 
-    this.logger.debug(
-      {
-        options: filterOptionsSecrets(this.options)
-      },
-      `WorkflowConnector initialized`
-    )
+    this.logger.debug(`WorkflowConnector initialized`, {
+      options: isDevelopment ? this.options : null
+    })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -68,12 +58,12 @@ export class BullWorkflowConnector implements WorkflowConnector {
   //async connect(): Promise<void> {
   //  await this._redis.connect()
   //
-  //  this.logger.debug({}, `WorkflowConnector connected`)
+  //  this.logger.debug(`WorkflowConnector connected`)
   //}
 
   async close(): Promise<void> {
     await this._redis.quit()
 
-    this.logger.debug({}, `WorkflowConnector closed`)
+    this.logger.debug(`WorkflowConnector closed`)
   }
 }

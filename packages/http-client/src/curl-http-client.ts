@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, isDevelopment } from '@famir/common'
 import {
   Config,
   CONFIG,
@@ -7,44 +7,33 @@ import {
   HttpClientRequest,
   HttpClientResponse,
   Logger,
-  LOGGER,
-  Validator,
-  VALIDATOR
+  LOGGER
 } from '@famir/domain'
 import { Curl, CurlFeature } from 'node-libcurl'
 import setCookie from 'set-cookie-parser'
 import { HttpClientConfig, HttpClientOptions } from './http-client.js'
-import { buildOptions, filterOptionsSecrets } from './http-client.utils.js'
+import { buildOptions } from './http-client.utils.js'
 
 export class CurlHttpClient implements HttpClient {
   static inject(container: DIContainer) {
     container.registerSingleton<HttpClient>(
       HTTP_CLIENT,
       (c) =>
-        new CurlHttpClient(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<HttpClientConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER)
-        )
+        new CurlHttpClient(c.resolve<Config<HttpClientConfig>>(CONFIG), c.resolve<Logger>(LOGGER))
     )
   }
 
   protected readonly options: HttpClientOptions
 
   constructor(
-    validator: Validator,
     config: Config<HttpClientConfig>,
     protected readonly logger: Logger
   ) {
     this.options = buildOptions(config.data)
 
-    this.logger.debug(
-      {
-        module: 'http-client',
-        options: filterOptionsSecrets(this.options)
-      },
-      `HttpClient initialized`
-    )
+    this.logger.debug(`HttpClient initialized`, {
+      options: isDevelopment ? this.options : null
+    })
   }
 
   async query(request: HttpClientRequest): Promise<HttpClientResponse> {

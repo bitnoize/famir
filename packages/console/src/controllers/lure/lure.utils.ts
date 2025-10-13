@@ -32,7 +32,7 @@ export function validateCreateLureModel(
   } catch (error) {
     throw new ReplServerError(`CreateLureModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -46,7 +46,7 @@ export function validateReadLureModel(
   } catch (error) {
     throw new ReplServerError(`ReadLureModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -60,7 +60,7 @@ export function validateSwitchLureModel(
   } catch (error) {
     throw new ReplServerError(`SwitchLureModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -74,7 +74,7 @@ export function validateDeleteLureModel(
   } catch (error) {
     throw new ReplServerError(`DeleteLureModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -88,7 +88,7 @@ export function validateListLureModels(
   } catch (error) {
     throw new ReplServerError(`ListLureModels validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }

@@ -11,6 +11,7 @@
     { "path": "../validator" },
     { "path": "../config" },
     { "path": "../logger" },
+    { "path": "../templater" },
     { "path": "../database" },
     { "path": "../workflow" },
     { "path": "../http-client" },

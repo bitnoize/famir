@@ -45,13 +45,13 @@ export class SessionController extends BaseController {
     context.setHandler('readSession', this.readSessionHandler)
   }
 
-  private readonly readSessionHandler = async (data: unknown): Promise<SessionModel | null> => {
+  private readonly readSessionHandler = async (data: unknown): Promise<SessionModel> => {
     try {
       validateReadSessionModel(this.assertSchema, data)
 
       return await this.readSessionUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'readSession', data)
+      this.exceptionWrapper(error, 'readSession')
     }
   }
 }

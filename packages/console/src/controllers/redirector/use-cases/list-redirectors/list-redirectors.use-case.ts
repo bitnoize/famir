@@ -3,7 +3,8 @@ import {
   ListRedirectorModels,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
-  RedirectorRepository
+  RedirectorRepository,
+  ReplServerError
 } from '@famir/domain'
 
 export const LIST_REDIRECTORS_USE_CASE = Symbol('ListRedirectorsUseCase')
@@ -16,9 +17,17 @@ export class ListRedirectorsUseCase {
     )
   }
 
-  constructor(private readonly proxyRepository: RedirectorRepository) {}
+  constructor(private readonly redirectorRepository: RedirectorRepository) {}
 
-  async execute(data: ListRedirectorModels): Promise<RedirectorModel[] | null> {
-    return await this.proxyRepository.list(data)
+  async execute(data: ListRedirectorModels): Promise<RedirectorModel[]> {
+    const redirectors = await this.redirectorRepository.list(data)
+
+    if (!redirectors) {
+      throw new ReplServerError(`Campaign not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    return redirectors
   }
 }

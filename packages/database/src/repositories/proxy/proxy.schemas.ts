@@ -1,4 +1,4 @@
-import { JSONSchemaType } from '@famir/common'
+import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import {
   CreateProxyModel,
   DeleteProxyModel,
@@ -6,7 +6,6 @@ import {
   ReadProxyModel,
   SwitchProxyModel
 } from '@famir/domain'
-import { customIdentSchema } from '@famir/validator'
 
 export const proxyUrlSchema: JSONSchemaType<string> = {
   type: 'string',

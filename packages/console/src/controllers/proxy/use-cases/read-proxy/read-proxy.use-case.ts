@@ -1,5 +1,11 @@
 import { DIContainer } from '@famir/common'
-import { PROXY_REPOSITORY, ProxyModel, ProxyRepository, ReadProxyModel } from '@famir/domain'
+import {
+  PROXY_REPOSITORY,
+  ProxyModel,
+  ProxyRepository,
+  ReadProxyModel,
+  ReplServerError
+} from '@famir/domain'
 
 export const READ_PROXY_USE_CASE = Symbol('ReadProxyUseCase')
 
@@ -13,7 +19,15 @@ export class ReadProxyUseCase {
 
   constructor(private readonly proxyRepository: ProxyRepository) {}
 
-  async execute(data: ReadProxyModel): Promise<ProxyModel | null> {
-    return await this.proxyRepository.read(data)
+  async execute(data: ReadProxyModel): Promise<ProxyModel> {
+    const proxy = await this.proxyRepository.read(data)
+
+    if (!proxy) {
+      throw new ReplServerError(`Proxy not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    return proxy
   }
 }

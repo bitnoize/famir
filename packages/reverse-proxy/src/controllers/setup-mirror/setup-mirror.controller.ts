@@ -6,6 +6,8 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
+  Templater,
+  TEMPLATER,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -23,6 +25,7 @@ export class SetupMirrorController extends BaseController {
         new SetupMirrorController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<SetupMirrorUseCase>(SETUP_MIRROR_USE_CASE)
         )
@@ -36,10 +39,11 @@ export class SetupMirrorController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
     router: HttpServerRouter,
     protected readonly setupMirrorUseCase: SetupMirrorUseCase
   ) {
-    super(validator, logger, 'setup-mirror')
+    super(validator, logger, templater, 'setup-mirror')
 
     validator.addSchemas(addSchemas)
 
@@ -70,7 +74,7 @@ export class SetupMirrorController extends BaseController {
 
       return undefined
     } catch (error) {
-      this.exceptionFilter(error, 'default', request)
+      this.exceptionWrapper(error, 'default')
     }
   }
 }

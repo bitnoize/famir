@@ -6,32 +6,31 @@ import {
   EnabledTargetModel,
   HttpServerError,
   HttpServerLocals,
-  HttpServerRequest,
   Logger,
   RedirectorModel,
   SessionModel,
+  Templater,
   Validator,
-  ValidatorAssertSchema
+  ValidatorAssertSchema,
+  ValidatorGuardSchema
 } from '@famir/domain'
-import { REVERSE_PROXY_NAME } from '../../reverse-proxy.js'
 
 export abstract class BaseController {
+  protected readonly guardSchema: ValidatorGuardSchema
   protected readonly assertSchema: ValidatorAssertSchema
 
   constructor(
     validator: Validator,
     protected readonly logger: Logger,
+    protected readonly templater: Templater,
     protected readonly controllerName: string
   ) {
+    this.guardSchema = validator.guardSchema
     this.assertSchema = validator.assertSchema
 
-    this.logger.debug(
-      {
-        module: REVERSE_PROXY_NAME,
-        controller: this.controllerName
-      },
-      `Controller initialized`
-    )
+    this.logger.debug(`Controller initialized`, {
+      controller: this.controllerName
+    })
   }
 
   protected absentLocalsCampaign(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
@@ -141,7 +140,7 @@ export abstract class BaseController {
   protected existsLocalsSession(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
     readonly session: SessionModel
   } {
-    if (!locals['session'] === undefined) {
+    if (!locals['session']) {
       throw new Error(`Locals session absent`)
     }
   }
@@ -166,25 +165,20 @@ export abstract class BaseController {
     }
   }
 
-  protected exceptionFilter(error: unknown, handler: string, request: HttpServerRequest): never {
+  protected exceptionWrapper(error: unknown, handler: string): never {
     if (error instanceof HttpServerError) {
-      error.context['module'] = REVERSE_PROXY_NAME
       error.context['controller'] = this.controllerName
       error.context['handler'] = handler
-      error.context['request'] = request
 
       throw error
     } else {
       throw new HttpServerError(`Internal error`, {
         cause: error,
         context: {
-          module: REVERSE_PROXY_NAME,
           controller: this.controllerName,
-          handler,
-          request
+          handler
         },
-        code: 'INTERNAL_ERROR',
-        status: 500
+        code: 'INTERNAL_ERROR'
       })
     }
   }

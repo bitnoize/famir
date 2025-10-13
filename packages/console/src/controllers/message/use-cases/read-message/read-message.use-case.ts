@@ -3,7 +3,8 @@ import {
   MESSAGE_REPOSITORY,
   MessageModel,
   MessageRepository,
-  ReadMessageModel
+  ReadMessageModel,
+  ReplServerError
 } from '@famir/domain'
 
 export const READ_MESSAGE_USE_CASE = Symbol('ReadMessageUseCase')
@@ -18,7 +19,15 @@ export class ReadMessageUseCase {
 
   constructor(private readonly messageRepository: MessageRepository) {}
 
-  async execute(data: ReadMessageModel): Promise<MessageModel | null> {
-    return await this.messageRepository.read(data)
+  async execute(data: ReadMessageModel): Promise<MessageModel> {
+    const message = await this.messageRepository.read(data)
+
+    if (!message) {
+      throw new ReplServerError(`Message not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    return message
   }
 }

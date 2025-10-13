@@ -80,17 +80,17 @@ export class CampaignController extends BaseController {
 
       return await this.createCampaignUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'createCampaign', data)
+      this.exceptionWrapper(error, 'createCampaign')
     }
   }
 
-  private readonly readCampaignHandler = async (data: unknown): Promise<CampaignModel | null> => {
+  private readonly readCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
     try {
       validateReadCampaignModel(this.assertSchema, data)
 
       return await this.readCampaignUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'readCampaign', data)
+      this.exceptionWrapper(error, 'readCampaign')
     }
   }
 
@@ -100,7 +100,7 @@ export class CampaignController extends BaseController {
 
       return await this.updateCampaignUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'updateCampaign', data)
+      this.exceptionWrapper(error, 'updateCampaign')
     }
   }
 
@@ -110,7 +110,7 @@ export class CampaignController extends BaseController {
 
       return await this.deleteCampaignUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'deleteCampaign', data)
+      this.exceptionWrapper(error, 'deleteCampaign')
     }
   }
 
@@ -118,7 +118,7 @@ export class CampaignController extends BaseController {
     try {
       return await this.listCampaignsUseCase.execute()
     } catch (error) {
-      this.exceptionFilter(error, 'listCampaigns', undefined)
+      this.exceptionWrapper(error, 'listCampaigns')
     }
   }
 }

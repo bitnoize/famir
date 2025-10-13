@@ -1,11 +1,10 @@
-import { JSONSchemaType } from '@famir/common'
+import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import {
   CreateCampaignModel,
   DeleteCampaignModel,
   ReadCampaignModel,
   UpdateCampaignModel
 } from '@famir/domain'
-import { customIdentSchema, randomIdentSchema } from '@famir/validator'
 
 export const campaignMirrorDomainSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -46,10 +45,6 @@ export const createCampaignModelSchema: JSONSchemaType<CreateCampaignModel> = {
     description: {
       ...campaignDescriptionSchema,
       default: ''
-    },
-    landingSecret: {
-      ...randomIdentSchema,
-      nullable: true
     },
     landingAuthPath: {
       type: 'string',

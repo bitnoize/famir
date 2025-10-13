@@ -1,5 +1,11 @@
 import { DIContainer } from '@famir/common'
-import { ListTargetModels, TARGET_REPOSITORY, TargetModel, TargetRepository } from '@famir/domain'
+import {
+  ListTargetModels,
+  ReplServerError,
+  TARGET_REPOSITORY,
+  TargetModel,
+  TargetRepository
+} from '@famir/domain'
 
 export const LIST_TARGETS_USE_CASE = Symbol('ListTargetsUseCase')
 
@@ -11,9 +17,17 @@ export class ListTargetsUseCase {
     )
   }
 
-  constructor(private readonly proxyRepository: TargetRepository) {}
+  constructor(private readonly targetRepository: TargetRepository) {}
 
-  async execute(data: ListTargetModels): Promise<TargetModel[] | null> {
-    return await this.proxyRepository.list(data)
+  async execute(data: ListTargetModels): Promise<TargetModel[]> {
+    const targets = await this.targetRepository.list(data)
+
+    if (!targets) {
+      throw new ReplServerError(`Campaign not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    return targets
   }
 }

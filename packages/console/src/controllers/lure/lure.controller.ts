@@ -86,17 +86,17 @@ export class LureController extends BaseController {
 
       return await this.createLureUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'createLure', data)
+      this.exceptionWrapper(error, 'createLure')
     }
   }
 
-  private readonly readLureHandler = async (data: unknown): Promise<LureModel | null> => {
+  private readonly readLureHandler = async (data: unknown): Promise<LureModel> => {
     try {
       validateReadLureModel(this.assertSchema, data)
 
       return await this.readLureUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'readLure', data)
+      this.exceptionWrapper(error, 'readLure')
     }
   }
 
@@ -106,7 +106,7 @@ export class LureController extends BaseController {
 
       return await this.enableLureUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'enableLure', data)
+      this.exceptionWrapper(error, 'enableLure')
     }
   }
 
@@ -116,7 +116,7 @@ export class LureController extends BaseController {
 
       return await this.disableLureUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'disableLure', data)
+      this.exceptionWrapper(error, 'disableLure')
     }
   }
 
@@ -126,17 +126,17 @@ export class LureController extends BaseController {
 
       return await this.deleteLureUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'deleteLure', data)
+      this.exceptionWrapper(error, 'deleteLure')
     }
   }
 
-  private readonly listLuresHandler = async (data: unknown): Promise<LureModel[] | null> => {
+  private readonly listLuresHandler = async (data: unknown): Promise<LureModel[]> => {
     try {
       validateListLureModels(this.assertSchema, data)
 
       return await this.listLuresUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'listLures', data)
+      this.exceptionWrapper(error, 'listLures')
     }
   }
 }

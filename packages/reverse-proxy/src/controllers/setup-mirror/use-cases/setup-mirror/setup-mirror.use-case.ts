@@ -36,8 +36,7 @@ export class SetupMirrorUseCase {
 
     if (!campaign) {
       throw new HttpServerError(`Campaign not found`, {
-        code: 'SERVICE_UNAVAILABLE',
-        status: 503
+        code: 'SERVICE_UNAVAILABLE'
       })
     }
 
@@ -48,8 +47,7 @@ export class SetupMirrorUseCase {
 
     if (!target) {
       throw new HttpServerError(`Target not found`, {
-        code: 'SERVICE_UNAVAILABLE',
-        status: 503
+        code: 'SERVICE_UNAVAILABLE'
       })
     }
 

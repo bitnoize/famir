@@ -2,7 +2,6 @@ export interface CampaignModel {
   readonly campaignId: string
   readonly mirrorDomain: string
   readonly description: string
-  readonly landingSecret: string
   readonly landingAuthPath: string
   readonly landingAuthParam: string
   readonly landingLureParam: string

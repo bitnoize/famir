@@ -1,4 +1,4 @@
-import { JSONSchemaType } from '@famir/common'
+import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import {
   CreateRedirectorModel,
   DeleteRedirectorModel,
@@ -6,7 +6,6 @@ import {
   ReadRedirectorModel,
   UpdateRedirectorModel
 } from '@famir/domain'
-import { customIdentSchema } from '@famir/validator'
 
 export const redirectorPageSchema: JSONSchemaType<string> = {
   type: 'string',

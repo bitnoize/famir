@@ -1,5 +1,11 @@
 import { DIContainer } from '@famir/common'
-import { ListLureModels, LURE_REPOSITORY, LureModel, LureRepository } from '@famir/domain'
+import {
+  ListLureModels,
+  LURE_REPOSITORY,
+  LureModel,
+  LureRepository,
+  ReplServerError
+} from '@famir/domain'
 
 export const LIST_LURES_USE_CASE = Symbol('ListLuresUseCase')
 
@@ -13,7 +19,15 @@ export class ListLuresUseCase {
 
   constructor(private readonly lureRepository: LureRepository) {}
 
-  async execute(data: ListLureModels): Promise<LureModel[] | null> {
-    return await this.lureRepository.list(data)
+  async execute(data: ListLureModels): Promise<LureModel[]> {
+    const lures = await this.lureRepository.list(data)
+
+    if (!lures) {
+      throw new ReplServerError(`Campaign not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    return lures
   }
 }

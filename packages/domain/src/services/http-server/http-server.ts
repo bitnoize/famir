@@ -1,18 +1,4 @@
-import {
-  CampaignModel,
-  EnabledLureModel,
-  EnabledProxyModel,
-  EnabledTargetModel,
-  RedirectorModel,
-  SessionModel
-} from '../../models/index.js'
-import {
-  HttpHeaders,
-  HttpRequestCookies,
-  HttpResponseCookies,
-  HttpBody
-} from '../../domain.js'
-import { CreateMessageModel } from '../../repositories/index.js'
+import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '../../domain.js'
 
 export interface HttpServer {
   listen(): Promise<void>
@@ -64,7 +50,11 @@ export type HttpServerRouteHandlerSync = (
 export interface HttpServerRouter {
   applyTo(express: unknown): void
   setHandler(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandler): void
-  setHandlerSync(method: HttpServerRouteMethod, path: string, handler: HttpServerRouteHandlerSync): void
+  setHandlerSync(
+    method: HttpServerRouteMethod,
+    path: string,
+    handler: HttpServerRouteHandlerSync
+  ): void
 }
 
 export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')

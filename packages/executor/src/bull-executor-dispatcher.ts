@@ -19,12 +19,7 @@ export class BullExecutorDispatcher implements ExecutorDispatcher {
   private readonly _map = new Map<string, ExecutorDispatchHandler>()
 
   constructor(protected readonly logger: Logger) {
-    this.logger.debug(
-      {
-        module: 'executor'
-      },
-      `ExecutorDispatcher initialized`
-    )
+    this.logger.debug(`ExecutorDispatcher initialized`)
   }
 
   async applyTo(job: Job<unknown, unknown>): Promise<unknown> {
@@ -44,12 +39,8 @@ export class BullExecutorDispatcher implements ExecutorDispatcher {
 
     this._map.set(name, handler)
 
-    this.logger.debug(
-      {
-        module: 'executor',
-        handler: name
-      },
-      `ExecutorDispatcher register handler`
-    )
+    this.logger.debug(`ExecutorDispatcher register handler`, {
+      handler: name
+    })
   }
 }

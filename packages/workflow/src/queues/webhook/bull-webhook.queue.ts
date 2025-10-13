@@ -4,8 +4,6 @@ import {
   CONFIG,
   Logger,
   LOGGER,
-  Validator,
-  VALIDATOR,
   WEBHOOK_QUEUE,
   WEBHOOK_QUEUE_NAME,
   WebhookJobData,
@@ -23,7 +21,6 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
       WEBHOOK_QUEUE,
       (c) =>
         new BullWebhookQueue(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<WorkflowConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR).connection<BullWorkflowConnection>()
@@ -31,13 +28,8 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
     )
   }
 
-  constructor(
-    validator: Validator,
-    config: Config<WorkflowConfig>,
-    logger: Logger,
-    connection: BullWorkflowConnection
-  ) {
-    super(validator, config, logger, connection, WEBHOOK_QUEUE_NAME)
+  constructor(config: Config<WorkflowConfig>, logger: Logger, connection: BullWorkflowConnection) {
+    super(config, logger, connection, WEBHOOK_QUEUE_NAME)
   }
 
   async addJob(data: WebhookJobData): Promise<string> {

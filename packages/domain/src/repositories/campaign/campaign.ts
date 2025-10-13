@@ -4,7 +4,6 @@ export interface CreateCampaignModel {
   campaignId: string
   mirrorDomain: string
   description: string
-  landingSecret: string | null | undefined
   landingAuthPath: string
   landingAuthParam: string
   landingLureParam: string

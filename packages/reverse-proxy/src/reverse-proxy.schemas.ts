@@ -4,6 +4,7 @@ import { configHttpClientBodyLimitSchema } from '@famir/http-client'
 import {
   configHttpServerAddressSchema,
   configHttpServerBodyLimitSchema,
+  configHttpServerErrorPageSchema,
   configHttpServerPortSchema
 } from '@famir/http-server'
 import {
@@ -29,7 +30,8 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
     'HTTP_CLIENT_BODY_LIMIT',
     'HTTP_SERVER_ADDRESS',
     'HTTP_SERVER_PORT',
-    'HTTP_SERVER_BODY_LIMIT'
+    'HTTP_SERVER_BODY_LIMIT',
+    'HTTP_SERVER_ERROR_PAGE'
   ],
   properties: {
     LOGGER_APP_NAME: {
@@ -52,7 +54,8 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
       ...configHttpServerPortSchema,
       default: 3000
     },
-    HTTP_SERVER_BODY_LIMIT: configHttpServerBodyLimitSchema
+    HTTP_SERVER_BODY_LIMIT: configHttpServerBodyLimitSchema,
+    HTTP_SERVER_ERROR_PAGE: configHttpServerErrorPageSchema
   },
   additionalProperties: false
 } as const

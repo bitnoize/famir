@@ -6,6 +6,8 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
+  Templater,
+  TEMPLATER,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -22,6 +24,7 @@ export class BuildRequestController extends BaseController {
         new BuildRequestController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<BuildRequestUseCase>(BUILD_REQUEST_USE_CASE)
         )
@@ -35,10 +38,11 @@ export class BuildRequestController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
     router: HttpServerRouter,
     protected readonly buildRequestUseCase: BuildRequestUseCase
   ) {
-    super(validator, logger, 'build-request')
+    super(validator, logger, templater, 'build-request')
 
     router.setHandler('all', '{*splat}', this.defaultHandler)
   }
@@ -71,7 +75,7 @@ export class BuildRequestController extends BaseController {
 
       return undefined
     } catch (error) {
-      this.exceptionFilter(error, 'default', request)
+      this.exceptionWrapper(error, 'default')
     }
   }
 }

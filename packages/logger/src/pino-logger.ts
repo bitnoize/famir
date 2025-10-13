@@ -11,7 +11,7 @@ import {
 } from '@famir/domain'
 import pino from 'pino'
 import { LoggerConfig, LoggerOptions } from './logger.js'
-import { addSchemas, buildOptions, filterOptionsSecrets } from './logger.utils.js'
+import { addSchemas, buildOptions } from './logger.utils.js'
 
 export class PinoLogger implements Logger {
   static inject(container: DIContainer) {
@@ -42,32 +42,25 @@ export class PinoLogger implements Logger {
         options: this.options.transportOptions
       }
     })
-
-    this.debug(
-      {
-        options: filterOptionsSecrets(this.options)
-      },
-      `Logger initialized`
-    )
   }
 
-  debug(data: LoggerData, msg: string) {
+  debug(msg: string, data: LoggerData = {}) {
     this._pino.debug(data, msg)
   }
 
-  info(data: LoggerData, msg: string) {
+  info(msg: string, data: LoggerData = {}) {
     this._pino.info(data, msg)
   }
 
-  warn(data: LoggerData, msg: string) {
+  warn(msg: string, data: LoggerData = {}) {
     this._pino.warn(data, msg)
   }
 
-  error(data: LoggerData, msg: string) {
+  error(msg: string, data: LoggerData = {}) {
     this._pino.error(data, msg)
   }
 
-  fatal(data: LoggerData, msg: string) {
+  fatal(msg: string, data: LoggerData = {}) {
     this._pino.fatal(data, msg)
   }
 }

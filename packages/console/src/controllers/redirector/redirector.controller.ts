@@ -81,19 +81,17 @@ export class RedirectorController extends BaseController {
 
       return await this.createRedirectorUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'createRedirector', data)
+      this.exceptionWrapper(error, 'createRedirector')
     }
   }
 
-  private readonly readRedirectorHandler = async (
-    data: unknown
-  ): Promise<RedirectorModel | null> => {
+  private readonly readRedirectorHandler = async (data: unknown): Promise<RedirectorModel> => {
     try {
       validateReadRedirectorModel(this.assertSchema, data)
 
       return await this.readRedirectorUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'readRedirector', data)
+      this.exceptionWrapper(error, 'readRedirector')
     }
   }
 
@@ -103,7 +101,7 @@ export class RedirectorController extends BaseController {
 
       return await this.updateRedirectorUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'updateRedirector', data)
+      this.exceptionWrapper(error, 'updateRedirector')
     }
   }
 
@@ -113,19 +111,17 @@ export class RedirectorController extends BaseController {
 
       return await this.deleteRedirectorUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'deleteRedirector', data)
+      this.exceptionWrapper(error, 'deleteRedirector')
     }
   }
 
-  private readonly listRedirectorsHandler = async (
-    data: unknown
-  ): Promise<RedirectorModel[] | null> => {
+  private readonly listRedirectorsHandler = async (data: unknown): Promise<RedirectorModel[]> => {
     try {
       validateListRedirectorModels(this.assertSchema, data)
 
       return await this.listRedirectorsUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'listRedirectors', data)
+      this.exceptionWrapper(error, 'listRedirectors')
     }
   }
 }

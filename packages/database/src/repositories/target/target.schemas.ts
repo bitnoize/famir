@@ -1,4 +1,4 @@
-import { JSONSchemaType } from '@famir/common'
+import { JSONSchemaType, booleanSchema, customIdentSchema } from '@famir/common'
 import {
   CreateTargetModel,
   DeleteTargetModel,
@@ -7,7 +7,6 @@ import {
   SwitchTargetModel,
   UpdateTargetModel
 } from '@famir/domain'
-import { customIdentSchema, simpleBooleanSchema } from '@famir/validator'
 
 export const targetSubSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -77,12 +76,12 @@ export const createTargetModelSchema: JSONSchemaType<CreateTargetModel> = {
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
-    isLanding: simpleBooleanSchema,
-    donorSecure: simpleBooleanSchema,
+    isLanding: booleanSchema,
+    donorSecure: booleanSchema,
     donorSub: targetSubSchema,
     donorDomain: targetDomainSchema,
     donorPort: targetPortSchema,
-    mirrorSecure: simpleBooleanSchema,
+    mirrorSecure: booleanSchema,
     mirrorSub: targetSubSchema,
     mirrorPort: targetPortSchema,
     connectTimeout: {

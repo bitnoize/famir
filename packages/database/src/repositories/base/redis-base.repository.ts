@@ -1,6 +1,7 @@
+import { isDevelopment } from '@famir/common'
 import { Config, DatabaseError, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
 import { DatabaseConfig, DatabaseRepositoryOptions } from '../../database.js'
-import { buildRepositoryOptions, filterOptionsSecrets } from '../../database.utils.js'
+import { buildRepositoryOptions } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 
 export abstract class RedisBaseRepository {
@@ -18,13 +19,10 @@ export abstract class RedisBaseRepository {
 
     this.options = buildRepositoryOptions(config.data)
 
-    this.logger.debug(
-      {
-        repository: this.repositoryName,
-        options: filterOptionsSecrets(this.options)
-      },
-      `Repository initialized`
-    )
+    this.logger.debug(`Repository initialized`, {
+      repository: this.repositoryName,
+      options: isDevelopment ? this.options : null
+    })
   }
 
   protected exceptionWrapper(error: unknown, method: string, data: unknown): never {

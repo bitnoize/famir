@@ -1,10 +1,11 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Logger,
   LOGGER,
   REPL_SERVER_CONTEXT,
   ReplServerContext,
-  ReplServerContextHandler
+  ReplServerContextHandler,
+  ReplServerError
 } from '@famir/domain'
 import repl from 'node:repl'
 
@@ -19,12 +20,7 @@ export class NetReplServerContext implements ReplServerContext {
   private readonly _map = new Map<string, ReplServerContextHandler>()
 
   constructor(protected readonly logger: Logger) {
-    this.logger.debug(
-      {
-        module: 'repl-server'
-      },
-      `ReplServerContext initialized`
-    )
+    this.logger.debug(`ReplServerContext initialized`)
   }
 
   applyTo(replServer: repl.REPLServer) {
@@ -32,13 +28,7 @@ export class NetReplServerContext implements ReplServerContext {
       Object.defineProperty(replServer.context, name, {
         configurable: false,
         enumerable: true,
-        value: async (data: unknown): Promise<unknown> => {
-          try {
-            return await handler(data)
-          } catch (error) {
-            return error // FIXME
-          }
-        }
+        value: this.buildContextHandler(handler)
       })
     })
   }
@@ -50,16 +40,36 @@ export class NetReplServerContext implements ReplServerContext {
 
     this._map.set(name, handler)
 
-    this.logger.debug(
-      {
-        module: 'repl-server',
-        handler: name
-      },
-      `ReplServerContext register handler`
-    )
+    this.logger.debug(`ReplServerContext register handler`, {
+      handler: name
+    })
   }
 
   dump(): string[] {
     return [...this._map.keys()]
+  }
+
+  private buildContextHandler(handler: ReplServerContextHandler) {
+    return async (data: unknown): Promise<unknown> => {
+      try {
+        return await handler(data)
+      } catch (error) {
+        if (error instanceof ReplServerError) {
+          error.context['data'] = data
+
+          this.logger.error(`ReplServer context error`, {
+            error: serializeError(error)
+          })
+
+          throw error
+        } else {
+          this.logger.error(`ReplServer unhandled error`, {
+            error: serializeError(error)
+          })
+
+          throw error
+        }
+      }
+    }
   }
 }

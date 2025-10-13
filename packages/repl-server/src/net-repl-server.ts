@@ -1,4 +1,4 @@
-import { DIContainer, serializeError } from '@famir/common'
+import { DIContainer, isDevelopment, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
@@ -7,15 +7,13 @@ import {
   REPL_SERVER,
   REPL_SERVER_CONTEXT,
   ReplServer,
-  ReplServerContext,
-  Validator,
-  VALIDATOR
+  ReplServerContext
 } from '@famir/domain'
 import net from 'node:net'
 import repl from 'node:repl'
 import util from 'node:util'
 import { ReplServerConfig, ReplServerOptions } from './repl-server.js'
-import { buildOptions, filterOptionsSecrets } from './repl-server.utils.js'
+import { buildOptions } from './repl-server.utils.js'
 
 export class NetReplServer implements ReplServer {
   static inject(container: DIContainer) {
@@ -23,7 +21,6 @@ export class NetReplServer implements ReplServer {
       REPL_SERVER,
       (c) =>
         new NetReplServer(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<ReplServerConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT)
@@ -36,7 +33,6 @@ export class NetReplServer implements ReplServer {
   private readonly _connections = new Set<net.Socket>()
 
   constructor(
-    validator: Validator,
     config: Config<ReplServerConfig>,
     protected readonly logger: Logger,
     protected readonly context: ReplServerContext
@@ -46,41 +42,29 @@ export class NetReplServer implements ReplServer {
     this._server = net.createServer(this.connectionHandler)
 
     this._server.on('connection', (socket) => {
-      this.logger.debug(
-        {
-          module: 'repl-server',
-          socket: socket.address()
-        },
-        `Server connect event`
-      )
+      this.logger.debug(`Server connect event`, {
+        socket: socket.address()
+      })
     })
 
     this._server.on('drop', (data) => {
-      this.logger.debug(
-        {
-          module: 'repl-server',
-          socket:
-            data !== undefined
-              ? {
-                  family: data.remoteFamily,
-                  address: data.remoteAddress,
-                  port: data.remotePort
-                }
-              : null
-        },
-        `Server drop event`
-      )
+      this.logger.debug(`Server drop event`, {
+        socket:
+          data !== undefined
+            ? {
+                family: data.remoteFamily,
+                address: data.remoteAddress,
+                port: data.remotePort
+              }
+            : null
+      })
     })
 
     this._server.maxConnections = this.options.maxConnections
 
-    this.logger.debug(
-      {
-        module: 'repl-server',
-        options: filterOptionsSecrets(this.options)
-      },
-      `ReplServer initialized`
-    )
+    this.logger.debug(`ReplServer initialized`, {
+      options: isDevelopment ? this.options : null
+    })
   }
 
   protected connectionHandler = (socket: net.Socket) => {
@@ -89,39 +73,27 @@ export class NetReplServer implements ReplServer {
     socket.setTimeout(this.options.socketTimeout)
 
     socket.on('close', (hadError) => {
-      this.logger.debug(
-        {
-          module: 'repl-server',
-          socket: socket.address(),
-          hadError
-        },
-        `Socket close event`
-      )
+      this.logger.debug(`Socket close event`, {
+        socket: socket.address(),
+        hadError
+      })
 
       this._connections.delete(socket)
     })
 
     socket.on('error', (error) => {
-      this.logger.error(
-        {
-          module: 'repl-server',
-          socket: socket.address(),
-          error: serializeError(error)
-        },
-        `Socket error event`
-      )
+      this.logger.error(`Socket error event`, {
+        socket: socket.address(),
+        error: serializeError(error)
+      })
 
       socket.destroy()
     })
 
     socket.on('timeout', () => {
-      this.logger.debug(
-        {
-          module: 'repl-server',
-          socket: socket.address()
-        },
-        `Socket timeout event`
-      )
+      this.logger.debug(`Socket timeout event`, {
+        socket: socket.address()
+      })
 
       socket.destroy()
     })
@@ -204,23 +176,13 @@ export class NetReplServer implements ReplServer {
   async listen(): Promise<void> {
     await this._listen()
 
-    this.logger.debug(
-      {
-        module: 'repl-server'
-      },
-      `ReplServer listening`
-    )
+    this.logger.debug(`ReplServer listening`)
   }
 
   async close(): Promise<void> {
     await this._close()
 
-    this.logger.info(
-      {
-        module: 'repl-server'
-      },
-      `ReplServer closed`
-    )
+    this.logger.info(`ReplServer closed`)
   }
 
   private _listen(): Promise<void> {

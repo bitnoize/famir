@@ -13,7 +13,6 @@ export interface RawCampaign {
   campaign_id: string
   mirror_domain: string
   description: string
-  landing_secret: string
   landing_auth_path: string
   landing_auth_param: string
   landing_lure_param: string
@@ -42,7 +41,6 @@ export const campaignFunctions = {
         campaignId: string,
         mirrorDomain: string,
         description: string,
-        landingSecret: string,
         landingAuthPath: string,
         landingAuthParam: string,
         landingLureParam: string,
@@ -58,7 +56,6 @@ export const campaignFunctions = {
         parser.push(campaignId)
         parser.push(mirrorDomain)
         parser.push(description)
-        parser.push(landingSecret)
         parser.push(landingAuthPath)
         parser.push(landingAuthParam)
         parser.push(landingLureParam)

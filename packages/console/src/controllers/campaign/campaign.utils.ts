@@ -29,7 +29,7 @@ export function validateCreateCampaignModel(
   } catch (error) {
     throw new ReplServerError(`CreateCampaignModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -43,7 +43,7 @@ export function validateReadCampaignModel(
   } catch (error) {
     throw new ReplServerError(`ReadCampaignModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -57,7 +57,7 @@ export function validateUpdateCampaignModel(
   } catch (error) {
     throw new ReplServerError(`UpdateCampaignModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -71,7 +71,7 @@ export function validateDeleteCampaignModel(
   } catch (error) {
     throw new ReplServerError(`DeleteCampaignModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }

@@ -1,4 +1,4 @@
-import { JSONSchemaType } from '@famir/common'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
 import {
   MessageHeader,
   MessageHeaders,
@@ -8,7 +8,6 @@ import {
   MessageResponseCookies,
   ReadMessageModel
 } from '@famir/domain'
-import { customIdentSchema } from '@famir/validator'
 
 export const messageHeaderSchema: JSONSchemaType<MessageHeader> = {
   type: ['string', 'array'],
@@ -102,7 +101,7 @@ export const readMessageModelSchema: JSONSchemaType<ReadMessageModel> = {
   required: ['campaignId', 'messageId'],
   properties: {
     campaignId: customIdentSchema,
-    messageId: customIdentSchema
+    messageId: randomIdentSchema
   },
   additionalProperties: false
 } as const

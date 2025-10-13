@@ -1,5 +1,11 @@
 import { DIContainer } from '@famir/common'
-import { ReadTargetModel, TARGET_REPOSITORY, TargetModel, TargetRepository } from '@famir/domain'
+import {
+  ReadTargetModel,
+  ReplServerError,
+  TARGET_REPOSITORY,
+  TargetModel,
+  TargetRepository
+} from '@famir/domain'
 
 export const READ_TARGET_USE_CASE = Symbol('ReadTargetUseCase')
 
@@ -13,7 +19,15 @@ export class ReadTargetUseCase {
 
   constructor(private readonly targetRepository: TargetRepository) {}
 
-  async execute(data: ReadTargetModel): Promise<TargetModel | null> {
-    return await this.targetRepository.read(data)
+  async execute(data: ReadTargetModel): Promise<TargetModel> {
+    const target = await this.targetRepository.read(data)
+
+    if (!target) {
+      throw new ReplServerError(`Target not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    return target
   }
 }

@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   CreateRedirectorModel,
   DatabaseError,
@@ -20,18 +20,17 @@ export class CreateRedirectorUseCase {
 
   constructor(private readonly redirectorRepository: RedirectorRepository) {}
 
+  private readonly knownErrorCodes = ['CONFLICT'] as const
+
   async execute(data: CreateRedirectorModel): Promise<RedirectorModel> {
     try {
       return await this.redirectorRepository.create(data)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const isKnownError = ['CONFLICT'].includes(error.code)
+        const isKnownError = arrayIncludes(this.knownErrorCodes, error.code)
 
         if (isKnownError) {
           throw new ReplServerError(error.message, {
-            context: {
-              useCase: 'create-redirector'
-            },
             code: error.code
           })
         }

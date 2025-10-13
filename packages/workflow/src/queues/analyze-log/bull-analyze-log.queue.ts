@@ -8,8 +8,6 @@ import {
   CONFIG,
   Logger,
   LOGGER,
-  Validator,
-  VALIDATOR,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
@@ -23,7 +21,6 @@ export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueu
       ANALYZE_LOG_QUEUE,
       (c) =>
         new BullAnalyzeLogQueue(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<WorkflowConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR).connection<BullWorkflowConnection>()
@@ -31,13 +28,8 @@ export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueu
     )
   }
 
-  constructor(
-    validator: Validator,
-    config: Config<WorkflowConfig>,
-    logger: Logger,
-    connection: BullWorkflowConnection
-  ) {
-    super(validator, config, logger, connection, ANALYZE_LOG_QUEUE_NAME)
+  constructor(config: Config<WorkflowConfig>, logger: Logger, connection: BullWorkflowConnection) {
+    super(config, logger, connection, ANALYZE_LOG_QUEUE_NAME)
   }
 
   async addJob(data: AnalyzeLogJobData): Promise<string> {

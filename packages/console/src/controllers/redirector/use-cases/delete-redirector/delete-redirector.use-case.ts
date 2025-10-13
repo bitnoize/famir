@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   DatabaseError,
   DeleteRedirectorModel,
@@ -20,18 +20,17 @@ export class DeleteRedirectorUseCase {
 
   constructor(private readonly redirectorRepository: RedirectorRepository) {}
 
+  private readonly knownErrorCodes = ['NOT_FOUND', 'FORBIDDEN'] as const
+
   async execute(data: DeleteRedirectorModel): Promise<RedirectorModel> {
     try {
       return await this.redirectorRepository.delete(data)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const isKnownError = ['NOT_FOUND', 'FORBIDDEN'].includes(error.code)
+        const isKnownError = arrayIncludes(this.knownErrorCodes, error.code)
 
         if (isKnownError) {
           throw new ReplServerError(error.message, {
-            context: {
-              useCase: 'delete-redirector'
-            },
             code: error.code
           })
         }

@@ -3,7 +3,8 @@ import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
-  ReadCampaignModel
+  ReadCampaignModel,
+  ReplServerError
 } from '@famir/domain'
 
 export const READ_CAMPAIGN_USE_CASE = Symbol('ReadCampaignUseCase')
@@ -18,7 +19,15 @@ export class ReadCampaignUseCase {
 
   constructor(private readonly campaignRepository: CampaignRepository) {}
 
-  async execute(data: ReadCampaignModel): Promise<CampaignModel | null> {
-    return await this.campaignRepository.read(data)
+  async execute(data: ReadCampaignModel): Promise<CampaignModel> {
+    const campaign = await this.campaignRepository.read(data)
+
+    if (!campaign) {
+      throw new ReplServerError(`Campaign not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    return campaign
   }
 }

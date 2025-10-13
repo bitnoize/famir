@@ -33,7 +33,7 @@ export function parseRequestHeaders(
   } catch (error) {
     throw new DatabaseError(`Parse message request headers failed`, {
       cause: error,
-      code: 'UNKNOWN'
+      code: 'INTERNAL_ERROR'
     })
   }
 }
@@ -51,7 +51,7 @@ export function parseRequestCookies(
   } catch (error) {
     throw new DatabaseError(`Parse message request cookies failed`, {
       cause: error,
-      code: 'UNKNOWN'
+      code: 'INTERNAL_ERROR'
     })
   }
 }
@@ -62,7 +62,7 @@ export function parseRequestBody(data: string): Buffer {
   } catch (error) {
     throw new DatabaseError(`Parse message request body failed`, {
       cause: error,
-      code: 'UNKNOWN'
+      code: 'INTERNAL_ERROR'
     })
   }
 }
@@ -80,7 +80,7 @@ export function parseResponseHeaders(
   } catch (error) {
     throw new DatabaseError(`Parse message response headers failed`, {
       cause: error,
-      code: 'UNKNOWN'
+      code: 'INTERNAL_ERROR'
     })
   }
 }
@@ -98,7 +98,7 @@ export function parseResponseCookies(
   } catch (error) {
     throw new DatabaseError(`Parse message response cookies failed`, {
       cause: error,
-      code: 'UNKNOWN'
+      code: 'INTERNAL_ERROR'
     })
   }
 }
@@ -109,7 +109,7 @@ export function parseResponseBody(data: string): Buffer {
   } catch (error) {
     throw new DatabaseError(`Parse message response body failed`, {
       cause: error,
-      code: 'UNKNOWN'
+      code: 'INTERNAL_ERROR'
     })
   }
 }

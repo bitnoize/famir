@@ -32,7 +32,7 @@ export function validateCreateProxyModel(
   } catch (error) {
     throw new ReplServerError(`CreateProxyModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -46,7 +46,7 @@ export function validateReadProxyModel(
   } catch (error) {
     throw new ReplServerError(`ReadProxyModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -60,7 +60,7 @@ export function validateSwitchProxyModel(
   } catch (error) {
     throw new ReplServerError(`SwitchProxyModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -74,7 +74,7 @@ export function validateDeleteProxyModel(
   } catch (error) {
     throw new ReplServerError(`DeleteProxyModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -88,7 +88,7 @@ export function validateListProxyModels(
   } catch (error) {
     throw new ReplServerError(`ListProxyModels validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }

@@ -1,17 +1,15 @@
-import { DIContainer, serializeError } from '@famir/common'
+import { DIContainer, isDevelopment, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
   EXECUTOR_CONNECTOR,
   ExecutorConnector,
   Logger,
-  LOGGER,
-  Validator,
-  VALIDATOR
+  LOGGER
 } from '@famir/domain'
 import { Redis } from 'ioredis'
 import { ExecutorConfig, ExecutorConnectorOptions } from './executor.js'
-import { buildConnectorOptions, filterOptionsSecrets } from './executor.utils.js'
+import { buildConnectorOptions } from './executor.utils.js'
 
 export type BullExecutorConnection = Redis
 
@@ -21,7 +19,6 @@ export class BullExecutorConnector implements ExecutorConnector {
       EXECUTOR_CONNECTOR,
       (c) =>
         new BullExecutorConnector(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<ExecutorConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER)
         )
@@ -32,7 +29,6 @@ export class BullExecutorConnector implements ExecutorConnector {
   private readonly _redis: BullExecutorConnection
 
   constructor(
-    validator: Validator,
     config: Config<ExecutorConfig>,
     protected readonly logger: Logger
   ) {
@@ -45,20 +41,14 @@ export class BullExecutorConnector implements ExecutorConnector {
     })
 
     this._redis.on('error', (error) => {
-      this.logger.error(
-        {
-          error: serializeError(error)
-        },
-        `Redis error event`
-      )
+      this.logger.error(`Redis error event`, {
+        error: serializeError(error)
+      })
     })
 
-    this.logger.debug(
-      {
-        options: filterOptionsSecrets(this.options)
-      },
-      `ExecutorConnector initialized`
-    )
+    this.logger.debug(`ExecutorConnector initialized`, {
+      options: isDevelopment ? this.options : null
+    })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -69,12 +59,12 @@ export class BullExecutorConnector implements ExecutorConnector {
   //async connect(): Promise<void> {
   //  await this._redis.connect()
   //
-  //  this.logger.debug({}, `ExecutorConnector connected`)
+  //  this.logger.debug(`ExecutorConnector connected`)
   //}
 
   async close(): Promise<void> {
     await this._redis.quit()
 
-    this.logger.debug({}, `ExecutorConnector closed`)
+    this.logger.debug(`ExecutorConnector closed`)
   }
 }

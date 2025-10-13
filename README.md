@@ -19,6 +19,7 @@ Packages
 | [validator](packages/validator) | Validate data with JSON-Schema |
 | [config](packages/config) | Config infrastructure service |
 | [logger](packages/logger) | Logger with multiple transports |
+| [templater](packages/templater) | Template engine |
 | [database](packages/database) | Database repositories |
 | [storage](packages/storage) | S3 compatable client |
 | [workflow](packages/workflow) | Workflow queues |
@@ -28,7 +29,6 @@ Packages
 | [repl-server](packages/repl-server) | REPL server |
 | [console](packages/console) | Console application |
 | [reverse-proxy](packages/reverse-proxy) | Reverse proxy application |
-| [persist-log](packages/persist-log) | Persist log application |
 | [analyze-log](packages/analyze-log) | Analyze log application |
 
 

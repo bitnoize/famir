@@ -1,18 +1,16 @@
-import { DIContainer, serializeError } from '@famir/common'
+import { DIContainer, isDevelopment, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   Logger,
-  LOGGER,
-  Validator,
-  VALIDATOR
+  LOGGER
 } from '@famir/domain'
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
 import { DatabaseConfig, DatabaseConnectorOptions } from './database.js'
-import { buildConnectorOptions, filterOptionsSecrets } from './database.utils.js'
+import { buildConnectorOptions } from './database.utils.js'
 
 export type RedisDatabaseConnection = RedisClientType<
   Record<string, never>, // Modules
@@ -27,7 +25,6 @@ export class RedisDatabaseConnector implements DatabaseConnector {
       DATABASE_CONNECTOR,
       (c) =>
         new RedisDatabaseConnector(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<DatabaseConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER)
         )
@@ -38,7 +35,6 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   private readonly _redis: RedisDatabaseConnection
 
   constructor(
-    validator: Validator,
     config: Config<DatabaseConfig>,
     protected readonly logger: Logger
   ) {
@@ -52,20 +48,14 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     })
 
     this._redis.on('error', (error) => {
-      this.logger.error(
-        {
-          error: serializeError(error)
-        },
-        `Redis error event`
-      )
+      this.logger.error(`Redis error event`, {
+        error: serializeError(error)
+      })
     })
 
-    this.logger.debug(
-      {
-        options: filterOptionsSecrets(this.options)
-      },
-      `DatabaseConnector initialized`
-    )
+    this.logger.debug(`DatabaseConnector initialized`, {
+      options: isDevelopment ? this.options : null
+    })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -76,12 +66,12 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   async connect(): Promise<void> {
     await this._redis.connect()
 
-    this.logger.debug({}, `DatabaseConnector connected`)
+    this.logger.debug(`DatabaseConnector connected`)
   }
 
   async close(): Promise<void> {
     await this._redis.close()
 
-    this.logger.debug({}, `DatabaseConnector closed`)
+    this.logger.debug(`DatabaseConnector closed`)
   }
 }

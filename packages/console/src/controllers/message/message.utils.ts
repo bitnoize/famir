@@ -18,7 +18,7 @@ export function validateReadMessageModel(
   } catch (error) {
     throw new ReplServerError(`ReadMessageModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }

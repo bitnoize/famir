@@ -18,7 +18,7 @@ export function validateReadSessionModel(
   } catch (error) {
     throw new ReplServerError(`ReadSessionModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }

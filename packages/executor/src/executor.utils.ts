@@ -1,4 +1,3 @@
-import { filterSecrets } from '@famir/common'
 import { ExecutorConfig, ExecutorConnectorOptions, ExecutorWorkerOptions } from './executor.js'
 
 export function buildConnectorOptions(data: ExecutorConfig): ExecutorConnectorOptions {
@@ -14,8 +13,4 @@ export function buildWorkerOptions(data: ExecutorConfig): ExecutorWorkerOptions 
     limiterMax: data.EXECUTOR_LIMITER_MAX,
     limiterDuration: data.EXECUTOR_LIMITER_DURATION
   }
-}
-
-export function filterOptionsSecrets(data: object) {
-  return filterSecrets(data, ['connectionUrl'])
 }

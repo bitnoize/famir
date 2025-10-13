@@ -1,5 +1,11 @@
 import { DIContainer } from '@famir/common'
-import { LURE_REPOSITORY, LureModel, LureRepository, ReadLureModel } from '@famir/domain'
+import {
+  LURE_REPOSITORY,
+  LureModel,
+  LureRepository,
+  ReadLureModel,
+  ReplServerError
+} from '@famir/domain'
 
 export const READ_LURE_USE_CASE = Symbol('ReadLureUseCase')
 
@@ -13,7 +19,15 @@ export class ReadLureUseCase {
 
   constructor(private readonly lureRepository: LureRepository) {}
 
-  async execute(data: ReadLureModel): Promise<LureModel | null> {
-    return await this.lureRepository.read(data)
+  async execute(data: ReadLureModel): Promise<LureModel> {
+    const lure = await this.lureRepository.read(data)
+
+    if (!lure) {
+      throw new ReplServerError(`Lure not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    return lure
   }
 }

@@ -1,4 +1,4 @@
-import { DIContainer, serializeError } from '@famir/common'
+import { DIContainer, isDevelopment, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
@@ -9,15 +9,15 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
-  Validator,
-  VALIDATOR
+  TEMPLATER,
+  Templater
 } from '@famir/domain'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import express from 'express'
 import http from 'node:http'
 import { HttpServerConfig, HttpServerOptions } from './http-server.js'
-import { buildOptions, filterOptionsSecrets } from './http-server.utils.js'
+import { buildOptions } from './http-server.utils.js'
 
 export class ExpressHttpServer implements HttpServer {
   static inject(container: DIContainer) {
@@ -25,9 +25,9 @@ export class ExpressHttpServer implements HttpServer {
       HTTP_SERVER,
       (c) =>
         new ExpressHttpServer(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<HttpServerConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )
@@ -38,9 +38,9 @@ export class ExpressHttpServer implements HttpServer {
   private readonly _server: http.Server
 
   constructor(
-    validator: Validator,
     config: Config<HttpServerConfig>,
     protected readonly logger: Logger,
+    protected readonly templater: Templater,
     router: HttpServerRouter
   ) {
     this.options = buildOptions(config.data)
@@ -72,24 +72,21 @@ export class ExpressHttpServer implements HttpServer {
 
     this._express.use(this.exceptionHandler)
 
-    this.logger.debug(
-      {
-        options: filterOptionsSecrets(this.options)
-      },
-      `HttpServer initialized`
-    )
+    this.logger.debug(`HttpServer initialized`, {
+      options: isDevelopment ? this.options : null
+    })
   }
 
   async listen(): Promise<void> {
     await this._listen()
 
-    this.logger.debug({}, `HttpServer listening`)
+    this.logger.debug(`HttpServer listening`)
   }
 
   async close(): Promise<void> {
     await this._close()
 
-    this.logger.debug({}, `HttpServer closed`)
+    this.logger.debug(`HttpServer closed`)
   }
 
   private _listen(): Promise<void> {
@@ -152,9 +149,8 @@ export class ExpressHttpServer implements HttpServer {
     next: express.NextFunction
   ) => {
     next(
-      new HttpServerError(`Unhandled route`, {
+      new HttpServerError(`Unhandled route request`, {
         code: 'INTERNAL_ERROR',
-        status: 500
       })
     )
   }
@@ -172,38 +168,21 @@ export class ExpressHttpServer implements HttpServer {
     }
 
     if (error instanceof HttpServerError) {
-      error.context['module'] = 'http-server'
       error.context['request'] = this.dumpRequest(req)
 
       const logLevel = error.status >= 500 ? 'error' : 'warn'
 
-      this.logger[logLevel](
-        {
-          error: serializeError(error)
-        },
-        `HttpServer request error`
-      )
-
-      res.type('text').status(error.status).send(error.message)
-    } else {
-      const unknownError = new HttpServerError(`Server unknown error`, {
-        cause: error,
-        context: {
-          module: 'http-server',
-          request: this.dumpRequest(req)
-        },
-        code: 'INTERNAL_ERROR',
-        status: 500
+      this.logger[logLevel](`HttpServer request error`, {
+        error: serializeError(error)
       })
 
-      this.logger.fatal(
-        {
-          error: serializeError(unknownError)
-        },
-        `HttpServer request error`
-      )
+      this.replyErrorPage(res, error.status, error.message)
+    } else {
+      this.logger.error(`HttpServer unhandled error`, {
+        error: serializeError(error)
+      })
 
-      res.type('text').status(unknownError.status).send(unknownError.message)
+      this.replyErrorPage(res, 500, `Internal server error`)
     }
   }
 
@@ -218,5 +197,14 @@ export class ExpressHttpServer implements HttpServer {
       cookies: req.cookies,
       body: Buffer.isBuffer(req.body) ? req.body.length : 0
     }
+  }
+
+  private replyErrorPage(res: express.Response, status: number, message: string) {
+    const errorPage = this.templater.render(this.options.errorPage, {
+      status,
+      message
+    })
+
+    res.type('html').status(status).send(errorPage)
   }
 }

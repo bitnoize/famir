@@ -1,8 +1,4 @@
-import { filterSecrets } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
 import { StorageConfig, StorageOptions } from './storage.js'
-
-export const internalSchemas: ValidatorSchemas = {}
 
 export function buildOptions(data: StorageConfig): StorageOptions {
   return {
@@ -12,8 +8,4 @@ export function buildOptions(data: StorageConfig): StorageOptions {
     accessKey: data.STORAGE_ACCESS_KEY,
     secretKey: data.STORAGE_SECRET_KEY
   }
-}
-
-export function filterOptionsSecrets(data: object) {
-  return filterSecrets(data, ['secretKey'])
 }

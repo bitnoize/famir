@@ -1,33 +1,21 @@
-import { serializeError } from '@famir/common'
-import {
-  BaseWorker,
-  Config,
-  ExecutorDispatcher,
-  ExecutorError,
-  Logger,
-  Validator,
-  ValidatorAssertSchema
-} from '@famir/domain'
+import { isDevelopment, serializeError } from '@famir/common'
+import { BaseWorker, Config, ExecutorDispatcher, ExecutorError, Logger } from '@famir/domain'
 import { Job, MetricsTime, Processor, Worker } from 'bullmq'
 import { BullExecutorConnection } from '../../bull-executor-connector.js'
 import { ExecutorConfig, ExecutorWorkerOptions } from '../../executor.js'
-import { buildWorkerOptions, filterOptionsSecrets } from '../../executor.utils.js'
+import { buildWorkerOptions } from '../../executor.utils.js'
 
 export abstract class BullBaseWorker implements BaseWorker {
-  protected readonly assertSchema: ValidatorAssertSchema
   protected readonly options: ExecutorWorkerOptions
   protected readonly _worker: Worker<unknown, unknown>
 
   constructor(
-    validator: Validator,
     config: Config<ExecutorConfig>,
     protected readonly logger: Logger,
     protected readonly connection: BullExecutorConnection,
     protected readonly dispatcher: ExecutorDispatcher,
     protected readonly queueName: string
   ) {
-    this.assertSchema = validator.assertSchema
-
     this.options = buildWorkerOptions(config.data)
 
     this._worker = new Worker<unknown, unknown>(this.queueName, this.processorHandler, {
@@ -51,42 +39,69 @@ export abstract class BullBaseWorker implements BaseWorker {
     })
 
     this._worker.on('completed', (job: Job<unknown, unknown>) => {
-      this.logger.info(
-        {
-          queue: this.queueName,
-          job: this.dumpJob(job)
-        },
-        `Worker completed event`
-      )
+      this.logger.info(`Worker completed event`, {
+        queue: this.queueName,
+        job: this.dumpJob(job)
+      })
     })
 
     this._worker.on('failed', (job: Job<unknown, unknown> | undefined) => {
-      this.logger.error(
-        {
-          queue: this.queueName,
-          job: job !== undefined ? this.dumpJob(job) : null
-        },
-        `Worker failed event`
-      )
+      this.logger.error(`Worker failed event`, {
+        queue: this.queueName,
+        job: job !== undefined ? this.dumpJob(job) : null
+      })
     })
 
     this._worker.on('error', (error: unknown) => {
-      this.logger.error(
-        {
-          queue: this.queueName,
-          error: serializeError(error)
-        },
-        `Worker error event`
-      )
+      this.logger.error(`Worker error event`, {
+        queue: this.queueName,
+        error: serializeError(error)
+      })
     })
 
-    this.logger.debug(
-      {
-        queue: this.queueName,
-        options: filterOptionsSecrets(this.options)
-      },
-      `Worker initialized`
-    )
+    this.logger.debug(`Worker initialized`, {
+      queue: this.queueName,
+      options: isDevelopment ? this.options : null
+    })
+  }
+
+  protected processorHandler: Processor<unknown, unknown> = async (job) => {
+    try {
+      return await this.dispatcher.applyTo(job)
+    } catch (error) {
+      if (error instanceof ExecutorError) {
+        error.context['queue'] = this.queueName
+        error.context['job'] = this.dumpJob(job)
+
+        this.logger.error(`Worker processor error`, {
+          error: serializeError(error)
+        })
+
+        throw error
+      } else {
+        this.logger.error(`Worker unhandled error`, {
+          error: serializeError(error)
+        })
+
+        throw error
+      }
+    }
+  }
+
+  async run(): Promise<void> {
+    await this._worker.run()
+
+    this.logger.debug(`Worker running`, {
+      queue: this.queueName
+    })
+  }
+
+  async close(): Promise<void> {
+    await this._worker.close()
+
+    this.logger.debug(`Worker closed`, {
+      queue: this.queueName
+    })
   }
 
   private dumpJob(job: Job<unknown, unknown>): unknown {
@@ -96,51 +111,5 @@ export abstract class BullBaseWorker implements BaseWorker {
       data: job.data,
       result: job.returnvalue
     }
-  }
-
-  protected processorHandler: Processor<unknown, unknown> = async (job) => {
-    try {
-      return await this.dispatcher.applyTo(job)
-    } catch (error) {
-      if (error instanceof ExecutorError) {
-        error.context['module'] = 'executor'
-        error.context['queue'] = this.queueName
-        error.context['job'] = this.dumpJob(job)
-
-        throw error
-      } else {
-        throw new ExecutorError(`Worker unhandled error`, {
-          cause: error,
-          context: {
-            module: 'executor',
-            queue: this.queueName,
-            job: this.dumpJob(job)
-          },
-          code: 'INTERNAL_ERROR'
-        })
-      }
-    }
-  }
-
-  async run(): Promise<void> {
-    await this._worker.run()
-
-    this.logger.debug(
-      {
-        queue: this.queueName
-      },
-      `Worker running`
-    )
-  }
-
-  async close(): Promise<void> {
-    await this._worker.close()
-
-    this.logger.debug(
-      {
-        queue: this.queueName
-      },
-      `Worker closed`
-    )
   }
 }

@@ -8,6 +8,8 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
+  Templater,
+  TEMPLATER,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -24,6 +26,7 @@ export class WellKnownUrlsController extends BaseController {
         new WellKnownUrlsController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )
@@ -33,8 +36,13 @@ export class WellKnownUrlsController extends BaseController {
     return container.resolve<WellKnownUrlsController>(WELL_KNOWN_URLS_CONTROLLER)
   }
 
-  constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
-    super(validator, logger, 'well-known-urls')
+  constructor(
+    validator: Validator,
+    logger: Logger,
+    templater: Templater,
+    router: HttpServerRouter
+  ) {
+    super(validator, logger, templater, 'well-known-urls')
 
     router.setHandlerSync('options', '{*splat}', this.preflightCorsHandler)
     router.setHandlerSync('all', '/favicon.ico', this.faviconIcoHandler)
@@ -65,7 +73,7 @@ export class WellKnownUrlsController extends BaseController {
         body: Buffer.alloc(0)
       }
     } catch (error) {
-      this.exceptionFilter(error, 'preflight-cors', request)
+      this.exceptionWrapper(error, 'preflight-cors')
     }
   }
 
@@ -102,11 +110,10 @@ export class WellKnownUrlsController extends BaseController {
       }
 
       throw new HttpServerError(`Not found`, {
-        code: 'NOT_FOUND',
-        status: 404
+        code: 'NOT_FOUND'
       })
     } catch (error) {
-      this.exceptionFilter(error, 'faviconIco', request)
+      this.exceptionWrapper(error, 'faviconIco')
     }
   }
 
@@ -115,9 +122,19 @@ export class WellKnownUrlsController extends BaseController {
     locals: HttpServerLocals
   ): HttpServerResponse => {
     try {
+      this.existsLocalsCampaign(locals)
       this.existsLocalsTarget(locals)
 
-      const body = Buffer.from(locals.target.robotsTxt)
+      const { campaign, target } = locals
+
+      const robotsTxt = this.templater.render(target.robotsTxt, {
+        mirrorDomain: campaign.mirrorDomain,
+        mirrorSecure: target.mirrorSecure,
+        mirrorSub: target.mirrorSub,
+        mirrorPort: target.mirrorPort
+      })
+
+      const body = Buffer.from(robotsTxt)
 
       const response: HttpServerResponse = {
         status: 200,
@@ -143,11 +160,10 @@ export class WellKnownUrlsController extends BaseController {
       }
 
       throw new HttpServerError(`Not found`, {
-        code: 'NOT_FOUND',
-        status: 404
+        code: 'NOT_FOUND'
       })
     } catch (error) {
-      this.exceptionFilter(error, 'robotsTxt', request)
+      this.exceptionWrapper(error, 'robotsTxt')
     }
   }
 
@@ -184,11 +200,10 @@ export class WellKnownUrlsController extends BaseController {
       }
 
       throw new HttpServerError(`Not found`, {
-        code: 'NOT_FOUND',
-        status: 404
+        code: 'NOT_FOUND'
       })
     } catch (error) {
-      this.exceptionFilter(error, 'sitemapXml', request)
+      this.exceptionWrapper(error, 'sitemapXml')
     }
   }
 }

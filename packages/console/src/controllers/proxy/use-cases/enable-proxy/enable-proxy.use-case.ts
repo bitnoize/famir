@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   DatabaseError,
   PROXY_REPOSITORY,
@@ -20,18 +20,17 @@ export class EnableProxyUseCase {
 
   constructor(private readonly proxyRepository: ProxyRepository) {}
 
+  private readonly knownErrorCodes = ['NOT_FOUND'] as const
+
   async execute(data: SwitchProxyModel): Promise<ProxyModel> {
     try {
       return await this.proxyRepository.enable(data)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const isKnownError = ['NOT_FOUND'].includes(error.code)
+        const isKnownError = arrayIncludes(this.knownErrorCodes, error.code)
 
         if (isKnownError) {
           throw new ReplServerError(error.message, {
-            context: {
-              useCase: 'enable-proxy'
-            },
             code: error.code
           })
         }

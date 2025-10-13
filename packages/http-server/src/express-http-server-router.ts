@@ -24,7 +24,7 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
   private readonly _router = express.Router()
 
   constructor(protected readonly logger: Logger) {
-    this.logger.debug({}, `HttpServerRouter initialized`)
+    this.logger.debug(`HttpServerRouter initialized`)
   }
 
   applyTo(express: express.Express) {
@@ -125,7 +125,7 @@ export class ExpressHttpServerRouter implements HttpServerRouter {
         path: cookie.path,
         domain: cookie.domain,
         secure: cookie.secure,
-        sameSite: cookie.sameSite,
+        sameSite: cookie.sameSite
         //priority: cookie.priority,
         //partitioned: cookie.partitioned,
       }

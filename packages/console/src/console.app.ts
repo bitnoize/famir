@@ -1,4 +1,4 @@
-import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
+import { DIContainer, serializeError, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
   ANALYZE_LOG_QUEUE,
   AnalyzeLogQueue,
@@ -8,8 +8,6 @@ import {
   LOGGER,
   REPL_SERVER,
   ReplServer,
-  Validator,
-  VALIDATOR,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
@@ -22,7 +20,6 @@ export class ConsoleApp {
       CONSOLE_APP,
       (c) =>
         new ConsoleApp(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
@@ -37,7 +34,6 @@ export class ConsoleApp {
   }
 
   constructor(
-    validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
@@ -50,6 +46,8 @@ export class ConsoleApp {
         await this.stop()
       })
     })
+
+    this.logger.debug(`ConsoleApp initialized`)
   }
 
   async start(): Promise<void> {
@@ -57,8 +55,12 @@ export class ConsoleApp {
       await this.databaseConnector.connect()
 
       await this.replServer.listen()
+
+      this.logger.debug(`ConsoleApp started`)
     } catch (error) {
-      console.error(`Console start failed`, { error })
+      this.logger.error(`ConsoleApp start failed`, {
+        error: serializeError(error)
+      })
 
       process.exit(1)
     }
@@ -73,8 +75,12 @@ export class ConsoleApp {
       await this.workflowConnector.close()
 
       await this.databaseConnector.close()
+
+      this.logger.debug(`ConsoleApp stopped`)
     } catch (error) {
-      console.error(`Console stop failed`, { error })
+      this.logger.error(`ConsoleApp stop failed`, {
+        error: serializeError(error)
+      })
 
       process.exit(1)
     }

@@ -1,4 +1,4 @@
-import { DIContainer, randomSecret } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
@@ -54,7 +54,6 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
           data.campaignId,
           data.mirrorDomain,
           data.description,
-          data.landingSecret ?? randomSecret(),
           data.landingAuthPath,
           data.landingAuthParam,
           data.landingLureParam,

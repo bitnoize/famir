@@ -26,6 +26,7 @@ import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import {
+  assertModel,
   assertDisabledModel,
   assertEnabledModel,
   buildCollection,
@@ -132,7 +133,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async update(data: UpdateTargetModel): Promise<DisabledTargetModel> {
+  async update(data: UpdateTargetModel): Promise<TargetModel> {
     try {
       const [status, raw] = await Promise.all([
         this.connection.target.update_target(
@@ -158,7 +159,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       if (code === 'OK') {
         const model = buildModel(raw)
 
-        assertDisabledModel(model)
+        assertModel(model)
 
         return model
       }

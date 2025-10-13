@@ -13,6 +13,7 @@ import {
 import { CurlHttpClient } from '@famir/http-client'
 import { ExpressHttpServer, ExpressHttpServerRouter } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
+import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeLogQueue, BullWorkflowConnector } from '@famir/workflow'
 import { ReverseProxyApp } from './reverse-proxy.app.js'
@@ -27,6 +28,8 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   EnvConfig.inject<ReverseProxyConfig>(container, configReverseProxySchema)
 
   PinoLogger.inject(container)
+
+  EtaTemplater.inject(container)
 
   RedisDatabaseConnector.inject(container)
 

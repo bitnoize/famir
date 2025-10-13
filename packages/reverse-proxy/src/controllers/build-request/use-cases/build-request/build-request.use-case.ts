@@ -45,8 +45,7 @@ export class BuildRequestUseCase {
 
     if (!targets) {
       throw new HttpServerError(`Campaign lost`, {
-        code: 'INTERNAL_ERROR',
-        status: 500
+        code: 'INTERNAL_ERROR'
       })
     }
 
@@ -71,23 +70,21 @@ export class BuildRequestUseCase {
       score: 0
     }
 
-    Object.entries(request.headers)
-      .forEach(([name, value]) => {
-        if (this.obsoleteRequestHeaders.some((regexp) => regexp.test(name))) {
-          return
-        }
+    Object.entries(request.headers).forEach(([name, value]) => {
+      if (this.obsoleteRequestHeaders.some((regexp) => regexp.test(name))) {
+        return
+      }
 
-        createMessage.requestHeaders[name] = value
-      })
+      createMessage.requestHeaders[name] = value
+    })
 
-    Object.entries(request.cookies)
-      .forEach(([name, value]) => {
-        if (name === campaign.sessionCookieName) {
-          return
-        }
+    Object.entries(request.cookies).forEach(([name, value]) => {
+      if (name === campaign.sessionCookieName) {
+        return
+      }
 
-        createMessage.requestCookies[name] = value
-      })
+      createMessage.requestCookies[name] = value
+    })
 
     return {
       targets,

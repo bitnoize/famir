@@ -35,7 +35,7 @@ export function validateCreateTargetModel(
   } catch (error) {
     throw new ReplServerError(`CreateTargetModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -49,7 +49,7 @@ export function validateReadTargetModel(
   } catch (error) {
     throw new ReplServerError(`ReadTargetModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -63,7 +63,7 @@ export function validateUpdateTargetModel(
   } catch (error) {
     throw new ReplServerError(`UpdateTargetModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -77,7 +77,7 @@ export function validateSwitchTargetModel(
   } catch (error) {
     throw new ReplServerError(`SwitchTargetModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -91,7 +91,7 @@ export function validateDeleteTargetModel(
   } catch (error) {
     throw new ReplServerError(`DeleteTargetModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -105,7 +105,7 @@ export function validateListTargetModels(
   } catch (error) {
     throw new ReplServerError(`ListTargetModels validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }

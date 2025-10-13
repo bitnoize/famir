@@ -15,8 +15,7 @@ export function validateSetupMirrorHeaders(
   } catch (error) {
     throw new HttpServerError(`SetupMirrorHeaders validation failed`, {
       cause: error,
-      code: 'SERVICE_UNAVAILABLE',
-      status: 503
+      code: 'SERVICE_UNAVAILABLE'
     })
   }
 }

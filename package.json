@@ -18,6 +18,7 @@
     "packages/validator",
     "packages/config",
     "packages/logger",
+    "packages/templater",
     "packages/database",
     "packages/storage",
     "packages/workflow",

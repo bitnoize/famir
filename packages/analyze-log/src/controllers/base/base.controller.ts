@@ -10,12 +10,9 @@ export abstract class BaseController {
   ) {
     this.assertSchema = validator.assertSchema
 
-    this.logger.debug(
-      {
-        controller: this.controllerName
-      },
-      `Controller initialized`
-    )
+    this.logger.debug(`Controller initialized`, {
+      controller: this.controllerName
+    })
   }
 
   protected exceptionWrapper(error: unknown, handler: string): never {
@@ -29,7 +26,7 @@ export abstract class BaseController {
         cause: error,
         context: {
           controller: this.controllerName,
-          handler,
+          handler
         },
         code: 'INTERNAL_ERROR'
       })

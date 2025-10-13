@@ -1,4 +1,4 @@
-import { arrayIncludes, filterSecrets } from '@famir/common'
+import { arrayIncludes } from '@famir/common'
 import { DATABASE_STATUS_CODES, DatabaseStatusCode } from '@famir/domain'
 import { DatabaseConfig, DatabaseConnectorOptions, DatabaseRepositoryOptions } from './database.js'
 
@@ -12,10 +12,6 @@ export function buildRepositoryOptions(data: DatabaseConfig): DatabaseRepository
   return {
     prefix: data.DATABASE_PREFIX
   }
-}
-
-export function filterOptionsSecrets(data: object) {
-  return filterSecrets(data, ['connectionUrl'])
 }
 
 export function parseStatusReply(status: string): [DatabaseStatusCode, string] {

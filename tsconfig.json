@@ -6,6 +6,7 @@
     { "path": "packages/validator" },
     { "path": "packages/config" },
     { "path": "packages/logger" },
+    { "path": "packages/templater" },
     { "path": "packages/database" },
     { "path": "packages/storage" },
     { "path": "packages/workflow" },

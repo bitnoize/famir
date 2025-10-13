@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   CreateProxyModel,
   DatabaseError,
@@ -20,18 +20,17 @@ export class CreateProxyUseCase {
 
   constructor(private readonly proxyRepository: ProxyRepository) {}
 
+  private readonly knownErrorCodes = ['CONFLICT'] as const
+
   async execute(data: CreateProxyModel): Promise<ProxyModel> {
     try {
       return await this.proxyRepository.create(data)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const isKnownError = ['CONFLICT'].includes(error.code)
+        const isKnownError = arrayIncludes(this.knownErrorCodes, error.code)
 
         if (isKnownError) {
           throw new ReplServerError(error.message, {
-            context: {
-              useCase: 'create-proxy'
-            },
             code: error.code
           })
         }

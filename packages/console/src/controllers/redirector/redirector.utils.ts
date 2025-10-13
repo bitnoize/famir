@@ -32,7 +32,7 @@ export function validateCreateRedirectorModel(
   } catch (error) {
     throw new ReplServerError(`CreateRedirectorModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -46,7 +46,7 @@ export function validateReadRedirectorModel(
   } catch (error) {
     throw new ReplServerError(`ReadRedirectorModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -60,7 +60,7 @@ export function validateUpdateRedirectorModel(
   } catch (error) {
     throw new ReplServerError(`UpdateRedirectorModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -74,7 +74,7 @@ export function validateDeleteRedirectorModel(
   } catch (error) {
     throw new ReplServerError(`DeleteRedirectorModel validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }
@@ -88,7 +88,7 @@ export function validateListRedirectorModels(
   } catch (error) {
     throw new ReplServerError(`ListRedirectorModels validation failed`, {
       cause: error,
-      code: 'BAD_PARAMS'
+      code: 'BAD_REQUEST'
     })
   }
 }

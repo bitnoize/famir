@@ -1,15 +1,13 @@
-import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
+import { DIContainer, serializeError, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
+  ANALYZE_LOG_QUEUE,
+  AnalyzeLogQueue,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   HTTP_SERVER,
   HttpServer,
   Logger,
   LOGGER,
-  ANALYZE_LOG_QUEUE,
-  AnalyzeLogQueue,
-  Validator,
-  VALIDATOR,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
@@ -22,7 +20,6 @@ export class ReverseProxyApp {
       REVERSE_PROXY_APP,
       (c) =>
         new ReverseProxyApp(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
@@ -37,7 +34,6 @@ export class ReverseProxyApp {
   }
 
   constructor(
-    validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
@@ -50,6 +46,8 @@ export class ReverseProxyApp {
         await this.stop()
       })
     })
+
+    this.logger.debug(`ReverseProxyApp initialized`)
   }
 
   async start(): Promise<void> {
@@ -57,8 +55,12 @@ export class ReverseProxyApp {
       await this.databaseConnector.connect()
 
       await this.httpServer.listen()
+
+      this.logger.debug(`ReverseProxyApp started`)
     } catch (error) {
-      console.error(`ReverseProxy start failed`, { error })
+      this.logger.error(`ReverseProxyApp start failed`, {
+        error: serializeError(error)
+      })
 
       process.exit(1)
     }
@@ -73,8 +75,12 @@ export class ReverseProxyApp {
       await this.workflowConnector.close()
 
       await this.databaseConnector.close()
+
+      this.logger.debug(`ReverseProxyApp stopped`)
     } catch (error) {
-      console.error(`ReverseProxy stop failed`, { error })
+      this.logger.error(`ReverseProxyApp stop failed`, {
+        error: serializeError(error)
+      })
 
       process.exit(1)
     }

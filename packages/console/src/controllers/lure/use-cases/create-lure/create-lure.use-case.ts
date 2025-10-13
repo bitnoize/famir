@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   CreateLureModel,
   DatabaseError,
@@ -20,18 +20,17 @@ export class CreateLureUseCase {
 
   constructor(private readonly lureRepository: LureRepository) {}
 
+  private readonly knownErrorCodes = ['CONFLICT'] as const
+
   async execute(data: CreateLureModel): Promise<LureModel> {
     try {
       return await this.lureRepository.create(data)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const isKnownError = ['CONFLICT'].includes(error.code)
+        const isKnownError = arrayIncludes(this.knownErrorCodes, error.code)
 
         if (isKnownError) {
           throw new ReplServerError(error.message, {
-            context: {
-              useCase: 'create-lure'
-            },
             code: error.code
           })
         }

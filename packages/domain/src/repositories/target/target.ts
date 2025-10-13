@@ -59,7 +59,7 @@ export interface TargetRepository {
   create(data: CreateTargetModel): Promise<DisabledTargetModel>
   read(data: ReadTargetModel): Promise<TargetModel | null>
   readEnabled(data: ReadTargetModel): Promise<EnabledTargetModel | null>
-  update(data: UpdateTargetModel): Promise<DisabledTargetModel>
+  update(data: UpdateTargetModel): Promise<TargetModel>
   enable(data: SwitchTargetModel): Promise<EnabledTargetModel>
   disable(data: SwitchTargetModel): Promise<DisabledTargetModel>
   delete(data: DeleteTargetModel): Promise<DisabledTargetModel>

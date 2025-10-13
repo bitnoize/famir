@@ -10,9 +10,7 @@ import {
   ExecutorConnector,
   ExecutorDispatcher,
   Logger,
-  LOGGER,
-  Validator,
-  VALIDATOR
+  LOGGER
 } from '@famir/domain'
 import { BullExecutorConnection } from '../../bull-executor-connector.js'
 import { ExecutorConfig } from '../../executor.js'
@@ -24,7 +22,6 @@ export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWo
       ANALYZE_LOG_WORKER,
       (c) =>
         new BullAnalyzeLogWorker(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<ExecutorConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR).connection<BullExecutorConnection>(),
@@ -34,12 +31,11 @@ export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWo
   }
 
   constructor(
-    validator: Validator,
     config: Config<ExecutorConfig>,
     logger: Logger,
     connection: BullExecutorConnection,
     dispatcher: ExecutorDispatcher
   ) {
-    super(validator, config, logger, connection, dispatcher, ANALYZE_LOG_QUEUE_NAME)
+    super(config, logger, connection, dispatcher, ANALYZE_LOG_QUEUE_NAME)
   }
 }

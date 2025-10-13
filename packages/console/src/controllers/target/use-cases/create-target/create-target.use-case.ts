@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   CreateTargetModel,
   DatabaseError,
@@ -20,18 +20,17 @@ export class CreateTargetUseCase {
 
   constructor(private readonly targetRepository: TargetRepository) {}
 
+  private readonly knownErrorCodes = ['CONFLICT'] as const
+
   async execute(data: CreateTargetModel): Promise<TargetModel> {
     try {
       return await this.targetRepository.create(data)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const isKnownError = ['CONFLICT'].includes(error.code)
+        const isKnownError = arrayIncludes(this.knownErrorCodes, error.code)
 
         if (isKnownError) {
           throw new ReplServerError(error.message, {
-            context: {
-              useCase: 'create-target'
-            },
             code: error.code
           })
         }

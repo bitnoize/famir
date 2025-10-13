@@ -1,0 +1,21 @@
+{
+  "name": "@famir/templater",
+  "type": "module",
+  "version": "0.3.3",
+  "description": "Templater module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@famir/common": "*",
+    "@famir/domain": "*",
+    "eta": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1"
+  }
+}

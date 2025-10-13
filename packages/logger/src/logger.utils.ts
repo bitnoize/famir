@@ -1,4 +1,3 @@
-import { filterSecrets } from '@famir/common'
 import { ValidatorAssertSchema, ValidatorSchemas } from '@famir/domain'
 import { LoggerConfig, LoggerOptions, LoggerTransportOptions } from './logger.js'
 import { loggerTransportOptionsSchema } from './logger.schemas.js'
@@ -27,8 +26,4 @@ export function buildOptions(
 
     process.exit(1)
   }
-}
-
-export function filterOptionsSecrets(data: object) {
-  return filterSecrets(data, [])
 }

@@ -45,13 +45,13 @@ export class MessageController extends BaseController {
     context.setHandler('readMessage', this.readMessageHandler)
   }
 
-  private readonly readMessageHandler = async (data: unknown): Promise<MessageModel | null> => {
+  private readonly readMessageHandler = async (data: unknown): Promise<MessageModel> => {
     try {
       validateReadMessageModel(this.assertSchema, data)
 
       return await this.readMessageUseCase.execute(data)
     } catch (error) {
-      this.exceptionFilter(error, 'readMessage', data)
+      this.exceptionWrapper(error, 'readMessage')
     }
   }
 }

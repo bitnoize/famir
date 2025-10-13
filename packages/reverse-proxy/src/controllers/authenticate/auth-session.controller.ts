@@ -6,6 +6,8 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
+  Templater,
+  TEMPLATER,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -21,6 +23,7 @@ export class AuthSessionController extends BaseController {
         new AuthSessionController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )
@@ -30,8 +33,13 @@ export class AuthSessionController extends BaseController {
     return container.resolve<AuthSessionController>(AUTH_SESSION_CONTROLLER)
   }
 
-  constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
-    super(validator, logger, 'auth-session')
+  constructor(
+    validator: Validator,
+    logger: Logger,
+    templater: Templater,
+    router: HttpServerRouter
+  ) {
+    super(validator, logger, templater, 'auth-session')
 
     router.setHandler('all', '{*splat}', this.defaultHandler)
   }
@@ -42,7 +50,7 @@ export class AuthSessionController extends BaseController {
     try {
       return undefined
     } catch (error) {
-      this.exceptionFilter(error, 'default', request)
+      this.exceptionWrapper(error, 'default')
     }
   }
 }

@@ -1,4 +1,4 @@
-import { DIContainer, SHUTDOWN_SIGNALS } from '@famir/common'
+import { DIContainer, serializeError, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
   ANALYZE_LOG_WORKER,
   AnalyzeLogWorker,
@@ -53,6 +53,8 @@ export class AnalyzeLogApp {
     })
 
     validator.addSchemas(addSchemas)
+
+    this.logger.debug(`AnalyzeLogApp initialized`)
   }
 
   async start(): Promise<void> {
@@ -60,8 +62,12 @@ export class AnalyzeLogApp {
       await this.databaseConnector.connect()
 
       await this.analyzeLogWorker.run()
+
+      this.logger.debug(`AnalyzeLogApp started`)
     } catch (error) {
-      console.error(`AnalyzeLog start failed`, { error })
+      this.logger.error(`AnalyzeLogApp start failed`, {
+        error: serializeError(error)
+      })
 
       process.exit(1)
     }
@@ -76,8 +82,12 @@ export class AnalyzeLogApp {
       await this.workflowConnector.close()
 
       await this.databaseConnector.close()
+
+      this.logger.debug(`AnalyzeLogApp stopped`)
     } catch (error) {
-      console.error(`AnalyzeLog stop failed`, { error })
+      this.logger.error(`AnalyzeLogApp stop failed`, {
+        error: serializeError(error)
+      })
 
       process.exit(1)
     }
