@@ -1,5 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { HTTP_CLIENT, HttpClient, HttpClientRequest } from '@famir/domain'
+import { HTTP_CLIENT, HttpClient, HttpClientRequest, HttpHeaders, HttpHeader } from '@famir/domain'
 import { BuildResponseData } from './build-response.js'
 
 export const BUILD_RESPONSE_USE_CASE = Symbol('BuildResponseUseCase')
@@ -14,26 +14,17 @@ export class BuildResponseUseCase {
 
   constructor(protected readonly httpClient: HttpClient) {}
 
-  private readonly obsoleteResponseHeaders: RegExp[] = [
-    /^Set-Cookie$/i,
-    /^Connection$/i,
-    /^Keep-Alive$/i,
-    /^Transfer-Encoding$/i,
-    /^Content-Encoding$/i,
-    /^Upgrade$/i,
-    /^Trailer$/i,
-    /^Via$/i,
-    /^Server$/i,
-    /^Content-Security-/i,
-    /^Cross-Origin-/i,
-    /^Strict-Transport-Security$/,
-    /^X-XSS-Protection$/,
-    /^X-Content-Type-Options$/,
-    /^X-Frame-Options$/i
-  ]
-
   async execute(data: BuildResponseData): Promise<void> {
     const { proxy, target, createMessage } = data
+
+    const requestHeaders: HttpHeaders = Object.fromEntries(
+      Object.entries(createMessage.requestHeaders)
+        .filter((entry: [string, HttpHeader | null | undefined]): entry is [string, HttpHeader] => {
+          const [, value] = entry
+
+          return !!value
+        })
+    )
 
     const request: HttpClientRequest = {
       proxy: proxy.url,
@@ -45,22 +36,6 @@ export class BuildResponseUseCase {
       connectTimeout: target.connectTimeout,
       timeout: target.timeout
     }
-
-    Object.entries(createMessage.requestHeaders).forEach(([name, value]) => {
-      if (!value) {
-        return
-      }
-
-      request.headers[name] = value
-    })
-
-    Object.entries(createMessage.requestCookies).forEach(([name, cookie]) => {
-      if (!cookie) {
-        return
-      }
-
-      request.cookies[name] = cookie
-    })
 
     const response = await this.httpClient.query(request)
 

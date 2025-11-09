@@ -38,7 +38,7 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
 
 export const createCampaignModelSchema: JSONSchemaType<CreateCampaignModel> = {
   type: 'object',
-  required: ['campaignId'],
+  required: ['campaignId', 'mirrorDomain'],
   properties: {
     campaignId: customIdentSchema,
     mirrorDomain: campaignMirrorDomainSchema,

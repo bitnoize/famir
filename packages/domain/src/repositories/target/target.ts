@@ -11,6 +11,7 @@ export interface CreateTargetModel {
   mirrorSecure: boolean
   mirrorSub: string
   mirrorPort: number
+  marks: string[]
   connectTimeout: number
   timeout: number
   mainPage: string
@@ -30,6 +31,7 @@ export interface ReadTargetModel {
 export interface UpdateTargetModel {
   campaignId: string
   targetId: string
+  marks: string[] | null | undefined
   connectTimeout: number | null | undefined
   timeout: number | null | undefined
   mainPage: string | null | undefined

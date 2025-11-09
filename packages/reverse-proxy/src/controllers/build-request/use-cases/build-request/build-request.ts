@@ -9,13 +9,11 @@ import {
 
 export interface BuildRequestData {
   campaign: CampaignModel
-  proxy: EnabledProxyModel
   target: EnabledTargetModel
   session: SessionModel
-  request: HttpServerRequest
 }
 
 export interface BuildRequestResult {
+  proxy: EnabledProxyModel
   targets: EnabledTargetModel[]
-  createMessage: CreateMessageModel
 }

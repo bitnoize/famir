@@ -20,19 +20,19 @@ export class EnvConfig<T> implements Config<T> {
     })
   }
 
-  private _data: T | null = null
+  #data: T | null = null
 
   get data(): T {
-    if (this._data) {
-      return this._data
+    if (this.#data) {
+      return this.#data
     }
 
-    this._data = buildConfig<T>(this.assertSchema)
+    this.#data = buildConfig<T>(this.assertSchema)
 
-    return this._data
+    return this.#data
   }
 
   reset() {
-    this._data = null
+    this.#data = null
   }
 }

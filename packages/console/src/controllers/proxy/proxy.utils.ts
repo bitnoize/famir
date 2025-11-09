@@ -30,7 +30,7 @@ export function validateCreateProxyModel(
   try {
     assertSchema<CreateProxyModel>('create-proxy-model', data)
   } catch (error) {
-    throw new ReplServerError(`CreateProxyModel validation failed`, {
+    throw new ReplServerError(`Create proxy data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -44,7 +44,7 @@ export function validateReadProxyModel(
   try {
     assertSchema<ReadProxyModel>('read-proxy-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadProxyModel validation failed`, {
+    throw new ReplServerError(`Read proxy data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -58,7 +58,7 @@ export function validateSwitchProxyModel(
   try {
     assertSchema<SwitchProxyModel>('switch-proxy-model', data)
   } catch (error) {
-    throw new ReplServerError(`SwitchProxyModel validation failed`, {
+    throw new ReplServerError(`Switch proxy data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -72,7 +72,7 @@ export function validateDeleteProxyModel(
   try {
     assertSchema<DeleteProxyModel>('delete-proxy-model', data)
   } catch (error) {
-    throw new ReplServerError(`DeleteProxyModel validation failed`, {
+    throw new ReplServerError(`Delete proxy data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -86,7 +86,7 @@ export function validateListProxyModels(
   try {
     assertSchema<ListProxyModels>('list-proxy-models', data)
   } catch (error) {
-    throw new ReplServerError(`ListProxyModels validation failed`, {
+    throw new ReplServerError(`List proxies data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })

@@ -4,7 +4,7 @@
   Create message
 --]]
 local function create_message(keys, args)
-  if not (#keys == 5 and #args == 19) then
+  if not (#keys == 5 and #args == 21) then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -13,76 +13,6 @@ local function create_message(keys, args)
   local proxy_key = keys[3]
   local target_key = keys[4]
   local session_key = keys[5]
-
-  local model = {
-    campaign_id = args[1],
-    message_id = args[2],
-    proxy_id = args[3],
-    target_id = args[4],
-    session_id = args[5],
-    client_ip = args[6],
-    method = args[7],
-    origin_url = args[8],
-    forward_url = args[9],
-    request_headers = args[10],
-    request_cookies = args[11],
-    request_body = args[12],
-    status = tonumber(args[13]),
-    response_headers = args[14],
-    response_cookies = args[15],
-    response_body = args[16],
-    query_time = tonumber(args[17]),
-    score = tonumber(args[18]),
-    created_at = tonumber(args[19]),
-  }
-
-  if not (#model.campaign_id > 0) then
-    return redis.error_reply('ERR Wrong model.campaign_id')
-  end
-
-  if not (#model.message_id > 0) then
-    return redis.error_reply('ERR Wrong model.message_id')
-  end
-
-  if not (#model.proxy_id > 0) then
-    return redis.error_reply('ERR Wrong model.proxy_id')
-  end
-
-  if not (#model.target_id > 0) then
-    return redis.error_reply('ERR Wrong model.target_id')
-  end
-
-  if not (#model.session_id > 0) then
-    return redis.error_reply('ERR Wrong model.session_id')
-  end
-
-  if not (#model.method > 0) then
-    return redis.error_reply('ERR Wrong model.method')
-  end
-
-  if not (#model.origin_url > 0) then
-    return redis.error_reply('ERR Wrong model.origin_url')
-  end
-
-  if not (#model.forward_url > 0) then
-    return redis.error_reply('ERR Wrong model.forward_url')
-  end
-
-  if not model.status then
-    return redis.error_reply('ERR Wrong model.status')
-  end
-
-  if not model.query_time then
-    return redis.error_reply('ERR Wrong model.query_time')
-  end
-
-  if not model.score then
-    return redis.error_reply('ERR Wrong model.score')
-  end
-
-  if not (model.created_at and model.created_at > 0) then
-    return redis.error_reply('ERR Wrong model.created_at')
-  end
 
   if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
@@ -102,6 +32,74 @@ local function create_message(keys, args)
 
   if not (redis.call('EXISTS', session_key) == 1) then
     return redis.status_reply('NOT_FOUND Session not found')
+  end
+
+  local model = {
+    campaign_id = args[1],
+    message_id = args[2],
+    proxy_id = args[3],
+    target_id = args[4],
+    session_id = args[5],
+    method = args[6],
+    origin_url = args[7],
+    url_path = args[8],
+    url_query = args[9],
+    url_hash = args[10],
+    request_headers = args[11],
+    request_cookies = args[12],
+    request_body = args[13],
+    status = tonumber(args[14]),
+    response_headers = args[15],
+    response_cookies = args[16],
+    response_body = args[17],
+    client_ip = args[18],
+    score = tonumber(args[19]),
+    query_time = tonumber(args[20]),
+    created_at = tonumber(args[21]),
+  }
+
+  if not (model.campaign_id and #model.campaign_id > 0) then
+    return redis.error_reply('ERR Wrong model.campaign_id')
+  end
+
+  if not (model.message_id and #model.message_id > 0) then
+    return redis.error_reply('ERR Wrong model.message_id')
+  end
+
+  if not (model.proxy_id and #model.proxy_id > 0) then
+    return redis.error_reply('ERR Wrong model.proxy_id')
+  end
+
+  if not (model.target_id and #model.target_id > 0) then
+    return redis.error_reply('ERR Wrong model.target_id')
+  end
+
+  if not (model.session_id and #model.session_id > 0) then
+    return redis.error_reply('ERR Wrong model.session_id')
+  end
+
+  if not (model.method and #model.method > 0) then
+    return redis.error_reply('ERR Wrong model.method')
+  end
+
+  if not (model.origin_url and #model.origin_url > 0) then
+    return redis.error_reply('ERR Wrong model.origin_url')
+  end
+
+  if not model.status then
+    return redis.error_reply('ERR Wrong model.status')
+  end
+
+  if not model.score then
+    return redis.error_reply('ERR Wrong model.score')
+  end
+
+  if not model.query_time then
+    return redis.error_reply('ERR Wrong model.query_time')
+  end
+
+  if not (model.created_at and model.created_at > 0) then
+    return redis.error_reply('ERR Wrong model.created_at')
   end
 
   local data = {
@@ -165,10 +163,11 @@ local function read_message(keys, args)
     'proxy_id',
     'target_id',
     'session_id',
-    'client_ip',
     'method',
     'origin_url',
-    'forward_url',
+    'url_path',
+    'url_query',
+    'url_hash',
     'request_headers',
     'request_cookies',
     'request_body',
@@ -176,12 +175,13 @@ local function read_message(keys, args)
     'response_headers',
     'response_cookies',
     'response_body',
-    'query_time',
+    'client_ip',
     'score',
+    'query_time',
     'created_at'
   )
 
-  if not (#values == 19) then
+  if not (#values == 21) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -191,20 +191,22 @@ local function read_message(keys, args)
     proxy_id = values[3],
     target_id = values[4],
     session_id = values[5],
-    client_ip = values[6],
-    method = values[7],
-    origin_url = values[8],
-    forward_url = values[9],
-    request_headers = values[10],
-    request_cookies = values[11],
-    request_body = values[12],
-    status = tonumber(values[13]),
-    response_headers = values[14],
-    response_cookies = values[15],
-    response_body = values[16],
-    query_time = tonumber(values[17]),
-    score = tonumber(values[18]),
-    created_at = tonumber(values[19]),
+    method = values[6],
+    origin_url = values[7],
+    url_path = values[8],
+    url_query = values[9],
+    url_hash = values[10],
+    request_headers = values[11],
+    request_cookies = values[12],
+    request_body = values[13],
+    status = tonumber(values[14]),
+    response_headers = values[15],
+    response_cookies = values[16],
+    response_body = values[17],
+    client_ip = values[18],
+    score = tonumber(values[19]),
+    query_time = tonumber(values[20]),
+    created_at = tonumber(values[21]),
   }
 
   for field, value in pairs(model) do

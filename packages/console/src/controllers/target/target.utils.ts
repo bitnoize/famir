@@ -33,7 +33,7 @@ export function validateCreateTargetModel(
   try {
     assertSchema<CreateTargetModel>('create-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`CreateTargetModel validation failed`, {
+    throw new ReplServerError(`Create target data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -47,7 +47,7 @@ export function validateReadTargetModel(
   try {
     assertSchema<ReadTargetModel>('read-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadTargetModel validation failed`, {
+    throw new ReplServerError(`Read target data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -61,7 +61,7 @@ export function validateUpdateTargetModel(
   try {
     assertSchema<UpdateTargetModel>('update-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`UpdateTargetModel validation failed`, {
+    throw new ReplServerError(`Update target data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -75,7 +75,7 @@ export function validateSwitchTargetModel(
   try {
     assertSchema<SwitchTargetModel>('switch-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`SwitchTargetModel validation failed`, {
+    throw new ReplServerError(`Switch target data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -89,7 +89,7 @@ export function validateDeleteTargetModel(
   try {
     assertSchema<DeleteTargetModel>('delete-target-model', data)
   } catch (error) {
-    throw new ReplServerError(`DeleteTargetModel validation failed`, {
+    throw new ReplServerError(`Delete target data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -103,7 +103,7 @@ export function validateListTargetModels(
   try {
     assertSchema<ListTargetModels>('list-target-models', data)
   } catch (error) {
-    throw new ReplServerError(`ListTargetModels validation failed`, {
+    throw new ReplServerError(`List targets data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })

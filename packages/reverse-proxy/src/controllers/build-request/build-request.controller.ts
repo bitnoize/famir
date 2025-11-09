@@ -1,9 +1,9 @@
 import { DIContainer } from '@famir/common'
 import {
-  HTTP_SERVER_ROUTER,
-  HttpServerLocals,
-  HttpServerRequest,
-  HttpServerRouter,
+  HTTP_SERVER_REGISTRY,
+  HttpServerState,
+  HttpServerContext,
+  HttpServerRegistry,
   Logger,
   LOGGER,
   Templater,
@@ -12,70 +12,94 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import { BUILD_REQUEST_USE_CASE, BuildRequestUseCase } from './use-cases/index.js'
+import { CAMPAIGN_SERVICE, CampaignService } from '../../services/index.js'
 
-export const BUILD_REQUEST_CONTROLLER = Symbol('BuildRequestController')
+export const PREPARE_CONTROLLER = Symbol('PrepareController')
 
-export class BuildRequestController extends BaseController {
+export class PrepareController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<BuildRequestController>(
-      BUILD_REQUEST_CONTROLLER,
+    container.registerSingleton<PrepareController>(
+      PREPARE_CONTROLLER,
       (c) =>
-        new BuildRequestController(
+        new PrepareController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<BuildRequestUseCase>(BUILD_REQUEST_USE_CASE)
+          c.resolve<HttpServerRegistry>(HTTP_SERVER_REGISTRY),
+          c.resolve<CampaignService>(CAMPAIGN_SERVICE)
         )
     )
   }
 
-  static resolve(container: DIContainer): BuildRequestController {
-    return container.resolve<BuildRequestController>(BUILD_REQUEST_CONTROLLER)
+  static resolve(container: DIContainer): PrepareController {
+    return container.resolve<PrepareController>(PREPARE_CONTROLLER)
   }
 
   constructor(
     validator: Validator,
     logger: Logger,
     templater: Templater,
-    router: HttpServerRouter,
-    protected readonly buildRequestUseCase: BuildRequestUseCase
+    registry: HttpServerRegistry,
+    protected readonly campaignService: CampaignService
   ) {
-    super(validator, logger, templater, 'build-request')
+    super(validator, logger, templater, 'prepare')
 
-    router.setHandler('all', '{*splat}', this.defaultHandler)
+    registry.addMiddleware('prepare', this.loadRequestBodyMiddleware)
+    registry.addMiddleware('prepare', this.loadTargetsMiddleware)
   }
 
-  private readonly defaultHandler = async (
-    request: HttpServerRequest,
-    locals: HttpServerLocals
-  ): Promise<undefined> => {
+  private readonly loadRequestBodyMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.absentLocalsTargets(locals)
-      this.absentLocalsCreateMessage(locals)
+      await ctx.loadRequestBody()
 
-      this.existsLocalsCampaign(locals)
-      this.existsLocalsProxy(locals)
-      this.existsLocalsTarget(locals)
-      this.existsLocalsSession(locals)
+      await next()
+    } catch (error) {
+      this.handleException(error, 'prepare', 'loadRequestBodyMiddleware')
+    }
+  }
 
-      const { campaign, proxy, target, session } = locals
+  private readonly loadTargetsMiddleware: HttpServerMiddleware = async (ctx, next) => {
+    try {
+      absentStateTargets(ctx.state)
 
-      const { targets, createMessage } = await this.buildRequestUseCase.execute({
+      const { targets } = await this.databaseService.listTargets({
         campaign,
-        proxy,
-        target,
-        session,
-        request
       })
 
-      locals.targets = targets
-      locals.createMessage = createMessage
+      ctx.state.targets = targets
 
-      return undefined
+      await next()
     } catch (error) {
-      this.exceptionWrapper(error, 'default')
+      this.handleException(error, 'prepare', 'loadTargetsMiddleware')
+    }
+  }
+
+  private readonly prepareMiddleware = async (
+    ctx: HttpServerContext,
+    next: HttpServerNextFunction
+  ): Promise<void> => {
+    try {
+      this.absentShareProxy(share)
+      this.absentShareTargets(share)
+
+      this.existsShareCampaign(share)
+      this.existsShareTarget(share)
+      this.existsShareSession(share)
+
+      const { request, campaign, target, session } = share
+
+      request.headers['host'] = undefined
+      request.headers['cookie'] = undefined
+
+      const { targets } = await this.buildRequestUseCase.execute({
+        campaign,
+      })
+
+      share.targets = targets
+
+      await next()
+    } catch (error) {
+      this.handleException(error, 'prepare', 'default')
     }
   }
 }

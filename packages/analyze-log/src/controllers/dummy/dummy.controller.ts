@@ -1,8 +1,8 @@
 import { DIContainer } from '@famir/common'
 import {
   AnalyzeLogJobResult,
-  EXECUTOR_DISPATCHER,
-  ExecutorDispatcher,
+  EXECUTOR_REGISTRY,
+  ExecutorRegistry,
   Logger,
   LOGGER,
   Validator,
@@ -22,7 +22,7 @@ export class DummyController extends BaseController {
         new DummyController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ExecutorDispatcher>(EXECUTOR_DISPATCHER),
+          c.resolve<ExecutorRegistry>(EXECUTOR_REGISTRY),
           c.resolve<DummyUseCase>(DUMMY_USE_CASE)
         )
     )
@@ -35,12 +35,12 @@ export class DummyController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    dispatcher: ExecutorDispatcher,
+    registry: ExecutorRegistry,
     protected readonly dummyUseCase: DummyUseCase
   ) {
     super(validator, logger, 'analyze')
 
-    dispatcher.setHandler('example', this.exampleHandler)
+    registry.addProcessor('example', this.exampleHandler)
   }
 
   private readonly exampleHandler = async (data: unknown): Promise<AnalyzeLogJobResult> => {

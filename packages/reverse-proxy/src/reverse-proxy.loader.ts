@@ -11,7 +11,7 @@ import {
   RedisTargetRepository
 } from '@famir/database'
 import { CurlHttpClient } from '@famir/http-client'
-import { ExpressHttpServer, ExpressHttpServerRouter } from '@famir/http-server'
+import { ExpressHttpServer, ExpressHttpServerRegistry } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
 import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'
@@ -47,7 +47,23 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   CurlHttpClient.inject(container)
 
-  ExpressHttpServerRouter.inject(container)
+  ExpressHttpServerRegistry.inject(container, [
+    'beforeSetup',
+    'setup',
+    'afterSetup',
+    'beforeAuth',
+    'auth',
+    'afterAuth',
+    'beforePrepare',
+    'prepare',
+    'afterPrepare',
+    'beforeForward',
+    'forward',
+    'afterForward',
+    'beforeComplete',
+    'complete',
+    'afterComplete'
+  ])
 
   ExpressHttpServer.inject(container)
 

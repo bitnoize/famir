@@ -54,6 +54,8 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     connection: RedisDatabaseConnection
   ) {
     super(validator, config, logger, connection, 'proxy')
+
+    this.logger.debug(`ProxyRepository initialized`)
   }
 
   async create(data: CreateProxyModel): Promise<DisabledProxyModel> {
@@ -81,7 +83,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'create', data)
+      this.handleException(error, 'create', data)
     }
   }
 
@@ -95,7 +97,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionWrapper(error, 'read', data)
+      this.handleException(error, 'read', data)
     }
   }
 
@@ -111,7 +113,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return guardEnabledModel(model) ? model : null
     } catch (error) {
-      this.exceptionWrapper(error, 'readEnabled', data)
+      this.handleException(error, 'readEnabled', data)
     }
   }
 
@@ -135,7 +137,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'enable', data)
+      this.handleException(error, 'enable', data)
     }
   }
 
@@ -159,7 +161,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'disable', data)
+      this.handleException(error, 'disable', data)
     }
   }
 
@@ -183,7 +185,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'delete', data)
+      this.handleException(error, 'delete', data)
     }
   }
 
@@ -206,7 +208,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionWrapper(error, 'list', data)
+      this.handleException(error, 'list', data)
     }
   }
 }

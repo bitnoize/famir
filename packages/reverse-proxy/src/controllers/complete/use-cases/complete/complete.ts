@@ -1,7 +1,17 @@
-import { CreateMessageModel, EnabledTargetModel, HttpServerResponse } from '@famir/domain'
+import {
+  CampaignModel,
+  EnabledProxyModel,
+  EnabledTargetModel,
+  HttpServerRequest,
+  SessionModel,
+  HttpServerResponse,
+} from '@famir/domain'
 
 export interface CompleteData {
-  target: EnabledTargetModel
-  createMessage: CreateMessageModel
+  request: HttpServerRequest
   response: HttpServerResponse
+  campaign: CampaignModel
+  proxy: EnabledProxyModel
+  target: EnabledTargetModel
+  session: SessionModel
 }

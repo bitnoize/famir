@@ -44,6 +44,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     connection: RedisDatabaseConnection
   ) {
     super(validator, config, logger, connection, 'campaign')
+
+    this.logger.debug(`CampaignRepository initialized`)
   }
 
   async create(data: CreateCampaignModel): Promise<CampaignModel> {
@@ -78,7 +80,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'create', data)
+      this.handleException(error, 'create', data)
     }
   }
 
@@ -88,7 +90,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionWrapper(error, 'read', data)
+      this.handleException(error, 'read', data)
     }
   }
 
@@ -119,7 +121,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'update', data)
+      this.handleException(error, 'update', data)
     }
   }
 
@@ -143,7 +145,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'delete', data)
+      this.handleException(error, 'delete', data)
     }
   }
 
@@ -159,7 +161,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionWrapper(error, 'list', null)
+      this.handleException(error, 'list', null)
     }
   }
 }

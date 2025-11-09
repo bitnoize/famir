@@ -17,6 +17,7 @@ export function buildModel(raw: RawTarget | null): TargetModel | null {
     mirrorSecure: !!raw.mirror_secure,
     mirrorSub: raw.mirror_sub,
     mirrorPort: raw.mirror_port,
+    marks: raw.marks.split(' '),
     connectTimeout: raw.connect_timeout,
     timeout: raw.timeout,
     mainPage: raw.main_page,

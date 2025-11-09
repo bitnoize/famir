@@ -1,11 +1,12 @@
 import {
+  HttpBody,
+  HttpHeaders,
   CampaignModel,
-  CreateMessageModel,
   EnabledLureModel,
   EnabledProxyModel,
   EnabledTargetModel,
   HttpServerError,
-  HttpServerLocals,
+  HttpServerShare,
   Logger,
   RedirectorModel,
   SessionModel,
@@ -14,6 +15,7 @@ import {
   ValidatorAssertSchema,
   ValidatorGuardSchema
 } from '@famir/domain'
+import { commonResponseHeaders } from '../../reverse-proxy.utils.js'
 
 export abstract class BaseController {
   protected readonly guardSchema: ValidatorGuardSchema
@@ -33,135 +35,115 @@ export abstract class BaseController {
     })
   }
 
-  protected absentLocalsCampaign(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected absentShareCampaign(share: HttpServerShare): asserts share is HttpServerShare & {
     campaign: CampaignModel | undefined
   } {
-    if (locals['campaign']) {
-      throw new Error(`Locals campaign exists`)
+    if (share['campaign']) {
+      throw new Error(`Share campaign exists`)
     }
   }
 
-  protected existsLocalsCampaign(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected existsShareCampaign(share: HttpServerShare): asserts share is HttpServerShare & {
     readonly campaign: CampaignModel
   } {
-    if (!locals['campaign']) {
-      throw new Error(`Locals campaign absent`)
+    if (!share['campaign']) {
+      throw new Error(`Share campaign absent`)
     }
   }
 
-  protected absentLocalsProxy(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected absentShareProxy(share: HttpServerShare): asserts share is HttpServerShare & {
     proxy: EnabledProxyModel | undefined
   } {
-    if (locals['proxy']) {
-      throw new Error(`Locals proxy exists`)
+    if (share['proxy']) {
+      throw new Error(`Share proxy exists`)
     }
   }
 
-  protected existsLocalsProxy(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected existsShareProxy(share: HttpServerShare): asserts share is HttpServerShare & {
     readonly proxy: EnabledProxyModel
   } {
-    if (!locals['proxy']) {
-      throw new Error(`Locals proxy absent`)
+    if (!share['proxy']) {
+      throw new Error(`Share proxy absent`)
     }
   }
 
-  protected absentLocalsTarget(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected absentShareTarget(share: HttpServerShare): asserts share is HttpServerShare & {
     target: EnabledTargetModel | undefined
   } {
-    if (locals['target']) {
-      throw new Error(`Locals target exists`)
+    if (share['target']) {
+      throw new Error(`Share target exists`)
     }
   }
 
-  protected existsLocalsTarget(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected existsShareTarget(share: HttpServerShare): asserts share is HttpServerShare & {
     readonly target: EnabledTargetModel
   } {
-    if (!locals['target']) {
-      throw new Error(`Locals target absent`)
+    if (!share['target']) {
+      throw new Error(`Share target absent`)
     }
   }
 
-  protected absentLocalsTargets(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected absentShareTargets(share: HttpServerShare): asserts share is HttpServerShare & {
     targets: EnabledTargetModel[] | undefined
   } {
-    if (locals['targets']) {
-      throw new Error(`Locals targets exists`)
+    if (share['targets']) {
+      throw new Error(`Share targets exists`)
     }
   }
 
-  protected existsLocalsTargets(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected existsShareTargets(share: HttpServerShare): asserts share is HttpServerShare & {
     readonly targets: EnabledTargetModel[]
   } {
-    if (!locals['targets']) {
-      throw new Error(`Locals targets absent`)
+    if (!share['targets']) {
+      throw new Error(`Share targets absent`)
     }
   }
 
-  protected absentLocalsRedirector(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected absentShareRedirector(share: HttpServerShare): asserts share is HttpServerShare & {
     redirector: RedirectorModel | undefined
   } {
-    if (locals['redirector']) {
-      throw new Error(`Locals redirector exists`)
+    if (share['redirector']) {
+      throw new Error(`Share redirector exists`)
     }
   }
 
-  protected existsLocalsRedirector(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected existsShareRedirector(share: HttpServerShare): asserts share is HttpServerShare & {
     readonly redirector: RedirectorModel
   } {
-    if (!locals['redirector']) {
-      throw new Error(`Locals redirector absent`)
+    if (!share['redirector']) {
+      throw new Error(`Share redirector absent`)
     }
   }
 
-  protected absentLocalsLure(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected absentShareLure(share: HttpServerShare): asserts share is HttpServerShare & {
     lure: EnabledLureModel | undefined
   } {
-    if (locals['lure']) {
-      throw new Error(`Locals lure exists`)
+    if (share['lure']) {
+      throw new Error(`Share lure exists`)
     }
   }
 
-  protected existsLocalsLure(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected existsShareLure(share: HttpServerShare): asserts share is HttpServerShare & {
     readonly lure: EnabledLureModel
   } {
-    if (!locals['lure']) {
-      throw new Error(`Locals lure absent`)
+    if (!share['lure']) {
+      throw new Error(`Share lure absent`)
     }
   }
 
-  protected absentLocalsSession(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected absentShareSession(share: HttpServerShare): asserts share is HttpServerShare & {
     session: SessionModel | undefined
   } {
-    if (locals['session']) {
-      throw new Error(`Locals session exists`)
+    if (share['session']) {
+      throw new Error(`Share session exists`)
     }
   }
 
-  protected existsLocalsSession(locals: HttpServerLocals): asserts locals is HttpServerLocals & {
+  protected existsShareSession(share: HttpServerShare): asserts share is HttpServerShare & {
     readonly session: SessionModel
   } {
-    if (!locals['session']) {
-      throw new Error(`Locals session absent`)
-    }
-  }
-
-  protected absentLocalsCreateMessage(
-    locals: HttpServerLocals
-  ): asserts locals is HttpServerLocals & {
-    createMessage: CreateMessageModel | undefined
-  } {
-    if (locals['createMessage']) {
-      throw new Error(`Locals createMessage exists`)
-    }
-  }
-
-  protected existsLocalsCreateMessage(
-    locals: HttpServerLocals
-  ): asserts locals is HttpServerLocals & {
-    readonly createMessage: CreateMessageModel
-  } {
-    if (!locals['createMessage']) {
-      throw new Error(`Locals createMessage absent`)
+    if (!share['session']) {
+      throw new Error(`Share session absent`)
     }
   }
 

@@ -12,7 +12,7 @@ import {
 import { Curl, CurlFeature } from 'node-libcurl'
 import setCookie from 'set-cookie-parser'
 import { HttpClientConfig, HttpClientOptions } from './http-client.js'
-import { buildOptions } from './http-client.utils.js'
+import { buildOptions, parseCookieSameSite } from './http-client.utils.js'
 
 export class CurlHttpClient implements HttpClient {
   static inject(container: DIContainer) {
@@ -37,44 +37,27 @@ export class CurlHttpClient implements HttpClient {
   }
 
   async query(request: HttpClientRequest): Promise<HttpClientResponse> {
-    if (Object.keys(request.cookies).length > 0) {
-      request.headers['cookie'] = Object.entries(request.cookies)
-        .map(([name, value]) => `${name}=${value}`)
-        .join('; ')
+    const requestCookies: string[] = []
+
+    Object.entries(request.cookies).forEach(([name, cookie]) => {
+      if (cookie != null) {
+        requestCookies.push(`${name}=${cookie}`)
+      }
+    })
+
+    if (requestCookies.length > 0) {
+      request.headers['cookie'] = requestCookies.join('; ')
     }
 
     const response = await this._query(request)
 
     const setCookieHeader = response.headers['set-cookie'] || ''
 
-    const cookies = setCookie.parse(setCookieHeader, {
-      decodeValues: false,
-      map: true
-    })
-
-    const parseCookieSameSite = (
-      sameSite: string | undefined
-    ): 'strict' | 'lax' | 'none' | undefined => {
-      if (!sameSite) {
-        return undefined
-      }
-
-      sameSite = sameSite.toLowerCase()
-
-      const allowValues = ['strict', 'lax', 'none']
-
-      if (!allowValues.includes(sameSite)) {
-        return undefined
-      }
-
-      return sameSite as 'strict' | 'lax' | 'none'
-    }
-
-    Object.entries(cookies).forEach(([name, cookie]) => {
-      response.cookies[name] = {
+    setCookie.parse(setCookieHeader, { decodeValues: false }).forEach((cookie) => {
+      response.cookies[cookie.name] = {
         value: cookie.value,
         maxAge: cookie.maxAge,
-        expires: cookie.expires,
+        expires: cookie.expires ? cookie.expires.getTime() : undefined,
         httpOnly: cookie.httpOnly,
         path: cookie.path,
         domain: cookie.domain,
@@ -113,15 +96,17 @@ export class CurlHttpClient implements HttpClient {
 
         curl.setOpt(Curl.option.URL, request.url)
 
-        const headers = Object.entries(request.headers)
-          .map(([name, value]) => {
-            if (Array.isArray(value)) {
-              return value.map((val) => `${name}: ${val}`)
-            } else {
-              return `${name}: ${value}`
-            }
-          })
-          .flat()
+        const headers: string[] = []
+
+        Object.entries(request.headers).forEach(([name, value]) => {
+          if (Array.isArray(value)) {
+            value.forEach((val) => {
+              headers.push(`${name}: ${val}`)
+            })
+          } else if (value != null) {
+            headers.push(`${name}: ${value}`)
+          }
+        })
 
         curl.setOpt(Curl.option.HTTPHEADER, headers)
 
@@ -172,7 +157,7 @@ export class CurlHttpClient implements HttpClient {
               return
             }
 
-            if (response.headers[name]) {
+            if (response.headers[name] != null) {
               if (Array.isArray(response.headers[name])) {
                 response.headers[name].push(value)
               } else {

@@ -14,10 +14,10 @@ export class AjvValidator implements Validator {
     container.registerSingleton<Validator>(VALIDATOR, () => new AjvValidator())
   }
 
-  private readonly _ajv: Ajv
+  protected readonly ajv: Ajv
 
   constructor() {
-    this._ajv = new Ajv({
+    this.ajv = new Ajv({
       allErrors: true,
       useDefaults: true,
       coerceTypes: true,
@@ -30,12 +30,12 @@ export class AjvValidator implements Validator {
 
   addSchemas(schemas: ValidatorSchemas) {
     Object.entries(schemas).forEach(([name, schema]) => {
-      this._ajv.addSchema(schema, name)
+      this.ajv.addSchema(schema, name)
     })
   }
 
   private getSchema<T>(schemaName: string): ValidateFunction<T> {
-    const validate = this._ajv.getSchema<T>(schemaName)
+    const validate = this.ajv.getSchema<T>(schemaName)
 
     if (!validate) {
       throw new Error(`JSON-Schema '${schemaName}' not known`)

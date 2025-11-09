@@ -32,7 +32,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   }
 
   protected readonly options: DatabaseConnectorOptions
-  private readonly _redis: RedisDatabaseConnection
+  protected readonly redis: RedisDatabaseConnection
 
   constructor(
     config: Config<DatabaseConfig>,
@@ -40,14 +40,14 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   ) {
     this.options = buildConnectorOptions(config.data)
 
-    this._redis = createClient({
+    this.redis = createClient({
       url: this.options.connectionUrl,
       functions: databaseFunctions,
       name: 'database',
       RESP: 3
     })
 
-    this._redis.on('error', (error) => {
+    this.redis.on('error', (error) => {
       this.logger.error(`Redis error event`, {
         error: serializeError(error)
       })
@@ -60,17 +60,17 @@ export class RedisDatabaseConnector implements DatabaseConnector {
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   connection<T>(): T {
-    return this._redis as T
+    return this.redis as T
   }
 
   async connect(): Promise<void> {
-    await this._redis.connect()
+    await this.redis.connect()
 
     this.logger.debug(`DatabaseConnector connected`)
   }
 
   async close(): Promise<void> {
-    await this._redis.close()
+    await this.redis.close()
 
     this.logger.debug(`DatabaseConnector closed`)
   }

@@ -2,12 +2,13 @@ import { DIContainer } from '@famir/common'
 import {
   Logger,
   LOGGER,
-  REPL_SERVER_CONTEXT,
-  ReplServerContext,
-  TargetModel,
+  REPL_SERVER_REGISTRY,
+  ReplServerApiCall,
+  ReplServerRegistry,
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { TARGET_SERVICE, TargetService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import {
   addSchemas,
@@ -18,22 +19,6 @@ import {
   validateSwitchTargetModel,
   validateUpdateTargetModel
 } from './target.utils.js'
-import {
-  CREATE_TARGET_USE_CASE,
-  CreateTargetUseCase,
-  DELETE_TARGET_USE_CASE,
-  DeleteTargetUseCase,
-  DISABLE_TARGET_USE_CASE,
-  DisableTargetUseCase,
-  ENABLE_TARGET_USE_CASE,
-  EnableTargetUseCase,
-  LIST_TARGETS_USE_CASE,
-  ListTargetsUseCase,
-  READ_TARGET_USE_CASE,
-  ReadTargetUseCase,
-  UPDATE_TARGET_USE_CASE,
-  UpdateTargetUseCase
-} from './use-cases/index.js'
 
 export const TARGET_CONTROLLER = Symbol('TargetController')
 
@@ -45,14 +30,8 @@ export class TargetController extends BaseController {
         new TargetController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT),
-          c.resolve<CreateTargetUseCase>(CREATE_TARGET_USE_CASE),
-          c.resolve<ReadTargetUseCase>(READ_TARGET_USE_CASE),
-          c.resolve<UpdateTargetUseCase>(UPDATE_TARGET_USE_CASE),
-          c.resolve<EnableTargetUseCase>(ENABLE_TARGET_USE_CASE),
-          c.resolve<DisableTargetUseCase>(DISABLE_TARGET_USE_CASE),
-          c.resolve<DeleteTargetUseCase>(DELETE_TARGET_USE_CASE),
-          c.resolve<ListTargetsUseCase>(LIST_TARGETS_USE_CASE)
+          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<TargetService>(TARGET_SERVICE)
         )
     )
   }
@@ -64,95 +43,91 @@ export class TargetController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    context: ReplServerContext,
-    protected readonly createTargetUseCase: CreateTargetUseCase,
-    protected readonly readTargetUseCase: ReadTargetUseCase,
-    protected readonly updateTargetUseCase: UpdateTargetUseCase,
-    protected readonly enableTargetUseCase: EnableTargetUseCase,
-    protected readonly disableTargetUseCase: DisableTargetUseCase,
-    protected readonly deleteTargetUseCase: DeleteTargetUseCase,
-    protected readonly listTargetsUseCase: ListTargetsUseCase
+    registry: ReplServerRegistry,
+    protected readonly targetService: TargetService
   ) {
     super(validator, logger, 'target')
 
     validator.addSchemas(addSchemas)
 
-    context.setHandler('createTarget', this.createTargetHandler)
-    context.setHandler('readTarget', this.readTargetHandler)
-    context.setHandler('updateTarget', this.updateTargetHandler)
-    context.setHandler('enableTarget', this.enableTargetHandler)
-    context.setHandler('disableTarget', this.disableTargetHandler)
-    context.setHandler('deleteTarget', this.deleteTargetHandler)
-    context.setHandler('listTargets', this.listTargetsHandler)
+    registry.addApiCall('createTarget', this.createTargetApiCall)
+    registry.addApiCall('readTarget', this.readTargetApiCall)
+    registry.addApiCall('updateTarget', this.updateTargetApiCall)
+    registry.addApiCall('enableTarget', this.enableTargetApiCall)
+    registry.addApiCall('disableTarget', this.disableTargetApiCall)
+    registry.addApiCall('deleteTarget', this.deleteTargetApiCall)
+    registry.addApiCall('listTargets', this.listTargetsApiCall)
+
+    this.logger.debug(`TargetController initialized`)
   }
 
-  private readonly createTargetHandler = async (data: unknown): Promise<TargetModel> => {
+  private readonly createTargetApiCall: ReplServerApiCall = async (data) => {
     try {
       validateCreateTargetModel(this.assertSchema, data)
 
-      return await this.createTargetUseCase.execute(data)
+      return await this.targetService.create(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'createTarget')
+      this.handleException(error, 'createTarget', data)
     }
   }
 
-  private readonly readTargetHandler = async (data: unknown): Promise<TargetModel> => {
+  private readonly readTargetApiCall: ReplServerApiCall = async (data) => {
     try {
       validateReadTargetModel(this.assertSchema, data)
 
-      return await this.readTargetUseCase.execute(data)
+      return await this.targetService.read(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'readTarget')
+      this.handleException(error, 'readTarget', data)
     }
   }
 
-  private readonly updateTargetHandler = async (data: unknown): Promise<TargetModel> => {
+  private readonly updateTargetApiCall: ReplServerApiCall = async (data) => {
     try {
       validateUpdateTargetModel(this.assertSchema, data)
 
-      return await this.updateTargetUseCase.execute(data)
+      return await this.targetService.update(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'updateTarget')
+      this.handleException(error, 'updateTarget', data)
     }
   }
 
-  private readonly enableTargetHandler = async (data: unknown): Promise<TargetModel> => {
+  private readonly enableTargetApiCall: ReplServerApiCall = async (data) => {
     try {
       validateSwitchTargetModel(this.assertSchema, data)
 
-      return await this.enableTargetUseCase.execute(data)
+      return await this.targetService.enable(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'enableTarget')
+      this.handleException(error, 'enableTarget', data)
     }
   }
 
-  private readonly disableTargetHandler = async (data: unknown): Promise<TargetModel> => {
+  private readonly disableTargetApiCall: ReplServerApiCall = async (data) => {
     try {
       validateSwitchTargetModel(this.assertSchema, data)
 
-      return await this.disableTargetUseCase.execute(data)
+      return await this.targetService.disable(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'disableTarget')
+      this.handleException(error, 'disableTarget', data)
     }
   }
 
-  private readonly deleteTargetHandler = async (data: unknown): Promise<TargetModel> => {
+  private readonly deleteTargetApiCall: ReplServerApiCall = async (data) => {
     try {
       validateDeleteTargetModel(this.assertSchema, data)
 
-      return await this.deleteTargetUseCase.execute(data)
+      return await this.targetService.delete(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'deleteTarget')
+      this.handleException(error, 'deleteTarget', data)
     }
   }
 
-  private readonly listTargetsHandler = async (data: unknown): Promise<TargetModel[]> => {
+  private readonly listTargetsApiCall: ReplServerApiCall = async (data) => {
     try {
       validateListTargetModels(this.assertSchema, data)
 
-      return await this.listTargetsUseCase.execute(data)
+      return await this.targetService.list(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'listTargets')
+      this.handleException(error, 'listTargets', data)
     }
   }
 }

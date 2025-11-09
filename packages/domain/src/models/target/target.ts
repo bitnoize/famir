@@ -11,6 +11,7 @@ export interface TargetModel {
   readonly mirrorSecure: boolean
   readonly mirrorSub: string
   readonly mirrorPort: number
+  readonly marks: string[]
   readonly connectTimeout: number
   readonly timeout: number
   readonly mainPage: string

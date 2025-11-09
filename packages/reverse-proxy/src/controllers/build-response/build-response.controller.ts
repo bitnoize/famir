@@ -1,7 +1,10 @@
 import { DIContainer } from '@famir/common'
 import {
+  HttpClientRequest,
+  HttpClientResponse,
+  TARGET_SUB_ROOT,
   HTTP_SERVER_ROUTER,
-  HttpServerLocals,
+  HttpServerShare,
   HttpServerRequest,
   HttpServerRouter,
   Logger,
@@ -47,24 +50,56 @@ export class BuildResponseController extends BaseController {
     router.setHandler('all', '{*splat}', this.defaultHandler)
   }
 
-  private readonly defaultHandler = async (
-    request: HttpServerRequest,
-    locals: HttpServerLocals
-  ): Promise<undefined> => {
+  private readonly defaultHandler = async (share: HttpServerShare): Promise<void> => {
     try {
-      this.existsLocalsProxy(locals)
-      this.existsLocalsTarget(locals)
-      this.existsLocalsCreateMessage(locals)
+      this.existsShareProxy(share)
+      this.existsShareTarget(share)
 
-      const { proxy, target, createMessage } = locals
+      const { request, response, proxy, target } = share
 
-      await this.buildResponseUseCase.execute({
-        proxy,
-        target,
-        createMessage
+      const donorProto = target.donorSecure ? 'https:' : 'http:'
+
+      const donorHostname = target.donorSub === TARGET_SUB_ROOT
+        ? [target.donorSub, target.donorDomain].join('.')
+        : target.donorDomain
+
+      const donorHost = [donorHostname, target.donorPort.toString()].join(':')
+
+      this.setRequestHeaders(share, {
+        host: undefined,
       })
 
-      return undefined
+      const url = new URL([
+        donorProto,
+        '//',
+        donorHost,
+        request.path,
+        request.query,
+        request.hash,
+      ].join(''))
+
+      const clientRequest: HttpClientRequest = {
+        proxy: proxy.url,
+        method: request.method,
+        url: url.toString(),
+        headers: request.headers,
+        cookies: request.cookies,
+        body: request.body,
+        connectTimeout: target.connectTimeout,
+        timeout: target.timeout
+      }
+
+
+      const { clientResponse } = await this.buildResponseUseCase.execute({
+        clientRequest
+      })
+
+
+      response.status = clientResponse.status
+      response.body = clientResponse.body
+      response.queryTime = clientResponse.queryTime
+
+      this.setResponseHeaders(share, clientResponse.headers)
     } catch (error) {
       this.exceptionWrapper(error, 'default')
     }

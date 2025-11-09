@@ -9,24 +9,22 @@ export abstract class BaseController {
     protected readonly controllerName: string
   ) {
     this.assertSchema = validator.assertSchema
-
-    this.logger.debug(`Controller initialized`, {
-      controller: this.controllerName
-    })
   }
 
-  protected exceptionWrapper(error: unknown, handler: string): never {
+  protected handleException(error: unknown, apiCall: string, data: unknown): never {
     if (error instanceof ReplServerError) {
       error.context['controller'] = this.controllerName
-      error.context['handler'] = handler
+      error.context['apiCall'] = apiCall
+      error.context['data'] = data
 
       throw error
     } else {
-      throw new ReplServerError(`Controller unhandled error`, {
+      throw new ReplServerError(`Controller internal error`, {
         cause: error,
         context: {
           controller: this.controllerName,
-          handler
+          apiCall,
+          data
         },
         code: 'INTERNAL_ERROR'
       })

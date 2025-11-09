@@ -26,6 +26,13 @@ export const targetPortSchema: JSONSchemaType<number> = {
   maximum: 65535
 } as const
 
+export const targetMarksSchema: JSONSchemaType<string[]> = {
+  type: 'array',
+  items: {
+    type: 'string'
+  }
+} as const
+
 export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,
@@ -63,6 +70,7 @@ export const createTargetModelSchema: JSONSchemaType<CreateTargetModel> = {
     'mirrorSecure',
     'mirrorSub',
     'mirrorPort',
+    'marks',
     'connectTimeout',
     'timeout',
     'mainPage',
@@ -84,6 +92,10 @@ export const createTargetModelSchema: JSONSchemaType<CreateTargetModel> = {
     mirrorSecure: booleanSchema,
     mirrorSub: targetSubSchema,
     mirrorPort: targetPortSchema,
+    marks: {
+      ...targetMarksSchema,
+      default: []
+    },
     connectTimeout: {
       ...targetConnectTimeoutSchema,
       default: 1 * 1000
@@ -140,6 +152,10 @@ export const updateTargetModelSchema: JSONSchemaType<UpdateTargetModel> = {
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
+    marks: {
+      ...targetMarksSchema,
+      nullable: true
+    },
     connectTimeout: {
       ...targetConnectTimeoutSchema,
       nullable: true

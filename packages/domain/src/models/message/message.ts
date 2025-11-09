@@ -1,20 +1,4 @@
-export type MessageHeader = string | string[]
-export type MessageHeaders = Record<string, MessageHeader | null | undefined>
-
-export type MessageRequestCookie = string
-export type MessageRequestCookies = Record<string, MessageRequestCookie | null | undefined>
-
-export interface MessageResponseCookie {
-  value: string | null | undefined
-  maxAge?: number | null | undefined
-  expires?: number | null | undefined
-  httpOnly?: boolean | null | undefined
-  path?: string | null | undefined
-  domain?: string | null | undefined
-  secure?: boolean | null | undefined
-  sameSite?: 'strict' | 'lax' | 'none' | null | undefined
-}
-export type MessageResponseCookies = Record<string, MessageResponseCookie | null | undefined>
+import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '../../domain.js'
 
 export interface MessageModel {
   readonly campaignId: string
@@ -22,21 +6,20 @@ export interface MessageModel {
   readonly proxyId: string
   readonly targetId: string
   readonly sessionId: string
-  readonly clientIp: string
   readonly method: string
   readonly originUrl: string
-  readonly forwardUrl: string
-  readonly requestHeaders: MessageHeaders
-  readonly requestCookies: MessageRequestCookies
-  readonly requestBody: Buffer
+  readonly urlPath: string
+  readonly urlQuery: string
+  readonly urlHash: string
+  readonly requestHeaders: HttpHeaders
+  readonly requestCookies: HttpRequestCookies
+  readonly requestBody: HttpBody
   readonly status: number
-  readonly responseHeaders: MessageHeaders
-  readonly responseCookies: MessageResponseCookies
-  readonly responseBody: Buffer
-  readonly queryTime: number
+  readonly responseHeaders: HttpHeaders
+  readonly responseCookies: HttpResponseCookies
+  readonly responseBody: HttpBody
+  readonly clientIp: string
   readonly score: number
+  readonly queryTime: number
   readonly createdAt: Date
 }
-
-export type MessageHeadersDirection = 'requestHeaders' | 'responseHeaders'
-export type MessageBodyDirection = 'requestBody' | 'responseBody'

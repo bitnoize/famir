@@ -1,13 +1,13 @@
 import { isDevelopment, serializeError } from '@famir/common'
-import { BaseQueue, Config, Logger, WorkflowError } from '@famir/domain'
+import { Config, Logger, WorkflowError } from '@famir/domain'
 import { Queue } from 'bullmq'
 import { BullWorkflowConnection } from '../../bull-workflow-connector.js'
 import { WorkflowConfig, WorkflowQueueOptions } from '../../workflow.js'
 import { buildQueueOptions } from '../../workflow.utils.js'
 
-export abstract class BullBaseQueue implements BaseQueue {
+export abstract class BullBaseQueue {
   protected readonly options: WorkflowQueueOptions
-  protected readonly _queue: Queue<unknown, unknown>
+  protected readonly queue: Queue<unknown, unknown>
 
   constructor(
     config: Config<WorkflowConfig>,
@@ -17,15 +17,15 @@ export abstract class BullBaseQueue implements BaseQueue {
   ) {
     this.options = buildQueueOptions(config.data)
 
-    this._queue = new Queue<unknown, unknown>(this.queueName, {
+    this.queue = new Queue<unknown, unknown>(this.queueName, {
       connection: this.connection,
       prefix: this.options.prefix
     })
 
-    this._queue.on('error', (error: unknown) => {
+    this.queue.on('error', (error: unknown) => {
       this.logger.error(`Queue error event`, {
-        queue: this.queueName,
-        error: serializeError(error)
+        error: serializeError(error),
+        queue: this.queueName
       })
     })
 
@@ -36,7 +36,7 @@ export abstract class BullBaseQueue implements BaseQueue {
   }
 
   async close(): Promise<void> {
-    await this._queue.close()
+    await this.queue.close()
 
     this.logger.debug(`Queue closed`, {
       queue: this.queueName
@@ -45,21 +45,21 @@ export abstract class BullBaseQueue implements BaseQueue {
 
   async getJobCount(): Promise<number> {
     try {
-      return await this._queue.count()
+      return await this.queue.count()
     } catch (error) {
-      this.exceptionWrapper(error, 'getJobCount', null)
+      this.handleException(error, 'getJobCount', null)
     }
   }
 
   async getJobCounts(): Promise<Record<string, number>> {
     try {
-      return await this._queue.getJobCounts()
+      return await this.queue.getJobCounts()
     } catch (error) {
-      this.exceptionWrapper(error, 'getJobCounts', null)
+      this.handleException(error, 'getJobCounts', null)
     }
   }
 
-  protected exceptionWrapper(error: unknown, method: string, data: unknown): never {
+  protected handleException(error: unknown, method: string, data: object | null): never {
     if (error instanceof WorkflowError) {
       error.context['queue'] = this.queueName
       error.context['method'] = method
@@ -67,7 +67,7 @@ export abstract class BullBaseQueue implements BaseQueue {
 
       throw error
     } else {
-      throw new WorkflowError(`Queue unhandled error`, {
+      throw new WorkflowError(`Workflow internal error`, {
         cause: error,
         context: {
           queue: this.queueName,

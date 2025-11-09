@@ -10,7 +10,7 @@ import {
 import {
   BullAnalyzeLogWorker,
   BullExecutorConnector,
-  BullExecutorDispatcher
+  BullExecutorRegistry
 } from '@famir/executor'
 import { PinoLogger } from '@famir/logger'
 import { MinioStorage } from '@famir/storage'
@@ -42,7 +42,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   BullExecutorConnector.inject(container)
 
-  BullExecutorDispatcher.inject(container)
+  BullExecutorRegistry.inject(container)
 
   BullAnalyzeLogWorker.inject(container)
 

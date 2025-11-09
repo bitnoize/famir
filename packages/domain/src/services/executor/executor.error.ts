@@ -1,6 +1,6 @@
 import { DomainError, DomainErrorOptions } from '../../domain.error.js'
 
-export type ExecutorErrorCode = 'BAD_REQUEST' | 'INTERNAL_ERROR'
+export type ExecutorErrorCode = 'BAD_REQUEST' | 'UNKNOWN_JOB' | 'INTERNAL_ERROR'
 
 export type ExecutorErrorOptions = DomainErrorOptions & {
   code: ExecutorErrorCode

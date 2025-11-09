@@ -1,5 +1,3 @@
-import { BaseQueue } from '../base/index.js'
-
 export const ANALYZE_LOG_QUEUE_NAME = 'analyze-log'
 
 export interface AnalyzeLogJobData {
@@ -9,7 +7,10 @@ export interface AnalyzeLogJobData {
 
 export type AnalyzeLogJobResult = boolean
 
-export interface AnalyzeLogQueue extends BaseQueue {
+export interface AnalyzeLogQueue {
+  close(): Promise<void>
+  getJobCount(): Promise<number>
+  getJobCounts(): Promise<Record<string, number>>
   addJob(data: AnalyzeLogJobData, name: string): Promise<string>
 }
 

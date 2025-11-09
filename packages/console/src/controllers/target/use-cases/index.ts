@@ -1,7 +1,0 @@
-export * from './create-target/index.js'
-export * from './delete-target/index.js'
-export * from './disable-target/index.js'
-export * from './enable-target/index.js'
-export * from './list-targets/index.js'
-export * from './read-target/index.js'
-export * from './update-target/index.js'

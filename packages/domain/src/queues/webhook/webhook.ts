@@ -1,5 +1,3 @@
-import { BaseQueue } from '../base/index.js'
-
 export const WEBHOOK_QUEUE_NAME = 'webhook'
 
 export interface WebhookJobData {
@@ -8,7 +6,10 @@ export interface WebhookJobData {
 
 export type WebhookJobResult = boolean
 
-export interface WebhookQueue extends BaseQueue {
+export interface WebhookQueue {
+  close(): Promise<void>
+  getJobCount(): Promise<number>
+  getJobCounts(): Promise<Record<string, number>>
   addJob(data: WebhookJobData): Promise<string>
 }
 

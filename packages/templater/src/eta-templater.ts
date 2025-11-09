@@ -7,15 +7,15 @@ export class EtaTemplater implements Templater {
     container.registerSingleton<Templater>(TEMPLATER, () => new EtaTemplater())
   }
 
-  private readonly _eta: Eta
+  protected readonly eta: Eta
 
   constructor() {
-    this._eta = new Eta({
+    this.eta = new Eta({
       varName: 'data'
     })
   }
 
   render(template: string, data: object): string {
-    return this._eta.renderString(template, data)
+    return this.eta.renderString(template, data)
   }
 }

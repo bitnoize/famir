@@ -1,11 +1,11 @@
 import { HttpServerConfig, HttpServerOptions } from './http-server.js'
 
-export function buildOptions(data: HttpServerConfig): HttpServerOptions {
+export function buildOptions(config: HttpServerConfig): HttpServerOptions {
   return {
-    address: data.HTTP_SERVER_ADDRESS,
-    port: data.HTTP_SERVER_PORT,
-    bodyLimit: data.HTTP_SERVER_BODY_LIMIT,
-    errorPage: data.HTTP_SERVER_ERROR_PAGE
+    address: config.HTTP_SERVER_ADDRESS,
+    port: config.HTTP_SERVER_PORT,
+    bodyLimit: config.HTTP_SERVER_BODY_LIMIT,
+    errorPage: config.HTTP_SERVER_ERROR_PAGE
   }
 }
 

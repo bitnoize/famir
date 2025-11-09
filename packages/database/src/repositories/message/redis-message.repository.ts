@@ -1,8 +1,9 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, randomIdent } from '@famir/common'
 import {
   Config,
   CONFIG,
   CreateMessageModel,
+  CreateMessageResult,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
@@ -44,21 +45,26 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     super(validator, config, logger, connection, 'message')
 
     validator.addSchemas(addSchemas)
+
+    this.logger.debug(`MessageRepository initialized`)
   }
 
-  async create(data: CreateMessageModel): Promise<void> {
+  async create(data: CreateMessageModel): Promise<CreateMessageResult> {
     try {
+      const messageId = randomIdent()
+
       const status = await this.connection.message.create_message(
         this.options.prefix,
         data.campaignId,
-        data.messageId,
+        messageId,
         data.proxyId,
         data.targetId,
         data.sessionId,
-        data.clientIp,
         data.method,
         data.originUrl,
-        data.forwardUrl,
+        data.urlPath,
+        data.urlQuery,
+        data.urlHash,
         data.requestHeaders,
         data.requestCookies,
         data.requestBody,
@@ -66,19 +72,20 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         data.responseHeaders,
         data.responseCookies,
         data.responseBody,
-        data.queryTime,
-        data.score
+        data.clientIp,
+        data.score,
+        data.queryTime
       )
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        return
+        return { messageId }
       }
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'create', data)
+      this.handleException(error, 'create', data)
     }
   }
 
@@ -92,7 +99,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return buildModel(this.assertSchema, raw)
     } catch (error) {
-      this.exceptionWrapper(error, 'read', data)
+      this.handleException(error, 'read', data)
     }
   }
 }

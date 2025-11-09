@@ -45,6 +45,8 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     connection: RedisDatabaseConnection
   ) {
     super(validator, config, logger, connection, 'redirector')
+
+    this.logger.debug(`RedirectorRepository initialized`)
   }
 
   async create(data: CreateRedirectorModel): Promise<RedirectorModel> {
@@ -76,7 +78,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'create', data)
+      this.handleException(error, 'create', data)
     }
   }
 
@@ -90,7 +92,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionWrapper(error, 'read', data)
+      this.handleException(error, 'read', data)
     }
   }
 
@@ -123,7 +125,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'update', data)
+      this.handleException(error, 'update', data)
     }
   }
 
@@ -155,7 +157,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'delete', data)
+      this.handleException(error, 'delete', data)
     }
   }
 
@@ -182,7 +184,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionWrapper(error, 'list', data)
+      this.handleException(error, 'list', data)
     }
   }
 }

@@ -18,6 +18,7 @@ export interface RawTarget {
   mirror_secure: number
   mirror_sub: string
   mirror_port: number
+  marks: string
   connect_timeout: number
   timeout: number
   main_page: string
@@ -51,6 +52,7 @@ export const targetFunctions = {
         mirrorSecure: boolean,
         mirrorSub: string,
         mirrorPort: number,
+        marks: string[],
         connectTimeout: number,
         timeout: number,
         mainPage: string,
@@ -77,6 +79,7 @@ export const targetFunctions = {
         parser.push(mirrorSecure ? '1' : '0')
         parser.push(mirrorSub)
         parser.push(mirrorPort.toString())
+        parser.push(marks.join(' '))
         parser.push(connectTimeout.toString())
         parser.push(timeout.toString())
         parser.push(mainPage)
@@ -122,6 +125,7 @@ export const targetFunctions = {
         prefix: string,
         campaignId: string,
         targetId: string,
+        marks: string[] | null | undefined,
         connectTimeout: number | null | undefined,
         timeout: number | null | undefined,
         mainPage: string | null | undefined,
@@ -134,6 +138,11 @@ export const targetFunctions = {
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
+
+        if (marks != null) {
+          parser.push('marks')
+          parser.push(marks.join(' '))
+        }
 
         if (connectTimeout != null) {
           parser.push('connect_timeout')

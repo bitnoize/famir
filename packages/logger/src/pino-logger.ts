@@ -24,7 +24,7 @@ export class PinoLogger implements Logger {
 
   protected readonly assertSchema: ValidatorAssertSchema
   protected readonly options: LoggerOptions
-  private readonly _pino: pino.Logger
+  protected readonly pino: pino.Logger
 
   constructor(validator: Validator, config: Config<LoggerConfig>) {
     this.assertSchema = validator.assertSchema
@@ -33,7 +33,7 @@ export class PinoLogger implements Logger {
 
     this.options = buildOptions(this.assertSchema, config.data)
 
-    this._pino = pino({
+    this.pino = pino({
       name: this.options.appName,
       level: this.options.logLevel,
       base: {},
@@ -45,22 +45,22 @@ export class PinoLogger implements Logger {
   }
 
   debug(msg: string, data: LoggerData = {}) {
-    this._pino.debug(data, msg)
+    this.pino.debug(data, msg)
   }
 
   info(msg: string, data: LoggerData = {}) {
-    this._pino.info(data, msg)
+    this.pino.info(data, msg)
   }
 
   warn(msg: string, data: LoggerData = {}) {
-    this._pino.warn(data, msg)
+    this.pino.warn(data, msg)
   }
 
   error(msg: string, data: LoggerData = {}) {
-    this._pino.error(data, msg)
+    this.pino.error(data, msg)
   }
 
   fatal(msg: string, data: LoggerData = {}) {
-    this._pino.fatal(data, msg)
+    this.pino.fatal(data, msg)
   }
 }

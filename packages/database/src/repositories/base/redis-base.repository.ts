@@ -1,4 +1,3 @@
-import { isDevelopment } from '@famir/common'
 import { Config, DatabaseError, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
 import { DatabaseConfig, DatabaseRepositoryOptions } from '../../database.js'
 import { buildRepositoryOptions } from '../../database.utils.js'
@@ -18,14 +17,9 @@ export abstract class RedisBaseRepository {
     this.assertSchema = validator.assertSchema
 
     this.options = buildRepositoryOptions(config.data)
-
-    this.logger.debug(`Repository initialized`, {
-      repository: this.repositoryName,
-      options: isDevelopment ? this.options : null
-    })
   }
 
-  protected exceptionWrapper(error: unknown, method: string, data: unknown): never {
+  protected handleException(error: unknown, method: string, data: object | null): never {
     if (error instanceof DatabaseError) {
       error.context['repository'] = this.repositoryName
       error.context['method'] = method
@@ -33,7 +27,7 @@ export abstract class RedisBaseRepository {
 
       throw error
     } else {
-      throw new DatabaseError(`Repository unhandled error`, {
+      throw new DatabaseError(`Database internal error`, {
         cause: error,
         context: {
           repository: this.repositoryName,

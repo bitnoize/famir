@@ -1,6 +1,6 @@
-import { BaseWorker } from '../base/index.js'
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface WebhookWorker extends BaseWorker {}
+export interface WebhookWorker {
+  run(): Promise<void>
+  close(): Promise<void>
+}
 
 export const WEBHOOK_WORKER = Symbol('WebhookWorker')

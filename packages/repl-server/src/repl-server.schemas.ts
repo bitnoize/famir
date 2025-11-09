@@ -12,7 +12,7 @@ export const configReplServerPortSchema: JSONSchemaType<number> = {
   maximum: 65535
 } as const
 
-export const configReplServerMaxConnectionsSchema: JSONSchemaType<number> = {
+export const configReplServerMaxClientsSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 1,
   maximum: 100,

@@ -36,13 +36,13 @@ export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueu
     try {
       const jobId = [data.campaignId, data.messageId].join('-')
 
-      await this._queue.add('default', data, {
+      await this.queue.add('default', data, {
         jobId
       })
 
       return jobId
     } catch (error) {
-      this.exceptionWrapper(error, 'addJob', data)
+      this.handleException(error, 'addJob', data)
     }
   }
 }

@@ -1,4 +1,4 @@
-import { MessageHeaders, MessageRequestCookies, MessageResponseCookies } from '@famir/domain'
+import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '@famir/domain'
 import { CommandParser } from '@redis/client'
 import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../database.keys.js'
 
@@ -8,10 +8,11 @@ export interface RawMessage {
   proxy_id: string
   target_id: string
   session_id: string
-  client_ip: string
   method: string
   origin_url: string
-  forward_url: string
+  url_path: string
+  url_query: string
+  url_hash: string
   request_headers: string
   request_cookies: string
   request_body: string
@@ -19,8 +20,9 @@ export interface RawMessage {
   response_headers: string
   response_cookies: string
   response_body: string
-  query_time: number
+  client_ip: string
   score: number
+  query_time: number
   created_at: number
 }
 
@@ -37,19 +39,21 @@ export const messageFunctions = {
         proxyId: string,
         targetId: string,
         sessionId: string,
-        clientIp: string,
         method: string,
         originUrl: string,
-        forwardUrl: string,
-        requestHeaders: MessageHeaders,
-        requestCookies: MessageRequestCookies,
-        requestBody: Buffer,
+        urlPath: string,
+        urlQuery: string,
+        urlHash: string,
+        requestHeaders: HttpHeaders,
+        requestCookies: HttpRequestCookies,
+        requestBody: HttpBody,
         status: number,
-        responseHeaders: MessageHeaders,
-        responseCookies: MessageResponseCookies,
-        responseBody: Buffer,
-        queryTime: number,
-        score: number
+        responseHeaders: HttpHeaders,
+        responseCookies: HttpResponseCookies,
+        responseBody: HttpBody,
+        clientIp: string,
+        score: number,
+        queryTime: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))
@@ -62,10 +66,11 @@ export const messageFunctions = {
         parser.push(proxyId)
         parser.push(targetId)
         parser.push(sessionId)
-        parser.push(clientIp)
         parser.push(method)
         parser.push(originUrl)
-        parser.push(forwardUrl)
+        parser.push(urlPath)
+        parser.push(urlQuery)
+        parser.push(urlHash)
         parser.push(JSON.stringify(requestHeaders))
         parser.push(JSON.stringify(requestCookies))
         parser.push(requestBody.toString('base64'))
@@ -73,8 +78,9 @@ export const messageFunctions = {
         parser.push(JSON.stringify(responseHeaders))
         parser.push(JSON.stringify(responseCookies))
         parser.push(responseBody.toString('base64'))
-        parser.push(queryTime.toString())
+        parser.push(clientIp)
         parser.push(score.toString())
+        parser.push(queryTime.toString())
         parser.push(Date.now().toString())
       },
 

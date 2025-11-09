@@ -15,14 +15,14 @@ export abstract class BaseController {
     })
   }
 
-  protected exceptionWrapper(error: unknown, handler: string): never {
+  protected handleException(error: unknown, handler: string, data: object | null): never {
     if (error instanceof ExecutorError) {
       error.context['controller'] = this.controllerName
       error.context['handler'] = handler
 
       throw error
     } else {
-      throw new ExecutorError(`Controller unhandled error`, {
+      throw new ExecutorError(`Controller unknown error`, {
         cause: error,
         context: {
           controller: this.controllerName,

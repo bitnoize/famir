@@ -2,15 +2,15 @@ import { DIContainer } from '@famir/common'
 import {
   Logger,
   LOGGER,
-  MessageModel,
-  REPL_SERVER_CONTEXT,
-  ReplServerContext,
+  REPL_SERVER_REGISTRY,
+  ReplServerApiCall,
+  ReplServerRegistry,
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { MESSAGE_SERVICE, MessageService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { addSchemas, validateReadMessageModel } from './message.utils.js'
-import { READ_MESSAGE_USE_CASE, ReadMessageUseCase } from './use-cases/index.js'
 
 export const MESSAGE_CONTROLLER = Symbol('MessageController')
 
@@ -22,8 +22,8 @@ export class MessageController extends BaseController {
         new MessageController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT),
-          c.resolve<ReadMessageUseCase>(READ_MESSAGE_USE_CASE)
+          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<MessageService>(MESSAGE_SERVICE)
         )
     )
   }
@@ -35,23 +35,25 @@ export class MessageController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    context: ReplServerContext,
-    protected readonly readMessageUseCase: ReadMessageUseCase
+    registry: ReplServerRegistry,
+    protected readonly messageService: MessageService
   ) {
     super(validator, logger, 'message')
 
     validator.addSchemas(addSchemas)
 
-    context.setHandler('readMessage', this.readMessageHandler)
+    registry.addApiCall('readMessage', this.readMessageApiCall)
+
+    this.logger.debug(`MessageController initialized`)
   }
 
-  private readonly readMessageHandler = async (data: unknown): Promise<MessageModel> => {
+  private readonly readMessageApiCall: ReplServerApiCall = async (data) => {
     try {
       validateReadMessageModel(this.assertSchema, data)
 
-      return await this.readMessageUseCase.execute(data)
+      return await this.messageService.read(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'readMessage')
+      this.handleException(error, 'readMessage', data)
     }
   }
 }

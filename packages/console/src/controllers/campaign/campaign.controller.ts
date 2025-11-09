@@ -1,13 +1,14 @@
 import { DIContainer } from '@famir/common'
 import {
-  CampaignModel,
   Logger,
   LOGGER,
-  REPL_SERVER_CONTEXT,
-  ReplServerContext,
+  REPL_SERVER_REGISTRY,
+  ReplServerApiCall,
+  ReplServerRegistry,
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { CAMPAIGN_SERVICE, CampaignService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import {
   addSchemas,
@@ -16,18 +17,6 @@ import {
   validateReadCampaignModel,
   validateUpdateCampaignModel
 } from './campaign.utils.js'
-import {
-  CREATE_CAMPAIGN_USE_CASE,
-  CreateCampaignUseCase,
-  DELETE_CAMPAIGN_USE_CASE,
-  DeleteCampaignUseCase,
-  LIST_CAMPAIGNS_USE_CASE,
-  ListCampaignsUseCase,
-  READ_CAMPAIGN_USE_CASE,
-  ReadCampaignUseCase,
-  UPDATE_CAMPAIGN_USE_CASE,
-  UpdateCampaignUseCase
-} from './use-cases/index.js'
 
 export const CAMPAIGN_CONTROLLER = Symbol('CampaignController')
 
@@ -39,12 +28,8 @@ export class CampaignController extends BaseController {
         new CampaignController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT),
-          c.resolve<CreateCampaignUseCase>(CREATE_CAMPAIGN_USE_CASE),
-          c.resolve<ReadCampaignUseCase>(READ_CAMPAIGN_USE_CASE),
-          c.resolve<UpdateCampaignUseCase>(UPDATE_CAMPAIGN_USE_CASE),
-          c.resolve<DeleteCampaignUseCase>(DELETE_CAMPAIGN_USE_CASE),
-          c.resolve<ListCampaignsUseCase>(LIST_CAMPAIGNS_USE_CASE)
+          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<CampaignService>(CAMPAIGN_SERVICE)
         )
     )
   }
@@ -56,69 +41,67 @@ export class CampaignController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    context: ReplServerContext,
-    protected readonly createCampaignUseCase: CreateCampaignUseCase,
-    protected readonly readCampaignUseCase: ReadCampaignUseCase,
-    protected readonly updateCampaignUseCase: UpdateCampaignUseCase,
-    protected readonly deleteCampaignUseCase: DeleteCampaignUseCase,
-    protected readonly listCampaignsUseCase: ListCampaignsUseCase
+    registry: ReplServerRegistry,
+    protected readonly campaignService: CampaignService
   ) {
     super(validator, logger, 'campaign')
 
     validator.addSchemas(addSchemas)
 
-    context.setHandler('createCampaign', this.createCampaignHandler)
-    context.setHandler('readCampaign', this.readCampaignHandler)
-    context.setHandler('updateCampaign', this.updateCampaignHandler)
-    context.setHandler('deleteCampaign', this.deleteCampaignHandler)
-    context.setHandler('listCampaigns', this.listCampaignsHandler)
+    registry.addApiCall('createCampaign', this.createCampaignApiCall)
+    registry.addApiCall('readCampaign', this.readCampaignApiCall)
+    registry.addApiCall('updateCampaign', this.updateCampaignApiCall)
+    registry.addApiCall('deleteCampaign', this.deleteCampaignApiCall)
+    registry.addApiCall('listCampaigns', this.listCampaignsApiCall)
+
+    this.logger.debug(`CampaignController initialized`)
   }
 
-  private readonly createCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
+  private readonly createCampaignApiCall: ReplServerApiCall = async (data) => {
     try {
       validateCreateCampaignModel(this.assertSchema, data)
 
-      return await this.createCampaignUseCase.execute(data)
+      return await this.campaignService.create(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'createCampaign')
+      this.handleException(error, 'createCampaign', data)
     }
   }
 
-  private readonly readCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
+  private readonly readCampaignApiCall: ReplServerApiCall = async (data) => {
     try {
       validateReadCampaignModel(this.assertSchema, data)
 
-      return await this.readCampaignUseCase.execute(data)
+      return await this.campaignService.read(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'readCampaign')
+      this.handleException(error, 'readCampaign', data)
     }
   }
 
-  private readonly updateCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
+  private readonly updateCampaignApiCall: ReplServerApiCall = async (data) => {
     try {
       validateUpdateCampaignModel(this.assertSchema, data)
 
-      return await this.updateCampaignUseCase.execute(data)
+      return await this.campaignService.update(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'updateCampaign')
+      this.handleException(error, 'updateCampaign', data)
     }
   }
 
-  private readonly deleteCampaignHandler = async (data: unknown): Promise<CampaignModel> => {
+  private readonly deleteCampaignApiCall: ReplServerApiCall = async (data) => {
     try {
       validateDeleteCampaignModel(this.assertSchema, data)
 
-      return await this.deleteCampaignUseCase.execute(data)
+      return await this.campaignService.delete(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'deleteCampaign')
+      this.handleException(error, 'deleteCampaign', data)
     }
   }
 
-  private readonly listCampaignsHandler = async (): Promise<CampaignModel[]> => {
+  private readonly listCampaignsApiCall: ReplServerApiCall = async () => {
     try {
-      return await this.listCampaignsUseCase.execute()
+      return await this.campaignService.list()
     } catch (error) {
-      this.exceptionWrapper(error, 'listCampaigns')
+      this.handleException(error, 'listCampaigns', null)
     }
   }
 }

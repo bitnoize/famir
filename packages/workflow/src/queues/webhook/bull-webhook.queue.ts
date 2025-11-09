@@ -36,7 +36,7 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
     try {
       return ''
     } catch (error) {
-      this.exceptionWrapper(error, 'addJob', data)
+      this.handleException(error, 'addJob', data)
     }
   }
 }

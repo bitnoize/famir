@@ -30,7 +30,7 @@ export function validateCreateRedirectorModel(
   try {
     assertSchema<CreateRedirectorModel>('create-redirector-model', data)
   } catch (error) {
-    throw new ReplServerError(`CreateRedirectorModel validation failed`, {
+    throw new ReplServerError(`Create redirector data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -44,7 +44,7 @@ export function validateReadRedirectorModel(
   try {
     assertSchema<ReadRedirectorModel>('read-redirector-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadRedirectorModel validation failed`, {
+    throw new ReplServerError(`Read redirector data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -58,7 +58,7 @@ export function validateUpdateRedirectorModel(
   try {
     assertSchema<UpdateRedirectorModel>('update-redirector-model', data)
   } catch (error) {
-    throw new ReplServerError(`UpdateRedirectorModel validation failed`, {
+    throw new ReplServerError(`Update redirector datal validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -72,7 +72,7 @@ export function validateDeleteRedirectorModel(
   try {
     assertSchema<DeleteRedirectorModel>('delete-redirector-model', data)
   } catch (error) {
-    throw new ReplServerError(`DeleteRedirectorModel validation failed`, {
+    throw new ReplServerError(`Delete redirector data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -86,7 +86,7 @@ export function validateListRedirectorModels(
   try {
     assertSchema<ListRedirectorModels>('list-redirector-models', data)
   } catch (error) {
-    throw new ReplServerError(`ListRedirectorModels validation failed`, {
+    throw new ReplServerError(`List redirectors data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })

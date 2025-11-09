@@ -5,7 +5,10 @@ export type HttpServerErrorCode =
   | 'FORBIDDEN'
   | 'NOT_FOUND'
   | 'CONFLICT'
+  | 'CONTENT_TOO_LARGE'
+  | 'UNPROCESSABLE_CONTENT'
   | 'INTERNAL_ERROR'
+  | 'BAD_GATEWAY'
   | 'SERVICE_UNAVAILABLE'
 
 export type HttpServerErrorOptions = DomainErrorOptions & {
@@ -17,7 +20,10 @@ const codeToStatusMap = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
+  CONTENT_TOO_LARGE: 413,
+  UNPROCESSABLE_CONTENT: 422,
   INTERNAL_ERROR: 500,
+  BAD_GATEWAY: 502,
   SERVICE_UNAVAILABLE: 503
 } as const
 

@@ -46,9 +46,12 @@ export class AnalyzeLogApp {
     protected readonly analyzeLogWorker: AnalyzeLogWorker
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      process.once(signal, async () => {
-        await this.stop()
+      process.once(signal, () => {
+        this.stop().catch((error: unknown) => {
+          this.logger.fatal(`AnalyzeLogApp stop failed`, {
+            error: serializeError(error)
+          })
+        })
       })
     })
 

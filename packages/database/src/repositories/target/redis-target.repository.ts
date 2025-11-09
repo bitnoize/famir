@@ -26,9 +26,9 @@ import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import {
-  assertModel,
   assertDisabledModel,
   assertEnabledModel,
+  assertModel,
   buildCollection,
   buildModel,
   guardEnabledModel,
@@ -56,6 +56,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     connection: RedisDatabaseConnection
   ) {
     super(validator, config, logger, connection, 'target')
+
+    this.logger.debug(`TargetRepository initialized`)
   }
 
   async create(data: CreateTargetModel): Promise<DisabledTargetModel> {
@@ -73,6 +75,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           data.mirrorSecure,
           data.mirrorSub,
           data.mirrorPort,
+          data.marks,
           data.connectTimeout,
           data.timeout,
           data.mainPage,
@@ -99,7 +102,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'create', data)
+      this.handleException(error, 'create', data)
     }
   }
 
@@ -113,7 +116,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionWrapper(error, 'read', data)
+      this.handleException(error, 'read', data)
     }
   }
 
@@ -129,7 +132,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return guardEnabledModel(model) ? model : null
     } catch (error) {
-      this.exceptionWrapper(error, 'readEnabled', data)
+      this.handleException(error, 'readEnabled', data)
     }
   }
 
@@ -140,6 +143,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           this.options.prefix,
           data.campaignId,
           data.targetId,
+          data.marks,
           data.connectTimeout,
           data.timeout,
           data.mainPage,
@@ -166,7 +170,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'update', data)
+      this.handleException(error, 'update', data)
     }
   }
 
@@ -190,7 +194,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'enable', data)
+      this.handleException(error, 'enable', data)
     }
   }
 
@@ -214,7 +218,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'disable', data)
+      this.handleException(error, 'disable', data)
     }
   }
 
@@ -238,7 +242,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'delete', data)
+      this.handleException(error, 'delete', data)
     }
   }
 
@@ -261,7 +265,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return buildCollection(raws).filter(guardModel)
     } catch (error) {
-      this.exceptionWrapper(error, 'list', data)
+      this.handleException(error, 'list', data)
     }
   }
 
@@ -284,7 +288,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return buildCollection(raws).filter(guardEnabledModel)
     } catch (error) {
-      this.exceptionWrapper(error, 'listEnabled', data)
+      this.handleException(error, 'listEnabled', data)
     }
   }
 }

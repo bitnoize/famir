@@ -2,12 +2,13 @@ import { DIContainer } from '@famir/common'
 import {
   Logger,
   LOGGER,
-  ProxyModel,
-  REPL_SERVER_CONTEXT,
-  ReplServerContext,
+  REPL_SERVER_REGISTRY,
+  ReplServerApiCall,
+  ReplServerRegistry,
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { PROXY_SERVICE, ProxyService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import {
   addSchemas,
@@ -17,20 +18,6 @@ import {
   validateReadProxyModel,
   validateSwitchProxyModel
 } from './proxy.utils.js'
-import {
-  CREATE_PROXY_USE_CASE,
-  CreateProxyUseCase,
-  DELETE_PROXY_USE_CASE,
-  DeleteProxyUseCase,
-  DISABLE_PROXY_USE_CASE,
-  DisableProxyUseCase,
-  ENABLE_PROXY_USE_CASE,
-  EnableProxyUseCase,
-  LIST_PROXIES_USE_CASE,
-  ListProxiesUseCase,
-  READ_PROXY_USE_CASE,
-  ReadProxyUseCase
-} from './use-cases/index.js'
 
 export const PROXY_CONTROLLER = Symbol('ProxyController')
 
@@ -42,13 +29,8 @@ export class ProxyController extends BaseController {
         new ProxyController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT),
-          c.resolve<CreateProxyUseCase>(CREATE_PROXY_USE_CASE),
-          c.resolve<ReadProxyUseCase>(READ_PROXY_USE_CASE),
-          c.resolve<EnableProxyUseCase>(ENABLE_PROXY_USE_CASE),
-          c.resolve<DisableProxyUseCase>(DISABLE_PROXY_USE_CASE),
-          c.resolve<DeleteProxyUseCase>(DELETE_PROXY_USE_CASE),
-          c.resolve<ListProxiesUseCase>(LIST_PROXIES_USE_CASE)
+          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<ProxyService>(PROXY_SERVICE)
         )
     )
   }
@@ -60,83 +42,80 @@ export class ProxyController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    context: ReplServerContext,
-    protected readonly createProxyUseCase: CreateProxyUseCase,
-    protected readonly readProxyUseCase: ReadProxyUseCase,
-    protected readonly enableProxyUseCase: EnableProxyUseCase,
-    protected readonly disableProxyUseCase: DisableProxyUseCase,
-    protected readonly deleteProxyUseCase: DeleteProxyUseCase,
-    protected readonly listProxiesUseCase: ListProxiesUseCase
+    registry: ReplServerRegistry,
+    protected readonly proxyService: ProxyService
   ) {
     super(validator, logger, 'proxy')
 
     validator.addSchemas(addSchemas)
 
-    context.setHandler('createProxy', this.createProxyHandler)
-    context.setHandler('readProxy', this.readProxyHandler)
-    context.setHandler('enableProxy', this.enableProxyHandler)
-    context.setHandler('disableProxy', this.disableProxyHandler)
-    context.setHandler('deleteProxy', this.deleteProxyHandler)
-    context.setHandler('listProxies', this.listProxiesHandler)
+    registry.addApiCall('createProxy', this.createProxyApiCall)
+    registry.addApiCall('readProxy', this.readProxyApiCall)
+    registry.addApiCall('enableProxy', this.enableProxyApiCall)
+    registry.addApiCall('disableProxy', this.disableProxyApiCall)
+    registry.addApiCall('deleteProxy', this.deleteProxyApiCall)
+    registry.addApiCall('listProxies', this.listProxiesApiCall)
+
+    this.logger.debug(`ProxyController initialized`)
   }
 
-  private readonly createProxyHandler = async (data: unknown): Promise<ProxyModel> => {
+  private readonly createProxyApiCall: ReplServerApiCall = async (data) => {
     try {
       validateCreateProxyModel(this.assertSchema, data)
 
-      return await this.createProxyUseCase.execute(data)
+      return await this.proxyService.create(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'createProxy')
+      this.handleException(error, 'createProxy', data)
     }
   }
 
-  private readonly readProxyHandler = async (data: unknown): Promise<ProxyModel> => {
+  private readonly readProxyApiCall: ReplServerApiCall = async (data) => {
     try {
       validateReadProxyModel(this.assertSchema, data)
 
-      return await this.readProxyUseCase.execute(data)
+      return await this.proxyService.read(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'readProxy')
+      this.handleException(error, 'readProxy', data)
     }
   }
 
-  private readonly enableProxyHandler = async (data: unknown): Promise<ProxyModel> => {
+  private readonly enableProxyApiCall: ReplServerApiCall = async (data) => {
     try {
       validateSwitchProxyModel(this.assertSchema, data)
 
-      return await this.enableProxyUseCase.execute(data)
+      return await this.proxyService.enable(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'enableProxy')
+      this.handleException(error, 'enableProxy', data)
     }
   }
 
-  private readonly disableProxyHandler = async (data: unknown): Promise<ProxyModel> => {
+  private readonly disableProxyApiCall: ReplServerApiCall = async (data) => {
     try {
       validateSwitchProxyModel(this.assertSchema, data)
 
-      return await this.disableProxyUseCase.execute(data)
+      return await this.proxyService.disable(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'disableProxy')
+      this.handleException(error, 'disableProxy', data)
     }
   }
 
-  private readonly deleteProxyHandler = async (data: unknown): Promise<ProxyModel> => {
+  private readonly deleteProxyApiCall: ReplServerApiCall = async (data) => {
     try {
       validateDeleteProxyModel(this.assertSchema, data)
 
-      return await this.deleteProxyUseCase.execute(data)
+      return await this.proxyService.delete(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'deleteProxy')
+      this.handleException(error, 'deleteProxy', data)
     }
   }
 
-  private readonly listProxiesHandler = async (data: unknown): Promise<ProxyModel[]> => {
+  private readonly listProxiesApiCall: ReplServerApiCall = async (data) => {
     try {
       validateListProxyModels(this.assertSchema, data)
 
-      return await this.listProxiesUseCase.execute(data)
+      return await this.proxyService.list(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'listProxies')
+      this.handleException(error, 'listProxies', data)
     }
   }
 }

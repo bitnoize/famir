@@ -26,7 +26,7 @@ export class BullExecutorConnector implements ExecutorConnector {
   }
 
   protected readonly options: ExecutorConnectorOptions
-  private readonly _redis: BullExecutorConnection
+  private readonly redis: BullExecutorConnection
 
   constructor(
     config: Config<ExecutorConfig>,
@@ -34,13 +34,13 @@ export class BullExecutorConnector implements ExecutorConnector {
   ) {
     this.options = buildConnectorOptions(config.data)
 
-    this._redis = new Redis(this.options.connectionUrl, {
+    this.redis = new Redis(this.options.connectionUrl, {
       //lazyConnect: true,
       connectionName: 'executor',
       maxRetriesPerRequest: null
     })
 
-    this._redis.on('error', (error) => {
+    this.redis.on('error', (error) => {
       this.logger.error(`Redis error event`, {
         error: serializeError(error)
       })
@@ -53,17 +53,17 @@ export class BullExecutorConnector implements ExecutorConnector {
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   connection<T>(): T {
-    return this._redis as T
+    return this.redis as T
   }
 
   //async connect(): Promise<void> {
-  //  await this._redis.connect()
+  //  await this.redis.connect()
   //
   //  this.logger.debug(`ExecutorConnector connected`)
   //}
 
   async close(): Promise<void> {
-    await this._redis.quit()
+    await this.redis.quit()
 
     this.logger.debug(`ExecutorConnector closed`)
   }

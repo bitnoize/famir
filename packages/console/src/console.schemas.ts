@@ -8,7 +8,7 @@ import {
 } from '@famir/logger'
 import {
   configReplServerAddressSchema,
-  configReplServerMaxConnectionsSchema,
+  configReplServerMaxClientsSchema,
   configReplServerPortSchema,
   configReplServerPromptSchema,
   configReplServerSocketTimeoutSchema,
@@ -42,7 +42,7 @@ export const configConsoleSchema: JSONSchemaType<ConsoleConfig> = {
     'WORKFLOW_PREFIX',
     'REPL_SERVER_ADDRESS',
     'REPL_SERVER_PORT',
-    'REPL_SERVER_MAX_CONNECTIONS',
+    'REPL_SERVER_MAX_CLIENTS',
     'REPL_SERVER_SOCKET_TIMEOUT',
     'REPL_SERVER_PROMPT',
     'REPL_SERVER_USE_COLORS'
@@ -72,7 +72,7 @@ export const configConsoleSchema: JSONSchemaType<ConsoleConfig> = {
       ...configReplServerPortSchema,
       default: 5000
     },
-    REPL_SERVER_MAX_CONNECTIONS: configReplServerMaxConnectionsSchema,
+    REPL_SERVER_MAX_CLIENTS: configReplServerMaxClientsSchema,
     REPL_SERVER_SOCKET_TIMEOUT: configReplServerSocketTimeoutSchema,
     REPL_SERVER_PROMPT: configReplServerPromptSchema,
     REPL_SERVER_USE_COLORS: configReplServerUseColorsSchema

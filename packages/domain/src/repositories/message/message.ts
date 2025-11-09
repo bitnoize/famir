@@ -1,9 +1,5 @@
-import {
-  MessageHeaders,
-  MessageModel,
-  MessageRequestCookies,
-  MessageResponseCookies
-} from '../../models/index.js'
+import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '../../domain.js'
+import { MessageModel } from '../../models/index.js'
 
 export interface CreateMessageModel {
   campaignId: string
@@ -11,19 +7,25 @@ export interface CreateMessageModel {
   proxyId: string
   targetId: string
   sessionId: string
-  clientIp: string
   method: string
   originUrl: string
-  forwardUrl: string
-  requestHeaders: MessageHeaders
-  requestCookies: MessageRequestCookies
-  requestBody: Buffer
+  urlPath: string
+  urlQuery: string
+  urlHash: string
+  requestHeaders: HttpHeaders
+  requestCookies: HttpRequestCookies
+  requestBody: HttpBody
   status: number
-  responseHeaders: MessageHeaders
-  responseCookies: MessageResponseCookies
-  responseBody: Buffer
-  queryTime: number
+  responseHeaders: HttpHeaders
+  responseCookies: HttpResponseCookies
+  responseBody: HttpBody
+  clientIp: string
   score: number
+  queryTime: number
+}
+
+export interface CreateMessageResult {
+  messageId: string
 }
 
 export interface ReadMessageModel {
@@ -32,7 +34,7 @@ export interface ReadMessageModel {
 }
 
 export interface MessageRepository {
-  create(data: CreateMessageModel): Promise<void>
+  create(data: CreateMessageModel): Promise<CreateMessageResult>
   read(data: ReadMessageModel): Promise<MessageModel | null>
 }
 

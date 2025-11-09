@@ -1,5 +1,0 @@
-export * from './create-redirector/index.js'
-export * from './delete-redirector/index.js'
-export * from './list-redirectors/index.js'
-export * from './read-redirector/index.js'
-export * from './update-redirector/index.js'

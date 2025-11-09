@@ -2,15 +2,15 @@ import { DIContainer } from '@famir/common'
 import {
   Logger,
   LOGGER,
-  REPL_SERVER_CONTEXT,
-  ReplServerContext,
-  SessionModel,
+  REPL_SERVER_REGISTRY,
+  ReplServerApiCall,
+  ReplServerRegistry,
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { SESSION_SERVICE, SessionService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { addSchemas, validateReadSessionModel } from './session.utils.js'
-import { READ_SESSION_USE_CASE, ReadSessionUseCase } from './use-cases/index.js'
 
 export const SESSION_CONTROLLER = Symbol('SessionController')
 
@@ -22,8 +22,8 @@ export class SessionController extends BaseController {
         new SessionController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT),
-          c.resolve<ReadSessionUseCase>(READ_SESSION_USE_CASE)
+          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<SessionService>(SESSION_SERVICE)
         )
     )
   }
@@ -35,23 +35,25 @@ export class SessionController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    context: ReplServerContext,
-    protected readonly readSessionUseCase: ReadSessionUseCase
+    registry: ReplServerRegistry,
+    protected readonly sessionService: SessionService
   ) {
     super(validator, logger, 'session')
 
     validator.addSchemas(addSchemas)
 
-    context.setHandler('readSession', this.readSessionHandler)
+    registry.addApiCall('readSession', this.readSessionApiCall)
+
+    this.logger.debug(`SessionController initialized`)
   }
 
-  private readonly readSessionHandler = async (data: unknown): Promise<SessionModel> => {
+  private readonly readSessionApiCall: ReplServerApiCall = async (data) => {
     try {
       validateReadSessionModel(this.assertSchema, data)
 
-      return await this.readSessionUseCase.execute(data)
+      return await this.sessionService.read(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'readSession')
+      this.handleException(error, 'readSession', data)
     }
   }
 }

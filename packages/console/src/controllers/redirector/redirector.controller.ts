@@ -2,12 +2,13 @@ import { DIContainer } from '@famir/common'
 import {
   Logger,
   LOGGER,
-  RedirectorModel,
-  REPL_SERVER_CONTEXT,
-  ReplServerContext,
+  REPL_SERVER_REGISTRY,
+  ReplServerApiCall,
+  ReplServerRegistry,
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { REDIRECTOR_SERVICE, RedirectorService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import {
   addSchemas,
@@ -17,18 +18,6 @@ import {
   validateReadRedirectorModel,
   validateUpdateRedirectorModel
 } from './redirector.utils.js'
-import {
-  CREATE_REDIRECTOR_USE_CASE,
-  CreateRedirectorUseCase,
-  DELETE_REDIRECTOR_USE_CASE,
-  DeleteRedirectorUseCase,
-  LIST_REDIRECTORS_USE_CASE,
-  ListRedirectorsUseCase,
-  READ_REDIRECTOR_USE_CASE,
-  ReadRedirectorUseCase,
-  UPDATE_REDIRECTOR_USE_CASE,
-  UpdateRedirectorUseCase
-} from './use-cases/index.js'
 
 export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')
 
@@ -40,12 +29,8 @@ export class RedirectorController extends BaseController {
         new RedirectorController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT),
-          c.resolve<CreateRedirectorUseCase>(CREATE_REDIRECTOR_USE_CASE),
-          c.resolve<ReadRedirectorUseCase>(READ_REDIRECTOR_USE_CASE),
-          c.resolve<UpdateRedirectorUseCase>(UPDATE_REDIRECTOR_USE_CASE),
-          c.resolve<DeleteRedirectorUseCase>(DELETE_REDIRECTOR_USE_CASE),
-          c.resolve<ListRedirectorsUseCase>(LIST_REDIRECTORS_USE_CASE)
+          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<RedirectorService>(REDIRECTOR_SERVICE)
         )
     )
   }
@@ -57,71 +42,69 @@ export class RedirectorController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    context: ReplServerContext,
-    protected readonly createRedirectorUseCase: CreateRedirectorUseCase,
-    protected readonly readRedirectorUseCase: ReadRedirectorUseCase,
-    protected readonly updateRedirectorUseCase: UpdateRedirectorUseCase,
-    protected readonly deleteRedirectorUseCase: DeleteRedirectorUseCase,
-    protected readonly listRedirectorsUseCase: ListRedirectorsUseCase
+    registry: ReplServerRegistry,
+    protected readonly redirectorService: RedirectorService
   ) {
     super(validator, logger, 'redirector')
 
     validator.addSchemas(addSchemas)
 
-    context.setHandler('createRedirector', this.createRedirectorHandler)
-    context.setHandler('readRedirector', this.readRedirectorHandler)
-    context.setHandler('updateRedirector', this.updateRedirectorHandler)
-    context.setHandler('deleteRedirector', this.deleteRedirectorHandler)
-    context.setHandler('listRedirectors', this.listRedirectorsHandler)
+    registry.addApiCall('createRedirector', this.createRedirectorApiCall)
+    registry.addApiCall('readRedirector', this.readRedirectorApiCall)
+    registry.addApiCall('updateRedirector', this.updateRedirectorApiCall)
+    registry.addApiCall('deleteRedirector', this.deleteRedirectorApiCall)
+    registry.addApiCall('listRedirectors', this.listRedirectorsApiCall)
+
+    this.logger.debug(`RedirectorController initialized`)
   }
 
-  private readonly createRedirectorHandler = async (data: unknown): Promise<RedirectorModel> => {
+  private readonly createRedirectorApiCall: ReplServerApiCall = async (data) => {
     try {
       validateCreateRedirectorModel(this.assertSchema, data)
 
-      return await this.createRedirectorUseCase.execute(data)
+      return await this.redirectorService.create(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'createRedirector')
+      this.handleException(error, 'createRedirector', data)
     }
   }
 
-  private readonly readRedirectorHandler = async (data: unknown): Promise<RedirectorModel> => {
+  private readonly readRedirectorApiCall: ReplServerApiCall = async (data) => {
     try {
       validateReadRedirectorModel(this.assertSchema, data)
 
-      return await this.readRedirectorUseCase.execute(data)
+      return await this.redirectorService.read(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'readRedirector')
+      this.handleException(error, 'readRedirector', data)
     }
   }
 
-  private readonly updateRedirectorHandler = async (data: unknown): Promise<RedirectorModel> => {
+  private readonly updateRedirectorApiCall: ReplServerApiCall = async (data) => {
     try {
       validateUpdateRedirectorModel(this.assertSchema, data)
 
-      return await this.updateRedirectorUseCase.execute(data)
+      return await this.redirectorService.update(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'updateRedirector')
+      this.handleException(error, 'updateRedirector', data)
     }
   }
 
-  private readonly deleteRedirectorHandler = async (data: unknown): Promise<RedirectorModel> => {
+  private readonly deleteRedirectorApiCall: ReplServerApiCall = async (data) => {
     try {
       validateDeleteRedirectorModel(this.assertSchema, data)
 
-      return await this.deleteRedirectorUseCase.execute(data)
+      return await this.redirectorService.delete(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'deleteRedirector')
+      this.handleException(error, 'deleteRedirector', data)
     }
   }
 
-  private readonly listRedirectorsHandler = async (data: unknown): Promise<RedirectorModel[]> => {
+  private readonly listRedirectorsApiCall: ReplServerApiCall = async (data) => {
     try {
       validateListRedirectorModels(this.assertSchema, data)
 
-      return await this.listRedirectorsUseCase.execute(data)
+      return await this.redirectorService.list(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'listRedirectors')
+      this.handleException(error, 'listRedirectors', data)
     }
   }
 }

@@ -2,12 +2,13 @@ import { DIContainer } from '@famir/common'
 import {
   Logger,
   LOGGER,
-  LureModel,
-  REPL_SERVER_CONTEXT,
-  ReplServerContext,
+  REPL_SERVER_REGISTRY,
+  ReplServerApiCall,
+  ReplServerRegistry,
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { LURE_SERVICE, LureService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import {
   addSchemas,
@@ -17,20 +18,6 @@ import {
   validateReadLureModel,
   validateSwitchLureModel
 } from './lure.utils.js'
-import {
-  CREATE_LURE_USE_CASE,
-  CreateLureUseCase,
-  DELETE_LURE_USE_CASE,
-  DeleteLureUseCase,
-  DISABLE_LURE_USE_CASE,
-  DisableLureUseCase,
-  ENABLE_LURE_USE_CASE,
-  EnableLureUseCase,
-  LIST_LURES_USE_CASE,
-  ListLuresUseCase,
-  READ_LURE_USE_CASE,
-  ReadLureUseCase
-} from './use-cases/index.js'
 
 export const LURE_CONTROLLER = Symbol('LureController')
 
@@ -42,13 +29,8 @@ export class LureController extends BaseController {
         new LureController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerContext>(REPL_SERVER_CONTEXT),
-          c.resolve<CreateLureUseCase>(CREATE_LURE_USE_CASE),
-          c.resolve<ReadLureUseCase>(READ_LURE_USE_CASE),
-          c.resolve<EnableLureUseCase>(ENABLE_LURE_USE_CASE),
-          c.resolve<DisableLureUseCase>(DISABLE_LURE_USE_CASE),
-          c.resolve<DeleteLureUseCase>(DELETE_LURE_USE_CASE),
-          c.resolve<ListLuresUseCase>(LIST_LURES_USE_CASE)
+          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<LureService>(LURE_SERVICE)
         )
     )
   }
@@ -60,83 +42,80 @@ export class LureController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    context: ReplServerContext,
-    protected readonly createLureUseCase: CreateLureUseCase,
-    protected readonly readLureUseCase: ReadLureUseCase,
-    protected readonly enableLureUseCase: EnableLureUseCase,
-    protected readonly disableLureUseCase: DisableLureUseCase,
-    protected readonly deleteLureUseCase: DeleteLureUseCase,
-    protected readonly listLuresUseCase: ListLuresUseCase
+    registry: ReplServerRegistry,
+    protected readonly lureService: LureService
   ) {
     super(validator, logger, 'lure')
 
     validator.addSchemas(addSchemas)
 
-    context.setHandler('createLure', this.createLureHandler)
-    context.setHandler('readLure', this.readLureHandler)
-    context.setHandler('enableLure', this.enableLureHandler)
-    context.setHandler('disableLure', this.disableLureHandler)
-    context.setHandler('deleteLure', this.deleteLureHandler)
-    context.setHandler('listLures', this.listLuresHandler)
+    registry.addApiCall('createLure', this.createLureApiCall)
+    registry.addApiCall('readLure', this.readLureApiCall)
+    registry.addApiCall('enableLure', this.enableLureApiCall)
+    registry.addApiCall('disableLure', this.disableLureApiCall)
+    registry.addApiCall('deleteLure', this.deleteLureApiCall)
+    registry.addApiCall('listLures', this.listLuresApiCall)
+
+    this.logger.debug(`LureController initialized`)
   }
 
-  private readonly createLureHandler = async (data: unknown): Promise<LureModel> => {
+  private readonly createLureApiCall: ReplServerApiCall = async (data) => {
     try {
       validateCreateLureModel(this.assertSchema, data)
 
-      return await this.createLureUseCase.execute(data)
+      return await this.lureService.create(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'createLure')
+      this.handleException(error, 'createLure', data)
     }
   }
 
-  private readonly readLureHandler = async (data: unknown): Promise<LureModel> => {
+  private readonly readLureApiCall: ReplServerApiCall = async (data) => {
     try {
       validateReadLureModel(this.assertSchema, data)
 
-      return await this.readLureUseCase.execute(data)
+      return await this.lureService.read(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'readLure')
+      this.handleException(error, 'readLure', data)
     }
   }
 
-  private readonly enableLureHandler = async (data: unknown): Promise<LureModel> => {
+  private readonly enableLureApiCall: ReplServerApiCall = async (data) => {
     try {
       validateSwitchLureModel(this.assertSchema, data)
 
-      return await this.enableLureUseCase.execute(data)
+      return await this.lureService.enable(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'enableLure')
+      this.handleException(error, 'enableLure', data)
     }
   }
 
-  private readonly disableLureHandler = async (data: unknown): Promise<LureModel> => {
+  private readonly disableLureApiCall: ReplServerApiCall = async (data) => {
     try {
       validateSwitchLureModel(this.assertSchema, data)
 
-      return await this.disableLureUseCase.execute(data)
+      return await this.lureService.disable(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'disableLure')
+      this.handleException(error, 'disableLure', data)
     }
   }
 
-  private readonly deleteLureHandler = async (data: unknown): Promise<LureModel> => {
+  private readonly deleteLureApiCall: ReplServerApiCall = async (data) => {
     try {
       validateDeleteLureModel(this.assertSchema, data)
 
-      return await this.deleteLureUseCase.execute(data)
+      return await this.lureService.delete(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'deleteLure')
+      this.handleException(error, 'deleteLure', data)
     }
   }
 
-  private readonly listLuresHandler = async (data: unknown): Promise<LureModel[]> => {
+  private readonly listLuresApiCall: ReplServerApiCall = async (data) => {
     try {
       validateListLureModels(this.assertSchema, data)
 
-      return await this.listLuresUseCase.execute(data)
+      return await this.lureService.list(data)
     } catch (error) {
-      this.exceptionWrapper(error, 'listLures')
+      this.handleException(error, 'listLures', data)
     }
   }
 }

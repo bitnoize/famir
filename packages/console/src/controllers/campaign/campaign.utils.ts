@@ -27,7 +27,7 @@ export function validateCreateCampaignModel(
   try {
     assertSchema<CreateCampaignModel>('create-campaign-model', data)
   } catch (error) {
-    throw new ReplServerError(`CreateCampaignModel validation failed`, {
+    throw new ReplServerError(`Create campaign data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -41,7 +41,7 @@ export function validateReadCampaignModel(
   try {
     assertSchema<ReadCampaignModel>('read-campaign-model', data)
   } catch (error) {
-    throw new ReplServerError(`ReadCampaignModel validation failed`, {
+    throw new ReplServerError(`Read campaign data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -55,7 +55,7 @@ export function validateUpdateCampaignModel(
   try {
     assertSchema<UpdateCampaignModel>('update-campaign-model', data)
   } catch (error) {
-    throw new ReplServerError(`UpdateCampaignModel validation failed`, {
+    throw new ReplServerError(`Update campaign data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })
@@ -69,7 +69,7 @@ export function validateDeleteCampaignModel(
   try {
     assertSchema<DeleteCampaignModel>('delete-campaign-model', data)
   } catch (error) {
-    throw new ReplServerError(`DeleteCampaignModel validation failed`, {
+    throw new ReplServerError(`Delete campaign data validation failed`, {
       cause: error,
       code: 'BAD_REQUEST'
     })

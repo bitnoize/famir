@@ -1,9 +1,9 @@
 import {
   DatabaseError,
-  MessageHeaders,
+  HttpHeaders,
+  HttpRequestCookies,
+  HttpResponseCookies,
   MessageModel,
-  MessageRequestCookies,
-  MessageResponseCookies,
   ValidatorAssertSchema,
   ValidatorSchemas
 } from '@famir/domain'
@@ -23,11 +23,11 @@ export const addSchemas: ValidatorSchemas = {
 export function parseRequestHeaders(
   assertSchema: ValidatorAssertSchema,
   data: string
-): MessageHeaders {
+): HttpHeaders {
   try {
     const headers: unknown = JSON.parse(data)
 
-    assertSchema<MessageHeaders>('message-headers', headers)
+    assertSchema<HttpHeaders>('message-headers', headers)
 
     return headers
   } catch (error) {
@@ -41,11 +41,11 @@ export function parseRequestHeaders(
 export function parseRequestCookies(
   assertSchema: ValidatorAssertSchema,
   data: string
-): MessageRequestCookies {
+): HttpRequestCookies {
   try {
     const cookies: unknown = JSON.parse(data)
 
-    assertSchema<MessageRequestCookies>('message-request-cookies', cookies)
+    assertSchema<HttpRequestCookies>('message-request-cookies', cookies)
 
     return cookies
   } catch (error) {
@@ -70,11 +70,11 @@ export function parseRequestBody(data: string): Buffer {
 export function parseResponseHeaders(
   assertSchema: ValidatorAssertSchema,
   data: string
-): MessageHeaders {
+): HttpHeaders {
   try {
     const headers: unknown = JSON.parse(data)
 
-    assertSchema<MessageHeaders>('message-headers', headers)
+    assertSchema<HttpHeaders>('message-headers', headers)
 
     return headers
   } catch (error) {
@@ -88,11 +88,11 @@ export function parseResponseHeaders(
 export function parseResponseCookies(
   assertSchema: ValidatorAssertSchema,
   data: string
-): MessageResponseCookies {
+): HttpResponseCookies {
   try {
     const cookies: unknown = JSON.parse(data)
 
-    assertSchema<MessageResponseCookies>('message-response-cookies', cookies)
+    assertSchema<HttpResponseCookies>('message-response-cookies', cookies)
 
     return cookies
   } catch (error) {
@@ -128,10 +128,11 @@ export function buildModel(
     proxyId: raw.proxy_id,
     targetId: raw.target_id,
     sessionId: raw.session_id,
-    clientIp: raw.client_ip,
     method: raw.method,
     originUrl: raw.origin_url,
-    forwardUrl: raw.forward_url,
+    urlPath: raw.url_path,
+    urlQuery: raw.url_query,
+    urlHash: raw.url_hash,
     requestHeaders: parseRequestHeaders(assertSchema, raw.request_headers),
     requestCookies: parseRequestCookies(assertSchema, raw.request_cookies),
     requestBody: parseRequestBody(raw.request_body),
@@ -139,8 +140,9 @@ export function buildModel(
     responseHeaders: parseResponseHeaders(assertSchema, raw.response_headers),
     responseCookies: parseResponseCookies(assertSchema, raw.response_cookies),
     responseBody: parseResponseBody(raw.response_body),
-    queryTime: raw.query_time,
+    clientIp: raw.client_ip,
     score: raw.score,
+    queryTime: raw.query_time,
     createdAt: new Date(raw.created_at)
   }
 }

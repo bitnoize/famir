@@ -26,7 +26,7 @@ export class BullWorkflowConnector implements WorkflowConnector {
   }
 
   protected readonly options: WorkflowConnectorOptions
-  private readonly _redis: BullWorkflowConnection
+  protected readonly redis: BullWorkflowConnection
 
   constructor(
     config: Config<WorkflowConfig>,
@@ -34,12 +34,12 @@ export class BullWorkflowConnector implements WorkflowConnector {
   ) {
     this.options = buildConnectorOptions(config.data)
 
-    this._redis = new Redis(this.options.connectionUrl, {
+    this.redis = new Redis(this.options.connectionUrl, {
       //lazyConnect: true,
       connectionName: 'workflow'
     })
 
-    this._redis.on('error', (error) => {
+    this.redis.on('error', (error) => {
       this.logger.error(`Redis error event`, {
         error: serializeError(error)
       })
@@ -52,17 +52,17 @@ export class BullWorkflowConnector implements WorkflowConnector {
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   connection<T>(): T {
-    return this._redis as T
+    return this.redis as T
   }
 
   //async connect(): Promise<void> {
-  //  await this._redis.connect()
+  //  await this.redis.connect()
   //
   //  this.logger.debug(`WorkflowConnector connected`)
   //}
 
   async close(): Promise<void> {
-    await this._redis.quit()
+    await this.redis.quit()
 
     this.logger.debug(`WorkflowConnector closed`)
   }

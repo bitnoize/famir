@@ -1,15 +1,15 @@
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
 import {
-  MessageHeader,
-  MessageHeaders,
-  MessageRequestCookie,
-  MessageRequestCookies,
-  MessageResponseCookie,
-  MessageResponseCookies,
+  HttpHeader,
+  HttpHeaders,
+  HttpRequestCookie,
+  HttpRequestCookies,
+  HttpResponseCookie,
+  HttpResponseCookies,
   ReadMessageModel
 } from '@famir/domain'
 
-export const messageHeaderSchema: JSONSchemaType<MessageHeader> = {
+export const messageHeaderSchema: JSONSchemaType<HttpHeader> = {
   type: ['string', 'array'],
   oneOf: [
     {
@@ -24,7 +24,7 @@ export const messageHeaderSchema: JSONSchemaType<MessageHeader> = {
   ]
 } as const
 
-export const messageHeadersSchema: JSONSchemaType<MessageHeaders> = {
+export const messageHeadersSchema: JSONSchemaType<HttpHeaders> = {
   type: 'object',
   required: [],
   additionalProperties: {
@@ -33,11 +33,11 @@ export const messageHeadersSchema: JSONSchemaType<MessageHeaders> = {
   }
 } as const
 
-export const messageRequestCookieSchema: JSONSchemaType<MessageRequestCookie> = {
+export const messageRequestCookieSchema: JSONSchemaType<HttpRequestCookie> = {
   type: 'string'
 } as const
 
-export const messageRequestCookiesSchema: JSONSchemaType<MessageRequestCookies> = {
+export const messageRequestCookiesSchema: JSONSchemaType<HttpRequestCookies> = {
   type: 'object',
   required: [],
   additionalProperties: {
@@ -46,7 +46,7 @@ export const messageRequestCookiesSchema: JSONSchemaType<MessageRequestCookies> 
   }
 } as const
 
-export const messageResponseCookieSchema: JSONSchemaType<MessageResponseCookie> = {
+export const messageResponseCookieSchema: JSONSchemaType<HttpResponseCookie> = {
   type: 'object',
   required: [],
   properties: {
@@ -87,7 +87,7 @@ export const messageResponseCookieSchema: JSONSchemaType<MessageResponseCookie> 
   additionalProperties: false
 } as const
 
-export const messageResponseCookiesSchema: JSONSchemaType<MessageResponseCookies> = {
+export const messageResponseCookiesSchema: JSONSchemaType<HttpResponseCookies> = {
   type: 'object',
   required: [],
   additionalProperties: {

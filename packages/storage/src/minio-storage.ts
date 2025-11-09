@@ -13,7 +13,7 @@ export class MinioStorage implements Storage {
   }
 
   protected readonly options: StorageOptions
-  private readonly _minio: MinioClient
+  protected readonly minio: MinioClient
 
   constructor(
     config: Config<StorageConfig>,
@@ -21,7 +21,7 @@ export class MinioStorage implements Storage {
   ) {
     this.options = buildOptions(config.data)
 
-    this._minio = new MinioClient({
+    this.minio = new MinioClient({
       endPoint: this.options.endPoint,
       port: this.options.port,
       useSSL: this.options.useSSL,

@@ -1,7 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
-  HttpServerLocals,
+  HttpServerShare,
   HttpServerRequest,
   HttpServerResponse,
   HttpServerRouter,
@@ -48,26 +48,23 @@ export class CompleteController extends BaseController {
     router.setHandler('all', '{*splat}', this.defaultHandler)
   }
 
-  private readonly defaultHandler = async (
-    request: HttpServerRequest,
-    locals: HttpServerLocals
-  ): Promise<HttpServerResponse> => {
+  private readonly defaultHandler = async (share: HttpServerShare): Promise<void> => {
     try {
-      this.existsLocalsTarget(locals)
-      this.existsLocalsCreateMessage(locals)
+      this.existsShareCampaign(share)
+      this.existsShareProxy(share)
+      this.existsShareTarget(share)
+      this.existsShareSession(share)
 
-      const { target, createMessage } = locals
+      const { request, response, campaign, proxy, target, session } = share
 
-      const response: HttpServerResponse = {
-        status: 0,
-        headers: {},
-        cookies: {},
-        body: Buffer.alloc(0)
-      }
-
-      await this.completeUseCase.execute({ target, createMessage, response })
-
-      return response
+      await this.completeUseCase.execute({
+        request,
+        response,
+        campaign,
+        proxy,
+        target,
+        session
+      })
     } catch (error) {
       this.exceptionWrapper(error, 'default')
     }

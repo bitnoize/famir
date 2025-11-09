@@ -1,9 +1,10 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, randomIdent } from '@famir/common'
 import {
   AuthSessionModel,
   Config,
   CONFIG,
   CreateSessionModel,
+  CreateSessionResult,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
@@ -44,34 +45,31 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     connection: RedisDatabaseConnection
   ) {
     super(validator, config, logger, connection, 'session')
+
+    this.logger.debug(`SessionRepository initialized`)
   }
 
-  async create(data: CreateSessionModel): Promise<SessionModel> {
+  async create(data: CreateSessionModel): Promise<CreateSessionResult> {
     try {
-      const [status, raw] = await Promise.all([
-        this.connection.session.create_session(
-          this.options.prefix,
-          data.campaignId,
-          data.sessionId,
-          data.secret
-        ),
+      const sessionId = randomIdent()
+      const secret = randomIdent()
 
-        this.connection.session.read_session(this.options.prefix, data.campaignId, data.sessionId)
-      ])
+      const status = await this.connection.session.create_session(
+        this.options.prefix,
+        data.campaignId,
+        sessionId,
+        secret
+      )
 
       const [code, message] = parseStatusReply(status)
 
       if (code === 'OK') {
-        const model = buildModel(raw)
-
-        assertModel(model)
-
-        return model
+        return { sessionId }
       }
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'create', data)
+      this.handleException(error, 'create', data)
     }
   }
 
@@ -85,7 +83,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       return buildModel(raw)
     } catch (error) {
-      this.exceptionWrapper(error, 'read', data)
+      this.handleException(error, 'read', data)
     }
   }
 
@@ -109,7 +107,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'auth', data)
+      this.handleException(error, 'auth', data)
     }
   }
 
@@ -139,7 +137,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       throw new DatabaseError(message, { code })
     } catch (error) {
-      this.exceptionWrapper(error, 'upgrade', data)
+      this.handleException(error, 'upgrade', data)
     }
   }
 }

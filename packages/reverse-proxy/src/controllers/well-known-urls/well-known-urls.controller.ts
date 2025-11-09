@@ -1,10 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
-  HttpServerError,
-  HttpServerLocals,
-  HttpServerRequest,
-  HttpServerResponse,
+  HttpServerShare,
   HttpServerRouter,
   Logger,
   LOGGER,
@@ -50,160 +47,147 @@ export class WellKnownUrlsController extends BaseController {
     router.setHandlerSync('all', '/sitemap.xml', this.sitemapXmlHandler)
   }
 
-  private readonly preflightCorsHandler = (
-    request: HttpServerRequest,
-    locals: HttpServerLocals
-  ): HttpServerResponse => {
+  protected readonly preflightCorsHandler = (share: HttpServerShare) => {
     try {
-      this.existsLocalsCampaign(locals)
+      this.existsShareCampaign(share)
 
-      return {
-        status: 204,
-        headers: {
-          ...commonResponseHeaders,
-          'content-type': 'text/plain',
-          'access-control-allow-origin': locals.campaign.mirrorDomain,
-          'access-control-allow-methods': '*',
-          'access-control-allow-headers': '*',
-          'access-control-expose-headers': '*',
-          'access-control-allow-credentials': 'true',
-          'access-control-max-age': '86400'
-        },
-        cookies: {},
-        body: Buffer.alloc(0)
+      const { response, campaign } = share
+
+      response.isComplete = true
+      response.status = 204
+
+      const responseHeaders: HttpHeaders = {
+        ...commonResponseHeaders,
+        'content-type': 'text/plain',
+        'access-control-allow-origin': campaign.mirrorDomain,
+        'access-control-allow-methods': '*',
+        'access-control-allow-headers': '*',
+        'access-control-expose-headers': '*',
+        'access-control-allow-credentials': 'true',
+        'access-control-max-age': '86400'
       }
+
+      Object.entries(responseHeaders).forEach(([name, value]) => {
+        response.headers[name] = value
+      })
     } catch (error) {
       this.exceptionWrapper(error, 'preflight-cors')
     }
   }
 
-  private readonly faviconIcoHandler = (
-    request: HttpServerRequest,
-    locals: HttpServerLocals
-  ): HttpServerResponse => {
+  protected readonly faviconIcoHandler = (share: HttpServerShare) => {
     try {
-      this.existsLocalsTarget(locals)
+      this.existsShareTarget(share)
 
-      const body = Buffer.from(locals.target.faviconIco, 'base64')
+      const { target } = share
 
-      const response: HttpServerResponse = {
-        status: 200,
-        headers: {
-          ...commonResponseHeaders,
-          'content-type': 'image/x-icon',
-          'content-length': body.length.toString(),
-          'last-modified': locals.target.updatedAt.toUTCString(),
-          'cache-control': 'public, max-age=691200'
-        },
-        cookies: {},
-        body: Buffer.alloc(0)
+      const responseBody = Buffer.from(target.faviconIco, 'base64')
+      const notFoundPageBody = Buffer.from(target.notFoundPage)
+
+      const responseHeaders: HttpHeaders = {
+        ...commonResponseHeaders,
+        'content-type': 'image/x-icon',
+        'content-length': responseBody.length.toString(),
+        'last-modified': target.updatedAt.toUTCString(),
+        'cache-control': 'public, max-age=691200'
       }
 
-      if (request.method === 'HEAD') {
-        return response
-      }
-
-      if (request.method === 'GET') {
-        response.body = body
-
-        return response
-      }
-
-      throw new HttpServerError(`Not found`, {
-        code: 'NOT_FOUND'
-      })
+      this.serveStaticFile(share, responseHeaders, responseBody, notFoundPageBody)
     } catch (error) {
       this.exceptionWrapper(error, 'faviconIco')
     }
   }
 
-  private readonly robotsTxtHandler = (
-    request: HttpServerRequest,
-    locals: HttpServerLocals
-  ): HttpServerResponse => {
+  protected readonly robotsTxtHandler = (share: HttpServerShare) => {
     try {
-      this.existsLocalsCampaign(locals)
-      this.existsLocalsTarget(locals)
+      this.existsShareTarget(share)
 
-      const { campaign, target } = locals
+      const { target } = share
 
-      const robotsTxt = this.templater.render(target.robotsTxt, {
-        mirrorDomain: campaign.mirrorDomain,
-        mirrorSecure: target.mirrorSecure,
-        mirrorSub: target.mirrorSub,
-        mirrorPort: target.mirrorPort
-      })
+      const responseBody = Buffer.from(target.robotsTxt)
+      const notFoundPageBody = Buffer.from(target.notFoundPage)
 
-      const body = Buffer.from(robotsTxt)
-
-      const response: HttpServerResponse = {
-        status: 200,
-        headers: {
-          ...commonResponseHeaders,
-          'content-type': 'text/plain',
-          'content-length': body.length.toString(),
-          'last-modified': locals.target.updatedAt.toUTCString(),
-          'cache-control': 'public, max-age=691200'
-        },
-        cookies: {},
-        body: Buffer.alloc(0)
+      const responseHeaders: HttpHeaders = {
+        ...commonResponseHeaders,
+        'content-type': 'text/plain',
+        'content-length': responseBody.length.toString(),
+        'last-modified': target.updatedAt.toUTCString(),
+        'cache-control': 'public, max-age=691200'
       }
 
-      if (request.method === 'HEAD') {
-        return response
-      }
-
-      if (request.method === 'GET') {
-        response.body = body
-
-        return response
-      }
-
-      throw new HttpServerError(`Not found`, {
-        code: 'NOT_FOUND'
-      })
+      this.serveStaticFile(share, responseHeaders, responseBody, notFoundPageBody)
     } catch (error) {
       this.exceptionWrapper(error, 'robotsTxt')
     }
   }
 
-  private readonly sitemapXmlHandler = (
-    request: HttpServerRequest,
-    locals: HttpServerLocals
-  ): HttpServerResponse => {
+  protected readonly sitemapXmlHandler = (share: HttpServerShare) => {
     try {
-      this.existsLocalsTarget(locals)
+      this.existsShareTarget(share)
 
-      const body = Buffer.from(locals.target.sitemapXml)
+      const { target } = share
 
-      const response: HttpServerResponse = {
-        status: 200,
-        headers: {
-          ...commonResponseHeaders,
-          'content-type': 'application/xml',
-          'content-length': body.length.toString(),
-          'last-modified': locals.target.updatedAt.toUTCString(),
-          'cache-control': 'public, max-age=691200'
-        },
-        cookies: {},
-        body: Buffer.alloc(0)
+      const responseBody = Buffer.from(target.sitemapXml)
+      const notFoundPageBody = Buffer.from(target.notFoundPage)
+
+      const responseHeaders: HttpHeaders = {
+        ...commonResponseHeaders,
+        'content-type': 'application/xml',
+        'content-length': responseBody.length.toString(),
+        'last-modified': target.updatedAt.toUTCString(),
+        'cache-control': 'public, max-age=691200'
       }
 
-      if (request.method === 'HEAD') {
-        return response
-      }
-
-      if (request.method === 'GET') {
-        response.body = body
-
-        return response
-      }
-
-      throw new HttpServerError(`Not found`, {
-        code: 'NOT_FOUND'
-      })
+      this.serveStaticFile(share, responseHeaders, responseBody, notFoundPageBody)
     } catch (error) {
       this.exceptionWrapper(error, 'sitemapXml')
     }
+  }
+
+  private serveStaticFile(
+    share: HttpServerShare,
+    responseHeaders: HttpHeaders,
+    responseBody: HttpBody,
+    notFoundPageBody: HttpBody,
+  ) {
+    const { request, response } = share
+
+    response.isComplete = true
+
+    if (responseBody.length > 0) {
+      if (request.method === 'HEAD') {
+        response.status = 200
+
+        Object.entries(responseHeaders).forEach(([name, value]) => {
+          response.headers[name] = value
+        })
+
+        return
+      }
+
+      if (request.method === 'GET') {
+        response.status = 200
+        response.body = responseBody
+
+        Object.entries(responseHeaders).forEach(([name, value]) => {
+          response.headers[name] = value
+        })
+
+        return
+      }
+    }
+
+    response.status = 404
+    response.body = notFoundPageBody
+
+    const notFoundHeaders: HttpHeaders = {
+      ...commonResponseHeaders,
+      'content-type': 'text/html',
+      'content-length': notFoundPageBody.length.toString(),
+    }
+
+    Object.entries(notFoundHeaders).forEach(([name, value]) => {
+      response.headers[name] = value
+    })
   }
 }

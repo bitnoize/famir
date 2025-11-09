@@ -2,8 +2,10 @@ import { SessionModel } from '../../models/index.js'
 
 export interface CreateSessionModel {
   campaignId: string
+}
+
+export interface CreateSessionResult {
   sessionId: string
-  secret: string
 }
 
 export interface ReadSessionModel {
@@ -24,7 +26,7 @@ export interface UpgradeSessionModel {
 }
 
 export interface SessionRepository {
-  create(data: CreateSessionModel): Promise<SessionModel>
+  create(data: CreateSessionModel): Promise<CreateSessionResult>
   read(data: ReadSessionModel): Promise<SessionModel | null>
   auth(data: AuthSessionModel): Promise<SessionModel>
   upgrade(data: UpgradeSessionModel): Promise<SessionModel>
