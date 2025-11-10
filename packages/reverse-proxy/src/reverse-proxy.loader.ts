@@ -11,7 +11,7 @@ import {
   RedisTargetRepository
 } from '@famir/database'
 import { CurlHttpClient } from '@famir/http-client'
-import { ExpressHttpServer, ExpressHttpServerRegistry } from '@famir/http-server'
+import { NodeHttpServer, ImplHttpServerRouter } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
 import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'
@@ -47,25 +47,25 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   CurlHttpClient.inject(container)
 
-  ExpressHttpServerRegistry.inject(container, [
-    'beforeSetup',
+  ImplHttpServerRouter.inject(container, [
+    'before-setup',
     'setup',
-    'afterSetup',
-    'beforeAuth',
+    'after-setup',
+    'before-auth',
     'auth',
-    'afterAuth',
-    'beforePrepare',
+    'after-auth',
+    'before-prepare',
     'prepare',
-    'afterPrepare',
-    'beforeForward',
+    'after-prepare',
+    'before-forward',
     'forward',
-    'afterForward',
-    'beforeComplete',
+    'after-forward',
+    'before-complete',
     'complete',
-    'afterComplete'
+    'after-complete'
   ])
 
-  ExpressHttpServer.inject(container)
+  NodeHttpServer.inject(container)
 
   ReverseProxyApp.inject(container)
 

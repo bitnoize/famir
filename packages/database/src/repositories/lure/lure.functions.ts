@@ -44,7 +44,7 @@ export const lureFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_lure: {
@@ -55,7 +55,7 @@ export const lureFunctions = {
         parser.pushKey(lureKey(prefix, campaignId, lureId))
       },
 
-      transformReply: undefined as unknown as () => RawLure | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_lure_path: {
@@ -66,7 +66,7 @@ export const lureFunctions = {
         parser.pushKey(lurePathKey(prefix, campaignId, path))
       },
 
-      transformReply: undefined as unknown as () => string | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_lure_index: {
@@ -77,7 +77,7 @@ export const lureFunctions = {
         parser.pushKey(lureIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => string[] | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     enable_lure: {
@@ -90,7 +90,7 @@ export const lureFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     disable_lure: {
@@ -103,7 +103,7 @@ export const lureFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     delete_lure: {
@@ -124,7 +124,7 @@ export const lureFunctions = {
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     }
   }
 } as const

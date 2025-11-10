@@ -84,7 +84,7 @@ export const messageFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_message: {
@@ -95,7 +95,7 @@ export const messageFunctions = {
         parser.pushKey(messageKey(prefix, campaignId, messageId))
       },
 
-      transformReply: undefined as unknown as () => RawMessage | null
+      transformReply: undefined as unknown as () => unknown
     }
   }
 } as const

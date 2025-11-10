@@ -9,7 +9,6 @@ import {
 } from '@famir/domain'
 import { Redis } from 'ioredis'
 import { WorkflowConfig, WorkflowConnectorOptions } from './workflow.js'
-import { buildConnectorOptions } from './workflow.utils.js'
 
 export type BullWorkflowConnection = Redis
 
@@ -32,7 +31,7 @@ export class BullWorkflowConnector implements WorkflowConnector {
     config: Config<WorkflowConfig>,
     protected readonly logger: Logger
   ) {
-    this.options = buildConnectorOptions(config.data)
+    this.options = this.buildOptions(config.data)
 
     this.redis = new Redis(this.options.connectionUrl, {
       //lazyConnect: true,
@@ -65,5 +64,11 @@ export class BullWorkflowConnector implements WorkflowConnector {
     await this.redis.quit()
 
     this.logger.debug(`WorkflowConnector closed`)
+  }
+
+  private buildOptions(config: WorkflowConfig): WorkflowConnectorOptions {
+    return {
+      connectionUrl: config.WORKFLOW_CONNECTION_URL
+    }
   }
 }

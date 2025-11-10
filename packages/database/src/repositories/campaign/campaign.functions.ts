@@ -66,7 +66,7 @@ export const campaignFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_campaign: {
@@ -80,7 +80,7 @@ export const campaignFunctions = {
         parser.pushKey(lureIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => RawCampaign | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_campaign_index: {
@@ -90,7 +90,7 @@ export const campaignFunctions = {
         parser.pushKey(campaignIndexKey(prefix))
       },
 
-      transformReply: undefined as unknown as () => string[]
+      transformReply: undefined as unknown as () => unknown
     },
 
     update_campaign: {
@@ -131,7 +131,7 @@ export const campaignFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     delete_campaign: {
@@ -147,7 +147,7 @@ export const campaignFunctions = {
         parser.pushKey(lureIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     }
   }
 } as const

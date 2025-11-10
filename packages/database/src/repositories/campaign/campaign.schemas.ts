@@ -1,10 +1,91 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import {
-  CreateCampaignModel,
-  DeleteCampaignModel,
-  ReadCampaignModel,
-  UpdateCampaignModel
+  CreateCampaignData,
+  DeleteCampaignData,
+  ReadCampaignData,
+  UpdateCampaignData
 } from '@famir/domain'
+import { RawCampaign } from './campaign.functions.js'
+
+export const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
+  type: 'object',
+  required: [
+    'campaign_id',
+    'mirror_domain',
+    'description',
+    'landing_auth_path',
+    'landing_auth_param',
+    'landing_lure_param',
+    'session_cookie_name',
+    'session_expire',
+    'new_session_expire',
+    'message_expire',
+    'proxy_count',
+    'target_count',
+    'redirector_count',
+    'lure_count',
+    'session_count',
+    'message_count',
+    'created_at',
+    'updated_at'
+  ],
+  properties: {
+    campaign_id: {
+      type: 'string'
+    },
+    mirror_domain: {
+      type: 'string'
+    },
+    description: {
+      type: 'string'
+    },
+    landing_auth_path: {
+      type: 'string'
+    },
+    landing_auth_param: {
+      type: 'string'
+    },
+    landing_lure_param: {
+      type: 'string'
+    },
+    session_cookie_name: {
+      type: 'string'
+    },
+    session_expire: {
+      type: 'integer'
+    },
+    new_session_expire: {
+      type: 'integer'
+    },
+    message_expire: {
+      type: 'integer'
+    },
+    proxy_count: {
+      type: 'integer'
+    },
+    target_count: {
+      type: 'integer'
+    },
+    redirector_count: {
+      type: 'integer'
+    },
+    lure_count: {
+      type: 'integer'
+    },
+    session_count: {
+      type: 'integer'
+    },
+    message_count: {
+      type: 'integer'
+    },
+    created_at: {
+      type: 'integer'
+    },
+    updated_at: {
+      type: 'integer'
+    }
+  }
+} as const
 
 export const campaignMirrorDomainSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -36,7 +117,7 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
   maximum: 24 * 3600 * 1000
 } as const
 
-export const createCampaignModelSchema: JSONSchemaType<CreateCampaignModel> = {
+export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
   type: 'object',
   required: ['campaignId', 'mirrorDomain'],
   properties: {
@@ -78,7 +159,7 @@ export const createCampaignModelSchema: JSONSchemaType<CreateCampaignModel> = {
   additionalProperties: false
 } as const
 
-export const readCampaignModelSchema: JSONSchemaType<ReadCampaignModel> = {
+export const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
@@ -86,7 +167,7 @@ export const readCampaignModelSchema: JSONSchemaType<ReadCampaignModel> = {
   }
 }
 
-export const updateCampaignModelSchema: JSONSchemaType<UpdateCampaignModel> = {
+export const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
@@ -111,10 +192,10 @@ export const updateCampaignModelSchema: JSONSchemaType<UpdateCampaignModel> = {
   additionalProperties: false
 } as const
 
-export const deleteCampaignModelSchema: JSONSchemaType<DeleteCampaignModel> = {
+export const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
     campaignId: customIdentSchema
   }
-}
+} as const

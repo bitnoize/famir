@@ -1,28 +1,27 @@
 import { DIContainer, randomIdent } from '@famir/common'
 import {
-  AuthSessionModel,
+  AuthSessionData,
   Config,
   CONFIG,
-  CreateSessionModel,
-  CreateSessionResult,
+  CreateSessionData,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   Logger,
   LOGGER,
-  ReadSessionModel,
+  ReadSessionData,
   SESSION_REPOSITORY,
   SessionModel,
   SessionRepository,
-  UpgradeSessionModel,
+  UpgradeSessionData,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
-import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { assertModel, buildModel } from './session.utils.js'
+import { RawSession } from './session.functions.js'
+import { rawSessionSchema } from './session.schemas.js'
 
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {
   static inject(container: DIContainer) {
@@ -46,10 +45,14 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
   ) {
     super(validator, config, logger, connection, 'session')
 
+    validator.addSchemas({
+      'database-raw-session': rawSessionSchema
+    })
+
     this.logger.debug(`SessionRepository initialized`)
   }
 
-  async create(data: CreateSessionModel): Promise<CreateSessionResult> {
+  async createSession(data: CreateSessionData): Promise<string> {
     try {
       const sessionId = randomIdent()
       const secret = randomIdent()
@@ -61,59 +64,63 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         secret
       )
 
-      const [code, message] = parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(status)
 
-      if (code === 'OK') {
-        return { sessionId }
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
       }
 
-      throw new DatabaseError(message, { code })
+      this.logger.info(message, { sessionId })
+
+      return sessionId
     } catch (error) {
-      this.handleException(error, 'create', data)
+      this.handleException(error, 'createSession', data)
     }
   }
 
-  async read(data: ReadSessionModel): Promise<SessionModel | null> {
+  async readSession(data: ReadSessionData): Promise<SessionModel | null> {
     try {
-      const raw = await this.connection.session.read_session(
+      const rawSession = await this.connection.session.read_session(
         this.options.prefix,
         data.campaignId,
         data.sessionId
       )
 
-      return buildModel(raw)
+      return this.buildSessionModel(rawSession)
     } catch (error) {
-      this.handleException(error, 'read', data)
+      this.handleException(error, 'readSession', data)
     }
   }
 
-  async auth(data: AuthSessionModel): Promise<SessionModel> {
+  async authSession(data: AuthSessionData): Promise<SessionModel> {
     try {
-      const [status, raw] = await Promise.all([
+      const [status, rawSession] = await Promise.all([
         this.connection.session.auth_session(this.options.prefix, data.campaignId, data.sessionId),
 
         this.connection.session.read_session(this.options.prefix, data.campaignId, data.sessionId)
       ])
 
-      const [code, message] = parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(status)
 
-      if (code === 'OK') {
-        const model = buildModel(raw)
-
-        assertModel(model)
-
-        return model
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
       }
 
-      throw new DatabaseError(message, { code })
+      const sessionModel = this.buildSessionModel(rawSession)
+
+      this.assertSessionModel(sessionModel)
+
+      this.logger.info(message, { sessionModel })
+
+      return sessionModel
     } catch (error) {
-      this.handleException(error, 'auth', data)
+      this.handleException(error, 'authSession', data)
     }
   }
 
-  async upgrade(data: UpgradeSessionModel): Promise<SessionModel> {
+  async upgradeSession(data: UpgradeSessionData): Promise<SessionModel> {
     try {
-      const [status, raw] = await Promise.all([
+      const [status, rawSession] = await Promise.all([
         this.connection.session.upgrade_session(
           this.options.prefix,
           data.campaignId,
@@ -125,19 +132,69 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, data.campaignId, data.sessionId)
       ])
 
-      const [code, message] = parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(status)
 
-      if (code === 'OK') {
-        const model = buildModel(raw)
-
-        assertModel(model)
-
-        return model
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
       }
 
-      throw new DatabaseError(message, { code })
+      const sessionModel = this.buildSessionModel(rawSession)
+
+      this.assertSessionModel(sessionModel)
+
+      this.logger.info(message, { sessionModel })
+
+      return sessionModel
     } catch (error) {
-      this.handleException(error, 'upgrade', data)
+      this.handleException(error, 'upgradeSession', data)
+    }
+  }
+
+  protected buildSessionModel(rawSession: unknown): SessionModel | null {
+    if (rawSession === null) {
+      return null
+    }
+
+    this.validateRawSession(rawSession)
+
+    return {
+      campaignId: rawSession.campaign_id,
+      sessionId: rawSession.session_id,
+      proxyId: rawSession.proxy_id,
+      secret: rawSession.secret,
+      isLanding: !!rawSession.is_landing,
+      messageCount: rawSession.message_count,
+      createdAt: new Date(rawSession.created_at),
+      lastAuthAt: new Date(rawSession.last_auth_at)
+    }
+  }
+
+  protected buildSessionCollection(rawSessions: unknown): Array<SessionModel | null> {
+    this.validateArrayReply(rawSessions)
+
+    return rawSessions.map((rawSession) => this.buildSessionModel(rawSession))
+  }
+
+  protected validateRawSession(value: unknown): asserts value is RawSession {
+    try {
+      this.validator.assertSchema<RawSession>('database-raw-session', value)
+    } catch (error) {
+      throw new DatabaseError(`RawSession validate failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected guardSessionModel(value: SessionModel | null): value is SessionModel {
+    return value != null
+  }
+
+  protected assertSessionModel(value: SessionModel | null): asserts value is SessionModel {
+    if (!this.guardSessionModel(value)) {
+      throw new DatabaseError(`SessionModel unexpected lost`, {
+        code: 'INTERNAL_ERROR'
+      })
     }
   }
 }

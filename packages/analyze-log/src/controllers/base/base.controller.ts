@@ -9,16 +9,12 @@ export abstract class BaseController {
     protected readonly controllerName: string
   ) {
     this.assertSchema = validator.assertSchema
-
-    this.logger.debug(`Controller initialized`, {
-      controller: this.controllerName
-    })
   }
 
-  protected handleException(error: unknown, handler: string, data: object | null): never {
+  protected handleException(error: unknown, processor: string, data: unknown): never {
     if (error instanceof ExecutorError) {
       error.context['controller'] = this.controllerName
-      error.context['handler'] = handler
+      error.context['processor'] = processor
 
       throw error
     } else {
@@ -26,7 +22,7 @@ export abstract class BaseController {
         cause: error,
         context: {
           controller: this.controllerName,
-          handler
+          processor
         },
         code: 'INTERNAL_ERROR'
       })

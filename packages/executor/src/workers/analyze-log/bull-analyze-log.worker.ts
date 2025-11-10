@@ -6,9 +6,9 @@ import {
   Config,
   CONFIG,
   EXECUTOR_CONNECTOR,
-  EXECUTOR_REGISTRY,
+  EXECUTOR_ROUTER,
   ExecutorConnector,
-  ExecutorRegistry,
+  ExecutorRouter,
   Logger,
   LOGGER
 } from '@famir/domain'
@@ -25,7 +25,7 @@ export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWo
           c.resolve<Config<ExecutorConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR).connection<BullExecutorConnection>(),
-          c.resolve<ExecutorRegistry>(EXECUTOR_REGISTRY)
+          c.resolve<ExecutorRouter>(EXECUTOR_ROUTER)
         )
     )
   }
@@ -34,9 +34,9 @@ export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWo
     config: Config<ExecutorConfig>,
     logger: Logger,
     connection: BullExecutorConnection,
-    registry: ExecutorRegistry
+    router: ExecutorRouter
   ) {
-    super(config, logger, connection, registry, ANALYZE_LOG_QUEUE_NAME)
+    super(config, logger, connection, router, ANALYZE_LOG_QUEUE_NAME)
 
     this.logger.debug(`AnalyzeLogWorker initialized`)
   }

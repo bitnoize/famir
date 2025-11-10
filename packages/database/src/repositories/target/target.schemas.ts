@@ -1,12 +1,117 @@
 import { JSONSchemaType, booleanSchema, customIdentSchema } from '@famir/common'
 import {
-  CreateTargetModel,
-  DeleteTargetModel,
-  ListTargetModels,
-  ReadTargetModel,
-  SwitchTargetModel,
-  UpdateTargetModel
+  CreateTargetData,
+  DeleteTargetData,
+  ListTargetsData,
+  ReadTargetData,
+  SwitchTargetData,
+  UpdateTargetData
 } from '@famir/domain'
+import { RawTarget } from './target.functions.js'
+
+export const rawTargetSchema: JSONSchemaType<RawTarget> = {
+  type: 'object',
+  required: [
+    'campaign_id',
+    'target_id',
+    'is_landing',
+    'donor_secure',
+    'donor_sub',
+    'donor_domain',
+    'donor_port',
+    'mirror_secure',
+    'mirror_sub',
+    'mirror_port',
+    'marks',
+    'connect_timeout',
+    'timeout',
+    'main_page',
+    'not_found_page',
+    'favicon_ico',
+    'robots_txt',
+    'sitemap_xml',
+    'success_redirect_url',
+    'failure_redirect_url',
+    'is_enabled',
+    'message_count',
+    'created_at',
+    'updated_at'
+  ],
+  properties: {
+    campaign_id: {
+      type: 'string'
+    },
+    target_id: {
+      type: 'string'
+    },
+    is_landing: {
+      type: 'integer'
+    },
+    donor_secure: {
+      type: 'integer'
+    },
+    donor_sub: {
+      type: 'string'
+    },
+    donor_domain: {
+      type: 'string'
+    },
+    donor_port: {
+      type: 'integer'
+    },
+    mirror_secure: {
+      type: 'integer'
+    },
+    mirror_sub: {
+      type: 'string'
+    },
+    mirror_port: {
+      type: 'integer'
+    },
+    marks: {
+      type: 'string'
+    },
+    connect_timeout: {
+      type: 'integer'
+    },
+    timeout: {
+      type: 'integer'
+    },
+    main_page: {
+      type: 'string'
+    },
+    not_found_page: {
+      type: 'string'
+    },
+    favicon_ico: {
+      type: 'string'
+    },
+    robots_txt: {
+      type: 'string'
+    },
+    sitemap_xml: {
+      type: 'string'
+    },
+    success_redirect_url: {
+      type: 'string'
+    },
+    failure_redirect_url: {
+      type: 'string'
+    },
+    is_enabled: {
+      type: 'integer'
+    },
+    message_count: {
+      type: 'integer'
+    },
+    created_at: {
+      type: 'integer'
+    },
+    updated_at: {
+      type: 'integer'
+    }
+  }
+} as const
 
 export const targetSubSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -57,7 +162,7 @@ export const targetRedirectUrlSchema: JSONSchemaType<string> = {
   maxLength: 128
 } as const
 
-export const createTargetModelSchema: JSONSchemaType<CreateTargetModel> = {
+export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
   type: 'object',
   required: [
     'campaignId',
@@ -136,7 +241,7 @@ export const createTargetModelSchema: JSONSchemaType<CreateTargetModel> = {
   additionalProperties: false
 } as const
 
-export const readTargetModelSchema: JSONSchemaType<ReadTargetModel> = {
+export const readTargetDataSchema: JSONSchemaType<ReadTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {
@@ -146,7 +251,7 @@ export const readTargetModelSchema: JSONSchemaType<ReadTargetModel> = {
   additionalProperties: false
 } as const
 
-export const updateTargetModelSchema: JSONSchemaType<UpdateTargetModel> = {
+export const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {
@@ -196,7 +301,7 @@ export const updateTargetModelSchema: JSONSchemaType<UpdateTargetModel> = {
   additionalProperties: false
 } as const
 
-export const switchTargetModelSchema: JSONSchemaType<SwitchTargetModel> = {
+export const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {
@@ -206,7 +311,7 @@ export const switchTargetModelSchema: JSONSchemaType<SwitchTargetModel> = {
   additionalProperties: false
 } as const
 
-export const deleteTargetModelSchema: JSONSchemaType<DeleteTargetModel> = {
+export const deleteTargetDataSchema: JSONSchemaType<DeleteTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {
@@ -216,7 +321,7 @@ export const deleteTargetModelSchema: JSONSchemaType<DeleteTargetModel> = {
   additionalProperties: false
 } as const
 
-export const listTargetModelsSchema: JSONSchemaType<ListTargetModels> = {
+export const listTargetsDataSchema: JSONSchemaType<ListTargetsData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {

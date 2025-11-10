@@ -8,5 +8,3 @@ export interface ExecutorConnector {
 export const EXECUTOR_CONNECTOR = Symbol('ExecutorConnector')
 
 export type ExecutorProcessor = (data: unknown) => Promise<unknown>
-
-

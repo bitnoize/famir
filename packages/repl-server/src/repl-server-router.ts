@@ -2,24 +2,24 @@ import { DIContainer } from '@famir/common'
 import {
   Logger,
   LOGGER,
-  REPL_SERVER_REGISTRY,
+  REPL_SERVER_ROUTER,
   ReplServerApiCall,
   ReplServerApiCalls,
-  ReplServerRegistry
+  ReplServerRouter
 } from '@famir/domain'
 
-export class NodeReplServerRegistry implements ReplServerRegistry {
+export class ImplReplServerRouter implements ReplServerRouter {
   static inject(container: DIContainer) {
-    container.registerSingleton<ReplServerRegistry>(
-      REPL_SERVER_REGISTRY,
-      (c) => new NodeReplServerRegistry(c.resolve<Logger>(LOGGER))
+    container.registerSingleton<ReplServerRouter>(
+      REPL_SERVER_ROUTER,
+      (c) => new ImplReplServerRouter(c.resolve<Logger>(LOGGER))
     )
   }
 
   protected readonly apiCalls: ReplServerApiCalls = {}
 
   constructor(protected readonly logger: Logger) {
-    this.logger.debug(`ReplServerRegistry initialized`)
+    this.logger.debug(`ReplServerRouter initialized`)
   }
 
   addApiCall(name: string, apiCall: ReplServerApiCall) {

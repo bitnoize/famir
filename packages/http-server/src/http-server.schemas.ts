@@ -1,5 +1,4 @@
 import { JSONSchemaType } from '@famir/common'
-import { DEFAULT_ERROR_PAGE } from './http-server.utils.js'
 
 export const configHttpServerAddressSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -19,6 +18,22 @@ export const configHttpServerBodyLimitSchema: JSONSchemaType<number> = {
   maximum: 1024 * 1024 * 1024,
   default: 10 * 1024 * 1024
 } as const
+
+const DEFAULT_ERROR_PAGE = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Error</title>
+  </head>
+  <body>
+    <div>
+      <h1><%= data.status %></h1>
+      <p><%= data.message %></p>
+    </div>
+  </body>
+</html>`
 
 export const configHttpServerErrorPageSchema: JSONSchemaType<string> = {
   type: 'string',

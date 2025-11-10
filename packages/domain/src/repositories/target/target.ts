@@ -1,6 +1,6 @@
 import { DisabledTargetModel, EnabledTargetModel, TargetModel } from '../../models/index.js'
 
-export interface CreateTargetModel {
+export interface CreateTargetData {
   campaignId: string
   targetId: string
   isLanding: boolean
@@ -23,12 +23,12 @@ export interface CreateTargetModel {
   failureRedirectUrl: string
 }
 
-export interface ReadTargetModel {
+export interface ReadTargetData {
   campaignId: string
   targetId: string
 }
 
-export interface UpdateTargetModel {
+export interface UpdateTargetData {
   campaignId: string
   targetId: string
   marks: string[] | null | undefined
@@ -43,30 +43,30 @@ export interface UpdateTargetModel {
   failureRedirectUrl: string | null | undefined
 }
 
-export interface SwitchTargetModel {
+export interface SwitchTargetData {
   campaignId: string
   targetId: string
 }
 
-export interface DeleteTargetModel {
+export interface DeleteTargetData {
   campaignId: string
   targetId: string
 }
 
-export interface ListTargetModels {
+export interface ListTargetsData {
   campaignId: string
 }
 
 export interface TargetRepository {
-  create(data: CreateTargetModel): Promise<DisabledTargetModel>
-  read(data: ReadTargetModel): Promise<TargetModel | null>
-  readEnabled(data: ReadTargetModel): Promise<EnabledTargetModel | null>
-  update(data: UpdateTargetModel): Promise<TargetModel>
-  enable(data: SwitchTargetModel): Promise<EnabledTargetModel>
-  disable(data: SwitchTargetModel): Promise<DisabledTargetModel>
-  delete(data: DeleteTargetModel): Promise<DisabledTargetModel>
-  list(data: ListTargetModels): Promise<TargetModel[] | null>
-  listEnabled(data: ListTargetModels): Promise<EnabledTargetModel[] | null>
+  createTarget(data: CreateTargetData): Promise<DisabledTargetModel>
+  readTarget(data: ReadTargetData): Promise<TargetModel | null>
+  readEnabledTarget(data: ReadTargetData): Promise<EnabledTargetModel | null>
+  updateTarget(data: UpdateTargetData): Promise<TargetModel>
+  enableTarget(data: SwitchTargetData): Promise<EnabledTargetModel>
+  disableTarget(data: SwitchTargetData): Promise<DisabledTargetModel>
+  deleteTarget(data: DeleteTargetData): Promise<DisabledTargetModel>
+  listTargets(data: ListTargetsData): Promise<TargetModel[] | null>
+  listEnabledTargets(data: ListTargetsData): Promise<EnabledTargetModel[] | null>
 }
 
 export const TARGET_REPOSITORY = Symbol('TargetRepository')

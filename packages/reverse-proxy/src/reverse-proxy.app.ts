@@ -41,9 +41,12 @@ export class ReverseProxyApp {
     protected readonly httpServer: HttpServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      process.once(signal, async () => {
-        await this.stop()
+      process.once(signal, () => {
+        this.stop().catch((error: unknown) => {
+          this.logger.fatal(`App stop unhandled error`, {
+            error: serializeError(error)
+          })
+        })
       })
     })
 
@@ -56,9 +59,9 @@ export class ReverseProxyApp {
 
       await this.httpServer.listen()
 
-      this.logger.debug(`ReverseProxyApp started`)
+      this.logger.debug(`App started`)
     } catch (error) {
-      this.logger.error(`ReverseProxyApp start failed`, {
+      this.logger.error(`App start failed`, {
         error: serializeError(error)
       })
 
@@ -76,9 +79,9 @@ export class ReverseProxyApp {
 
       await this.databaseConnector.close()
 
-      this.logger.debug(`ReverseProxyApp stopped`)
+      this.logger.debug(`App stopped`)
     } catch (error) {
-      this.logger.error(`ReverseProxyApp stop failed`, {
+      this.logger.error(`App stop failed`, {
         error: serializeError(error)
       })
 

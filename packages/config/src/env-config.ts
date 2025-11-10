@@ -1,6 +1,5 @@
 import { DIContainer, JSONSchemaType } from '@famir/common'
-import { Config, CONFIG, Validator, VALIDATOR, ValidatorAssertSchema } from '@famir/domain'
-import { buildConfig } from './config.utils.js'
+import { Config, CONFIG, Validator, VALIDATOR } from '@famir/domain'
 
 export class EnvConfig<T> implements Config<T> {
   static inject<C>(container: DIContainer, configSchema: JSONSchemaType<C>) {
@@ -10,12 +9,11 @@ export class EnvConfig<T> implements Config<T> {
     )
   }
 
-  protected readonly assertSchema: ValidatorAssertSchema
-
-  constructor(validator: Validator, configSchema: JSONSchemaType<T>) {
-    this.assertSchema = validator.assertSchema
-
-    validator.addSchemas({
+  constructor(
+    private readonly validator: Validator,
+    configSchema: JSONSchemaType<T>
+  ) {
+    this.validator.addSchemas({
       config: configSchema
     })
   }
@@ -27,12 +25,26 @@ export class EnvConfig<T> implements Config<T> {
       return this.#data
     }
 
-    this.#data = buildConfig<T>(this.assertSchema)
+    this.#data = this.buildData()
 
     return this.#data
   }
 
   reset() {
     this.#data = null
+  }
+
+  protected buildData(): T {
+    try {
+      const data = { ...process.env }
+
+      this.validator.assertSchema<T>('config', data)
+
+      return data
+    } catch (error) {
+      console.error(`Build config error`, { error })
+
+      process.exit(1)
+    }
   }
 }

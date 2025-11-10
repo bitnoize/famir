@@ -3,7 +3,6 @@ import { Config, Logger, WorkflowError } from '@famir/domain'
 import { Queue } from 'bullmq'
 import { BullWorkflowConnection } from '../../bull-workflow-connector.js'
 import { WorkflowConfig, WorkflowQueueOptions } from '../../workflow.js'
-import { buildQueueOptions } from '../../workflow.utils.js'
 
 export abstract class BullBaseQueue {
   protected readonly options: WorkflowQueueOptions
@@ -15,7 +14,7 @@ export abstract class BullBaseQueue {
     protected readonly connection: BullWorkflowConnection,
     protected readonly queueName: string
   ) {
-    this.options = buildQueueOptions(config.data)
+    this.options = this.buildOptions(config.data)
 
     this.queue = new Queue<unknown, unknown>(this.queueName, {
       connection: this.connection,
@@ -76,6 +75,12 @@ export abstract class BullBaseQueue {
         },
         code: 'INTERNAL_ERROR'
       })
+    }
+  }
+
+  private buildOptions(config: WorkflowConfig): WorkflowQueueOptions {
+    return {
+      prefix: config.WORKFLOW_PREFIX
     }
   }
 }

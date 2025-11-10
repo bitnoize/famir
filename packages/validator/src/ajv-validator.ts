@@ -1,12 +1,5 @@
 import { DIContainer } from '@famir/common'
-import {
-  VALIDATOR,
-  Validator,
-  ValidatorAssertSchema,
-  ValidatorError,
-  ValidatorGuardSchema,
-  ValidatorSchemas
-} from '@famir/domain'
+import { VALIDATOR, Validator, ValidatorError, ValidatorSchemas } from '@famir/domain'
 import { Ajv, ValidateFunction } from 'ajv'
 
 export class AjvValidator implements Validator {
@@ -34,7 +27,7 @@ export class AjvValidator implements Validator {
     })
   }
 
-  private getSchema<T>(schemaName: string): ValidateFunction<T> {
+  protected getValidate<T>(schemaName: string): ValidateFunction<T> {
     const validate = this.ajv.getSchema<T>(schemaName)
 
     if (!validate) {
@@ -44,40 +37,36 @@ export class AjvValidator implements Validator {
     return validate
   }
 
-  get guardSchema(): ValidatorGuardSchema {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-    return <T>(schemaName: string, data: unknown): data is T => {
-      const validate = this.getSchema<T>(schemaName)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  guardSchema<T>(schemaName: string, data: unknown): data is T {
+    const validate = this.getValidate<T>(schemaName)
 
-      return validate(data) ? true : false
-    }
+    return validate(data) ? true : false
   }
 
-  get assertSchema(): ValidatorAssertSchema {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-    return <T>(schemaName: string, data: unknown): asserts data is T => {
-      const validate = this.getSchema<T>(schemaName)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  assertSchema<T>(schemaName: string, data: unknown): asserts data is T {
+    const validate = this.getValidate<T>(schemaName)
 
-      if (!validate(data)) {
-        const validateErrors = (validate.errors || []).map((error) => {
-          return {
-            keyword: error.keyword,
-            instancePath: error.instancePath,
-            schemaPath: error.schemaPath,
-            params: error.params,
-            propertyName: error.propertyName,
-            message: error.message
-          }
-        })
+    if (!validate(data)) {
+      const validateErrors = (validate.errors || []).map((error) => {
+        return {
+          keyword: error.keyword,
+          instancePath: error.instancePath,
+          schemaPath: error.schemaPath,
+          params: error.params,
+          propertyName: error.propertyName,
+          message: error.message
+        }
+      })
 
-        throw new ValidatorError(`JSON-Schema validation failed`, {
-          context: {
-            schemaName,
-            data
-          },
-          validateErrors
-        })
-      }
+      throw new ValidatorError(`JSON-Schema validation failed`, {
+        context: {
+          schemaName,
+          data
+        },
+        validateErrors
+      })
     }
   }
 }

@@ -1,9 +1,8 @@
 import { serializeError } from '@famir/common'
-import { Config, ExecutorRegistry, Logger } from '@famir/domain'
+import { Config, ExecutorRouter, Logger } from '@famir/domain'
 import { Job, MetricsTime, Worker } from 'bullmq'
 import { BullExecutorConnection } from '../../bull-executor-connector.js'
 import { ExecutorConfig, ExecutorWorkerOptions } from '../../executor.js'
-import { buildWorkerOptions } from '../../executor.utils.js'
 
 export abstract class BullBaseWorker {
   protected readonly options: ExecutorWorkerOptions
@@ -13,16 +12,16 @@ export abstract class BullBaseWorker {
     config: Config<ExecutorConfig>,
     protected readonly logger: Logger,
     protected readonly connection: BullExecutorConnection,
-    protected readonly registry: ExecutorRegistry,
+    protected readonly router: ExecutorRouter,
     protected readonly queueName: string
   ) {
-    this.options = buildWorkerOptions(config.data)
+    this.options = this.buildOptions(config.data)
 
     this.worker = new Worker<unknown, unknown>(
       this.queueName,
       async (job: Job<unknown, unknown>): Promise<unknown> => {
         try {
-          const processor = this.registry.getProcessor(this.queueName, job.name)
+          const processor = this.router.getProcessor(this.queueName, job.name)
 
           return await processor(job.data)
         } catch (error) {
@@ -100,6 +99,15 @@ export abstract class BullBaseWorker {
       name: job.name,
       data: job.data,
       result: job.returnvalue
+    }
+  }
+
+  private buildOptions(config: ExecutorConfig): ExecutorWorkerOptions {
+    return {
+      prefix: config.EXECUTOR_PREFIX,
+      concurrency: config.EXECUTOR_CONCURRENCY,
+      limiterMax: config.EXECUTOR_LIMITER_MAX,
+      limiterDuration: config.EXECUTOR_LIMITER_DURATION
     }
   }
 }

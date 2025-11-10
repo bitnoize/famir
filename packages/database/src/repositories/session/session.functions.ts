@@ -34,7 +34,7 @@ export const sessionFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_session: {
@@ -45,7 +45,7 @@ export const sessionFunctions = {
         parser.pushKey(sessionKey(prefix, campaignId, sessionId))
       },
 
-      transformReply: undefined as unknown as () => RawSession | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     auth_session: {
@@ -59,7 +59,7 @@ export const sessionFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     upgrade_session: {
@@ -80,7 +80,7 @@ export const sessionFunctions = {
         parser.push(secret)
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     }
   }
 } as const

@@ -1,22 +1,22 @@
 import { DIContainer } from '@famir/common'
 import {
-  HTTP_SERVER_REGISTRY,
+  HTTP_SERVER_ROUTER,
   HttpServerMiddleware,
-  HttpServerRegistry,
-  HttpServerRegistrySteps,
+  HttpServerRouter,
+  HttpServerRouterSteps,
   Logger,
   LOGGER
 } from '@famir/domain'
 
-export class NodeHttpServerRegistry implements HttpServerRegistry {
+export class ImplHttpServerRouter implements HttpServerRouter {
   static inject(container: DIContainer, stepNames: string[]) {
-    container.registerSingleton<HttpServerRegistry>(
-      HTTP_SERVER_REGISTRY,
-      (c) => new NodeHttpServerRegistry(c.resolve<Logger>(LOGGER), stepNames)
+    container.registerSingleton<HttpServerRouter>(
+      HTTP_SERVER_ROUTER,
+      (c) => new ImplHttpServerRouter(c.resolve<Logger>(LOGGER), stepNames)
     )
   }
 
-  protected readonly steps: HttpServerRegistrySteps
+  protected readonly steps: HttpServerRouterSteps
 
   constructor(
     protected readonly logger: Logger,
@@ -24,7 +24,7 @@ export class NodeHttpServerRegistry implements HttpServerRegistry {
   ) {
     this.steps = Object.fromEntries(stepNames.map((stepName) => [stepName, []]))
 
-    this.logger.debug(`HttpServerRegistry initialized`, {
+    this.logger.debug(`HttpServerRouter initialized`, {
       stepNames
     })
   }

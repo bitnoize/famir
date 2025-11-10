@@ -9,7 +9,6 @@ import {
 } from '@famir/domain'
 import { Redis } from 'ioredis'
 import { ExecutorConfig, ExecutorConnectorOptions } from './executor.js'
-import { buildConnectorOptions } from './executor.utils.js'
 
 export type BullExecutorConnection = Redis
 
@@ -32,7 +31,7 @@ export class BullExecutorConnector implements ExecutorConnector {
     config: Config<ExecutorConfig>,
     protected readonly logger: Logger
   ) {
-    this.options = buildConnectorOptions(config.data)
+    this.options = this.buildOptions(config.data)
 
     this.redis = new Redis(this.options.connectionUrl, {
       //lazyConnect: true,
@@ -66,5 +65,11 @@ export class BullExecutorConnector implements ExecutorConnector {
     await this.redis.quit()
 
     this.logger.debug(`ExecutorConnector closed`)
+  }
+
+  private buildOptions(config: ExecutorConfig): ExecutorConnectorOptions {
+    return {
+      connectionUrl: config.EXECUTOR_CONNECTION_URL
+    }
   }
 }

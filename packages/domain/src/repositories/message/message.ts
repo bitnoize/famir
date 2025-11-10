@@ -1,7 +1,7 @@
 import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '../../domain.js'
 import { MessageModel } from '../../models/index.js'
 
-export interface CreateMessageModel {
+export interface CreateMessageData {
   campaignId: string
   messageId: string
   proxyId: string
@@ -24,18 +24,14 @@ export interface CreateMessageModel {
   queryTime: number
 }
 
-export interface CreateMessageResult {
-  messageId: string
-}
-
-export interface ReadMessageModel {
+export interface ReadMessageData {
   campaignId: string
   messageId: string
 }
 
 export interface MessageRepository {
-  create(data: CreateMessageModel): Promise<CreateMessageResult>
-  read(data: ReadMessageModel): Promise<MessageModel | null>
+  createMessage(data: CreateMessageData): Promise<string>
+  readMessage(data: ReadMessageData): Promise<MessageModel | null>
 }
 
 export const MESSAGE_REPOSITORY = Symbol('MessageRepository')

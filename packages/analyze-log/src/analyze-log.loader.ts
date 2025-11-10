@@ -7,11 +7,7 @@ import {
   RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
-import {
-  BullAnalyzeLogWorker,
-  BullExecutorConnector,
-  BullExecutorRegistry
-} from '@famir/executor'
+import { BullAnalyzeLogWorker, BullExecutorConnector, BullExecutorRegistry } from '@famir/executor'
 import { PinoLogger } from '@famir/logger'
 import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
@@ -42,7 +38,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   BullExecutorConnector.inject(container)
 
-  BullExecutorRegistry.inject(container)
+  BullExecutorRegistry.inject(container, ['analyze-log'])
 
   BullAnalyzeLogWorker.inject(container)
 

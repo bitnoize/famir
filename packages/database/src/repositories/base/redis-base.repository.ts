@@ -1,22 +1,79 @@
-import { Config, DatabaseError, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
+import { arrayIncludes } from '@famir/common'
+import {
+  Config,
+  DATABASE_STATUS_CODES,
+  DatabaseError,
+  DatabaseStatusCode,
+  Logger,
+  Validator
+} from '@famir/domain'
 import { DatabaseConfig, DatabaseRepositoryOptions } from '../../database.js'
-import { buildRepositoryOptions } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 
 export abstract class RedisBaseRepository {
-  protected readonly assertSchema: ValidatorAssertSchema
   protected readonly options: DatabaseRepositoryOptions
 
   constructor(
-    validator: Validator,
+    protected readonly validator: Validator,
     config: Config<DatabaseConfig>,
     protected readonly logger: Logger,
     protected readonly connection: RedisDatabaseConnection,
     protected readonly repositoryName: string
   ) {
-    this.assertSchema = validator.assertSchema
+    this.options = this.buildOptions(config.data)
+  }
 
-    this.options = buildRepositoryOptions(config.data)
+  protected validateStringReply(value: unknown): asserts value is string {
+    const isValid = value != null && typeof value === 'string' && value
+
+    if (!isValid) {
+      throw new DatabaseError(`StringReply validate failed`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected validateArrayReply(value: unknown): asserts value is unknown[] {
+    const isValid = value != null && Array.isArray(value)
+
+    if (!isValid) {
+      throw new DatabaseError(`ArrayReply validate failed`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected validateArrayStringsReply(value: unknown): asserts value is string[] {
+    const isValid =
+      value != null &&
+      Array.isArray(value) &&
+      value.every((item) => item != null && typeof item === 'string' && item)
+
+    if (!isValid) {
+      throw new DatabaseError(`ArrayStringsReply validate failed`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected parseStatusReply(value: unknown): [DatabaseStatusCode, string] {
+    if (!(value != null && typeof value === 'string')) {
+      throw new DatabaseError(`StatusReply validate failed`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+
+    const [code, message] = value.split(/\s+(.*)/, 2)
+
+    const isValid = code && message && arrayIncludes(DATABASE_STATUS_CODES, code)
+
+    if (!isValid) {
+      throw new DatabaseError(`StatusReply parse failed`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+
+    return [code, message]
   }
 
   protected handleException(error: unknown, method: string, data: object | null): never {
@@ -36,6 +93,12 @@ export abstract class RedisBaseRepository {
         },
         code: 'INTERNAL_ERROR'
       })
+    }
+  }
+
+  private buildOptions(config: DatabaseConfig): DatabaseRepositoryOptions {
+    return {
+      prefix: config.DATABASE_PREFIX
     }
   }
 }

@@ -5,16 +5,15 @@ import {
   Logger,
   LOGGER,
   REPL_SERVER,
-  REPL_SERVER_REGISTRY,
+  REPL_SERVER_ROUTER,
   ReplServer,
   ReplServerApiCalls,
-  ReplServerRegistry
+  ReplServerRouter
 } from '@famir/domain'
 import net from 'node:net'
 import repl from 'node:repl'
 import util from 'node:util'
 import { ReplServerConfig, ReplServerOptions } from './repl-server.js'
-import { buildOptions } from './repl-server.utils.js'
 
 export class NodeReplServer implements ReplServer {
   static inject(container: DIContainer) {
@@ -24,7 +23,7 @@ export class NodeReplServer implements ReplServer {
         new NodeReplServer(
           c.resolve<Config<ReplServerConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY)
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
         )
     )
   }
@@ -36,9 +35,9 @@ export class NodeReplServer implements ReplServer {
   constructor(
     config: Config<ReplServerConfig>,
     protected readonly logger: Logger,
-    protected readonly registry: ReplServerRegistry
+    protected readonly router: ReplServerRouter
   ) {
-    this.options = buildOptions(config.data)
+    this.options = this.buildOptions(config.data)
 
     this.server = net.createServer()
 
@@ -180,6 +179,8 @@ export class NodeReplServer implements ReplServer {
       socket.end(`So long!\n`)
     })
 
+    this.defineReplContext(replServer)
+
     this.defineReplCommands(replServer, socket)
 
     socket.write(`Welcome to Fake-Mirrors REPL!\n`)
@@ -190,7 +191,7 @@ export class NodeReplServer implements ReplServer {
   protected defineReplContext(replServer: repl.REPLServer) {
     const value: ReplServerApiCalls = {}
 
-    const apiCalls = this.registry.getApiCalls()
+    const apiCalls = this.router.getApiCalls()
 
     Object.entries(apiCalls).forEach(([name, apiCall]) => {
       value[name] = async (data: unknown): Promise<unknown> => {
@@ -234,7 +235,7 @@ export class NodeReplServer implements ReplServer {
       }
     })
 
-    replServer.defineCommand('.calls', {
+    replServer.defineCommand('apiCalls', {
       help: `Show Api calls`,
       action: () => {
         replServer.clearBufferedCommand()
@@ -242,7 +243,7 @@ export class NodeReplServer implements ReplServer {
         socket.write(`Api calls:\n\n`)
 
         socket.write(
-          util.inspect(this.registry.getApiNames(), {
+          util.inspect(this.router.getApiNames(), {
             colors: this.options.useColors
           })
         )
@@ -252,5 +253,16 @@ export class NodeReplServer implements ReplServer {
         replServer.displayPrompt()
       }
     })
+  }
+
+  private buildOptions(config: ReplServerConfig): ReplServerOptions {
+    return {
+      address: config.REPL_SERVER_ADDRESS,
+      port: config.REPL_SERVER_PORT,
+      maxClients: config.REPL_SERVER_MAX_CLIENTS,
+      socketTimeout: config.REPL_SERVER_SOCKET_TIMEOUT,
+      prompt: config.REPL_SERVER_PROMPT,
+      useColors: config.REPL_SERVER_USE_COLORS
+    }
   }
 }

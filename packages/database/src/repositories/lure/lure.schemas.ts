@@ -1,11 +1,52 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import {
-  CreateLureModel,
-  DeleteLureModel,
-  ListLureModels,
-  ReadLureModel,
-  SwitchLureModel
+  CreateLureData,
+  DeleteLureData,
+  ListLuresData,
+  ReadLureData,
+  SwitchLureData
 } from '@famir/domain'
+import { RawLure } from './lure.functions.js'
+
+export const rawLureSchema: JSONSchemaType<RawLure> = {
+  type: 'object',
+  required: [
+    'campaign_id',
+    'lure_id',
+    'path',
+    'redirector_id',
+    'is_enabled',
+    'session_count',
+    'created_at',
+    'updated_at'
+  ],
+  properties: {
+    campaign_id: {
+      type: 'string'
+    },
+    lure_id: {
+      type: 'string'
+    },
+    path: {
+      type: 'string'
+    },
+    redirector_id: {
+      type: 'string'
+    },
+    is_enabled: {
+      type: 'integer'
+    },
+    session_count: {
+      type: 'integer'
+    },
+    created_at: {
+      type: 'integer'
+    },
+    updated_at: {
+      type: 'integer'
+    }
+  }
+} as const
 
 export const lurePathSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -13,7 +54,7 @@ export const lurePathSchema: JSONSchemaType<string> = {
   maxLength: 128
 } as const
 
-export const createLureModelSchema: JSONSchemaType<CreateLureModel> = {
+export const createLureDataSchema: JSONSchemaType<CreateLureData> = {
   type: 'object',
   required: ['campaignId', 'lureId', 'path', 'redirectorId'],
   properties: {
@@ -25,7 +66,7 @@ export const createLureModelSchema: JSONSchemaType<CreateLureModel> = {
   additionalProperties: false
 } as const
 
-export const readLureModelSchema: JSONSchemaType<ReadLureModel> = {
+export const readLureDataSchema: JSONSchemaType<ReadLureData> = {
   type: 'object',
   required: ['campaignId', 'lureId'],
   properties: {
@@ -35,7 +76,7 @@ export const readLureModelSchema: JSONSchemaType<ReadLureModel> = {
   additionalProperties: false
 } as const
 
-export const switchLureModelSchema: JSONSchemaType<SwitchLureModel> = {
+export const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
   type: 'object',
   required: ['campaignId', 'lureId'],
   properties: {
@@ -45,7 +86,7 @@ export const switchLureModelSchema: JSONSchemaType<SwitchLureModel> = {
   additionalProperties: false
 } as const
 
-export const deleteLureModelSchema: JSONSchemaType<DeleteLureModel> = {
+export const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
   type: 'object',
   required: ['campaignId', 'lureId', 'path', 'redirectorId'],
   properties: {
@@ -57,7 +98,7 @@ export const deleteLureModelSchema: JSONSchemaType<DeleteLureModel> = {
   additionalProperties: false
 } as const
 
-export const listLureModelsSchema: JSONSchemaType<ListLureModels> = {
+export const listLuresDataSchema: JSONSchemaType<ListLuresData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {

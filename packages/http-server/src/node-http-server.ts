@@ -3,13 +3,13 @@ import {
   Config,
   CONFIG,
   HTTP_SERVER,
-  HTTP_SERVER_REGISTRY,
+  HTTP_SERVER_ROUTER,
   HttpServer,
   HttpServerContext,
   HttpServerError,
   HttpServerMiddleware,
   HttpServerNextFunction,
-  HttpServerRegistry,
+  HttpServerRouter,
   Logger,
   LOGGER,
   TEMPLATER,
@@ -17,7 +17,6 @@ import {
 } from '@famir/domain'
 import http from 'node:http'
 import { HttpServerConfig, HttpServerOptions } from './http-server.js'
-import { buildOptions } from './http-server.utils.js'
 import { NodeHttpServerContext } from './node-http-server-context.js'
 
 export class NodeHttpServer implements HttpServer {
@@ -29,7 +28,7 @@ export class NodeHttpServer implements HttpServer {
           c.resolve<Config<HttpServerConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
-          c.resolve<HttpServerRegistry>(HTTP_SERVER_REGISTRY)
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )
   }
@@ -41,9 +40,9 @@ export class NodeHttpServer implements HttpServer {
     config: Config<HttpServerConfig>,
     protected readonly logger: Logger,
     protected readonly templater: Templater,
-    protected readonly registry: HttpServerRegistry
+    protected readonly router: HttpServerRouter
   ) {
-    this.options = buildOptions(config.data)
+    this.options = this.buildOptions(config.data)
 
     this.server = http.createServer()
 
@@ -120,7 +119,7 @@ export class NodeHttpServer implements HttpServer {
     try {
       const ctx = new NodeHttpServerContext(req, res)
 
-      const middlewares = this.registry.getMiddlewares()
+      const middlewares = this.router.getMiddlewares()
 
       const middleware = this.chainMiddlewares(middlewares)
 
@@ -205,7 +204,16 @@ export class NodeHttpServer implements HttpServer {
     }
   }
 
-  protected dumpRequest(req: http.IncomingMessage): object {
+  private buildOptions(config: HttpServerConfig): HttpServerOptions {
+    return {
+      address: config.HTTP_SERVER_ADDRESS,
+      port: config.HTTP_SERVER_PORT,
+      bodyLimit: config.HTTP_SERVER_BODY_LIMIT,
+      errorPage: config.HTTP_SERVER_ERROR_PAGE
+    }
+  }
+
+  private dumpRequest(req: http.IncomingMessage): object {
     return {
       method: req.method,
       url: req.url,

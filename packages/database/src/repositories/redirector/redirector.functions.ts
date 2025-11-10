@@ -32,7 +32,7 @@ export const redirectorFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_redirector: {
@@ -48,7 +48,7 @@ export const redirectorFunctions = {
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
       },
 
-      transformReply: undefined as unknown as () => RawRedirector | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_redirector_index: {
@@ -59,7 +59,7 @@ export const redirectorFunctions = {
         parser.pushKey(redirectorIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => string[] | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     update_redirector: {
@@ -84,7 +84,7 @@ export const redirectorFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     delete_redirector: {
@@ -101,7 +101,7 @@ export const redirectorFunctions = {
         parser.pushKey(redirectorIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     }
   }
 } as const

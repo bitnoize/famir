@@ -40,7 +40,7 @@ export const proxyFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_proxy: {
@@ -51,7 +51,7 @@ export const proxyFunctions = {
         parser.pushKey(proxyKey(prefix, campaignId, proxyId))
       },
 
-      transformReply: undefined as unknown as () => RawProxy | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_proxy_index: {
@@ -62,7 +62,7 @@ export const proxyFunctions = {
         parser.pushKey(proxyIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => string[] | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     enable_proxy: {
@@ -76,7 +76,7 @@ export const proxyFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     disable_proxy: {
@@ -90,7 +90,7 @@ export const proxyFunctions = {
         parser.push(Date.now().toString())
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     delete_proxy: {
@@ -103,7 +103,7 @@ export const proxyFunctions = {
         parser.pushKey(proxyIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     }
   }
 } as const

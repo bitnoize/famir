@@ -20,6 +20,7 @@ export const addSchemas: ValidatorSchemas = {
   'update-campaign-model': updateCampaignModelSchema,
   'delete-campaign-model': deleteCampaignModelSchema
 }
+
 export function validateCreateCampaignModel(
   assertSchema: ValidatorAssertSchema,
   data: unknown

@@ -2,38 +2,30 @@ import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
-  CreateTargetModel,
+  CreateTargetData,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteTargetModel,
+  DeleteTargetData,
   DisabledTargetModel,
   EnabledTargetModel,
-  ListTargetModels,
+  ListTargetsData,
   Logger,
   LOGGER,
-  ReadTargetModel,
-  SwitchTargetModel,
+  ReadTargetData,
+  SwitchTargetData,
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository,
-  UpdateTargetModel,
+  UpdateTargetData,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
-import { parseStatusReply } from '../../database.utils.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import {
-  assertDisabledModel,
-  assertEnabledModel,
-  assertModel,
-  buildCollection,
-  buildModel,
-  guardEnabledModel,
-  guardModel
-} from './target.utils.js'
+import { RawTarget } from './target.functions.js'
+import { rawTargetSchema } from './target.schemas.js'
 
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
   static inject(container: DIContainer) {
@@ -57,12 +49,16 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   ) {
     super(validator, config, logger, connection, 'target')
 
+    validator.addSchemas({
+      'database-raw-target': rawTargetSchema
+    })
+
     this.logger.debug(`TargetRepository initialized`)
   }
 
-  async create(data: CreateTargetModel): Promise<DisabledTargetModel> {
+  async createTarget(data: CreateTargetData): Promise<DisabledTargetModel> {
     try {
-      const [status, raw] = await Promise.all([
+      const [status, rawTarget] = await Promise.all([
         this.connection.target.create_target(
           this.options.prefix,
           data.campaignId,
@@ -90,55 +86,57 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
-      const [code, message] = parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(status)
 
-      if (code === 'OK') {
-        const model = buildModel(raw)
-
-        assertDisabledModel(model)
-
-        return model
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
       }
 
-      throw new DatabaseError(message, { code })
+      const targetModel = this.buildTargetModel(rawTarget)
+
+      this.assertDisabledTargetModel(targetModel)
+
+      this.logger.info(message, { targetModel })
+
+      return targetModel
     } catch (error) {
-      this.handleException(error, 'create', data)
+      this.handleException(error, 'createTarget', data)
     }
   }
 
-  async read(data: ReadTargetModel): Promise<TargetModel | null> {
+  async readTarget(data: ReadTargetData): Promise<TargetModel | null> {
     try {
-      const raw = await this.connection.target.read_target(
+      const rawTarget = await this.connection.target.read_target(
         this.options.prefix,
         data.campaignId,
         data.targetId
       )
 
-      return buildModel(raw)
+      return this.buildTargetModel(rawTarget)
     } catch (error) {
-      this.handleException(error, 'read', data)
+      this.handleException(error, 'readTarget', data)
     }
   }
 
-  async readEnabled(data: ReadTargetModel): Promise<EnabledTargetModel | null> {
+  async readEnabledTarget(data: ReadTargetData): Promise<EnabledTargetModel | null> {
     try {
-      const raw = await this.connection.target.read_target(
+      const rawTarget = await this.connection.target.read_target(
         this.options.prefix,
         data.campaignId,
         data.targetId
       )
 
-      const model = buildModel(raw)
+      const targetModel = this.buildTargetModel(rawTarget)
 
-      return guardEnabledModel(model) ? model : null
+      return this.guardEnabledTargetModel(targetModel) ? targetModel : null
     } catch (error) {
-      this.handleException(error, 'readEnabled', data)
+      this.handleException(error, 'readEnabledTarget', data)
     }
   }
 
-  async update(data: UpdateTargetModel): Promise<TargetModel> {
+  async updateTarget(data: UpdateTargetData): Promise<TargetModel> {
     try {
-      const [status, raw] = await Promise.all([
+      const [status, rawTarget] = await Promise.all([
         this.connection.target.update_target(
           this.options.prefix,
           data.campaignId,
@@ -158,137 +156,233 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
-      const [code, message] = parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(status)
 
-      if (code === 'OK') {
-        const model = buildModel(raw)
-
-        assertModel(model)
-
-        return model
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
       }
 
-      throw new DatabaseError(message, { code })
+      const targetModel = this.buildTargetModel(rawTarget)
+
+      this.assertTargetModel(targetModel)
+
+      this.logger.info(message, { targetModel })
+
+      return targetModel
     } catch (error) {
-      this.handleException(error, 'update', data)
+      this.handleException(error, 'updateTarget', data)
     }
   }
 
-  async enable(data: SwitchTargetModel): Promise<EnabledTargetModel> {
+  async enableTarget(data: SwitchTargetData): Promise<EnabledTargetModel> {
     try {
-      const [status, raw] = await Promise.all([
+      const [status, rawTarget] = await Promise.all([
         this.connection.target.enable_target(this.options.prefix, data.campaignId, data.targetId),
 
         this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
-      const [code, message] = parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(status)
 
-      if (code === 'OK') {
-        const model = buildModel(raw)
-
-        assertEnabledModel(model)
-
-        return model
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
       }
 
-      throw new DatabaseError(message, { code })
+      const targetModel = this.buildTargetModel(rawTarget)
+
+      this.assertEnabledTargetModel(targetModel)
+
+      this.logger.info(message, { targetModel })
+
+      return targetModel
     } catch (error) {
-      this.handleException(error, 'enable', data)
+      this.handleException(error, 'enableTarget', data)
     }
   }
 
-  async disable(data: SwitchTargetModel): Promise<DisabledTargetModel> {
+  async disableTarget(data: SwitchTargetData): Promise<DisabledTargetModel> {
     try {
-      const [status, raw] = await Promise.all([
+      const [status, rawTarget] = await Promise.all([
         this.connection.target.disable_target(this.options.prefix, data.campaignId, data.targetId),
 
         this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
-      const [code, message] = parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(status)
 
-      if (code === 'OK') {
-        const model = buildModel(raw)
-
-        assertDisabledModel(model)
-
-        return model
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
       }
 
-      throw new DatabaseError(message, { code })
+      const targetModel = this.buildTargetModel(rawTarget)
+
+      this.assertDisabledTargetModel(targetModel)
+
+      this.logger.info(message, { targetModel })
+
+      return targetModel
     } catch (error) {
-      this.handleException(error, 'disable', data)
+      this.handleException(error, 'disableTarget', data)
     }
   }
 
-  async delete(data: DeleteTargetModel): Promise<DisabledTargetModel> {
+  async deleteTarget(data: DeleteTargetData): Promise<DisabledTargetModel> {
     try {
-      const [raw, status] = await Promise.all([
+      const [rawTarget, status] = await Promise.all([
         this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId),
 
         this.connection.target.delete_target(this.options.prefix, data.campaignId, data.targetId)
       ])
 
-      const [code, message] = parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(status)
 
-      if (code === 'OK') {
-        const model = buildModel(raw)
-
-        assertDisabledModel(model)
-
-        return model
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
       }
 
-      throw new DatabaseError(message, { code })
+      const targetModel = this.buildTargetModel(rawTarget)
+
+      this.assertDisabledTargetModel(targetModel)
+
+      this.logger.info(message, { targetModel })
+
+      return targetModel
     } catch (error) {
-      this.handleException(error, 'delete', data)
+      this.handleException(error, 'deleteTarget', data)
     }
   }
 
-  async list(data: ListTargetModels): Promise<TargetModel[] | null> {
+  async listTargets(data: ListTargetsData): Promise<TargetModel[] | null> {
     try {
       const index = await this.connection.target.read_target_index(
         this.options.prefix,
         data.campaignId
       )
 
-      if (!index) {
+      if (index === null) {
         return null
       }
 
-      const raws = await Promise.all(
+      this.validateArrayStringsReply(index)
+
+      const rawTargets = await Promise.all(
         index.map((targetId) =>
           this.connection.target.read_target(this.options.prefix, data.campaignId, targetId)
         )
       )
 
-      return buildCollection(raws).filter(guardModel)
+      return this.buildTargetCollection(rawTargets).filter(this.guardTargetModel)
     } catch (error) {
-      this.handleException(error, 'list', data)
+      this.handleException(error, 'listTargets', data)
     }
   }
 
-  async listEnabled(data: ListTargetModels): Promise<EnabledTargetModel[] | null> {
+  async listEnabledTargets(data: ListTargetsData): Promise<EnabledTargetModel[] | null> {
     try {
       const index = await this.connection.target.read_target_index(
         this.options.prefix,
         data.campaignId
       )
 
-      if (!index) {
+      if (index === null) {
         return null
       }
 
-      const raws = await Promise.all(
+      const rawTargets = await Promise.all(
         index.map((targetId) =>
           this.connection.target.read_target(this.options.prefix, data.campaignId, targetId)
         )
       )
 
-      return buildCollection(raws).filter(guardEnabledModel)
+      return this.buildTargetCollection(rawTargets).filter(this.guardEnabledTargetModel)
     } catch (error) {
-      this.handleException(error, 'listEnabled', data)
+      this.handleException(error, 'listEnabledTargets', data)
+    }
+  }
+
+  protected buildTargetModel(rawTarget: unknown): TargetModel | null {
+    if (rawTarget === null) {
+      return null
+    }
+
+    this.validateRawTarget(rawTarget)
+
+    return {
+      campaignId: rawTarget.campaign_id,
+      targetId: rawTarget.target_id,
+      isLanding: !!rawTarget.is_landing,
+      donorSecure: !!rawTarget.donor_secure,
+      donorSub: rawTarget.donor_sub,
+      donorDomain: rawTarget.donor_domain,
+      donorPort: rawTarget.donor_port,
+      mirrorSecure: !!rawTarget.mirror_secure,
+      mirrorSub: rawTarget.mirror_sub,
+      mirrorPort: rawTarget.mirror_port,
+      marks: rawTarget.marks.split(' '),
+      connectTimeout: rawTarget.connect_timeout,
+      timeout: rawTarget.timeout,
+      mainPage: rawTarget.main_page,
+      notFoundPage: rawTarget.not_found_page,
+      faviconIco: rawTarget.favicon_ico,
+      robotsTxt: rawTarget.robots_txt,
+      sitemapXml: rawTarget.sitemap_xml,
+      successRedirectUrl: rawTarget.success_redirect_url,
+      failureRedirectUrl: rawTarget.failure_redirect_url,
+      isEnabled: !!rawTarget.is_enabled,
+      messageCount: rawTarget.message_count,
+      createdAt: new Date(rawTarget.created_at),
+      updatedAt: new Date(rawTarget.updated_at)
+    }
+  }
+
+  protected buildTargetCollection(rawTargets: unknown): Array<TargetModel | null> {
+    this.validateArrayReply(rawTargets)
+
+    return rawTargets.map((rawTarget) => this.buildTargetModel(rawTarget))
+  }
+
+  protected validateRawTarget(value: unknown): asserts value is RawTarget {
+    try {
+      this.validator.assertSchema<RawTarget>('database-raw-target', value)
+    } catch (error) {
+      throw new DatabaseError(`RawTarget validate failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected guardTargetModel(value: TargetModel | null): value is TargetModel {
+    return value != null
+  }
+
+  protected guardEnabledTargetModel(value: TargetModel | null): value is EnabledTargetModel {
+    return this.guardTargetModel(value) && value.isEnabled
+  }
+
+  protected guardDisabledTargetModel(value: TargetModel | null): value is DisabledTargetModel {
+    return this.guardTargetModel(value) && !value.isEnabled
+  }
+
+  protected assertTargetModel(value: TargetModel | null): asserts value is TargetModel {
+    if (!this.guardTargetModel(value)) {
+      throw new Error(`TargetModel unexpected lost`)
+    }
+  }
+
+  protected assertEnabledTargetModel(
+    value: TargetModel | null
+  ): asserts value is EnabledTargetModel {
+    if (!this.guardEnabledTargetModel(value)) {
+      throw new Error(`EnabledTargetModel unexpected lost`)
+    }
+  }
+
+  protected assertDisabledTargetModel(
+    value: TargetModel | null
+  ): asserts value is DisabledTargetModel {
+    if (!this.guardDisabledTargetModel(value)) {
+      throw new Error(`DisabledTargetModel unexpected lost`)
     }
   }
 }

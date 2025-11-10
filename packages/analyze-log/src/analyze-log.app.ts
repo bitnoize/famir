@@ -48,7 +48,7 @@ export class AnalyzeLogApp {
     SHUTDOWN_SIGNALS.forEach((signal) => {
       process.once(signal, () => {
         this.stop().catch((error: unknown) => {
-          this.logger.fatal(`AnalyzeLogApp stop failed`, {
+          this.logger.fatal(`App stop unhandled error`, {
             error: serializeError(error)
           })
         })
@@ -66,9 +66,9 @@ export class AnalyzeLogApp {
 
       await this.analyzeLogWorker.run()
 
-      this.logger.debug(`AnalyzeLogApp started`)
+      this.logger.debug(`App started`)
     } catch (error) {
-      this.logger.error(`AnalyzeLogApp start failed`, {
+      this.logger.error(`App start failed`, {
         error: serializeError(error)
       })
 
@@ -86,9 +86,9 @@ export class AnalyzeLogApp {
 
       await this.databaseConnector.close()
 
-      this.logger.debug(`AnalyzeLogApp stopped`)
+      this.logger.debug(`App stopped`)
     } catch (error) {
-      this.logger.error(`AnalyzeLogApp stop failed`, {
+      this.logger.error(`App stop failed`, {
         error: serializeError(error)
       })
 

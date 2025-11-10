@@ -1,24 +1,20 @@
 import { SessionModel } from '../../models/index.js'
 
-export interface CreateSessionModel {
+export interface CreateSessionData {
   campaignId: string
 }
 
-export interface CreateSessionResult {
-  sessionId: string
-}
-
-export interface ReadSessionModel {
+export interface ReadSessionData {
   campaignId: string
   sessionId: string
 }
 
-export interface AuthSessionModel {
+export interface AuthSessionData {
   campaignId: string
   sessionId: string
 }
 
-export interface UpgradeSessionModel {
+export interface UpgradeSessionData {
   campaignId: string
   lureId: string
   sessionId: string
@@ -26,10 +22,10 @@ export interface UpgradeSessionModel {
 }
 
 export interface SessionRepository {
-  create(data: CreateSessionModel): Promise<CreateSessionResult>
-  read(data: ReadSessionModel): Promise<SessionModel | null>
-  auth(data: AuthSessionModel): Promise<SessionModel>
-  upgrade(data: UpgradeSessionModel): Promise<SessionModel>
+  createSession(data: CreateSessionData): Promise<string>
+  readSession(data: ReadSessionData): Promise<SessionModel | null>
+  authSession(data: AuthSessionData): Promise<SessionModel>
+  upgradeSession(data: UpgradeSessionData): Promise<SessionModel>
 }
 
 export const SESSION_REPOSITORY = Symbol('SessionRepository')

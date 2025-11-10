@@ -1,4 +1,4 @@
-import { DIContainer, isDevelopment, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
@@ -10,7 +10,6 @@ import {
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
 import { DatabaseConfig, DatabaseConnectorOptions } from './database.js'
-import { buildConnectorOptions } from './database.utils.js'
 
 export type RedisDatabaseConnection = RedisClientType<
   Record<string, never>, // Modules
@@ -38,7 +37,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     config: Config<DatabaseConfig>,
     protected readonly logger: Logger
   ) {
-    this.options = buildConnectorOptions(config.data)
+    this.options = this.buildOptions(config.data)
 
     this.redis = createClient({
       url: this.options.connectionUrl,
@@ -53,9 +52,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
       })
     })
 
-    this.logger.debug(`DatabaseConnector initialized`, {
-      options: isDevelopment ? this.options : null
-    })
+    this.logger.debug(`DatabaseConnector initialized`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -73,5 +70,11 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     await this.redis.close()
 
     this.logger.debug(`DatabaseConnector closed`)
+  }
+
+  private buildOptions(config: DatabaseConfig): DatabaseConnectorOptions {
+    return {
+      connectionUrl: config.DATABASE_CONNECTION_URL
+    }
   }
 }

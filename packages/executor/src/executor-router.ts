@@ -1,23 +1,23 @@
 import { DIContainer } from '@famir/common'
 import {
-  EXECUTOR_REGISTRY,
+  EXECUTOR_ROUTER,
   ExecutorError,
   ExecutorProcessor,
-  ExecutorRegistry,
-  ExecutorRegistryMap,
+  ExecutorRouter,
+  ExecutorRouterMap,
   Logger,
   LOGGER
 } from '@famir/domain'
 
-export class BullExecutorRegistry implements ExecutorRegistry {
+export class ImplExecutorRouter implements ExecutorRouter {
   static inject(container: DIContainer, queueNames: string[]) {
-    container.registerSingleton<ExecutorRegistry>(
-      EXECUTOR_REGISTRY,
-      (c) => new BullExecutorRegistry(c.resolve<Logger>(LOGGER), queueNames)
+    container.registerSingleton<ExecutorRouter>(
+      EXECUTOR_ROUTER,
+      (c) => new ImplExecutorRouter(c.resolve<Logger>(LOGGER), queueNames)
     )
   }
 
-  protected readonly map: ExecutorRegistryMap
+  protected readonly map: ExecutorRouterMap
 
   constructor(
     protected readonly logger: Logger,
@@ -25,7 +25,7 @@ export class BullExecutorRegistry implements ExecutorRegistry {
   ) {
     this.map = Object.fromEntries(queueNames.map((queueName) => [queueName, {}]))
 
-    this.logger.debug(`ExecutorRegistry initialized`, {
+    this.logger.debug(`ExecutorRouter initialized`, {
       queueNames
     })
   }
