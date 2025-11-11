@@ -49,7 +49,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
   ) {
     super(validator, config, logger, connection, 'lure')
 
-    validator.addSchemas({
+    this.validator.addSchemas({
       'database-raw-lure': rawLureSchema
     })
 

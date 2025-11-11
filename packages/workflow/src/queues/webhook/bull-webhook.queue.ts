@@ -30,6 +30,8 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
 
   constructor(config: Config<WorkflowConfig>, logger: Logger, connection: BullWorkflowConnection) {
     super(config, logger, connection, WEBHOOK_QUEUE_NAME)
+
+    this.logger.debug(`WebhookQueue initialized`)
   }
 
   async addJob(data: WebhookJobData): Promise<string> {

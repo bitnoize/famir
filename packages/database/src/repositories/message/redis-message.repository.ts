@@ -52,7 +52,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
   ) {
     super(validator, config, logger, connection, 'message')
 
-    validator.addSchemas({
+    this.validator.addSchemas({
       'database-raw-message': rawMessageSchema,
       'database-message-headers': messageHeadersSchema,
       'database-message-request-cookies': messageRequestCookiesSchema,

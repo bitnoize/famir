@@ -1,4 +1,4 @@
-import { DIContainer, isDevelopment, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
@@ -44,9 +44,7 @@ export class BullWorkflowConnector implements WorkflowConnector {
       })
     })
 
-    this.logger.debug(`WorkflowConnector initialized`, {
-      options: isDevelopment ? this.options : null
-    })
+    this.logger.debug(`WorkflowConnector initialized`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters

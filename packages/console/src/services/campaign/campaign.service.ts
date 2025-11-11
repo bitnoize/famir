@@ -3,17 +3,15 @@ import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
-  CreateCampaignModel,
-  DeleteCampaignModel,
+  CreateCampaignData,
+  DeleteCampaignData,
   Logger,
   LOGGER,
-  ReadCampaignModel,
+  ReadCampaignData,
   ReplServerError,
-  UpdateCampaignModel
+  UpdateCampaignData
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
-
-export const CAMPAIGN_SERVICE = Symbol('CampaignService')
 
 export class CampaignService extends BaseService {
   static inject(container: DIContainer) {
@@ -36,43 +34,45 @@ export class CampaignService extends BaseService {
     this.logger.debug(`CampaignService initialized`)
   }
 
-  async create(data: CreateCampaignModel): Promise<CampaignModel> {
+  async createCampaign(data: CreateCampaignData): Promise<CampaignModel> {
     try {
-      return await this.campaignRepository.create(data)
+      return await this.campaignRepository.createCampaign(data)
     } catch (error) {
       this.filterDatabaseException(error, ['CONFLICT'])
     }
   }
 
-  async read(data: ReadCampaignModel): Promise<CampaignModel> {
-    const campaign = await this.campaignRepository.read(data)
+  async readCampaign(data: ReadCampaignData): Promise<CampaignModel> {
+    const campaignModel = await this.campaignRepository.readCampaign(data)
 
-    if (!campaign) {
+    if (!campaignModel) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return campaign
+    return campaignModel
   }
 
-  async update(data: UpdateCampaignModel): Promise<CampaignModel> {
+  async updateCampaign(data: UpdateCampaignData): Promise<CampaignModel> {
     try {
-      return await this.campaignRepository.update(data)
+      return await this.campaignRepository.updateCampaign(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
     }
   }
 
-  async delete(data: DeleteCampaignModel): Promise<CampaignModel> {
+  async deleteCampaign(data: DeleteCampaignData): Promise<CampaignModel> {
     try {
-      return await this.campaignRepository.delete(data)
+      return await this.campaignRepository.deleteCampaign(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
     }
   }
 
-  async list(): Promise<CampaignModel[]> {
-    return await this.campaignRepository.list()
+  async listCampaigns(): Promise<CampaignModel[]> {
+    return await this.campaignRepository.listCampaigns()
   }
 }
+
+export const CAMPAIGN_SERVICE = Symbol('CampaignService')

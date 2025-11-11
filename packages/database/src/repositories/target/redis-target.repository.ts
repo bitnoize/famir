@@ -49,7 +49,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   ) {
     super(validator, config, logger, connection, 'target')
 
-    validator.addSchemas({
+    this.validator.addSchemas({
       'database-raw-target': rawTargetSchema
     })
 

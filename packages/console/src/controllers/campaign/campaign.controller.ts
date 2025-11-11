@@ -1,22 +1,26 @@
 import { DIContainer } from '@famir/common'
 import {
+  createCampaignDataSchema,
+  deleteCampaignDataSchema,
+  readCampaignDataSchema,
+  updateCampaignDataSchema
+} from '@famir/database'
+import {
+  CreateCampaignData,
+  DeleteCampaignData,
   Logger,
   LOGGER,
-  REPL_SERVER_REGISTRY,
+  ReadCampaignData,
+  REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerRegistry,
+  ReplServerError,
+  ReplServerRouter,
+  UpdateCampaignData,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { CAMPAIGN_SERVICE, CampaignService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
-import {
-  addSchemas,
-  validateCreateCampaignModel,
-  validateDeleteCampaignModel,
-  validateReadCampaignModel,
-  validateUpdateCampaignModel
-} from './campaign.utils.js'
 
 export const CAMPAIGN_CONTROLLER = Symbol('CampaignController')
 
@@ -28,7 +32,7 @@ export class CampaignController extends BaseController {
         new CampaignController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<CampaignService>(CAMPAIGN_SERVICE)
         )
     )
@@ -41,67 +45,116 @@ export class CampaignController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    registry: ReplServerRegistry,
+    router: ReplServerRouter,
     protected readonly campaignService: CampaignService
   ) {
-    super(validator, logger, 'campaign')
+    super(validator, logger, router, 'campaign')
 
-    validator.addSchemas(addSchemas)
+    this.validator.addSchemas({
+      'console-create-campaign-data': createCampaignDataSchema,
+      'console-read-campaign-data': readCampaignDataSchema,
+      'console-update-campaign-data': updateCampaignDataSchema,
+      'console-delete-campaign-data': deleteCampaignDataSchema
+    })
 
-    registry.addApiCall('createCampaign', this.createCampaignApiCall)
-    registry.addApiCall('readCampaign', this.readCampaignApiCall)
-    registry.addApiCall('updateCampaign', this.updateCampaignApiCall)
-    registry.addApiCall('deleteCampaign', this.deleteCampaignApiCall)
-    registry.addApiCall('listCampaigns', this.listCampaignsApiCall)
+    this.router.addApiCall('createCampaign', this.createCampaignApiCall)
+    this.router.addApiCall('readCampaign', this.readCampaignApiCall)
+    this.router.addApiCall('updateCampaign', this.updateCampaignApiCall)
+    this.router.addApiCall('deleteCampaign', this.deleteCampaignApiCall)
+    this.router.addApiCall('listCampaigns', this.listCampaignsApiCall)
 
     this.logger.debug(`CampaignController initialized`)
   }
 
-  private readonly createCampaignApiCall: ReplServerApiCall = async (data) => {
+  private createCampaignApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateCreateCampaignModel(this.assertSchema, data)
+      this.validateCreateCampaignData(data)
 
-      return await this.campaignService.create(data)
+      return await this.campaignService.createCampaign(data)
     } catch (error) {
       this.handleException(error, 'createCampaign', data)
     }
   }
 
-  private readonly readCampaignApiCall: ReplServerApiCall = async (data) => {
+  private readCampaignApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateReadCampaignModel(this.assertSchema, data)
+      this.validateReadCampaignData(data)
 
-      return await this.campaignService.read(data)
+      return await this.campaignService.readCampaign(data)
     } catch (error) {
       this.handleException(error, 'readCampaign', data)
     }
   }
 
-  private readonly updateCampaignApiCall: ReplServerApiCall = async (data) => {
+  private updateCampaignApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateUpdateCampaignModel(this.assertSchema, data)
+      this.validateUpdateCampaignData(data)
 
-      return await this.campaignService.update(data)
+      return await this.campaignService.updateCampaign(data)
     } catch (error) {
       this.handleException(error, 'updateCampaign', data)
     }
   }
 
-  private readonly deleteCampaignApiCall: ReplServerApiCall = async (data) => {
+  private deleteCampaignApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateDeleteCampaignModel(this.assertSchema, data)
+      this.validateDeleteCampaignData(data)
 
-      return await this.campaignService.delete(data)
+      return await this.campaignService.deleteCampaign(data)
     } catch (error) {
       this.handleException(error, 'deleteCampaign', data)
     }
   }
 
-  private readonly listCampaignsApiCall: ReplServerApiCall = async () => {
+  private listCampaignsApiCall: ReplServerApiCall = async () => {
     try {
-      return await this.campaignService.list()
+      return await this.campaignService.listCampaigns()
     } catch (error) {
       this.handleException(error, 'listCampaigns', null)
+    }
+  }
+
+  private validateCreateCampaignData(value: unknown): asserts value is CreateCampaignData {
+    try {
+      this.validator.assertSchema<CreateCampaignData>('console-create-campaign-data', value)
+    } catch (error) {
+      throw new ReplServerError(`CreateCampaignData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateReadCampaignData(value: unknown): asserts value is ReadCampaignData {
+    try {
+      this.validator.assertSchema<ReadCampaignData>('console-read-campaign-data', value)
+    } catch (error) {
+      throw new ReplServerError(`ReadCampaignData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateUpdateCampaignData(value: unknown): asserts value is UpdateCampaignData {
+    try {
+      this.validator.assertSchema<UpdateCampaignData>('console-update-campaign-data', value)
+    } catch (error) {
+      throw new ReplServerError(`UpdateCampaignData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateDeleteCampaignData(value: unknown): asserts value is DeleteCampaignData {
+    try {
+      this.validator.assertSchema<DeleteCampaignData>('console-delete-campaign-data', value)
+    } catch (error) {
+      throw new ReplServerError(`DeleteCampaignData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
     }
   }
 }

@@ -1,18 +1,18 @@
 import { DIContainer } from '@famir/common'
+import { readMessageDataSchema } from '@famir/database'
 import {
   Logger,
   LOGGER,
-  REPL_SERVER_REGISTRY,
+  ReadMessageData,
+  REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerRegistry,
+  ReplServerError,
+  ReplServerRouter,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { MESSAGE_SERVICE, MessageService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
-import { addSchemas, validateReadMessageModel } from './message.utils.js'
-
-export const MESSAGE_CONTROLLER = Symbol('MessageController')
 
 export class MessageController extends BaseController {
   static inject(container: DIContainer) {
@@ -22,7 +22,7 @@ export class MessageController extends BaseController {
         new MessageController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<MessageService>(MESSAGE_SERVICE)
         )
     )
@@ -35,25 +35,40 @@ export class MessageController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    registry: ReplServerRegistry,
+    router: ReplServerRouter,
     protected readonly messageService: MessageService
   ) {
-    super(validator, logger, 'message')
+    super(validator, logger, router, 'message')
 
-    validator.addSchemas(addSchemas)
+    this.validator.addSchemas({
+      'console-read-message-data': readMessageDataSchema
+    })
 
-    registry.addApiCall('readMessage', this.readMessageApiCall)
+    this.router.addApiCall('readMessage', this.readMessageApiCall)
 
     this.logger.debug(`MessageController initialized`)
   }
 
-  private readonly readMessageApiCall: ReplServerApiCall = async (data) => {
+  private readMessageApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateReadMessageModel(this.assertSchema, data)
+      this.validateReadMessageData(data)
 
-      return await this.messageService.read(data)
+      return await this.messageService.readMessage(data)
     } catch (error) {
       this.handleException(error, 'readMessage', data)
     }
   }
+
+  private validateReadMessageData(value: unknown): asserts value is ReadMessageData {
+    try {
+      this.validator.assertSchema<ReadMessageData>('console-read-message-data', value)
+    } catch (error) {
+      throw new ReplServerError(`ReadMessageData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
 }
+
+export const MESSAGE_CONTROLLER = Symbol('MessageController')

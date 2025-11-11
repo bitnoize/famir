@@ -34,7 +34,7 @@ export class EnvConfig<T> implements Config<T> {
     this.#data = null
   }
 
-  protected buildData(): T {
+  private buildData(): T {
     try {
       const data = { ...process.env }
 

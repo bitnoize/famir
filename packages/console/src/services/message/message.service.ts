@@ -5,7 +5,7 @@ import {
   MESSAGE_REPOSITORY,
   MessageModel,
   MessageRepository,
-  ReadMessageModel,
+  ReadMessageData,
   ReplServerError
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
@@ -33,15 +33,15 @@ export class MessageService extends BaseService {
     this.logger.debug(`MessageService initialized`)
   }
 
-  async read(data: ReadMessageModel): Promise<MessageModel> {
-    const message = await this.messageRepository.read(data)
+  async readMessage(data: ReadMessageData): Promise<MessageModel> {
+    const messageModel = await this.messageRepository.readMessage(data)
 
-    if (!message) {
+    if (!messageModel) {
       throw new ReplServerError(`Message not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return message
+    return messageModel
   }
 }

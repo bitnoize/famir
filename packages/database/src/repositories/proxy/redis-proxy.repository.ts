@@ -48,7 +48,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   ) {
     super(validator, config, logger, connection, 'proxy')
 
-    validator.addSchemas({
+    this.validator.addSchemas({
       'database-raw-proxy': rawProxySchema
     })
 

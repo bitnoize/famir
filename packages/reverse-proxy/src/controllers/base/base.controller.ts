@@ -1,25 +1,12 @@
-import {
-  HttpServerError,
-  Logger,
-  Templater,
-  Validator,
-  ValidatorAssertSchema,
-  ValidatorGuardSchema
-} from '@famir/domain'
+import { HttpServerError, Logger, Templater, Validator } from '@famir/domain'
 
 export abstract class BaseController {
-  protected readonly guardSchema: ValidatorGuardSchema
-  protected readonly assertSchema: ValidatorAssertSchema
-
   constructor(
-    validator: Validator,
+    protected readonly validator: Validator,
     protected readonly logger: Logger,
     protected readonly templater: Templater,
     protected readonly controllerName: string
-  ) {
-    this.guardSchema = validator.guardSchema
-    this.assertSchema = validator.assertSchema
-  }
+  ) {}
 
   protected handleException(error: unknown, step: string): never {
     if (error instanceof HttpServerError) {

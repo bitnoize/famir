@@ -46,7 +46,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
   ) {
     super(validator, config, logger, connection, 'redirector')
 
-    validator.addSchemas({
+    this.validator.addSchemas({
       'database-raw-redirector': rawRedirectorSchema
     })
 

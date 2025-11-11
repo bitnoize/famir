@@ -1,4 +1,4 @@
-import { DIContainer, isDevelopment, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
@@ -45,9 +45,7 @@ export class BullExecutorConnector implements ExecutorConnector {
       })
     })
 
-    this.logger.debug(`ExecutorConnector initialized`, {
-      options: isDevelopment ? this.options : null
-    })
+    this.logger.debug(`ExecutorConnector initialized`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters

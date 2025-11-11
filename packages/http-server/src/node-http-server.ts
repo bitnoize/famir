@@ -1,4 +1,4 @@
-import { DIContainer, isDevelopment, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
@@ -59,9 +59,7 @@ export class NodeHttpServer implements HttpServer {
       })
     })
 
-    this.logger.debug(`HttpServer initialized`, {
-      options: isDevelopment ? this.options : null
-    })
+    this.logger.debug(`HttpServer initialized`)
   }
 
   listen(): Promise<void> {

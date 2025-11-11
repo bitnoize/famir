@@ -1,4 +1,4 @@
-import { DIContainer, isDevelopment, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
@@ -64,9 +64,7 @@ export class NodeReplServer implements ReplServer {
 
     this.server.maxConnections = this.options.maxClients
 
-    this.logger.debug(`ReplServer initialized`, {
-      options: isDevelopment ? this.options : null
-    })
+    this.logger.debug(`ReplServer initialized`)
   }
 
   listen(): Promise<void> {

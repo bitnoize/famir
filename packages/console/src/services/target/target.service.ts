@@ -1,19 +1,19 @@
 import { DIContainer } from '@famir/common'
 import {
-  CreateTargetModel,
-  DeleteTargetModel,
+  CreateTargetData,
+  DeleteTargetData,
   DisabledTargetModel,
   EnabledTargetModel,
-  ListTargetModels,
+  ListTargetsData,
   Logger,
   LOGGER,
-  ReadTargetModel,
+  ReadTargetData,
   ReplServerError,
-  SwitchTargetModel,
+  SwitchTargetData,
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository,
-  UpdateTargetModel
+  UpdateTargetData
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
 
@@ -37,16 +37,16 @@ export class TargetService extends BaseService {
     this.logger.debug(`TargetService initialized`)
   }
 
-  async create(data: CreateTargetModel): Promise<DisabledTargetModel> {
+  async createTarget(data: CreateTargetData): Promise<DisabledTargetModel> {
     try {
-      return await this.targetRepository.create(data)
+      return await this.targetRepository.createTarget(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
     }
   }
 
-  async read(data: ReadTargetModel): Promise<TargetModel> {
-    const target = await this.targetRepository.read(data)
+  async readTarget(data: ReadTargetData): Promise<TargetModel> {
+    const target = await this.targetRepository.readTarget(data)
 
     if (!target) {
       throw new ReplServerError(`Target not found`, {
@@ -57,47 +57,47 @@ export class TargetService extends BaseService {
     return target
   }
 
-  async update(data: UpdateTargetModel): Promise<TargetModel> {
+  async updateTarget(data: UpdateTargetData): Promise<TargetModel> {
     try {
-      return await this.targetRepository.update(data)
+      return await this.targetRepository.updateTarget(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
     }
   }
 
-  async enable(data: SwitchTargetModel): Promise<EnabledTargetModel> {
+  async enableTarget(data: SwitchTargetData): Promise<EnabledTargetModel> {
     try {
-      return await this.targetRepository.enable(data)
+      return await this.targetRepository.enableTarget(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
     }
   }
 
-  async disable(data: SwitchTargetModel): Promise<DisabledTargetModel> {
+  async disableTarget(data: SwitchTargetData): Promise<DisabledTargetModel> {
     try {
-      return await this.targetRepository.disable(data)
+      return await this.targetRepository.disableTarget(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
     }
   }
 
-  async delete(data: DeleteTargetModel): Promise<DisabledTargetModel> {
+  async deleteTarget(data: DeleteTargetData): Promise<DisabledTargetModel> {
     try {
-      return await this.targetRepository.delete(data)
+      return await this.targetRepository.deleteTarget(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
     }
   }
 
-  async list(data: ListTargetModels): Promise<TargetModel[]> {
-    const targets = await this.targetRepository.list(data)
+  async listTargets(data: ListTargetsData): Promise<TargetModel[]> {
+    const targetCollection = await this.targetRepository.listTargets(data)
 
-    if (!targets) {
+    if (!targetCollection) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return targets
+    return targetCollection
   }
 }

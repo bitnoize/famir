@@ -1,4 +1,4 @@
-import { DIContainer, isDevelopment } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import { Config, CONFIG, Logger, LOGGER, Storage, STORAGE } from '@famir/domain'
 import { Client as MinioClient } from 'minio'
 import { StorageConfig, StorageOptions } from './storage.js'
@@ -28,11 +28,9 @@ export class MinioStorage implements Storage {
       secretKey: this.options.secretKey
     })
 
-    this.logger.debug(`Storage initialized`, {
-      options: isDevelopment ? this.options : null
-    })
+    this.logger.debug(`Storage initialized`)
   }
-  
+
   private buildOptions(config: StorageConfig): StorageOptions {
     return {
       endPoint: config.STORAGE_END_POINT,

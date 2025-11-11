@@ -1,25 +1,28 @@
 import { DIContainer } from '@famir/common'
 import {
+  createLureDataSchema,
+  deleteLureDataSchema,
+  listLuresDataSchema,
+  readLureDataSchema,
+  switchLureDataSchema
+} from '@famir/database'
+import {
+  CreateLureData,
+  DeleteLureData,
+  ListLuresData,
   Logger,
   LOGGER,
-  REPL_SERVER_REGISTRY,
+  ReadLureData,
+  REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerRegistry,
+  ReplServerError,
+  ReplServerRouter,
+  SwitchLureData,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { LURE_SERVICE, LureService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
-import {
-  addSchemas,
-  validateCreateLureModel,
-  validateDeleteLureModel,
-  validateListLureModels,
-  validateReadLureModel,
-  validateSwitchLureModel
-} from './lure.utils.js'
-
-export const LURE_CONTROLLER = Symbol('LureController')
 
 export class LureController extends BaseController {
   static inject(container: DIContainer) {
@@ -29,7 +32,7 @@ export class LureController extends BaseController {
         new LureController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<LureService>(LURE_SERVICE)
         )
     )
@@ -42,80 +45,143 @@ export class LureController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    registry: ReplServerRegistry,
+    router: ReplServerRouter,
     protected readonly lureService: LureService
   ) {
-    super(validator, logger, 'lure')
+    super(validator, logger, router, 'lure')
 
-    validator.addSchemas(addSchemas)
+    this.validator.addSchemas({
+      'console-create-lure-data': createLureDataSchema,
+      'console-read-lure-data': readLureDataSchema,
+      'console-switch-lure-data': switchLureDataSchema,
+      'console-delete-lure-data': deleteLureDataSchema,
+      'console-list-lures-data': listLuresDataSchema
+    })
 
-    registry.addApiCall('createLure', this.createLureApiCall)
-    registry.addApiCall('readLure', this.readLureApiCall)
-    registry.addApiCall('enableLure', this.enableLureApiCall)
-    registry.addApiCall('disableLure', this.disableLureApiCall)
-    registry.addApiCall('deleteLure', this.deleteLureApiCall)
-    registry.addApiCall('listLures', this.listLuresApiCall)
+    this.router.addApiCall('createLure', this.createLureApiCall)
+    this.router.addApiCall('readLure', this.readLureApiCall)
+    this.router.addApiCall('enableLure', this.enableLureApiCall)
+    this.router.addApiCall('disableLure', this.disableLureApiCall)
+    this.router.addApiCall('deleteLure', this.deleteLureApiCall)
+    this.router.addApiCall('listLures', this.listLuresApiCall)
 
     this.logger.debug(`LureController initialized`)
   }
 
-  private readonly createLureApiCall: ReplServerApiCall = async (data) => {
+  private createLureApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateCreateLureModel(this.assertSchema, data)
+      this.validateCreateLureData(data)
 
-      return await this.lureService.create(data)
+      return await this.lureService.createLure(data)
     } catch (error) {
       this.handleException(error, 'createLure', data)
     }
   }
 
-  private readonly readLureApiCall: ReplServerApiCall = async (data) => {
+  private readLureApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateReadLureModel(this.assertSchema, data)
+      this.validateReadLureData(data)
 
-      return await this.lureService.read(data)
+      return await this.lureService.readLure(data)
     } catch (error) {
       this.handleException(error, 'readLure', data)
     }
   }
 
-  private readonly enableLureApiCall: ReplServerApiCall = async (data) => {
+  private enableLureApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateSwitchLureModel(this.assertSchema, data)
+      this.validateSwitchLureData(data)
 
-      return await this.lureService.enable(data)
+      return await this.lureService.enableLure(data)
     } catch (error) {
       this.handleException(error, 'enableLure', data)
     }
   }
 
-  private readonly disableLureApiCall: ReplServerApiCall = async (data) => {
+  private disableLureApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateSwitchLureModel(this.assertSchema, data)
+      this.validateSwitchLureData(data)
 
-      return await this.lureService.disable(data)
+      return await this.lureService.disableLure(data)
     } catch (error) {
       this.handleException(error, 'disableLure', data)
     }
   }
 
-  private readonly deleteLureApiCall: ReplServerApiCall = async (data) => {
+  private deleteLureApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateDeleteLureModel(this.assertSchema, data)
+      this.validateDeleteLureData(data)
 
-      return await this.lureService.delete(data)
+      return await this.lureService.deleteLure(data)
     } catch (error) {
       this.handleException(error, 'deleteLure', data)
     }
   }
 
-  private readonly listLuresApiCall: ReplServerApiCall = async (data) => {
+  private listLuresApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateListLureModels(this.assertSchema, data)
+      this.validateListLuresData(data)
 
-      return await this.lureService.list(data)
+      return await this.lureService.listLures(data)
     } catch (error) {
       this.handleException(error, 'listLures', data)
     }
   }
+
+  private validateCreateLureData(value: unknown): asserts value is CreateLureData {
+    try {
+      this.validator.assertSchema<CreateLureData>('console-create-lure-data', value)
+    } catch (error) {
+      throw new ReplServerError(`CreateLureData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateReadLureData(value: unknown): asserts value is ReadLureData {
+    try {
+      this.validator.assertSchema<ReadLureData>('console-read-lure-data', value)
+    } catch (error) {
+      throw new ReplServerError(`ReadLureData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateSwitchLureData(value: unknown): asserts value is SwitchLureData {
+    try {
+      this.validator.assertSchema<SwitchLureData>('console-switch-lure-data', value)
+    } catch (error) {
+      throw new ReplServerError(`SwitchLureData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateDeleteLureData(value: unknown): asserts value is DeleteLureData {
+    try {
+      this.validator.assertSchema<DeleteLureData>('console-delete-lure-data', value)
+    } catch (error) {
+      throw new ReplServerError(`DeleteLureData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateListLuresData(value: unknown): asserts value is ListLuresData {
+    try {
+      this.validator.assertSchema<ListLuresData>('console-list-lures-data', value)
+    } catch (error) {
+      throw new ReplServerError(`ListLuresData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
 }
+
+export const LURE_CONTROLLER = Symbol('LureController')

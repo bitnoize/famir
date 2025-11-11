@@ -13,7 +13,7 @@ import {
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
-import { addSchemas } from './analyze-log.utils.js'
+import { analyzeLogJobDataSchema } from '@famir/workflow'
 
 export const ANALYZE_LOG_APP = Symbol('AnalyzeLogApp')
 
@@ -38,7 +38,7 @@ export class AnalyzeLogApp {
   }
 
   constructor(
-    validator: Validator,
+    protected readonly validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
@@ -55,7 +55,9 @@ export class AnalyzeLogApp {
       })
     })
 
-    validator.addSchemas(addSchemas)
+    this.validator.addSchemas({
+      'analyze-log-job-data': analyzeLogJobDataSchema
+    })
 
     this.logger.debug(`AnalyzeLogApp initialized`)
   }

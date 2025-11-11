@@ -1,18 +1,18 @@
 import { DIContainer } from '@famir/common'
+import { readSessionDataSchema } from '@famir/database'
 import {
   Logger,
   LOGGER,
-  REPL_SERVER_REGISTRY,
+  ReadSessionData,
+  REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerRegistry,
+  ReplServerError,
+  ReplServerRouter,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { SESSION_SERVICE, SessionService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
-import { addSchemas, validateReadSessionModel } from './session.utils.js'
-
-export const SESSION_CONTROLLER = Symbol('SessionController')
 
 export class SessionController extends BaseController {
   static inject(container: DIContainer) {
@@ -22,7 +22,7 @@ export class SessionController extends BaseController {
         new SessionController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<SessionService>(SESSION_SERVICE)
         )
     )
@@ -35,25 +35,40 @@ export class SessionController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    registry: ReplServerRegistry,
+    router: ReplServerRouter,
     protected readonly sessionService: SessionService
   ) {
-    super(validator, logger, 'session')
+    super(validator, logger, router, 'session')
 
-    validator.addSchemas(addSchemas)
+    this.validator.addSchemas({
+      'console-read-session-data': readSessionDataSchema
+    })
 
-    registry.addApiCall('readSession', this.readSessionApiCall)
+    this.router.addApiCall('readSession', this.readSessionApiCall)
 
     this.logger.debug(`SessionController initialized`)
   }
 
-  private readonly readSessionApiCall: ReplServerApiCall = async (data) => {
+  private readSessionApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateReadSessionModel(this.assertSchema, data)
+      this.validateReadSessionData(data)
 
-      return await this.sessionService.read(data)
+      return await this.sessionService.readSession(data)
     } catch (error) {
       this.handleException(error, 'readSession', data)
     }
   }
+
+  private validateReadSessionData(value: unknown): asserts value is ReadSessionData {
+    try {
+      this.validator.assertSchema<ReadSessionData>('console-read-session-data', value)
+    } catch (error) {
+      throw new ReplServerError(`ReadSessionData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
 }
+
+export const SESSION_CONTROLLER = Symbol('SessionController')

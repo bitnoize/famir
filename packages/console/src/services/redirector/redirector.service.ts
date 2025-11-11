@@ -1,16 +1,16 @@
 import { DIContainer } from '@famir/common'
 import {
-  CreateRedirectorModel,
-  DeleteRedirectorModel,
-  ListRedirectorModels,
+  CreateRedirectorData,
+  DeleteRedirectorData,
+  ListRedirectorsData,
   Logger,
   LOGGER,
-  ReadRedirectorModel,
+  ReadRedirectorData,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository,
   ReplServerError,
-  UpdateRedirectorModel
+  UpdateRedirectorData
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
 
@@ -37,16 +37,16 @@ export class RedirectorService extends BaseService {
     this.logger.debug(`RedirectorService initialized`)
   }
 
-  async create(data: CreateRedirectorModel): Promise<RedirectorModel> {
+  async createRedirector(data: CreateRedirectorData): Promise<RedirectorModel> {
     try {
-      return await this.redirectorRepository.create(data)
+      return await this.redirectorRepository.createRedirector(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
     }
   }
 
-  async read(data: ReadRedirectorModel): Promise<RedirectorModel> {
-    const redirector = await this.redirectorRepository.read(data)
+  async readRedirector(data: ReadRedirectorData): Promise<RedirectorModel> {
+    const redirector = await this.redirectorRepository.readRedirector(data)
 
     if (!redirector) {
       throw new ReplServerError(`Redirector not found`, {
@@ -57,31 +57,31 @@ export class RedirectorService extends BaseService {
     return redirector
   }
 
-  async update(data: UpdateRedirectorModel): Promise<RedirectorModel> {
+  async updateRedirector(data: UpdateRedirectorData): Promise<RedirectorModel> {
     try {
-      return await this.redirectorRepository.update(data)
+      return await this.redirectorRepository.updateRedirector(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
     }
   }
 
-  async delete(data: DeleteRedirectorModel): Promise<RedirectorModel> {
+  async deleteRedirector(data: DeleteRedirectorData): Promise<RedirectorModel> {
     try {
-      return await this.redirectorRepository.delete(data)
+      return await this.redirectorRepository.deleteRedirector(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
     }
   }
 
-  async list(data: ListRedirectorModels): Promise<RedirectorModel[]> {
-    const redirectors = await this.redirectorRepository.list(data)
+  async listRedirectors(data: ListRedirectorsData): Promise<RedirectorModel[]> {
+    const redirectorCollection = await this.redirectorRepository.listRedirectors(data)
 
-    if (!redirectors) {
+    if (!redirectorCollection) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return redirectors
+    return redirectorCollection
   }
 }

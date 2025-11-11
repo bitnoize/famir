@@ -1,28 +1,37 @@
-import { ExecutorError, Logger, Validator, ValidatorAssertSchema } from '@famir/domain'
+import { AnalyzeLogJobData, ExecutorError, Logger, Validator } from '@famir/domain'
 
 export abstract class BaseController {
-  protected readonly assertSchema: ValidatorAssertSchema
-
   constructor(
-    validator: Validator,
+    protected readonly validator: Validator,
     protected readonly logger: Logger,
     protected readonly controllerName: string
-  ) {
-    this.assertSchema = validator.assertSchema
+  ) {}
+
+  protected validateAnalyzeLogJobData(value: unknown): asserts value is AnalyzeLogJobData {
+    try {
+      this.validator.assertSchema<AnalyzeLogJobData>('analyze-log-job-data', value)
+    } catch (error) {
+      throw new ExecutorError(`AnalyzeLogJobData validate failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
   }
 
   protected handleException(error: unknown, processor: string, data: unknown): never {
     if (error instanceof ExecutorError) {
       error.context['controller'] = this.controllerName
       error.context['processor'] = processor
+      error.context['data'] = data
 
       throw error
     } else {
-      throw new ExecutorError(`Controller unknown error`, {
+      throw new ExecutorError(`Controller internal error`, {
         cause: error,
         context: {
           controller: this.controllerName,
-          processor
+          processor,
+          data
         },
         code: 'INTERNAL_ERROR'
       })

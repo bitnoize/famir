@@ -1,15 +1,12 @@
-import { Logger, ReplServerError, Validator, ValidatorAssertSchema } from '@famir/domain'
+import { Logger, ReplServerError, ReplServerRouter, Validator } from '@famir/domain'
 
 export abstract class BaseController {
-  protected readonly assertSchema: ValidatorAssertSchema
-
   constructor(
-    validator: Validator,
+    protected readonly validator: Validator,
     protected readonly logger: Logger,
+    protected readonly router: ReplServerRouter,
     protected readonly controllerName: string
-  ) {
-    this.assertSchema = validator.assertSchema
-  }
+  ) {}
 
   protected handleException(error: unknown, apiCall: string, data: unknown): never {
     if (error instanceof ReplServerError) {

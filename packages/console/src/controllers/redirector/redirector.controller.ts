@@ -1,25 +1,28 @@
 import { DIContainer } from '@famir/common'
 import {
+  createRedirectorDataSchema,
+  deleteRedirectorDataSchema,
+  listRedirectorsDataSchema,
+  readRedirectorDataSchema,
+  updateRedirectorDataSchema
+} from '@famir/database'
+import {
+  CreateRedirectorData,
+  DeleteRedirectorData,
+  ListRedirectorsData,
   Logger,
   LOGGER,
-  REPL_SERVER_REGISTRY,
+  ReadRedirectorData,
+  REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerRegistry,
+  ReplServerError,
+  ReplServerRouter,
+  UpdateRedirectorData,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { REDIRECTOR_SERVICE, RedirectorService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
-import {
-  addSchemas,
-  validateCreateRedirectorModel,
-  validateDeleteRedirectorModel,
-  validateListRedirectorModels,
-  validateReadRedirectorModel,
-  validateUpdateRedirectorModel
-} from './redirector.utils.js'
-
-export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')
 
 export class RedirectorController extends BaseController {
   static inject(container: DIContainer) {
@@ -29,7 +32,7 @@ export class RedirectorController extends BaseController {
         new RedirectorController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRegistry>(REPL_SERVER_REGISTRY),
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<RedirectorService>(REDIRECTOR_SERVICE)
         )
     )
@@ -42,69 +45,132 @@ export class RedirectorController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    registry: ReplServerRegistry,
+    router: ReplServerRouter,
     protected readonly redirectorService: RedirectorService
   ) {
-    super(validator, logger, 'redirector')
+    super(validator, logger, router, 'redirector')
 
-    validator.addSchemas(addSchemas)
+    this.validator.addSchemas({
+      'console-create-redirector-data': createRedirectorDataSchema,
+      'console-read-redirector-data': readRedirectorDataSchema,
+      'console-update-redirector-data': updateRedirectorDataSchema,
+      'console-delete-redirector-data': deleteRedirectorDataSchema,
+      'console-list-redirectors-data': listRedirectorsDataSchema
+    })
 
-    registry.addApiCall('createRedirector', this.createRedirectorApiCall)
-    registry.addApiCall('readRedirector', this.readRedirectorApiCall)
-    registry.addApiCall('updateRedirector', this.updateRedirectorApiCall)
-    registry.addApiCall('deleteRedirector', this.deleteRedirectorApiCall)
-    registry.addApiCall('listRedirectors', this.listRedirectorsApiCall)
+    this.router.addApiCall('createRedirector', this.createRedirectorApiCall)
+    this.router.addApiCall('readRedirector', this.readRedirectorApiCall)
+    this.router.addApiCall('updateRedirector', this.updateRedirectorApiCall)
+    this.router.addApiCall('deleteRedirector', this.deleteRedirectorApiCall)
+    this.router.addApiCall('listRedirectors', this.listRedirectorsApiCall)
 
     this.logger.debug(`RedirectorController initialized`)
   }
 
-  private readonly createRedirectorApiCall: ReplServerApiCall = async (data) => {
+  private createRedirectorApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateCreateRedirectorModel(this.assertSchema, data)
+      this.validateCreateRedirectorData(data)
 
-      return await this.redirectorService.create(data)
+      return await this.redirectorService.createRedirector(data)
     } catch (error) {
       this.handleException(error, 'createRedirector', data)
     }
   }
 
-  private readonly readRedirectorApiCall: ReplServerApiCall = async (data) => {
+  private readRedirectorApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateReadRedirectorModel(this.assertSchema, data)
+      this.validateReadRedirectorData(data)
 
-      return await this.redirectorService.read(data)
+      return await this.redirectorService.readRedirector(data)
     } catch (error) {
       this.handleException(error, 'readRedirector', data)
     }
   }
 
-  private readonly updateRedirectorApiCall: ReplServerApiCall = async (data) => {
+  private updateRedirectorApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateUpdateRedirectorModel(this.assertSchema, data)
+      this.validateUpdateRedirectorData(data)
 
-      return await this.redirectorService.update(data)
+      return await this.redirectorService.updateRedirector(data)
     } catch (error) {
       this.handleException(error, 'updateRedirector', data)
     }
   }
 
-  private readonly deleteRedirectorApiCall: ReplServerApiCall = async (data) => {
+  private deleteRedirectorApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateDeleteRedirectorModel(this.assertSchema, data)
+      this.validateDeleteRedirectorData(data)
 
-      return await this.redirectorService.delete(data)
+      return await this.redirectorService.deleteRedirector(data)
     } catch (error) {
       this.handleException(error, 'deleteRedirector', data)
     }
   }
 
-  private readonly listRedirectorsApiCall: ReplServerApiCall = async (data) => {
+  private listRedirectorsApiCall: ReplServerApiCall = async (data) => {
     try {
-      validateListRedirectorModels(this.assertSchema, data)
+      this.validateListRedirectorsData(data)
 
-      return await this.redirectorService.list(data)
+      return await this.redirectorService.listRedirectors(data)
     } catch (error) {
       this.handleException(error, 'listRedirectors', data)
     }
   }
+
+  private validateCreateRedirectorData(value: unknown): asserts value is CreateRedirectorData {
+    try {
+      this.validator.assertSchema<CreateRedirectorData>('console-create-redirector-data', value)
+    } catch (error) {
+      throw new ReplServerError(`CreateRedirectorData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateReadRedirectorData(value: unknown): asserts value is ReadRedirectorData {
+    try {
+      this.validator.assertSchema<ReadRedirectorData>('console-read-redirector-data', value)
+    } catch (error) {
+      throw new ReplServerError(`ReadRedirectorData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateUpdateRedirectorData(value: unknown): asserts value is UpdateRedirectorData {
+    try {
+      this.validator.assertSchema<UpdateRedirectorData>('console-update-redirector-data', value)
+    } catch (error) {
+      throw new ReplServerError(`UpdateRedirectorData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateDeleteRedirectorData(value: unknown): asserts value is DeleteRedirectorData {
+    try {
+      this.validator.assertSchema<DeleteRedirectorData>('console-delete-redirector-data', value)
+    } catch (error) {
+      throw new ReplServerError(`DeleteRedirectorData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateListRedirectorsData(value: unknown): asserts value is ListRedirectorsData {
+    try {
+      this.validator.assertSchema<ListRedirectorsData>('console-list-redirectors-data', value)
+    } catch (error) {
+      throw new ReplServerError(`ListRedirectorsData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
 }
+
+export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')

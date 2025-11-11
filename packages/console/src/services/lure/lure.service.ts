@@ -1,18 +1,18 @@
 import { DIContainer } from '@famir/common'
 import {
-  CreateLureModel,
-  DeleteLureModel,
+  CreateLureData,
+  DeleteLureData,
   DisabledLureModel,
   EnabledLureModel,
-  ListLureModels,
+  ListLuresData,
   Logger,
   LOGGER,
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
-  ReadLureModel,
+  ReadLureData,
   ReplServerError,
-  SwitchLureModel
+  SwitchLureData
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
 
@@ -35,59 +35,59 @@ export class LureService extends BaseService {
     this.logger.debug(`LureService initialized`)
   }
 
-  async create(data: CreateLureModel): Promise<DisabledLureModel> {
+  async createLure(data: CreateLureData): Promise<DisabledLureModel> {
     try {
-      return await this.lureRepository.create(data)
+      return await this.lureRepository.createLure(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
     }
   }
 
-  async read(data: ReadLureModel): Promise<LureModel> {
-    const lure = await this.lureRepository.read(data)
+  async readLure(data: ReadLureData): Promise<LureModel> {
+    const lureModel = await this.lureRepository.readLure(data)
 
-    if (!lure) {
+    if (!lureModel) {
       throw new ReplServerError(`Lure not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return lure
+    return lureModel
   }
 
-  async enable(data: SwitchLureModel): Promise<EnabledLureModel> {
+  async enableLure(data: SwitchLureData): Promise<EnabledLureModel> {
     try {
-      return await this.lureRepository.enable(data)
+      return await this.lureRepository.enableLure(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
     }
   }
 
-  async disable(data: SwitchLureModel): Promise<DisabledLureModel> {
+  async disableLure(data: SwitchLureData): Promise<DisabledLureModel> {
     try {
-      return await this.lureRepository.disable(data)
+      return await this.lureRepository.disableLure(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
     }
   }
 
-  async delete(data: DeleteLureModel): Promise<DisabledLureModel> {
+  async deleteLure(data: DeleteLureData): Promise<DisabledLureModel> {
     try {
-      return await this.lureRepository.delete(data)
+      return await this.lureRepository.deleteLure(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
     }
   }
 
-  async list(data: ListLureModels): Promise<LureModel[]> {
-    const lures = await this.lureRepository.list(data)
+  async listLures(data: ListLuresData): Promise<LureModel[]> {
+    const lureCollection = await this.lureRepository.listLures(data)
 
-    if (!lures) {
+    if (!lureCollection) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return lures
+    return lureCollection
   }
 }

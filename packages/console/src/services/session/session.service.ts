@@ -2,7 +2,7 @@ import { DIContainer } from '@famir/common'
 import {
   Logger,
   LOGGER,
-  ReadSessionModel,
+  ReadSessionData,
   ReplServerError,
   SESSION_REPOSITORY,
   SessionModel,
@@ -33,15 +33,15 @@ export class SessionService extends BaseService {
     this.logger.debug(`SessionService initialized`)
   }
 
-  async read(data: ReadSessionModel): Promise<SessionModel> {
-    const session = await this.sessionRepository.read(data)
+  async readSession(data: ReadSessionData): Promise<SessionModel> {
+    const sessionModel = await this.sessionRepository.readSession(data)
 
-    if (!session) {
+    if (!sessionModel) {
       throw new ReplServerError(`Session not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return session
+    return sessionModel
   }
 }

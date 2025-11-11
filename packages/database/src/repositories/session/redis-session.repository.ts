@@ -45,7 +45,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
   ) {
     super(validator, config, logger, connection, 'session')
 
-    validator.addSchemas({
+    this.validator.addSchemas({
       'database-raw-session': rawSessionSchema
     })
 

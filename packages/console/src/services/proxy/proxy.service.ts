@@ -1,18 +1,18 @@
 import { DIContainer } from '@famir/common'
 import {
-  CreateProxyModel,
-  DeleteProxyModel,
+  CreateProxyData,
+  DeleteProxyData,
   DisabledProxyModel,
   EnabledProxyModel,
-  ListProxyModels,
+  ListProxiesData,
   Logger,
   LOGGER,
   PROXY_REPOSITORY,
   ProxyModel,
   ProxyRepository,
-  ReadProxyModel,
+  ReadProxyData,
   ReplServerError,
-  SwitchProxyModel
+  SwitchProxyData
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
 
@@ -36,16 +36,16 @@ export class ProxyService extends BaseService {
     this.logger.debug(`ProxyService initialized`)
   }
 
-  async create(data: CreateProxyModel): Promise<DisabledProxyModel> {
+  async createProxy(data: CreateProxyData): Promise<DisabledProxyModel> {
     try {
-      return await this.proxyRepository.create(data)
+      return await this.proxyRepository.createProxy(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
     }
   }
 
-  async read(data: ReadProxyModel): Promise<ProxyModel> {
-    const proxy = await this.proxyRepository.read(data)
+  async readProxy(data: ReadProxyData): Promise<ProxyModel> {
+    const proxy = await this.proxyRepository.readProxy(data)
 
     if (!proxy) {
       throw new ReplServerError(`Proxy not found`, {
@@ -56,39 +56,39 @@ export class ProxyService extends BaseService {
     return proxy
   }
 
-  async enable(data: SwitchProxyModel): Promise<EnabledProxyModel> {
+  async enableProxy(data: SwitchProxyData): Promise<EnabledProxyModel> {
     try {
-      return await this.proxyRepository.enable(data)
+      return await this.proxyRepository.enableProxy(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
     }
   }
 
-  async disable(data: SwitchProxyModel): Promise<DisabledProxyModel> {
+  async disableProxy(data: SwitchProxyData): Promise<DisabledProxyModel> {
     try {
-      return await this.proxyRepository.disable(data)
+      return await this.proxyRepository.disableProxy(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
     }
   }
 
-  async delete(data: DeleteProxyModel): Promise<DisabledProxyModel> {
+  async deleteProxy(data: DeleteProxyData): Promise<DisabledProxyModel> {
     try {
-      return await this.proxyRepository.delete(data)
+      return await this.proxyRepository.deleteProxy(data)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
     }
   }
 
-  async list(data: ListProxyModels): Promise<ProxyModel[]> {
-    const proxies = await this.proxyRepository.list(data)
+  async listProxies(data: ListProxiesData): Promise<ProxyModel[]> {
+    const proxyCollection = await this.proxyRepository.listProxies(data)
 
-    if (!proxies) {
+    if (!proxyCollection) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return proxies
+    return proxyCollection
   }
 }

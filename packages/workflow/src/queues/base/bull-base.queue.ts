@@ -1,4 +1,4 @@
-import { isDevelopment, serializeError } from '@famir/common'
+import { serializeError } from '@famir/common'
 import { Config, Logger, WorkflowError } from '@famir/domain'
 import { Queue } from 'bullmq'
 import { BullWorkflowConnection } from '../../bull-workflow-connector.js'
@@ -26,11 +26,6 @@ export abstract class BullBaseQueue {
         error: serializeError(error),
         queue: this.queueName
       })
-    })
-
-    this.logger.debug(`Queue initialized`, {
-      queue: this.queueName,
-      options: isDevelopment ? this.options : null
     })
   }
 

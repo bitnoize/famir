@@ -45,7 +45,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
   ) {
     super(validator, config, logger, connection, 'campaign')
 
-    validator.addSchemas({
+    this.validator.addSchemas({
       'database-raw-campaign': rawCampaignSchema
     })
 
