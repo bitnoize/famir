@@ -19,8 +19,8 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { CAMPAIGN_SERVICE, CampaignService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
+import { CAMPAIGN_SERVICE, type CampaignService } from './campaign.service.js'
 
 export const CAMPAIGN_CONTROLLER = Symbol('CampaignController')
 

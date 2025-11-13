@@ -79,7 +79,7 @@ export const targetFunctions = {
         parser.push(mirrorSecure ? '1' : '0')
         parser.push(mirrorSub)
         parser.push(mirrorPort.toString())
-        parser.push(marks.join(' '))
+        //parser.push(marks.join(' '))
         parser.push(connectTimeout.toString())
         parser.push(timeout.toString())
         parser.push(mainPage)
@@ -140,8 +140,8 @@ export const targetFunctions = {
         parser.pushKey(targetKey(prefix, campaignId, targetId))
 
         if (marks != null) {
-          parser.push('marks')
-          parser.push(marks.join(' '))
+          //parser.push('marks')
+          //parser.push(marks.join(' '))
         }
 
         if (connectTimeout != null) {

@@ -48,28 +48,21 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   CurlHttpClient.inject(container)
 
   ImplHttpServerRouter.inject(container, [
-    'before-setup',
-    'setup',
-    'after-setup',
-    'before-auth',
-    'auth',
-    'after-auth',
-    'before-prepare',
-    'prepare',
-    'after-prepare',
-    'before-forward',
-    'forward',
-    'after-forward',
-    'before-complete',
-    'complete',
-    'after-complete'
+    'setup-mirror',
+    'well-known-urls',
+    'authorize',
+    'build-request',
+    'parse-request',
+    'interact-donor',
+    'parse-response',
+    'send-response'
   ])
 
   NodeHttpServer.inject(container)
 
   ReverseProxyApp.inject(container)
 
-  composer(container)
+  await composer(container)
 
   await ReverseProxyApp.resolve(container).start()
 }

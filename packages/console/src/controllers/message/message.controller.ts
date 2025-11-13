@@ -11,8 +11,8 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { MESSAGE_SERVICE, MessageService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
+import { MESSAGE_SERVICE, type MessageService } from './message.service.js'
 
 export class MessageController extends BaseController {
   static inject(container: DIContainer) {

@@ -181,7 +181,8 @@ export class NodeHttpServer implements HttpServer {
   }
 
   protected chainMiddlewares(middlewares: HttpServerMiddleware[]): HttpServerMiddleware {
-    return async (ctx: HttpServerContext, next?: HttpServerNextFunction): Promise<void> => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return async (ctx: HttpServerContext, next: HttpServerNextFunction): Promise<void> => {
       let index = -1
 
       const dispatch = async (i: number): Promise<void> => {

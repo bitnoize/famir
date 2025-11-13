@@ -65,8 +65,15 @@ export class NodeHttpServerContext implements HttpServerContext {
     }
   }
 
-  readonly #requestHeaders: HttpHeaders = {}
+  isStreaming: boolean = false
 
+  get originRequestHeaders(): Record<string, HttpHeader | undefined> {
+    return this.req.headers
+  }
+
+  readonly requestHeaders: HttpHeaders = {}
+
+  /*
   parseRequestHeaders() {
     Object.entries(this.req.headers).forEach(([name, value]) => {
       this.#requestHeaders[name] = value
@@ -74,11 +81,12 @@ export class NodeHttpServerContext implements HttpServerContext {
 
     // obsolete headers..
   }
+  */
 
   strictRequestHeaders(): Record<string, HttpHeader> {
     const headers: Record<string, HttpHeader> = {}
 
-    Object.entries(this.#requestHeaders).forEach(([name, value]) => {
+    Object.entries(this.requestHeaders).forEach(([name, value]) => {
       if (value != null) {
         headers[name] = value
       }
@@ -87,67 +95,19 @@ export class NodeHttpServerContext implements HttpServerContext {
     return headers
   }
 
-  getRequestHeader(name: string): string | undefined {
-    name = name.toLowerCase()
-
-    const value = this.#requestHeaders[name]
-
-    if (value == null) {
-      return undefined
-    }
-
-    if (Array.isArray(value)) {
-      return value[0] != null ? value[0] : undefined
-    }
-
-    return value
-  }
-
-  getRequestHeaderArray(name: string): string[] | undefined {
-    name = name.toLowerCase()
-
-    const value = this.#requestHeaders[name]
-
-    if (value == null) {
-      return undefined
-    }
-
-    if (typeof value === 'string') {
-      return [value]
-    }
-
-    return value
-  }
-
-  setRequestHeader(name: string, value: HttpHeader) {
-    name = name.toLowerCase()
-
-    this.#requestHeaders[name] = value
-  }
-
-  setRequestHeaders(headers: Record<string, HttpHeader>) {
+  setResponseHeaders(headers: Record<string, HttpHeader>) {
     Object.entries(headers).forEach(([name, value]) => {
-      this.setRequestHeader(name, value)
+      name = name.toLowerCase()
+
+      this.responseHeaders[name] = value
     })
   }
 
-  delRequestHeader(name: string, prune = false) {
-    name = name.toLowerCase()
-
-    this.#requestHeaders[name] = prune ? undefined : null
-  }
-
-  delRequestHeaders(names: string[], prune = false) {
-    names.forEach((name) => {
-      this.delRequestHeader(name, prune)
-    })
-  }
-
-  readonly #requestCookies: HttpRequestCookies = {}
+  readonly requestCookies: HttpRequestCookies = {}
 
   parseRequestCookies() {
     try {
-      const cookieHeader = this.getRequestHeader('Cookie') || ''
+      const cookieHeader = this.requestHeaders['cookie'] || ''
 
       // TODO
     } catch (error) {
@@ -158,7 +118,7 @@ export class NodeHttpServerContext implements HttpServerContext {
   strictRequestCookies(): Record<string, HttpRequestCookie> {
     const cookies: Record<string, HttpRequestCookie> = {}
 
-    Object.entries(this.#requestCookies).forEach(([name, value]) => {
+    Object.entries(this.requestCookies).forEach(([name, value]) => {
       if (value != null) {
         cookies[name] = value
       }
@@ -172,33 +132,7 @@ export class NodeHttpServerContext implements HttpServerContext {
 
     const cookieHeader = '' // TODO
 
-    this.setRequestHeader('Cookie', cookieHeader)
-  }
-
-  getRequestCookie(name: string): HttpRequestCookie | undefined {
-    const value = this.#requestCookies[name]
-
-    return value != null ? value : undefined
-  }
-
-  setRequestCookie(name: string, value: HttpRequestCookie) {
-    this.#requestCookies[name] = value
-  }
-
-  setRequestCookies(cookies: Record<string, HttpRequestCookie>) {
-    Object.entries(cookies).forEach(([name, value]) => {
-      this.setRequestCookie(name, value)
-    })
-  }
-
-  delRequestCookie(name: string, prune = false) {
-    this.#requestCookies[name] = prune ? undefined : null
-  }
-
-  delRequestCookies(names: string[], prune = false) {
-    names.forEach((name) => {
-      this.delRequestCookie(name, prune)
-    })
+    this.requestHeaders['cookie'] = cookieHeader
   }
 
   requestBody: HttpBody = Buffer.alloc(0)
@@ -269,8 +203,9 @@ export class NodeHttpServerContext implements HttpServerContext {
     return this.#status
   }
 
-  readonly #responseHeaders: HttpHeaders = {}
+  readonly responseHeaders: HttpHeaders = {}
 
+  /*
   parseResponseHeaders(headers: Record<string, string | string[] | undefined>) {
     Object.entries(headers).forEach(([name, value]) => {
       this.#responseHeaders[name] = value
@@ -278,11 +213,12 @@ export class NodeHttpServerContext implements HttpServerContext {
 
     // obsolete headers..
   }
+  */
 
   strictResponseHeaders(): Record<string, HttpHeader> {
     const headers: Record<string, HttpHeader> = {}
 
-    Object.entries(this.#responseHeaders).forEach(([name, value]) => {
+    Object.entries(this.responseHeaders).forEach(([name, value]) => {
       if (value != null) {
         headers[name] = value
       }
@@ -291,6 +227,157 @@ export class NodeHttpServerContext implements HttpServerContext {
     return headers
   }
 
+  get responseHeadersSent(): boolean {
+    return this.res.headersSent
+  }
+
+  readonly responseCookies: HttpResponseCookies = {}
+
+  parseResponseCookies() {
+    try {
+      const setCookieHeader = this.responseHeaders['set-cookie'] || []
+
+      // TODO
+    } catch (error) {
+      this.errors.push(serializeError(error))
+    }
+  }
+
+  strictResponseCookies(): Record<string, HttpResponseCookie> {
+    const cookies: Record<string, HttpResponseCookie> = {}
+
+    Object.entries(this.responseCookies).forEach(([name, value]) => {
+      if (value != null) {
+        cookies[name] = value
+      }
+    })
+
+    return cookies
+  }
+
+  updateResponseSetCookieHeader() {
+    const cookies = this.strictResponseCookies()
+
+    const setCookieHeader = [''] // TODO
+
+    this.responseHeaders['set-cookie'] = setCookieHeader
+  }
+
+  responseBody: HttpBody = Buffer.alloc(0)
+
+  sendResponse(status: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.#status = status
+
+      this.res.writeHead(this.#status, this.strictResponseHeaders())
+
+      this.res.end(this.responseBody, (error?: Error) => {
+        if (error) {
+          reject(
+            new HttpServerError(`Response send failed`, {
+              cause: error,
+              code: 'INTERNAL_ERROR'
+            })
+          )
+        } else {
+          resolve()
+        }
+      })
+    })
+  }
+
+  get isComplete(): boolean {
+    return this.req.complete
+  }
+}
+
+/*
+  getRequestHeader(name: string): string | undefined {
+    name = name.toLowerCase()
+
+    const value = this.#requestHeaders[name]
+
+    if (value == null) {
+      return undefined
+    }
+
+    if (Array.isArray(value)) {
+      return value[0] != null ? value[0] : undefined
+    }
+
+    return value
+  }
+
+  getRequestHeaderArray(name: string): string[] | undefined {
+    name = name.toLowerCase()
+
+    const value = this.#requestHeaders[name]
+
+    if (value == null) {
+      return undefined
+    }
+
+    if (typeof value === 'string') {
+      return [value]
+    }
+
+    return value
+  }
+
+  setRequestHeader(name: string, value: HttpHeader) {
+    name = name.toLowerCase()
+
+    this.#requestHeaders[name] = value
+  }
+
+  setRequestHeaders(headers: Record<string, HttpHeader>) {
+    Object.entries(headers).forEach(([name, value]) => {
+      this.setRequestHeader(name, value)
+    })
+  }
+
+  delRequestHeader(name: string, prune = false) {
+    name = name.toLowerCase()
+
+    this.#requestHeaders[name] = prune ? undefined : null
+  }
+
+  delRequestHeaders(names: string[], prune = false) {
+    names.forEach((name) => {
+      this.delRequestHeader(name, prune)
+    })
+  }
+  */
+
+/*
+  getRequestCookie(name: string): HttpRequestCookie | undefined {
+    const value = this.#requestCookies[name]
+
+    return value != null ? value : undefined
+  }
+
+  setRequestCookie(name: string, value: HttpRequestCookie) {
+    this.#requestCookies[name] = value
+  }
+
+  setRequestCookies(cookies: Record<string, HttpRequestCookie>) {
+    Object.entries(cookies).forEach(([name, value]) => {
+      this.setRequestCookie(name, value)
+    })
+  }
+
+  delRequestCookie(name: string, prune = false) {
+    this.#requestCookies[name] = prune ? undefined : null
+  }
+
+  delRequestCookies(names: string[], prune = false) {
+    names.forEach((name) => {
+      this.delRequestCookie(name, prune)
+    })
+  }
+  */
+
+/*
   getResponseHeader(name: string): string | undefined {
     name = name.toLowerCase()
 
@@ -346,43 +433,9 @@ export class NodeHttpServerContext implements HttpServerContext {
       this.delResponseHeader(name, prune)
     })
   }
+  */
 
-  get responseHeadersSent(): boolean {
-    return this.res.headersSent
-  }
-
-  readonly #responseCookies: HttpResponseCookies = {}
-
-  parseResponseCookies() {
-    try {
-      const setCookieHeader = this.getResponseHeaderArray('Set-Cookie') || []
-
-      // TODO
-    } catch (error) {
-      this.errors.push(serializeError(error))
-    }
-  }
-
-  strictResponseCookies(): Record<string, HttpResponseCookie> {
-    const cookies: Record<string, HttpResponseCookie> = {}
-
-    Object.entries(this.#responseCookies).forEach(([name, value]) => {
-      if (value != null) {
-        cookies[name] = value
-      }
-    })
-
-    return cookies
-  }
-
-  updateResponseSetCookieHeader() {
-    const cookies = this.strictResponseCookies()
-
-    const setCookieHeader = '' // TODO
-
-    this.setResponseHeader('Set-Cookie', setCookieHeader)
-  }
-
+/*
   getResponseCookie(name: string): HttpResponseCookie | undefined {
     const value = this.#responseCookies[name]
 
@@ -408,33 +461,4 @@ export class NodeHttpServerContext implements HttpServerContext {
       this.delResponseCookie(name, prune)
     })
   }
-
-  responseBody: HttpBody = Buffer.alloc(0)
-
-  sendResponseReply(status: number): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.#status = status
-
-      this.res.writeHead(this.#status, this.strictResponseHeaders())
-
-      this.res.end(this.responseBody, (error?: Error) => {
-        if (error) {
-          reject(
-            new HttpServerError(`Response send failed`, {
-              cause: error,
-              code: 'INTERNAL_ERROR'
-            })
-          )
-        } else {
-          resolve()
-        }
-      })
-    })
-  }
-
-  #isComplete: boolean = false
-
-  get isComplete(): boolean {
-    return this.#isComplete
-  }
-}
+  */

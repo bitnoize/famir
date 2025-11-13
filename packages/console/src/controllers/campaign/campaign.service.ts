@@ -13,6 +13,8 @@ import {
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
 
+export const CAMPAIGN_SERVICE = Symbol('CampaignService')
+
 export class CampaignService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<CampaignService>(
@@ -74,5 +76,3 @@ export class CampaignService extends BaseService {
     return await this.campaignRepository.listCampaigns()
   }
 }
-
-export const CAMPAIGN_SERVICE = Symbol('CampaignService')

@@ -11,8 +11,8 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { SESSION_SERVICE, SessionService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
+import { SESSION_SERVICE, type SessionService } from './session.service.js'
 
 export class SessionController extends BaseController {
   static inject(container: DIContainer) {

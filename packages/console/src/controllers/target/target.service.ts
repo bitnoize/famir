@@ -46,15 +46,15 @@ export class TargetService extends BaseService {
   }
 
   async readTarget(data: ReadTargetData): Promise<TargetModel> {
-    const target = await this.targetRepository.readTarget(data)
+    const targetModel = await this.targetRepository.readTarget(data)
 
-    if (!target) {
+    if (!targetModel) {
       throw new ReplServerError(`Target not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return target
+    return targetModel
   }
 
   async updateTarget(data: UpdateTargetData): Promise<TargetModel> {

@@ -46,15 +46,15 @@ export class RedirectorService extends BaseService {
   }
 
   async readRedirector(data: ReadRedirectorData): Promise<RedirectorModel> {
-    const redirector = await this.redirectorRepository.readRedirector(data)
+    const redirectorModel = await this.redirectorRepository.readRedirector(data)
 
-    if (!redirector) {
+    if (!redirectorModel) {
       throw new ReplServerError(`Redirector not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return redirector
+    return redirectorModel
   }
 
   async updateRedirector(data: UpdateRedirectorData): Promise<RedirectorModel> {

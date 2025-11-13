@@ -45,15 +45,15 @@ export class ProxyService extends BaseService {
   }
 
   async readProxy(data: ReadProxyData): Promise<ProxyModel> {
-    const proxy = await this.proxyRepository.readProxy(data)
+    const proxyModel = await this.proxyRepository.readProxy(data)
 
-    if (!proxy) {
+    if (!proxyModel) {
       throw new ReplServerError(`Proxy not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return proxy
+    return proxyModel
   }
 
   async enableProxy(data: SwitchProxyData): Promise<EnabledProxyModel> {

@@ -21,8 +21,8 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { REDIRECTOR_SERVICE, RedirectorService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
+import { REDIRECTOR_SERVICE, type RedirectorService } from './redirector.service.js'
 
 export class RedirectorController extends BaseController {
   static inject(container: DIContainer) {

@@ -11,5 +11,5 @@ export type HttpServerNextFunction = () => Promise<void>
 
 export type HttpServerMiddleware = (
   ctx: HttpServerContext,
-  next?: HttpServerNextFunction
+  next: HttpServerNextFunction
 ) => Promise<void>

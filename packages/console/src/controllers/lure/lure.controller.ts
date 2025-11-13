@@ -21,8 +21,10 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { LURE_SERVICE, LureService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
+import { LURE_SERVICE, type LureService } from './lure.service.js'
+
+export const LURE_CONTROLLER = Symbol('LureController')
 
 export class LureController extends BaseController {
   static inject(container: DIContainer) {
@@ -183,5 +185,3 @@ export class LureController extends BaseController {
     }
   }
 }
-
-export const LURE_CONTROLLER = Symbol('LureController')

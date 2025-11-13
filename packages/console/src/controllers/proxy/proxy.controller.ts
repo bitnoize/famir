@@ -21,8 +21,8 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { PROXY_SERVICE, ProxyService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
+import { PROXY_SERVICE, type ProxyService } from './proxy.service.js'
 
 export class ProxyController extends BaseController {
   static inject(container: DIContainer) {

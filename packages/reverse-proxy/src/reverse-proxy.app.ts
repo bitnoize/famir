@@ -12,8 +12,6 @@ import {
   WorkflowConnector
 } from '@famir/domain'
 
-export const REVERSE_PROXY_APP = Symbol('ReverseProxyApp')
-
 export class ReverseProxyApp {
   static inject(container: DIContainer) {
     container.registerSingleton<ReverseProxyApp>(
@@ -89,3 +87,5 @@ export class ReverseProxyApp {
     }
   }
 }
+
+export const REVERSE_PROXY_APP = Symbol('ReverseProxyApp')

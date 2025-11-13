@@ -23,8 +23,8 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { TARGET_SERVICE, TargetService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
+import { TARGET_SERVICE, type TargetService } from './target.service.js'
 
 export class TargetController extends BaseController {
   static inject(container: DIContainer) {

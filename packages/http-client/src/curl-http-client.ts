@@ -1,18 +1,19 @@
-import { DIContainer, isDevelopment } from '@famir/common'
+import { arrayIncludes, DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
   HTTP_CLIENT,
+  HTTP_RESPONSE_COOKIE_SAME_SITE,
   HttpClient,
   HttpClientRequest,
   HttpClientResponse,
+  HttpResponseCookieSameSite,
   Logger,
   LOGGER
 } from '@famir/domain'
 import { Curl, CurlFeature } from 'node-libcurl'
 import setCookie from 'set-cookie-parser'
 import { HttpClientConfig, HttpClientOptions } from './http-client.js'
-import { buildOptions, parseCookieSameSite } from './http-client.utils.js'
 
 export class CurlHttpClient implements HttpClient {
   static inject(container: DIContainer) {
@@ -29,11 +30,9 @@ export class CurlHttpClient implements HttpClient {
     config: Config<HttpClientConfig>,
     protected readonly logger: Logger
   ) {
-    this.options = buildOptions(config.data)
+    this.options = this.buildOptions(config.data)
 
-    this.logger.debug(`HttpClient initialized`, {
-      options: isDevelopment ? this.options : null
-    })
+    this.logger.debug(`HttpClient initialized`)
   }
 
   async query(request: HttpClientRequest): Promise<HttpClientResponse> {
@@ -62,7 +61,7 @@ export class CurlHttpClient implements HttpClient {
         path: cookie.path,
         domain: cookie.domain,
         secure: cookie.secure,
-        sameSite: parseCookieSameSite(cookie.sameSite)
+        sameSite: this.parseCookieSameSite(cookie.sameSite)
       }
     })
 
@@ -193,5 +192,27 @@ export class CurlHttpClient implements HttpClient {
         response.queryTime = Date.now() - startTime
       }
     })
+  }
+
+  private buildOptions(config: HttpClientConfig): HttpClientOptions {
+    return {
+      bodyLimit: config.HTTP_CLIENT_BODY_LIMIT
+    }
+  }
+
+  private parseCookieSameSite(value: string | undefined): HttpResponseCookieSameSite | undefined {
+    if (value == null) {
+      return undefined
+    }
+
+    value = value.toLowerCase()
+
+    const isKnownValue = arrayIncludes(HTTP_RESPONSE_COOKIE_SAME_SITE, value)
+
+    if (!isKnownValue) {
+      return undefined
+    }
+
+    return value as HttpResponseCookieSameSite
   }
 }
