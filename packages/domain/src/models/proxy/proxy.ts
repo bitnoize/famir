@@ -8,10 +8,6 @@ export interface ProxyModel {
   readonly updatedAt: Date
 }
 
-export interface DisabledProxyModel extends ProxyModel {
-  isEnabled: false
-}
-
 export interface EnabledProxyModel extends ProxyModel {
   isEnabled: true
 }

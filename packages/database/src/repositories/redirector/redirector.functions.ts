@@ -4,10 +4,13 @@ import { campaignKey, redirectorIndexKey, redirectorKey } from '../../database.k
 export interface RawRedirector {
   campaign_id: string
   redirector_id: string
-  page: string
   lure_count: number
   created_at: number
   updated_at: number
+}
+
+export interface RawFullRedirector extends RawRedirector {
+  page: string
 }
 
 export const redirectorFunctions = {
@@ -36,6 +39,22 @@ export const redirectorFunctions = {
     },
 
     read_redirector: {
+      NUMBER_OF_KEYS: 2,
+
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        redirectorId: string
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    read_full_redirector: {
       NUMBER_OF_KEYS: 2,
 
       parseCommand(

@@ -6,9 +6,32 @@ import {
   ReadRedirectorData,
   UpdateRedirectorData
 } from '@famir/domain'
-import { RawRedirector } from './redirector.functions.js'
+import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 
 export const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
+  type: 'object',
+  required: ['campaign_id', 'redirector_id', 'lure_count', 'created_at', 'updated_at'],
+  properties: {
+    campaign_id: {
+      type: 'string'
+    },
+    redirector_id: {
+      type: 'string'
+    },
+    lure_count: {
+      type: 'integer'
+    },
+    created_at: {
+      type: 'integer'
+    },
+    updated_at: {
+      type: 'integer'
+    }
+  },
+  additionalProperties: false
+} as const
+
+export const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
   type: 'object',
   required: ['campaign_id', 'redirector_id', 'page', 'lure_count', 'created_at', 'updated_at'],
   properties: {
@@ -30,7 +53,8 @@ export const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
     updated_at: {
       type: 'integer'
     }
-  }
+  },
+  additionalProperties: false
 } as const
 
 export const redirectorPageSchema: JSONSchemaType<string> = {
@@ -38,6 +62,8 @@ export const redirectorPageSchema: JSONSchemaType<string> = {
   minLength: 0,
   maxLength: 10485760
 } as const
+
+const DEFAULT_PAGE = ``
 
 export const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = {
   type: 'object',
@@ -47,7 +73,7 @@ export const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = 
     redirectorId: customIdentSchema,
     page: {
       ...redirectorPageSchema,
-      default: '' // FIXME
+      default: DEFAULT_PAGE
     }
   },
   additionalProperties: false

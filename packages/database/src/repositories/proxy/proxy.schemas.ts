@@ -41,7 +41,8 @@ export const rawProxySchema: JSONSchemaType<RawProxy> = {
     updated_at: {
       type: 'integer'
     }
-  }
+  },
+  additionalProperties: false
 } as const
 
 export const proxyUrlSchema: JSONSchemaType<string> = {

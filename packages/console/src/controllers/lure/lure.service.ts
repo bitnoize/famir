@@ -2,8 +2,6 @@ import { DIContainer } from '@famir/common'
 import {
   CreateLureData,
   DeleteLureData,
-  DisabledLureModel,
-  EnabledLureModel,
   ListLuresData,
   Logger,
   LOGGER,
@@ -35,7 +33,7 @@ export class LureService extends BaseService {
     this.logger.debug(`LureService initialized`)
   }
 
-  async createLure(data: CreateLureData): Promise<DisabledLureModel> {
+  async createLure(data: CreateLureData): Promise<LureModel> {
     try {
       return await this.lureRepository.createLure(data)
     } catch (error) {
@@ -55,7 +53,7 @@ export class LureService extends BaseService {
     return lureModel
   }
 
-  async enableLure(data: SwitchLureData): Promise<EnabledLureModel> {
+  async enableLure(data: SwitchLureData): Promise<LureModel> {
     try {
       return await this.lureRepository.enableLure(data)
     } catch (error) {
@@ -63,7 +61,7 @@ export class LureService extends BaseService {
     }
   }
 
-  async disableLure(data: SwitchLureData): Promise<DisabledLureModel> {
+  async disableLure(data: SwitchLureData): Promise<LureModel> {
     try {
       return await this.lureRepository.disableLure(data)
     } catch (error) {
@@ -71,7 +69,7 @@ export class LureService extends BaseService {
     }
   }
 
-  async deleteLure(data: DeleteLureData): Promise<DisabledLureModel> {
+  async deleteLure(data: DeleteLureData): Promise<LureModel> {
     try {
       return await this.lureRepository.deleteLure(data)
     } catch (error) {

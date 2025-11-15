@@ -1,6 +1,13 @@
 export interface CampaignModel {
   readonly campaignId: string
   readonly mirrorDomain: string
+  readonly sessionCount: number
+  readonly messageCount: number
+  readonly createdAt: Date
+  readonly updatedAt: Date
+}
+
+export interface FullCampaignModel extends CampaignModel {
   readonly description: string
   readonly landingAuthPath: string
   readonly landingAuthParam: string
@@ -13,8 +20,4 @@ export interface CampaignModel {
   readonly targetCount: number
   readonly redirectorCount: number
   readonly lureCount: number
-  readonly sessionCount: number
-  readonly messageCount: number
-  readonly createdAt: Date
-  readonly updatedAt: Date
 }

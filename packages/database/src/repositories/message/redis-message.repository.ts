@@ -6,6 +6,7 @@ import {
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
+  FullMessageModel,
   HttpBody,
   HttpHeaders,
   HttpRequestCookies,
@@ -22,11 +23,12 @@ import {
 import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { RawMessage } from './message.functions.js'
+import { RawFullMessage, RawMessage } from './message.functions.js'
 import {
   messageHeadersSchema,
   messageRequestCookiesSchema,
   messageResponseCookiesSchema,
+  rawFullMessageSchema,
   rawMessageSchema
 } from './message.schemas.js'
 
@@ -54,41 +56,49 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
     this.validator.addSchemas({
       'database-raw-message': rawMessageSchema,
+      'database-raw-full-message': rawFullMessageSchema,
       'database-message-headers': messageHeadersSchema,
       'database-message-request-cookies': messageRequestCookiesSchema,
       'database-message-response-cookies': messageResponseCookiesSchema
     })
 
-    this.logger.debug(`MessageRepository initialized`)
+    this.logger.debug(`Repository initialized`, {
+      repository: this.repositoryName
+    })
   }
 
-  async createMessage(data: CreateMessageData): Promise<string> {
+  async createMessage(data: CreateMessageData): Promise<MessageModel> {
     try {
       const messageId = randomIdent()
 
-      const status = await this.connection.message.create_message(
-        this.options.prefix,
-        data.campaignId,
-        messageId,
-        data.proxyId,
-        data.targetId,
-        data.sessionId,
-        data.method,
-        data.originUrl,
-        data.urlPath,
-        data.urlQuery,
-        data.urlHash,
-        data.requestHeaders,
-        data.requestCookies,
-        data.requestBody,
-        data.status,
-        data.responseHeaders,
-        data.responseCookies,
-        data.responseBody,
-        data.clientIp,
-        data.score,
-        data.queryTime
-      )
+      const [status, rawValue] = await Promise.all([
+        this.connection.message.create_message(
+          this.options.prefix,
+          data.campaignId,
+          messageId,
+          data.proxyId,
+          data.targetId,
+          data.sessionId,
+          data.method,
+          data.originUrl,
+          data.urlPath,
+          data.urlQuery,
+          data.urlHash,
+          data.isStreaming,
+          data.requestHeaders,
+          data.requestCookies,
+          data.requestBody,
+          data.responseHeaders,
+          data.responseCookies,
+          data.responseBody,
+          data.clientIp,
+          data.status,
+          data.score,
+          data.totalTime
+        ),
+
+        this.connection.message.read_message(this.options.prefix, data.campaignId, messageId)
+      ])
 
       const [code, message] = this.parseStatusReply(status)
 
@@ -96,9 +106,13 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         throw new DatabaseError(message, { code })
       }
 
-      this.logger.info(message, { messageId })
+      const messageModel = this.buildMessageModel(rawValue)
 
-      return messageId
+      this.assertMessageModel(messageModel)
+
+      this.logger.info(message, { messageModel })
+
+      return messageModel
     } catch (error) {
       this.handleException(error, 'createMessage', {
         ...data,
@@ -108,15 +122,15 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  async readMessage(data: ReadMessageData): Promise<MessageModel | null> {
+  async readMessage(data: ReadMessageData): Promise<FullMessageModel | null> {
     try {
-      const rawMessage = await this.connection.message.read_message(
+      const rawValue = await this.connection.message.read_full_message(
         this.options.prefix,
         data.campaignId,
         data.messageId
       )
 
-      return this.buildMessageModel(rawMessage)
+      return this.buildFullMessageModel(rawValue)
     } catch (error) {
       this.handleException(error, 'readMessage', data)
     }
@@ -178,42 +192,69 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  protected buildMessageModel(rawMessage: unknown): MessageModel | null {
-    if (rawMessage === null) {
+  protected buildMessageModel(rawValue: unknown): MessageModel | null {
+    if (rawValue === null) {
       return null
     }
 
-    this.validateRawMessage(rawMessage)
+    this.validateRawMessage(rawValue)
 
     return {
-      campaignId: rawMessage.campaign_id,
-      messageId: rawMessage.message_id,
-      proxyId: rawMessage.proxy_id,
-      targetId: rawMessage.target_id,
-      sessionId: rawMessage.session_id,
-      method: rawMessage.method,
-      originUrl: rawMessage.origin_url,
-      urlPath: rawMessage.url_path,
-      urlQuery: rawMessage.url_query,
-      urlHash: rawMessage.url_hash,
-      requestHeaders: this.parseMessageHeaders(rawMessage.request_headers),
-      requestCookies: this.parseMessageRequestCookies(rawMessage.request_cookies),
-      requestBody: this.parseMessageBody(rawMessage.request_body),
-      status: rawMessage.status,
-      responseHeaders: this.parseMessageHeaders(rawMessage.response_headers),
-      responseCookies: this.parseMessageResponseCookies(rawMessage.response_cookies),
-      responseBody: this.parseMessageBody(rawMessage.request_body),
-      clientIp: rawMessage.client_ip,
-      score: rawMessage.score,
-      queryTime: rawMessage.query_time,
-      createdAt: new Date(rawMessage.created_at)
+      campaignId: rawValue.campaign_id,
+      messageId: rawValue.message_id,
+      proxyId: rawValue.proxy_id,
+      targetId: rawValue.target_id,
+      sessionId: rawValue.session_id,
+      method: rawValue.method,
+      originUrl: rawValue.origin_url,
+      urlPath: rawValue.url_path,
+      urlQuery: rawValue.url_query,
+      urlHash: rawValue.url_hash,
+      isStreaming: !!rawValue.is_streaming,
+      status: rawValue.status,
+      score: rawValue.score,
+      totalTime: rawValue.total_time,
+      createdAt: new Date(rawValue.created_at)
     }
   }
 
-  protected buildMessageCollection(rawMessages: unknown): Array<MessageModel | null> {
-    this.validateArrayReply(rawMessages)
+  protected buildFullMessageModel(rawValue: unknown): FullMessageModel | null {
+    if (rawValue === null) {
+      return null
+    }
 
-    return rawMessages.map((rawMessage) => this.buildMessageModel(rawMessage))
+    this.validateRawFullMessage(rawValue)
+
+    return {
+      campaignId: rawValue.campaign_id,
+      messageId: rawValue.message_id,
+      proxyId: rawValue.proxy_id,
+      targetId: rawValue.target_id,
+      sessionId: rawValue.session_id,
+      method: rawValue.method,
+      originUrl: rawValue.origin_url,
+      urlPath: rawValue.url_path,
+      urlQuery: rawValue.url_query,
+      urlHash: rawValue.url_hash,
+      isStreaming: !!rawValue.is_streaming,
+      requestHeaders: this.parseMessageHeaders(rawValue.request_headers),
+      requestCookies: this.parseMessageRequestCookies(rawValue.request_cookies),
+      requestBody: this.parseMessageBody(rawValue.request_body),
+      responseHeaders: this.parseMessageHeaders(rawValue.response_headers),
+      responseCookies: this.parseMessageResponseCookies(rawValue.response_cookies),
+      responseBody: this.parseMessageBody(rawValue.response_body),
+      clientIp: rawValue.client_ip,
+      status: rawValue.status,
+      score: rawValue.score,
+      totalTime: rawValue.total_time,
+      createdAt: new Date(rawValue.created_at)
+    }
+  }
+
+  protected buildMessageCollection(rawValues: unknown): Array<MessageModel | null> {
+    this.validateArrayReply(rawValues)
+
+    return rawValues.map((rawValue) => this.buildMessageModel(rawValue))
   }
 
   protected validateRawMessage(value: unknown): asserts value is RawMessage {
@@ -227,7 +268,18 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  protected guardMessageModel(value: MessageModel | null): value is MessageModel {
+  protected validateRawFullMessage(value: unknown): asserts value is RawFullMessage {
+    try {
+      this.validator.assertSchema<RawFullMessage>('database-raw-full-message', value)
+    } catch (error) {
+      throw new DatabaseError(`RawFullMessage validate failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected guardMessageModel = (value: MessageModel | null): value is MessageModel => {
     return value != null
   }
 

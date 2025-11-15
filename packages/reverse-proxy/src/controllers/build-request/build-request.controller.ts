@@ -5,8 +5,6 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
-  Templater,
-  TEMPLATER,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -23,7 +21,6 @@ export class BuildRequestController extends BaseController {
         new BuildRequestController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<GetTargetsUseCase>(GET_TARGETS_USE_CASE)
         )
@@ -37,14 +34,17 @@ export class BuildRequestController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    templater: Templater,
     router: HttpServerRouter,
     protected readonly getTargetsUseCase: GetTargetsUseCase
   ) {
-    super(validator, logger, templater, router, 'build-request')
+    super(validator, logger, router, 'build-request')
 
     this.router.addMiddleware('build-request', this.prepareRequestMiddleware)
     this.router.addMiddleware('build-request', this.gatherStateMiddleware)
+
+    this.logger.debug(`Controller initialized`, {
+      controllerName: this.controllerName
+    })
   }
 
   private prepareRequestMiddleware: HttpServerMiddleware = async (ctx, next) => {

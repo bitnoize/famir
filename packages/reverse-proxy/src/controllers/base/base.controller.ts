@@ -1,15 +1,16 @@
 import {
-  CampaignModel,
+  EnabledFullTargetModel,
   EnabledLureModel,
   EnabledProxyModel,
   EnabledTargetModel,
+  FullCampaignModel,
+  FullMessageModel,
+  FullRedirectorModel,
   HttpServerContextState,
   HttpServerError,
   HttpServerRouter,
   Logger,
-  RedirectorModel,
   SessionModel,
-  Templater,
   Validator
 } from '@famir/domain'
 
@@ -17,7 +18,6 @@ export abstract class BaseController {
   constructor(
     protected readonly validator: Validator,
     protected readonly logger: Logger,
-    protected readonly templater: Templater,
     protected readonly router: HttpServerRouter,
     protected readonly controllerName: string
   ) {}
@@ -25,7 +25,7 @@ export abstract class BaseController {
   protected absentStateCampaign(
     state: HttpServerContextState
   ): asserts state is HttpServerContextState & {
-    campaign: CampaignModel | undefined
+    campaign: FullCampaignModel | undefined
   } {
     if (state['campaign']) {
       throw new HttpServerError(`ContextState campaign exists`, {
@@ -37,7 +37,7 @@ export abstract class BaseController {
   protected existsStateCampaign(
     state: HttpServerContextState
   ): asserts state is HttpServerContextState & {
-    readonly campaign: CampaignModel
+    readonly campaign: FullCampaignModel
   } {
     if (!state['campaign']) {
       throw new HttpServerError(`ContextState campaign absent`, {
@@ -73,7 +73,7 @@ export abstract class BaseController {
   protected absentStateTarget(
     state: HttpServerContextState
   ): asserts state is HttpServerContextState & {
-    target: EnabledTargetModel | undefined
+    target: EnabledFullTargetModel | undefined
   } {
     if (state['target']) {
       throw new HttpServerError(`ContextState target exists`, {
@@ -85,7 +85,7 @@ export abstract class BaseController {
   protected existsStateTarget(
     state: HttpServerContextState
   ): asserts state is HttpServerContextState & {
-    readonly target: EnabledTargetModel
+    readonly target: EnabledFullTargetModel
   } {
     if (!state['target']) {
       throw new HttpServerError(`ContextState target absent`, {
@@ -121,7 +121,7 @@ export abstract class BaseController {
   protected absentStateRedirector(
     state: HttpServerContextState
   ): asserts state is HttpServerContextState & {
-    redirector: RedirectorModel | undefined
+    redirector: FullRedirectorModel | undefined
   } {
     if (state['redirector']) {
       throw new HttpServerError(`ContextState redirector exists`, {
@@ -133,7 +133,7 @@ export abstract class BaseController {
   protected existsStateRedirector(
     state: HttpServerContextState
   ): asserts state is HttpServerContextState & {
-    readonly redirector: RedirectorModel
+    readonly redirector: FullRedirectorModel
   } {
     if (!state['redirector']) {
       throw new HttpServerError(`ContextState redirector absent`, {
@@ -185,6 +185,30 @@ export abstract class BaseController {
   } {
     if (!state['session']) {
       throw new HttpServerError(`ContextState session absent`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected absentStateMessage(
+    state: HttpServerContextState
+  ): asserts state is HttpServerContextState & {
+    message: FullMessageModel | undefined
+  } {
+    if (state['message']) {
+      throw new HttpServerError(`ContextState message exists`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected existsStateMessage(
+    state: HttpServerContextState
+  ): asserts state is HttpServerContextState & {
+    readonly message: FullMessageModel
+  } {
+    if (!state['message']) {
+      throw new HttpServerError(`ContextState message absent`, {
         code: 'INTERNAL_ERROR'
       })
     }

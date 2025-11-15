@@ -46,7 +46,9 @@ export class MessageController extends BaseController {
 
     this.router.addApiCall('readMessage', this.readMessageApiCall)
 
-    this.logger.debug(`MessageController initialized`)
+    this.logger.debug(`Controller initialized`, {
+      controllerName: this.controllerName
+    })
   }
 
   private readMessageApiCall: ReplServerApiCall = async (data) => {

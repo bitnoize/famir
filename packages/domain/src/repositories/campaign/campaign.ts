@@ -1,4 +1,4 @@
-import { CampaignModel } from '../../models/index.js'
+import { CampaignModel, FullCampaignModel } from '../../models/index.js'
 
 export interface CreateCampaignData {
   campaignId: string
@@ -31,7 +31,7 @@ export interface DeleteCampaignData {
 
 export interface CampaignRepository {
   createCampaign(data: CreateCampaignData): Promise<CampaignModel>
-  readCampaign(data: ReadCampaignData): Promise<CampaignModel | null>
+  readCampaign(data: ReadCampaignData): Promise<FullCampaignModel | null>
   updateCampaign(data: UpdateCampaignData): Promise<CampaignModel>
   deleteCampaign(data: DeleteCampaignData): Promise<CampaignModel>
   listCampaigns(): Promise<CampaignModel[]>

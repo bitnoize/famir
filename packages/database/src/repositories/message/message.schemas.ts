@@ -8,7 +8,7 @@ import {
   HttpResponseCookies,
   ReadMessageData
 } from '@famir/domain'
-import { RawMessage } from './message.functions.js'
+import { RawFullMessage, RawMessage } from './message.functions.js'
 
 export const rawMessageSchema: JSONSchemaType<RawMessage> = {
   type: 'object',
@@ -23,16 +23,10 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     'url_path',
     'url_query',
     'url_hash',
-    'request_headers',
-    'request_cookies',
-    'request_body',
+    'is_streaming',
     'status',
-    'response_headers',
-    'response_cookies',
-    'response_body',
-    'client_ip',
     'score',
-    'query_time',
+    'total_time',
     'created_at'
   ],
   properties: {
@@ -66,6 +60,85 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     url_hash: {
       type: 'string'
     },
+    is_streaming: {
+      type: 'integer'
+    },
+    status: {
+      type: 'integer'
+    },
+    score: {
+      type: 'integer'
+    },
+    total_time: {
+      type: 'integer'
+    },
+    created_at: {
+      type: 'integer'
+    }
+  },
+  additionalProperties: false
+} as const
+
+export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
+  type: 'object',
+  required: [
+    'campaign_id',
+    'message_id',
+    'proxy_id',
+    'target_id',
+    'session_id',
+    'method',
+    'origin_url',
+    'url_path',
+    'url_query',
+    'url_hash',
+    'is_streaming',
+    'request_headers',
+    'request_cookies',
+    'request_body',
+    'response_headers',
+    'response_cookies',
+    'response_body',
+    'client_ip',
+    'status',
+    'score',
+    'total_time',
+    'created_at'
+  ],
+  properties: {
+    campaign_id: {
+      type: 'string'
+    },
+    message_id: {
+      type: 'string'
+    },
+    proxy_id: {
+      type: 'string'
+    },
+    target_id: {
+      type: 'string'
+    },
+    session_id: {
+      type: 'string'
+    },
+    method: {
+      type: 'string'
+    },
+    origin_url: {
+      type: 'string'
+    },
+    url_path: {
+      type: 'string'
+    },
+    url_query: {
+      type: 'string'
+    },
+    url_hash: {
+      type: 'string'
+    },
+    is_streaming: {
+      type: 'integer'
+    },
     request_headers: {
       type: 'string'
     },
@@ -74,9 +147,6 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     },
     request_body: {
       type: 'string'
-    },
-    status: {
-      type: 'integer'
     },
     response_headers: {
       type: 'string'
@@ -90,16 +160,20 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     client_ip: {
       type: 'string'
     },
+    status: {
+      type: 'integer'
+    },
     score: {
       type: 'integer'
     },
-    query_time: {
+    total_time: {
       type: 'integer'
     },
     created_at: {
       type: 'integer'
     }
-  }
+  },
+  additionalProperties: false
 } as const
 
 export const messageHeaderSchema: JSONSchemaType<HttpHeader> = {

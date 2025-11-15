@@ -7,8 +7,6 @@ import {
   DatabaseConnector,
   DatabaseError,
   DeleteProxyData,
-  DisabledProxyModel,
-  EnabledProxyModel,
   ListProxiesData,
   Logger,
   LOGGER,
@@ -52,12 +50,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       'database-raw-proxy': rawProxySchema
     })
 
-    this.logger.debug(`ProxyRepository initialized`)
+    this.logger.debug(`Repository initialized`, {
+      repository: this.repositoryName
+    })
   }
 
-  async createProxy(data: CreateProxyData): Promise<DisabledProxyModel> {
+  async createProxy(data: CreateProxyData): Promise<ProxyModel> {
     try {
-      const [status, rawProxy] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.proxy.create_proxy(
           this.options.prefix,
           data.campaignId,
@@ -74,9 +74,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         throw new DatabaseError(message, { code })
       }
 
-      const proxyModel = this.buildProxyModel(rawProxy)
+      const proxyModel = this.buildProxyModel(rawValue)
 
-      this.assertDisabledProxyModel(proxyModel)
+      this.assertProxyModel(proxyModel)
 
       this.logger.info(message, { proxyModel })
 
@@ -88,37 +88,21 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async readProxy(data: ReadProxyData): Promise<ProxyModel | null> {
     try {
-      const rawProxy = await this.connection.proxy.read_proxy(
+      const rawValue = await this.connection.proxy.read_proxy(
         this.options.prefix,
         data.campaignId,
         data.proxyId
       )
 
-      return this.buildProxyModel(rawProxy)
+      return this.buildProxyModel(rawValue)
     } catch (error) {
       this.handleException(error, 'readProxy', data)
     }
   }
 
-  async readEnabledProxy(data: ReadProxyData): Promise<EnabledProxyModel | null> {
+  async enableProxy(data: SwitchProxyData): Promise<ProxyModel> {
     try {
-      const rawProxy = await this.connection.proxy.read_proxy(
-        this.options.prefix,
-        data.campaignId,
-        data.proxyId
-      )
-
-      const proxyModel = this.buildProxyModel(rawProxy)
-
-      return this.guardEnabledProxyModel(proxyModel) ? proxyModel : null
-    } catch (error) {
-      this.handleException(error, 'readEnabledProxy', data)
-    }
-  }
-
-  async enableProxy(data: SwitchProxyData): Promise<EnabledProxyModel> {
-    try {
-      const [status, rawProxy] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.proxy.enable_proxy(this.options.prefix, data.campaignId, data.proxyId),
 
         this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId)
@@ -130,9 +114,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         throw new DatabaseError(message, { code })
       }
 
-      const proxyModel = this.buildProxyModel(rawProxy)
+      const proxyModel = this.buildProxyModel(rawValue)
 
-      this.assertEnabledProxyModel(proxyModel)
+      this.assertProxyModel(proxyModel)
 
       this.logger.info(message, { proxyModel })
 
@@ -142,9 +126,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async disableProxy(data: SwitchProxyData): Promise<DisabledProxyModel> {
+  async disableProxy(data: SwitchProxyData): Promise<ProxyModel> {
     try {
-      const [status, rawProxy] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.proxy.disable_proxy(this.options.prefix, data.campaignId, data.proxyId),
 
         this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId)
@@ -156,9 +140,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         throw new DatabaseError(message, { code })
       }
 
-      const proxyModel = this.buildProxyModel(rawProxy)
+      const proxyModel = this.buildProxyModel(rawValue)
 
-      this.assertDisabledProxyModel(proxyModel)
+      this.assertProxyModel(proxyModel)
 
       this.logger.info(message, { proxyModel })
 
@@ -168,9 +152,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async deleteProxy(data: DeleteProxyData): Promise<DisabledProxyModel> {
+  async deleteProxy(data: DeleteProxyData): Promise<ProxyModel> {
     try {
-      const [rawProxy, status] = await Promise.all([
+      const [rawValue, status] = await Promise.all([
         this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId),
 
         this.connection.proxy.delete_proxy(this.options.prefix, data.campaignId, data.proxyId)
@@ -182,9 +166,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         throw new DatabaseError(message, { code })
       }
 
-      const proxyModel = this.buildProxyModel(rawProxy)
+      const proxyModel = this.buildProxyModel(rawValue)
 
-      this.assertDisabledProxyModel(proxyModel)
+      this.assertProxyModel(proxyModel)
 
       this.logger.info(message, { proxyModel })
 
@@ -207,40 +191,40 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.validateArrayStringsReply(index)
 
-      const rawProxies = await Promise.all(
+      const rawValues = await Promise.all(
         index.map((proxyId) =>
           this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, proxyId)
         )
       )
 
-      return this.buildProxyCollection(rawProxies).filter(this.guardProxyModel)
+      return this.buildProxyCollection(rawValues).filter(this.guardProxyModel)
     } catch (error) {
       this.handleException(error, 'listProxies', data)
     }
   }
 
-  protected buildProxyModel(rawProxy: unknown): ProxyModel | null {
-    if (rawProxy === null) {
+  protected buildProxyModel(rawValue: unknown): ProxyModel | null {
+    if (rawValue === null) {
       return null
     }
 
-    this.validateRawProxy(rawProxy)
+    this.validateRawProxy(rawValue)
 
     return {
-      campaignId: rawProxy.campaign_id,
-      proxyId: rawProxy.proxy_id,
-      url: rawProxy.url,
-      isEnabled: !!rawProxy.is_enabled,
-      messageCount: rawProxy.message_count,
-      createdAt: new Date(rawProxy.created_at),
-      updatedAt: new Date(rawProxy.updated_at)
+      campaignId: rawValue.campaign_id,
+      proxyId: rawValue.proxy_id,
+      url: rawValue.url,
+      isEnabled: !!rawValue.is_enabled,
+      messageCount: rawValue.message_count,
+      createdAt: new Date(rawValue.created_at),
+      updatedAt: new Date(rawValue.updated_at)
     }
   }
 
-  protected buildProxyCollection(rawProxies: unknown): Array<ProxyModel | null> {
-    this.validateArrayReply(rawProxies)
+  protected buildProxyCollection(rawValues: unknown): Array<ProxyModel | null> {
+    this.validateArrayReply(rawValues)
 
-    return rawProxies.map((rawProxy) => this.buildProxyModel(rawProxy))
+    return rawValues.map((rawValue) => this.buildProxyModel(rawValue))
   }
 
   protected validateRawProxy(value: unknown): asserts value is RawProxy {
@@ -254,39 +238,13 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  protected guardProxyModel(value: ProxyModel | null): value is ProxyModel {
+  protected guardProxyModel = (value: ProxyModel | null): value is ProxyModel => {
     return value != null
-  }
-
-  protected guardEnabledProxyModel(value: ProxyModel | null): value is EnabledProxyModel {
-    return this.guardProxyModel(value) && value.isEnabled
-  }
-
-  protected guardDisabledProxyModel(value: ProxyModel | null): value is DisabledProxyModel {
-    return this.guardProxyModel(value) && !value.isEnabled
   }
 
   protected assertProxyModel(value: ProxyModel | null): asserts value is ProxyModel {
     if (!this.guardProxyModel(value)) {
       throw new DatabaseError(`ProxyModel unexpected lost`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected assertEnabledProxyModel(value: ProxyModel | null): asserts value is EnabledProxyModel {
-    if (!this.guardEnabledProxyModel(value)) {
-      throw new DatabaseError(`EnabledProxyModel unexpected lost`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected assertDisabledProxyModel(
-    value: ProxyModel | null
-  ): asserts value is DisabledProxyModel {
-    if (!this.guardDisabledProxyModel(value)) {
-      throw new DatabaseError(`DisabledProxyModel unexpected lost`, {
         code: 'INTERNAL_ERROR'
       })
     }

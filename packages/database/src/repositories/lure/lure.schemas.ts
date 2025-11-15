@@ -45,7 +45,8 @@ export const rawLureSchema: JSONSchemaType<RawLure> = {
     updated_at: {
       type: 'integer'
     }
-  }
+  },
+  additionalProperties: false
 } as const
 
 export const lurePathSchema: JSONSchemaType<string> = {

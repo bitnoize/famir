@@ -49,20 +49,26 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       'database-raw-session': rawSessionSchema
     })
 
-    this.logger.debug(`SessionRepository initialized`)
+    this.logger.debug(`Repository initialized`, {
+      repository: this.repositoryName
+    })
   }
 
-  async createSession(data: CreateSessionData): Promise<string> {
+  async createSession(data: CreateSessionData): Promise<SessionModel> {
     try {
       const sessionId = randomIdent()
       const secret = randomIdent()
 
-      const status = await this.connection.session.create_session(
-        this.options.prefix,
-        data.campaignId,
-        sessionId,
-        secret
-      )
+      const [status, rawValue] = await Promise.all([
+        this.connection.session.create_session(
+          this.options.prefix,
+          data.campaignId,
+          sessionId,
+          secret
+        ),
+
+        this.connection.session.read_session(this.options.prefix, data.campaignId, sessionId)
+      ])
 
       const [code, message] = this.parseStatusReply(status)
 
@@ -70,9 +76,13 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         throw new DatabaseError(message, { code })
       }
 
-      this.logger.info(message, { sessionId })
+      const sessionModel = this.buildSessionModel(rawValue)
 
-      return sessionId
+      this.assertSessionModel(sessionModel)
+
+      this.logger.info(message, { sessionModel })
+
+      return sessionModel
     } catch (error) {
       this.handleException(error, 'createSession', data)
     }
@@ -80,13 +90,13 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
   async readSession(data: ReadSessionData): Promise<SessionModel | null> {
     try {
-      const rawSession = await this.connection.session.read_session(
+      const rawValue = await this.connection.session.read_session(
         this.options.prefix,
         data.campaignId,
         data.sessionId
       )
 
-      return this.buildSessionModel(rawSession)
+      return this.buildSessionModel(rawValue)
     } catch (error) {
       this.handleException(error, 'readSession', data)
     }
@@ -94,7 +104,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
   async authSession(data: AuthSessionData): Promise<SessionModel> {
     try {
-      const [status, rawSession] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.session.auth_session(this.options.prefix, data.campaignId, data.sessionId),
 
         this.connection.session.read_session(this.options.prefix, data.campaignId, data.sessionId)
@@ -106,7 +116,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         throw new DatabaseError(message, { code })
       }
 
-      const sessionModel = this.buildSessionModel(rawSession)
+      const sessionModel = this.buildSessionModel(rawValue)
 
       this.assertSessionModel(sessionModel)
 
@@ -120,7 +130,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
   async upgradeSession(data: UpgradeSessionData): Promise<SessionModel> {
     try {
-      const [status, rawSession] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.session.upgrade_session(
           this.options.prefix,
           data.campaignId,
@@ -138,7 +148,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         throw new DatabaseError(message, { code })
       }
 
-      const sessionModel = this.buildSessionModel(rawSession)
+      const sessionModel = this.buildSessionModel(rawValue)
 
       this.assertSessionModel(sessionModel)
 
@@ -150,29 +160,29 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  protected buildSessionModel(rawSession: unknown): SessionModel | null {
-    if (rawSession === null) {
+  protected buildSessionModel(rawValue: unknown): SessionModel | null {
+    if (rawValue === null) {
       return null
     }
 
-    this.validateRawSession(rawSession)
+    this.validateRawSession(rawValue)
 
     return {
-      campaignId: rawSession.campaign_id,
-      sessionId: rawSession.session_id,
-      proxyId: rawSession.proxy_id,
-      secret: rawSession.secret,
-      isLanding: !!rawSession.is_landing,
-      messageCount: rawSession.message_count,
-      createdAt: new Date(rawSession.created_at),
-      lastAuthAt: new Date(rawSession.last_auth_at)
+      campaignId: rawValue.campaign_id,
+      sessionId: rawValue.session_id,
+      proxyId: rawValue.proxy_id,
+      secret: rawValue.secret,
+      isLanding: !!rawValue.is_landing,
+      messageCount: rawValue.message_count,
+      createdAt: new Date(rawValue.created_at),
+      lastAuthAt: new Date(rawValue.last_auth_at)
     }
   }
 
-  protected buildSessionCollection(rawSessions: unknown): Array<SessionModel | null> {
-    this.validateArrayReply(rawSessions)
+  protected buildSessionCollection(rawValues: unknown): Array<SessionModel | null> {
+    this.validateArrayReply(rawValues)
 
-    return rawSessions.map((rawSession) => this.buildSessionModel(rawSession))
+    return rawValues.map((rawValue) => this.buildSessionModel(rawValue))
   }
 
   protected validateRawSession(value: unknown): asserts value is RawSession {
@@ -186,7 +196,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  protected guardSessionModel(value: SessionModel | null): value is SessionModel {
+  protected guardSessionModel = (value: SessionModel | null): value is SessionModel => {
     return value != null
   }
 

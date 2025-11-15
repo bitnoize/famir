@@ -1,5 +1,11 @@
 import { DIContainer } from '@famir/common'
-import { HttpServerError, TARGET_REPOSITORY, TargetRepository } from '@famir/domain'
+import {
+  EnabledTargetModel,
+  HttpServerError,
+  TARGET_REPOSITORY,
+  TargetModel,
+  TargetRepository
+} from '@famir/domain'
 import { GetTargetsData, GetTargetsReply } from './get-targets.js'
 
 export const GET_TARGETS_USE_CASE = Symbol('GetTargetsUseCase')
@@ -15,7 +21,7 @@ export class GetTargetsUseCase {
   constructor(protected readonly targetRepository: TargetRepository) {}
 
   async execute(data: GetTargetsData): Promise<GetTargetsReply> {
-    const targetCollection = await this.targetRepository.listEnabledTargets({
+    const targetCollection = await this.targetRepository.listTargets({
       campaignId: data.campaignId
     })
 
@@ -26,7 +32,11 @@ export class GetTargetsUseCase {
     }
 
     return {
-      targets: targetCollection
+      targets: targetCollection.filter(this.guardEnabledTarget)
     }
+  }
+
+  protected guardEnabledTarget = (value: TargetModel): value is EnabledTargetModel => {
+    return value.isEnabled
   }
 }

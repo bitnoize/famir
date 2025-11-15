@@ -4,7 +4,7 @@
   Create message
 --]]
 local function create_message(keys, args)
-  if not (#keys == 5 and #args == 21) then
+  if not (#keys == 5 and #args == 22) then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -45,18 +45,25 @@ local function create_message(keys, args)
     url_path = args[8],
     url_query = args[9],
     url_hash = args[10],
-    request_headers = args[11],
-    request_cookies = args[12],
-    request_body = args[13],
-    status = tonumber(args[14]),
+    is_streaming = args[11],
+    request_headers = args[12],
+    request_cookies = args[13],
+    request_body = args[14],
     response_headers = args[15],
     response_cookies = args[16],
     response_body = args[17],
     client_ip = args[18],
-    score = tonumber(args[19]),
-    query_time = tonumber(args[20]),
-    created_at = tonumber(args[21]),
+    status = tonumber(args[19]),
+    score = tonumber(args[20]),
+    total_time = tonumber(args[21]),
+    created_at = tonumber(args[22]),
   }
+
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
+  end
 
   if not (model.campaign_id and #model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
@@ -78,36 +85,12 @@ local function create_message(keys, args)
     return redis.error_reply('ERR Wrong model.session_id')
   end
 
-  if not (model.method and #model.method > 0) then
-    return redis.error_reply('ERR Wrong model.method')
-  end
-
-  if not (model.origin_url and #model.origin_url > 0) then
-    return redis.error_reply('ERR Wrong model.origin_url')
-  end
-
-  if not model.status then
-    return redis.error_reply('ERR Wrong model.status')
-  end
-
-  if not model.score then
-    return redis.error_reply('ERR Wrong model.score')
-  end
-
-  if not model.query_time then
-    return redis.error_reply('ERR Wrong model.query_time')
-  end
-
-  if not (model.created_at and model.created_at > 0) then
-    return redis.error_reply('ERR Wrong model.created_at')
-  end
-
-  local data = {
+  local stash = {
     message_expire = tonumber(redis.call('HGET', campaign_key, 'message_expire')),
   }
 
-  if not (data.message_expire and data.message_expire > 0) then
-    return redis.error_reply('ERR Malform data.message_expire')
+  if not (stash.message_expire and stash.message_expire > 0) then
+    return redis.error_reply('ERR Malform stash.message_expire')
   end
 
   -- Point of no return
@@ -125,7 +108,7 @@ local function create_message(keys, args)
   redis.call('HINCRBY', target_key, 'message_count', 1)
   redis.call('HINCRBY', session_key, 'message_count', 1)
 
-  redis.call('PEXPIRE', message_key, data.message_expire)
+  redis.call('PEXPIRE', message_key, stash.message_expire)
 
   return redis.status_reply('OK Message created')
 end
@@ -168,20 +151,14 @@ local function read_message(keys, args)
     'url_path',
     'url_query',
     'url_hash',
-    'request_headers',
-    'request_cookies',
-    'request_body',
+    'is_streaming',
     'status',
-    'response_headers',
-    'response_cookies',
-    'response_body',
-    'client_ip',
     'score',
-    'query_time',
+    'total_time',
     'created_at'
   )
 
-  if not (#values == 21) then
+  if not (#values == 15) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -196,17 +173,11 @@ local function read_message(keys, args)
     url_path = values[8],
     url_query = values[9],
     url_hash = values[10],
-    request_headers = values[11],
-    request_cookies = values[12],
-    request_body = values[13],
-    status = tonumber(values[14]),
-    response_headers = values[15],
-    response_cookies = values[16],
-    response_body = values[17],
-    client_ip = values[18],
-    score = tonumber(values[19]),
-    query_time = tonumber(values[20]),
-    created_at = tonumber(values[21]),
+    is_streaming = tonumber(values[11]),
+    status = tonumber(values[12]),
+    score = tonumber(values[13]),
+    total_time = tonumber(values[14]),
+    created_at = tonumber(values[15]),
   }
 
   for field, value in pairs(model) do
@@ -223,4 +194,95 @@ redis.register_function({
   callback = read_message,
   flags = { 'no-writes' },
   description = 'Read message',
+})
+
+--[[
+  Read full message
+--]]
+local function read_full_message(keys, args)
+  if not (#keys == 2 and #args == 0) then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local message_key = keys[2]
+
+  if not (redis.call('EXISTS', campaign_key) == 1) then
+    return nil
+  end
+
+  if not (redis.call('EXISTS', message_key) == 1) then
+    return nil
+  end
+
+  -- stylua: ignore
+  local values = redis.call(
+    'HMGET', message_key,
+    'campaign_id',
+    'message_id',
+    'proxy_id',
+    'target_id',
+    'session_id',
+    'method',
+    'origin_url',
+    'url_path',
+    'url_query',
+    'url_hash',
+    'is_streaming',
+    'request_headers',
+    'request_cookies',
+    'request_body',
+    'response_headers',
+    'response_cookies',
+    'response_body',
+    'client_ip',
+    'status',
+    'score',
+    'total_time',
+    'created_at'
+  )
+
+  if not (#values == 22) then
+    return redis.error_reply('ERR Malform values')
+  end
+
+  local model = {
+    campaign_id = values[1],
+    message_id = values[2],
+    proxy_id = values[3],
+    target_id = values[4],
+    session_id = values[5],
+    method = values[6],
+    origin_url = values[7],
+    url_path = values[8],
+    url_query = values[9],
+    url_hash = values[10],
+    is_streaming = tonumber(values[11]),
+    request_headers = values[12],
+    request_cookies = values[13],
+    request_body = values[14],
+    status = tonumber(values[15]),
+    response_headers = values[16],
+    response_cookies = values[17],
+    response_body = values[18],
+    client_ip = values[19],
+    score = tonumber(values[20]),
+    total_time = tonumber(values[21]),
+    created_at = tonumber(values[22]),
+  }
+
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Malform model.' .. field)
+    end
+  end
+
+  return { map = model }
+end
+
+redis.register_function({
+  function_name = 'read_full_message',
+  callback = read_full_message,
+  flags = { 'no-writes' },
+  description = 'Read full_message',
 })

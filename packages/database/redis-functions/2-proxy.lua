@@ -13,6 +13,14 @@ local function create_proxy(keys, args)
   local proxy_unique_url_key = keys[3]
   local proxy_index_key = keys[4]
 
+  if not (redis.call('EXISTS', campaign_key) == 1) then
+    return redis.status_reply('NOT_FOUND Campaign not found')
+  end
+
+  if not (redis.call('EXISTS', proxy_key) == 0) then
+    return redis.status_reply('CONFLICT Proxy allready exists')
+  end
+
   local model = {
     campaign_id = args[1],
     proxy_id = args[2],
@@ -20,8 +28,14 @@ local function create_proxy(keys, args)
     is_enabled = 0,
     message_count = 0,
     created_at = tonumber(args[4]),
-    updated_at = nil,
+    updated_at = tonumber(args[4]),
   }
+
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
+  end
 
   if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
@@ -33,20 +47,6 @@ local function create_proxy(keys, args)
 
   if not (#model.url > 0) then
     return redis.error_reply('ERR Wrong model.url')
-  end
-
-  if not (model.created_at and model.created_at > 0) then
-    return redis.error_reply('ERR Wrong model.created_at')
-  end
-
-  model.updated_at = model.created_at
-
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
-  end
-
-  if not (redis.call('EXISTS', proxy_key) == 0) then
-    return redis.status_reply('CONFLICT Proxy allready exists')
   end
 
   if not (redis.call('SISMEMBER', proxy_unique_url_key, model.url) == 0) then
@@ -175,14 +175,6 @@ local function enable_proxy(keys, args)
   local proxy_key = keys[2]
   local enabled_proxy_index_key = keys[3]
 
-  local params = {
-    updated_at = tonumber(args[1]),
-  }
-
-  if not (params.updated_at and params.updated_at > 0) then
-    return redis.error_reply('ERR Wrong params.updated_at')
-  end
-
   if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
@@ -191,20 +183,25 @@ local function enable_proxy(keys, args)
     return redis.status_reply('NOT_FOUND Proxy not found')
   end
 
-  local data = {
+  local stash = {
+    updated_at = tonumber(args[1]),
     proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
 
-  if not (data.proxy_id and #data.proxy_id > 0) then
-    return redis.error_reply('ERR Malform data.proxy_id')
+  if not stash.updated_at then
+    return redis.error_reply('ERR Wrong stash.updated_at')
   end
 
-  if not data.is_enabled then
-    return redis.error_reply('ERR Malform data.is_enabled')
+  if not (stash.proxy_id and #stash.proxy_id > 0) then
+    return redis.error_reply('ERR Malform stash.proxy_id')
   end
 
-  if data.is_enabled ~= 0 then
+  if not stash.is_enabled then
+    return redis.error_reply('ERR Malform stash.is_enabled')
+  end
+
+  if stash.is_enabled ~= 0 then
     return redis.status_reply('OK Proxy allready enabled')
   end
 
@@ -214,10 +211,10 @@ local function enable_proxy(keys, args)
   redis.call(
     'HSET', proxy_key,
     'is_enabled', 1,
-    'updated_at', params.updated_at
+    'updated_at', stash.updated_at
   )
 
-  redis.call('SADD', enabled_proxy_index_key, data.proxy_id)
+  redis.call('SADD', enabled_proxy_index_key, stash.proxy_id)
 
   return redis.status_reply('OK Proxy enabled')
 end
@@ -240,14 +237,6 @@ local function disable_proxy(keys, args)
   local proxy_key = keys[2]
   local enabled_proxy_index_key = keys[3]
 
-  local params = {
-    updated_at = tonumber(args[1]),
-  }
-
-  if not (params.updated_at and params.updated_at > 0) then
-    return redis.error_reply('ERR Wrong params.updated_at')
-  end
-
   if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
@@ -256,20 +245,25 @@ local function disable_proxy(keys, args)
     return redis.status_reply('NOT_FOUND Proxy not found')
   end
 
-  local data = {
+  local stash = {
+    updated_at = tonumber(args[1]),
     proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
 
-  if not (data.proxy_id and #data.proxy_id > 0) then
-    return redis.error_reply('ERR Malform data.proxy_id')
+  if not stash.updated_at then
+    return redis.error_reply('ERR Wrong stash.updated_at')
   end
 
-  if not data.is_enabled then
-    return redis.error_reply('ERR Malform data.is_enabled')
+  if not (stash.proxy_id and #stash.proxy_id > 0) then
+    return redis.error_reply('ERR Malform stash.proxy_id')
   end
 
-  if data.is_enabled == 0 then
+  if not stash.is_enabled then
+    return redis.error_reply('ERR Malform stash.is_enabled')
+  end
+
+  if stash.is_enabled == 0 then
     return redis.status_reply('OK Proxy allready disabled')
   end
 
@@ -279,10 +273,10 @@ local function disable_proxy(keys, args)
   redis.call(
     'HSET', proxy_key,
     'is_enabled', 0,
-    'updated_at', params.updated_at
+    'updated_at', stash.updated_at
   )
 
-  redis.call('SREM', enabled_proxy_index_key, data.proxy_id)
+  redis.call('SREM', enabled_proxy_index_key, stash.proxy_id)
 
   return redis.status_reply('OK Proxy disabled')
 end
@@ -314,25 +308,25 @@ local function delete_proxy(keys, args)
     return redis.status_reply('NOT_FOUND Proxy not found')
   end
 
-  local data = {
+  local stash = {
     proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     url = redis.call('HGET', proxy_key, 'url'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
 
-  if not (data.proxy_id and #data.proxy_id > 0) then
-    return redis.error_reply('ERR Malform data.proxy_id')
+  if not (stash.proxy_id and #stash.proxy_id > 0) then
+    return redis.error_reply('ERR Malform stash.proxy_id')
   end
 
-  if not (data.url and #data.url > 0) then
-    return redis.error_reply('ERR Malform data.url')
+  if not (stash.url and #stash.url > 0) then
+    return redis.error_reply('ERR Malform stash.url')
   end
 
-  if not data.is_enabled then
-    return redis.error_reply('ERR Malform data.is_enabled')
+  if not stash.is_enabled then
+    return redis.error_reply('ERR Malform stash.is_enabled')
   end
 
-  if data.is_enabled ~= 0 then
+  if stash.is_enabled ~= 0 then
     return redis.status_reply('FORBIDDEN Proxy not disabled')
   end
 
@@ -340,9 +334,9 @@ local function delete_proxy(keys, args)
 
   redis.call('DEL', proxy_key)
 
-  redis.call('SREM', proxy_unique_url_key, data.url)
+  redis.call('SREM', proxy_unique_url_key, stash.url)
 
-  redis.call('ZREM', proxy_index_key, data.proxy_id)
+  redis.call('ZREM', proxy_index_key, stash.proxy_id)
 
   return redis.status_reply('OK Proxy deleted')
 end

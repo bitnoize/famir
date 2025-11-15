@@ -12,14 +12,28 @@ local function create_redirector(keys, args)
   local redirector_key = keys[2]
   local redirector_index_key = keys[3]
 
+  if not (redis.call('EXISTS', campaign_key) == 1) then
+    return redis.status_reply('NOT_FOUND Campaign not found')
+  end
+
+  if not (redis.call('EXISTS', redirector_key) == 0) then
+    return redis.status_reply('CONFLICT Redirector allready exists')
+  end
+
   local model = {
     campaign_id = args[1],
     redirector_id = args[2],
     page = args[3],
     lure_count = 0,
     created_at = tonumber(args[4]),
-    updated_at = nil,
+    updated_at = tonumber(args[4]),
   }
+
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
+  end
 
   if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
@@ -27,20 +41,6 @@ local function create_redirector(keys, args)
 
   if not (#model.redirector_id > 0) then
     return redis.error_reply('ERR Wrong model.redirector_id')
-  end
-
-  if not (model.created_at and model.created_at > 0) then
-    return redis.error_reply('ERR Wrong model.created_at')
-  end
-
-  model.updated_at = model.created_at
-
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
-  end
-
-  if not (redis.call('EXISTS', redirector_key) == 0) then
-    return redis.status_reply('CONFLICT Redirector allready exists')
   end
 
   -- Point of no return
@@ -69,6 +69,63 @@ redis.register_function({
   Read redirector
 --]]
 local function read_redirector(keys, args)
+  if not (#keys == 2 and #args == 0) then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local redirector_key = keys[2]
+
+  if not (redis.call('EXISTS', campaign_key) == 1) then
+    return nil
+  end
+
+  if not (redis.call('EXISTS', redirector_key) == 1) then
+    return nil
+  end
+
+  -- stylua: ignore
+  local values = redis.call(
+    'HMGET', redirector_key,
+    'campaign_id',
+    'redirector_id',
+    'lure_count',
+    'created_at',
+    'updated_at'
+  )
+
+  if not (#values == 5) then
+    return redis.error_reply('ERR Malform values')
+  end
+
+  local model = {
+    campaign_id = values[1],
+    redirector_id = values[2],
+    lure_count = tonumber(values[3]),
+    created_at = tonumber(values[4]),
+    updated_at = tonumber(values[5]),
+  }
+
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Malform model.' .. field)
+    end
+  end
+
+  return { map = model }
+end
+
+redis.register_function({
+  function_name = 'read_redirector',
+  callback = read_redirector,
+  flags = { 'no-writes' },
+  description = 'Read redirector',
+})
+
+--[[
+  Read full redirector
+--]]
+local function read_full_redirector(keys, args)
   if not (#keys == 2 and #args == 0) then
     return redis.error_reply('ERR Wrong function use')
   end
@@ -118,10 +175,10 @@ local function read_redirector(keys, args)
 end
 
 redis.register_function({
-  function_name = 'read_redirector',
-  callback = read_redirector,
+  function_name = 'read_full_redirector',
+  callback = read_full_redirector,
   flags = { 'no-writes' },
-  description = 'Read redirector',
+  description = 'Read full redirector',
 })
 
 --[[
@@ -160,6 +217,14 @@ local function update_redirector(keys, args)
   local campaign_key = keys[1]
   local redirector_key = keys[2]
 
+  if not (redis.call('EXISTS', campaign_key) == 1) then
+    return redis.status_reply('NOT_FOUND Campaign not found')
+  end
+
+  if not (redis.call('EXISTS', redirector_key) == 1) then
+    return redis.status_reply('NOT_FOUND Redirector not found')
+  end
+
   local model = {}
 
   for i = 1, #args, 2 do
@@ -170,24 +235,20 @@ local function update_redirector(keys, args)
     end
 
     if field == 'page' then
-      model.main_page = value
+      model.page = value
+
+      if not model.page then
+        return redis.error_reply('ERR Wrong model.page')
+      end
     elseif field == 'updated_at' then
       model.updated_at = tonumber(value)
 
-      if not (model.updated_at and model.updated_at > 0) then
+      if not model.updated_at then
         return redis.error_reply('ERR Wrong model.updated_at')
       end
     else
       return redis.error_reply('ERR Unknown model.' .. field)
     end
-  end
-
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
-  end
-
-  if not (redis.call('EXISTS', redirector_key) == 1) then
-    return redis.status_reply('NOT_FOUND Redirector not found')
   end
 
   if next(model) == nil then
@@ -234,20 +295,20 @@ local function delete_redirector(keys, args)
     return redis.status_reply('NOT_FOUND redirector not found')
   end
 
-  local data = {
+  local stash = {
     redirector_id = redis.call('HGET', redirector_key, 'redirector_id'),
     lure_count = tonumber(redis.call('HGET', redirector_key, 'lure_count')),
   }
 
-  if not (data.redirector_id and #data.redirector_id > 0) then
-    return redis.error_reply('ERR Malform data.redirector_id')
+  if not (stash.redirector_id and #stash.redirector_id > 0) then
+    return redis.error_reply('ERR Malform stash.redirector_id')
   end
 
-  if not (data.lure_count and data.lure_count >= 0) then
-    return redis.error_reply('ERR Malform data.lure_count')
+  if not (stash.lure_count and stash.lure_count >= 0) then
+    return redis.error_reply('ERR Malform stash.lure_count')
   end
 
-  if data.lure_count > 0 then
+  if stash.lure_count > 0 then
     return redis.status_reply('FORBIDDEN Lures exists')
   end
 
@@ -255,7 +316,7 @@ local function delete_redirector(keys, args)
 
   redis.call('DEL', redirector_key)
 
-  redis.call('ZREM', redirector_index_key, data.redirector_id)
+  redis.call('ZREM', redirector_index_key, stash.redirector_id)
 
   return redis.status_reply('OK Redirector deleted')
 end

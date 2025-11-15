@@ -12,6 +12,10 @@ local function create_campaign(keys, args)
   local campaign_unique_mirror_domain_key = keys[2]
   local campaign_index_key = keys[3]
 
+  if not (redis.call('EXISTS', campaign_key) == 0) then
+    return redis.status_reply('CONFLICT Campaign allready exists')
+  end
+
   local model = {
     campaign_id = args[1],
     mirror_domain = args[2],
@@ -26,8 +30,14 @@ local function create_campaign(keys, args)
     session_count = 0,
     message_count = 0,
     created_at = tonumber(args[11]),
-    updated_at = nil,
+    updated_at = tonumber(args[11]),
   }
+
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
+  end
 
   if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
@@ -37,42 +47,16 @@ local function create_campaign(keys, args)
     return redis.error_reply('ERR Wrong model.mirror_domain')
   end
 
-  if not (#model.landing_auth_path > 0) then
-    return redis.error_reply('ERR Wrong model.landing_auth_path')
-  end
-
-  if not (#model.landing_auth_param > 0) then
-    return redis.error_reply('ERR Wrong model.landing_auth_param')
-  end
-
-  if not (#model.landing_lure_param > 0) then
-    return redis.error_reply('ERR Wrong model.landing_lure_param')
-  end
-
-  if not (#model.session_cookie_name > 0) then
-    return redis.error_reply('ERR Wrong model.session_cookie_name')
-  end
-
-  if not (model.session_expire and model.session_expire > 0) then
+  if not (model.session_expire > 0) then
     return redis.error_reply('ERR Wrong model.session_expire')
   end
 
-  if not (model.new_session_expire and model.new_session_expire > 0) then
+  if not (model.new_session_expire > 0) then
     return redis.error_reply('ERR Wrong model.new_session_expire')
   end
 
-  if not (model.message_expire and model.message_expire > 0) then
+  if not (model.message_expire > 0) then
     return redis.error_reply('ERR Wrong model.message_expire')
-  end
-
-  if not (model.created_at and model.created_at > 0) then
-    return redis.error_reply('ERR Wrong model.created_at')
-  end
-
-  model.updated_at = model.created_at
-
-  if not (redis.call('EXISTS', campaign_key) == 0) then
-    return redis.status_reply('CONFLICT Campaign allready exists')
   end
 
   if not (redis.call('SISMEMBER', campaign_unique_mirror_domain_key, model.mirror_domain) == 0) then
@@ -105,6 +89,61 @@ redis.register_function({
   Read campaign
 --]]
 local function read_campaign(keys, args)
+  if not (#keys == 1 and #args == 0) then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+
+  if not (redis.call('EXISTS', campaign_key) == 1) then
+    return nil
+  end
+
+  -- stylua: ignore
+  local values = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id',
+    'mirror_domain',
+    'session_count',
+    'message_count',
+    'created_at',
+    'updated_at'
+  )
+
+  if not (#values == 6) then
+    return redis.error_reply('ERR Malform values')
+  end
+
+  local model = {
+    campaign_id = values[1],
+    mirror_domain = values[2],
+    session_count = tonumber(values[3]),
+    message_count = tonumber(values[4]),
+    created_at = tonumber(values[5]),
+    updated_at = tonumber(values[6]),
+  }
+
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Malform model.' .. field)
+    end
+  end
+
+  return { map = model }
+end
+
+redis.register_function({
+  function_name = 'read_campaign',
+  callback = read_campaign,
+  flags = { 'no-writes' },
+  description = 'Read campaign',
+})
+
+
+--[[
+  Read full campaign
+--]]
+local function read_full_campaign(keys, args)
   if not (#keys == 5 and #args == 0) then
     return redis.error_reply('ERR Wrong function use')
   end
@@ -173,10 +212,10 @@ local function read_campaign(keys, args)
 end
 
 redis.register_function({
-  function_name = 'read_campaign',
-  callback = read_campaign,
+  function_name = 'read_full_campaign',
+  callback = read_full_campaign,
   flags = { 'no-writes' },
-  description = 'Read campaign',
+  description = 'Read full campaign',
 })
 
 --[[
@@ -209,6 +248,10 @@ local function update_campaign(keys, args)
 
   local campaign_key = keys[1]
 
+  if not (redis.call('EXISTS', campaign_key) == 1) then
+    return redis.status_reply('NOT_FOUND Campaign not found')
+  end
+
   local model = {}
 
   for i = 1, #args, 2 do
@@ -220,6 +263,10 @@ local function update_campaign(keys, args)
 
     if field == 'description' then
       model.description = value
+
+      if not model.description then
+        return redis.error_reply('ERR Wrong model.description')
+      end
     elseif field == 'session_expire' then
       model.session_expire = tonumber(value)
 
@@ -241,16 +288,12 @@ local function update_campaign(keys, args)
     elseif field == 'updated_at' then
       model.updated_at = tonumber(value)
 
-      if not (model.updated_at and model.updated_at > 0) then
+      if not model.updated_at then
         return redis.error_reply('ERR Wrong model.updated_at')
       end
     else
       return redis.error_reply('ERR Unknown model.' .. field)
     end
-  end
-
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
   end
 
   if next(model) == nil then
@@ -313,26 +356,26 @@ local function delete_campaign(keys, args)
     return redis.status_reply('FORBIDDEN Campaign lures exists')
   end
 
-  local data = {
+  local stash = {
     campaign_id = redis.call('HGET', campaign_key, 'campaign_id'),
     mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
   }
 
-  if not (data.campaign_id and #data.campaign_id > 0) then
-    return redis.error_reply('ERR Malform data.campaign_id')
+  if not (stash.campaign_id and #stash.campaign_id > 0) then
+    return redis.error_reply('ERR Malform stash.campaign_id')
   end
 
-  if not (data.mirror_domain and #data.mirror_domain > 0) then
-    return redis.error_reply('ERR Malform data.mirror_domain')
+  if not (stash.mirror_domain and #stash.mirror_domain > 0) then
+    return redis.error_reply('ERR Malform stash.mirror_domain')
   end
 
   -- Point of no return
 
   redis.call('DEL', campaign_key)
 
-  redis.call('SREM', campaign_unique_mirror_domain_key, data.mirror_domain)
+  redis.call('SREM', campaign_unique_mirror_domain_key, stash.mirror_domain)
 
-  redis.call('ZREM', campaign_index_key, data.campaign_id)
+  redis.call('ZREM', campaign_index_key, stash.campaign_id)
 
   return redis.status_reply('OK Campaign deleted')
 end

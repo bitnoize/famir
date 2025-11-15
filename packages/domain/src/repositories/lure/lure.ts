@@ -1,4 +1,4 @@
-import { DisabledLureModel, EnabledLureModel, LureModel } from '../../models/index.js'
+import { LureModel } from '../../models/index.js'
 
 export interface CreateLureData {
   campaignId: string
@@ -34,12 +34,12 @@ export interface ListLuresData {
 }
 
 export interface LureRepository {
-  createLure(data: CreateLureData): Promise<DisabledLureModel>
+  createLure(data: CreateLureData): Promise<LureModel>
   readLure(data: ReadLureData): Promise<LureModel | null>
-  readLurePath(data: ReadLurePathData): Promise<EnabledLureModel | null>
-  enableLure(data: SwitchLureData): Promise<EnabledLureModel>
-  disableLure(data: SwitchLureData): Promise<DisabledLureModel>
-  deleteLure(data: DeleteLureData): Promise<DisabledLureModel>
+  readLurePath(data: ReadLurePathData): Promise<LureModel | null>
+  enableLure(data: SwitchLureData): Promise<LureModel>
+  disableLure(data: SwitchLureData): Promise<LureModel>
+  deleteLure(data: DeleteLureData): Promise<LureModel>
   listLures(data: ListLuresData): Promise<LureModel[] | null>
 }
 

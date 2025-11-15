@@ -7,6 +7,7 @@ import {
   DatabaseConnector,
   DatabaseError,
   DeleteRedirectorData,
+  FullRedirectorModel,
   ListRedirectorsData,
   Logger,
   LOGGER,
@@ -21,8 +22,8 @@ import {
 import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { RawRedirector } from './redirector.functions.js'
-import { rawRedirectorSchema } from './redirector.schemas.js'
+import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
+import { rawFullRedirectorSchema, rawRedirectorSchema } from './redirector.schemas.js'
 
 export class RedisRedirectorRepository extends RedisBaseRepository implements RedirectorRepository {
   static inject(container: DIContainer) {
@@ -47,15 +48,18 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     super(validator, config, logger, connection, 'redirector')
 
     this.validator.addSchemas({
-      'database-raw-redirector': rawRedirectorSchema
+      'database-raw-redirector': rawRedirectorSchema,
+      'database-raw-full-redirector': rawFullRedirectorSchema
     })
 
-    this.logger.debug(`RedirectorRepository initialized`)
+    this.logger.debug(`Repository initialized`, {
+      repository: this.repositoryName
+    })
   }
 
   async createRedirector(data: CreateRedirectorData): Promise<RedirectorModel> {
     try {
-      const [status, rawRedirector] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.redirector.create_redirector(
           this.options.prefix,
           data.campaignId,
@@ -76,7 +80,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         throw new DatabaseError(message, { code })
       }
 
-      const redirectorModel = this.buildRedirectorModel(rawRedirector)
+      const redirectorModel = this.buildRedirectorModel(rawValue)
 
       this.assertRedirectorModel(redirectorModel)
 
@@ -88,15 +92,15 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async readRedirector(data: ReadRedirectorData): Promise<RedirectorModel | null> {
+  async readRedirector(data: ReadRedirectorData): Promise<FullRedirectorModel | null> {
     try {
-      const rawRedirector = await this.connection.redirector.read_redirector(
+      const rawValue = await this.connection.redirector.read_full_redirector(
         this.options.prefix,
         data.campaignId,
         data.redirectorId
       )
 
-      return this.buildRedirectorModel(rawRedirector)
+      return this.buildFullRedirectorModel(rawValue)
     } catch (error) {
       this.handleException(error, 'readRedirector', data)
     }
@@ -104,7 +108,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
   async updateRedirector(data: UpdateRedirectorData): Promise<RedirectorModel> {
     try {
-      const [status, rawRedirector] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.redirector.update_redirector(
           this.options.prefix,
           data.campaignId,
@@ -125,7 +129,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         throw new DatabaseError(message, { code })
       }
 
-      const redirectorModel = this.buildRedirectorModel(rawRedirector)
+      const redirectorModel = this.buildRedirectorModel(rawValue)
 
       this.assertRedirectorModel(redirectorModel)
 
@@ -139,7 +143,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
   async deleteRedirector(data: DeleteRedirectorData): Promise<RedirectorModel> {
     try {
-      const [rawRedirector, status] = await Promise.all([
+      const [rawValue, status] = await Promise.all([
         this.connection.redirector.read_redirector(
           this.options.prefix,
           data.campaignId,
@@ -159,7 +163,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         throw new DatabaseError(message, { code })
       }
 
-      const redirectorModel = this.buildRedirectorModel(rawRedirector)
+      const redirectorModel = this.buildRedirectorModel(rawValue)
 
       this.assertRedirectorModel(redirectorModel)
 
@@ -184,7 +188,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.validateArrayStringsReply(index)
 
-      const rawRedirectors = await Promise.all(
+      const rawValues = await Promise.all(
         index.map((redirectorId) =>
           this.connection.redirector.read_redirector(
             this.options.prefix,
@@ -194,33 +198,49 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         )
       )
 
-      return this.buildRedirectorCollection(rawRedirectors).filter(this.guardRedirectorModel)
+      return this.buildRedirectorCollection(rawValues).filter(this.guardRedirectorModel)
     } catch (error) {
       this.handleException(error, 'listRedirectors', data)
     }
   }
 
-  protected buildRedirectorModel(rawRedirector: unknown): RedirectorModel | null {
-    if (rawRedirector === null) {
+  protected buildRedirectorModel(rawValue: unknown): RedirectorModel | null {
+    if (rawValue === null) {
       return null
     }
 
-    this.validateRawRedirector(rawRedirector)
+    this.validateRawRedirector(rawValue)
 
     return {
-      campaignId: rawRedirector.campaign_id,
-      redirectorId: rawRedirector.redirector_id,
-      page: rawRedirector.page,
-      lureCount: rawRedirector.lure_count,
-      createdAt: new Date(rawRedirector.created_at),
-      updatedAt: new Date(rawRedirector.updated_at)
+      campaignId: rawValue.campaign_id,
+      redirectorId: rawValue.redirector_id,
+      lureCount: rawValue.lure_count,
+      createdAt: new Date(rawValue.created_at),
+      updatedAt: new Date(rawValue.updated_at)
     }
   }
 
-  protected buildRedirectorCollection(rawRedirectors: unknown): Array<RedirectorModel | null> {
-    this.validateArrayReply(rawRedirectors)
+  protected buildFullRedirectorModel(rawValue: unknown): FullRedirectorModel | null {
+    if (rawValue === null) {
+      return null
+    }
 
-    return rawRedirectors.map((rawRedirector) => this.buildRedirectorModel(rawRedirector))
+    this.validateRawFullRedirector(rawValue)
+
+    return {
+      campaignId: rawValue.campaign_id,
+      redirectorId: rawValue.redirector_id,
+      page: rawValue.page,
+      lureCount: rawValue.lure_count,
+      createdAt: new Date(rawValue.created_at),
+      updatedAt: new Date(rawValue.updated_at)
+    }
+  }
+
+  protected buildRedirectorCollection(rawValues: unknown): Array<RedirectorModel | null> {
+    this.validateArrayReply(rawValues)
+
+    return rawValues.map((rawValue) => this.buildRedirectorModel(rawValue))
   }
 
   protected validateRawRedirector(value: unknown): asserts value is RawRedirector {
@@ -234,7 +254,18 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  protected guardRedirectorModel(value: RedirectorModel | null): value is RedirectorModel {
+  protected validateRawFullRedirector(value: unknown): asserts value is RawFullRedirector {
+    try {
+      this.validator.assertSchema<RawFullRedirector>('database-raw-full-redirector', value)
+    } catch (error) {
+      throw new DatabaseError(`RawFullRedirector validate failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected guardRedirectorModel = (value: RedirectorModel | null): value is RedirectorModel => {
     return value != null
   }
 

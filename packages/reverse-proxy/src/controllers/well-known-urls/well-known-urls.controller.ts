@@ -5,8 +5,6 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
-  Templater,
-  TEMPLATER,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -22,7 +20,6 @@ export class WellKnownUrlsController extends BaseController {
         new WellKnownUrlsController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )
@@ -32,23 +29,24 @@ export class WellKnownUrlsController extends BaseController {
     return container.resolve<WellKnownUrlsController>(WELL_KNOWN_URLS_CONTROLLER)
   }
 
-  constructor(
-    validator: Validator,
-    logger: Logger,
-    templater: Templater,
-    router: HttpServerRouter
-  ) {
-    super(validator, logger, templater, router, 'well-known-urls')
+  constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
+    super(validator, logger, router, 'well-known-urls')
 
     this.router.addMiddleware('well-known-urls', this.preflightCorsMiddleware)
     this.router.addMiddleware('well-known-urls', this.faviconIcoMiddleware)
     this.router.addMiddleware('well-known-urls', this.robotsTxtMiddleware)
     this.router.addMiddleware('well-known-urls', this.sitemapXmlMiddleware)
+
+    this.logger.debug(`Controller initialized`, {
+      controllerName: this.controllerName
+    })
   }
 
   private preflightCorsMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
       this.existsStateCampaign(ctx.state)
+
+      const { campaign } = ctx.state
 
       const isFound = ctx.isMethod('OPTIONS')
 
@@ -57,8 +55,6 @@ export class WellKnownUrlsController extends BaseController {
 
         return
       }
-
-      const { campaign } = ctx.state
 
       ctx.setResponseHeaders({
         'content-type': 'text/plain',

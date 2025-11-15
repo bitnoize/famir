@@ -1,5 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
+  ActionTargetLabelData,
   Config,
   CONFIG,
   CreateTargetData,
@@ -7,8 +8,7 @@ import {
   DatabaseConnector,
   DatabaseError,
   DeleteTargetData,
-  DisabledTargetModel,
-  EnabledTargetModel,
+  FullTargetModel,
   ListTargetsData,
   Logger,
   LOGGER,
@@ -24,8 +24,8 @@ import {
 import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { RawTarget } from './target.functions.js'
-import { rawTargetSchema } from './target.schemas.js'
+import { RawFullTarget, RawTarget } from './target.functions.js'
+import { rawFullTargetSchema, rawTargetSchema } from './target.schemas.js'
 
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
   static inject(container: DIContainer) {
@@ -50,15 +50,18 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     super(validator, config, logger, connection, 'target')
 
     this.validator.addSchemas({
-      'database-raw-target': rawTargetSchema
+      'database-raw-target': rawTargetSchema,
+      'database-raw-full-target': rawFullTargetSchema
     })
 
-    this.logger.debug(`TargetRepository initialized`)
+    this.logger.debug(`Repository initialized`, {
+      repository: this.repositoryName
+    })
   }
 
-  async createTarget(data: CreateTargetData): Promise<DisabledTargetModel> {
+  async createTarget(data: CreateTargetData): Promise<TargetModel> {
     try {
-      const [status, rawTarget] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.target.create_target(
           this.options.prefix,
           data.campaignId,
@@ -71,9 +74,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           data.mirrorSecure,
           data.mirrorSub,
           data.mirrorPort,
-          data.marks,
           data.connectTimeout,
-          data.timeout,
+          data.regularTimeout,
+          data.streamingTimeout,
+          data.requestDataLimit,
+          data.responseDataLimit,
           data.mainPage,
           data.notFoundPage,
           data.faviconIco,
@@ -92,9 +97,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawTarget)
+      const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertDisabledTargetModel(targetModel)
+      this.assertTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -104,46 +109,32 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async readTarget(data: ReadTargetData): Promise<TargetModel | null> {
+  async readTarget(data: ReadTargetData): Promise<FullTargetModel | null> {
     try {
-      const rawTarget = await this.connection.target.read_target(
+      const rawValue = await this.connection.target.read_full_target(
         this.options.prefix,
         data.campaignId,
         data.targetId
       )
 
-      return this.buildTargetModel(rawTarget)
+      return this.buildFullTargetModel(rawValue)
     } catch (error) {
       this.handleException(error, 'readTarget', data)
     }
   }
 
-  async readEnabledTarget(data: ReadTargetData): Promise<EnabledTargetModel | null> {
-    try {
-      const rawTarget = await this.connection.target.read_target(
-        this.options.prefix,
-        data.campaignId,
-        data.targetId
-      )
-
-      const targetModel = this.buildTargetModel(rawTarget)
-
-      return this.guardEnabledTargetModel(targetModel) ? targetModel : null
-    } catch (error) {
-      this.handleException(error, 'readEnabledTarget', data)
-    }
-  }
-
   async updateTarget(data: UpdateTargetData): Promise<TargetModel> {
     try {
-      const [status, rawTarget] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.target.update_target(
           this.options.prefix,
           data.campaignId,
           data.targetId,
-          data.marks,
           data.connectTimeout,
-          data.timeout,
+          data.regularTimeout,
+          data.streamingTimeout,
+          data.requestDataLimit,
+          data.responseDataLimit,
           data.mainPage,
           data.notFoundPage,
           data.faviconIco,
@@ -162,7 +153,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawTarget)
+      const targetModel = this.buildTargetModel(rawValue)
 
       this.assertTargetModel(targetModel)
 
@@ -174,9 +165,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async enableTarget(data: SwitchTargetData): Promise<EnabledTargetModel> {
+  async enableTarget(data: SwitchTargetData): Promise<TargetModel> {
     try {
-      const [status, rawTarget] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.target.enable_target(this.options.prefix, data.campaignId, data.targetId),
 
         this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
@@ -188,9 +179,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawTarget)
+      const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertEnabledTargetModel(targetModel)
+      this.assertTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -200,9 +191,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async disableTarget(data: SwitchTargetData): Promise<DisabledTargetModel> {
+  async disableTarget(data: SwitchTargetData): Promise<TargetModel> {
     try {
-      const [status, rawTarget] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
         this.connection.target.disable_target(this.options.prefix, data.campaignId, data.targetId),
 
         this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
@@ -214,9 +205,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawTarget)
+      const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertDisabledTargetModel(targetModel)
+      this.assertTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -226,9 +217,71 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async deleteTarget(data: DeleteTargetData): Promise<DisabledTargetModel> {
+  async appendTargetLabel(data: ActionTargetLabelData): Promise<TargetModel> {
     try {
-      const [rawTarget, status] = await Promise.all([
+      const [status, rawValue] = await Promise.all([
+        this.connection.target.append_target_label(
+          this.options.prefix,
+          data.campaignId,
+          data.targetId,
+          data.label
+        ),
+
+        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
+      ])
+
+      const [code, message] = this.parseStatusReply(status)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
+      }
+
+      const targetModel = this.buildTargetModel(rawValue)
+
+      this.assertTargetModel(targetModel)
+
+      this.logger.info(message, { targetModel })
+
+      return targetModel
+    } catch (error) {
+      this.handleException(error, 'appendTargetLabel', data)
+    }
+  }
+
+  async removeTargetLabel(data: ActionTargetLabelData): Promise<TargetModel> {
+    try {
+      const [status, rawValue] = await Promise.all([
+        this.connection.target.remove_target_label(
+          this.options.prefix,
+          data.campaignId,
+          data.targetId,
+          data.label
+        ),
+
+        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
+      ])
+
+      const [code, message] = this.parseStatusReply(status)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(message, { code })
+      }
+
+      const targetModel = this.buildTargetModel(rawValue)
+
+      this.assertTargetModel(targetModel)
+
+      this.logger.info(message, { targetModel })
+
+      return targetModel
+    } catch (error) {
+      this.handleException(error, 'removeTargetLabel', data)
+    }
+  }
+
+  async deleteTarget(data: DeleteTargetData): Promise<TargetModel> {
+    try {
+      const [rawValue, status] = await Promise.all([
         this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId),
 
         this.connection.target.delete_target(this.options.prefix, data.campaignId, data.targetId)
@@ -240,9 +293,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawTarget)
+      const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertDisabledTargetModel(targetModel)
+      this.assertTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -265,80 +318,85 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.validateArrayStringsReply(index)
 
-      const rawTargets = await Promise.all(
+      const rawValues = await Promise.all(
         index.map((targetId) =>
           this.connection.target.read_target(this.options.prefix, data.campaignId, targetId)
         )
       )
 
-      return this.buildTargetCollection(rawTargets).filter(this.guardTargetModel)
+      return this.buildTargetCollection(rawValues).filter(this.guardTargetModel)
     } catch (error) {
       this.handleException(error, 'listTargets', data)
     }
   }
 
-  async listEnabledTargets(data: ListTargetsData): Promise<EnabledTargetModel[] | null> {
-    try {
-      const index = await this.connection.target.read_target_index(
-        this.options.prefix,
-        data.campaignId
-      )
-
-      if (index === null) {
-        return null
-      }
-
-      const rawTargets = await Promise.all(
-        index.map((targetId) =>
-          this.connection.target.read_target(this.options.prefix, data.campaignId, targetId)
-        )
-      )
-
-      return this.buildTargetCollection(rawTargets).filter(this.guardEnabledTargetModel)
-    } catch (error) {
-      this.handleException(error, 'listEnabledTargets', data)
-    }
-  }
-
-  protected buildTargetModel(rawTarget: unknown): TargetModel | null {
-    if (rawTarget === null) {
+  protected buildTargetModel(rawValue: unknown): TargetModel | null {
+    if (rawValue === null) {
       return null
     }
 
-    this.validateRawTarget(rawTarget)
+    this.validateRawTarget(rawValue)
 
     return {
-      campaignId: rawTarget.campaign_id,
-      targetId: rawTarget.target_id,
-      isLanding: !!rawTarget.is_landing,
-      donorSecure: !!rawTarget.donor_secure,
-      donorSub: rawTarget.donor_sub,
-      donorDomain: rawTarget.donor_domain,
-      donorPort: rawTarget.donor_port,
-      mirrorSecure: !!rawTarget.mirror_secure,
-      mirrorSub: rawTarget.mirror_sub,
-      mirrorPort: rawTarget.mirror_port,
-      marks: rawTarget.marks.split(' '),
-      connectTimeout: rawTarget.connect_timeout,
-      timeout: rawTarget.timeout,
-      mainPage: rawTarget.main_page,
-      notFoundPage: rawTarget.not_found_page,
-      faviconIco: rawTarget.favicon_ico,
-      robotsTxt: rawTarget.robots_txt,
-      sitemapXml: rawTarget.sitemap_xml,
-      successRedirectUrl: rawTarget.success_redirect_url,
-      failureRedirectUrl: rawTarget.failure_redirect_url,
-      isEnabled: !!rawTarget.is_enabled,
-      messageCount: rawTarget.message_count,
-      createdAt: new Date(rawTarget.created_at),
-      updatedAt: new Date(rawTarget.updated_at)
+      campaignId: rawValue.campaign_id,
+      targetId: rawValue.target_id,
+      isLanding: !!rawValue.is_landing,
+      donorSecure: !!rawValue.donor_secure,
+      donorSub: rawValue.donor_sub,
+      donorDomain: rawValue.donor_domain,
+      donorPort: rawValue.donor_port,
+      mirrorSecure: !!rawValue.mirror_secure,
+      mirrorSub: rawValue.mirror_sub,
+      mirrorPort: rawValue.mirror_port,
+      isEnabled: !!rawValue.is_enabled,
+      messageCount: rawValue.message_count,
+      createdAt: new Date(rawValue.created_at),
+      updatedAt: new Date(rawValue.updated_at)
     }
   }
 
-  protected buildTargetCollection(rawTargets: unknown): Array<TargetModel | null> {
-    this.validateArrayReply(rawTargets)
+  protected buildFullTargetModel(rawValue: unknown): FullTargetModel | null {
+    if (rawValue === null) {
+      return null
+    }
 
-    return rawTargets.map((rawTarget) => this.buildTargetModel(rawTarget))
+    this.validateRawFullTarget(rawValue)
+
+    return {
+      campaignId: rawValue.campaign_id,
+      targetId: rawValue.target_id,
+      isLanding: !!rawValue.is_landing,
+      donorSecure: !!rawValue.donor_secure,
+      donorSub: rawValue.donor_sub,
+      donorDomain: rawValue.donor_domain,
+      donorPort: rawValue.donor_port,
+      mirrorSecure: !!rawValue.mirror_secure,
+      mirrorSub: rawValue.mirror_sub,
+      mirrorPort: rawValue.mirror_port,
+      labels: rawValue.labels,
+      connectTimeout: rawValue.connect_timeout,
+      regularTimeout: rawValue.regular_timeout,
+      streamingTimeout: rawValue.streaming_timeout,
+      requestDataLimit: rawValue.request_data_limit,
+      responseDataLimit: rawValue.response_data_limit,
+      mainPage: rawValue.main_page,
+      notFoundPage: rawValue.not_found_page,
+      faviconIco: rawValue.favicon_ico,
+      robotsTxt: rawValue.robots_txt,
+      sitemapXml: rawValue.sitemap_xml,
+      successRedirectUrl: rawValue.success_redirect_url,
+      failureRedirectUrl: rawValue.failure_redirect_url,
+      isEnabled: !!rawValue.is_enabled,
+      messageCount: rawValue.message_count,
+      createdAt: new Date(rawValue.created_at),
+      updatedAt: new Date(rawValue.updated_at)
+    }
+  }
+
+  protected buildTargetCollection(rawValues: unknown): Array<TargetModel | null> {
+    this.validateArrayReply(rawValues)
+
+    return rawValues.map((rawValue) => this.buildTargetModel(rawValue))
   }
 
   protected validateRawTarget(value: unknown): asserts value is RawTarget {
@@ -352,37 +410,24 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  protected guardTargetModel(value: TargetModel | null): value is TargetModel {
+  protected validateRawFullTarget(value: unknown): asserts value is RawFullTarget {
+    try {
+      this.validator.assertSchema<RawFullTarget>('database-raw-full-target', value)
+    } catch (error) {
+      throw new DatabaseError(`RawFullTarget validate failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected guardTargetModel = (value: TargetModel | null): value is TargetModel => {
     return value != null
-  }
-
-  protected guardEnabledTargetModel(value: TargetModel | null): value is EnabledTargetModel {
-    return this.guardTargetModel(value) && value.isEnabled
-  }
-
-  protected guardDisabledTargetModel(value: TargetModel | null): value is DisabledTargetModel {
-    return this.guardTargetModel(value) && !value.isEnabled
   }
 
   protected assertTargetModel(value: TargetModel | null): asserts value is TargetModel {
     if (!this.guardTargetModel(value)) {
       throw new Error(`TargetModel unexpected lost`)
-    }
-  }
-
-  protected assertEnabledTargetModel(
-    value: TargetModel | null
-  ): asserts value is EnabledTargetModel {
-    if (!this.guardEnabledTargetModel(value)) {
-      throw new Error(`EnabledTargetModel unexpected lost`)
-    }
-  }
-
-  protected assertDisabledTargetModel(
-    value: TargetModel | null
-  ): asserts value is DisabledTargetModel {
-    if (!this.guardDisabledTargetModel(value)) {
-      throw new Error(`DisabledTargetModel unexpected lost`)
     }
   }
 }

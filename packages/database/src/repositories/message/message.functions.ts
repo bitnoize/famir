@@ -13,17 +13,21 @@ export interface RawMessage {
   url_path: string
   url_query: string
   url_hash: string
+  is_streaming: number
+  status: number
+  score: number
+  total_time: number
+  created_at: number
+}
+
+export interface RawFullMessage extends RawMessage {
   request_headers: string
   request_cookies: string
   request_body: string
-  status: number
   response_headers: string
   response_cookies: string
   response_body: string
   client_ip: string
-  score: number
-  query_time: number
-  created_at: number
 }
 
 export const messageFunctions = {
@@ -44,16 +48,17 @@ export const messageFunctions = {
         urlPath: string,
         urlQuery: string,
         urlHash: string,
+        isStreaming: boolean,
         requestHeaders: HttpHeaders,
         requestCookies: HttpRequestCookies,
         requestBody: HttpBody,
-        status: number,
         responseHeaders: HttpHeaders,
         responseCookies: HttpResponseCookies,
         responseBody: HttpBody,
         clientIp: string,
+        status: number,
         score: number,
-        queryTime: number
+        totalTime: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))
@@ -71,16 +76,17 @@ export const messageFunctions = {
         parser.push(urlPath)
         parser.push(urlQuery)
         parser.push(urlHash)
+        parser.push(isStreaming ? '1' : '0')
         parser.push(JSON.stringify(requestHeaders))
         parser.push(JSON.stringify(requestCookies))
         parser.push(requestBody.toString('base64'))
-        parser.push(status.toString())
         parser.push(JSON.stringify(responseHeaders))
         parser.push(JSON.stringify(responseCookies))
         parser.push(responseBody.toString('base64'))
         parser.push(clientIp)
+        parser.push(status.toString())
         parser.push(score.toString())
-        parser.push(queryTime.toString())
+        parser.push(totalTime.toString())
         parser.push(Date.now().toString())
       },
 
@@ -88,6 +94,17 @@ export const messageFunctions = {
     },
 
     read_message: {
+      NUMBER_OF_KEYS: 2,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(messageKey(prefix, campaignId, messageId))
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    read_full_message: {
       NUMBER_OF_KEYS: 2,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {

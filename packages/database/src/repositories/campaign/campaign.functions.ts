@@ -12,6 +12,13 @@ import {
 export interface RawCampaign {
   campaign_id: string
   mirror_domain: string
+  session_count: number
+  message_count: number
+  created_at: number
+  updated_at: number
+}
+
+export interface RawFullCampaign extends RawCampaign {
   description: string
   landing_auth_path: string
   landing_auth_param: string
@@ -24,10 +31,6 @@ export interface RawCampaign {
   target_count: number
   redirector_count: number
   lure_count: number
-  session_count: number
-  message_count: number
-  created_at: number
-  updated_at: number
 }
 
 export const campaignFunctions = {
@@ -78,6 +81,16 @@ export const campaignFunctions = {
         parser.pushKey(targetIndexKey(prefix, campaignId))
         parser.pushKey(redirectorIndexKey(prefix, campaignId))
         parser.pushKey(lureIndexKey(prefix, campaignId))
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    read_full_campaign: {
+      NUMBER_OF_KEYS: 1,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => unknown

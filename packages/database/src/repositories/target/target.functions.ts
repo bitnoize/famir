@@ -3,6 +3,7 @@ import {
   campaignKey,
   targetIndexKey,
   targetKey,
+  targetLabelsKey,
   targetUniqueDonorKey,
   targetUniqueMirrorKey
 } from '../../database.keys.js'
@@ -14,13 +15,23 @@ export interface RawTarget {
   donor_secure: number
   donor_sub: string
   donor_domain: string
-  donor_port: number
+  donor_port: string
   mirror_secure: number
   mirror_sub: string
-  mirror_port: number
-  marks: string
+  mirror_port: string
+  is_enabled: number
+  message_count: number
+  created_at: number
+  updated_at: number
+}
+
+export interface RawFullTarget extends RawTarget {
+  labels: string[]
   connect_timeout: number
-  timeout: number
+  regular_timeout: number
+  streaming_timeout: number
+  request_data_limit: number
+  response_data_limit: number
   main_page: string
   not_found_page: string
   favicon_ico: string
@@ -28,10 +39,6 @@ export interface RawTarget {
   sitemap_xml: string
   success_redirect_url: string
   failure_redirect_url: string
-  is_enabled: number
-  message_count: number
-  created_at: number
-  updated_at: number
 }
 
 export const targetFunctions = {
@@ -48,13 +55,15 @@ export const targetFunctions = {
         donorSecure: boolean,
         donorSub: string,
         donorDomain: string,
-        donorPort: number,
+        donorPort: string,
         mirrorSecure: boolean,
         mirrorSub: string,
-        mirrorPort: number,
-        marks: string[],
+        mirrorPort: string,
         connectTimeout: number,
-        timeout: number,
+        regularTimeout: number,
+        streamingTimeout: number,
+        requestDataLimit: number,
+        responseDataLimit: number,
         mainPage: string,
         notFoundPage: string,
         faviconIco: string,
@@ -75,13 +84,15 @@ export const targetFunctions = {
         parser.push(donorSecure ? '1' : '0')
         parser.push(donorSub)
         parser.push(donorDomain)
-        parser.push(donorPort.toString())
+        parser.push(donorPort)
         parser.push(mirrorSecure ? '1' : '0')
         parser.push(mirrorSub)
-        parser.push(mirrorPort.toString())
-        //parser.push(marks.join(' '))
+        parser.push(mirrorPort)
         parser.push(connectTimeout.toString())
-        parser.push(timeout.toString())
+        parser.push(regularTimeout.toString())
+        parser.push(streamingTimeout.toString())
+        parser.push(requestDataLimit.toString())
+        parser.push(responseDataLimit.toString())
         parser.push(mainPage)
         parser.push(notFoundPage)
         parser.push(faviconIco)
@@ -106,6 +117,18 @@ export const targetFunctions = {
       transformReply: undefined as unknown as () => RawTarget | null
     },
 
+    read_full_target: {
+      NUMBER_OF_KEYS: 3,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
+        parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
+      },
+
+      transformReply: undefined as unknown as () => RawTarget | null
+    },
+
     read_target_index: {
       NUMBER_OF_KEYS: 2,
 
@@ -125,9 +148,11 @@ export const targetFunctions = {
         prefix: string,
         campaignId: string,
         targetId: string,
-        marks: string[] | null | undefined,
         connectTimeout: number | null | undefined,
-        timeout: number | null | undefined,
+        regularTimeout: number | null | undefined,
+        streamingTimeout: number | null | undefined,
+        requestDataLimit: number | null | undefined,
+        responseDataLimit: number | null | undefined,
         mainPage: string | null | undefined,
         notFoundPage: string | null | undefined,
         faviconIco: string | null | undefined,
@@ -139,19 +164,29 @@ export const targetFunctions = {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
 
-        if (marks != null) {
-          //parser.push('marks')
-          //parser.push(marks.join(' '))
-        }
-
         if (connectTimeout != null) {
           parser.push('connect_timeout')
           parser.push(connectTimeout.toString())
         }
 
-        if (timeout != null) {
-          parser.push('timeout')
-          parser.push(timeout.toString())
+        if (regularTimeout != null) {
+          parser.push('regular_timeout')
+          parser.push(regularTimeout.toString())
+        }
+
+        if (streamingTimeout != null) {
+          parser.push('streaming_timeout')
+          parser.push(streamingTimeout.toString())
+        }
+
+        if (requestDataLimit != null) {
+          parser.push('request_data_limit')
+          parser.push(requestDataLimit.toString())
+        }
+
+        if (responseDataLimit != null) {
+          parser.push('response_data_limit')
+          parser.push(responseDataLimit.toString())
         }
 
         if (mainPage != null) {
@@ -222,12 +257,55 @@ export const targetFunctions = {
       transformReply: undefined as unknown as () => string
     },
 
+    append_target_label: {
+      NUMBER_OF_KEYS: 3,
+
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        targetId: string,
+        label: string
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
+        parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
+
+        parser.push(label.toLowerCase())
+        parser.push(Date.now().toString())
+      },
+
+      transformReply: undefined as unknown as () => string
+    },
+
+    remove_target_label: {
+      NUMBER_OF_KEYS: 3,
+
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        targetId: string,
+        label: string
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
+        parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
+
+        parser.push(label.toLowerCase())
+        parser.push(Date.now().toString())
+      },
+
+      transformReply: undefined as unknown as () => string
+    },
+
     delete_target: {
-      NUMBER_OF_KEYS: 5,
+      NUMBER_OF_KEYS: 6,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
+        parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
         parser.pushKey(targetUniqueDonorKey(prefix, campaignId))
         parser.pushKey(targetUniqueMirrorKey(prefix, campaignId))
         parser.pushKey(targetIndexKey(prefix, campaignId))

@@ -64,7 +64,9 @@ export class RedirectorController extends BaseController {
     this.router.addApiCall('deleteRedirector', this.deleteRedirectorApiCall)
     this.router.addApiCall('listRedirectors', this.listRedirectorsApiCall)
 
-    this.logger.debug(`RedirectorController initialized`)
+    this.logger.debug(`Controller initialized`, {
+      controllerName: this.controllerName
+    })
   }
 
   private createRedirectorApiCall: ReplServerApiCall = async (data) => {

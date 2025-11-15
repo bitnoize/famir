@@ -38,6 +38,8 @@ export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWo
   ) {
     super(config, logger, connection, router, ANALYZE_LOG_QUEUE_NAME)
 
-    this.logger.debug(`AnalyzeLogWorker initialized`)
+    this.logger.debug(`Worker initialized`, {
+      queue: this.queueName
+    })
   }
 }

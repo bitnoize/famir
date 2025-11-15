@@ -6,15 +6,13 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
-  Templater,
-  TEMPLATER,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
 import { SetupMirrorHeaders } from './setup-mirror.js'
 import { setupMirrorHeadersSchema } from './setup-mirror.schemas.js'
-import { type GetCampaignTargetUseCase, GET_CAMPAIGN_TARGET_USE_CASE } from './use-cases/index.js'
+import { type GetTargetUseCase, GET_TARGET_USE_CASE } from './use-cases/index.js'
 
 export const SETUP_MIRROR_CONTROLLER = Symbol('SetupMirrorController')
 
@@ -26,9 +24,8 @@ export class SetupMirrorController extends BaseController {
         new SetupMirrorController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<GetCampaignTargetUseCase>(GET_CAMPAIGN_TARGET_USE_CASE)
+          c.resolve<GetTargetUseCase>(GET_TARGET_USE_CASE)
         )
     )
   }
@@ -40,20 +37,23 @@ export class SetupMirrorController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    templater: Templater,
     router: HttpServerRouter,
-    protected readonly getCampaignTargetUseCase: GetCampaignTargetUseCase
+    protected readonly getTargetUseCase: GetTargetUseCase
   ) {
-    super(validator, logger, templater, router, 'setup-mirror')
+    super(validator, logger, router, 'setup-mirror')
 
     this.validator.addSchemas({
       'setup-mirror-headers': setupMirrorHeadersSchema
     })
 
-    this.router.addMiddleware('setup-mirror', this.gatherStateMiddleware)
+    this.router.addMiddleware('setup-mirror', this.defaultMiddleware)
+
+    this.logger.debug(`Controller initialized`, {
+      controllerName: this.controllerName
+    })
   }
 
-  private gatherStateMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
       this.absentStateCampaign(ctx.state)
       this.absentStateTarget(ctx.state)
@@ -65,7 +65,7 @@ export class SetupMirrorController extends BaseController {
 
       this.validateSetupMirrorHeaders(setupHeaders)
 
-      const { campaign, target } = await this.getCampaignTargetUseCase.execute({
+      const { campaign, target } = await this.getTargetUseCase.execute({
         campaignId: setupHeaders.campaignId,
         targetId: setupHeaders.targetId
       })
@@ -75,7 +75,7 @@ export class SetupMirrorController extends BaseController {
 
       await next()
     } catch (error) {
-      this.handleException(error, 'gatherState')
+      this.handleException(error, 'default')
     }
   }
 

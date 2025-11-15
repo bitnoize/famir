@@ -9,10 +9,6 @@ export interface LureModel {
   readonly updatedAt: Date
 }
 
-export interface DisabledLureModel extends LureModel {
-  isEnabled: false
-}
-
 export interface EnabledLureModel extends LureModel {
   isEnabled: true
 }

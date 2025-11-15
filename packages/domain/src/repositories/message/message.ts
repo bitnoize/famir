@@ -1,5 +1,5 @@
 import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '../../domain.js'
-import { MessageModel } from '../../models/index.js'
+import { FullMessageModel, MessageModel } from '../../models/index.js'
 
 export interface CreateMessageData {
   campaignId: string
@@ -12,16 +12,17 @@ export interface CreateMessageData {
   urlPath: string
   urlQuery: string
   urlHash: string
+  isStreaming: boolean
   requestHeaders: HttpHeaders
   requestCookies: HttpRequestCookies
   requestBody: HttpBody
-  status: number
   responseHeaders: HttpHeaders
   responseCookies: HttpResponseCookies
   responseBody: HttpBody
   clientIp: string
+  status: number
   score: number
-  queryTime: number
+  totalTime: number
 }
 
 export interface ReadMessageData {
@@ -30,8 +31,8 @@ export interface ReadMessageData {
 }
 
 export interface MessageRepository {
-  createMessage(data: CreateMessageData): Promise<string>
-  readMessage(data: ReadMessageData): Promise<MessageModel | null>
+  createMessage(data: CreateMessageData): Promise<MessageModel>
+  readMessage(data: ReadMessageData): Promise<FullMessageModel | null>
 }
 
 export const MESSAGE_REPOSITORY = Symbol('MessageRepository')

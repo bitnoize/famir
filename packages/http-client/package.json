@@ -13,7 +13,7 @@
   "dependencies": {
     "@famir/common": "*",
     "@famir/domain": "*",
-    "node-libcurl": "^4.1.0",
+    "node-libcurl": "^5.0.1",
     "set-cookie-parser": "^2.7.1"
   },
   "devDependencies": {

@@ -22,7 +22,7 @@ export interface UpgradeSessionData {
 }
 
 export interface SessionRepository {
-  createSession(data: CreateSessionData): Promise<string>
+  createSession(data: CreateSessionData): Promise<SessionModel>
   readSession(data: ReadSessionData): Promise<SessionModel | null>
   authSession(data: AuthSessionData): Promise<SessionModel>
   upgradeSession(data: UpgradeSessionData): Promise<SessionModel>

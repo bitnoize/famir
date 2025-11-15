@@ -11,15 +11,19 @@ export interface MessageModel {
   readonly urlPath: string
   readonly urlQuery: string
   readonly urlHash: string
+  readonly isStreaming: boolean
+  readonly status: number
+  readonly score: number
+  readonly totalTime: number
+  readonly createdAt: Date
+}
+
+export interface FullMessageModel extends MessageModel {
   readonly requestHeaders: HttpHeaders
   readonly requestCookies: HttpRequestCookies
   readonly requestBody: HttpBody
-  readonly status: number
   readonly responseHeaders: HttpHeaders
   readonly responseCookies: HttpResponseCookies
   readonly responseBody: HttpBody
   readonly clientIp: string
-  readonly score: number
-  readonly queryTime: number
-  readonly createdAt: Date
 }

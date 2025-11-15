@@ -2,8 +2,6 @@ import { DIContainer } from '@famir/common'
 import {
   CreateProxyData,
   DeleteProxyData,
-  DisabledProxyModel,
-  EnabledProxyModel,
   ListProxiesData,
   Logger,
   LOGGER,
@@ -36,7 +34,7 @@ export class ProxyService extends BaseService {
     this.logger.debug(`ProxyService initialized`)
   }
 
-  async createProxy(data: CreateProxyData): Promise<DisabledProxyModel> {
+  async createProxy(data: CreateProxyData): Promise<ProxyModel> {
     try {
       return await this.proxyRepository.createProxy(data)
     } catch (error) {
@@ -56,7 +54,7 @@ export class ProxyService extends BaseService {
     return proxyModel
   }
 
-  async enableProxy(data: SwitchProxyData): Promise<EnabledProxyModel> {
+  async enableProxy(data: SwitchProxyData): Promise<ProxyModel> {
     try {
       return await this.proxyRepository.enableProxy(data)
     } catch (error) {
@@ -64,7 +62,7 @@ export class ProxyService extends BaseService {
     }
   }
 
-  async disableProxy(data: SwitchProxyData): Promise<DisabledProxyModel> {
+  async disableProxy(data: SwitchProxyData): Promise<ProxyModel> {
     try {
       return await this.proxyRepository.disableProxy(data)
     } catch (error) {
@@ -72,7 +70,7 @@ export class ProxyService extends BaseService {
     }
   }
 
-  async deleteProxy(data: DeleteProxyData): Promise<DisabledProxyModel> {
+  async deleteProxy(data: DeleteProxyData): Promise<ProxyModel> {
     try {
       return await this.proxyRepository.deleteProxy(data)
     } catch (error) {

@@ -1,5 +1,6 @@
 import { JSONSchemaType, booleanSchema, customIdentSchema } from '@famir/common'
 import {
+  ActionTargetLabelData,
   CreateTargetData,
   DeleteTargetData,
   ListTargetsData,
@@ -7,7 +8,7 @@ import {
   SwitchTargetData,
   UpdateTargetData
 } from '@famir/domain'
-import { RawTarget } from './target.functions.js'
+import { RawFullTarget, RawTarget } from './target.functions.js'
 
 export const rawTargetSchema: JSONSchemaType<RawTarget> = {
   type: 'object',
@@ -22,9 +23,77 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
     'mirror_secure',
     'mirror_sub',
     'mirror_port',
-    'marks',
+    'is_enabled',
+    'message_count',
+    'created_at',
+    'updated_at'
+  ],
+  properties: {
+    campaign_id: {
+      type: 'string'
+    },
+    target_id: {
+      type: 'string'
+    },
+    is_landing: {
+      type: 'integer'
+    },
+    donor_secure: {
+      type: 'integer'
+    },
+    donor_sub: {
+      type: 'string'
+    },
+    donor_domain: {
+      type: 'string'
+    },
+    donor_port: {
+      type: 'string'
+    },
+    mirror_secure: {
+      type: 'integer'
+    },
+    mirror_sub: {
+      type: 'string'
+    },
+    mirror_port: {
+      type: 'string'
+    },
+    is_enabled: {
+      type: 'integer'
+    },
+    message_count: {
+      type: 'integer'
+    },
+    created_at: {
+      type: 'integer'
+    },
+    updated_at: {
+      type: 'integer'
+    }
+  },
+  additionalProperties: false
+} as const
+
+export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
+  type: 'object',
+  required: [
+    'campaign_id',
+    'target_id',
+    'is_landing',
+    'donor_secure',
+    'donor_sub',
+    'donor_domain',
+    'donor_port',
+    'mirror_secure',
+    'mirror_sub',
+    'mirror_port',
+    'labels',
     'connect_timeout',
-    'timeout',
+    'regular_timeout',
+    'streaming_timeout',
+    'request_data_limit',
+    'response_data_limit',
     'main_page',
     'not_found_page',
     'favicon_ico',
@@ -57,7 +126,7 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
       type: 'string'
     },
     donor_port: {
-      type: 'integer'
+      type: 'string'
     },
     mirror_secure: {
       type: 'integer'
@@ -66,15 +135,27 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
       type: 'string'
     },
     mirror_port: {
-      type: 'integer'
-    },
-    marks: {
       type: 'string'
+    },
+    labels: {
+      type: 'array',
+      items: {
+        type: 'string'
+      }
     },
     connect_timeout: {
       type: 'integer'
     },
-    timeout: {
+    regular_timeout: {
+      type: 'integer'
+    },
+    streaming_timeout: {
+      type: 'integer'
+    },
+    request_data_limit: {
+      type: 'integer'
+    },
+    response_data_limit: {
       type: 'integer'
     },
     main_page: {
@@ -110,7 +191,8 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
     updated_at: {
       type: 'integer'
     }
-  }
+  },
+  additionalProperties: false
 } as const
 
 export const targetSubSchema: JSONSchemaType<string> = {
@@ -125,17 +207,20 @@ export const targetDomainSchema: JSONSchemaType<string> = {
   maxLength: 128
 } as const
 
-export const targetPortSchema: JSONSchemaType<number> = {
-  type: 'integer',
-  minimum: 0,
-  maximum: 65535
+export const targetPortSchema: JSONSchemaType<string> = {
+  type: 'string',
+  pattern: '^[0-9]{1,5}$'
 } as const
 
-export const targetMarksSchema: JSONSchemaType<string[]> = {
+export const targetLabelSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 3,
+  maxLength: 64
+}
+
+export const targetLabelsSchema: JSONSchemaType<string[]> = {
   type: 'array',
-  items: {
-    type: 'string'
-  }
+  items: targetLabelSchema
 } as const
 
 export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
@@ -144,22 +229,40 @@ export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
   maximum: 60 * 1000
 } as const
 
-export const targetTimeoutSchema: JSONSchemaType<number> = {
+export const targetRegularTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1 * 1000,
-  maximum: 5 * 60 * 1000
+  maximum: 2 * 60 * 1000
+} as const
+
+export const targetStreamingTimeoutSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  minimum: 60 * 1000,
+  maximum: 24 * 3600 * 1000
+} as const
+
+export const targetRequestDataLimitSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  minimum: 1024,
+  maximum: 1024 * 1024 * 1024
+} as const
+
+export const targetResponseDataLimitSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  minimum: 1024,
+  maximum: 1024 * 1024 * 1024
 } as const
 
 export const targetContentSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 0,
-  maxLength: 10485760
+  maxLength: 10 * 1024 * 1024
 } as const
 
 export const targetRedirectUrlSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
-  maxLength: 128
+  maxLength: 256
 } as const
 
 export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
@@ -175,9 +278,11 @@ export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     'mirrorSecure',
     'mirrorSub',
     'mirrorPort',
-    'marks',
     'connectTimeout',
-    'timeout',
+    'regularTimeout',
+    'streamingTimeout',
+    'requestDataLimit',
+    'responseDataLimit',
     'mainPage',
     'notFoundPage',
     'faviconIco',
@@ -197,17 +302,25 @@ export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     mirrorSecure: booleanSchema,
     mirrorSub: targetSubSchema,
     mirrorPort: targetPortSchema,
-    marks: {
-      ...targetMarksSchema,
-      default: []
-    },
     connectTimeout: {
       ...targetConnectTimeoutSchema,
       default: 1 * 1000
     },
-    timeout: {
-      ...targetTimeoutSchema,
+    regularTimeout: {
+      ...targetRegularTimeoutSchema,
       default: 10 * 1000
+    },
+    streamingTimeout: {
+      ...targetStreamingTimeoutSchema,
+      default: 3600 * 1000
+    },
+    requestDataLimit: {
+      ...targetRequestDataLimitSchema,
+      default: 10 * 1024 * 1024
+    },
+    responseDataLimit: {
+      ...targetResponseDataLimitSchema,
+      default: 10 * 1024 * 1024
     },
     mainPage: {
       ...targetContentSchema,
@@ -257,16 +370,24 @@ export const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
-    marks: {
-      ...targetMarksSchema,
-      nullable: true
-    },
     connectTimeout: {
       ...targetConnectTimeoutSchema,
       nullable: true
     },
-    timeout: {
-      ...targetTimeoutSchema,
+    regularTimeout: {
+      ...targetRegularTimeoutSchema,
+      nullable: true
+    },
+    streamingTimeout: {
+      ...targetStreamingTimeoutSchema,
+      nullable: true
+    },
+    requestDataLimit: {
+      ...targetRequestDataLimitSchema,
+      nullable: true
+    },
+    responseDataLimit: {
+      ...targetResponseDataLimitSchema,
       nullable: true
     },
     mainPage: {
@@ -307,6 +428,17 @@ export const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema
+  },
+  additionalProperties: false
+} as const
+
+export const actionTargetLabelDataSchema: JSONSchemaType<ActionTargetLabelData> = {
+  type: 'object',
+  required: ['campaignId', 'targetId', 'label'],
+  properties: {
+    campaignId: customIdentSchema,
+    targetId: customIdentSchema,
+    label: targetLabelSchema
   },
   additionalProperties: false
 } as const

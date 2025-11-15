@@ -62,7 +62,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   ReverseProxyApp.inject(container)
 
-  await composer(container)
+  composer(container)
 
   await ReverseProxyApp.resolve(container).start()
 }

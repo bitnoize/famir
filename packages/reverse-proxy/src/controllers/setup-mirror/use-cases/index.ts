@@ -1,1 +1,1 @@
-export * from './get-campaign-target/index.js'
+export * from './get-target/index.js'

@@ -1,4 +1,4 @@
-import { DisabledProxyModel, EnabledProxyModel, ProxyModel } from '../../models/index.js'
+import { ProxyModel } from '../../models/index.js'
 
 export interface CreateProxyData {
   campaignId: string
@@ -26,12 +26,11 @@ export interface ListProxiesData {
 }
 
 export interface ProxyRepository {
-  createProxy(data: CreateProxyData): Promise<DisabledProxyModel>
+  createProxy(data: CreateProxyData): Promise<ProxyModel>
   readProxy(data: ReadProxyData): Promise<ProxyModel | null>
-  readEnabledProxy(data: ReadProxyData): Promise<EnabledProxyModel | null>
-  enableProxy(data: SwitchProxyData): Promise<EnabledProxyModel>
-  disableProxy(data: SwitchProxyData): Promise<DisabledProxyModel>
-  deleteProxy(data: DeleteProxyData): Promise<DisabledProxyModel>
+  enableProxy(data: SwitchProxyData): Promise<ProxyModel>
+  disableProxy(data: SwitchProxyData): Promise<ProxyModel>
+  deleteProxy(data: DeleteProxyData): Promise<ProxyModel>
   listProxies(data: ListProxiesData): Promise<ProxyModel[] | null>
 }
 

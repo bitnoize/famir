@@ -12,35 +12,6 @@ local function create_session(keys, args)
   local session_key = keys[2]
   local enabled_proxy_index_key = keys[3]
 
-  local model = {
-    campaign_id = args[1],
-    session_id = args[2],
-    proxy_id = nil,
-    secret = args[3],
-    is_landing = 0,
-    message_count = 0,
-    created_at = tonumber(args[4]),
-    last_auth_at = nil,
-  }
-
-  if not (#model.campaign_id > 0) then
-    return redis.error_reply('ERR Wrong model.campaign_id')
-  end
-
-  if not (#model.session_id > 0) then
-    return redis.error_reply('ERR Wrong model.session_id')
-  end
-
-  if not (#model.secret > 0) then
-    return redis.error_reply('ERR Wrong model.secret')
-  end
-
-  if not (model.created_at and model.created_at > 0) then
-    return redis.error_reply('ERR Wrong model.created_at')
-  end
-
-  model.last_auth_at = model.created_at
-
   if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
@@ -53,18 +24,41 @@ local function create_session(keys, args)
     return redis.status_reply('FORBIDDEN No enabled proxies found')
   end
 
-  model.proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key)
+  local model = {
+    campaign_id = args[1],
+    session_id = args[2],
+    proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key),
+    secret = args[3],
+    is_landing = 0,
+    message_count = 0,
+    created_at = tonumber(args[4]),
+    last_auth_at = tonumber(args[4]),
+  }
 
-  if not (model.proxy_id and #model.proxy_id > 0) then
-    return redis.error_reply('ERR Malform model.proxy_id')
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
   end
 
-  local data = {
+  if not (#model.campaign_id > 0) then
+    return redis.error_reply('ERR Wrong model.campaign_id')
+  end
+
+  if not (#model.session_id > 0) then
+    return redis.error_reply('ERR Wrong model.session_id')
+  end
+
+  if not (#model.proxy_id > 0) then
+    return redis.error_reply('ERR Wrong model.proxy_id')
+  end
+
+  local stash = {
     new_session_expire = tonumber(redis.call('HGET', campaign_key, 'new_session_expire')),
   }
 
-  if not (data.new_session_expire and data.new_session_expire > 0) then
-    return redis.error_reply('ERR Malform data.new_session_expire')
+  if not (stash.new_session_expire and stash.new_session_expire > 0) then
+    return redis.error_reply('ERR Malform stash.new_session_expire')
   end
 
   -- Point of no return
@@ -78,7 +72,7 @@ local function create_session(keys, args)
 
   redis.call('HSET', session_key, unpack(store))
 
-  redis.call('PEXPIRE', session_key, data.new_session_expire)
+  redis.call('PEXPIRE', session_key, stash.new_session_expire)
 
   return redis.status_reply('OK Session created')
 end
@@ -164,14 +158,6 @@ local function auth_session(keys, args)
   local session_key = keys[2]
   local enabled_proxy_index_key = keys[3]
 
-  local params = {
-    last_auth_at = tonumber(args[1]),
-  }
-
-  if not (params.last_auth_at and params.last_auth_at > 0) then
-    return redis.error_reply('ERR Wrong params.last_auth_at')
-  end
-
   if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
@@ -184,35 +170,40 @@ local function auth_session(keys, args)
     return redis.status_reply('FORBIDDEN No enabled proxies found')
   end
 
-  local data = {
+  local stash = {
+    last_auth_at = tonumber(args[1]),
     proxy_id = redis.call('HGET', session_key, 'proxy_id'),
     session_expire = tonumber(redis.call('HGET', campaign_key, 'session_expire')),
   }
 
-  if not (data.proxy_id and #data.proxy_id > 0) then
-    return redis.error_reply('ERR Malform data.proxy_id')
+  if not stash.last_auth_at then
+    return redis.error_reply('ERR Wrong stash.last_auth_at')
   end
 
-  if not (data.session_expire and data.session_expire > 0) then
-    return redis.error_reply('ERR Malform data.session_expire')
+  if not (stash.proxy_id and #stash.proxy_id > 0) then
+    return redis.error_reply('ERR Malform stash.proxy_id')
   end
 
-  if redis.call('SISMEMBER', enabled_proxy_index_key, data.proxy_id) == 0 then
-    data.proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key)
+  if not (stash.session_expire and stash.session_expire > 0) then
+    return redis.error_reply('ERR Malform stash.session_expire')
+  end
 
-    if not (data.proxy_id and #data.proxy_id > 0) then
-      return redis.error_reply('ERR Malform data.proxy_id')
+  if redis.call('SISMEMBER', enabled_proxy_index_key, stash.proxy_id) == 0 then
+    stash.proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key)
+
+    if not (stash.proxy_id and #stash.proxy_id > 0) then
+      return redis.error_reply('ERR Malform stash.proxy_id')
     end
   end
 
   -- stylua: ignore
   redis.call(
     'HSET', session_key,
-    'proxy_id', data.proxy_id,
-    'last_auth_at', params.last_auth_at
+    'proxy_id', stash.proxy_id,
+    'last_auth_at', stash.last_auth_at
   )
 
-  redis.call('PEXPIRE', session_key, data.session_expire)
+  redis.call('PEXPIRE', session_key, stash.session_expire)
 
   return redis.status_reply('OK Session authorized')
 end
@@ -235,14 +226,6 @@ local function upgrade_session(keys, args)
   local lure_key = keys[2]
   local session_key = keys[3]
 
-  local params = {
-    secret = args[1],
-  }
-
-  if not (#params.secret > 0) then
-    return redis.error_reply('ERR Wrong params.secret')
-  end
-
   if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
@@ -255,24 +238,29 @@ local function upgrade_session(keys, args)
     return redis.status_reply('NOT_FOUND Session not found')
   end
 
-  local data = {
-    secret = redis.call('HGET', session_key, 'secret'),
+  local stash = {
+    test_secret = args[1],
+    orig_secret = redis.call('HGET', session_key, 'secret'),
     is_landing = tonumber(redis.call('HGET', session_key, 'is_landing')),
   }
 
-  if not (data.secret and #data.secret > 0) then
-    return redis.error_reply('ERR Malform data.secret')
+  if not (stash.test_secret and #stash.test_secret > 0) then
+    return redis.error_reply('ERR Wrong stash.test_secret')
   end
 
-  if not data.is_landing then
-    return redis.error_reply('ERR Malform data.is_landing')
+  if not (stash.orig_secret and #stash.orig_secret > 0) then
+    return redis.error_reply('ERR Malform stash.orig_secret')
   end
 
-  if params.secret ~= data.secret then
+  if not stash.is_landing then
+    return redis.error_reply('ERR Malform stash.is_landing')
+  end
+
+  if stash.test_secret ~= stash.orig_secret then
     return redis.status_reply('FORBIDDEN Session secret not match')
   end
 
-  if data.is_landing ~= 0 then
+  if stash.is_landing ~= 0 then
     return redis.status_reply('OK Session allready upgraded')
   end
 

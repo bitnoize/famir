@@ -39,7 +39,8 @@ export const rawSessionSchema: JSONSchemaType<RawSession> = {
     last_auth_at: {
       type: 'integer'
     }
-  }
+  },
+  additionalProperties: false
 } as const
 
 export const readSessionDataSchema: JSONSchemaType<ReadSessionData> = {

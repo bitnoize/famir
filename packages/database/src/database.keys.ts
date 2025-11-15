@@ -34,6 +34,10 @@ export const targetKey = (prefix: string, campaignId: string, targetId: string) 
   return buildKey(prefix, 'target', campaignId, targetId)
 }
 
+export const targetLabelsKey = (prefix: string, campaignId: string, targetId: string) => {
+  return buildKey(prefix, 'target', campaignId, targetId, 'labels')
+}
+
 export const targetUniqueDonorKey = (prefix: string, campaignId: string) => {
   return buildKey(prefix, 'target-unique-donor', campaignId)
 }

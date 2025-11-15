@@ -5,9 +5,42 @@ import {
   ReadCampaignData,
   UpdateCampaignData
 } from '@famir/domain'
-import { RawCampaign } from './campaign.functions.js'
+import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 
 export const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
+  type: 'object',
+  required: [
+    'campaign_id',
+    'mirror_domain',
+    'session_count',
+    'message_count',
+    'created_at',
+    'updated_at'
+  ],
+  properties: {
+    campaign_id: {
+      type: 'string'
+    },
+    mirror_domain: {
+      type: 'string'
+    },
+    session_count: {
+      type: 'integer'
+    },
+    message_count: {
+      type: 'integer'
+    },
+    created_at: {
+      type: 'integer'
+    },
+    updated_at: {
+      type: 'integer'
+    }
+  },
+  additionalProperties: false
+} as const
+
+export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -84,7 +117,8 @@ export const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
     updated_at: {
       type: 'integer'
     }
-  }
+  },
+  additionalProperties: false
 } as const
 
 export const campaignMirrorDomainSchema: JSONSchemaType<string> = {
@@ -97,6 +131,30 @@ export const campaignDescriptionSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 0,
   maxLength: 1024
+} as const
+
+export const campaignLandingAuthPathSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 3,
+  maxLength: 64
+} as const
+
+export const campaignLandingAuthParamSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 1,
+  maxLength: 8
+} as const
+
+export const campaignLandingLureParamSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 1,
+  maxLength: 8
+} as const
+
+export const campaignSessionCookieNameSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 3,
+  maxLength: 64
 } as const
 
 export const campaignSessionExpireSchema: JSONSchemaType<number> = {
@@ -119,7 +177,18 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
 
 export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
   type: 'object',
-  required: ['campaignId', 'mirrorDomain'],
+  required: [
+    'campaignId',
+    'mirrorDomain',
+    'description',
+    'landingAuthPath',
+    'landingAuthParam',
+    'landingLureParam',
+    'sessionCookieName',
+    'sessionExpire',
+    'newSessionExpire',
+    'messageExpire'
+  ],
   properties: {
     campaignId: customIdentSchema,
     mirrorDomain: campaignMirrorDomainSchema,
@@ -128,19 +197,19 @@ export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
       default: ''
     },
     landingAuthPath: {
-      type: 'string',
+      ...campaignLandingAuthPathSchema,
       default: '/fake-auth'
     },
     landingAuthParam: {
-      ...customIdentSchema,
+      ...campaignLandingAuthParamSchema,
       default: 'data'
     },
     landingLureParam: {
-      ...customIdentSchema,
+      ...campaignLandingLureParamSchema,
       default: 'data'
     },
     sessionCookieName: {
-      type: 'string',
+      ...campaignSessionCookieNameSchema,
       default: 'fake-sess'
     },
     sessionExpire: {
@@ -164,7 +233,8 @@ export const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
   required: ['campaignId'],
   properties: {
     campaignId: customIdentSchema
-  }
+  },
+  additionalProperties: false
 }
 
 export const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
@@ -197,5 +267,6 @@ export const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
   required: ['campaignId'],
   properties: {
     campaignId: customIdentSchema
-  }
+  },
+  additionalProperties: false
 } as const

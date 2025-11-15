@@ -1,4 +1,4 @@
-import { RedirectorModel } from '../../models/index.js'
+import { FullRedirectorModel, RedirectorModel } from '../../models/index.js'
 
 export interface CreateRedirectorData {
   campaignId: string
@@ -28,7 +28,7 @@ export interface ListRedirectorsData {
 
 export interface RedirectorRepository {
   createRedirector(data: CreateRedirectorData): Promise<RedirectorModel>
-  readRedirector(data: ReadRedirectorData): Promise<RedirectorModel | null>
+  readRedirector(data: ReadRedirectorData): Promise<FullRedirectorModel | null>
   updateRedirector(data: UpdateRedirectorData): Promise<RedirectorModel>
   deleteRedirector(data: DeleteRedirectorData): Promise<RedirectorModel>
   listRedirectors(data: ListRedirectorsData): Promise<RedirectorModel[] | null>

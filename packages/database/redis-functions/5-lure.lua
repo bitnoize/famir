@@ -14,6 +14,22 @@ local function create_lure(keys, args)
   local lure_index_key = keys[4]
   local redirector_key = keys[5]
 
+  if not (redis.call('EXISTS', campaign_key) == 1) then
+    return redis.status_reply('NOT_FOUND Campaign not found')
+  end
+
+  if not (redis.call('EXISTS', lure_key) == 0) then
+    return redis.status_reply('CONFLICT Lure allready exists')
+  end
+
+  if not (redis.call('EXISTS', lure_path_key) == 0) then
+    return redis.status_reply('CONFLICT Lure path allready taken')
+  end
+
+  if not (redis.call('EXISTS', redirector_key) == 1) then
+    return redis.status_reply('NOT_FOUND Redirector not found')
+  end
+
   local model = {
     campaign_id = args[1],
     lure_id = args[2],
@@ -22,8 +38,14 @@ local function create_lure(keys, args)
     is_enabled = 0,
     session_count = 0,
     created_at = tonumber(args[5]),
-    updated_at = nil,
+    updated_at = tonumber(args[5]),
   }
+
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
+  end
 
   if not (#model.campaign_id > 0) then
     return redis.error_reply('ERR Wrong model.campaign_id')
@@ -39,28 +61,6 @@ local function create_lure(keys, args)
 
   if not (#model.redirector_id > 0) then
     return redis.error_reply('ERR Wrong model.redirector_id')
-  end
-
-  if not (model.created_at and model.created_at > 0) then
-    return redis.error_reply('ERR Wrong model.created_at')
-  end
-
-  model.updated_at = model.created_at
-
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
-  end
-
-  if not (redis.call('EXISTS', lure_key) == 0) then
-    return redis.status_reply('CONFLICT Lure allready exists')
-  end
-
-  if not (redis.call('EXISTS', lure_path_key) == 0) then
-    return redis.status_reply('CONFLICT Lure path allready taken')
-  end
-
-  if not (redis.call('EXISTS', redirector_key) == 1) then
-    return redis.status_reply('NOT_FOUND Redirector not found')
   end
 
   -- Point of no return
@@ -217,14 +217,6 @@ local function enable_lure(keys, args)
   local campaign_key = keys[1]
   local lure_key = keys[2]
 
-  local params = {
-    updated_at = tonumber(args[1]),
-  }
-
-  if not (params.updated_at and params.updated_at > 0) then
-    return redis.error_reply('ERR Wrong params.updated_at')
-  end
-
   if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
@@ -233,15 +225,20 @@ local function enable_lure(keys, args)
     return redis.status_reply('NOT_FOUND Lure not found')
   end
 
-  local data = {
+  local stash = {
+    updated_at = tonumber(args[1]),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
-  if not data.is_enabled then
-    return redis.error_reply('ERR Malform data.is_enabled')
+  if not stash.updated_at then
+    return redis.error_reply('ERR Wrong stash.updated_at')
   end
 
-  if data.is_enabled ~= 0 then
+  if not stash.is_enabled then
+    return redis.error_reply('ERR Malform stash.is_enabled')
+  end
+
+  if stash.is_enabled ~= 0 then
     return redis.status_reply('OK Lure allready enabled')
   end
 
@@ -251,7 +248,7 @@ local function enable_lure(keys, args)
   redis.call(
     'HSET', lure_key,
     'is_enabled', 1,
-    'updated_at', params.updated_at
+    'updated_at', stash.updated_at
   )
 
   return redis.status_reply('OK Lure enabled')
@@ -274,14 +271,6 @@ local function disable_lure(keys, args)
   local campaign_key = keys[1]
   local lure_key = keys[2]
 
-  local params = {
-    updated_at = tonumber(args[1]),
-  }
-
-  if not (params.updated_at and params.updated_at > 0) then
-    return redis.error_reply('ERR Wrong params.updated_at')
-  end
-
   if not (redis.call('EXISTS', campaign_key) == 1) then
     return redis.status_reply('NOT_FOUND Campaign not found')
   end
@@ -290,15 +279,20 @@ local function disable_lure(keys, args)
     return redis.status_reply('NOT_FOUND Lure not found')
   end
 
-  local data = {
+  local stash = {
+    updated_at = tonumber(args[1]),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
-  if not data.is_enabled then
-    return redis.error_reply('ERR Malform data.is_enabled')
+  if not stash.updated_at then
+    return redis.error_reply('ERR Wrong stash.updated_at')
   end
 
-  if data.is_enabled == 0 then
+  if not stash.is_enabled then
+    return redis.error_reply('ERR Malform stash.is_enabled')
+  end
+
+  if stash.is_enabled == 0 then
     return redis.status_reply('OK Lure allready disabled')
   end
 
@@ -308,7 +302,7 @@ local function disable_lure(keys, args)
   redis.call(
     'HSET', lure_key,
     'is_enabled', 0,
-    'updated_at', params.updated_at
+    'updated_at', stash.updated_at
   )
 
   return redis.status_reply('OK Lure disabled')
@@ -346,7 +340,7 @@ local function delete_lure(keys, args)
     return redis.status_reply('NOT_FOUND Redirector not found')
   end
 
-  local data = {
+  local stash = {
     lure_id = redis.call('HGET', lure_key, 'lure_id'),
     redirector_id = redis.call('HGET', lure_key, 'redirector_id'),
     orig_path_id = redis.call('GET', lure_path_key),
@@ -354,35 +348,35 @@ local function delete_lure(keys, args)
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
-  if not (data.lure_id and #data.lure_id > 0) then
-    return redis.error_reply('ERR Malform data.lure_id')
+  if not (stash.lure_id and #stash.lure_id > 0) then
+    return redis.error_reply('ERR Malform stash.lure_id')
   end
 
-  if not (data.redirector_id and #data.redirector_id > 0) then
-    return redis.error_reply('ERR Malform data.daredirector_id')
+  if not (stash.redirector_id and #stash.redirector_id > 0) then
+    return redis.error_reply('ERR Malform stash.daredirector_id')
   end
 
-  if not (data.orig_path_id and #data.orig_path_id > 0) then
-    return redis.error_reply('ERR Malform data.orig_path_id')
+  if not (stash.orig_path_id and #stash.orig_path_id > 0) then
+    return redis.error_reply('ERR Malform stash.orig_path_id')
   end
 
-  if not (data.lure_id == data.orig_path_id) then
+  if not (stash.lure_id == stash.orig_path_id) then
     return redis.status_reply('FORBIDDEN Lure path not match')
   end
 
-  if not (data.orig_redirector_id and data.orig_redirector_id ~= '') then
-    return redis.error_reply('ERR Malform data.orig_redirector_id')
+  if not (stash.orig_redirector_id and stash.orig_redirector_id ~= '') then
+    return redis.error_reply('ERR Malform stash.orig_redirector_id')
   end
 
-  if not (data.redirector_id == data.orig_redirector_id) then
+  if not (stash.redirector_id == stash.orig_redirector_id) then
     return redis.status_reply('FORBIDDEN Lure redirector not match')
   end
 
-  if not data.is_enabled then
-    return redis.error_reply('ERR Malform data.is_enabled')
+  if not stash.is_enabled then
+    return redis.error_reply('ERR Malform stash.is_enabled')
   end
 
-  if data.is_enabled ~= 0 then
+  if stash.is_enabled ~= 0 then
     return redis.status_reply('FORBIDDEN Lure not disabled')
   end
 
@@ -392,7 +386,7 @@ local function delete_lure(keys, args)
 
   redis.call('DEL', lure_path_key)
 
-  redis.call('ZREM', lure_index_key, data.lure_id)
+  redis.call('ZREM', lure_index_key, stash.lure_id)
 
   redis.call('HINCRBY', redirector_key, 'lure_count', -1)
 

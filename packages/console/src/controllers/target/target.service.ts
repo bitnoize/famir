@@ -1,9 +1,9 @@
 import { DIContainer } from '@famir/common'
 import {
+  ActionTargetLabelData,
   CreateTargetData,
   DeleteTargetData,
-  DisabledTargetModel,
-  EnabledTargetModel,
+  FullTargetModel,
   ListTargetsData,
   Logger,
   LOGGER,
@@ -37,7 +37,7 @@ export class TargetService extends BaseService {
     this.logger.debug(`TargetService initialized`)
   }
 
-  async createTarget(data: CreateTargetData): Promise<DisabledTargetModel> {
+  async createTarget(data: CreateTargetData): Promise<TargetModel> {
     try {
       return await this.targetRepository.createTarget(data)
     } catch (error) {
@@ -45,7 +45,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async readTarget(data: ReadTargetData): Promise<TargetModel> {
+  async readTarget(data: ReadTargetData): Promise<FullTargetModel> {
     const targetModel = await this.targetRepository.readTarget(data)
 
     if (!targetModel) {
@@ -65,7 +65,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async enableTarget(data: SwitchTargetData): Promise<EnabledTargetModel> {
+  async enableTarget(data: SwitchTargetData): Promise<TargetModel> {
     try {
       return await this.targetRepository.enableTarget(data)
     } catch (error) {
@@ -73,7 +73,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async disableTarget(data: SwitchTargetData): Promise<DisabledTargetModel> {
+  async disableTarget(data: SwitchTargetData): Promise<TargetModel> {
     try {
       return await this.targetRepository.disableTarget(data)
     } catch (error) {
@@ -81,7 +81,23 @@ export class TargetService extends BaseService {
     }
   }
 
-  async deleteTarget(data: DeleteTargetData): Promise<DisabledTargetModel> {
+  async appendTargetLabel(data: ActionTargetLabelData): Promise<TargetModel> {
+    try {
+      return await this.targetRepository.appendTargetLabel(data)
+    } catch (error) {
+      this.filterDatabaseException(error, ['NOT_FOUND'])
+    }
+  }
+
+  async removeTargetLabel(data: ActionTargetLabelData): Promise<TargetModel> {
+    try {
+      return await this.targetRepository.removeTargetLabel(data)
+    } catch (error) {
+      this.filterDatabaseException(error, ['NOT_FOUND'])
+    }
+  }
+
+  async deleteTarget(data: DeleteTargetData): Promise<TargetModel> {
     try {
       return await this.targetRepository.deleteTarget(data)
     } catch (error) {

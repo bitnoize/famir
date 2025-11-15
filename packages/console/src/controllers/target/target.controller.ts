@@ -1,5 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
+  actionTargetLabelDataSchema,
   createTargetDataSchema,
   deleteTargetDataSchema,
   listTargetsDataSchema,
@@ -8,6 +9,7 @@ import {
   updateTargetDataSchema
 } from '@famir/database'
 import {
+  ActionTargetLabelData,
   CreateTargetData,
   DeleteTargetData,
   ListTargetsData,
@@ -57,6 +59,7 @@ export class TargetController extends BaseController {
       'console-read-target-data': readTargetDataSchema,
       'console-update-target-data': updateTargetDataSchema,
       'console-switch-target-data': switchTargetDataSchema,
+      'console-action-target-label-data': actionTargetLabelDataSchema,
       'console-delete-target-data': deleteTargetDataSchema,
       'console-list-targets-data': listTargetsDataSchema
     })
@@ -66,10 +69,14 @@ export class TargetController extends BaseController {
     this.router.addApiCall('updateTarget', this.updateTargetApiCall)
     this.router.addApiCall('enableTarget', this.enableTargetApiCall)
     this.router.addApiCall('disableTarget', this.disableTargetApiCall)
+    this.router.addApiCall('appendTargetLabel', this.appendTargetLabelApiCall)
+    this.router.addApiCall('removeTargetLabel', this.removeTargetLabelApiCall)
     this.router.addApiCall('deleteTarget', this.deleteTargetApiCall)
     this.router.addApiCall('listTargets', this.listTargetsApiCall)
 
-    this.logger.debug(`TargetController initialized`)
+    this.logger.debug(`Controller initialized`, {
+      controllerName: this.controllerName
+    })
   }
 
   private createTargetApiCall: ReplServerApiCall = async (data) => {
@@ -119,6 +126,26 @@ export class TargetController extends BaseController {
       return await this.targetService.disableTarget(data)
     } catch (error) {
       this.handleException(error, 'disableTarget', data)
+    }
+  }
+
+  private appendTargetLabelApiCall: ReplServerApiCall = async (data) => {
+    try {
+      this.validateActionTargetLabelData(data)
+
+      return await this.targetService.appendTargetLabel(data)
+    } catch (error) {
+      this.handleException(error, 'appendTargetLabel', data)
+    }
+  }
+
+  private removeTargetLabelApiCall: ReplServerApiCall = async (data) => {
+    try {
+      this.validateActionTargetLabelData(data)
+
+      return await this.targetService.removeTargetLabel(data)
+    } catch (error) {
+      this.handleException(error, 'removeTargetLabel', data)
     }
   }
 
@@ -180,6 +207,17 @@ export class TargetController extends BaseController {
       this.validator.assertSchema<SwitchTargetData>('console-switch-target-data', value)
     } catch (error) {
       throw new ReplServerError(`SwitchTargetData validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  private validateActionTargetLabelData(value: unknown): asserts value is ActionTargetLabelData {
+    try {
+      this.validator.assertSchema<ActionTargetLabelData>('console-action-target-label-data', value)
+    } catch (error) {
+      throw new ReplServerError(`ActionTargetLabelData validate failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })

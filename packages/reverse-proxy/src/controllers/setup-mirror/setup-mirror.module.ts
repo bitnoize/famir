@@ -1,9 +1,9 @@
 import { DIContainer } from '@famir/common'
 import { SetupMirrorController } from './setup-mirror.controller.js'
-import { GetCampaignTargetUseCase } from './use-cases/get-campaign-target/index.js'
+import { GetTargetUseCase } from './use-cases/index.js'
 
 export const composeSetupMirrorModule = (container: DIContainer) => {
-  GetCampaignTargetUseCase.inject(container)
+  GetTargetUseCase.inject(container)
 
   SetupMirrorController.inject(container)
 
