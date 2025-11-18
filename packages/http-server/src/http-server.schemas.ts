@@ -12,13 +12,6 @@ export const configHttpServerPortSchema: JSONSchemaType<number> = {
   maximum: 65535
 } as const
 
-export const configHttpServerBodyLimitSchema: JSONSchemaType<number> = {
-  type: 'number',
-  minimum: 1,
-  maximum: 1024 * 1024 * 1024,
-  default: 10 * 1024 * 1024
-} as const
-
 const DEFAULT_ERROR_PAGE = `<!DOCTYPE html>
 <html lang="en">
   <head>

@@ -13,6 +13,7 @@ import {
   SESSION_REPOSITORY,
   SessionModel,
   SessionRepository,
+  testSessionModel,
   UpgradeSessionData,
   Validator,
   VALIDATOR
@@ -78,7 +79,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       const sessionModel = this.buildSessionModel(rawValue)
 
-      this.assertSessionModel(sessionModel)
+      this.existsSessionModel(sessionModel)
 
       this.logger.info(message, { sessionModel })
 
@@ -118,7 +119,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       const sessionModel = this.buildSessionModel(rawValue)
 
-      this.assertSessionModel(sessionModel)
+      this.existsSessionModel(sessionModel)
 
       this.logger.info(message, { sessionModel })
 
@@ -150,7 +151,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       const sessionModel = this.buildSessionModel(rawValue)
 
-      this.assertSessionModel(sessionModel)
+      this.existsSessionModel(sessionModel)
 
       this.logger.info(message, { sessionModel })
 
@@ -196,13 +197,9 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  protected guardSessionModel = (value: SessionModel | null): value is SessionModel => {
-    return value != null
-  }
-
-  protected assertSessionModel(value: SessionModel | null): asserts value is SessionModel {
-    if (!this.guardSessionModel(value)) {
-      throw new DatabaseError(`SessionModel unexpected lost`, {
+  protected existsSessionModel<T extends SessionModel>(value: T | null): asserts value is T {
+    if (!testSessionModel(value)) {
+      throw new DatabaseError(`SessionModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

@@ -7,10 +7,10 @@ export interface CreateTargetData {
   donorSecure: boolean
   donorSub: string
   donorDomain: string
-  donorPort: string
+  donorPort: number
   mirrorSecure: boolean
   mirrorSub: string
-  mirrorPort: string
+  mirrorPort: number
   connectTimeout: number
   regularTimeout: number
   streamingTimeout: number
@@ -67,6 +67,8 @@ export interface ListTargetsData {
   campaignId: string
 }
 
+export const TARGET_REPOSITORY = Symbol('TargetRepository')
+
 export interface TargetRepository {
   createTarget(data: CreateTargetData): Promise<TargetModel>
   readTarget(data: ReadTargetData): Promise<FullTargetModel | null>
@@ -78,5 +80,3 @@ export interface TargetRepository {
   deleteTarget(data: DeleteTargetData): Promise<TargetModel>
   listTargets(data: ListTargetsData): Promise<TargetModel[] | null>
 }
-
-export const TARGET_REPOSITORY = Symbol('TargetRepository')

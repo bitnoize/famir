@@ -15,6 +15,7 @@ import {
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository,
+  testRedirectorModel,
   UpdateRedirectorData,
   Validator,
   VALIDATOR
@@ -82,7 +83,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       const redirectorModel = this.buildRedirectorModel(rawValue)
 
-      this.assertRedirectorModel(redirectorModel)
+      this.existsRedirectorModel(redirectorModel)
 
       this.logger.info(message, { redirectorModel })
 
@@ -131,7 +132,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       const redirectorModel = this.buildRedirectorModel(rawValue)
 
-      this.assertRedirectorModel(redirectorModel)
+      this.existsRedirectorModel(redirectorModel)
 
       this.logger.info(message, { redirectorModel })
 
@@ -165,7 +166,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       const redirectorModel = this.buildRedirectorModel(rawValue)
 
-      this.assertRedirectorModel(redirectorModel)
+      this.existsRedirectorModel(redirectorModel)
 
       this.logger.info(message, { redirectorModel })
 
@@ -198,7 +199,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         )
       )
 
-      return this.buildRedirectorCollection(rawValues).filter(this.guardRedirectorModel)
+      return this.buildRedirectorCollection(rawValues).filter(testRedirectorModel)
     } catch (error) {
       this.handleException(error, 'listRedirectors', data)
     }
@@ -265,13 +266,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  protected guardRedirectorModel = (value: RedirectorModel | null): value is RedirectorModel => {
-    return value != null
-  }
-
-  protected assertRedirectorModel(value: RedirectorModel | null): asserts value is RedirectorModel {
-    if (!this.guardRedirectorModel(value)) {
-      throw new DatabaseError(`RedirectorModel unexpected lost`, {
+  protected existsRedirectorModel<T extends RedirectorModel>(value: T | null): asserts value is T {
+    if (!testRedirectorModel(value)) {
+      throw new DatabaseError(`RedirectorModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

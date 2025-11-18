@@ -10,9 +10,12 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import { SetupMirrorHeaders } from './setup-mirror.js'
-import { setupMirrorHeadersSchema } from './setup-mirror.schemas.js'
-import { type GetTargetUseCase, GET_TARGET_USE_CASE } from './use-cases/index.js'
+import { setupMirrorDataSchema } from './setup-mirror.schemas.js'
+import {
+  type SetupMirrorUseCase,
+  SETUP_MIRROR_USE_CASE,
+  SetupMirrorData
+} from './use-cases/index.js'
 
 export const SETUP_MIRROR_CONTROLLER = Symbol('SetupMirrorController')
 
@@ -25,7 +28,7 @@ export class SetupMirrorController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<GetTargetUseCase>(GET_TARGET_USE_CASE)
+          c.resolve<SetupMirrorUseCase>(SETUP_MIRROR_USE_CASE)
         )
     )
   }
@@ -38,12 +41,12 @@ export class SetupMirrorController extends BaseController {
     validator: Validator,
     logger: Logger,
     router: HttpServerRouter,
-    protected readonly getTargetUseCase: GetTargetUseCase
+    protected readonly setupMirrorUseCase: SetupMirrorUseCase
   ) {
     super(validator, logger, router, 'setup-mirror')
 
     this.validator.addSchemas({
-      'setup-mirror-headers': setupMirrorHeadersSchema
+      'setup-mirror-data': setupMirrorDataSchema
     })
 
     this.router.addMiddleware('setup-mirror', this.defaultMiddleware)
@@ -57,21 +60,20 @@ export class SetupMirrorController extends BaseController {
     try {
       this.absentStateCampaign(ctx.state)
       this.absentStateTarget(ctx.state)
+      this.absentStateTargets(ctx.state)
 
-      const setupHeaders = {
-        campaignId: ctx.originRequestHeaders['x-famir-campaign-id'],
-        targetId: ctx.originRequestHeaders['x-famir-target-id']
+      const data = {
+        campaignId: ctx.requestHeaders['x-famir-campaign-id'],
+        targetId: ctx.requestHeaders['x-famir-target-id']
       }
 
-      this.validateSetupMirrorHeaders(setupHeaders)
+      this.validateSetupMirrorData(data)
 
-      const { campaign, target } = await this.getTargetUseCase.execute({
-        campaignId: setupHeaders.campaignId,
-        targetId: setupHeaders.targetId
-      })
+      const { campaign, target, targets } = await this.setupMirrorUseCase.execute(data)
 
       ctx.state.campaign = campaign
       ctx.state.target = target
+      ctx.state.targets = targets
 
       await next()
     } catch (error) {
@@ -79,11 +81,11 @@ export class SetupMirrorController extends BaseController {
     }
   }
 
-  private validateSetupMirrorHeaders(value: unknown): asserts value is SetupMirrorHeaders {
+  private validateSetupMirrorData(value: unknown): asserts value is SetupMirrorData {
     try {
-      this.validator.assertSchema<SetupMirrorHeaders>('setup-mirror-headers', value)
+      this.validator.assertSchema<SetupMirrorData>('setup-mirror-data', value)
     } catch (error) {
-      throw new HttpServerError(`SetupMirrorHeaders validate failed`, {
+      throw new HttpServerError(`SetupMirrorData validate failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })

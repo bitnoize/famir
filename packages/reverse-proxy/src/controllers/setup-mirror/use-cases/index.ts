@@ -1,1 +1,1 @@
-export * from './get-target/index.js'
+export * from './setup-mirror/index.js'

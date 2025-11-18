@@ -8,3 +8,7 @@ export interface SessionModel {
   readonly createdAt: Date
   readonly lastAuthAt: Date
 }
+
+export const testSessionModel = <T extends SessionModel>(value: T | null): value is T => {
+  return value != null
+}

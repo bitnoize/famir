@@ -17,6 +17,7 @@ import {
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository,
+  testTargetModel,
   UpdateTargetData,
   Validator,
   VALIDATOR
@@ -99,7 +100,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertTargetModel(targetModel)
+      this.existsTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -155,7 +156,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertTargetModel(targetModel)
+      this.existsTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -181,7 +182,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertTargetModel(targetModel)
+      this.existsTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -207,7 +208,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertTargetModel(targetModel)
+      this.existsTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -238,7 +239,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertTargetModel(targetModel)
+      this.existsTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -269,7 +270,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertTargetModel(targetModel)
+      this.existsTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -295,7 +296,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.assertTargetModel(targetModel)
+      this.existsTargetModel(targetModel)
 
       this.logger.info(message, { targetModel })
 
@@ -324,7 +325,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         )
       )
 
-      return this.buildTargetCollection(rawValues).filter(this.guardTargetModel)
+      return this.buildTargetCollection(rawValues).filter(testTargetModel)
     } catch (error) {
       this.handleException(error, 'listTargets', data)
     }
@@ -421,13 +422,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  protected guardTargetModel = (value: TargetModel | null): value is TargetModel => {
-    return value != null
-  }
-
-  protected assertTargetModel(value: TargetModel | null): asserts value is TargetModel {
-    if (!this.guardTargetModel(value)) {
-      throw new Error(`TargetModel unexpected lost`)
+  protected existsTargetModel<T extends TargetModel>(value: T | null): asserts value is T {
+    if (!testTargetModel(value)) {
+      throw new DatabaseError(`TargetModel not exists`, {
+        code: 'INTERNAL_ERROR'
+      })
     }
   }
 }

@@ -3,30 +3,21 @@ import {
   HTTP_SERVER_ROUTER,
   HttpServerMiddleware,
   HttpServerRouter,
-  HttpServerRouterSteps,
-  Logger,
-  LOGGER
+  HttpServerRouterSteps
 } from '@famir/domain'
 
 export class ImplHttpServerRouter implements HttpServerRouter {
   static inject(container: DIContainer, stepNames: string[]) {
     container.registerSingleton<HttpServerRouter>(
       HTTP_SERVER_ROUTER,
-      (c) => new ImplHttpServerRouter(c.resolve<Logger>(LOGGER), stepNames)
+      (c) => new ImplHttpServerRouter(stepNames)
     )
   }
 
   protected readonly steps: HttpServerRouterSteps
 
-  constructor(
-    protected readonly logger: Logger,
-    protected readonly stepNames: string[]
-  ) {
+  constructor(protected readonly stepNames: string[]) {
     this.steps = Object.fromEntries(stepNames.map((stepName) => [stepName, []]))
-
-    this.logger.debug(`HttpServerRouter initialized`, {
-      stepNames
-    })
   }
 
   addMiddleware(stepName: string, middleware: HttpServerMiddleware) {

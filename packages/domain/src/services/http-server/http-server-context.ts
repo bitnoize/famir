@@ -1,62 +1,51 @@
 import {
   HttpBody,
-  HttpHeader,
   HttpHeaders,
-  HttpRequestCookie,
+  HttpLogs,
   HttpRequestCookies,
-  HttpResponseCookie,
-  HttpResponseCookies
-} from '../../domain.js'
+  HttpResponseCookies,
+  HttpStrictHeaders,
+  HttpStrictRequestCookies,
+  HttpStrictResponseCookies
+} from '../../http-proto.js'
 
-export type HttpServerContextState = Record<string, unknown>
-export type HttpServerContextErrors = unknown[]
+export type HttpServerState = Record<string, unknown>
+
+export interface HttpServerUrl {
+  path: string
+  query: string
+  hash: string
+}
+
+export type HttpServerUrlQuery = Record<string, unknown>
 
 export interface HttpServerContext {
-  readonly state: HttpServerContextState
+  readonly state: HttpServerState
+  readonly logs: HttpLogs
   readonly method: string
   isMethod(method: string): boolean
   isMethods(methods: string[]): boolean
-  readonly originUrl: string
-  urlPath: string
-  urlQuery: string
-  urlHash: string
-  parseUrl(): void
+  readonly url: HttpServerUrl
+  isUrlPath(path: string): boolean
+  parseUrlQuery(): HttpServerUrlQuery
   isStreaming: boolean
-  readonly originRequestHeaders: Record<string, HttpHeader | undefined>
   readonly requestHeaders: HttpHeaders
-  strictRequestHeaders(): Record<string, HttpHeader>
-  setResponseHeaders(headers: Record<string, HttpHeader>): void
+  strictRequestHeaders(): Readonly<HttpStrictHeaders>
   readonly requestCookies: HttpRequestCookies
-  parseResponseCookies(): void
-  strictRequestCookies(): Record<string, HttpRequestCookie>
-  updateRequestCookieHeader(): void
+  strictRequestCookies(): Readonly<HttpStrictRequestCookies>
   requestBody: HttpBody
   loadRequestBody(limit: number): Promise<void>
-  readonly status: number
   readonly responseHeaders: HttpHeaders
-  strictResponseHeaders(): Record<string, HttpHeader>
+  strictResponseHeaders(): Readonly<HttpStrictHeaders>
   readonly responseHeadersSent: boolean
   readonly responseCookies: HttpResponseCookies
-  parseResponseCookies(): void
-  strictResponseCookies(): Record<string, HttpResponseCookie>
-  updateResponseSetCookieHeader(): void
+  strictResponseCookies(): Readonly<HttpStrictResponseCookies>
   responseBody: HttpBody
   sendResponse(status: number): Promise<void>
-  readonly isComplete: boolean
-}
-
-export interface HttpServerContextDump {
-  readonly method: string
-  readonly originUrl: string
-  readonly urlPath: string
-  readonly urlQuery: string
-  readonly urlHash: string
-  readonly requestHeaders: HttpHeaders
-  readonly requestCookies: HttpRequestCookies
-  readonly requestBody: HttpBody
+  readonly clientIp: string
   readonly status: number
-  readonly responseHeaders: HttpHeaders
-  readonly responseCookies: HttpResponseCookies
-  readonly responseBody: HttpBody
-  readonly errors: unknown[]
+  readonly score: number
+  upScore(score: number): void
+  startTime: number
+  finishTime: number
 }

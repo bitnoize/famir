@@ -13,6 +13,7 @@
   "dependencies": {
     "@famir/common": "*",
     "@famir/domain": "*",
+    "qs": "^6.14.0",
     "tough-cookie": "^6.0.0",
     "ws": "^8.18.3"
   },

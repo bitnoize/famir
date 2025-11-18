@@ -46,49 +46,56 @@ export class AuthorizeController extends BaseController {
   ) {
     super(validator, logger, router, 'authorize')
 
-    this.router.addMiddleware('authorize', this.authLandingMiddleware)
-    this.router.addMiddleware('authorize', this.authTransparentMiddleware)
+    this.router.addMiddleware('authorize', this.landingAuthMiddleware)
 
     this.logger.debug(`Controller initialized`, {
       controllerName: this.controllerName
     })
   }
 
-  private authLandingMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  private landingAuthMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
       this.existsStateCampaign(ctx.state)
       this.existsStateTarget(ctx.state)
 
       const { campaign, target } = ctx.state
 
-      if (!target.isLanding) {
+      const isFound = target.isLanding && ctx.isUrlPath(campaign.landingAuthPath)
+
+      if (!isFound) {
         await next()
 
         return
       }
 
-      await next()
-    } catch (error) {
-      this.handleException(error, 'authLanding')
-    }
-  }
+      /*
+      const authQuery = ctx.parseUrlQuery()
 
-  private authTransparentMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      this.existsStateCampaign(ctx.state)
-      this.existsStateTarget(ctx.state)
+      const value = authQuery['campaign.landingAuthParam']
 
-      const { campaign, target } = ctx.state
+      this.parseAuthQuery(authQuery[campaign.landingAuthParam])
 
-      if (target.isLanding) {
-        await next()
+      if (!authQuery) {
+        this.renderNotFound()
 
         return
       }
 
-      await next()
+      const { session, proxy } = this.landingAuthUseCase.execute({
+        campaignId: campaign.campaignId,
+        lureId: authQuery.lureId,
+        sessionId: authQuery.sessionId,
+        sessionSecret: authQuery.sessionSecret
+      })
+
+      if (!session) {
+        this.renderFailureRedirect()
+      }
+
+      ctx.responseCookies[campaign.sessionCookieName]
+      */
     } catch (error) {
-      this.handleException(error, 'authTransparent')
+      this.handleException(error, 'landingAuth')
     }
   }
 }

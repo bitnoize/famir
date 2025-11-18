@@ -26,6 +26,8 @@ export interface ListRedirectorsData {
   campaignId: string
 }
 
+export const REDIRECTOR_REPOSITORY = Symbol('RedirectorRepository')
+
 export interface RedirectorRepository {
   createRedirector(data: CreateRedirectorData): Promise<RedirectorModel>
   readRedirector(data: ReadRedirectorData): Promise<FullRedirectorModel | null>
@@ -33,5 +35,3 @@ export interface RedirectorRepository {
   deleteRedirector(data: DeleteRedirectorData): Promise<RedirectorModel>
   listRedirectors(data: ListRedirectorsData): Promise<RedirectorModel[] | null>
 }
-
-export const REDIRECTOR_REPOSITORY = Symbol('RedirectorRepository')

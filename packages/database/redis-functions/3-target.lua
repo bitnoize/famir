@@ -29,10 +29,10 @@ local function create_target(keys, args)
     donor_secure = tonumber(args[4]),
     donor_sub = args[5],
     donor_domain = args[6],
-    donor_port = args[7],
+    donor_port = tonumber(args[7]),
     mirror_secure = tonumber(args[8]),
     mirror_sub = args[9],
-    mirror_port = args[10],
+    mirror_port = tonumber(args[10]),
     connect_timeout = tonumber(args[11]),
     regular_timeout = tonumber(args[12]),
     streaming_timeout = tonumber(args[13]),
@@ -73,7 +73,7 @@ local function create_target(keys, args)
     return redis.error_reply('ERR Wrong model.donor_domain')
   end
 
-  if not (#model.donor_port > 0) then
+  if not (model.donor_port >= 0) then
     return redis.error_reply('ERR Wrong model.donor_port')
   end
 
@@ -81,7 +81,7 @@ local function create_target(keys, args)
     return redis.error_reply('ERR Wrong model.mirror_sub')
   end
 
-  if not (#model.mirror_port > 0) then
+  if not (model.mirror_port >= 0) then
     return redis.error_reply('ERR Wrong model.mirror_port')
   end
 
@@ -89,12 +89,12 @@ local function create_target(keys, args)
   local donor = model.campaign_id
     .. '\t' .. model.donor_sub
     .. '\t' .. model.donor_domain
-    .. '\t' .. model.donor_port
+    .. '\t' .. tostring(model.donor_port)
 
   -- stylua: ignore
   local mirror = model.campaign_id
     .. '\t' .. model.mirror_sub
-    .. '\t' .. model.mirror_port
+    .. '\t' .. tostring(model.mirror_port)
 
   if not (redis.call('SISMEMBER', target_unique_donor_key, donor) == 0) then
     return redis.status_reply('CONFLICT Target donor allready taken')
@@ -178,7 +178,7 @@ local function read_target(keys, args)
     donor_secure = tonumber(values[4]),
     donor_sub = values[5],
     donor_domain = values[6],
-    donor_port = values[7],
+    donor_port = tonumber(values[7]),
     mirror_secure = tonumber(values[8]),
     mirror_sub = values[9],
     mirror_port = values[10],
@@ -266,10 +266,10 @@ local function read_full_target(keys, args)
     donor_secure = tonumber(values[4]),
     donor_sub = values[5],
     donor_domain = values[6],
-    donor_port = values[7],
+    donor_port = tonumber(values[7]),
     mirror_secure = tonumber(values[8]),
     mirror_sub = values[9],
-    mirror_port = values[10],
+    mirror_port = tonumber(values[10]),
     labels = redis.call('SMEMBERS', target_labels_key),
     connect_timeout = tonumber(values[11]),
     regular_timeout = tonumber(values[12]),
@@ -701,9 +701,9 @@ local function delete_target(keys, args)
     target_id = redis.call('HGET', target_key, 'target_id'),
     donor_sub = redis.call('HGET', target_key, 'donor_sub'),
     donor_domain = redis.call('HGET', target_key, 'donor_domain'),
-    donor_port = redis.call('HGET', target_key, 'donor_port'),
+    donor_port = tonumber(redis.call('HGET', target_key, 'donor_port')),
     mirror_sub = redis.call('HGET', target_key, 'mirror_sub'),
-    mirror_port = redis.call('HGET', target_key, 'mirror_port'),
+    mirror_port = tonumber(redis.call('HGET', target_key, 'mirror_port')),
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
@@ -723,7 +723,7 @@ local function delete_target(keys, args)
     return redis.error_reply('ERR Malform stash.donor_domain')
   end
 
-  if not (stash.donor_port and #stash.donor_port > 0) then
+  if not (stash.donor_port and stash.donor_port >= 0) then
     return redis.error_reply('ERR Malform stash.donor_port')
   end
 
@@ -731,7 +731,7 @@ local function delete_target(keys, args)
     return redis.error_reply('ERR Malform stash.mirror_sub')
   end
 
-  if not (stash.mirror_port and #stash.mirror_port > 0) then
+  if not (stash.mirror_port and stash.mirror_port >= 0) then
     return redis.error_reply('ERR Malform stash.mirror_port')
   end
 
@@ -747,12 +747,12 @@ local function delete_target(keys, args)
   local donor = stash.campaign_id
     .. '\t' .. stash.donor_sub
     .. '\t' .. stash.donor_domain
-    .. '\t' .. stash.donor_port
+    .. '\t' .. tostring(stash.donor_port)
 
   -- stylua: ignore
   local mirror = stash.campaign_id
     .. '\t' .. stash.mirror_sub
-    .. '\t' .. stash.mirror_port
+    .. '\t' .. tostring(stash.mirror_port)
 
   -- Point of no return
 

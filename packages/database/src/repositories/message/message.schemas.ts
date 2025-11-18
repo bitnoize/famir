@@ -2,6 +2,8 @@ import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/com
 import {
   HttpHeader,
   HttpHeaders,
+  HttpLog,
+  HttpLogs,
   HttpRequestCookie,
   HttpRequestCookies,
   HttpResponseCookie,
@@ -19,14 +21,12 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     'target_id',
     'session_id',
     'method',
-    'origin_url',
-    'url_path',
-    'url_query',
-    'url_hash',
+    'url',
     'is_streaming',
     'status',
     'score',
-    'total_time',
+    'start_time',
+    'finish_time',
     'created_at'
   ],
   properties: {
@@ -48,16 +48,7 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     method: {
       type: 'string'
     },
-    origin_url: {
-      type: 'string'
-    },
-    url_path: {
-      type: 'string'
-    },
-    url_query: {
-      type: 'string'
-    },
-    url_hash: {
+    url: {
       type: 'string'
     },
     is_streaming: {
@@ -69,7 +60,10 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     score: {
       type: 'integer'
     },
-    total_time: {
+    start_time: {
+      type: 'integer'
+    },
+    finish_time: {
       type: 'integer'
     },
     created_at: {
@@ -88,11 +82,9 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     'target_id',
     'session_id',
     'method',
-    'origin_url',
-    'url_path',
-    'url_query',
-    'url_hash',
+    'url',
     'is_streaming',
+    'logs',
     'request_headers',
     'request_cookies',
     'request_body',
@@ -102,7 +94,8 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     'client_ip',
     'status',
     'score',
-    'total_time',
+    'start_time',
+    'finish_time',
     'created_at'
   ],
   properties: {
@@ -124,16 +117,7 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     method: {
       type: 'string'
     },
-    origin_url: {
-      type: 'string'
-    },
-    url_path: {
-      type: 'string'
-    },
-    url_query: {
-      type: 'string'
-    },
-    url_hash: {
+    url: {
       type: 'string'
     },
     is_streaming: {
@@ -166,14 +150,40 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     score: {
       type: 'integer'
     },
-    total_time: {
+    start_time: {
       type: 'integer'
+    },
+    finish_time: {
+      type: 'integer'
+    },
+    logs: {
+      type: 'string'
     },
     created_at: {
       type: 'integer'
     }
   },
   additionalProperties: false
+} as const
+
+export const messageLogSchema: JSONSchemaType<HttpLog> = {
+  type: 'array',
+  items: [
+    {
+      type: 'string'
+    },
+    {
+      type: 'object'
+    }
+  ],
+  minItems: 2,
+  maxItems: 2,
+  additionalItems: false
+} as const
+
+export const messageLogsSchema: JSONSchemaType<HttpLogs> = {
+  type: 'array',
+  items: messageLogSchema
 } as const
 
 export const messageHeaderSchema: JSONSchemaType<HttpHeader> = {
@@ -247,7 +257,6 @@ export const messageResponseCookieSchema: JSONSchemaType<HttpResponseCookie> = {
     },
     sameSite: {
       type: 'string',
-      enum: ['strict', 'lax', 'none'],
       nullable: true
     }
   },

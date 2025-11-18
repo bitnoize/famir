@@ -49,13 +49,13 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   ImplHttpServerRouter.inject(container, [
     'setup-mirror',
+    'build-request',
     'well-known-urls',
     'authorize',
-    'build-request',
     'parse-request',
-    'interact-donor',
+    'build-response',
     'parse-response',
-    'send-response'
+    'complete'
   ])
 
   NodeHttpServer.inject(container)

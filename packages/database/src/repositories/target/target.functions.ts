@@ -15,10 +15,10 @@ export interface RawTarget {
   donor_secure: number
   donor_sub: string
   donor_domain: string
-  donor_port: string
+  donor_port: number
   mirror_secure: number
   mirror_sub: string
-  mirror_port: string
+  mirror_port: number
   is_enabled: number
   message_count: number
   created_at: number
@@ -55,10 +55,10 @@ export const targetFunctions = {
         donorSecure: boolean,
         donorSub: string,
         donorDomain: string,
-        donorPort: string,
+        donorPort: number,
         mirrorSecure: boolean,
         mirrorSub: string,
-        mirrorPort: string,
+        mirrorPort: number,
         connectTimeout: number,
         regularTimeout: number,
         streamingTimeout: number,
@@ -84,10 +84,10 @@ export const targetFunctions = {
         parser.push(donorSecure ? '1' : '0')
         parser.push(donorSub)
         parser.push(donorDomain)
-        parser.push(donorPort)
+        parser.push(donorPort.toString())
         parser.push(mirrorSecure ? '1' : '0')
         parser.push(mirrorSub)
-        parser.push(mirrorPort)
+        parser.push(mirrorPort.toString())
         parser.push(connectTimeout.toString())
         parser.push(regularTimeout.toString())
         parser.push(streamingTimeout.toString())

@@ -1,4 +1,10 @@
-import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '@famir/domain'
+import {
+  HttpBody,
+  HttpHeaders,
+  HttpLogs,
+  HttpRequestCookies,
+  HttpResponseCookies
+} from '@famir/domain'
 import { CommandParser } from '@redis/client'
 import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../database.keys.js'
 
@@ -9,14 +15,12 @@ export interface RawMessage {
   target_id: string
   session_id: string
   method: string
-  origin_url: string
-  url_path: string
-  url_query: string
-  url_hash: string
+  url: string
   is_streaming: number
   status: number
   score: number
-  total_time: number
+  start_time: number
+  finish_time: number
   created_at: number
 }
 
@@ -28,6 +32,7 @@ export interface RawFullMessage extends RawMessage {
   response_cookies: string
   response_body: string
   client_ip: string
+  logs: string
 }
 
 export const messageFunctions = {
@@ -44,10 +49,7 @@ export const messageFunctions = {
         targetId: string,
         sessionId: string,
         method: string,
-        originUrl: string,
-        urlPath: string,
-        urlQuery: string,
-        urlHash: string,
+        url: string,
         isStreaming: boolean,
         requestHeaders: HttpHeaders,
         requestCookies: HttpRequestCookies,
@@ -58,7 +60,9 @@ export const messageFunctions = {
         clientIp: string,
         status: number,
         score: number,
-        totalTime: number
+        startTime: number,
+        finishTime: number,
+        logs: HttpLogs
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))
@@ -72,10 +76,7 @@ export const messageFunctions = {
         parser.push(targetId)
         parser.push(sessionId)
         parser.push(method)
-        parser.push(originUrl)
-        parser.push(urlPath)
-        parser.push(urlQuery)
-        parser.push(urlHash)
+        parser.push(url)
         parser.push(isStreaming ? '1' : '0')
         parser.push(JSON.stringify(requestHeaders))
         parser.push(JSON.stringify(requestCookies))
@@ -86,7 +87,9 @@ export const messageFunctions = {
         parser.push(clientIp)
         parser.push(status.toString())
         parser.push(score.toString())
-        parser.push(totalTime.toString())
+        parser.push(startTime.toString())
+        parser.push(finishTime.toString())
+        parser.push(JSON.stringify(logs))
         parser.push(Date.now().toString())
       },
 

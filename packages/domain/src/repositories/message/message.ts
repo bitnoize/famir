@@ -1,17 +1,19 @@
-import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '../../domain.js'
+import {
+  HttpBody,
+  HttpHeaders,
+  HttpLogs,
+  HttpRequestCookies,
+  HttpResponseCookies
+} from '../../http-proto.js'
 import { FullMessageModel, MessageModel } from '../../models/index.js'
 
 export interface CreateMessageData {
   campaignId: string
-  messageId: string
   proxyId: string
   targetId: string
   sessionId: string
   method: string
-  originUrl: string
-  urlPath: string
-  urlQuery: string
-  urlHash: string
+  url: string
   isStreaming: boolean
   requestHeaders: HttpHeaders
   requestCookies: HttpRequestCookies
@@ -22,7 +24,9 @@ export interface CreateMessageData {
   clientIp: string
   status: number
   score: number
-  totalTime: number
+  startTime: number
+  finishTime: number
+  logs: HttpLogs
 }
 
 export interface ReadMessageData {
@@ -30,9 +34,9 @@ export interface ReadMessageData {
   messageId: string
 }
 
+export const MESSAGE_REPOSITORY = Symbol('MessageRepository')
+
 export interface MessageRepository {
   createMessage(data: CreateMessageData): Promise<MessageModel>
   readMessage(data: ReadMessageData): Promise<FullMessageModel | null>
 }
-
-export const MESSAGE_REPOSITORY = Symbol('MessageRepository')

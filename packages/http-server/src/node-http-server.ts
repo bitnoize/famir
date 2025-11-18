@@ -123,7 +123,7 @@ export class NodeHttpServer implements HttpServer {
 
       await middleware(ctx, async () => {})
 
-      if (!ctx.isComplete) {
+      if (!ctx.status) {
         throw new HttpServerError(`Incomplete request`, {
           code: 'INTERNAL_ERROR'
         })
@@ -207,7 +207,6 @@ export class NodeHttpServer implements HttpServer {
     return {
       address: config.HTTP_SERVER_ADDRESS,
       port: config.HTTP_SERVER_PORT,
-      bodyLimit: config.HTTP_SERVER_BODY_LIMIT,
       errorPage: config.HTTP_SERVER_ERROR_PAGE
     }
   }

@@ -16,6 +16,7 @@ import {
   ReadLureData,
   ReadLurePathData,
   SwitchLureData,
+  testLureModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -78,7 +79,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const lureModel = this.buildLureModel(rawValue)
 
-      this.assertLureModel(lureModel)
+      this.existsLureModel(lureModel)
 
       this.logger.info(message, { lureModel })
 
@@ -144,7 +145,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const lureModel = this.buildLureModel(rawValue)
 
-      this.assertLureModel(lureModel)
+      this.existsLureModel(lureModel)
 
       this.logger.info(message, { lureModel })
 
@@ -170,7 +171,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const lureModel = this.buildLureModel(rawValue)
 
-      this.assertLureModel(lureModel)
+      this.existsLureModel(lureModel)
 
       this.logger.info(message, { lureModel })
 
@@ -202,7 +203,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const lureModel = this.buildLureModel(rawValue)
 
-      this.assertLureModel(lureModel)
+      this.existsLureModel(lureModel)
 
       this.logger.info(message, { lureModel })
 
@@ -228,7 +229,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         )
       )
 
-      return this.buildLureCollection(rawValues).filter(this.guardLureModel)
+      return this.buildLureCollection(rawValues).filter(testLureModel)
     } catch (error) {
       this.handleException(error, 'listLures', data)
     }
@@ -270,13 +271,9 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  protected guardLureModel = (value: LureModel | null): value is LureModel => {
-    return value != null
-  }
-
-  protected assertLureModel(value: LureModel | null): asserts value is LureModel {
-    if (!this.guardLureModel(value)) {
-      throw new DatabaseError(`LureModel unexpected lost`, {
+  protected existsLureModel<T extends LureModel>(value: T | null): asserts value is T {
+    if (!testLureModel(value)) {
+      throw new DatabaseError(`LureModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

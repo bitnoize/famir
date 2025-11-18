@@ -15,6 +15,7 @@ import {
   ProxyRepository,
   ReadProxyData,
   SwitchProxyData,
+  testProxyModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -76,7 +77,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const proxyModel = this.buildProxyModel(rawValue)
 
-      this.assertProxyModel(proxyModel)
+      this.existsProxyModel(proxyModel)
 
       this.logger.info(message, { proxyModel })
 
@@ -116,7 +117,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const proxyModel = this.buildProxyModel(rawValue)
 
-      this.assertProxyModel(proxyModel)
+      this.existsProxyModel(proxyModel)
 
       this.logger.info(message, { proxyModel })
 
@@ -142,7 +143,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const proxyModel = this.buildProxyModel(rawValue)
 
-      this.assertProxyModel(proxyModel)
+      this.existsProxyModel(proxyModel)
 
       this.logger.info(message, { proxyModel })
 
@@ -168,7 +169,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const proxyModel = this.buildProxyModel(rawValue)
 
-      this.assertProxyModel(proxyModel)
+      this.existsProxyModel(proxyModel)
 
       this.logger.info(message, { proxyModel })
 
@@ -197,7 +198,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         )
       )
 
-      return this.buildProxyCollection(rawValues).filter(this.guardProxyModel)
+      return this.buildProxyCollection(rawValues).filter(testProxyModel)
     } catch (error) {
       this.handleException(error, 'listProxies', data)
     }
@@ -238,13 +239,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  protected guardProxyModel = (value: ProxyModel | null): value is ProxyModel => {
-    return value != null
-  }
-
-  protected assertProxyModel(value: ProxyModel | null): asserts value is ProxyModel {
-    if (!this.guardProxyModel(value)) {
-      throw new DatabaseError(`ProxyModel unexpected lost`, {
+  protected existsProxyModel<T extends ProxyModel>(value: T | null): asserts value is T {
+    if (!testProxyModel(value)) {
+      throw new DatabaseError(`ProxyModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

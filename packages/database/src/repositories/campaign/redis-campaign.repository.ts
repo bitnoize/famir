@@ -14,6 +14,7 @@ import {
   Logger,
   LOGGER,
   ReadCampaignData,
+  testCampaignModel,
   UpdateCampaignData,
   Validator,
   VALIDATOR
@@ -84,7 +85,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       const campaignModel = this.buildCampaignModel(rawValue)
 
-      this.assertCampaignModel(campaignModel)
+      this.existsCampaignModel(campaignModel)
 
       this.logger.info(message, { campaignModel })
 
@@ -130,7 +131,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       const campaignModel = this.buildCampaignModel(rawValue)
 
-      this.assertCampaignModel(campaignModel)
+      this.existsCampaignModel(campaignModel)
 
       this.logger.info(message, { campaignModel })
 
@@ -156,7 +157,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       const campaignModel = this.buildCampaignModel(rawValue)
 
-      this.assertCampaignModel(campaignModel)
+      this.existsCampaignModel(campaignModel)
 
       this.logger.info(message, { campaignModel })
 
@@ -178,7 +179,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         )
       )
 
-      return this.buildCampaignCollection(rawValues).filter(this.guardCampaignModel)
+      return this.buildCampaignCollection(rawValues).filter(testCampaignModel)
     } catch (error) {
       this.handleException(error, 'listCampaigns', null)
     }
@@ -258,13 +259,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  protected guardCampaignModel = (value: CampaignModel | null): value is CampaignModel => {
-    return value != null
-  }
-
-  protected assertCampaignModel(value: CampaignModel | null): asserts value is CampaignModel {
-    if (!this.guardCampaignModel(value)) {
-      throw new DatabaseError(`CampaignModel unexpected lost`, {
+  protected existsCampaignModel<T extends CampaignModel>(value: T | null): asserts value is T {
+    if (!testCampaignModel(value)) {
+      throw new DatabaseError(`CampaignModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

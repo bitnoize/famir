@@ -29,6 +29,8 @@ export interface DeleteCampaignData {
   campaignId: string
 }
 
+export const CAMPAIGN_REPOSITORY = Symbol('CampaignRepository')
+
 export interface CampaignRepository {
   createCampaign(data: CreateCampaignData): Promise<CampaignModel>
   readCampaign(data: ReadCampaignData): Promise<FullCampaignModel | null>
@@ -36,5 +38,3 @@ export interface CampaignRepository {
   deleteCampaign(data: DeleteCampaignData): Promise<CampaignModel>
   listCampaigns(): Promise<CampaignModel[]>
 }
-
-export const CAMPAIGN_REPOSITORY = Symbol('CampaignRepository')

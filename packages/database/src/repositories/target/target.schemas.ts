@@ -48,7 +48,7 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
       type: 'string'
     },
     donor_port: {
-      type: 'string'
+      type: 'integer'
     },
     mirror_secure: {
       type: 'integer'
@@ -57,7 +57,7 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
       type: 'string'
     },
     mirror_port: {
-      type: 'string'
+      type: 'integer'
     },
     is_enabled: {
       type: 'integer'
@@ -126,7 +126,7 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
       type: 'string'
     },
     donor_port: {
-      type: 'string'
+      type: 'integer'
     },
     mirror_secure: {
       type: 'integer'
@@ -135,7 +135,7 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
       type: 'string'
     },
     mirror_port: {
-      type: 'string'
+      type: 'integer'
     },
     labels: {
       type: 'array',
@@ -207,9 +207,10 @@ export const targetDomainSchema: JSONSchemaType<string> = {
   maxLength: 128
 } as const
 
-export const targetPortSchema: JSONSchemaType<string> = {
-  type: 'string',
-  pattern: '^[0-9]{1,5}$'
+export const targetPortSchema: JSONSchemaType<number> = {
+  type: 'number',
+  minimum: 0,
+  maximum: 65535
 } as const
 
 export const targetLabelSchema: JSONSchemaType<string> = {

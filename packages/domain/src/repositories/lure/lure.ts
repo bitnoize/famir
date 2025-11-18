@@ -33,6 +33,8 @@ export interface ListLuresData {
   campaignId: string
 }
 
+export const LURE_REPOSITORY = Symbol('LureRepository')
+
 export interface LureRepository {
   createLure(data: CreateLureData): Promise<LureModel>
   readLure(data: ReadLureData): Promise<LureModel | null>
@@ -42,5 +44,3 @@ export interface LureRepository {
   deleteLure(data: DeleteLureData): Promise<LureModel>
   listLures(data: ListLuresData): Promise<LureModel[] | null>
 }
-
-export const LURE_REPOSITORY = Symbol('LureRepository')

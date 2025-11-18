@@ -1,7 +1,7 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
-import { SetupMirrorHeaders } from './setup-mirror.js'
+import { SetupMirrorData } from './use-cases/index.js'
 
-export const setupMirrorHeadersSchema: JSONSchemaType<SetupMirrorHeaders> = {
+export const setupMirrorDataSchema: JSONSchemaType<SetupMirrorData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {

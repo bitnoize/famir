@@ -6,6 +6,10 @@ export interface RedirectorModel {
   readonly updatedAt: Date
 }
 
+export const testRedirectorModel = <T extends RedirectorModel>(value: T | null): value is T => {
+  return value != null
+}
+
 export interface FullRedirectorModel extends RedirectorModel {
   readonly page: string
 }

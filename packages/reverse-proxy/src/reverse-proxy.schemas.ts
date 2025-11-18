@@ -1,9 +1,7 @@
 import { JSONSchemaType } from '@famir/common'
 import { configDatabaseConnectionUrlSchema, configDatabasePrefixSchema } from '@famir/database'
-import { configHttpClientBodyLimitSchema } from '@famir/http-client'
 import {
   configHttpServerAddressSchema,
-  configHttpServerBodyLimitSchema,
   configHttpServerErrorPageSchema,
   configHttpServerPortSchema
 } from '@famir/http-server'
@@ -27,10 +25,8 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
     'DATABASE_PREFIX',
     'WORKFLOW_CONNECTION_URL',
     'WORKFLOW_PREFIX',
-    'HTTP_CLIENT_BODY_LIMIT',
     'HTTP_SERVER_ADDRESS',
     'HTTP_SERVER_PORT',
-    'HTTP_SERVER_BODY_LIMIT',
     'HTTP_SERVER_ERROR_PAGE'
   ],
   properties: {
@@ -45,7 +41,6 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
     DATABASE_PREFIX: configDatabasePrefixSchema,
     WORKFLOW_CONNECTION_URL: configWorkflowConnectionUrlSchema,
     WORKFLOW_PREFIX: configWorkflowPrefixSchema,
-    HTTP_CLIENT_BODY_LIMIT: configHttpClientBodyLimitSchema,
     HTTP_SERVER_ADDRESS: {
       ...configHttpServerAddressSchema,
       default: '127.0.0.1'
@@ -54,7 +49,6 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
       ...configHttpServerPortSchema,
       default: 3000
     },
-    HTTP_SERVER_BODY_LIMIT: configHttpServerBodyLimitSchema,
     HTTP_SERVER_ERROR_PAGE: configHttpServerErrorPageSchema
   },
   additionalProperties: false

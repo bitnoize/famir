@@ -21,11 +21,11 @@ export interface UpgradeSessionData {
   secret: string
 }
 
+export const SESSION_REPOSITORY = Symbol('SessionRepository')
+
 export interface SessionRepository {
   createSession(data: CreateSessionData): Promise<SessionModel>
   readSession(data: ReadSessionData): Promise<SessionModel | null>
   authSession(data: AuthSessionData): Promise<SessionModel>
   upgradeSession(data: UpgradeSessionData): Promise<SessionModel>
 }
-
-export const SESSION_REPOSITORY = Symbol('SessionRepository')

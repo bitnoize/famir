@@ -4,7 +4,7 @@
   Create message
 --]]
 local function create_message(keys, args)
-  if not (#keys == 5 and #args == 22) then
+  if not (#keys == 5 and #args == 21) then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -41,22 +41,21 @@ local function create_message(keys, args)
     target_id = args[4],
     session_id = args[5],
     method = args[6],
-    origin_url = args[7],
-    url_path = args[8],
-    url_query = args[9],
-    url_hash = args[10],
-    is_streaming = args[11],
-    request_headers = args[12],
-    request_cookies = args[13],
-    request_body = args[14],
-    response_headers = args[15],
-    response_cookies = args[16],
-    response_body = args[17],
-    client_ip = args[18],
-    status = tonumber(args[19]),
-    score = tonumber(args[20]),
-    total_time = tonumber(args[21]),
-    created_at = tonumber(args[22]),
+    url = args[7],
+    is_streaming = args[8],
+    request_headers = args[9],
+    request_cookies = args[10],
+    request_body = args[11],
+    response_headers = args[12],
+    response_cookies = args[13],
+    response_body = args[14],
+    client_ip = args[15],
+    status = tonumber(args[16]),
+    score = tonumber(args[17]),
+    start_time = tonumber(args[18]),
+    finish_time = tonumber(args[19]),
+    logs = args[20],
+    created_at = tonumber(args[21]),
   }
 
   for field, value in pairs(model) do
@@ -147,18 +146,16 @@ local function read_message(keys, args)
     'target_id',
     'session_id',
     'method',
-    'origin_url',
-    'url_path',
-    'url_query',
-    'url_hash',
+    'url',
     'is_streaming',
     'status',
     'score',
-    'total_time',
+    'start_time',
+    'finish_time',
     'created_at'
   )
 
-  if not (#values == 15) then
+  if not (#values == 13) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -169,15 +166,13 @@ local function read_message(keys, args)
     target_id = values[4],
     session_id = values[5],
     method = values[6],
-    origin_url = values[7],
-    url_path = values[8],
-    url_query = values[9],
-    url_hash = values[10],
-    is_streaming = tonumber(values[11]),
-    status = tonumber(values[12]),
-    score = tonumber(values[13]),
-    total_time = tonumber(values[14]),
-    created_at = tonumber(values[15]),
+    url = values[7],
+    is_streaming = tonumber(values[8]),
+    status = tonumber(values[9]),
+    score = tonumber(values[10]),
+    start_time = tonumber(values[11]),
+    finish_time = tonumber(values[12]),
+    created_at = tonumber(values[13]),
   }
 
   for field, value in pairs(model) do
@@ -224,10 +219,7 @@ local function read_full_message(keys, args)
     'target_id',
     'session_id',
     'method',
-    'origin_url',
-    'url_path',
-    'url_query',
-    'url_hash',
+    'url',
     'is_streaming',
     'request_headers',
     'request_cookies',
@@ -238,11 +230,13 @@ local function read_full_message(keys, args)
     'client_ip',
     'status',
     'score',
-    'total_time',
+    'start_time',
+    'finish_time',
+    'logs',
     'created_at'
   )
 
-  if not (#values == 22) then
+  if not (#values == 21) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -253,22 +247,21 @@ local function read_full_message(keys, args)
     target_id = values[4],
     session_id = values[5],
     method = values[6],
-    origin_url = values[7],
-    url_path = values[8],
-    url_query = values[9],
-    url_hash = values[10],
-    is_streaming = tonumber(values[11]),
-    request_headers = values[12],
-    request_cookies = values[13],
-    request_body = values[14],
-    status = tonumber(values[15]),
-    response_headers = values[16],
-    response_cookies = values[17],
-    response_body = values[18],
-    client_ip = values[19],
-    score = tonumber(values[20]),
-    total_time = tonumber(values[21]),
-    created_at = tonumber(values[22]),
+    url = values[7],
+    is_streaming = tonumber(values[8]),
+    request_headers = values[9],
+    request_cookies = values[10],
+    request_body = values[11],
+    response_headers = values[12],
+    response_cookies = values[13],
+    response_body = values[14],
+    client_ip = values[15],
+    status = tonumber(values[16]),
+    score = tonumber(values[17]),
+    start_time = tonumber(values[18]),
+    finish_time = tonumber(values[19]),
+    logs = values[20],
+    created_at = tonumber(values[21]),
   }
 
   for field, value in pairs(model) do

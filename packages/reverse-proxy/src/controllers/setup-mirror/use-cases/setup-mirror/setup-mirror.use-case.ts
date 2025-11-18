@@ -2,22 +2,21 @@ import { DIContainer } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignRepository,
-  EnabledFullTargetModel,
-  FullTargetModel,
   HttpServerError,
   TARGET_REPOSITORY,
-  TargetRepository
+  TargetRepository,
+  testEnabledTargetModel
 } from '@famir/domain'
-import { GetTargetData, GetTargetReply } from './get-target.js'
+import { SetupMirrorData, SetupMirrorReply } from './setup-mirror.js'
 
-export const GET_TARGET_USE_CASE = Symbol('GetTargetUseCase')
+export const SETUP_MIRROR_USE_CASE = Symbol('SetupMirrorUseCase')
 
-export class GetTargetUseCase {
+export class SetupMirrorUseCase {
   static inject(container: DIContainer) {
-    container.registerSingleton<GetTargetUseCase>(
-      GET_TARGET_USE_CASE,
+    container.registerSingleton<SetupMirrorUseCase>(
+      SETUP_MIRROR_USE_CASE,
       (c) =>
-        new GetTargetUseCase(
+        new SetupMirrorUseCase(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY)
         )
@@ -29,8 +28,8 @@ export class GetTargetUseCase {
     protected readonly targetRepository: TargetRepository
   ) {}
 
-  async execute(data: GetTargetData): Promise<GetTargetReply> {
-    const [campaignModel, targetModel] = await Promise.all([
+  async execute(data: SetupMirrorData): Promise<SetupMirrorReply> {
+    const [campaign, target] = await Promise.all([
       this.campaignRepository.readCampaign({
         campaignId: data.campaignId
       }),
@@ -41,31 +40,38 @@ export class GetTargetUseCase {
       })
     ])
 
-    if (!campaignModel) {
+    if (!campaign) {
       throw new HttpServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    if (!targetModel) {
+    if (!target) {
       throw new HttpServerError(`Target not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    if (!this.guardEnabledTarget(targetModel)) {
+    if (!testEnabledTargetModel(target)) {
       throw new HttpServerError(`Target disabled`, {
-        code: 'FORBIDDEN'
+        code: 'NOT_FOUND'
+      })
+    }
+
+    const targets = await this.targetRepository.listTargets({
+      campaignId: data.campaignId
+    })
+
+    if (!targets) {
+      throw new HttpServerError(`Campaign lost`, {
+        code: 'NOT_FOUND'
       })
     }
 
     return {
-      campaign: campaignModel,
-      target: targetModel
+      campaign,
+      target,
+      targets: targets.filter(testEnabledTargetModel)
     }
-  }
-
-  protected guardEnabledTarget = (value: FullTargetModel): value is EnabledFullTargetModel => {
-    return value.isEnabled
   }
 }

@@ -8,6 +8,10 @@ export interface ProxyModel {
   readonly updatedAt: Date
 }
 
+export const testProxyModel = <T extends ProxyModel>(value: T | null): value is T => {
+  return value != null
+}
+
 export interface EnabledProxyModel extends ProxyModel {
   isEnabled: true
 }

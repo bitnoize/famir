@@ -1,5 +1,7 @@
 export type LoggerData = Record<string, unknown>
 
+export const LOGGER = Symbol('Logger')
+
 export interface Logger {
   debug(msg: string, data?: LoggerData): void
   info(msg: string, data?: LoggerData): void
@@ -7,5 +9,3 @@ export interface Logger {
   error(msg: string, data?: LoggerData): void
   fatal(msg: string, data?: LoggerData): void
 }
-
-export const LOGGER = Symbol('Logger')

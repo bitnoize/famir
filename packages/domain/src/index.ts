@@ -1,5 +1,5 @@
 export * from './domain.error.js'
-export * from './domain.js'
+export * from './http-proto.js'
 export * from './models/index.js'
 export * from './queues/index.js'
 export * from './repositories/index.js'

@@ -7,6 +7,10 @@ export interface CampaignModel {
   readonly updatedAt: Date
 }
 
+export const testCampaignModel = <T extends CampaignModel>(value: T | null): value is T => {
+  return value != null
+}
+
 export interface FullCampaignModel extends CampaignModel {
   readonly description: string
   readonly landingAuthPath: string

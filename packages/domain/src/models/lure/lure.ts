@@ -9,6 +9,16 @@ export interface LureModel {
   readonly updatedAt: Date
 }
 
+export const testLureModel = <T extends LureModel>(value: T | null): value is T => {
+  return value != null
+}
+
 export interface EnabledLureModel extends LureModel {
   isEnabled: true
+}
+
+export const testEnabledLureModel = <T extends LureModel>(
+  value: T
+): value is T & { isEnabled: true } => {
+  return value.isEnabled
 }

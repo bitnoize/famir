@@ -139,7 +139,6 @@ redis.register_function({
   description = 'Read campaign',
 })
 
-
 --[[
   Read full campaign
 --]]

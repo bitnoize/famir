@@ -6,11 +6,11 @@ export interface WebhookJobData {
 
 export type WebhookJobResult = boolean
 
+export const WEBHOOK_QUEUE = Symbol('WebhookQueue')
+
 export interface WebhookQueue {
   close(): Promise<void>
   getJobCount(): Promise<number>
   getJobCounts(): Promise<Record<string, number>>
   addJob(data: WebhookJobData): Promise<string>
 }
-
-export const WEBHOOK_QUEUE = Symbol('WebhookQueue')

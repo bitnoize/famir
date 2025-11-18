@@ -1,82 +1,31 @@
-import { arrayIncludes, DIContainer } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
-  Config,
-  CONFIG,
   HTTP_CLIENT,
-  HTTP_RESPONSE_COOKIE_SAME_SITE,
   HttpClient,
   HttpClientRequest,
   HttpClientResponse,
-  HttpResponseCookieSameSite,
   Logger,
   LOGGER
 } from '@famir/domain'
 import { Curl, CurlFeature } from 'node-libcurl'
-import setCookie from 'set-cookie-parser'
-import { HttpClientConfig, HttpClientOptions } from './http-client.js'
 
 export class CurlHttpClient implements HttpClient {
   static inject(container: DIContainer) {
     container.registerSingleton<HttpClient>(
       HTTP_CLIENT,
-      (c) =>
-        new CurlHttpClient(c.resolve<Config<HttpClientConfig>>(CONFIG), c.resolve<Logger>(LOGGER))
+      (c) => new CurlHttpClient(c.resolve<Logger>(LOGGER))
     )
   }
 
-  protected readonly options: HttpClientOptions
-
-  constructor(
-    config: Config<HttpClientConfig>,
-    protected readonly logger: Logger
-  ) {
-    this.options = this.buildOptions(config.data)
-
+  constructor(protected readonly logger: Logger) {
     this.logger.debug(`HttpClient initialized`)
   }
 
-  async query(request: HttpClientRequest): Promise<HttpClientResponse> {
-    const requestCookies: string[] = []
-
-    Object.entries(request.cookies).forEach(([name, cookie]) => {
-      if (cookie != null) {
-        requestCookies.push(`${name}=${cookie}`)
-      }
-    })
-
-    if (requestCookies.length > 0) {
-      request.headers['cookie'] = requestCookies.join('; ')
-    }
-
-    const response = await this._query(request)
-
-    const setCookieHeader = response.headers['set-cookie'] || ''
-
-    setCookie.parse(setCookieHeader, { decodeValues: false }).forEach((cookie) => {
-      response.cookies[cookie.name] = {
-        value: cookie.value,
-        maxAge: cookie.maxAge,
-        expires: cookie.expires ? cookie.expires.getTime() : undefined,
-        httpOnly: cookie.httpOnly,
-        path: cookie.path,
-        domain: cookie.domain,
-        secure: cookie.secure,
-        sameSite: this.parseCookieSameSite(cookie.sameSite)
-      }
-    })
-
-    return response
-  }
-
-  private _query(request: HttpClientRequest): Promise<HttpClientResponse> {
+  forwardRegularRequest(request: HttpClientRequest): Promise<HttpClientResponse> {
     return new Promise<HttpClientResponse>((resolve) => {
-      const startTime = Date.now()
-
       const response: HttpClientResponse = {
         status: 0,
         headers: {},
-        cookies: {},
-        queryTime: 0,
         body: Buffer.alloc(0)
       }
 
@@ -87,7 +36,7 @@ export class CurlHttpClient implements HttpClient {
 
         curl.setOpt(Curl.option.DNS_USE_GLOBAL_CACHE, 1)
 
-        curl.setOpt(Curl.option.MAXFILESIZE_LARGE, this.options.bodyLimit)
+        curl.setOpt(Curl.option.MAXFILESIZE_LARGE, request.bodyLimit)
 
         curl.setOpt(Curl.option.PROXY, request.proxy)
 
@@ -188,31 +137,7 @@ export class CurlHttpClient implements HttpClient {
         response.error = error
 
         resolve(response)
-      } finally {
-        response.queryTime = Date.now() - startTime
       }
     })
-  }
-
-  private buildOptions(config: HttpClientConfig): HttpClientOptions {
-    return {
-      bodyLimit: config.HTTP_CLIENT_BODY_LIMIT
-    }
-  }
-
-  private parseCookieSameSite(value: string | undefined): HttpResponseCookieSameSite | undefined {
-    if (value == null) {
-      return undefined
-    }
-
-    value = value.toLowerCase()
-
-    const isKnownValue = arrayIncludes(HTTP_RESPONSE_COOKIE_SAME_SITE, value)
-
-    if (!isKnownValue) {
-      return undefined
-    }
-
-    return value as HttpResponseCookieSameSite
   }
 }

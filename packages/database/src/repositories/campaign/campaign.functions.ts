@@ -73,6 +73,16 @@ export const campaignFunctions = {
     },
 
     read_campaign: {
+      NUMBER_OF_KEYS: 1,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    read_full_campaign: {
       NUMBER_OF_KEYS: 5,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
@@ -81,16 +91,6 @@ export const campaignFunctions = {
         parser.pushKey(targetIndexKey(prefix, campaignId))
         parser.pushKey(redirectorIndexKey(prefix, campaignId))
         parser.pushKey(lureIndexKey(prefix, campaignId))
-      },
-
-      transformReply: undefined as unknown as () => unknown
-    },
-
-    read_full_campaign: {
-      NUMBER_OF_KEYS: 1,
-
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => unknown

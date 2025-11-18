@@ -1,4 +1,10 @@
-import { HttpBody, HttpHeaders, HttpRequestCookies, HttpResponseCookies } from '../../domain.js'
+import {
+  HttpBody,
+  HttpHeaders,
+  HttpLogs,
+  HttpRequestCookies,
+  HttpResponseCookies
+} from '../../http-proto.js'
 
 export interface MessageModel {
   readonly campaignId: string
@@ -7,15 +13,17 @@ export interface MessageModel {
   readonly targetId: string
   readonly sessionId: string
   readonly method: string
-  readonly originUrl: string
-  readonly urlPath: string
-  readonly urlQuery: string
-  readonly urlHash: string
+  readonly url: string
   readonly isStreaming: boolean
   readonly status: number
   readonly score: number
-  readonly totalTime: number
+  readonly startTime: number
+  readonly finishTime: number
   readonly createdAt: Date
+}
+
+export const testMessageModel = <T extends MessageModel>(value: T | null): value is T => {
+  return value != null
 }
 
 export interface FullMessageModel extends MessageModel {
@@ -26,4 +34,5 @@ export interface FullMessageModel extends MessageModel {
   readonly responseCookies: HttpResponseCookies
   readonly responseBody: HttpBody
   readonly clientIp: string
+  readonly logs: HttpLogs
 }

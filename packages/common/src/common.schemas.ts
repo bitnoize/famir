@@ -1,4 +1,4 @@
-import { JSONSchemaType } from './common.js'
+import { JSONSchemaType } from './common.utils.js'
 
 export const customIdentSchema: JSONSchemaType<string> = {
   type: 'string',

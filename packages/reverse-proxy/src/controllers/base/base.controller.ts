@@ -6,9 +6,9 @@ import {
   FullCampaignModel,
   FullMessageModel,
   FullRedirectorModel,
-  HttpServerContextState,
   HttpServerError,
   HttpServerRouter,
+  HttpServerState,
   Logger,
   SessionModel,
   Validator
@@ -22,193 +22,161 @@ export abstract class BaseController {
     protected readonly controllerName: string
   ) {}
 
-  protected absentStateCampaign(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected absentStateCampaign(state: HttpServerState): asserts state is HttpServerState & {
     campaign: FullCampaignModel | undefined
   } {
     if (state['campaign']) {
-      throw new HttpServerError(`ContextState campaign exists`, {
+      throw new HttpServerError(`State campaign exists`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected existsStateCampaign(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected existsStateCampaign(state: HttpServerState): asserts state is HttpServerState & {
     readonly campaign: FullCampaignModel
   } {
     if (!state['campaign']) {
-      throw new HttpServerError(`ContextState campaign absent`, {
+      throw new HttpServerError(`State campaign absent`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected absentStateProxy(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected absentStateProxy(state: HttpServerState): asserts state is HttpServerState & {
     proxy: EnabledProxyModel | undefined
   } {
     if (state['proxy']) {
-      throw new HttpServerError(`ContextState proxy exists`, {
+      throw new HttpServerError(`State proxy exists`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected existsStateProxy(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected existsStateProxy(state: HttpServerState): asserts state is HttpServerState & {
     readonly proxy: EnabledProxyModel
   } {
     if (!state['proxy']) {
-      throw new HttpServerError(`ContextState proxy absent`, {
+      throw new HttpServerError(`State proxy absent`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected absentStateTarget(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected absentStateTarget(state: HttpServerState): asserts state is HttpServerState & {
     target: EnabledFullTargetModel | undefined
   } {
     if (state['target']) {
-      throw new HttpServerError(`ContextState target exists`, {
+      throw new HttpServerError(`State target exists`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected existsStateTarget(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected existsStateTarget(state: HttpServerState): asserts state is HttpServerState & {
     readonly target: EnabledFullTargetModel
   } {
     if (!state['target']) {
-      throw new HttpServerError(`ContextState target absent`, {
+      throw new HttpServerError(`State target absent`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected absentStateTargets(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected absentStateTargets(state: HttpServerState): asserts state is HttpServerState & {
     targets: EnabledTargetModel[] | undefined
   } {
     if (state['targets']) {
-      throw new HttpServerError(`ContextState targets exists`, {
+      throw new HttpServerError(`State targets exists`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected existsStateTargets(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected existsStateTargets(state: HttpServerState): asserts state is HttpServerState & {
     readonly targets: EnabledTargetModel[]
   } {
     if (!state['targets']) {
-      throw new HttpServerError(`ContextState targets absent`, {
+      throw new HttpServerError(`State targets absent`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected absentStateRedirector(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected absentStateRedirector(state: HttpServerState): asserts state is HttpServerState & {
     redirector: FullRedirectorModel | undefined
   } {
     if (state['redirector']) {
-      throw new HttpServerError(`ContextState redirector exists`, {
+      throw new HttpServerError(`State redirector exists`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected existsStateRedirector(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected existsStateRedirector(state: HttpServerState): asserts state is HttpServerState & {
     readonly redirector: FullRedirectorModel
   } {
     if (!state['redirector']) {
-      throw new HttpServerError(`ContextState redirector absent`, {
+      throw new HttpServerError(`State redirector absent`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected absentStateLure(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected absentStateLure(state: HttpServerState): asserts state is HttpServerState & {
     lure: EnabledLureModel | undefined
   } {
     if (state['lure']) {
-      throw new HttpServerError(`ContextState lure exists`, {
+      throw new HttpServerError(`State lure exists`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected existsStateLure(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected existsStateLure(state: HttpServerState): asserts state is HttpServerState & {
     readonly lure: EnabledLureModel
   } {
     if (!state['lure']) {
-      throw new HttpServerError(`ContextState lure absent`, {
+      throw new HttpServerError(`State lure absent`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected absentStateSession(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected absentStateSession(state: HttpServerState): asserts state is HttpServerState & {
     session: SessionModel | undefined
   } {
     if (state['session']) {
-      throw new HttpServerError(`ContextState session exists`, {
+      throw new HttpServerError(`State session exists`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected existsStateSession(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected existsStateSession(state: HttpServerState): asserts state is HttpServerState & {
     readonly session: SessionModel
   } {
     if (!state['session']) {
-      throw new HttpServerError(`ContextState session absent`, {
+      throw new HttpServerError(`State session absent`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected absentStateMessage(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected absentStateMessage(state: HttpServerState): asserts state is HttpServerState & {
     message: FullMessageModel | undefined
   } {
     if (state['message']) {
-      throw new HttpServerError(`ContextState message exists`, {
+      throw new HttpServerError(`State message exists`, {
         code: 'INTERNAL_ERROR'
       })
     }
   }
 
-  protected existsStateMessage(
-    state: HttpServerContextState
-  ): asserts state is HttpServerContextState & {
+  protected existsStateMessage(state: HttpServerState): asserts state is HttpServerState & {
     readonly message: FullMessageModel
   } {
     if (!state['message']) {
-      throw new HttpServerError(`ContextState message absent`, {
+      throw new HttpServerError(`State message absent`, {
         code: 'INTERNAL_ERROR'
       })
     }

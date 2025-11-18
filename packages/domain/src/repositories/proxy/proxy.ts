@@ -25,6 +25,8 @@ export interface ListProxiesData {
   campaignId: string
 }
 
+export const PROXY_REPOSITORY = Symbol('ProxyRepository')
+
 export interface ProxyRepository {
   createProxy(data: CreateProxyData): Promise<ProxyModel>
   readProxy(data: ReadProxyData): Promise<ProxyModel | null>
@@ -33,5 +35,3 @@ export interface ProxyRepository {
   deleteProxy(data: DeleteProxyData): Promise<ProxyModel>
   listProxies(data: ListProxiesData): Promise<ProxyModel[] | null>
 }
-
-export const PROXY_REPOSITORY = Symbol('ProxyRepository')

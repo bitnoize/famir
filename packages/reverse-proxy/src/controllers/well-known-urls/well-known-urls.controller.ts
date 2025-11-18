@@ -56,15 +56,13 @@ export class WellKnownUrlsController extends BaseController {
         return
       }
 
-      ctx.setResponseHeaders({
-        'content-type': 'text/plain',
-        'access-control-allow-origin': campaign.mirrorDomain,
-        'access-control-allow-methods': '*',
-        'access-control-allow-headers': '*',
-        'access-control-expose-headers': '*',
-        'access-control-allow-credentials': 'true',
-        'access-control-max-age': '86400'
-      })
+      ctx.responseHeaders['content-type'] = 'text/plain'
+      ctx.responseHeaders['access-control-allow-origin'] = campaign.mirrorDomain
+      ctx.responseHeaders['access-control-allow-methods'] = '*'
+      ctx.responseHeaders['access-control-allow-headers'] = '*'
+      ctx.responseHeaders['access-control-expose-headers'] = '*'
+      ctx.responseHeaders['access-control-allow-credentials'] = 'true'
+      ctx.responseHeaders['access-control-max-age'] = '86400'
 
       await ctx.sendResponse(204)
     } catch (error) {
@@ -79,7 +77,7 @@ export class WellKnownUrlsController extends BaseController {
       const { target } = ctx.state
 
       const isFound =
-        ctx.isMethods(['GET', 'HEAD']) && ctx.originUrl === '/favicon.ico' && target.faviconIco
+        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPath('/favicon.ico') && target.faviconIco
 
       if (!isFound) {
         await next()
@@ -89,12 +87,10 @@ export class WellKnownUrlsController extends BaseController {
 
       const responseBody = Buffer.from(target.faviconIco, 'base64')
 
-      ctx.setResponseHeaders({
-        'content-type': 'image/x-icon',
-        'content-length': responseBody.length.toString(),
-        'last-modified': target.updatedAt.toUTCString(),
-        'cache-control': 'public, max-age=691200'
-      })
+      ctx.responseHeaders['content-type'] = 'image/x-icon'
+      ctx.responseHeaders['content-length'] = responseBody.length.toString()
+      ctx.responseHeaders['last-modified'] = target.updatedAt.toUTCString()
+      ctx.responseHeaders['cache-control'] = 'public, max-age=691200'
 
       if (ctx.isMethod('GET')) {
         ctx.responseBody = responseBody
@@ -113,7 +109,7 @@ export class WellKnownUrlsController extends BaseController {
       const { target } = ctx.state
 
       const isFound =
-        ctx.isMethods(['GET', 'HEAD']) && ctx.originUrl === '/robots.txt' && target.robotsTxt
+        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPath('/robots.txt') && target.robotsTxt
 
       if (!isFound) {
         await next()
@@ -123,12 +119,10 @@ export class WellKnownUrlsController extends BaseController {
 
       const responseBody = Buffer.from(target.robotsTxt)
 
-      ctx.setResponseHeaders({
-        'content-type': 'image/x-icon',
-        'content-length': responseBody.length.toString(),
-        'last-modified': target.updatedAt.toUTCString(),
-        'cache-control': 'public, max-age=691200'
-      })
+      ctx.responseHeaders['content-type'] = 'text/plain'
+      ctx.responseHeaders['content-length'] = responseBody.length.toString()
+      ctx.responseHeaders['last-modified'] = target.updatedAt.toUTCString()
+      ctx.responseHeaders['cache-control'] = 'public, max-age=691200'
 
       if (ctx.isMethod('GET')) {
         ctx.responseBody = responseBody
@@ -147,7 +141,7 @@ export class WellKnownUrlsController extends BaseController {
       const { target } = ctx.state
 
       const isFound =
-        ctx.isMethods(['GET', 'HEAD']) && ctx.originUrl === '/sitemap.xml' && target.sitemapXml
+        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPath('/sitemap.xml') && target.sitemapXml
 
       if (!isFound) {
         await next()
@@ -157,12 +151,10 @@ export class WellKnownUrlsController extends BaseController {
 
       const responseBody = Buffer.from(target.sitemapXml)
 
-      ctx.setResponseHeaders({
-        'content-type': 'image/x-icon',
-        'content-length': responseBody.length.toString(),
-        'last-modified': target.updatedAt.toUTCString(),
-        'cache-control': 'public, max-age=691200'
-      })
+      ctx.responseHeaders['content-type'] = 'application/xml'
+      ctx.responseHeaders['content-length'] = responseBody.length.toString()
+      ctx.responseHeaders['last-modified'] = target.updatedAt.toUTCString()
+      ctx.responseHeaders['cache-control'] = 'public, max-age=691200'
 
       if (ctx.isMethod('GET')) {
         ctx.responseBody = responseBody

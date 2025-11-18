@@ -9,6 +9,7 @@ import {
   FullMessageModel,
   HttpBody,
   HttpHeaders,
+  HttpLogs,
   HttpRequestCookies,
   HttpResponseCookies,
   Logger,
@@ -17,6 +18,7 @@ import {
   MessageModel,
   MessageRepository,
   ReadMessageData,
+  testMessageModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -26,6 +28,7 @@ import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 import {
   messageHeadersSchema,
+  messageLogsSchema,
   messageRequestCookiesSchema,
   messageResponseCookiesSchema,
   rawFullMessageSchema,
@@ -59,7 +62,8 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       'database-raw-full-message': rawFullMessageSchema,
       'database-message-headers': messageHeadersSchema,
       'database-message-request-cookies': messageRequestCookiesSchema,
-      'database-message-response-cookies': messageResponseCookiesSchema
+      'database-message-response-cookies': messageResponseCookiesSchema,
+      'database-message-logs': messageLogsSchema
     })
 
     this.logger.debug(`Repository initialized`, {
@@ -80,10 +84,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
           data.targetId,
           data.sessionId,
           data.method,
-          data.originUrl,
-          data.urlPath,
-          data.urlQuery,
-          data.urlHash,
+          data.url,
           data.isStreaming,
           data.requestHeaders,
           data.requestCookies,
@@ -94,7 +95,9 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
           data.clientIp,
           data.status,
           data.score,
-          data.totalTime
+          data.startTime,
+          data.finishTime,
+          data.logs
         ),
 
         this.connection.message.read_message(this.options.prefix, data.campaignId, messageId)
@@ -108,7 +111,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       const messageModel = this.buildMessageModel(rawValue)
 
-      this.assertMessageModel(messageModel)
+      this.existsMessageModel(messageModel)
 
       this.logger.info(message, { messageModel })
 
@@ -192,6 +195,21 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
+  protected parseMessageLogs(value: string): HttpLogs {
+    try {
+      const logs: unknown = JSON.parse(value)
+
+      this.validator.assertSchema<HttpLogs>('database-message-logs', logs)
+
+      return logs
+    } catch (error) {
+      throw new DatabaseError(`HttpLogs parse failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
   protected buildMessageModel(rawValue: unknown): MessageModel | null {
     if (rawValue === null) {
       return null
@@ -206,14 +224,12 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       targetId: rawValue.target_id,
       sessionId: rawValue.session_id,
       method: rawValue.method,
-      originUrl: rawValue.origin_url,
-      urlPath: rawValue.url_path,
-      urlQuery: rawValue.url_query,
-      urlHash: rawValue.url_hash,
+      url: rawValue.url,
       isStreaming: !!rawValue.is_streaming,
       status: rawValue.status,
       score: rawValue.score,
-      totalTime: rawValue.total_time,
+      startTime: rawValue.start_time,
+      finishTime: rawValue.finish_time,
       createdAt: new Date(rawValue.created_at)
     }
   }
@@ -232,10 +248,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       targetId: rawValue.target_id,
       sessionId: rawValue.session_id,
       method: rawValue.method,
-      originUrl: rawValue.origin_url,
-      urlPath: rawValue.url_path,
-      urlQuery: rawValue.url_query,
-      urlHash: rawValue.url_hash,
+      url: rawValue.url,
       isStreaming: !!rawValue.is_streaming,
       requestHeaders: this.parseMessageHeaders(rawValue.request_headers),
       requestCookies: this.parseMessageRequestCookies(rawValue.request_cookies),
@@ -246,7 +259,9 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       clientIp: rawValue.client_ip,
       status: rawValue.status,
       score: rawValue.score,
-      totalTime: rawValue.total_time,
+      startTime: rawValue.start_time,
+      finishTime: rawValue.finish_time,
+      logs: this.parseMessageLogs(rawValue.logs),
       createdAt: new Date(rawValue.created_at)
     }
   }
@@ -279,13 +294,9 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  protected guardMessageModel = (value: MessageModel | null): value is MessageModel => {
-    return value != null
-  }
-
-  protected assertMessageModel(value: MessageModel | null): asserts value is MessageModel {
-    if (!this.guardMessageModel(value)) {
-      throw new DatabaseError(`MessageModel unexpected lost`, {
+  protected existsMessageModel<T extends MessageModel>(value: T | null): asserts value is T {
+    if (!testMessageModel(value)) {
+      throw new DatabaseError(`MessageModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }
