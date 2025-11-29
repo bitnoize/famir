@@ -1,28 +1,44 @@
-export type HttpLog = [string, Record<string, unknown>]
-export type HttpLogs = HttpLog[]
+export type HttpState = Record<string, unknown>
+
+export type HttpLogData = Record<string, unknown>
+export type HttpLog = [string, HttpLogData]
+
+export interface HttpRelativeUrl {
+  path: string
+  search: string
+  hash: string
+}
 
 export type HttpHeader = string | string[]
 
-export type HttpHeaders = Record<string, HttpHeader | null | undefined>
-export type HttpStrictHeaders = Record<string, HttpHeader>
+export type HttpHeaders = Record<string, HttpHeader | undefined>
 
 export type HttpRequestCookie = string
 
-export type HttpRequestCookies = Record<string, HttpRequestCookie | null | undefined>
-export type HttpStrictRequestCookies = Record<string, HttpRequestCookie>
+export type HttpRequestCookies = Record<string, HttpRequestCookie | undefined>
 
 export interface HttpResponseCookie {
-  value: string | null | undefined
-  path?: string | null | undefined
-  expires?: number | null | undefined
-  maxAge?: number | null | undefined
-  domain?: string | null | undefined
-  secure?: boolean | null | undefined
-  httpOnly?: boolean | null | undefined
-  sameSite?: string | null | undefined
+  value: string
+  expires?: number
+  maxAge?: number
+  path?: string
+  domain?: string
+  secure?: boolean
+  httpOnly?: boolean
+  sameSite?: string
 }
 
-export type HttpResponseCookies = Record<string, HttpResponseCookie | null | undefined>
-export type HttpStrictResponseCookies = Record<string, HttpResponseCookie>
+export type HttpResponseCookies = Record<string, HttpResponseCookie | undefined>
+
+export interface HttpMediaType {
+  type: string
+  parameters: Record<string, string>
+}
 
 export type HttpBody = Buffer
+
+export interface HttpPlainText {
+  data: string
+}
+
+export type HttpQueryString = Record<string, unknown>

@@ -12,10 +12,10 @@ export interface CreateTargetData {
   mirrorSub: string
   mirrorPort: number
   connectTimeout: number
-  regularTimeout: number
+  requestTimeout: number
   streamingTimeout: number
-  requestDataLimit: number
-  responseDataLimit: number
+  requestBodyLimit: number
+  responseBodyLimit: number
   mainPage: string
   notFoundPage: string
   faviconIco: string
@@ -34,10 +34,10 @@ export interface UpdateTargetData {
   campaignId: string
   targetId: string
   connectTimeout: number | null | undefined
-  regularTimeout: number | null | undefined
+  requestTimeout: number | null | undefined
   streamingTimeout: number | null | undefined
-  requestDataLimit: number | null | undefined
-  responseDataLimit: number | null | undefined
+  requestBodyLimit: number | null | undefined
+  responseBodyLimit: number | null | undefined
   mainPage: string | null | undefined
   notFoundPage: string | null | undefined
   faviconIco: string | null | undefined

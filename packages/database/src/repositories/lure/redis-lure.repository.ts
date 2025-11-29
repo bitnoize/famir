@@ -51,10 +51,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     this.validator.addSchemas({
       'database-raw-lure': rawLureSchema
     })
-
-    this.logger.debug(`Repository initialized`, {
-      repository: this.repositoryName
-    })
   }
 
   async createLure(data: CreateLureData): Promise<LureModel> {

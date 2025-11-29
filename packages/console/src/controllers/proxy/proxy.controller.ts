@@ -64,10 +64,6 @@ export class ProxyController extends BaseController {
     this.router.addApiCall('disableProxy', this.disableProxyApiCall)
     this.router.addApiCall('deleteProxy', this.deleteProxyApiCall)
     this.router.addApiCall('listProxies', this.listProxiesApiCall)
-
-    this.logger.debug(`Controller initialized`, {
-      controllerName: this.controllerName
-    })
   }
 
   private createProxyApiCall: ReplServerApiCall = async (data) => {

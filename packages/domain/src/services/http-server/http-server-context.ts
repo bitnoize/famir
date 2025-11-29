@@ -1,51 +1,78 @@
 import {
   HttpBody,
+  HttpHeader,
   HttpHeaders,
-  HttpLogs,
+  HttpLog,
+  HttpLogData,
+  HttpMediaType,
+  HttpQueryString,
+  HttpRelativeUrl,
+  HttpRequestCookie,
   HttpRequestCookies,
+  HttpResponseCookie,
   HttpResponseCookies,
-  HttpStrictHeaders,
-  HttpStrictRequestCookies,
-  HttpStrictResponseCookies
+  HttpState
 } from '../../http-proto.js'
 
-export type HttpServerState = Record<string, unknown>
-
-export interface HttpServerUrl {
-  path: string
-  query: string
-  hash: string
-}
-
-export type HttpServerUrlQuery = Record<string, unknown>
+type AbstractOptions = Record<string, unknown>
 
 export interface HttpServerContext {
-  readonly state: HttpServerState
-  readonly logs: HttpLogs
+  readonly state: HttpState
+  readonly logs: HttpLog[]
+  addLog(name: string, data: HttpLogData): void
   readonly method: string
   isMethod(method: string): boolean
   isMethods(methods: string[]): boolean
-  readonly url: HttpServerUrl
-  isUrlPath(path: string): boolean
-  parseUrlQuery(): HttpServerUrlQuery
+  readonly originalUrl: string
+  readonly url: HttpRelativeUrl
+  normalizeUrl(): string
+  isUrlPathEquals(path: string): boolean
+  isUrlPathUnder(path: string): boolean
+  isUrlPathMatch(regExp: RegExp): boolean
+  getUrlQuery(options?: AbstractOptions): HttpQueryString | null
+  setUrlQuery(query: HttpQueryString, options?: AbstractOptions): void
   isStreaming: boolean
   readonly requestHeaders: HttpHeaders
-  strictRequestHeaders(): Readonly<HttpStrictHeaders>
+  getRequestHeader(name: string): string | undefined
+  getRequestHeaderArray(name: string): string[] | undefined
+  setRequestHeader(name: string, value: HttpHeader | undefined): void
+  setRequestHeaders(headers: HttpHeaders): void
   readonly requestCookies: HttpRequestCookies
-  strictRequestCookies(): Readonly<HttpStrictRequestCookies>
+  getRequestCookie(name: string): HttpRequestCookie | undefined
+  setRequestCookie(name: string, cookie: HttpRequestCookie | undefined): void
+  setRequestCookies(cookies: HttpRequestCookies): void
+  getRequestMediaType(): HttpMediaType | null
+  setRequestMediaType(mediaType: HttpMediaType): void
+  prepareRequest(): void
   requestBody: HttpBody
-  loadRequestBody(limit: number): Promise<void>
+  loadRequestBody(bodyLimit: number): Promise<void>
+  renewRequestCookieHeader(): void
   readonly responseHeaders: HttpHeaders
-  strictResponseHeaders(): Readonly<HttpStrictHeaders>
-  readonly responseHeadersSent: boolean
+  getResponseHeader(name: string): string | undefined
+  getResponseHeaderArray(name: string): string[] | undefined
+  setResponseHeader(name: string, value: HttpHeader | undefined): void
+  setResponseHeaders(headers: HttpHeaders): void
   readonly responseCookies: HttpResponseCookies
-  strictResponseCookies(): Readonly<HttpStrictResponseCookies>
+  getResponseCookie(name: string): HttpResponseCookie | undefined
+  setResponseCookie(name: string, cookie: HttpResponseCookie | undefined): void
+  setResponseCookies(cookies: HttpResponseCookies): void
+  getResponseMediaType(): HttpMediaType | null
+  setResponseMediaType(mediaType: HttpMediaType): void
   responseBody: HttpBody
-  sendResponse(status: number): Promise<void>
-  readonly clientIp: string
+  prepareResponse(status: number, headers?: HttpHeaders, body?: HttpBody): void
+  renewResponseSetCookieHeader(): void
+  sendResponse(): Promise<void>
+  readonly responseHeadersSent: boolean
   readonly status: number
+  isStatusInformation: boolean
+  isStatusSuccess: boolean
+  isStatusRedirect: boolean
+  isStatusClientError: boolean
+  isStatusServerError: boolean
+  isStatusUnknown: boolean
   readonly score: number
   upScore(score: number): void
-  startTime: number
-  finishTime: number
+  readonly startTime: number
+  readonly finishTime: number
+  isComplete: boolean
 }

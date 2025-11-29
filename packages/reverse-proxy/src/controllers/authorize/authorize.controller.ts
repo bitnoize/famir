@@ -9,12 +9,14 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-//import {
-//  type AuthLandingUseCase,
-//  AUTH_LANDING_USE_CASE,
-//  type AuthTransparentUseCase,
-//  AUTH_TRANSPARENT_USE_CASE,
-//} from './use-cases/index.js'
+import {
+  type AuthSessionUseCase,
+  AUTH_SESSION_USE_CASE,
+  type CreateSessionUseCase,
+  CREATE_SESSION_USE_CASE,
+  type UpgradeSessionUseCase,
+  UPGRADE_SESSION_USE_CASE,
+} from './authorize.use-cases.js'
 
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
 
@@ -26,9 +28,10 @@ export class AuthorizeController extends BaseController {
         new AuthorizeController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
-          //c.resolve<AuthLandingUseCase>(AUTH_LANDING_USE_CASE),
-          //c.resolve<AuthTransparentUseCase>(AUTH_TRANSPARENT_USE_CASE)
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<CreateSessionUseCase>(CREATE_SESSION_USE_CASE),
+          c.resolve<AuthSessionUseCase>(AUTH_SESSION_USE_CASE),
+          c.resolve<UpgradeSessionUseCase>(UPGRADE_SESSION_USE_CASE),
         )
     )
   }
@@ -40,17 +43,143 @@ export class AuthorizeController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    router: HttpServerRouter
-    //protected readonly authLandingUseCase: AuthLandingUseCase,
-    //protected readonly authTransparentUseCase: AuthTransparentUseCase,
+    router: HttpServerRouter,
+    protected readonly createSessionUseCase: CreateSessionUseCase,
+    protected readonly authSessionUseCase: AuthSessionUseCase,
+    protected readonly upgradeSessionUseCase: UpgradeSessionUseCase,
   ) {
     super(validator, logger, router, 'authorize')
 
-    this.router.addMiddleware('authorize', this.landingAuthMiddleware)
+    this.router.addMiddleware(this.defaultMiddleware)
+  }
 
-    this.logger.debug(`Controller initialized`, {
-      controllerName: this.controllerName
-    })
+  private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
+    try {
+      this.testConfigure(ctx.state)
+
+      const { campaign, target } = ctx.state
+
+      if (target.isLanding) {
+        const isLandingAuthPath = ctx.isUrlPathEquals(campaign.landingAuthPath)
+
+        if (isLandingAuthPath) {
+          if (!ctx.isMethod('GET')) {
+            await this.renderNotFoundPage(ctx, target)
+
+            return
+          }
+
+          const urlQuery = ctx.getUrlQuery()
+
+          const landingAuthValue = urlQuery[campaign.landingAuthParam]
+          const landingAuthQuery = this.parseLandingAuthQuery(landingAuthValue)
+
+          if (!landingAuthQuery) {
+            await this.renderNotFoundPage(ctx, target)
+
+            return
+          }
+
+          const { session, proxy } = await this.authorizeService.landingAuth({
+
+          })
+
+          if (!session) {
+            this.renderFailureRedirect()
+
+            return
+          }
+
+          ctx.setResponseCookie(campaign.sessionCookieName, {
+            value: session.sessionId,
+            maxAge: Math.round(campaign.sessionExpire / 1000),
+            httpOnly: true
+          })
+
+        } else {
+
+        }
+      } else {
+      }
+
+      await next()
+    } catch (error) {
+      this.handleException(error, 'default')
+    }
+  }
+
+  protected renderNotFoundPage(ctx: HttpServerContext, target: FullTargetModel): Promise<void> {
+    const body = Buffer.from(target.notFoundPage)
+
+    const headers: HttpHeaders = {
+      'content-type': 'text/html',
+    }
+
+    ctx.prepareResponse(200, headers, body)
+
+    await ctx.sendResponse()
+  }
+
+
+
+
+  private transparentAuthMiddleware: HttpServerMiddleware = async (ctx, next) => {
+    try {
+      this.existsStateCampaign(ctx.state)
+      this.existsStateTarget(ctx.state)
+
+      const { campaign, target } = ctx.state
+
+      if (target.isLanding) {
+        await next()
+
+        return
+      }
+
+      const sessionCookie = ctx.requestCookies[campaign.sessionCookieName]
+
+      if (!sessionCookie) {
+        const { session } = await this.createSessionUseCase({
+          campaignId: campaign.campaignId
+        })
+
+        ctx.responseCookies[campaign.sessionCookieName] = session.sessionId
+        ctx.responseHeaders['location'] = ctx.url
+
+        await ctx.sendResponse(301)
+
+        return
+      }
+
+      const isOk = this.validateSessionCookie(sessionCookie)
+
+      if (!isOk) {
+        ctx.responseCookies[campaign.sessionCookieName] = null
+        ctx.responseHeaders['location'] = ctx.url
+
+        await ctx.sendResponse(301)
+
+        return
+      }
+
+      const { session } = await this.authSessionUseCase({
+        campaignId: campaign.campaignId,
+        sessionCookie
+      })
+
+      if (!session) {
+        ctx.responseCookies[campaign.sessionCookieName] = null
+        ctx.responseHeaders['location'] = ctx.url
+
+        await ctx.sendResponse(301)
+
+        return
+      }
+
+      await next()
+    } catch (error) {
+      this.handleException(error, 'transparentAuth')
+    }
   }
 
   private landingAuthMiddleware: HttpServerMiddleware = async (ctx, next) => {
@@ -60,7 +189,13 @@ export class AuthorizeController extends BaseController {
 
       const { campaign, target } = ctx.state
 
-      const isFound = target.isLanding && ctx.isUrlPath(campaign.landingAuthPath)
+      if (!this.isLandingAuthRoute(ctx, campaign, target)) {
+      }
+
+      const isFound =
+        ctx.isMethod('GET') &&
+        ctx.isUrlPathEquals(campaign.landingAuthPath) &&
+        target.isLanding
 
       if (!isFound) {
         await next()
@@ -68,34 +203,65 @@ export class AuthorizeController extends BaseController {
         return
       }
 
-      /*
-      const authQuery = ctx.parseUrlQuery()
+      const urlQuery = ctx.getUrlQuery()
 
-      const value = authQuery['campaign.landingAuthParam']
+      const authParamsValue = urlQuery[campaign.landingAuthParam]
+      const authParamsData = this.parseAuthParamsData(authParamsValue)
 
-      this.parseAuthQuery(authQuery[campaign.landingAuthParam])
-
-      if (!authQuery) {
-        this.renderNotFound()
+      if (!authParamsData) {
+        this.renderNotFoundPage()
 
         return
       }
 
       const { session, proxy } = this.landingAuthUseCase.execute({
         campaignId: campaign.campaignId,
-        lureId: authQuery.lureId,
-        sessionId: authQuery.sessionId,
-        sessionSecret: authQuery.sessionSecret
+        lureId: authParamsData.lureId,
+        sessionId: authParamsData.sessionId,
+        sessionSecret: authParamsData.sessionSecret
       })
 
       if (!session) {
         this.renderFailureRedirect()
+
+        return
       }
 
-      ctx.responseCookies[campaign.sessionCookieName]
-      */
+      ctx.setResponseCookie(campaign.sessionCookieName, session.sessionId)
+
+      await next()
     } catch (error) {
       this.handleException(error, 'landingAuth')
     }
   }
+
+  private isLandingAuthRoute(
+    ctx: HttpServerContext,
+    campaign: CampaignModel,
+    target: EnabledTargetModel
+  ): boolean {
+    return ctx.isMethod('GET') && ctx.isUrlPathEquals(campaign.landingAuthPath) && target.isLanding
+  }
+
+  protected parseLandingAuthData(value: unknown): LandingAuthData | null {
+    try {
+      if (value !== 'string') {
+        return null
+      }
+
+      const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
+
+      this.validator.assertSchema<LandingAuthData>('authorize-landing-auth-data', data)
+
+      return data
+    } catch (error) {
+      ctx.addLog('parse-landing-auth-data-error', {
+        value,
+        error: serializeError(error)
+      })
+
+      return null
+    }
+  }
+
 }

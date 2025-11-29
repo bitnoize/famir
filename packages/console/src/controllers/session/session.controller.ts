@@ -45,10 +45,6 @@ export class SessionController extends BaseController {
     })
 
     this.router.addApiCall('readSession', this.readSessionApiCall)
-
-    this.logger.debug(`Controller initialized`, {
-      controllerName: this.controllerName
-    })
   }
 
   private readSessionApiCall: ReplServerApiCall = async (data) => {

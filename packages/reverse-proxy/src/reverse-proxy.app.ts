@@ -47,8 +47,6 @@ export class ReverseProxyApp {
         })
       })
     })
-
-    this.logger.debug(`ReverseProxyApp initialized`)
   }
 
   async start(): Promise<void> {

@@ -54,10 +54,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       'database-raw-target': rawTargetSchema,
       'database-raw-full-target': rawFullTargetSchema
     })
-
-    this.logger.debug(`Repository initialized`, {
-      repository: this.repositoryName
-    })
   }
 
   async createTarget(data: CreateTargetData): Promise<TargetModel> {
@@ -76,10 +72,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           data.mirrorSub,
           data.mirrorPort,
           data.connectTimeout,
-          data.regularTimeout,
+          data.requestTimeout,
           data.streamingTimeout,
-          data.requestDataLimit,
-          data.responseDataLimit,
+          data.requestBodyLimit,
+          data.responseBodyLimit,
           data.mainPage,
           data.notFoundPage,
           data.faviconIco,
@@ -132,10 +128,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           data.campaignId,
           data.targetId,
           data.connectTimeout,
-          data.regularTimeout,
+          data.requestTimeout,
           data.streamingTimeout,
-          data.requestDataLimit,
-          data.responseDataLimit,
+          data.requestBodyLimit,
+          data.responseBodyLimit,
           data.mainPage,
           data.notFoundPage,
           data.faviconIco,
@@ -376,10 +372,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       mirrorPort: rawValue.mirror_port,
       labels: rawValue.labels,
       connectTimeout: rawValue.connect_timeout,
-      regularTimeout: rawValue.regular_timeout,
+      requestTimeout: rawValue.request_timeout,
       streamingTimeout: rawValue.streaming_timeout,
-      requestDataLimit: rawValue.request_data_limit,
-      responseDataLimit: rawValue.response_data_limit,
+      requestBodyLimit: rawValue.request_body_limit,
+      responseBodyLimit: rawValue.response_body_limit,
       mainPage: rawValue.main_page,
       notFoundPage: rawValue.not_found_page,
       faviconIco: rawValue.favicon_ico,

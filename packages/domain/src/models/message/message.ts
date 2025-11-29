@@ -1,7 +1,7 @@
 import {
   HttpBody,
   HttpHeaders,
-  HttpLogs,
+  HttpLog,
   HttpRequestCookies,
   HttpResponseCookies
 } from '../../http-proto.js'
@@ -34,5 +34,5 @@ export interface FullMessageModel extends MessageModel {
   readonly responseCookies: HttpResponseCookies
   readonly responseBody: HttpBody
   readonly clientIp: string
-  readonly logs: HttpLogs
+  readonly logs: HttpLog[]
 }

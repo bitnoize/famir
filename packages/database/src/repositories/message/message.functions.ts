@@ -1,7 +1,7 @@
 import {
   HttpBody,
   HttpHeaders,
-  HttpLogs,
+  HttpLog,
   HttpRequestCookies,
   HttpResponseCookies
 } from '@famir/domain'
@@ -62,7 +62,7 @@ export const messageFunctions = {
         score: number,
         startTime: number,
         finishTime: number,
-        logs: HttpLogs
+        logs: HttpLog[]
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))

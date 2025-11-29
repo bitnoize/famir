@@ -7,7 +7,7 @@ export interface HttpClientRequest {
   headers: HttpHeaders
   body: HttpBody
   connectTimeout: number
-  timeout: number
+  requestTimeout: number
   bodyLimit: number
 }
 
@@ -15,11 +15,17 @@ export interface HttpClientResponse {
   status: number
   headers: HttpHeaders
   body: HttpBody
-  error?: unknown
+}
+
+export interface HttpClientStreamingResponse {
+  status: number
+  headers: HttpHeaders
+  // TODO
 }
 
 export const HTTP_CLIENT = Symbol('HttpClient')
 
 export interface HttpClient {
-  forwardRegularRequest(request: HttpClientRequest): Promise<HttpClientResponse>
+  forwardRequest(request: HttpClientRequest): Promise<HttpClientResponse>
+  //forwardStreamingRequest(request: HttpClientRequest): Promise<HttpClientStreamingResponse>
 }

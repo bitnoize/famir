@@ -63,8 +63,6 @@ export class NodeReplServer implements ReplServer {
     })
 
     this.server.maxConnections = this.options.maxClients
-
-    this.logger.debug(`ReplServer initialized`)
   }
 
   listen(): Promise<void> {

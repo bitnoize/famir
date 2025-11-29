@@ -90,10 +90,10 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     'mirror_port',
     'labels',
     'connect_timeout',
-    'regular_timeout',
+    'request_timeout',
     'streaming_timeout',
-    'request_data_limit',
-    'response_data_limit',
+    'request_body_limit',
+    'response_body_limit',
     'main_page',
     'not_found_page',
     'favicon_ico',
@@ -146,16 +146,16 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     connect_timeout: {
       type: 'integer'
     },
-    regular_timeout: {
+    request_timeout: {
       type: 'integer'
     },
     streaming_timeout: {
       type: 'integer'
     },
-    request_data_limit: {
+    request_body_limit: {
       type: 'integer'
     },
-    response_data_limit: {
+    response_body_limit: {
       type: 'integer'
     },
     main_page: {
@@ -230,7 +230,7 @@ export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
   maximum: 60 * 1000
 } as const
 
-export const targetRegularTimeoutSchema: JSONSchemaType<number> = {
+export const targetRequestTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1 * 1000,
   maximum: 2 * 60 * 1000
@@ -242,13 +242,13 @@ export const targetStreamingTimeoutSchema: JSONSchemaType<number> = {
   maximum: 24 * 3600 * 1000
 } as const
 
-export const targetRequestDataLimitSchema: JSONSchemaType<number> = {
+export const targetRequestBodyLimitSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1024,
   maximum: 1024 * 1024 * 1024
 } as const
 
-export const targetResponseDataLimitSchema: JSONSchemaType<number> = {
+export const targetResponseBodyLimitSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1024,
   maximum: 1024 * 1024 * 1024
@@ -280,10 +280,10 @@ export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     'mirrorSub',
     'mirrorPort',
     'connectTimeout',
-    'regularTimeout',
+    'requestTimeout',
     'streamingTimeout',
-    'requestDataLimit',
-    'responseDataLimit',
+    'requestBodyLimit',
+    'responseBodyLimit',
     'mainPage',
     'notFoundPage',
     'faviconIco',
@@ -307,20 +307,20 @@ export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
       ...targetConnectTimeoutSchema,
       default: 1 * 1000
     },
-    regularTimeout: {
-      ...targetRegularTimeoutSchema,
+    requestTimeout: {
+      ...targetRequestTimeoutSchema,
       default: 10 * 1000
     },
     streamingTimeout: {
       ...targetStreamingTimeoutSchema,
       default: 3600 * 1000
     },
-    requestDataLimit: {
-      ...targetRequestDataLimitSchema,
+    requestBodyLimit: {
+      ...targetRequestBodyLimitSchema,
       default: 10 * 1024 * 1024
     },
-    responseDataLimit: {
-      ...targetResponseDataLimitSchema,
+    responseBodyLimit: {
+      ...targetResponseBodyLimitSchema,
       default: 10 * 1024 * 1024
     },
     mainPage: {
@@ -375,20 +375,20 @@ export const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
       ...targetConnectTimeoutSchema,
       nullable: true
     },
-    regularTimeout: {
-      ...targetRegularTimeoutSchema,
+    requestTimeout: {
+      ...targetRequestTimeoutSchema,
       nullable: true
     },
     streamingTimeout: {
       ...targetStreamingTimeoutSchema,
       nullable: true
     },
-    requestDataLimit: {
-      ...targetRequestDataLimitSchema,
+    requestBodyLimit: {
+      ...targetRequestBodyLimitSchema,
       nullable: true
     },
-    responseDataLimit: {
-      ...targetResponseDataLimitSchema,
+    responseBodyLimit: {
+      ...targetResponseBodyLimitSchema,
       nullable: true
     },
     mainPage: {

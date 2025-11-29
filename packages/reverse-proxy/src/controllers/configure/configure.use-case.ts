@@ -7,19 +7,19 @@ import {
   TargetRepository,
   testEnabledTargetModel
 } from '@famir/domain'
-import { SetupMirrorData, SetupMirrorReply } from './setup-mirror.js'
+import { ConfigureData, ConfigureReply } from './configure.js'
 
-export const SETUP_MIRROR_USE_CASE = Symbol('SetupMirrorUseCase')
+export const CONFIGURE_USE_CASE = Symbol('ConfigureUseCase')
 
-export class SetupMirrorUseCase {
+export class ConfigureUseCase {
   static inject(container: DIContainer) {
-    container.registerSingleton<SetupMirrorUseCase>(
-      SETUP_MIRROR_USE_CASE,
+    container.registerSingleton<ConfigureUseCase>(
+      CONFIGURE_USE_CASE,
       (c) =>
-        new SetupMirrorUseCase(
+        new ConfigureUseCase(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY)
-        )
+      )
     )
   }
 
@@ -28,7 +28,7 @@ export class SetupMirrorUseCase {
     protected readonly targetRepository: TargetRepository
   ) {}
 
-  async execute(data: SetupMirrorData): Promise<SetupMirrorReply> {
+  async execute(data: ConfigureData): Promise<ConfigureReply> {
     const [campaign, target] = await Promise.all([
       this.campaignRepository.readCampaign({
         campaignId: data.campaignId

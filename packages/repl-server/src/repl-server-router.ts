@@ -18,9 +18,7 @@ export class ImplReplServerRouter implements ReplServerRouter {
 
   protected readonly apiCalls: ReplServerApiCalls = {}
 
-  constructor(protected readonly logger: Logger) {
-    this.logger.debug(`ReplServerRouter initialized`)
-  }
+  constructor(protected readonly logger: Logger) {}
 
   addApiCall(name: string, apiCall: ReplServerApiCall) {
     if (this.apiCalls[name]) {

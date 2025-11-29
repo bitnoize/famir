@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { AuthorizeController } from './authorize.controller.js'
-//import { AuthLandingUseCase, AuthTransparentUseCase } from './use-cases/index.js'
+import { AuthLandingUseCase, AuthTransparentUseCase } from './use-cases/index.js'
 
 export const composeAuthorizeModule = (container: DIContainer) => {
   //AuthLandingUseCase.inject(container)

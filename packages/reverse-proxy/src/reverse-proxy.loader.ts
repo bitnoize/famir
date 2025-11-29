@@ -47,16 +47,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   CurlHttpClient.inject(container)
 
-  ImplHttpServerRouter.inject(container, [
-    'setup-mirror',
-    'build-request',
-    'well-known-urls',
-    'authorize',
-    'parse-request',
-    'build-response',
-    'parse-response',
-    'complete'
-  ])
+  ImplHttpServerRouter.inject(container)
 
   NodeHttpServer.inject(container)
 

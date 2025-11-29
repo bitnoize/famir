@@ -62,10 +62,6 @@ export class CampaignController extends BaseController {
     this.router.addApiCall('updateCampaign', this.updateCampaignApiCall)
     this.router.addApiCall('deleteCampaign', this.deleteCampaignApiCall)
     this.router.addApiCall('listCampaigns', this.listCampaignsApiCall)
-
-    this.logger.debug(`Controller initialized`, {
-      controllerName: this.controllerName
-    })
   }
 
   private createCampaignApiCall: ReplServerApiCall = async (data) => {

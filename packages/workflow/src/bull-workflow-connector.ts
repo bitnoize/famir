@@ -43,8 +43,6 @@ export class BullWorkflowConnector implements WorkflowConnector {
         error: serializeError(error)
       })
     })
-
-    this.logger.debug(`WorkflowConnector initialized`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -55,13 +53,13 @@ export class BullWorkflowConnector implements WorkflowConnector {
   //async connect(): Promise<void> {
   //  await this.redis.connect()
   //
-  //  this.logger.debug(`WorkflowConnector connected`)
+  //  this.logger.debug(`Workflow connected`)
   //}
 
   async close(): Promise<void> {
     await this.redis.quit()
 
-    this.logger.debug(`WorkflowConnector closed`)
+    this.logger.debug(`Workflow closed`)
   }
 
   private buildOptions(config: WorkflowConfig): WorkflowConnectorOptions {

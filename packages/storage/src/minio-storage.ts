@@ -27,8 +27,6 @@ export class MinioStorage implements Storage {
       accessKey: this.options.accessKey,
       secretKey: this.options.secretKey
     })
-
-    this.logger.debug(`Storage initialized`)
   }
 
   private buildOptions(config: StorageConfig): StorageOptions {

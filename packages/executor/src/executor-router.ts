@@ -24,10 +24,6 @@ export class ImplExecutorRouter implements ExecutorRouter {
     protected readonly queueNames: string[]
   ) {
     this.map = Object.fromEntries(queueNames.map((queueName) => [queueName, {}]))
-
-    this.logger.debug(`ExecutorRouter initialized`, {
-      queueNames
-    })
   }
 
   addProcessor(queueName: string, jobName: string, processor: ExecutorProcessor) {

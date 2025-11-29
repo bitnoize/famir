@@ -51,10 +51,6 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       'database-raw-campaign': rawCampaignSchema,
       'database-raw-full-campaign': rawFullCampaignSchema
     })
-
-    this.logger.debug(`Repository initialized`, {
-      repository: this.repositoryName
-    })
   }
 
   async createCampaign(data: CreateCampaignData): Promise<CampaignModel> {

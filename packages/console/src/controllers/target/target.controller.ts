@@ -73,10 +73,6 @@ export class TargetController extends BaseController {
     this.router.addApiCall('removeTargetLabel', this.removeTargetLabelApiCall)
     this.router.addApiCall('deleteTarget', this.deleteTargetApiCall)
     this.router.addApiCall('listTargets', this.listTargetsApiCall)
-
-    this.logger.debug(`Controller initialized`, {
-      controllerName: this.controllerName
-    })
   }
 
   private createTargetApiCall: ReplServerApiCall = async (data) => {

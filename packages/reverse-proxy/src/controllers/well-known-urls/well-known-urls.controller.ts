@@ -1,5 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
+  HttpHeaders,
   HTTP_SERVER_ROUTER,
   HttpServerMiddleware,
   HttpServerRouter,
@@ -32,39 +33,39 @@ export class WellKnownUrlsController extends BaseController {
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
     super(validator, logger, router, 'well-known-urls')
 
-    this.router.addMiddleware('well-known-urls', this.preflightCorsMiddleware)
-    this.router.addMiddleware('well-known-urls', this.faviconIcoMiddleware)
-    this.router.addMiddleware('well-known-urls', this.robotsTxtMiddleware)
-    this.router.addMiddleware('well-known-urls', this.sitemapXmlMiddleware)
-
-    this.logger.debug(`Controller initialized`, {
-      controllerName: this.controllerName
-    })
+    this.router.addMiddleware(this.preflightCorsMiddleware)
+    this.router.addMiddleware(this.faviconIcoMiddleware)
+    this.router.addMiddleware(this.robotsTxtMiddleware)
+    this.router.addMiddleware(this.sitemapXmlMiddleware)
   }
 
   private preflightCorsMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.existsStateCampaign(ctx.state)
+      this.testConfigure(ctx.state)
 
       const { campaign } = ctx.state
 
-      const isFound = ctx.isMethod('OPTIONS')
+      const foundRoute = ctx.isMethod('OPTIONS')
 
-      if (!isFound) {
+      if (!foundRoute) {
         await next()
 
         return
       }
 
-      ctx.responseHeaders['content-type'] = 'text/plain'
-      ctx.responseHeaders['access-control-allow-origin'] = campaign.mirrorDomain
-      ctx.responseHeaders['access-control-allow-methods'] = '*'
-      ctx.responseHeaders['access-control-allow-headers'] = '*'
-      ctx.responseHeaders['access-control-expose-headers'] = '*'
-      ctx.responseHeaders['access-control-allow-credentials'] = 'true'
-      ctx.responseHeaders['access-control-max-age'] = '86400'
+      const headers: HttpHeaders = {
+        'content-type': 'text/plain',
+        'access-control-allow-origin': campaign.mirrorDomain,
+        'access-control-allow-methods': '*',
+        'access-control-allow-headers': '*',
+        'access-control-expose-headers': '*',
+        'access-control-allow-credentials': 'true',
+        'access-control-max-age': '86400'
+      }
 
-      await ctx.sendResponse(204)
+      ctx.prepareResponse(204, headers)
+
+      await ctx.sendResponse()
     } catch (error) {
       this.handleException(error, 'preflightCors')
     }
@@ -72,31 +73,35 @@ export class WellKnownUrlsController extends BaseController {
 
   private faviconIcoMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.existsStateTarget(ctx.state)
+      this.testConfigure(ctx.state)
 
       const { target } = ctx.state
 
-      const isFound =
-        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPath('/favicon.ico') && target.faviconIco
+      const foundRoute =
+        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPathEquals('/favicon.ico') && target.faviconIco
 
-      if (!isFound) {
+      if (!foundRoute) {
         await next()
 
         return
       }
 
-      const responseBody = Buffer.from(target.faviconIco, 'base64')
+      const body = Buffer.from(target.faviconIco, 'base64')
 
-      ctx.responseHeaders['content-type'] = 'image/x-icon'
-      ctx.responseHeaders['content-length'] = responseBody.length.toString()
-      ctx.responseHeaders['last-modified'] = target.updatedAt.toUTCString()
-      ctx.responseHeaders['cache-control'] = 'public, max-age=691200'
-
-      if (ctx.isMethod('GET')) {
-        ctx.responseBody = responseBody
+      const headers: HttpHeaders = {
+        'content-type': 'image/x-icon',
+        'content-length': body.length.toString(),
+        'last-modified': target.updatedAt.toUTCString(),
+        'cache-control': 'public, max-age=691200',
       }
 
-      await ctx.sendResponse(200)
+      if (ctx.isMethod('GET')) {
+        ctx.prepareResponse(200, headers, body)
+      } else {
+        ctx.prepareResponse(200, headers)
+      }
+
+      await ctx.sendResponse()
     } catch (error) {
       this.handleException(error, 'faviconIco')
     }
@@ -104,31 +109,35 @@ export class WellKnownUrlsController extends BaseController {
 
   private robotsTxtMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.existsStateTarget(ctx.state)
+      this.testConfigure(ctx.state)
 
       const { target } = ctx.state
 
-      const isFound =
-        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPath('/robots.txt') && target.robotsTxt
+      const foundRoute =
+        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPathEquals('/robots.txt') && target.robotsTxt
 
-      if (!isFound) {
+      if (!foundRoute) {
         await next()
 
         return
       }
 
-      const responseBody = Buffer.from(target.robotsTxt)
+      const body = Buffer.from(target.robotsTxt)
 
-      ctx.responseHeaders['content-type'] = 'text/plain'
-      ctx.responseHeaders['content-length'] = responseBody.length.toString()
-      ctx.responseHeaders['last-modified'] = target.updatedAt.toUTCString()
-      ctx.responseHeaders['cache-control'] = 'public, max-age=691200'
-
-      if (ctx.isMethod('GET')) {
-        ctx.responseBody = responseBody
+      const headers: HttpHeaders = {
+        'content-type': 'text/plain',
+        'content-length':  body.length.toString(),
+        'last-modified': target.updatedAt.toUTCString(),
+        'cache-control': 'public, max-age=691200',
       }
 
-      await ctx.sendResponse(200)
+      if (ctx.isMethod('GET')) {
+        ctx.prepareResponse(200, headers, body)
+      } else {
+        ctx.prepareResponse(200, headers)
+      }
+
+      await ctx.sendResponse()
     } catch (error) {
       this.handleException(error, 'robotsTxt')
     }
@@ -136,31 +145,35 @@ export class WellKnownUrlsController extends BaseController {
 
   private sitemapXmlMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.existsStateTarget(ctx.state)
+      this.testConfigure(ctx.state)
 
       const { target } = ctx.state
 
-      const isFound =
-        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPath('/sitemap.xml') && target.sitemapXml
+      const foundRoute =
+        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPathEquals('/sitemap.xml') && target.sitemapXml
 
-      if (!isFound) {
+      if (!foundRoute) {
         await next()
 
         return
       }
 
-      const responseBody = Buffer.from(target.sitemapXml)
+      const body = Buffer.from(target.sitemapXml)
 
-      ctx.responseHeaders['content-type'] = 'application/xml'
-      ctx.responseHeaders['content-length'] = responseBody.length.toString()
-      ctx.responseHeaders['last-modified'] = target.updatedAt.toUTCString()
-      ctx.responseHeaders['cache-control'] = 'public, max-age=691200'
-
-      if (ctx.isMethod('GET')) {
-        ctx.responseBody = responseBody
+      const headers: HttpHeaders = {
+        'content-type': 'application/xml',
+        'content-length': body.length.toString(),
+        'last-modified': target.updatedAt.toUTCString(),
+        'cache-control': 'public, max-age=691200',
       }
 
-      await ctx.sendResponse(200)
+      if (ctx.isMethod('GET')) {
+        ctx.prepareResponse(200, headers, body)
+      } else {
+        ctx.prepareResponse(200, headers)
+      }
+
+      await ctx.sendResponse()
     } catch (error) {
       this.handleException(error, 'sitemapXml')
     }

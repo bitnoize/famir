@@ -44,8 +44,6 @@ export class BullExecutorConnector implements ExecutorConnector {
         error: serializeError(error)
       })
     })
-
-    this.logger.debug(`ExecutorConnector initialized`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -56,13 +54,13 @@ export class BullExecutorConnector implements ExecutorConnector {
   //async connect(): Promise<void> {
   //  await this.redis.connect()
   //
-  //  this.logger.debug(`ExecutorConnector connected`)
+  //  this.logger.debug(`Executor connected`)
   //}
 
   async close(): Promise<void> {
     await this.redis.quit()
 
-    this.logger.debug(`ExecutorConnector closed`)
+    this.logger.debug(`Executor closed`)
   }
 
   private buildOptions(config: ExecutorConfig): ExecutorConnectorOptions {

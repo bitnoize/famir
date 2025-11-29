@@ -34,10 +34,10 @@ local function create_target(keys, args)
     mirror_sub = args[9],
     mirror_port = tonumber(args[10]),
     connect_timeout = tonumber(args[11]),
-    regular_timeout = tonumber(args[12]),
+    request_timeout = tonumber(args[12]),
     streaming_timeout = tonumber(args[13]),
-    request_data_limit = tonumber(args[14]),
-    response_data_limit = tonumber(args[15]),
+    request_body_limit = tonumber(args[14]),
+    response_body_limit = tonumber(args[15]),
     main_page = args[16],
     not_found_page = args[17],
     favicon_ico = args[18],
@@ -238,10 +238,10 @@ local function read_full_target(keys, args)
     'mirror_sub',
     'mirror_port',
     'connect_timeout',
-    'regular_timeout',
+    'request_timeout',
     'streaming_timeout',
-    'request_data_limit',
-    'response_data_limit',
+    'request_body_limit',
+    'response_body_limit',
     'main_page',
     'not_found_page',
     'favicon_ico',
@@ -272,10 +272,10 @@ local function read_full_target(keys, args)
     mirror_port = tonumber(values[10]),
     labels = redis.call('SMEMBERS', target_labels_key),
     connect_timeout = tonumber(values[11]),
-    regular_timeout = tonumber(values[12]),
+    request_timeout = tonumber(values[12]),
     streaming_timeout = tonumber(values[13]),
-    request_data_limit = tonumber(values[14]),
-    response_data_limit = tonumber(values[15]),
+    request_body_limit = tonumber(values[14]),
+    response_body_limit = tonumber(values[15]),
     main_page = values[16],
     not_found_page = values[17],
     favicon_ico = values[18],
@@ -364,11 +364,11 @@ local function update_target(keys, args)
       if not model.connect_timeout then
         return redis.error_reply('ERR Wrong model.connect_timeout')
       end
-    elseif field == 'regular_timeout' then
-      model.regular_timeout = tonumber(value)
+    elseif field == 'request_timeout' then
+      model.request_timeout = tonumber(value)
 
-      if not model.regular_timeout then
-        return redis.error_reply('ERR Wrong model.regular_timeout')
+      if not model.request_timeout then
+        return redis.error_reply('ERR Wrong model.request_timeout')
       end
     elseif field == 'streaming_timeout' then
       model.streaming_timeout = tonumber(value)
@@ -376,17 +376,17 @@ local function update_target(keys, args)
       if not model.streaming_timeout then
         return redis.error_reply('ERR Wrong model.streaming_timeout')
       end
-    elseif field == 'request_data_limit' then
-      model.request_data_limit = tonumber(value)
+    elseif field == 'request_body_limit' then
+      model.request_body_limit = tonumber(value)
 
-      if not model.request_data_limit then
-        return redis.error_reply('ERR Wrong model.request_data_limit')
+      if not model.request_body_limit then
+        return redis.error_reply('ERR Wrong model.request_body_limit')
       end
-    elseif field == 'response_data_limit' then
-      model.response_data_limit = tonumber(value)
+    elseif field == 'response_body_limit' then
+      model.response_body_limit = tonumber(value)
 
-      if not model.response_data_limit then
-        return redis.error_reply('ERR Wrong model.response_data_limit')
+      if not model.response_body_limit then
+        return redis.error_reply('ERR Wrong model.response_body_limit')
       end
     elseif field == 'main_page' then
       model.main_page = value

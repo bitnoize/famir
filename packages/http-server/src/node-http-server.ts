@@ -8,7 +8,6 @@ import {
   HttpServerContext,
   HttpServerError,
   HttpServerMiddleware,
-  HttpServerNextFunction,
   HttpServerRouter,
   Logger,
   LOGGER,
@@ -44,22 +43,14 @@ export class NodeHttpServer implements HttpServer {
   ) {
     this.options = this.buildOptions(config.data)
 
-    this.server = http.createServer()
-
-    this.server.on('request', (req, res) => {
-      this.logger.debug(`Server request event`, {
-        request: this.dumpRequest(req)
-      })
-
+    this.server = http.createServer((req, res) => {
       this.handleServerRequest(req, res).catch((error: unknown) => {
-        this.logger.fatal(`HttpServer unhandled error`, {
+        this.logger.fatal(`Server unhandled error`, {
           error: serializeError(error),
           request: this.dumpRequest(req)
         })
       })
     })
-
-    this.logger.debug(`HttpServer initialized`)
   }
 
   listen(): Promise<void> {
@@ -123,7 +114,7 @@ export class NodeHttpServer implements HttpServer {
 
       await middleware(ctx, async () => {})
 
-      if (!ctx.status) {
+      if (!ctx.isComplete) {
         throw new HttpServerError(`Incomplete request`, {
           code: 'INTERNAL_ERROR'
         })
@@ -143,7 +134,7 @@ export class NodeHttpServer implements HttpServer {
         message = error.message
       }
 
-      this.logger.error(`HttpServer request error`, {
+      this.logger.error(`Server request error`, {
         error: serializeError(error),
         request: this.dumpRequest(req)
       })
@@ -163,7 +154,7 @@ export class NodeHttpServer implements HttpServer {
         res.end()
       }
     } catch (criticalError) {
-      this.logger.fatal(`HttpServer critical error`, {
+      this.logger.fatal(`Server critical error`, {
         criticalError: serializeError(criticalError),
         request: this.dumpRequest(req)
       })
@@ -181,13 +172,15 @@ export class NodeHttpServer implements HttpServer {
   }
 
   protected chainMiddlewares(middlewares: HttpServerMiddleware[]): HttpServerMiddleware {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return async (ctx: HttpServerContext, next: HttpServerNextFunction): Promise<void> => {
+    return async (
+      ctx: HttpServerContext
+      //next: HttpServerNextFunction
+    ): Promise<void> => {
       let index = -1
 
       const dispatch = async (i: number): Promise<void> => {
         if (i <= index) {
-          throw new Error('next() called multiple times')
+          throw new Error('Middleware next() called multiple times')
         }
 
         index = i

@@ -50,10 +50,6 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     this.validator.addSchemas({
       'database-raw-proxy': rawProxySchema
     })
-
-    this.logger.debug(`Repository initialized`, {
-      repository: this.repositoryName
-    })
   }
 
   async createProxy(data: CreateProxyData): Promise<ProxyModel> {

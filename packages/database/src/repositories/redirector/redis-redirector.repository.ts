@@ -52,10 +52,6 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       'database-raw-redirector': rawRedirectorSchema,
       'database-raw-full-redirector': rawFullRedirectorSchema
     })
-
-    this.logger.debug(`Repository initialized`, {
-      repository: this.repositoryName
-    })
   }
 
   async createRedirector(data: CreateRedirectorData): Promise<RedirectorModel> {

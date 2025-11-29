@@ -1,10 +1,8 @@
 import { HttpServerMiddleware } from './http-server.js'
 
-export type HttpServerRouterSteps = Record<string, HttpServerMiddleware[]>
-
 export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
 
 export interface HttpServerRouter {
-  addMiddleware(stepName: string, middleware: HttpServerMiddleware): void
+  addMiddleware(middleware: HttpServerMiddleware): void
   getMiddlewares(): HttpServerMiddleware[]
 }

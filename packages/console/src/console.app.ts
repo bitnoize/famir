@@ -49,8 +49,6 @@ export class ConsoleApp {
         })
       })
     })
-
-    this.logger.debug(`ConsoleApp initialized`)
   }
 
   async start(): Promise<void> {

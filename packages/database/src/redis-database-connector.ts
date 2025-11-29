@@ -51,8 +51,6 @@ export class RedisDatabaseConnector implements DatabaseConnector {
         error: serializeError(error)
       })
     })
-
-    this.logger.debug(`DatabaseConnector initialized`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -63,13 +61,13 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   async connect(): Promise<void> {
     await this.redis.connect()
 
-    this.logger.debug(`DatabaseConnector connected`)
+    this.logger.debug(`Database connected`)
   }
 
   async close(): Promise<void> {
     await this.redis.close()
 
-    this.logger.debug(`DatabaseConnector closed`)
+    this.logger.debug(`Database closed`)
   }
 
   private buildOptions(config: DatabaseConfig): DatabaseConnectorOptions {

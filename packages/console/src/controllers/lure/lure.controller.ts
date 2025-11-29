@@ -66,10 +66,6 @@ export class LureController extends BaseController {
     this.router.addApiCall('disableLure', this.disableLureApiCall)
     this.router.addApiCall('deleteLure', this.deleteLureApiCall)
     this.router.addApiCall('listLures', this.listLuresApiCall)
-
-    this.logger.debug(`Controller initialized`, {
-      controllerName: this.controllerName
-    })
   }
 
   private createLureApiCall: ReplServerApiCall = async (data) => {

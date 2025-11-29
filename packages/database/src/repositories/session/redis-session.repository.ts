@@ -49,10 +49,6 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     this.validator.addSchemas({
       'database-raw-session': rawSessionSchema
     })
-
-    this.logger.debug(`Repository initialized`, {
-      repository: this.repositoryName
-    })
   }
 
   async createSession(data: CreateSessionData): Promise<SessionModel> {

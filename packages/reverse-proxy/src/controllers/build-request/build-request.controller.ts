@@ -32,21 +32,18 @@ export class BuildRequestController extends BaseController {
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
     super(validator, logger, router, 'build-request')
 
-    this.router.addMiddleware('build-request', this.defaultMiddleware)
-
-    this.logger.debug(`Controller initialized`, {
-      controllerName: this.controllerName
-    })
+    this.router.addMiddleware(this.defaultMiddleware)
   }
 
   private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.existsStateCampaign(ctx.state)
-      this.existsStateTarget(ctx.state)
+      this.testConfigure(ctx.state)
 
       const { campaign, target } = ctx.state
 
-      await ctx.loadRequestBody(target.requestDataLimit)
+      ctx.prepareRequest()
+
+      await ctx.loadRequestBody(target.requestBodyLimit)
 
       await next()
     } catch (error) {

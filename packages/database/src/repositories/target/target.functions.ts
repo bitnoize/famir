@@ -28,10 +28,10 @@ export interface RawTarget {
 export interface RawFullTarget extends RawTarget {
   labels: string[]
   connect_timeout: number
-  regular_timeout: number
+  request_timeout: number
   streaming_timeout: number
-  request_data_limit: number
-  response_data_limit: number
+  request_body_limit: number
+  response_body_limit: number
   main_page: string
   not_found_page: string
   favicon_ico: string
@@ -60,10 +60,10 @@ export const targetFunctions = {
         mirrorSub: string,
         mirrorPort: number,
         connectTimeout: number,
-        regularTimeout: number,
+        requestTimeout: number,
         streamingTimeout: number,
-        requestDataLimit: number,
-        responseDataLimit: number,
+        requestBodyLimit: number,
+        responseBodyLimit: number,
         mainPage: string,
         notFoundPage: string,
         faviconIco: string,
@@ -89,10 +89,10 @@ export const targetFunctions = {
         parser.push(mirrorSub)
         parser.push(mirrorPort.toString())
         parser.push(connectTimeout.toString())
-        parser.push(regularTimeout.toString())
+        parser.push(requestTimeout.toString())
         parser.push(streamingTimeout.toString())
-        parser.push(requestDataLimit.toString())
-        parser.push(responseDataLimit.toString())
+        parser.push(requestBodyLimit.toString())
+        parser.push(responseBodyLimit.toString())
         parser.push(mainPage)
         parser.push(notFoundPage)
         parser.push(faviconIco)
@@ -149,10 +149,10 @@ export const targetFunctions = {
         campaignId: string,
         targetId: string,
         connectTimeout: number | null | undefined,
-        regularTimeout: number | null | undefined,
+        requestTimeout: number | null | undefined,
         streamingTimeout: number | null | undefined,
-        requestDataLimit: number | null | undefined,
-        responseDataLimit: number | null | undefined,
+        requestBodyLimit: number | null | undefined,
+        responseBodyLimit: number | null | undefined,
         mainPage: string | null | undefined,
         notFoundPage: string | null | undefined,
         faviconIco: string | null | undefined,
@@ -169,9 +169,9 @@ export const targetFunctions = {
           parser.push(connectTimeout.toString())
         }
 
-        if (regularTimeout != null) {
-          parser.push('regular_timeout')
-          parser.push(regularTimeout.toString())
+        if (requestTimeout != null) {
+          parser.push('request_timeout')
+          parser.push(requestTimeout.toString())
         }
 
         if (streamingTimeout != null) {
@@ -179,14 +179,14 @@ export const targetFunctions = {
           parser.push(streamingTimeout.toString())
         }
 
-        if (requestDataLimit != null) {
-          parser.push('request_data_limit')
-          parser.push(requestDataLimit.toString())
+        if (requestBodyLimit != null) {
+          parser.push('request_body_limit')
+          parser.push(requestBodyLimit.toString())
         }
 
-        if (responseDataLimit != null) {
-          parser.push('response_data_limit')
-          parser.push(responseDataLimit.toString())
+        if (responseBodyLimit != null) {
+          parser.push('response_body_limit')
+          parser.push(responseBodyLimit.toString())
         }
 
         if (mainPage != null) {

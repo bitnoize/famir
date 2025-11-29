@@ -3,7 +3,6 @@ import {
   HttpHeader,
   HttpHeaders,
   HttpLog,
-  HttpLogs,
   HttpRequestCookie,
   HttpRequestCookies,
   HttpResponseCookie,
@@ -181,7 +180,7 @@ export const messageLogSchema: JSONSchemaType<HttpLog> = {
   additionalItems: false
 } as const
 
-export const messageLogsSchema: JSONSchemaType<HttpLogs> = {
+export const messageLogsSchema: JSONSchemaType<HttpLog[]> = {
   type: 'array',
   items: messageLogSchema
 } as const
@@ -225,11 +224,10 @@ export const messageRequestCookiesSchema: JSONSchemaType<HttpRequestCookies> = {
 
 export const messageResponseCookieSchema: JSONSchemaType<HttpResponseCookie> = {
   type: 'object',
-  required: [],
+  required: ['value'],
   properties: {
     value: {
-      type: 'string',
-      nullable: true
+      type: 'string'
     },
     path: {
       type: 'string',

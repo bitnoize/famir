@@ -1,7 +1,7 @@
 import {
   HttpBody,
   HttpHeaders,
-  HttpLogs,
+  HttpLog,
   HttpRequestCookies,
   HttpResponseCookies
 } from '../../http-proto.js'
@@ -26,7 +26,7 @@ export interface CreateMessageData {
   score: number
   startTime: number
   finishTime: number
-  logs: HttpLogs
+  logs: HttpLog[]
 }
 
 export interface ReadMessageData {

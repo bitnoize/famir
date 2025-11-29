@@ -9,7 +9,7 @@ import {
   FullMessageModel,
   HttpBody,
   HttpHeaders,
-  HttpLogs,
+  HttpLog,
   HttpRequestCookies,
   HttpResponseCookies,
   Logger,
@@ -64,10 +64,6 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       'database-message-request-cookies': messageRequestCookiesSchema,
       'database-message-response-cookies': messageResponseCookiesSchema,
       'database-message-logs': messageLogsSchema
-    })
-
-    this.logger.debug(`Repository initialized`, {
-      repository: this.repositoryName
     })
   }
 
@@ -195,11 +191,11 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  protected parseMessageLogs(value: string): HttpLogs {
+  protected parseMessageLogs(value: string): HttpLog[] {
     try {
       const logs: unknown = JSON.parse(value)
 
-      this.validator.assertSchema<HttpLogs>('database-message-logs', logs)
+      this.validator.assertSchema<HttpLog[]>('database-message-logs', logs)
 
       return logs
     } catch (error) {
