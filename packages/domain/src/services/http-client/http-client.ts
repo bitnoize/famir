@@ -7,7 +7,7 @@ export interface HttpClientRequest {
   headers: HttpHeaders
   body: HttpBody
   connectTimeout: number
-  requestTimeout: number
+  timeout: number
   bodyLimit: number
 }
 

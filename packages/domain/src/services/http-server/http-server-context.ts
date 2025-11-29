@@ -23,7 +23,7 @@ export interface HttpServerContext {
   readonly method: string
   isMethod(method: string): boolean
   isMethods(methods: string[]): boolean
-  readonly originalUrl: string
+  readonly originUrl: string
   readonly url: HttpRelativeUrl
   normalizeUrl(): string
   isUrlPathEquals(path: string): boolean
@@ -32,6 +32,7 @@ export interface HttpServerContext {
   getUrlQuery(options?: AbstractOptions): HttpQueryString | null
   setUrlQuery(query: HttpQueryString, options?: AbstractOptions): void
   isStreaming: boolean
+  readonly originHeaders: HttpHeaders
   readonly requestHeaders: HttpHeaders
   getRequestHeader(name: string): string | undefined
   getRequestHeaderArray(name: string): string[] | undefined
@@ -43,9 +44,10 @@ export interface HttpServerContext {
   setRequestCookies(cookies: HttpRequestCookies): void
   getRequestMediaType(): HttpMediaType | null
   setRequestMediaType(mediaType: HttpMediaType): void
-  prepareRequest(): void
+  prepareRequestHeaders(): void
   requestBody: HttpBody
   loadRequestBody(bodyLimit: number): Promise<void>
+  applyRequestWrappers(): void
   renewRequestCookieHeader(): void
   readonly responseHeaders: HttpHeaders
   getResponseHeader(name: string): string | undefined
@@ -60,6 +62,7 @@ export interface HttpServerContext {
   setResponseMediaType(mediaType: HttpMediaType): void
   responseBody: HttpBody
   prepareResponse(status: number, headers?: HttpHeaders, body?: HttpBody): void
+  applyResponseWrappers(): void
   renewResponseSetCookieHeader(): void
   sendResponse(): Promise<void>
   readonly responseHeadersSent: boolean

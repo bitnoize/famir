@@ -9,17 +9,17 @@ import {
 } from '@famir/domain'
 import { ConfigureData, ConfigureReply } from './configure.js'
 
-export const CONFIGURE_USE_CASE = Symbol('ConfigureUseCase')
+export const CONFIGURE_SERVICE = Symbol('ConfigureService')
 
-export class ConfigureUseCase {
+export class ConfigureService {
   static inject(container: DIContainer) {
-    container.registerSingleton<ConfigureUseCase>(
-      CONFIGURE_USE_CASE,
+    container.registerSingleton<ConfigureService>(
+      CONFIGURE_SERVICE,
       (c) =>
-        new ConfigureUseCase(
+        new ConfigureService(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY)
-      )
+        )
     )
   }
 

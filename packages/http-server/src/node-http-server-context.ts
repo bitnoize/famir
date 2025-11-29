@@ -48,7 +48,7 @@ export class NodeHttpServerContext implements HttpServerContext {
     return values.some((value) => this.isMethod(value))
   }
 
-  get originalUrl(): string {
+  get originUrl(): string {
     return this.req.url ?? '/'
   }
 
@@ -59,7 +59,7 @@ export class NodeHttpServerContext implements HttpServerContext {
       return this.#url
     }
 
-    this.#url = this.parseRelativeUrl(this.originalUrl)
+    this.#url = this.parseRelativeUrl(this.originUrl)
 
     return this.#url
   }
@@ -97,6 +97,10 @@ export class NodeHttpServerContext implements HttpServerContext {
   }
 
   isStreaming: boolean = false
+
+  get originHeaders(): HttpHeaders {
+    return this.req.headers
+  }
 
   readonly requestHeaders: HttpHeaders = {}
 
@@ -140,7 +144,7 @@ export class NodeHttpServerContext implements HttpServerContext {
     this.setMediaType(this.requestHeaders, mediaType)
   }
 
-  prepareRequest() {
+  prepareRequestHeaders() {
     this.setRequestHeaders(this.req.headers)
 
     const cookieHeader = this.getRequestHeaderArray('Cookie') ?? []
@@ -149,6 +153,8 @@ export class NodeHttpServerContext implements HttpServerContext {
     this.setRequestCookies(cookies)
 
     //this.setRequestHeader('Cookie', undefined)
+
+    // Transport, X-Famir
   }
 
   requestBody: HttpBody = Buffer.alloc(0)
@@ -212,6 +218,8 @@ export class NodeHttpServerContext implements HttpServerContext {
       })
     })
   }
+
+  applyRequestWrappers() {}
 
   renewRequestCookieHeader() {
     const value = this.formatRequestCookies(this.requestCookies)
@@ -281,6 +289,8 @@ export class NodeHttpServerContext implements HttpServerContext {
       this.responseBody = body
     }
   }
+
+  applyResponseWrappers() {}
 
   renewResponseSetCookieHeader() {
     const value = this.formatResponseCookies(this.responseCookies)

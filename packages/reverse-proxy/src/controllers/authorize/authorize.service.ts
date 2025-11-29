@@ -1,12 +1,11 @@
 import { DIContainer } from '@famir/common'
 import {
-  HttpServerError,
-  SESSION_REPOSITORY,
   PROXY_REPOSITORY,
   ProxyRepository,
-  SessionRepository,
+  SESSION_REPOSITORY,
+  SessionRepository
 } from '@famir/domain'
-import { AuthorizeData, AuthorizeReply } from './authorize.js'
+//import { Data, Reply } from './authorize.js'
 
 export const AUTHORIZE_SERVICE = Symbol('AuthorizeService')
 
@@ -18,7 +17,7 @@ export class AuthorizeService {
         new AuthorizeService(
           c.resolve<ProxyRepository>(PROXY_REPOSITORY),
           c.resolve<SessionRepository>(SESSION_REPOSITORY)
-      )
+        )
     )
   }
 
@@ -27,6 +26,5 @@ export class AuthorizeService {
     protected readonly sessionRepository: SessionRepository
   ) {}
 
-  async execute(data: AuthorizeData): Promise<AuthorizeReply> {
-  }
+  //async execute(data: AuthorizeData): Promise<AuthorizeReply> {}
 }

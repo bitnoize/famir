@@ -1,16 +1,17 @@
 import { DIContainer } from '@famir/common'
 import {
-  TARGET_SUB_ROOT,
-  TargetModel,
   HTTP_SERVER_ROUTER,
   HttpServerMiddleware,
   HttpServerRouter,
   Logger,
   LOGGER,
+  TARGET_SUB_ROOT,
+  TargetModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
+import { type BuildResponseService, BUILD_RESPONSE_SERVICE } from './build-response.service.js'
 
 export const BUILD_RESPONSE_CONTROLLER = Symbol('BuildResponseController')
 
@@ -22,7 +23,8 @@ export class BuildResponseController extends BaseController {
         new BuildResponseController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<BuildResponseService>(BUILD_RESPONSE_SERVICE)
         )
     )
   }
@@ -31,7 +33,12 @@ export class BuildResponseController extends BaseController {
     return container.resolve<BuildResponseController>(BUILD_RESPONSE_CONTROLLER)
   }
 
-  constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
+  constructor(
+    validator: Validator,
+    logger: Logger,
+    router: HttpServerRouter,
+    protected readonly buildResponseService: BuildResponseService
+  ) {
     super(validator, logger, router, 'build-response')
 
     this.router.addMiddleware(this.defaultMiddleware)
@@ -40,31 +47,31 @@ export class BuildResponseController extends BaseController {
   private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
       this.testConfigure(ctx.state)
-      this.testAuthorize(ctx.state)
+      //this.testAuthorize(ctx.state)
 
       const { campaign, target, proxy } = ctx.state
 
-      //ctx.applyRequestWrappers()
+      ctx.applyRequestWrappers()
 
       ctx.renewRequestCookieHeader()
 
       if (ctx.isStreaming) {
         throw new Error(`Streaming requests not implemented yet :(`)
       } else {
-        const { status, headers, body } = await this.forwardRequestUseCase.execute({
-          proxy: proxy.url,
+        const { status, headers, body } = await this.buildResponseService.forwardRequest({
+          proxy: 'http://127.0.0.1:8080',
           method: ctx.method,
           url: this.makeUrl(target, ctx.normalizeUrl()),
           headers: ctx.requestHeaders,
           body: ctx.requestBody,
           connectTimeout: target.connectTimeout,
-          requestTimeout: target.requestTimeout,
-          bodyLimit: target.responseBodyLimit,
+          timeout: target.requestTimeout,
+          bodyLimit: target.responseBodyLimit
         })
 
         ctx.prepareResponse(status, headers, body)
-        
-        //ctx.applyResponseWrappers()
+
+        ctx.applyResponseWrappers()
 
         ctx.renewResponseSetCookieHeader()
 
@@ -85,7 +92,7 @@ export class BuildResponseController extends BaseController {
       target.donorDomain,
       ':',
       target.donorPort.toString(),
-      relativeUrl,
+      relativeUrl
     ].join('')
   }
 }

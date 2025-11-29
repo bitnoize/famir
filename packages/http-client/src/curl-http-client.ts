@@ -23,7 +23,7 @@ export class CurlHttpClient implements HttpClient {
       curl.setOpt(Curl.option.DNS_USE_GLOBAL_CACHE, 1)
 
       curl.setOpt(Curl.option.CONNECTTIMEOUT_MS, request.connectTimeout)
-      curl.setOpt(Curl.option.TIMEOUT_MS, request.requestTimeout)
+      curl.setOpt(Curl.option.TIMEOUT_MS, request.timeout)
 
       curl.setOpt(Curl.option.PROXY, request.proxy)
 

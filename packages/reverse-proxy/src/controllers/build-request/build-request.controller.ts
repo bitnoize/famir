@@ -41,7 +41,7 @@ export class BuildRequestController extends BaseController {
 
       const { campaign, target } = ctx.state
 
-      ctx.prepareRequest()
+      ctx.prepareRequestHeaders()
 
       await ctx.loadRequestBody(target.requestBodyLimit)
 

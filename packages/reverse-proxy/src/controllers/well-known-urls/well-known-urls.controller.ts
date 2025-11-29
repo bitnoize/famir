@@ -1,7 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
-  HttpHeaders,
   HTTP_SERVER_ROUTER,
+  HttpHeaders,
   HttpServerMiddleware,
   HttpServerRouter,
   Logger,
@@ -92,7 +92,7 @@ export class WellKnownUrlsController extends BaseController {
         'content-type': 'image/x-icon',
         'content-length': body.length.toString(),
         'last-modified': target.updatedAt.toUTCString(),
-        'cache-control': 'public, max-age=691200',
+        'cache-control': 'public, max-age=691200'
       }
 
       if (ctx.isMethod('GET')) {
@@ -126,9 +126,9 @@ export class WellKnownUrlsController extends BaseController {
 
       const headers: HttpHeaders = {
         'content-type': 'text/plain',
-        'content-length':  body.length.toString(),
+        'content-length': body.length.toString(),
         'last-modified': target.updatedAt.toUTCString(),
-        'cache-control': 'public, max-age=691200',
+        'cache-control': 'public, max-age=691200'
       }
 
       if (ctx.isMethod('GET')) {
@@ -164,7 +164,7 @@ export class WellKnownUrlsController extends BaseController {
         'content-type': 'application/xml',
         'content-length': body.length.toString(),
         'last-modified': target.updatedAt.toUTCString(),
-        'cache-control': 'public, max-age=691200',
+        'cache-control': 'public, max-age=691200'
       }
 
       if (ctx.isMethod('GET')) {

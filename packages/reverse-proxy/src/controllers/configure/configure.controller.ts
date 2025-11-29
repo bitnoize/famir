@@ -10,9 +10,9 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import { configureDataSchema } from './configure.schemas.js'
-import { type ConfigureUseCase, CONFIGURE_USE_CASE } from './configure.use-case.js'
 import { ConfigureData } from './configure.js'
+import { configureDataSchema } from './configure.schemas.js'
+import { type ConfigureService, CONFIGURE_SERVICE } from './configure.service.js'
 
 export const CONFIGURE_CONTROLLER = Symbol('ConfigureController')
 
@@ -25,7 +25,7 @@ export class ConfigureController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<ConfigureUseCase>(CONFIGURE_USE_CASE)
+          c.resolve<ConfigureService>(CONFIGURE_SERVICE)
         )
     )
   }
@@ -38,7 +38,7 @@ export class ConfigureController extends BaseController {
     validator: Validator,
     logger: Logger,
     router: HttpServerRouter,
-    protected readonly configureUseCase: ConfigureUseCase
+    protected readonly configureService: ConfigureService
   ) {
     super(validator, logger, router, 'configure')
 
@@ -64,24 +64,18 @@ export class ConfigureController extends BaseController {
       }
 
       const data = {
-        campaignId: ctx.getRequestHeader('X-Famir-Campaign-Id'),
-        targetId: ctx.getRequestHeader('X-Famir-Target-Id'),
-        clientIp: ctx.getRequestHeader('X-Famir-Client-Ip')
+        campaignId: ctx.originHeaders['x-famir-campaign-id'],
+        targetId: ctx.originHeaders['x-famir-target-id'],
+        clientIp: ctx.originHeaders['x-famir-client-ip']
       }
 
       this.validateConfigureData(data)
 
-      const { campaign, target, targets } = await this.configureUseCase.execute(data)
+      const { campaign, target, targets } = await this.configureService.execute(data)
 
       ctx.state['campaign'] = campaign
       ctx.state['target'] = target
       ctx.state['targets'] = targets
-
-      ctx.setRequestHeaders({
-        'X-Famir-Campaign-Id': undefined,
-        'X-Famir-Target-Id': undefined,
-        'X-Famir-Client-Ip': undefined
-      })
 
       await next()
     } catch (error) {

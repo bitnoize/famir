@@ -1,6 +1,9 @@
 import { DIContainer } from '@famir/common'
 import {
+  FullTargetModel,
   HTTP_SERVER_ROUTER,
+  HttpHeaders,
+  HttpServerContext,
   HttpServerMiddleware,
   HttpServerRouter,
   Logger,
@@ -9,14 +12,7 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import {
-  type AuthSessionUseCase,
-  AUTH_SESSION_USE_CASE,
-  type CreateSessionUseCase,
-  CREATE_SESSION_USE_CASE,
-  type UpgradeSessionUseCase,
-  UPGRADE_SESSION_USE_CASE,
-} from './authorize.use-cases.js'
+import { type AuthorizeService, AUTHORIZE_SERVICE } from './authorize.service.js'
 
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
 
@@ -29,9 +25,7 @@ export class AuthorizeController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<CreateSessionUseCase>(CREATE_SESSION_USE_CASE),
-          c.resolve<AuthSessionUseCase>(AUTH_SESSION_USE_CASE),
-          c.resolve<UpgradeSessionUseCase>(UPGRADE_SESSION_USE_CASE),
+          c.resolve<AuthorizeService>(AUTHORIZE_SERVICE)
         )
     )
   }
@@ -44,9 +38,7 @@ export class AuthorizeController extends BaseController {
     validator: Validator,
     logger: Logger,
     router: HttpServerRouter,
-    protected readonly createSessionUseCase: CreateSessionUseCase,
-    protected readonly authSessionUseCase: AuthSessionUseCase,
-    protected readonly upgradeSessionUseCase: UpgradeSessionUseCase,
+    protected readonly authorizeService: AuthorizeService
   ) {
     super(validator, logger, router, 'authorize')
 
@@ -59,6 +51,7 @@ export class AuthorizeController extends BaseController {
 
       const { campaign, target } = ctx.state
 
+      /*
       if (target.isLanding) {
         const isLandingAuthPath = ctx.isUrlPathEquals(campaign.landingAuthPath)
 
@@ -101,6 +94,7 @@ export class AuthorizeController extends BaseController {
         }
       } else {
       }
+      */
 
       await next()
     } catch (error) {
@@ -108,11 +102,14 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  protected renderNotFoundPage(ctx: HttpServerContext, target: FullTargetModel): Promise<void> {
+  protected async renderNotFoundPage(
+    ctx: HttpServerContext,
+    target: FullTargetModel
+  ): Promise<void> {
     const body = Buffer.from(target.notFoundPage)
 
     const headers: HttpHeaders = {
-      'content-type': 'text/html',
+      'content-type': 'text/html'
     }
 
     ctx.prepareResponse(200, headers, body)
@@ -120,7 +117,7 @@ export class AuthorizeController extends BaseController {
     await ctx.sendResponse()
   }
 
-
+  /*
 
 
   private transparentAuthMiddleware: HttpServerMiddleware = async (ctx, next) => {
@@ -263,5 +260,5 @@ export class AuthorizeController extends BaseController {
       return null
     }
   }
-
+*/
 }
