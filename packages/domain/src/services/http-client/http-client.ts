@@ -15,6 +15,9 @@ export interface HttpClientResponse {
   status: number
   headers: HttpHeaders
   body: HttpBody
+  totalTime: number
+  connectTime: number
+  httpVersion: number
 }
 
 export interface HttpClientStreamingResponse {

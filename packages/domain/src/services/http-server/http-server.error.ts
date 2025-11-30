@@ -10,6 +10,7 @@ export type HttpServerErrorCode =
   | 'INTERNAL_ERROR'
   | 'BAD_GATEWAY'
   | 'SERVICE_UNAVAILABLE'
+  | 'GATEWAY_TIMEOUT'
 
 export type HttpServerErrorOptions = DomainErrorOptions & {
   code: HttpServerErrorCode
@@ -24,7 +25,8 @@ const codeToStatusMap = {
   UNPROCESSABLE_CONTENT: 422,
   INTERNAL_ERROR: 500,
   BAD_GATEWAY: 502,
-  SERVICE_UNAVAILABLE: 503
+  SERVICE_UNAVAILABLE: 503,
+  GATEWAY_TIMEOUT: 504
 } as const
 
 export class HttpServerError extends DomainError {

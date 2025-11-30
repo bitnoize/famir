@@ -7,11 +7,12 @@ import {
   TargetRepository,
   testEnabledTargetModel
 } from '@famir/domain'
+import { BaseService } from '../base/index.js'
 import { ConfigureData, ConfigureReply } from './configure.js'
 
 export const CONFIGURE_SERVICE = Symbol('ConfigureService')
 
-export class ConfigureService {
+export class ConfigureService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<ConfigureService>(
       CONFIGURE_SERVICE,
@@ -26,7 +27,9 @@ export class ConfigureService {
   constructor(
     protected readonly campaignRepository: CampaignRepository,
     protected readonly targetRepository: TargetRepository
-  ) {}
+  ) {
+    super()
+  }
 
   async execute(data: ConfigureData): Promise<ConfigureReply> {
     const [campaign, target] = await Promise.all([

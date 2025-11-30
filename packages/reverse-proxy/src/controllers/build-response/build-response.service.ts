@@ -1,9 +1,10 @@
 import { DIContainer } from '@famir/common'
 import { HTTP_CLIENT, HttpClient, HttpClientRequest, HttpClientResponse } from '@famir/domain'
+import { BaseService } from '../base/index.js'
 
 export const BUILD_RESPONSE_SERVICE = Symbol('BuildResponseService')
 
-export class BuildResponseService {
+export class BuildResponseService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<BuildResponseService>(
       BUILD_RESPONSE_SERVICE,
@@ -11,9 +12,15 @@ export class BuildResponseService {
     )
   }
 
-  constructor(protected readonly httpClient: HttpClient) {}
+  constructor(protected readonly httpClient: HttpClient) {
+    super()
+  }
 
   async forwardRequest(request: HttpClientRequest): Promise<HttpClientResponse> {
-    return await this.httpClient.forwardRequest(request)
+    try {
+      return await this.httpClient.forwardRequest(request)
+    } catch (error) {
+      this.filterHttpClientException(error, ['BAD_GATEWAY', 'GATEWAY_TIMEOUT'])
+    }
   }
 }

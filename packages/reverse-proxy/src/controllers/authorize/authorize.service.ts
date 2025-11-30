@@ -5,11 +5,12 @@ import {
   SESSION_REPOSITORY,
   SessionRepository
 } from '@famir/domain'
+import { BaseService } from '../base/index.js'
 //import { Data, Reply } from './authorize.js'
 
 export const AUTHORIZE_SERVICE = Symbol('AuthorizeService')
 
-export class AuthorizeService {
+export class AuthorizeService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<AuthorizeService>(
       AUTHORIZE_SERVICE,
@@ -24,7 +25,9 @@ export class AuthorizeService {
   constructor(
     protected readonly proxyRepository: ProxyRepository,
     protected readonly sessionRepository: SessionRepository
-  ) {}
+  ) {
+    super()
+  }
 
   //async execute(data: AuthorizeData): Promise<AuthorizeReply> {}
 }

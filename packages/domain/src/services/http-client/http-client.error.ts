@@ -1,6 +1,6 @@
 import { DomainError, DomainErrorOptions } from '../../domain.error.js'
 
-export type HttpClientErrorCode = 'INTERNAL_ERROR'
+export type HttpClientErrorCode = 'INTERNAL_ERROR' | 'GATEWAY_TIMEOUT' | 'BAD_GATEWAY'
 
 export type HttpClientErrorOptions = DomainErrorOptions & {
   code: HttpClientErrorCode

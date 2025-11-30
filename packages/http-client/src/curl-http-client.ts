@@ -1,24 +1,49 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
+  Config,
+  CONFIG,
   HTTP_CLIENT,
   HttpClient,
   HttpClientError,
+  HttpClientErrorCode,
   HttpClientRequest,
   HttpClientResponse,
-  HttpHeaders
+  HttpHeaders,
+  Logger,
+  LOGGER
 } from '@famir/domain'
 import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
+import { HttpClientConfig, HttpClientOptions } from './http-client.js'
 
 export class CurlHttpClient implements HttpClient {
   static inject(container: DIContainer) {
-    container.registerSingleton<HttpClient>(HTTP_CLIENT, () => new CurlHttpClient())
+    container.registerSingleton<HttpClient>(
+      HTTP_CLIENT,
+      (c) =>
+        new CurlHttpClient(c.resolve<Config<HttpClientConfig>>(CONFIG), c.resolve<Logger>(LOGGER))
+    )
+  }
+
+  protected readonly options: HttpClientOptions
+
+  constructor(
+    config: Config<HttpClientConfig>,
+    protected readonly logger: Logger
+  ) {
+    this.options = this.buildOptions(config.data)
   }
 
   forwardRequest(request: HttpClientRequest): Promise<HttpClientResponse> {
     return new Promise<HttpClientResponse>((resolve, reject) => {
       const curl = new Curl()
 
-      curl.enable(CurlFeature.Raw)
+      let shouldStop = 0
+
+      curl.enable(CurlFeature.NoStorage)
+
+      if (this.options.verbose) {
+        curl.setOpt(Curl.option.VERBOSE, true)
+      }
 
       curl.setOpt(Curl.option.DNS_USE_GLOBAL_CACHE, 1)
 
@@ -28,66 +53,183 @@ export class CurlHttpClient implements HttpClient {
       curl.setOpt(Curl.option.PROXY, request.proxy)
 
       curl.setOpt(Curl.option.CUSTOMREQUEST, request.method)
-
       curl.setOpt(Curl.option.URL, request.url)
 
       curl.setOpt(Curl.option.HTTPHEADER, this.formatHeaders(request.headers))
-
-      curl.setOpt(Curl.option.ACCEPT_ENCODING, '')
+      curl.setOpt(Curl.option.ACCEPT_ENCODING, '') // Means all encodings!
 
       if (request.body.length > 0) {
         curl.setOpt(Curl.option.UPLOAD, true)
         curl.setOpt(Curl.option.INFILESIZE_LARGE, request.body.length)
 
-        let bodyOffset = 0
-        curl.setOpt(Curl.option.READFUNCTION, (body: Buffer, size: number, nmemb: number) => {
-          const chunkSize = size * nmemb
-          const remaining = request.body.length - bodyOffset
+        let requestBodyOffset = 0
+        curl.setOpt(Curl.option.READFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
+          try {
+            if (shouldStop != 0) {
+              return 0
+            }
 
-          if (remaining <= 0) {
-            return 0
-          }
+            const chunkSize = size * nmemb
+            const remaining = request.body.length - requestBodyOffset
 
-          const bytesToCopy = Math.min(chunkSize, remaining)
-          const chunk = request.body.subarray(bodyOffset, bodyOffset + bytesToCopy)
+            if (remaining <= 0) {
+              return 0
+            }
 
-          chunk.copy(body)
-          bodyOffset += bytesToCopy
+            const bytesToCopy = Math.min(chunkSize, remaining)
 
-          return bytesToCopy
-          /*
-          const chunkSize = Math.min(size, request.body.length - bodyOffset)
+            const chunk = request.body.subarray(requestBodyOffset, requestBodyOffset + bytesToCopy)
 
-          if (chunkSize > 0) {
-            request.body.copy(body, 0, bodyOffset, bodyOffset + chunkSize)
+            chunk.copy(buf)
 
-            bodyOffset += chunkSize
+            requestBodyOffset += bytesToCopy
+
+            return bytesToCopy
+            /*
+            const chunkSize = Math.min(size, request.body.length - requestBodyOffset)
+
+            if (chunkSize <= 0) {
+              return 0
+            }
+
+            request.body.copy(buf, 0, requestBodyOffset, requestBodyOffset + chunkSize)
+
+            requestBodyOffset += chunkSize
 
             return chunkSize
-          }
+            */
+          } catch (error) {
+            this.logger.error(`HttpClient parse request body failed`, {
+              error: serializeError(error),
+              request: { ...request, body: request.body.length }
+            })
 
-          return 0
-          */
+            shouldStop = 1
+
+            return 0
+          }
         })
       }
 
-      curl.setOpt(Curl.option.MAXFILESIZE_LARGE, request.bodyLimit)
+      //curl.setOpt(Curl.option.MAXFILESIZE_LARGE, request.bodyLimit)
 
-      curl.setOpt(Curl.option.HEADER, true)
-      curl.setOpt(Curl.option.NOBODY, false)
+      curl.setOpt(Curl.option.HEADER, false)
 
-      curl.on('end', (status: number, body: Buffer, headers: Buffer[]) => {
+      const responseHeaders: Buffer[] = []
+
+      curl.setOpt(Curl.option.HEADERFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
+        try {
+          if (shouldStop != 0) {
+            return 0
+          }
+
+          const chunkSize = size * nmemb
+          const chunk = buf.subarray(0, chunkSize)
+
+          responseHeaders.push(chunk)
+
+          return chunkSize
+        } catch (error) {
+          this.logger.error(`HttpClient parse response headers failed`, {
+            error: serializeError(error),
+            request: { ...request, body: request.body.length }
+          })
+
+          shouldStop = 2
+
+          return 0
+        }
+      })
+
+      //curl.setOpt(Curl.option.NOBODY, false)
+
+      const responseBody: Buffer[] = []
+      let responseBodySize = 0
+
+      curl.setOpt(Curl.option.WRITEFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
+        try {
+          if (shouldStop != 0) {
+            return 0
+          }
+
+          const chunkSize = size * nmemb
+          const chunk = buf.subarray(0, chunkSize)
+
+          if (responseBodySize + chunkSize > request.bodyLimit) {
+            shouldStop = 3
+
+            return 0
+          }
+
+          responseBody.push(chunk)
+
+          responseBodySize += chunkSize
+
+          return chunkSize
+        } catch (error) {
+          this.logger.error(`HttpClient parse response body failed`, {
+            error: serializeError(error),
+            request: { ...request, body: request.body.length }
+          })
+
+          shouldStop = 4
+
+          return 0
+        }
+      })
+
+      curl.on('end', (status: number) => {
+        const totalTime = curl.getInfo('TOTAL_TIME_T')
+        const connectTime = curl.getInfo('CONNECT_TIME_T')
+        const httpVersion = curl.getInfo('HTTP_VERSION')
+
         curl.close()
 
-        resolve({
-          status,
-          headers: this.parseHeaders(headers),
-          body
-        })
+        if (shouldStop != 0) {
+          reject(
+            new HttpClientError(`Response body too large`, {
+              context: {
+                shouldStop
+              },
+              code: 'BAD_GATEWAY'
+            })
+          )
+
+          return
+        }
+
+        try {
+          const response: HttpClientResponse = {
+            status,
+            headers: this.parseHeaders(responseHeaders),
+            body: Buffer.concat(responseBody),
+            totalTime: typeof totalTime === 'number' ? totalTime : 0,
+            connectTime: typeof connectTime === 'number' ? connectTime : 0,
+            httpVersion: typeof httpVersion === 'number' ? httpVersion : 0
+          }
+
+          if (this.options.verbose) {
+            this.logger.debug(`HttpClient forward request dump`, {
+              request: { ...request, body: request.body.length },
+              response: { ...response, body: response.body.length }
+            })
+          }
+
+          resolve(response)
+        } catch (error) {
+          reject(
+            new HttpClientError(`Response parse failed`, {
+              cause: error,
+              code: 'INTERNAL_ERROR'
+            })
+          )
+        }
       })
 
       curl.on('error', (error: Error, curlCode: CurlCode) => {
         curl.close()
+
+        const errorCode = this.knownCurlCodes[curlCode]
 
         reject(
           new HttpClientError(`Forward request failed`, {
@@ -95,13 +237,21 @@ export class CurlHttpClient implements HttpClient {
             context: {
               curlCode
             },
-            code: 'INTERNAL_ERROR'
+            code: errorCode ? errorCode : 'INTERNAL_ERROR'
           })
         )
       })
 
       curl.perform()
     })
+  }
+
+  protected knownCurlCodes: Record<number, HttpClientErrorCode> = {
+    5: 'BAD_GATEWAY', // COULDNT_RESOLVE_PROXY
+    6: 'BAD_GATEWAY', // COULDNT_RESOLVE_HOST
+    7: 'BAD_GATEWAY', // COULDNT_CONNECT
+    28: 'GATEWAY_TIMEOUT', // OPERATION_TIMEDOUT
+    35: 'BAD_GATEWAY' //SSL_CONNECT_ERROR
   }
 
   /*
@@ -164,5 +314,11 @@ export class CurlHttpClient implements HttpClient {
     })
 
     return curlHeaders
+  }
+
+  private buildOptions(config: HttpClientConfig): HttpClientOptions {
+    return {
+      verbose: config.HTTP_CLIENT_VERBOSE
+    }
   }
 }

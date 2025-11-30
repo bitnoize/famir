@@ -45,11 +45,8 @@ export class CompleteController extends BaseController {
   private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
       this.testConfigure(ctx.state)
-      this.testAuthorize(ctx.state)
 
       const { campaign, proxy, target, session } = ctx.state
-
-      await next()
     } catch (error) {
       this.handleException(error, 'default')
     }
