@@ -69,24 +69,7 @@ export class CurlHttpClient implements HttpClient {
               return 0
             }
 
-            const chunkSize = size * nmemb
-            const remaining = request.body.length - requestBodyOffset
-
-            if (remaining <= 0) {
-              return 0
-            }
-
-            const bytesToCopy = Math.min(chunkSize, remaining)
-
-            const chunk = request.body.subarray(requestBodyOffset, requestBodyOffset + bytesToCopy)
-
-            chunk.copy(buf)
-
-            requestBodyOffset += bytesToCopy
-
-            return bytesToCopy
-            /*
-            const chunkSize = Math.min(size, request.body.length - requestBodyOffset)
+            const chunkSize = Math.min(size * nmemb,  request.body.length - requestBodyOffset)
 
             if (chunkSize <= 0) {
               return 0
@@ -97,11 +80,9 @@ export class CurlHttpClient implements HttpClient {
             requestBodyOffset += chunkSize
 
             return chunkSize
-            */
           } catch (error) {
-            this.logger.error(`HttpClient parse request body failed`, {
+            this.logger.error(`HttpClient Curl READFUNCTION error`, {
               error: serializeError(error),
-              request: { ...request, body: request.body.length }
             })
 
             shouldStop = 1
@@ -130,9 +111,8 @@ export class CurlHttpClient implements HttpClient {
 
           return chunkSize
         } catch (error) {
-          this.logger.error(`HttpClient parse response headers failed`, {
+          this.logger.error(`HttpClient Curl HEADERFUNCTION error`, {
             error: serializeError(error),
-            request: { ...request, body: request.body.length }
           })
 
           shouldStop = 2
@@ -167,9 +147,8 @@ export class CurlHttpClient implements HttpClient {
 
           return chunkSize
         } catch (error) {
-          this.logger.error(`HttpClient parse response body failed`, {
+          this.logger.error(`HttpClient Curl WRITEFUNCTION error`, {
             error: serializeError(error),
-            request: { ...request, body: request.body.length }
           })
 
           shouldStop = 4
@@ -179,47 +158,41 @@ export class CurlHttpClient implements HttpClient {
       })
 
       curl.on('end', (status: number) => {
-        const totalTime = curl.getInfo('TOTAL_TIME_T')
-        const connectTime = curl.getInfo('CONNECT_TIME_T')
-        const httpVersion = curl.getInfo('HTTP_VERSION')
-
-        curl.close()
-
-        if (shouldStop != 0) {
-          reject(
-            new HttpClientError(`Response body too large`, {
-              context: {
-                shouldStop
-              },
-              code: 'BAD_GATEWAY'
-            })
-          )
-
-          return
-        }
-
         try {
-          const response: HttpClientResponse = {
+          const totalTime = curl.getInfo('TOTAL_TIME_T')
+          const connectTime = curl.getInfo('CONNECT_TIME_T')
+          const httpVersion = curl.getInfo('HTTP_VERSION')
+
+          curl.close()
+
+          if (shouldStop != 0) {
+            reject(
+              new HttpClientError(`Response body too large`, {
+                context: {
+                  shouldStop
+                },
+                code: 'BAD_GATEWAY'
+              })
+            )
+
+            return
+          }
+
+          resolve({
             status,
             headers: this.parseHeaders(responseHeaders),
             body: Buffer.concat(responseBody),
             totalTime: typeof totalTime === 'number' ? totalTime : 0,
             connectTime: typeof connectTime === 'number' ? connectTime : 0,
             httpVersion: typeof httpVersion === 'number' ? httpVersion : 0
-          }
-
-          if (this.options.verbose) {
-            this.logger.debug(`HttpClient forward request dump`, {
-              request: { ...request, body: request.body.length },
-              response: { ...response, body: response.body.length }
-            })
-          }
-
-          resolve(response)
+          })
         } catch (error) {
           reject(
-            new HttpClientError(`Response parse failed`, {
+            new HttpClientError(`Curl end event error`, {
               cause: error,
+              context: {
+                params: [status]
+              },
               code: 'INTERNAL_ERROR'
             })
           )
@@ -227,19 +200,31 @@ export class CurlHttpClient implements HttpClient {
       })
 
       curl.on('error', (error: Error, curlCode: CurlCode) => {
-        curl.close()
+        try {
+          curl.close()
 
-        const errorCode = this.knownCurlCodes[curlCode]
+          const errorCode = this.knownCurlCodes[curlCode]
 
-        reject(
-          new HttpClientError(`Forward request failed`, {
-            cause: error,
-            context: {
-              curlCode
-            },
-            code: errorCode ? errorCode : 'INTERNAL_ERROR'
-          })
-        )
+          reject(
+            new HttpClientError(`Forward request failed`, {
+              cause: error,
+              context: {
+                curlCode
+              },
+              code: errorCode ? errorCode : 'INTERNAL_ERROR'
+            })
+          )
+        } catch (fatalError) {
+          reject(
+            new HttpClientError(`Curl error event fatal error`, {
+              cause: fatalError,
+              context: {
+                params: [error, curlCode],
+              },
+              code: 'INTERNAL_ERROR'
+            })
+          )
+        }
       })
 
       curl.perform()

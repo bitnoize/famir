@@ -69,6 +69,13 @@ export class BuildResponseController extends BaseController {
 
         ctx.prepareResponse(status, headers, body)
 
+        ctx.setResponseHeaders({
+          'Connection': undefined,
+          'Keep-Alive': undefined,
+          'Upgrade': undefined,
+          'Set-Cookie': undefined,
+        })
+
         ctx.applyResponseWrappers()
 
         ctx.renewResponseSetCookieHeader()

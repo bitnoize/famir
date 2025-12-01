@@ -157,10 +157,6 @@ export class NodeHttpServerContext implements HttpServerContext {
     const cookies = this.parseRequestCookies(cookieHeader)
 
     this.setRequestCookies(cookies)
-
-    //this.setRequestHeader('Cookie', undefined)
-
-    // Transport, X-Famir
   }
 
   requestBody: HttpBody = Buffer.alloc(0)
@@ -288,8 +284,6 @@ export class NodeHttpServerContext implements HttpServerContext {
     const cookies = this.parseResponseCookies(setCookieHeader)
 
     this.setResponseCookies(cookies)
-
-    //this.setResponseHeader('Set-Cookie', undefined)
 
     if (body) {
       this.responseBody = body

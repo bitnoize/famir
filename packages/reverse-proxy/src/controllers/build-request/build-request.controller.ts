@@ -41,6 +41,17 @@ export class BuildRequestController extends BaseController {
 
       ctx.prepareRequestHeaders()
 
+      ctx.setRequestHeaders({
+        'Host': undefined,
+        'Connection': undefined,
+        'Keep-Alive': undefined,
+        'Upgrade': undefined,
+        'Cookie': undefined,
+        'X-Famir-Campaign-Id': undefined,
+        'X-Famir-Target-Id': undefined,
+        'X-Famir-Client-Ip': undefined,
+      })
+
       await ctx.loadRequestBody(target.requestBodyLimit)
 
       await next()

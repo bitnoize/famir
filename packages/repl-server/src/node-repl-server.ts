@@ -76,6 +76,8 @@ export class NodeReplServer implements ReplServer {
       const listeningHandler = () => {
         this.server.off('error', errorHandler)
 
+        this.logger.debug(`ReplServer listening`)
+
         resolve()
       }
 
@@ -83,8 +85,6 @@ export class NodeReplServer implements ReplServer {
       this.server.once('listening', listeningHandler)
 
       this.server.listen(this.options.port, this.options.address)
-
-      this.logger.debug(`ReplServer listening`)
     })
   }
 
@@ -98,6 +98,8 @@ export class NodeReplServer implements ReplServer {
 
       const closeHandler = () => {
         this.server.off('error', errorHandler)
+
+        this.logger.info(`ReplServer closed`)
 
         resolve()
       }
@@ -116,8 +118,6 @@ export class NodeReplServer implements ReplServer {
       })
 
       this.clients.clear()
-
-      this.logger.info(`ReplServer closed`)
     })
   }
 
