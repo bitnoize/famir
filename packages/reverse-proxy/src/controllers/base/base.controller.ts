@@ -3,13 +3,14 @@ import {
   EnabledProxyModel,
   EnabledTargetModel,
   FullCampaignModel,
+  HttpServerContext,
   HttpServerError,
   HttpServerRouter,
-  HttpState,
   Logger,
   SessionModel,
   Validator
 } from '@famir/domain'
+import { AuthorizeState, ConfigureState, ReverseProxyState } from '../../reverse-proxy.js'
 
 export abstract class BaseController {
   constructor(
@@ -19,70 +20,90 @@ export abstract class BaseController {
     protected readonly controllerName: string
   ) {}
 
-  /*
-  protected absentConfigure(state: HttpState): asserts state is HttpState & {
-    campaign: FullCampaignModel | undefined
-    target: EnabledFullTargetModel | undefined
-    targets: EnabledTargetModel[] | undefined
-  } {
-    if (state['campaign']) {
-      throw new Error(`State campaign exists`)
-    }
+  protected isConfigureState(ctx: HttpServerContext): boolean {
+    const state = ctx.getState<ReverseProxyState>()
 
-    if (state['target']) {
-      throw new Error(`State target exists`)
-    }
+    state.isConfigure ??= false
 
-    if (state['targets']) {
-      throw new Error(`State targets exists`)
-    }
-  }
-  */
-
-  protected testConfigure(state: HttpState): asserts state is HttpState & {
-    readonly campaign: FullCampaignModel
-    readonly target: EnabledFullTargetModel
-    readonly targets: EnabledTargetModel[]
-  } {
-    if (!state['campaign']) {
-      throw new Error(`State campaign absent`)
-    }
-
-    if (!state['target']) {
-      throw new Error(`State target absent`)
-    }
-
-    if (!state['targets']) {
-      throw new Error(`State targets absent`)
-    }
+    return state.isConfigure
   }
 
-  /*
-  protected absentAuthorize(state: HttpState): asserts state is HttpState & {
-    proxy: EnabledProxyModel | undefined
-    session: SessionModel | undefined
-  } {
-    if (state['proxy']) {
-      throw new Error(`State proxy exists`)
+  protected getConfigureState(ctx: HttpServerContext): ConfigureState {
+    const state = ctx.getState<ReverseProxyState>()
+
+    state.isConfigure ??= false
+
+    if (!state.isConfigure) {
+      throw new Error(`ConfigureState not exists`)
     }
 
-    if (state['session']) {
-      throw new Error(`State session exists`)
+    if (!state.campaign) {
+      throw new Error(`ConfigureState campaign missing`)
     }
+
+    if (!state.target) {
+      throw new Error(`ConfigureState target missing`)
+    }
+
+    if (!state.targets) {
+      throw new Error(`ConfigureState targets missing`)
+    }
+
+    return state as ConfigureState
   }
-  */
 
-  protected testAuthorize(state: HttpState): asserts state is HttpState & {
-    readonly proxy: EnabledProxyModel
-    readonly session: SessionModel
-  } {
-    if (!state['proxy']) {
-      throw new Error(`State proxy absent`)
+  protected setConfigureState(
+    ctx: HttpServerContext,
+    campaign: FullCampaignModel,
+    target: EnabledFullTargetModel,
+    targets: EnabledTargetModel[]
+  ): void {
+    const state = ctx.getState<ReverseProxyState>()
+
+    state.isConfigure = true
+    state.campaign = campaign
+    state.target = target
+    state.targets = targets
+  }
+
+  protected isAuthorizeState(ctx: HttpServerContext): boolean {
+    const state = ctx.getState<ReverseProxyState>()
+
+    state.isAuthorize ??= false
+
+    return state.isAuthorize
+  }
+
+  protected getAuthorizeState(ctx: HttpServerContext): AuthorizeState {
+    const state = ctx.getState<ReverseProxyState>()
+
+    state.isAuthorize ??= false
+
+    if (!state.isAuthorize) {
+      throw new Error(`AuthorizeState not exists`)
     }
 
-    if (!state['session']) {
-      throw new Error(`State session absent`)
+    if (!state.session) {
+      throw new Error(`AuthorizeState session missing`)
     }
+
+    if (!state.proxy) {
+      throw new Error(`AuthorizeState proxy missing`)
+    }
+
+    return state as AuthorizeState
+  }
+
+  protected setAuthorizeState(
+    ctx: HttpServerContext,
+    session: SessionModel,
+    proxy: EnabledProxyModel
+  ): void {
+    const state = ctx.getState<ReverseProxyState>()
+
+    state.isAuthorize = true
+    state.session = session
+    state.proxy = proxy
   }
 
   protected handleException(error: unknown, middleware: string): never {

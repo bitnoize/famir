@@ -18,6 +18,8 @@ type AbstractOptions = Record<string, unknown>
 
 export interface HttpServerContext {
   readonly state: HttpState
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  getState<T extends HttpState>(): T
   readonly logs: HttpLog[]
   addLog(name: string, data: HttpLogData): void
   readonly method: string

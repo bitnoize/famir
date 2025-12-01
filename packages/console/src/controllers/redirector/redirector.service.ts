@@ -3,8 +3,6 @@ import {
   CreateRedirectorData,
   DeleteRedirectorData,
   ListRedirectorsData,
-  Logger,
-  LOGGER,
   ReadRedirectorData,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
@@ -20,21 +18,12 @@ export class RedirectorService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<RedirectorService>(
       REDIRECTOR_SERVICE,
-      (c) =>
-        new RedirectorService(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY)
-        )
+      (c) => new RedirectorService(c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY))
     )
   }
 
-  constructor(
-    logger: Logger,
-    protected readonly redirectorRepository: RedirectorRepository
-  ) {
-    super(logger)
-
-    this.logger.debug(`RedirectorService initialized`)
+  constructor(protected readonly redirectorRepository: RedirectorRepository) {
+    super()
   }
 
   async createRedirector(data: CreateRedirectorData): Promise<RedirectorModel> {

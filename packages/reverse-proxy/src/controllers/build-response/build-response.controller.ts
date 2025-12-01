@@ -46,10 +46,8 @@ export class BuildResponseController extends BaseController {
 
   private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.testConfigure(ctx.state)
-      //this.testAuthorize(ctx.state)
-
-      const { campaign, target, proxy } = ctx.state
+      const { target } = this.getConfigureState(ctx)
+      //const { proxy } = this.getAuthorizeState(ctx)
 
       ctx.applyRequestWrappers()
 
@@ -61,7 +59,7 @@ export class BuildResponseController extends BaseController {
         const { status, headers, body } = await this.buildResponseService.forwardRequest({
           proxy: 'http://127.0.0.1:8080',
           method: ctx.method,
-          url: this.makeUrl(target, ctx.normalizeUrl()),
+          url: this.assemblyUrl(target, ctx.normalizeUrl()),
           headers: ctx.requestHeaders,
           body: ctx.requestBody,
           connectTimeout: target.connectTimeout,
@@ -84,7 +82,7 @@ export class BuildResponseController extends BaseController {
     }
   }
 
-  private makeUrl(target: TargetModel, relativeUrl: string): string {
+  private assemblyUrl(target: TargetModel, relativeUrl: string): string {
     return [
       target.donorSecure ? 'https:' : 'http:',
       '//',

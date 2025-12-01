@@ -55,6 +55,37 @@ export class NodeHttpServer implements HttpServer {
 
   listen(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+      this.server.listen(this.options.port, this.options.address, () => {
+        this.logger.debug(`HttpServer listening`)
+
+        resolve()
+      })
+
+      this.server.once('error', (error) => {
+        reject(error)
+      })
+    })
+  }
+
+  close(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.server.close((error?: Error) => {
+        if (error) {
+          reject(error)
+
+          return
+        }
+      })
+
+      this.logger.debug(`HttpServer closed`)
+
+      resolve()
+    })
+  }
+
+  /*
+  listen(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this.server.off('listening', listeningHandler)
 
@@ -100,6 +131,7 @@ export class NodeHttpServer implements HttpServer {
       this.logger.debug(`HttpServer closed`)
     })
   }
+  */
 
   protected async handleServerRequest(
     req: http.IncomingMessage,

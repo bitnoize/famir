@@ -1,8 +1,6 @@
-import { DatabaseError, DatabaseErrorCode, Logger, ReplServerError } from '@famir/domain'
+import { DatabaseError, DatabaseErrorCode, ReplServerError } from '@famir/domain'
 
 export abstract class BaseService {
-  constructor(protected readonly logger: Logger) {}
-
   protected filterDatabaseException(error: unknown, knownErrorCodes: DatabaseErrorCode[]): never {
     if (error instanceof DatabaseError) {
       const isKnownError = knownErrorCodes.includes(error.code)

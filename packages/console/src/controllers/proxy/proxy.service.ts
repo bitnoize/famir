@@ -3,8 +3,6 @@ import {
   CreateProxyData,
   DeleteProxyData,
   ListProxiesData,
-  Logger,
-  LOGGER,
   PROXY_REPOSITORY,
   ProxyModel,
   ProxyRepository,
@@ -20,18 +18,12 @@ export class ProxyService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<ProxyService>(
       PROXY_SERVICE,
-      (c) =>
-        new ProxyService(c.resolve<Logger>(LOGGER), c.resolve<ProxyRepository>(PROXY_REPOSITORY))
+      (c) => new ProxyService(c.resolve<ProxyRepository>(PROXY_REPOSITORY))
     )
   }
 
-  constructor(
-    logger: Logger,
-    protected readonly proxyRepository: ProxyRepository
-  ) {
-    super(logger)
-
-    this.logger.debug(`ProxyService initialized`)
+  constructor(protected readonly proxyRepository: ProxyRepository) {
+    super()
   }
 
   async createProxy(data: CreateProxyData): Promise<ProxyModel> {

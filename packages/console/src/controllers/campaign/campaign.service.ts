@@ -5,8 +5,6 @@ import {
   CampaignRepository,
   CreateCampaignData,
   DeleteCampaignData,
-  Logger,
-  LOGGER,
   ReadCampaignData,
   ReplServerError,
   UpdateCampaignData
@@ -19,21 +17,12 @@ export class CampaignService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<CampaignService>(
       CAMPAIGN_SERVICE,
-      (c) =>
-        new CampaignService(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY)
-        )
+      (c) => new CampaignService(c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY))
     )
   }
 
-  constructor(
-    logger: Logger,
-    protected readonly campaignRepository: CampaignRepository
-  ) {
-    super(logger)
-
-    this.logger.debug(`CampaignService initialized`)
+  constructor(protected readonly campaignRepository: CampaignRepository) {
+    super()
   }
 
   async createCampaign(data: CreateCampaignData): Promise<CampaignModel> {

@@ -2,10 +2,11 @@ import { DomainError, DomainErrorOptions } from '../../domain.error.js'
 
 export type ReplServerErrorCode =
   | 'BAD_REQUEST'
+  | 'FORBIDDEN'
   | 'NOT_FOUND'
   | 'CONFLICT'
-  | 'FORBIDDEN'
   | 'INTERNAL_ERROR'
+  | 'SERVICE_UNAVAILABLE'
 
 export type ReplServerErrorOptions = DomainErrorOptions & {
   code: ReplServerErrorCode

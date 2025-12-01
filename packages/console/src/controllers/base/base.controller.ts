@@ -16,7 +16,7 @@ export abstract class BaseController {
 
       throw error
     } else {
-      throw new ReplServerError(`Controller internal error`, {
+      throw new ReplServerError(`Server internal error`, {
         cause: error,
         context: {
           controller: this.controllerName,

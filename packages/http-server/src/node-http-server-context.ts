@@ -30,6 +30,12 @@ export class NodeHttpServerContext implements HttpServerContext {
   ) {}
 
   readonly state: HttpState = {}
+
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  getState<T extends HttpState>(): T {
+    return this.state as T
+  }
+
   readonly logs: HttpLog[] = []
 
   addLog(name: string, data: HttpLogData) {

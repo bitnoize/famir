@@ -51,16 +51,10 @@ export class ConfigureController extends BaseController {
 
   private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      if (ctx.state['campaign']) {
-        throw new Error(`State campaign exists`)
-      }
+      if (this.isConfigureState(ctx)) {
+        await next()
 
-      if (ctx.state['target']) {
-        throw new Error(`State target exists`)
-      }
-
-      if (ctx.state['targets']) {
-        throw new Error(`State targets exists`)
+        return
       }
 
       const data = {
@@ -73,9 +67,7 @@ export class ConfigureController extends BaseController {
 
       const { campaign, target, targets } = await this.configureService.execute(data)
 
-      ctx.state['campaign'] = campaign
-      ctx.state['target'] = target
-      ctx.state['targets'] = targets
+      this.setConfigureState(ctx, campaign, target, targets)
 
       await next()
     } catch (error) {

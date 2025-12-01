@@ -1,7 +1,5 @@
 import { DIContainer } from '@famir/common'
 import {
-  Logger,
-  LOGGER,
   ReadSessionData,
   ReplServerError,
   SESSION_REPOSITORY,
@@ -16,21 +14,12 @@ export class SessionService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<SessionService>(
       SESSION_SERVICE,
-      (c) =>
-        new SessionService(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<SessionRepository>(SESSION_REPOSITORY)
-        )
+      (c) => new SessionService(c.resolve<SessionRepository>(SESSION_REPOSITORY))
     )
   }
 
-  constructor(
-    logger: Logger,
-    protected readonly sessionRepository: SessionRepository
-  ) {
-    super(logger)
-
-    this.logger.debug(`SessionService initialized`)
+  constructor(protected readonly sessionRepository: SessionRepository) {
+    super()
   }
 
   async readSession(data: ReadSessionData): Promise<SessionModel> {

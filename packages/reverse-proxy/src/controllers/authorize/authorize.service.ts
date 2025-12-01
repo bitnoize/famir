@@ -1,12 +1,16 @@
 import { DIContainer } from '@famir/common'
 import {
+  HttpServerError,
   PROXY_REPOSITORY,
+  ProxyModel,
   ProxyRepository,
+  ReadSessionData,
   SESSION_REPOSITORY,
+  SessionModel,
   SessionRepository
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
-//import { Data, Reply } from './authorize.js'
+import { CreateSessionData } from './authorize.js'
 
 export const AUTHORIZE_SERVICE = Symbol('AuthorizeService')
 
@@ -29,5 +33,36 @@ export class AuthorizeService extends BaseService {
     super()
   }
 
-  //async execute(data: AuthorizeData): Promise<AuthorizeReply> {}
+  async createSession(data: CreateSessionData): Promise<{
+    proxy: ProxyModel
+    session: SessionModel
+  }> {
+    try {
+      const session = await this.sessionRepository.createSession({
+        campaignId: data.campaignId
+      })
+
+      const proxy = await this.proxyRepository.readProxy({
+        campaignId: data.campaignId,
+        proxyId: session.proxyId
+      })
+
+      if (!proxy) {
+        throw new HttpServerError(`Proxy not found`, {
+          code: 'NOT_FOUND'
+        })
+      }
+
+      return {
+        session,
+        proxy
+      }
+    } catch (error) {
+      this.filterDatabaseException(error, ['SERVICE_UNAVAILABLE'])
+    }
+  }
+
+  async readSession(data: ReadSessionData): Promise<SessionModel | null> {
+    return await this.sessionRepository.readSession(data)
+  }
 }

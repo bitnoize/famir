@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   FullTargetModel,
   HTTP_SERVER_ROUTER,
@@ -12,6 +12,7 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
+import { LandingAuthData } from './authorize.js'
 import { type AuthorizeService, AUTHORIZE_SERVICE } from './authorize.service.js'
 
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
@@ -42,63 +43,77 @@ export class AuthorizeController extends BaseController {
   ) {
     super(validator, logger, router, 'authorize')
 
-    this.router.addMiddleware(this.defaultMiddleware)
+    this.router.addMiddleware(this.landingUpgradeSessionMiddleware)
+    //this.router.addMiddleware(this.landingAuthMiddleware)
+    //this.router.addMiddleware(this.transparentAuthMiddleware)
   }
 
-  private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  private landingUpgradeSessionMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.testConfigure(ctx.state)
+      const { campaign, target } = this.getConfigureState(ctx)
 
-      const { campaign, target } = ctx.state
+      if (this.isAuthorizeState(ctx)) {
+        await next()
 
-      /*
-      if (target.isLanding) {
-        const isLandingAuthPath = ctx.isUrlPathEquals(campaign.landingAuthPath)
-
-        if (isLandingAuthPath) {
-          if (!ctx.isMethod('GET')) {
-            await this.renderNotFoundPage(ctx, target)
-
-            return
-          }
-
-          const urlQuery = ctx.getUrlQuery()
-
-          const landingAuthValue = urlQuery[campaign.landingAuthParam]
-          const landingAuthQuery = this.parseLandingAuthQuery(landingAuthValue)
-
-          if (!landingAuthQuery) {
-            await this.renderNotFoundPage(ctx, target)
-
-            return
-          }
-
-          const { session, proxy } = await this.authorizeService.landingAuth({
-
-          })
-
-          if (!session) {
-            this.renderFailureRedirect()
-
-            return
-          }
-
-          ctx.setResponseCookie(campaign.sessionCookieName, {
-            value: session.sessionId,
-            maxAge: Math.round(campaign.sessionExpire / 1000),
-            httpOnly: true
-          })
-
-        } else {
-
-        }
-      } else {
+        return
       }
-      */
 
-      await next()
+      const foundRoute = target.isLanding && ctx.isUrlPathEquals(campaign.landingAuthPath)
+
+      if (!foundRoute) {
+        await next()
+
+        return
+      }
+
+      const isLandingAuthPath = ctx.isUrlPathEquals(campaign.landingAuthPath)
+
+      if (isLandingAuthPath) {
+        if (!ctx.isMethod('GET')) {
+          await this.renderNotFoundPage(ctx, target)
+
+          return
+        }
+
+        const urlQuery = ctx.getUrlQuery()
+
+        if (!urlQuery) {
+          await this.renderNotFoundPage(ctx, target)
+
+          return
+        }
+
+        const landingAuthValue = urlQuery[campaign.landingAuthParam]
+        const landingAuthData = this.parseLandingAuthData(ctx, landingAuthValue)
+
+        if (!landingAuthData) {
+          await this.renderNotFoundPage(ctx, target)
+
+          return
+        }
+
+        /*
+        const { session, proxy } = await this.authorizeService.upgradeSession({
+          lureId: landingAuthData.lureId,
+          sessionId: landingAuthData.sessionId,
+          sessionSecret: landingAuthData.sessionSecret,
+        })
+
+        if (!session) {
+          this.renderFailureRedirect(ctx, target)
+
+          return
+        }
+
+        ctx.setResponseCookie(campaign.sessionCookieName, {
+          value: session.sessionId,
+          maxAge: Math.round(campaign.sessionExpire / 1000),
+          httpOnly: true
+        })
+        */
+      }
     } catch (error) {
-      this.handleException(error, 'default')
+      this.handleException(error, 'landingUpgradeSession')
     }
   }
 
@@ -112,7 +127,33 @@ export class AuthorizeController extends BaseController {
       'content-type': 'text/html'
     }
 
-    ctx.prepareResponse(200, headers, body)
+    ctx.prepareResponse(404, headers, body)
+
+    await ctx.sendResponse()
+  }
+
+  protected async renderFailureRedirect(
+    ctx: HttpServerContext,
+    target: FullTargetModel
+  ): Promise<void> {
+    const headers: HttpHeaders = {
+      Location: target.failureRedirectUrl
+    }
+
+    ctx.prepareResponse(302, headers)
+
+    await ctx.sendResponse()
+  }
+
+  protected async renderSuccessRedirect(
+    ctx: HttpServerContext,
+    target: FullTargetModel
+  ): Promise<void> {
+    const headers: HttpHeaders = {
+      Location: target.successRedirectUrl
+    }
+
+    ctx.prepareResponse(302, headers)
 
     await ctx.sendResponse()
   }
@@ -239,8 +280,9 @@ export class AuthorizeController extends BaseController {
   ): boolean {
     return ctx.isMethod('GET') && ctx.isUrlPathEquals(campaign.landingAuthPath) && target.isLanding
   }
+*/
 
-  protected parseLandingAuthData(value: unknown): LandingAuthData | null {
+  protected parseLandingAuthData(ctx: HttpServerContext, value: unknown): LandingAuthData | null {
     try {
       if (value !== 'string') {
         return null
@@ -260,5 +302,4 @@ export class AuthorizeController extends BaseController {
       return null
     }
   }
-*/
 }

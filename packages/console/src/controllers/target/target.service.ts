@@ -5,8 +5,6 @@ import {
   DeleteTargetData,
   FullTargetModel,
   ListTargetsData,
-  Logger,
-  LOGGER,
   ReadTargetData,
   ReplServerError,
   SwitchTargetData,
@@ -23,18 +21,12 @@ export class TargetService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<TargetService>(
       TARGET_SERVICE,
-      (c) =>
-        new TargetService(c.resolve<Logger>(LOGGER), c.resolve<TargetRepository>(TARGET_REPOSITORY))
+      (c) => new TargetService(c.resolve<TargetRepository>(TARGET_REPOSITORY))
     )
   }
 
-  constructor(
-    logger: Logger,
-    protected readonly targetRepository: TargetRepository
-  ) {
-    super(logger)
-
-    this.logger.debug(`TargetService initialized`)
+  constructor(protected readonly targetRepository: TargetRepository) {
+    super()
   }
 
   async createTarget(data: CreateTargetData): Promise<TargetModel> {

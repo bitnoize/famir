@@ -3,8 +3,6 @@ import {
   CreateLureData,
   DeleteLureData,
   ListLuresData,
-  Logger,
-  LOGGER,
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
@@ -20,17 +18,12 @@ export class LureService extends BaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<LureService>(
       LURE_SERVICE,
-      (c) => new LureService(c.resolve<Logger>(LOGGER), c.resolve<LureRepository>(LURE_REPOSITORY))
+      (c) => new LureService(c.resolve<LureRepository>(LURE_REPOSITORY))
     )
   }
 
-  constructor(
-    logger: Logger,
-    protected readonly lureRepository: LureRepository
-  ) {
-    super(logger)
-
-    this.logger.debug(`LureService initialized`)
+  constructor(protected readonly lureRepository: LureRepository) {
+    super()
   }
 
   async createLure(data: CreateLureData): Promise<LureModel> {

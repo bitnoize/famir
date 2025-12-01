@@ -41,9 +41,7 @@ export class WellKnownUrlsController extends BaseController {
 
   private preflightCorsMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.testConfigure(ctx.state)
-
-      const { campaign } = ctx.state
+      const { campaign } = this.getConfigureState(ctx)
 
       const foundRoute = ctx.isMethod('OPTIONS')
 
@@ -73,9 +71,7 @@ export class WellKnownUrlsController extends BaseController {
 
   private faviconIcoMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.testConfigure(ctx.state)
-
-      const { target } = ctx.state
+      const { target } = this.getConfigureState(ctx)
 
       const foundRoute =
         ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPathEquals('/favicon.ico') && target.faviconIco
@@ -109,9 +105,7 @@ export class WellKnownUrlsController extends BaseController {
 
   private robotsTxtMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.testConfigure(ctx.state)
-
-      const { target } = ctx.state
+      const { target } = this.getConfigureState(ctx)
 
       const foundRoute =
         ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPathEquals('/robots.txt') && target.robotsTxt
@@ -145,9 +139,7 @@ export class WellKnownUrlsController extends BaseController {
 
   private sitemapXmlMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.testConfigure(ctx.state)
-
-      const { target } = ctx.state
+      const { target } = this.getConfigureState(ctx)
 
       const foundRoute =
         ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPathEquals('/sitemap.xml') && target.sitemapXml

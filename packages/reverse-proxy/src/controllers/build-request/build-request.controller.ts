@@ -37,9 +37,7 @@ export class BuildRequestController extends BaseController {
 
   private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      this.testConfigure(ctx.state)
-
-      const { campaign, target } = ctx.state
+      const { target } = this.getConfigureState(ctx)
 
       ctx.prepareRequestHeaders()
 
