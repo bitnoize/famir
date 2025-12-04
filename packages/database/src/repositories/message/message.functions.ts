@@ -1,6 +1,6 @@
 import {
-  HttpConnection,
   HttpBody,
+  HttpConnection,
   HttpHeaders,
   HttpLog,
   HttpRequestCookies,
@@ -65,7 +65,7 @@ export const messageFunctions = {
         score: number,
         startTime: number,
         finishTime: number,
-        connection: HttpConnection,
+        connection: HttpConnection
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))

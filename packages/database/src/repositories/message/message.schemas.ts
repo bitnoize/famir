@@ -282,7 +282,7 @@ export const messageConnectionSchema: JSONSchemaType<HttpConnection> = {
     http_version: {
       type: 'integer',
       nullable: true
-    },
+    }
   },
   additionalProperties: false
 } as const
@@ -296,5 +296,3 @@ export const readMessageDataSchema: JSONSchemaType<ReadMessageData> = {
   },
   additionalProperties: false
 } as const
-
-

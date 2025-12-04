@@ -1,6 +1,6 @@
 import {
-  HttpConnection,
   HttpBody,
+  HttpConnection,
   HttpHeader,
   HttpHeaders,
   HttpLog,

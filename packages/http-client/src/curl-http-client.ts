@@ -69,7 +69,7 @@ export class CurlHttpClient implements HttpClient {
               return 0
             }
 
-            const chunkSize = Math.min(size * nmemb,  request.body.length - requestBodyOffset)
+            const chunkSize = Math.min(size * nmemb, request.body.length - requestBodyOffset)
 
             if (chunkSize <= 0) {
               return 0
@@ -82,7 +82,7 @@ export class CurlHttpClient implements HttpClient {
             return chunkSize
           } catch (error) {
             this.logger.error(`HttpClient Curl READFUNCTION error`, {
-              error: serializeError(error),
+              error: serializeError(error)
             })
 
             shouldStop = 1
@@ -112,7 +112,7 @@ export class CurlHttpClient implements HttpClient {
           return chunkSize
         } catch (error) {
           this.logger.error(`HttpClient Curl HEADERFUNCTION error`, {
-            error: serializeError(error),
+            error: serializeError(error)
           })
 
           shouldStop = 2
@@ -148,7 +148,7 @@ export class CurlHttpClient implements HttpClient {
           return chunkSize
         } catch (error) {
           this.logger.error(`HttpClient Curl WRITEFUNCTION error`, {
-            error: serializeError(error),
+            error: serializeError(error)
           })
 
           shouldStop = 4
@@ -186,7 +186,7 @@ export class CurlHttpClient implements HttpClient {
               total_time: typeof totalTime === 'number' ? totalTime : null,
               connect_time: typeof connectTime === 'number' ? connectTime : null,
               http_version: typeof httpVersion === 'number' ? httpVersion : null
-            },
+            }
           })
         } catch (error) {
           reject(
@@ -221,7 +221,7 @@ export class CurlHttpClient implements HttpClient {
             new HttpClientError(`Curl error event fatal error`, {
               cause: fatalError,
               context: {
-                params: [error, curlCode],
+                params: [error, curlCode]
               },
               code: 'INTERNAL_ERROR'
             })

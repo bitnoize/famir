@@ -14,8 +14,8 @@ import {
 import {
   AuthorizeState,
   CompleteState,
-  SetupMirrorState,
-  ReverseProxyState
+  ReverseProxyState,
+  SetupMirrorState
 } from '../../reverse-proxy.js'
 
 export abstract class BaseController {

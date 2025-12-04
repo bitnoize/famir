@@ -59,7 +59,7 @@ export class SetupMirrorController extends BaseController {
 
       const data = {
         campaignId: ctx.originHeaders['x-famir-campaign-id'],
-        targetId: ctx.originHeaders['x-famir-target-id'],
+        targetId: ctx.originHeaders['x-famir-target-id']
       }
 
       this.validateSetupMirrorData(data)

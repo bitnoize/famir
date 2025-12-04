@@ -6,7 +6,7 @@ export const setupMirrorDataSchema: JSONSchemaType<SetupMirrorData> = {
   required: ['campaignId', 'targetId'],
   properties: {
     campaignId: customIdentSchema,
-    targetId: customIdentSchema,
+    targetId: customIdentSchema
   },
   additionalProperties: false
 } as const

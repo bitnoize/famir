@@ -1,6 +1,5 @@
 import { DIContainer, randomIdent } from '@famir/common'
 import {
-  HttpConnection,
   Config,
   CONFIG,
   CreateMessageData,
@@ -9,6 +8,7 @@ import {
   DatabaseError,
   FullMessageModel,
   HttpBody,
+  HttpConnection,
   HttpHeaders,
   HttpLog,
   HttpRequestCookies,
@@ -66,7 +66,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       'database-message-headers': messageHeadersSchema,
       'database-message-request-cookies': messageRequestCookiesSchema,
       'database-message-response-cookies': messageResponseCookiesSchema,
-      'database-message-connection': messageConnectionSchema,
+      'database-message-connection': messageConnectionSchema
     })
   }
 
@@ -97,7 +97,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
           data.score,
           data.startTime,
           data.finishTime,
-          data.connection,
+          data.connection
         ),
 
         this.connection.message.read_message(this.options.prefix, data.campaignId, messageId)

@@ -1,4 +1,4 @@
-import { HttpBody, HttpHeaders, HttpConnection } from '../../http-proto.js'
+import { HttpBody, HttpConnection, HttpHeaders } from '../../http-proto.js'
 
 export interface HttpClientRequest {
   proxy: string

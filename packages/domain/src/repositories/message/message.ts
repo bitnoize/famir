@@ -1,10 +1,10 @@
 import {
   HttpBody,
+  HttpConnection,
   HttpHeaders,
   HttpLog,
   HttpRequestCookies,
-  HttpResponseCookies,
-  HttpConnection
+  HttpResponseCookies
 } from '../../http-proto.js'
 import { FullMessageModel, MessageModel } from '../../models/index.js'
 
