@@ -46,8 +46,8 @@ export class BuildResponseController extends BaseController {
 
   private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      const { target } = this.getConfigureState(ctx)
-      //const { proxy } = this.getAuthorizeState(ctx)
+      const { target } = this.getSetupMirrorState(ctx)
+      const { proxy } = this.getAuthorizeState(ctx)
 
       ctx.applyRequestWrappers()
 
@@ -56,24 +56,25 @@ export class BuildResponseController extends BaseController {
       if (ctx.isStreaming) {
         throw new Error(`Streaming requests not implemented yet :(`)
       } else {
-        const { status, headers, body } = await this.buildResponseService.forwardRequest({
-          proxy: 'http://127.0.0.1:8080',
-          method: ctx.method,
-          url: this.assemblyUrl(target, ctx.normalizeUrl()),
-          headers: ctx.requestHeaders,
-          body: ctx.requestBody,
-          connectTimeout: target.connectTimeout,
-          timeout: target.requestTimeout,
-          bodyLimit: target.responseBodyLimit
-        })
+        const { status, headers, body, connection } =
+          await this.buildResponseService.forwardRequest({
+            proxy: proxy.url,
+            method: ctx.method,
+            url: this.assemblyUrl(target, ctx.normalizeUrl()),
+            headers: ctx.requestHeaders,
+            body: ctx.requestBody,
+            connectTimeout: target.connectTimeout,
+            timeout: target.requestTimeout,
+            bodyLimit: target.responseBodyLimit
+          })
 
-        ctx.prepareResponse(status, headers, body)
+        ctx.prepareResponse(status, headers, body, connection)
 
         ctx.setResponseHeaders({
-          'Connection': undefined,
+          Connection: undefined,
           'Keep-Alive': undefined,
-          'Upgrade': undefined,
-          'Set-Cookie': undefined,
+          Upgrade: undefined,
+          'Set-Cookie': undefined
         })
 
         ctx.applyResponseWrappers()

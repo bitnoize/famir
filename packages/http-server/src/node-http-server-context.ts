@@ -1,6 +1,7 @@
 import { serializeError } from '@famir/common'
 import {
   HttpBody,
+  HttpConnection,
   HttpHeader,
   HttpHeaders,
   HttpLog,
@@ -273,11 +274,20 @@ export class NodeHttpServerContext implements HttpServerContext {
 
   responseBody: HttpBody = Buffer.alloc(0)
 
-  prepareResponse(status: number, headers?: HttpHeaders, body?: HttpBody) {
+  prepareResponse(
+    status: number,
+    headers?: HttpHeaders,
+    body?: HttpBody,
+    connection?: HttpConnection
+  ) {
     this.#status = status
 
     if (headers) {
       this.setResponseHeaders(headers)
+    }
+
+    if (connection) {
+      this.#connection = connection
     }
 
     const setCookieHeader = this.getResponseHeaderArray('Set-Cookie') ?? []
@@ -313,7 +323,6 @@ export class NodeHttpServerContext implements HttpServerContext {
       this.res.writeHead(this.status)
 
       this.res.end(this.responseBody, (error?: Error) => {
-        this.isComplete = true
         this.#finishTime = Date.now()
 
         if (error) {
@@ -388,7 +397,15 @@ export class NodeHttpServerContext implements HttpServerContext {
     return this.#finishTime
   }
 
-  isComplete: boolean = false
+  #connection: HttpConnection = {}
+
+  get connection(): HttpConnection {
+    return this.#connection
+  }
+
+  get isComplete(): boolean {
+    return this.#finishTime > 0
+  }
 
   //
   // Helpers

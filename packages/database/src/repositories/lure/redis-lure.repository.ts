@@ -75,7 +75,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const lureModel = this.buildLureModel(rawValue)
 
-      this.existsLureModel(lureModel)
+      if (!testLureModel(lureModel)) {
+        throw new DatabaseError(`LureModel lost on create`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { lureModel })
 
@@ -141,7 +145,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const lureModel = this.buildLureModel(rawValue)
 
-      this.existsLureModel(lureModel)
+      if (!testLureModel(lureModel)) {
+        throw new DatabaseError(`LureModel lost on enable`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { lureModel })
 
@@ -167,7 +175,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const lureModel = this.buildLureModel(rawValue)
 
-      this.existsLureModel(lureModel)
+      if (!testLureModel(lureModel)) {
+        throw new DatabaseError(`LureModel lost on disable`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { lureModel })
 
@@ -199,7 +211,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const lureModel = this.buildLureModel(rawValue)
 
-      this.existsLureModel(lureModel)
+      if (!testLureModel(lureModel)) {
+        throw new DatabaseError(`LureModel lost on delete`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { lureModel })
 
@@ -262,14 +278,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     } catch (error) {
       throw new DatabaseError(`RawLure validate failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected existsLureModel<T extends LureModel>(value: T | null): asserts value is T {
-    if (!testLureModel(value)) {
-      throw new DatabaseError(`LureModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

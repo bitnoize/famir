@@ -75,7 +75,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       const sessionModel = this.buildSessionModel(rawValue)
 
-      this.existsSessionModel(sessionModel)
+      if (!testSessionModel(sessionModel)) {
+        throw new DatabaseError(`SessionModel lost on create`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { sessionModel })
 
@@ -115,7 +119,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       const sessionModel = this.buildSessionModel(rawValue)
 
-      this.existsSessionModel(sessionModel)
+      if (!testSessionModel(sessionModel)) {
+        throw new DatabaseError(`SessionModel lost on auth`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { sessionModel })
 
@@ -147,7 +155,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       const sessionModel = this.buildSessionModel(rawValue)
 
-      this.existsSessionModel(sessionModel)
+      if (!testSessionModel(sessionModel)) {
+        throw new DatabaseError(`SessionModel lost on upgrade`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { sessionModel })
 
@@ -188,14 +200,6 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     } catch (error) {
       throw new DatabaseError(`RawSession validate failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected existsSessionModel<T extends SessionModel>(value: T | null): asserts value is T {
-    if (!testSessionModel(value)) {
-      throw new DatabaseError(`SessionModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

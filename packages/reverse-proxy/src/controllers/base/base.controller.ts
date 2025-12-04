@@ -7,10 +7,16 @@ import {
   HttpServerError,
   HttpServerRouter,
   Logger,
+  MessageModel,
   SessionModel,
   Validator
 } from '@famir/domain'
-import { AuthorizeState, ConfigureState, ReverseProxyState } from '../../reverse-proxy.js'
+import {
+  AuthorizeState,
+  CompleteState,
+  SetupMirrorState,
+  ReverseProxyState
+} from '../../reverse-proxy.js'
 
 export abstract class BaseController {
   constructor(
@@ -20,39 +26,43 @@ export abstract class BaseController {
     protected readonly controllerName: string
   ) {}
 
-  protected isConfigureState(ctx: HttpServerContext): boolean {
+  //
+  // SetupMirrorState
+  //
+
+  protected isSetupMirrorState(ctx: HttpServerContext): boolean {
     const state = ctx.getState<ReverseProxyState>()
 
-    state.isConfigure ??= false
+    state.isSetupMirror ??= false
 
-    return state.isConfigure
+    return state.isSetupMirror
   }
 
-  protected getConfigureState(ctx: HttpServerContext): ConfigureState {
+  protected getSetupMirrorState(ctx: HttpServerContext): SetupMirrorState {
     const state = ctx.getState<ReverseProxyState>()
 
-    state.isConfigure ??= false
+    state.isSetupMirror ??= false
 
-    if (!state.isConfigure) {
-      throw new Error(`ConfigureState not exists`)
+    if (!state.isSetupMirror) {
+      throw new Error(`SetupMirrorState not exists`)
     }
 
     if (!state.campaign) {
-      throw new Error(`ConfigureState campaign missing`)
+      throw new Error(`SetupMirrorState campaign missing`)
     }
 
     if (!state.target) {
-      throw new Error(`ConfigureState target missing`)
+      throw new Error(`SetupMirrorState target missing`)
     }
 
     if (!state.targets) {
-      throw new Error(`ConfigureState targets missing`)
+      throw new Error(`SetupMirrorState targets missing`)
     }
 
-    return state as ConfigureState
+    return state as SetupMirrorState
   }
 
-  protected setConfigureState(
+  protected setSetupMirrorState(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
@@ -60,11 +70,15 @@ export abstract class BaseController {
   ): void {
     const state = ctx.getState<ReverseProxyState>()
 
-    state.isConfigure = true
+    state.isSetupMirror = true
     state.campaign = campaign
     state.target = target
     state.targets = targets
   }
+
+  //
+  // AuthorizeState
+  //
 
   protected isAuthorizeState(ctx: HttpServerContext): boolean {
     const state = ctx.getState<ReverseProxyState>()
@@ -106,9 +120,43 @@ export abstract class BaseController {
     state.proxy = proxy
   }
 
+  //
+  // CompleteState
+  //
+
+  protected isCompleteState(ctx: HttpServerContext): boolean {
+    const state = ctx.getState<ReverseProxyState>()
+
+    state.isComplete ??= false
+
+    return state.isComplete
+  }
+
+  protected getCompleteState(ctx: HttpServerContext): CompleteState {
+    const state = ctx.getState<ReverseProxyState>()
+
+    state.isComplete ??= false
+
+    if (!state.isComplete) {
+      throw new Error(`CompleteState not exists`)
+    }
+
+    if (!state.message) {
+      throw new Error(`CompleteState message missing`)
+    }
+
+    return state as CompleteState
+  }
+
+  protected setCompleteState(ctx: HttpServerContext, message: MessageModel): void {
+    const state = ctx.getState<ReverseProxyState>()
+
+    state.isComplete = true
+    state.message = message
+  }
+
   protected handleException(error: unknown, middleware: string): never {
     if (error instanceof HttpServerError) {
-      error.context['controller'] = this.controllerName
       error.context['middleware'] = middleware
 
       throw error
@@ -116,7 +164,6 @@ export abstract class BaseController {
       throw new HttpServerError(`Server internal error`, {
         cause: error,
         context: {
-          controller: this.controllerName,
           middleware
         },
         code: 'INTERNAL_ERROR'

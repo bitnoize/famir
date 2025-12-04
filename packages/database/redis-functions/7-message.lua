@@ -4,7 +4,7 @@
   Create message
 --]]
 local function create_message(keys, args)
-  if not (#keys == 5 and #args == 21) then
+  if not (#keys == 5 and #args == 22) then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -40,22 +40,23 @@ local function create_message(keys, args)
     proxy_id = args[3],
     target_id = args[4],
     session_id = args[5],
-    method = args[6],
-    url = args[7],
-    is_streaming = args[8],
-    request_headers = args[9],
-    request_cookies = args[10],
-    request_body = args[11],
-    response_headers = args[12],
-    response_cookies = args[13],
-    response_body = args[14],
-    client_ip = args[15],
-    status = tonumber(args[16]),
-    score = tonumber(args[17]),
-    start_time = tonumber(args[18]),
-    finish_time = tonumber(args[19]),
-    logs = args[20],
-    created_at = tonumber(args[21]),
+    logs = args[6],
+    method = args[7],
+    url = args[8],
+    is_streaming = args[9],
+    request_headers = args[10],
+    request_cookies = args[11],
+    request_body = args[12],
+    response_headers = args[13],
+    response_cookies = args[14],
+    response_body = args[15],
+    client_ip = args[16],
+    status = tonumber(args[17]),
+    score = tonumber(args[18]),
+    start_time = tonumber(args[19]),
+    finish_time = tonumber(args[20]),
+    connection = args[21],
+    created_at = tonumber(args[22]),
   }
 
   for field, value in pairs(model) do
@@ -150,12 +151,10 @@ local function read_message(keys, args)
     'is_streaming',
     'status',
     'score',
-    'start_time',
-    'finish_time',
     'created_at'
   )
 
-  if not (#values == 13) then
+  if not (#values == 11) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -170,9 +169,7 @@ local function read_message(keys, args)
     is_streaming = tonumber(values[8]),
     status = tonumber(values[9]),
     score = tonumber(values[10]),
-    start_time = tonumber(values[11]),
-    finish_time = tonumber(values[12]),
-    created_at = tonumber(values[13]),
+    created_at = tonumber(values[11]),
   }
 
   for field, value in pairs(model) do
@@ -218,6 +215,7 @@ local function read_full_message(keys, args)
     'proxy_id',
     'target_id',
     'session_id',
+    'logs',
     'method',
     'url',
     'is_streaming',
@@ -232,11 +230,11 @@ local function read_full_message(keys, args)
     'score',
     'start_time',
     'finish_time',
-    'logs',
+    'connection',
     'created_at'
   )
 
-  if not (#values == 21) then
+  if not (#values == 22) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -246,22 +244,23 @@ local function read_full_message(keys, args)
     proxy_id = values[3],
     target_id = values[4],
     session_id = values[5],
-    method = values[6],
-    url = values[7],
-    is_streaming = tonumber(values[8]),
-    request_headers = values[9],
-    request_cookies = values[10],
-    request_body = values[11],
-    response_headers = values[12],
-    response_cookies = values[13],
-    response_body = values[14],
-    client_ip = values[15],
-    status = tonumber(values[16]),
-    score = tonumber(values[17]),
-    start_time = tonumber(values[18]),
-    finish_time = tonumber(values[19]),
-    logs = values[20],
-    created_at = tonumber(values[21]),
+    logs = values[6],
+    method = values[7],
+    url = values[8],
+    is_streaming = tonumber(values[9]),
+    request_headers = values[10],
+    request_cookies = values[11],
+    request_body = values[12],
+    response_headers = values[13],
+    response_cookies = values[14],
+    response_body = values[15],
+    client_ip = values[16],
+    status = tonumber(values[17]),
+    score = tonumber(values[18]),
+    start_time = tonumber(values[19]),
+    finish_time = tonumber(values[20]),
+    connection = values[21],
+    created_at = tonumber(values[22]),
   }
 
   for field, value in pairs(model) do

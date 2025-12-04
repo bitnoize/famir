@@ -1,4 +1,4 @@
-import { HttpBody, HttpHeaders } from '../../http-proto.js'
+import { HttpBody, HttpHeaders, HttpConnection } from '../../http-proto.js'
 
 export interface HttpClientRequest {
   proxy: string
@@ -15,15 +15,13 @@ export interface HttpClientResponse {
   status: number
   headers: HttpHeaders
   body: HttpBody
-  totalTime: number
-  connectTime: number
-  httpVersion: number
+  connection: HttpConnection
 }
 
 export interface HttpClientStreamingResponse {
   status: number
   headers: HttpHeaders
-  // TODO
+  // ...
 }
 
 export const HTTP_CLIENT = Symbol('HttpClient')

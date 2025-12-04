@@ -42,3 +42,10 @@ export interface HttpPlainText {
 }
 
 export type HttpQueryString = Record<string, unknown>
+
+export interface HttpConnection {
+  total_time?: number | null | undefined
+  connect_time?: number | null | undefined
+  http_version?: number | null | undefined
+  // ...
+}

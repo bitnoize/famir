@@ -182,9 +182,11 @@ export class CurlHttpClient implements HttpClient {
             status,
             headers: this.parseHeaders(responseHeaders),
             body: Buffer.concat(responseBody),
-            totalTime: typeof totalTime === 'number' ? totalTime : 0,
-            connectTime: typeof connectTime === 'number' ? connectTime : 0,
-            httpVersion: typeof httpVersion === 'number' ? httpVersion : 0
+            connection: {
+              total_time: typeof totalTime === 'number' ? totalTime : null,
+              connect_time: typeof connectTime === 'number' ? connectTime : null,
+              http_version: typeof httpVersion === 'number' ? httpVersion : null
+            },
           })
         } catch (error) {
           reject(

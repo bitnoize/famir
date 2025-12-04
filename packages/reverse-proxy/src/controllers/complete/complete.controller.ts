@@ -44,8 +44,33 @@ export class CompleteController extends BaseController {
 
   private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      //const { campaign, target } = this.getConfigureState(ctx)
-      //const { session, proxy } = this.getAuthorizeState(ctx)
+      const { campaign, target } = this.getSetupMirrorState(ctx)
+      const { session, proxy } = this.getAuthorizeState(ctx)
+
+      const { message } = await this.completeService.createMessage({
+        campaignId: campaign.campaignId,
+        proxyId: proxy.proxyId,
+        targetId: target.targetId,
+        sessionId: session.sessionId,
+        logs: ctx.logs,
+        method: ctx.method,
+        url: ctx.normalizeUrl(),
+        isStreaming: ctx.isStreaming,
+        requestHeaders: ctx.requestHeaders,
+        requestCookies: ctx.requestCookies,
+        requestBody: ctx.requestBody,
+        responseHeaders: ctx.responseHeaders,
+        responseCookies: ctx.responseCookies,
+        responseBody: ctx.responseBody,
+        clientIp: '',
+        status: ctx.status,
+        score: ctx.score,
+        startTime: ctx.startTime,
+        finishTime: ctx.finishTime,
+        connection: ctx.connection
+      })
+
+      //this.setComplete(ctx, message)
 
       await next()
     } catch (error) {

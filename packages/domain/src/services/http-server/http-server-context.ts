@@ -1,4 +1,5 @@
 import {
+  HttpConnection,
   HttpBody,
   HttpHeader,
   HttpHeaders,
@@ -63,21 +64,27 @@ export interface HttpServerContext {
   getResponseMediaType(): HttpMediaType | null
   setResponseMediaType(mediaType: HttpMediaType): void
   responseBody: HttpBody
-  prepareResponse(status: number, headers?: HttpHeaders, body?: HttpBody): void
+  prepareResponse(
+    status: number,
+    headers?: HttpHeaders,
+    body?: HttpBody,
+    connection?: HttpConnection
+  ): void
   applyResponseWrappers(): void
   renewResponseSetCookieHeader(): void
   sendResponse(): Promise<void>
   readonly responseHeadersSent: boolean
   readonly status: number
-  isStatusInformation: boolean
-  isStatusSuccess: boolean
-  isStatusRedirect: boolean
-  isStatusClientError: boolean
-  isStatusServerError: boolean
-  isStatusUnknown: boolean
+  readonly isStatusInformation: boolean
+  readonly isStatusSuccess: boolean
+  readonly isStatusRedirect: boolean
+  readonly isStatusClientError: boolean
+  readonly isStatusServerError: boolean
+  readonly isStatusUnknown: boolean
   readonly score: number
   upScore(score: number): void
   readonly startTime: number
   readonly finishTime: number
-  isComplete: boolean
+  readonly connection: HttpConnection
+  readonly isComplete: boolean
 }

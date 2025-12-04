@@ -96,7 +96,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.existsTargetModel(targetModel)
+      if (!testTargetModel(targetModel)) {
+        throw new DatabaseError(`TargetModel lost on create`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { targetModel })
 
@@ -152,7 +156,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.existsTargetModel(targetModel)
+      if (!testTargetModel(targetModel)) {
+        throw new DatabaseError(`TargetModel lost on update`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { targetModel })
 
@@ -178,7 +186,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.existsTargetModel(targetModel)
+      if (!testTargetModel(targetModel)) {
+        throw new DatabaseError(`TargetModel lost on enable`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { targetModel })
 
@@ -204,7 +216,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.existsTargetModel(targetModel)
+      if (!testTargetModel(targetModel)) {
+        throw new DatabaseError(`TargetModel lost on disable`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { targetModel })
 
@@ -235,7 +251,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.existsTargetModel(targetModel)
+      if (!testTargetModel(targetModel)) {
+        throw new DatabaseError(`TargetModel lost on append label`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { targetModel })
 
@@ -266,7 +286,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.existsTargetModel(targetModel)
+      if (!testTargetModel(targetModel)) {
+        throw new DatabaseError(`TargetModel lost on remove label`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { targetModel })
 
@@ -292,7 +316,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const targetModel = this.buildTargetModel(rawValue)
 
-      this.existsTargetModel(targetModel)
+      if (!testTargetModel(targetModel)) {
+        throw new DatabaseError(`TargetModel lost on delete`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { targetModel })
 
@@ -413,14 +441,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     } catch (error) {
       throw new DatabaseError(`RawFullTarget validate failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected existsTargetModel<T extends TargetModel>(value: T | null): asserts value is T {
-    if (!testTargetModel(value)) {
-      throw new DatabaseError(`TargetModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

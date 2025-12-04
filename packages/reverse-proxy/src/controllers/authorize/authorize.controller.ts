@@ -50,7 +50,7 @@ export class AuthorizeController extends BaseController {
 
   private landingUpgradeSessionMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      const { campaign, target } = this.getConfigureState(ctx)
+      const { campaign, target } = this.getSetupMirrorState(ctx)
 
       if (this.isAuthorizeState(ctx)) {
         await next()

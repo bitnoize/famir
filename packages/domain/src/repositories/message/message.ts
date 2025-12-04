@@ -3,7 +3,8 @@ import {
   HttpHeaders,
   HttpLog,
   HttpRequestCookies,
-  HttpResponseCookies
+  HttpResponseCookies,
+  HttpConnection
 } from '../../http-proto.js'
 import { FullMessageModel, MessageModel } from '../../models/index.js'
 
@@ -12,6 +13,7 @@ export interface CreateMessageData {
   proxyId: string
   targetId: string
   sessionId: string
+  logs: HttpLog[]
   method: string
   url: string
   isStreaming: boolean
@@ -26,7 +28,7 @@ export interface CreateMessageData {
   score: number
   startTime: number
   finishTime: number
-  logs: HttpLog[]
+  connection: HttpConnection
 }
 
 export interface ReadMessageData {

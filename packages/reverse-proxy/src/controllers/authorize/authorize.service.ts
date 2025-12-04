@@ -43,13 +43,13 @@ export class AuthorizeService extends BaseService {
       })
 
       const proxy = await this.proxyRepository.readProxy({
-        campaignId: data.campaignId,
+        campaignId: session.campaignId,
         proxyId: session.proxyId
       })
 
       if (!proxy) {
-        throw new HttpServerError(`Proxy not found`, {
-          code: 'NOT_FOUND'
+        throw new HttpServerError(`Proxy lost on create session`, {
+          code: 'INTERNAL_ERROR'
         })
       }
 

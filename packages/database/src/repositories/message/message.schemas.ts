@@ -1,5 +1,6 @@
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
 import {
+  HttpConnection,
   HttpHeader,
   HttpHeaders,
   HttpLog,
@@ -24,8 +25,6 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     'is_streaming',
     'status',
     'score',
-    'start_time',
-    'finish_time',
     'created_at'
   ],
   properties: {
@@ -59,12 +58,6 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     score: {
       type: 'integer'
     },
-    start_time: {
-      type: 'integer'
-    },
-    finish_time: {
-      type: 'integer'
-    },
     created_at: {
       type: 'integer'
     }
@@ -80,10 +73,10 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     'proxy_id',
     'target_id',
     'session_id',
+    'logs',
     'method',
     'url',
     'is_streaming',
-    'logs',
     'request_headers',
     'request_cookies',
     'request_body',
@@ -95,6 +88,7 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     'score',
     'start_time',
     'finish_time',
+    'connection',
     'created_at'
   ],
   properties: {
@@ -111,6 +105,9 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
       type: 'string'
     },
     session_id: {
+      type: 'string'
+    },
+    logs: {
       type: 'string'
     },
     method: {
@@ -155,7 +152,7 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     finish_time: {
       type: 'integer'
     },
-    logs: {
+    connection: {
       type: 'string'
     },
     created_at: {
@@ -270,6 +267,26 @@ export const messageResponseCookiesSchema: JSONSchemaType<HttpResponseCookies> =
   }
 } as const
 
+export const messageConnectionSchema: JSONSchemaType<HttpConnection> = {
+  type: 'object',
+  required: [],
+  properties: {
+    total_time: {
+      type: 'integer',
+      nullable: true
+    },
+    connect_time: {
+      type: 'integer',
+      nullable: true
+    },
+    http_version: {
+      type: 'integer',
+      nullable: true
+    },
+  },
+  additionalProperties: false
+} as const
+
 export const readMessageDataSchema: JSONSchemaType<ReadMessageData> = {
   type: 'object',
   required: ['campaignId', 'messageId'],
@@ -279,3 +296,5 @@ export const readMessageDataSchema: JSONSchemaType<ReadMessageData> = {
   },
   additionalProperties: false
 } as const
+
+

@@ -37,19 +37,19 @@ export class BuildRequestController extends BaseController {
 
   private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      const { target } = this.getConfigureState(ctx)
+      const { target } = this.getSetupMirrorState(ctx)
 
       ctx.prepareRequestHeaders()
 
       ctx.setRequestHeaders({
-        'Host': undefined,
-        'Connection': undefined,
+        Host: undefined,
+        Connection: undefined,
         'Keep-Alive': undefined,
-        'Upgrade': undefined,
-        'Cookie': undefined,
+        Upgrade: undefined,
+        Cookie: undefined,
         'X-Famir-Campaign-Id': undefined,
         'X-Famir-Target-Id': undefined,
-        'X-Famir-Client-Ip': undefined,
+        'X-Famir-Client-Ip': undefined
       })
 
       await ctx.loadRequestBody(target.requestBodyLimit)

@@ -3,7 +3,8 @@ import {
   HttpHeaders,
   HttpLog,
   HttpRequestCookies,
-  HttpResponseCookies
+  HttpResponseCookies,
+  HttpConnection
 } from '../../http-proto.js'
 
 export interface MessageModel {
@@ -17,8 +18,6 @@ export interface MessageModel {
   readonly isStreaming: boolean
   readonly status: number
   readonly score: number
-  readonly startTime: number
-  readonly finishTime: number
   readonly createdAt: Date
 }
 
@@ -27,6 +26,7 @@ export const testMessageModel = <T extends MessageModel>(value: T | null): value
 }
 
 export interface FullMessageModel extends MessageModel {
+  readonly logs: HttpLog[]
   readonly requestHeaders: HttpHeaders
   readonly requestCookies: HttpRequestCookies
   readonly requestBody: HttpBody
@@ -34,5 +34,7 @@ export interface FullMessageModel extends MessageModel {
   readonly responseCookies: HttpResponseCookies
   readonly responseBody: HttpBody
   readonly clientIp: string
-  readonly logs: HttpLog[]
+  readonly startTime: number
+  readonly finishTime: number
+  readonly connection: HttpConnection
 }

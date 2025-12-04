@@ -2,22 +2,25 @@ import { DIContainer } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignRepository,
+  EnabledFullTargetModel,
+  EnabledTargetModel,
+  FullCampaignModel,
   HttpServerError,
   TARGET_REPOSITORY,
   TargetRepository,
   testEnabledTargetModel
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
-import { ConfigureData, ConfigureReply } from './configure.js'
+import { SetupMirrorData } from './setup-mirror.js'
 
-export const CONFIGURE_SERVICE = Symbol('ConfigureService')
+export const SETUP_MIRROR_SERVICE = Symbol('SetupMirrorService')
 
-export class ConfigureService extends BaseService {
+export class SetupMirrorService extends BaseService {
   static inject(container: DIContainer) {
-    container.registerSingleton<ConfigureService>(
-      CONFIGURE_SERVICE,
+    container.registerSingleton<SetupMirrorService>(
+      SETUP_MIRROR_SERVICE,
       (c) =>
-        new ConfigureService(
+        new SetupMirrorService(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY)
         )
@@ -31,7 +34,11 @@ export class ConfigureService extends BaseService {
     super()
   }
 
-  async execute(data: ConfigureData): Promise<ConfigureReply> {
+  async execute(data: SetupMirrorData): Promise<{
+    campaign: FullCampaignModel
+    target: EnabledFullTargetModel
+    targets: EnabledTargetModel[]
+  }> {
     const [campaign, target] = await Promise.all([
       this.campaignRepository.readCampaign({
         campaignId: data.campaignId

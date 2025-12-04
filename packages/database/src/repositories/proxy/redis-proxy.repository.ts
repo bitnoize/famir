@@ -73,7 +73,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const proxyModel = this.buildProxyModel(rawValue)
 
-      this.existsProxyModel(proxyModel)
+      if (!testProxyModel(proxyModel)) {
+        throw new DatabaseError(`ProxyModel lost on create`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { proxyModel })
 
@@ -113,7 +117,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const proxyModel = this.buildProxyModel(rawValue)
 
-      this.existsProxyModel(proxyModel)
+      if (!testProxyModel(proxyModel)) {
+        throw new DatabaseError(`ProxyModel lost on enable`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { proxyModel })
 
@@ -139,7 +147,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const proxyModel = this.buildProxyModel(rawValue)
 
-      this.existsProxyModel(proxyModel)
+      if (!testProxyModel(proxyModel)) {
+        throw new DatabaseError(`ProxyModel lost on disable`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { proxyModel })
 
@@ -165,7 +177,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const proxyModel = this.buildProxyModel(rawValue)
 
-      this.existsProxyModel(proxyModel)
+      if (!testProxyModel(proxyModel)) {
+        throw new DatabaseError(`ProxyModel lost on delete`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { proxyModel })
 
@@ -230,14 +246,6 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     } catch (error) {
       throw new DatabaseError(`RawProxy validate failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected existsProxyModel<T extends ProxyModel>(value: T | null): asserts value is T {
-    if (!testProxyModel(value)) {
-      throw new DatabaseError(`ProxyModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

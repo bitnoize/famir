@@ -79,7 +79,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       const redirectorModel = this.buildRedirectorModel(rawValue)
 
-      this.existsRedirectorModel(redirectorModel)
+      if (!testRedirectorModel(redirectorModel)) {
+        throw new DatabaseError(`RedirectorModel lost on create`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { redirectorModel })
 
@@ -128,7 +132,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       const redirectorModel = this.buildRedirectorModel(rawValue)
 
-      this.existsRedirectorModel(redirectorModel)
+      if (!testRedirectorModel(redirectorModel)) {
+        throw new DatabaseError(`RedirectorModel lost on update`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { redirectorModel })
 
@@ -162,7 +170,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       const redirectorModel = this.buildRedirectorModel(rawValue)
 
-      this.existsRedirectorModel(redirectorModel)
+      if (!testRedirectorModel(redirectorModel)) {
+        throw new DatabaseError(`RedirectorModel lost on delete`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { redirectorModel })
 
@@ -257,14 +269,6 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     } catch (error) {
       throw new DatabaseError(`RawFullRedirector validate failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected existsRedirectorModel<T extends RedirectorModel>(value: T | null): asserts value is T {
-    if (!testRedirectorModel(value)) {
-      throw new DatabaseError(`RedirectorModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

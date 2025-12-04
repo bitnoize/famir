@@ -81,7 +81,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       const campaignModel = this.buildCampaignModel(rawValue)
 
-      this.existsCampaignModel(campaignModel)
+      if (!testCampaignModel(campaignModel)) {
+        throw new DatabaseError(`CampaignModel lost on create`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { campaignModel })
 
@@ -127,7 +131,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       const campaignModel = this.buildCampaignModel(rawValue)
 
-      this.existsCampaignModel(campaignModel)
+      if (!testCampaignModel(campaignModel)) {
+        throw new DatabaseError(`CampaignModel lost on update`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { campaignModel })
 
@@ -153,7 +161,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       const campaignModel = this.buildCampaignModel(rawValue)
 
-      this.existsCampaignModel(campaignModel)
+      if (!testCampaignModel(campaignModel)) {
+        throw new DatabaseError(`CampaignModel lost on delete`, {
+          code: 'INTERNAL_ERROR'
+        })
+      }
 
       this.logger.info(message, { campaignModel })
 
@@ -250,14 +262,6 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     } catch (error) {
       throw new DatabaseError(`RawFullCampaign validation failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected existsCampaignModel<T extends CampaignModel>(value: T | null): asserts value is T {
-    if (!testCampaignModel(value)) {
-      throw new DatabaseError(`CampaignModel not exists`, {
         code: 'INTERNAL_ERROR'
       })
     }

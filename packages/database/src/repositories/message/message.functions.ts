@@ -1,4 +1,5 @@
 import {
+  HttpConnection,
   HttpBody,
   HttpHeaders,
   HttpLog,
@@ -19,12 +20,11 @@ export interface RawMessage {
   is_streaming: number
   status: number
   score: number
-  start_time: number
-  finish_time: number
   created_at: number
 }
 
 export interface RawFullMessage extends RawMessage {
+  logs: string
   request_headers: string
   request_cookies: string
   request_body: string
@@ -32,7 +32,9 @@ export interface RawFullMessage extends RawMessage {
   response_cookies: string
   response_body: string
   client_ip: string
-  logs: string
+  start_time: number
+  finish_time: number
+  connection: string
 }
 
 export const messageFunctions = {
@@ -48,6 +50,7 @@ export const messageFunctions = {
         proxyId: string,
         targetId: string,
         sessionId: string,
+        logs: HttpLog[],
         method: string,
         url: string,
         isStreaming: boolean,
@@ -62,7 +65,7 @@ export const messageFunctions = {
         score: number,
         startTime: number,
         finishTime: number,
-        logs: HttpLog[]
+        connection: HttpConnection,
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))
@@ -75,6 +78,7 @@ export const messageFunctions = {
         parser.push(proxyId)
         parser.push(targetId)
         parser.push(sessionId)
+        parser.push(JSON.stringify(logs))
         parser.push(method)
         parser.push(url)
         parser.push(isStreaming ? '1' : '0')
@@ -89,7 +93,7 @@ export const messageFunctions = {
         parser.push(score.toString())
         parser.push(startTime.toString())
         parser.push(finishTime.toString())
-        parser.push(JSON.stringify(logs))
+        parser.push(JSON.stringify(connection))
         parser.push(Date.now().toString())
       },
 
