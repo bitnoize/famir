@@ -39,19 +39,19 @@ export class BuildResponseController extends BaseController {
     router: HttpServerRouter,
     protected readonly buildResponseService: BuildResponseService
   ) {
-    super(validator, logger, router, 'build-response')
-
-    this.router.addMiddleware(this.defaultMiddleware)
+    super(validator, logger, router)
   }
 
-  private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  addMiddlewares() {
+    this.router.addMiddleware(this.buildResponseMiddleware)
+  }
+
+  protected buildResponseMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      const { target } = this.getSetupMirrorState(ctx)
-      const { proxy } = this.getAuthorizeState(ctx)
+      const target = this.getState(ctx, 'target')
+      const proxy = this.getState(ctx, 'proxy')
 
       ctx.applyRequestWrappers()
-
-      ctx.renewRequestCookieHeader()
 
       if (ctx.isStreaming) {
         throw new Error(`Streaming requests not implemented yet :(`)
@@ -68,25 +68,28 @@ export class BuildResponseController extends BaseController {
             bodyLimit: target.responseBodyLimit
           })
 
-        ctx.prepareResponse(status, headers, body, connection)
+        ctx.setResponseHeaders(headers)
+        ctx.setResponseBody(body)
+        ctx.setStatus(status)
+        //ctx.setConnection(connection)
 
+        /*
         ctx.setResponseHeaders({
           Connection: undefined,
           'Keep-Alive': undefined,
           Upgrade: undefined,
           'Set-Cookie': undefined
         })
+        */
 
         ctx.applyResponseWrappers()
-
-        ctx.renewResponseSetCookieHeader()
 
         await ctx.sendResponse()
       }
 
       await next()
     } catch (error) {
-      this.handleException(error, 'default')
+      this.handleException(error, 'buildResponse')
     }
   }
 

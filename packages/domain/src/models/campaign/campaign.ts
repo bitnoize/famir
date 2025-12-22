@@ -13,9 +13,9 @@ export const testCampaignModel = <T extends CampaignModel>(value: T | null): val
 
 export interface FullCampaignModel extends CampaignModel {
   readonly description: string
-  readonly landingAuthPath: string
-  readonly landingAuthParam: string
-  readonly landingLureParam: string
+  readonly landingUpgradePath: string
+  readonly landingUpgradeParam: string
+  readonly landingRedirectorParam: string
   readonly sessionCookieName: string
   readonly sessionExpire: number
   readonly newSessionExpire: number

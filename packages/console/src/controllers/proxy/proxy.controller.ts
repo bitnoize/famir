@@ -1,28 +1,32 @@
 import { DIContainer } from '@famir/common'
 import {
+  Logger,
+  LOGGER,
+  REPL_SERVER_ROUTER,
+  ReplServerApiCall,
+  ReplServerError,
+  ReplServerRouter,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
+import { BaseController } from '../base/index.js'
+import {
+  CreateProxyData,
+  DeleteProxyData,
+  ListProxiesData,
+  ReadProxyData,
+  SwitchProxyData
+} from './proxy.js'
+import {
   createProxyDataSchema,
   deleteProxyDataSchema,
   listProxiesDataSchema,
   readProxyDataSchema,
   switchProxyDataSchema
-} from '@famir/database'
-import {
-  CreateProxyData,
-  DeleteProxyData,
-  ListProxiesData,
-  Logger,
-  LOGGER,
-  ReadProxyData,
-  REPL_SERVER_ROUTER,
-  ReplServerApiCall,
-  ReplServerError,
-  ReplServerRouter,
-  SwitchProxyData,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
-import { BaseController } from '../base/index.js'
+} from './proxy.schemas.js'
 import { PROXY_SERVICE, type ProxyService } from './proxy.service.js'
+
+export const PROXY_CONTROLLER = Symbol('ProxyController')
 
 export class ProxyController extends BaseController {
   static inject(container: DIContainer) {
@@ -181,5 +185,3 @@ export class ProxyController extends BaseController {
     }
   }
 }
-
-export const PROXY_CONTROLLER = Symbol('ProxyController')

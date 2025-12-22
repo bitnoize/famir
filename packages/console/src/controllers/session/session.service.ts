@@ -1,12 +1,7 @@
 import { DIContainer } from '@famir/common'
-import {
-  ReadSessionData,
-  ReplServerError,
-  SESSION_REPOSITORY,
-  SessionModel,
-  SessionRepository
-} from '@famir/domain'
+import { ReplServerError, SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/domain'
 import { BaseService } from '../base/index.js'
+import { ReadSessionData } from './session.js'
 
 export const SESSION_SERVICE = Symbol('SessionService')
 
@@ -23,14 +18,14 @@ export class SessionService extends BaseService {
   }
 
   async readSession(data: ReadSessionData): Promise<SessionModel> {
-    const sessionModel = await this.sessionRepository.readSession(data)
+    const model = await this.sessionRepository.read(data.campaignId, data.sessionId)
 
-    if (!sessionModel) {
+    if (!model) {
       throw new ReplServerError(`Session not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return sessionModel
+    return model
   }
 }

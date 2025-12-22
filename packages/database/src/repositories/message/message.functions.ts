@@ -1,11 +1,4 @@
-import {
-  HttpBody,
-  HttpConnection,
-  HttpHeaders,
-  HttpLog,
-  HttpRequestCookies,
-  HttpResponseCookies
-} from '@famir/domain'
+import { HttpBody, HttpConnection, HttpHeaders } from '@famir/domain'
 import { CommandParser } from '@redis/client'
 import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../database.keys.js'
 
@@ -24,12 +17,9 @@ export interface RawMessage {
 }
 
 export interface RawFullMessage extends RawMessage {
-  logs: string
   request_headers: string
-  request_cookies: string
   request_body: string
   response_headers: string
-  response_cookies: string
   response_body: string
   client_ip: string
   start_time: number
@@ -50,15 +40,12 @@ export const messageFunctions = {
         proxyId: string,
         targetId: string,
         sessionId: string,
-        logs: HttpLog[],
         method: string,
         url: string,
         isStreaming: boolean,
         requestHeaders: HttpHeaders,
-        requestCookies: HttpRequestCookies,
         requestBody: HttpBody,
         responseHeaders: HttpHeaders,
-        responseCookies: HttpResponseCookies,
         responseBody: HttpBody,
         clientIp: string,
         status: number,
@@ -78,15 +65,12 @@ export const messageFunctions = {
         parser.push(proxyId)
         parser.push(targetId)
         parser.push(sessionId)
-        parser.push(JSON.stringify(logs))
         parser.push(method)
         parser.push(url)
         parser.push(isStreaming ? '1' : '0')
         parser.push(JSON.stringify(requestHeaders))
-        parser.push(JSON.stringify(requestCookies))
         parser.push(requestBody.toString('base64'))
         parser.push(JSON.stringify(responseHeaders))
-        parser.push(JSON.stringify(responseCookies))
         parser.push(responseBody.toString('base64'))
         parser.push(clientIp)
         parser.push(status.toString())

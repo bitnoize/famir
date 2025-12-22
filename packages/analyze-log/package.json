@@ -22,6 +22,6 @@
     "@famir/executor": "*"
   },
   "devDependencies": {
-    "@types/node": "^24.0.1"
+    "@types/node": "^25.0.2"
   }
 }

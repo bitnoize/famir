@@ -1,27 +1,29 @@
 import { DIContainer } from '@famir/common'
 import {
+  Logger,
+  LOGGER,
+  REPL_SERVER_ROUTER,
+  ReplServerApiCall,
+  ReplServerError,
+  ReplServerRouter,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
+import { BaseController } from '../base/index.js'
+import {
+  CreateLureData,
+  DeleteLureData,
+  ListLuresData,
+  ReadLureData,
+  SwitchLureData
+} from './lure.js'
+import {
   createLureDataSchema,
   deleteLureDataSchema,
   listLuresDataSchema,
   readLureDataSchema,
   switchLureDataSchema
-} from '@famir/database'
-import {
-  CreateLureData,
-  DeleteLureData,
-  ListLuresData,
-  Logger,
-  LOGGER,
-  ReadLureData,
-  REPL_SERVER_ROUTER,
-  ReplServerApiCall,
-  ReplServerError,
-  ReplServerRouter,
-  SwitchLureData,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
-import { BaseController } from '../base/index.js'
+} from './lure.schemas.js'
 import { LURE_SERVICE, type LureService } from './lure.service.js'
 
 export const LURE_CONTROLLER = Symbol('LureController')

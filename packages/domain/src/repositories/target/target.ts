@@ -1,82 +1,49 @@
 import { FullTargetModel, TargetModel } from '../../models/index.js'
 
-export interface CreateTargetData {
-  campaignId: string
-  targetId: string
-  isLanding: boolean
-  donorSecure: boolean
-  donorSub: string
-  donorDomain: string
-  donorPort: number
-  mirrorSecure: boolean
-  mirrorSub: string
-  mirrorPort: number
-  connectTimeout: number
-  requestTimeout: number
-  streamingTimeout: number
-  requestBodyLimit: number
-  responseBodyLimit: number
-  mainPage: string
-  notFoundPage: string
-  faviconIco: string
-  robotsTxt: string
-  sitemapXml: string
-  successRedirectUrl: string
-  failureRedirectUrl: string
-}
-
-export interface ReadTargetData {
-  campaignId: string
-  targetId: string
-}
-
-export interface UpdateTargetData {
-  campaignId: string
-  targetId: string
-  connectTimeout: number | null | undefined
-  requestTimeout: number | null | undefined
-  streamingTimeout: number | null | undefined
-  requestBodyLimit: number | null | undefined
-  responseBodyLimit: number | null | undefined
-  mainPage: string | null | undefined
-  notFoundPage: string | null | undefined
-  faviconIco: string | null | undefined
-  robotsTxt: string | null | undefined
-  sitemapXml: string | null | undefined
-  successRedirectUrl: string | null | undefined
-  failureRedirectUrl: string | null | undefined
-}
-
-export interface SwitchTargetData {
-  campaignId: string
-  targetId: string
-}
-
-export interface ActionTargetLabelData {
-  campaignId: string
-  targetId: string
-  label: string
-}
-
-export interface DeleteTargetData {
-  campaignId: string
-  targetId: string
-}
-
-export interface ListTargetsData {
-  campaignId: string
-}
-
 export const TARGET_REPOSITORY = Symbol('TargetRepository')
 
 export interface TargetRepository {
-  createTarget(data: CreateTargetData): Promise<TargetModel>
-  readTarget(data: ReadTargetData): Promise<FullTargetModel | null>
-  updateTarget(data: UpdateTargetData): Promise<TargetModel>
-  enableTarget(data: SwitchTargetData): Promise<TargetModel>
-  disableTarget(data: SwitchTargetData): Promise<TargetModel>
-  appendTargetLabel(data: ActionTargetLabelData): Promise<TargetModel>
-  removeTargetLabel(data: ActionTargetLabelData): Promise<TargetModel>
-  deleteTarget(data: DeleteTargetData): Promise<TargetModel>
-  listTargets(data: ListTargetsData): Promise<TargetModel[] | null>
+  create(
+    campaignId: string,
+    targetId: string,
+    isLanding: boolean,
+    donorSecure: boolean,
+    donorSub: string,
+    donorDomain: string,
+    donorPort: number,
+    mirrorSecure: boolean,
+    mirrorSub: string,
+    mirrorPort: number,
+    connectTimeout: number,
+    requestTimeout: number,
+    streamingTimeout: number,
+    requestBodyLimit: number,
+    responseBodyLimit: number,
+    mainPage: string,
+    notFoundPage: string,
+    faviconIco: string,
+    robotsTxt: string,
+    sitemapXml: string
+  ): Promise<TargetModel>
+  read(campaignId: string, targetId: string): Promise<FullTargetModel | null>
+  update(
+    campaignId: string,
+    targetId: string,
+    connectTimeout: number | null | undefined,
+    requestTimeout: number | null | undefined,
+    streamingTimeout: number | null | undefined,
+    requestBodyLimit: number | null | undefined,
+    responseBodyLimit: number | null | undefined,
+    mainPage: string | null | undefined,
+    notFoundPage: string | null | undefined,
+    faviconIco: string | null | undefined,
+    robotsTxt: string | null | undefined,
+    sitemapXml: string | null | undefined
+  ): Promise<TargetModel>
+  enable(campaignId: string, targetId: string): Promise<TargetModel>
+  disable(campaignId: string, targetId: string): Promise<TargetModel>
+  appendLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel>
+  removeLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel>
+  delete(campaignId: string, targetId: string): Promise<TargetModel>
+  list(campaignId: string): Promise<TargetModel[] | null>
 }

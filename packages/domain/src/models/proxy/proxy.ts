@@ -15,3 +15,9 @@ export const testProxyModel = <T extends ProxyModel>(value: T | null): value is 
 export interface EnabledProxyModel extends ProxyModel {
   isEnabled: true
 }
+
+export const testEnabledProxyModel = <T extends ProxyModel>(
+  value: T
+): value is T & { isEnabled: true } => {
+  return value.isEnabled
+}

@@ -1,16 +1,42 @@
-import { ProxyModel, SessionModel } from '@famir/domain'
-
-export interface LandingAuthData {
+export interface LandingUpgradeData {
   lureId: string
-  sessionId: string
-  sessionSecret: string
+  secret: string
+}
+
+export interface LandingRedirectorData {
+  title: string
+  description: string
+  image: string
+  url: string
+}
+
+export interface ReadProxyData {
+  campaignId: string
+  proxyId: string
+}
+
+export interface ReadRedirectorData {
+  campaignId: string
+  redirectorId: string
+}
+
+export interface ReadLurePathData {
+  campaignId: string
+  path: string
 }
 
 export interface CreateSessionData {
   campaignId: string
 }
 
-export interface CreateSessionReply {
-  proxy: ProxyModel
-  session: SessionModel
+export interface AuthSessionData {
+  campaignId: string
+  sessionId: string
+}
+
+export interface UpgradeSessionData {
+  campaignId: string
+  lureId: string
+  sessionId: string
+  secret: string
 }

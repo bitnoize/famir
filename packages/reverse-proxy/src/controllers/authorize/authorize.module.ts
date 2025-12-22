@@ -7,5 +7,5 @@ export const composeAuthorizeModule = (container: DIContainer) => {
 
   AuthorizeController.inject(container)
 
-  AuthorizeController.resolve(container)
+  AuthorizeController.resolve(container).addMiddlewares()
 }

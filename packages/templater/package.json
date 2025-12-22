@@ -13,9 +13,9 @@
   "dependencies": {
     "@famir/common": "*",
     "@famir/domain": "*",
-    "eta": "^4.0.1"
+    "eta": "^4.5.0"
   },
   "devDependencies": {
-    "@types/node": "^24.0.1"
+    "@types/node": "^25.0.2"
   }
 }

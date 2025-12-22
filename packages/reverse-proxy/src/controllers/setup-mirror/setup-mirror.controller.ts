@@ -1,6 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
+  HttpServerContext,
   HttpServerError,
   HttpServerMiddleware,
   HttpServerRouter,
@@ -40,47 +41,49 @@ export class SetupMirrorController extends BaseController {
     router: HttpServerRouter,
     protected readonly setupMirrorService: SetupMirrorService
   ) {
-    super(validator, logger, router, 'setup-mirror')
+    super(validator, logger, router)
 
     this.validator.addSchemas({
       'setup-mirror-data': setupMirrorDataSchema
     })
-
-    this.router.addMiddleware(this.defaultMiddleware)
   }
 
-  private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  addMiddlewares() {
+    this.router.addMiddleware(this.setupMirrorMiddleware)
+  }
+
+  protected setupMirrorMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      if (this.isSetupMirrorState(ctx)) {
-        await next()
+      const setupMirrorData = this.parseSetupMirrorData(ctx)
 
-        return
-      }
+      const [campaign, target] = await this.setupMirrorService.readCampaignTarget(setupMirrorData)
 
-      const data = {
-        campaignId: ctx.originHeaders['x-famir-campaign-id'],
-        targetId: ctx.originHeaders['x-famir-target-id']
-      }
+      const targets = await this.setupMirrorService.listTargets(setupMirrorData)
 
-      this.validateSetupMirrorData(data)
-
-      const { campaign, target, targets } = await this.setupMirrorService.execute(data)
-
-      this.setSetupMirrorState(ctx, campaign, target, targets)
+      this.setState(ctx, 'campaign', campaign)
+      this.setState(ctx, 'target', target)
+      this.setState(ctx, 'targets', targets)
 
       await next()
     } catch (error) {
-      this.handleException(error, 'default')
+      this.handleException(error, 'setupMirror')
     }
   }
 
-  private validateSetupMirrorData(value: unknown): asserts value is SetupMirrorData {
+  protected parseSetupMirrorData(ctx: HttpServerContext): SetupMirrorData {
     try {
-      this.validator.assertSchema<SetupMirrorData>('setup-mirror-data', value)
+      const data = {
+        campaignId: ctx.getRequestHeader('X-Famir-Campaign-Id'),
+        targetId: ctx.getRequestHeader('X-Famir-Target-Id')
+      }
+
+      this.validator.assertSchema<SetupMirrorData>('setup-mirror-data', data)
+
+      return data
     } catch (error) {
-      throw new HttpServerError(`SetupMirrorData validate failed`, {
+      throw new HttpServerError(`Validate setup-mirror-data failed`, {
         cause: error,
-        code: 'BAD_REQUEST'
+        code: 'SERVICE_UNAVAILABLE'
       })
     }
   }

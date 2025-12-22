@@ -1,11 +1,6 @@
 import { DomainError, DomainErrorOptions } from '../../domain.error.js'
 
-export type DatabaseErrorCode =
-  | 'NOT_FOUND'
-  | 'CONFLICT'
-  | 'FORBIDDEN'
-  | 'INTERNAL_ERROR'
-  | 'SERVICE_UNAVAILABLE'
+export type DatabaseErrorCode = 'NOT_FOUND' | 'CONFLICT' | 'FORBIDDEN' | 'INTERNAL_ERROR'
 
 export type DatabaseErrorOptions = DomainErrorOptions & {
   code: DatabaseErrorCode

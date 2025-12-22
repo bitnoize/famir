@@ -1,23 +1,19 @@
-import { serializeError } from '@famir/common'
 import {
   HttpBody,
   HttpConnection,
   HttpHeader,
   HttpHeaders,
-  HttpLog,
-  HttpLogData,
   HttpMediaType,
   HttpQueryString,
   HttpRelativeUrl,
-  HttpRequestCookie,
   HttpRequestCookies,
-  HttpResponseCookie,
   HttpResponseCookies,
   HttpServerContext,
   HttpServerError,
   HttpState
 } from '@famir/domain'
 import contentType from 'content-type'
+import { isbot } from 'isbot'
 import http from 'node:http'
 import { URL } from 'node:url'
 import qs from 'qs'
@@ -28,20 +24,11 @@ export class NodeHttpServerContext implements HttpServerContext {
   constructor(
     protected readonly req: http.IncomingMessage,
     protected readonly res: http.ServerResponse
-  ) {}
+  ) {
+    this.url = this.parseRelativeUrl(this.originUrl)
+  }
 
   readonly state: HttpState = {}
-
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  getState<T extends HttpState>(): T {
-    return this.state as T
-  }
-
-  readonly logs: HttpLog[] = []
-
-  addLog(name: string, data: HttpLogData) {
-    this.logs.push([name, data])
-  }
 
   get method(): string {
     return this.req.method ?? 'GET'
@@ -59,17 +46,7 @@ export class NodeHttpServerContext implements HttpServerContext {
     return this.req.url ?? '/'
   }
 
-  #url: HttpRelativeUrl | null = null
-
-  get url(): HttpRelativeUrl {
-    if (this.#url) {
-      return this.#url
-    }
-
-    this.#url = this.parseRelativeUrl(this.originUrl)
-
-    return this.#url
-  }
+  readonly url: HttpRelativeUrl
 
   normalizeUrl(): string {
     return this.formatRelativeUrl(this.url)
@@ -87,7 +64,7 @@ export class NodeHttpServerContext implements HttpServerContext {
     return value.test(this.url.path)
   }
 
-  getUrlQuery(options: ParseQueryStringOptions = {}): HttpQueryString | null {
+  getUrlQuery(options: ParseQueryStringOptions = {}): HttpQueryString {
     options.ignoreQueryPrefix = true
 
     return this.parseQueryString(this.url.search, options)
@@ -96,20 +73,16 @@ export class NodeHttpServerContext implements HttpServerContext {
   setUrlQuery(query: HttpQueryString, options: FormatQueryStringOptions = {}) {
     options.addQueryPrefix = true
 
-    const value = this.formatQueryString(query, options)
+    const search = this.formatQueryString(query, options)
 
-    if (value != null) {
-      this.url.search = value
-    }
+    this.url.search = search
   }
 
   isStreaming: boolean = false
 
-  get originHeaders(): HttpHeaders {
+  get requestHeaders(): HttpHeaders {
     return this.req.headers
   }
-
-  readonly requestHeaders: HttpHeaders = {}
 
   getRequestHeader(name: string): string | undefined {
     return this.getHeader(this.requestHeaders, name)
@@ -127,23 +100,7 @@ export class NodeHttpServerContext implements HttpServerContext {
     this.setHeaders(this.requestHeaders, headers)
   }
 
-  readonly requestCookies: HttpRequestCookies = {}
-
-  getRequestCookie(name: string): HttpRequestCookie | undefined {
-    return this.requestCookies[name]
-  }
-
-  setRequestCookie(name: string, cookie: HttpRequestCookie | undefined) {
-    this.requestCookies[name] = cookie
-  }
-
-  setRequestCookies(cookies: HttpRequestCookies) {
-    Object.entries(cookies).forEach(([name, cookie]) => {
-      this.setRequestCookie(name, cookie)
-    })
-  }
-
-  getRequestMediaType(): HttpMediaType | null {
+  getRequestMediaType(): HttpMediaType {
     return this.getMediaType(this.requestHeaders)
   }
 
@@ -151,16 +108,29 @@ export class NodeHttpServerContext implements HttpServerContext {
     this.setMediaType(this.requestHeaders, mediaType)
   }
 
-  prepareRequestHeaders() {
-    this.setRequestHeaders(this.req.headers)
+  getRequestCookies(): HttpRequestCookies {
+    const header = this.getRequestHeaderArray('Cookie') ?? []
 
-    const cookieHeader = this.getRequestHeaderArray('Cookie') ?? []
-    const cookies = this.parseRequestCookies(cookieHeader)
-
-    this.setRequestCookies(cookies)
+    return this.parseRequestCookies(header)
   }
 
-  requestBody: HttpBody = Buffer.alloc(0)
+  setRequestCookies(cookies: HttpRequestCookies) {
+    const header = this.formatRequestCookies(cookies)
+
+    this.setRequestHeader('Cookie', header)
+  }
+
+  getClientIp(): string | null {
+    const header = this.getRequestHeaderArray('X-Forwarded-For') ?? []
+
+    return this.parseClientIp(header)
+  }
+
+  #requestBody: HttpBody = Buffer.alloc(0)
+
+  get requestBody(): HttpBody {
+    return this.#requestBody
+  }
 
   loadRequestBody(bodyLimit: number): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -188,7 +158,7 @@ export class NodeHttpServerContext implements HttpServerContext {
 
       this.req.on('end', () => {
         try {
-          this.requestBody = Buffer.concat(chunks, totalLength)
+          this.#requestBody = Buffer.concat(chunks, totalLength)
 
           resolve()
         } catch (error) {
@@ -222,12 +192,8 @@ export class NodeHttpServerContext implements HttpServerContext {
     })
   }
 
-  applyRequestWrappers() {}
-
-  renewRequestCookieHeader() {
-    const value = this.formatRequestCookies(this.requestCookies)
-
-    this.setRequestHeader('Cookie', value)
+  applyRequestWrappers() {
+    // ...
   }
 
   readonly responseHeaders: HttpHeaders = {}
@@ -248,23 +214,7 @@ export class NodeHttpServerContext implements HttpServerContext {
     this.setHeaders(this.responseHeaders, headers)
   }
 
-  readonly responseCookies: HttpResponseCookies = {}
-
-  getResponseCookie(name: string): HttpResponseCookie | undefined {
-    return this.responseCookies[name]
-  }
-
-  setResponseCookie(name: string, cookie: HttpResponseCookie | undefined) {
-    this.responseCookies[name] = cookie
-  }
-
-  setResponseCookies(cookies: HttpResponseCookies) {
-    Object.entries(cookies).forEach(([name, cookie]) => {
-      this.setResponseCookie(name, cookie)
-    })
-  }
-
-  getResponseMediaType(): HttpMediaType | null {
+  getResponseMediaType(): HttpMediaType {
     return this.getMediaType(this.responseHeaders)
   }
 
@@ -272,8 +222,29 @@ export class NodeHttpServerContext implements HttpServerContext {
     this.setMediaType(this.responseHeaders, mediaType)
   }
 
-  responseBody: HttpBody = Buffer.alloc(0)
+  getResponseCookies(): HttpResponseCookies {
+    const header = this.getResponseHeaderArray('Cookie') ?? []
 
+    return this.parseResponseCookies(header)
+  }
+
+  setResponseCookies(cookies: HttpResponseCookies) {
+    const header = this.formatResponseCookies(cookies)
+
+    this.setResponseHeader('Cookie', header)
+  }
+
+  #responseBody: HttpBody = Buffer.alloc(0)
+
+  get responseBody(): HttpBody {
+    return this.#responseBody
+  }
+
+  setResponseBody(body: HttpBody) {
+    this.#responseBody = body
+  }
+
+  /*
   prepareResponse(
     status: number,
     headers?: HttpHeaders,
@@ -286,27 +257,17 @@ export class NodeHttpServerContext implements HttpServerContext {
       this.setResponseHeaders(headers)
     }
 
+    if (body) {
+      this.#responseBody = body
+    }
+
     if (connection) {
       this.#connection = connection
     }
-
-    const setCookieHeader = this.getResponseHeaderArray('Set-Cookie') ?? []
-    const cookies = this.parseResponseCookies(setCookieHeader)
-
-    this.setResponseCookies(cookies)
-
-    if (body) {
-      this.responseBody = body
-    }
   }
+  */
 
   applyResponseWrappers() {}
-
-  renewResponseSetCookieHeader() {
-    const value = this.formatResponseCookies(this.responseCookies)
-
-    this.setResponseHeader('Set-Cookie', value)
-  }
 
   protected sendResponseHeaders() {
     Object.entries(this.responseHeaders).forEach(([name, value]) => {
@@ -339,14 +300,14 @@ export class NodeHttpServerContext implements HttpServerContext {
     })
   }
 
-  get responseHeadersSent(): boolean {
-    return this.res.headersSent
-  }
-
   #status: number = 0
 
   get status(): number {
     return this.#status
+  }
+
+  setStatus(status: number) {
+    this.#status = status
   }
 
   protected testStatusRange(min: number, max: number): boolean {
@@ -403,8 +364,38 @@ export class NodeHttpServerContext implements HttpServerContext {
     return this.#connection
   }
 
+  setConnection(connection: HttpConnection) {
+    this.#connection = connection
+  }
+
+  /*
+  dumpMessage(): HttpServerMessage {
+    return {
+      method: this.method,
+      url: ctx.normalizeUrl(),
+      isStreaming: this.isStreaming,
+      requestHeaders: this.requestHeaders,
+      requestBody: this.requestBody,
+      responseHeaders: this.responseHeaders,
+      responseBody: this.responseBody,
+      clientIp: this.clientIp,
+      status: this.status,
+      score: this.score,
+      startTime: this.startTime,
+      finishTime: this.finishTime,
+      connection: this.connection
+    }
+  }
+  */
+
   get isComplete(): boolean {
     return this.#finishTime > 0
+  }
+
+  isBot(): boolean {
+    const value = this.getRequestHeader('User-Agent')
+
+    return isbot(value)
   }
 
   //
@@ -455,7 +446,7 @@ export class NodeHttpServerContext implements HttpServerContext {
     })
   }
 
-  protected getMediaType(source: HttpHeaders): HttpMediaType | null {
+  protected getMediaType(source: HttpHeaders): HttpMediaType {
     const value = this.getHeader(source, 'Content-Type') ?? ''
 
     return this.parseMediaType(value)
@@ -464,9 +455,7 @@ export class NodeHttpServerContext implements HttpServerContext {
   protected setMediaType(source: HttpHeaders, mediaType: HttpMediaType) {
     const value = this.formatMediaType(mediaType)
 
-    if (value != null) {
-      this.setHeader(source, 'Content-Type', value)
-    }
+    this.setHeader(source, 'Content-Type', value)
   }
 
   //
@@ -499,64 +488,31 @@ export class NodeHttpServerContext implements HttpServerContext {
   // QueryString helpers
   //
 
-  private parseQueryString(
-    value: string,
-    options: ParseQueryStringOptions
-  ): HttpQueryString | null {
-    try {
-      return qs.parse(value, options)
-    } catch (error) {
-      this.addLog('parse-query-string-error', {
-        //value,
-        options,
-        error: serializeError(error)
-      })
-
-      return null
-    }
+  private parseQueryString(value: string, options: ParseQueryStringOptions): HttpQueryString {
+    return qs.parse(value, options)
   }
 
-  private formatQueryString(
-    query: HttpQueryString,
-    options: FormatQueryStringOptions
-  ): string | null {
-    try {
-      return qs.stringify(query, options)
-    } catch (error) {
-      this.addLog('format-query-string-error', {
-        //query,
-        options,
-        error: serializeError(error)
-      })
-
-      return null
-    }
+  private formatQueryString(query: HttpQueryString, options: FormatQueryStringOptions): string {
+    return qs.stringify(query, options)
   }
 
   //
   // RequestCookies helpers
   //
 
-  private parseRequestCookies(values: string[]): HttpRequestCookies {
+  private parseRequestCookies(header: string[]): HttpRequestCookies {
     const cookies: HttpRequestCookies = {}
 
-    values
+    header
       .join(';')
       .split(';')
-      .forEach((value) => {
-        try {
-          const toughCookie = Cookie.parse(value, {
-            //loose: true
-          })
+      .forEach((rawCookie) => {
+        const toughCookie = Cookie.parse(rawCookie, {
+          //loose: true
+        })
 
-          if (toughCookie) {
-            cookies[toughCookie.key] = toughCookie.value
-          }
-        } catch (error) {
-          this.addLog('parse-request-cookie-error', {
-            value,
-            error: serializeError(error)
-          })
+        if (toughCookie) {
+          cookies[toughCookie.key] = toughCookie.value
         }
       })
 
@@ -566,21 +522,14 @@ export class NodeHttpServerContext implements HttpServerContext {
   private formatRequestCookies(cookies: HttpRequestCookies): string {
     const toughCookies: Cookie[] = []
 
-    Object.entries(cookies).forEach(([name, cookie]) => {
-      try {
-        if (cookie != null) {
-          const toughCookie = new Cookie({
-            key: name,
-            value: cookie
-          })
-
-          toughCookies.push(toughCookie)
-        }
-      } catch (error) {
-        this.addLog('format-request-cookie-error', {
-          cookie: [name, cookie],
-          error: serializeError(error)
+    Object.entries(cookies).forEach(([name, value]) => {
+      if (value != null) {
+        const toughCookie = new Cookie({
+          key: name,
+          value: value
         })
+
+        toughCookies.push(toughCookie)
       }
     })
 
@@ -591,64 +540,57 @@ export class NodeHttpServerContext implements HttpServerContext {
   // ResponseCookies helpers
   //
 
-  private parseResponseCookies(values: string[]): HttpResponseCookies {
+  private parseResponseCookies(header: string[]): HttpResponseCookies {
     const cookies: HttpResponseCookies = {}
 
-    values
+    header
       .join(';')
       .split(';')
-      .forEach((value) => {
-        try {
-          const toughCookie = Cookie.parse(value, {
-            //loose: true
-          })
+      .forEach((rawCookie) => {
+        const toughCookie = Cookie.parse(rawCookie, {
+          //loose: true
+        })
 
-          if (!toughCookie) {
-            return
-          }
+        if (!toughCookie) {
+          return
+        }
 
-          const name = toughCookie.key
+        const name = toughCookie.key
 
-          cookies[name] = {
-            value: toughCookie.value
-          }
+        cookies[name] = {
+          value: toughCookie.value
+        }
 
-          // tough-cookie expires: Date | 'Infinity' | null
-          if (toughCookie.expires instanceof Date) {
-            cookies[name].expires = toughCookie.expires.getTime()
-          }
+        // tough-cookie expires: Date | 'Infinity' | null
+        if (toughCookie.expires instanceof Date) {
+          cookies[name].expires = toughCookie.expires.getTime()
+        }
 
-          // tough-cookie maxAge: number | 'Infinity' | '-Infinity' | null
-          if (typeof toughCookie.maxAge === 'number') {
-            cookies[name].maxAge = toughCookie.maxAge
-          }
+        // tough-cookie maxAge: number | 'Infinity' | '-Infinity' | null
+        if (typeof toughCookie.maxAge === 'number') {
+          cookies[name].maxAge = toughCookie.maxAge
+        }
 
-          if (toughCookie.path != null) {
-            cookies[name].path = toughCookie.path
-          }
+        if (toughCookie.path != null) {
+          cookies[name].path = toughCookie.path
+        }
 
-          if (toughCookie.domain != null) {
-            cookies[name].domain = toughCookie.domain
-          }
+        if (toughCookie.domain != null) {
+          cookies[name].domain = toughCookie.domain
+        }
 
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (toughCookie.secure != null) {
-            cookies[name].secure = toughCookie.secure
-          }
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (toughCookie.secure != null) {
+          cookies[name].secure = toughCookie.secure
+        }
 
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (toughCookie.httpOnly != null) {
-            cookies[name].httpOnly = toughCookie.httpOnly
-          }
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (toughCookie.httpOnly != null) {
+          cookies[name].httpOnly = toughCookie.httpOnly
+        }
 
-          if (toughCookie.sameSite != null) {
-            cookies[name].sameSite = toughCookie.sameSite
-          }
-        } catch (error) {
-          this.addLog('parse-response-cookie-error', {
-            value,
-            error: serializeError(error)
-          })
+        if (toughCookie.sameSite != null) {
+          cookies[name].sameSite = toughCookie.sameSite
         }
       })
 
@@ -659,48 +601,41 @@ export class NodeHttpServerContext implements HttpServerContext {
     const toughCookies: Cookie[] = []
 
     Object.entries(cookies).forEach(([name, cookie]) => {
-      try {
-        if (cookie != null) {
-          const toughCookie = new Cookie({
-            key: name,
-            value: cookie.value
-          })
-
-          if (cookie.expires != null) {
-            toughCookie.expires = new Date(cookie.expires)
-          }
-
-          if (cookie.maxAge != null) {
-            toughCookie.maxAge = cookie.maxAge
-          }
-
-          if (cookie.path != null) {
-            toughCookie.path = cookie.path
-          }
-
-          if (cookie.domain != null) {
-            toughCookie.domain = cookie.domain
-          }
-
-          if (cookie.secure != null) {
-            toughCookie.secure = cookie.secure
-          }
-
-          if (cookie.httpOnly != null) {
-            toughCookie.httpOnly = cookie.httpOnly
-          }
-
-          if (cookie.sameSite != null) {
-            toughCookie.sameSite = cookie.sameSite
-          }
-
-          toughCookies.push(toughCookie)
-        }
-      } catch (error) {
-        this.addLog('format-response-cookie-error', {
-          cookie: [name, cookie],
-          error: serializeError(error)
+      if (cookie != null) {
+        const toughCookie = new Cookie({
+          key: name,
+          value: cookie.value
         })
+
+        if (cookie.expires != null) {
+          toughCookie.expires = new Date(cookie.expires)
+        }
+
+        if (cookie.maxAge != null) {
+          toughCookie.maxAge = cookie.maxAge
+        }
+
+        if (cookie.path != null) {
+          toughCookie.path = cookie.path
+        }
+
+        if (cookie.domain != null) {
+          toughCookie.domain = cookie.domain
+        }
+
+        if (cookie.secure != null) {
+          toughCookie.secure = cookie.secure
+        }
+
+        if (cookie.httpOnly != null) {
+          toughCookie.httpOnly = cookie.httpOnly
+        }
+
+        if (cookie.sameSite != null) {
+          toughCookie.sameSite = cookie.sameSite
+        }
+
+        toughCookies.push(toughCookie)
       }
     })
 
@@ -711,30 +646,26 @@ export class NodeHttpServerContext implements HttpServerContext {
   // MediaType Helpers
   //
 
-  private parseMediaType(value: string): HttpMediaType | null {
-    try {
-      return contentType.parse(value)
-    } catch (error) {
-      this.addLog('parse-media-type-error', {
-        value,
-        error: serializeError(error)
-      })
-
-      return null
-    }
+  private parseMediaType(value: string): HttpMediaType {
+    return contentType.parse(value)
   }
 
-  private formatMediaType(mediaType: HttpMediaType): string | null {
-    try {
-      return contentType.format(mediaType)
-    } catch (error) {
-      this.addLog('format-content-type-error', {
-        mediaType,
-        error: serializeError(error)
-      })
+  private formatMediaType(mediaType: HttpMediaType): string {
+    return contentType.format(mediaType)
+  }
 
-      return null
-    }
+  //
+  // ClientIp Helpers
+  //
+
+  private parseClientIp(values: string[]): string | null {
+    const ips = values
+      .join(',')
+      .split(',')
+      .map((ip) => ip.trim())
+      .filter((ip) => ip)
+
+    return ips[0] ? ips[0] : null
   }
 
   /*

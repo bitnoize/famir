@@ -1,7 +1,8 @@
 import { DIContainer } from '@famir/common'
 import {
+  EnabledFullTargetModel,
   HTTP_SERVER_ROUTER,
-  HttpHeaders,
+  HttpServerContext,
   HttpServerMiddleware,
   HttpServerRouter,
   Logger,
@@ -31,143 +32,161 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
-    super(validator, logger, router, 'well-known-urls')
+    super(validator, logger, router)
+  }
 
+  addMiddlewares() {
     this.router.addMiddleware(this.preflightCorsMiddleware)
     this.router.addMiddleware(this.faviconIcoMiddleware)
     this.router.addMiddleware(this.robotsTxtMiddleware)
     this.router.addMiddleware(this.sitemapXmlMiddleware)
   }
 
-  private preflightCorsMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  protected preflightCorsMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      const { campaign } = this.getSetupMirrorState(ctx)
-
-      const foundRoute = ctx.isMethod('OPTIONS')
-
-      if (!foundRoute) {
+      if (ctx.isMethod('OPTIONS')) {
+        await this.renderPreflightCors(ctx)
+      } else {
         await next()
-
-        return
       }
-
-      const headers: HttpHeaders = {
-        'content-type': 'text/plain',
-        'access-control-allow-origin': campaign.mirrorDomain,
-        'access-control-allow-methods': '*',
-        'access-control-allow-headers': '*',
-        'access-control-expose-headers': '*',
-        'access-control-allow-credentials': 'true',
-        'access-control-max-age': '86400'
-      }
-
-      ctx.prepareResponse(204, headers)
-
-      await ctx.sendResponse()
     } catch (error) {
       this.handleException(error, 'preflightCors')
     }
   }
 
-  private faviconIcoMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  protected faviconIcoMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      const { target } = this.getSetupMirrorState(ctx)
+      const target = this.getState(ctx, 'target')
 
-      const foundRoute =
-        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPathEquals('/favicon.ico') && target.faviconIco
-
-      if (!foundRoute) {
-        await next()
-
-        return
-      }
-
-      const body = Buffer.from(target.faviconIco, 'base64')
-
-      const headers: HttpHeaders = {
-        'content-type': 'image/x-icon',
-        'content-length': body.length.toString(),
-        'last-modified': target.updatedAt.toUTCString(),
-        'cache-control': 'public, max-age=691200'
-      }
-
-      if (ctx.isMethod('GET')) {
-        ctx.prepareResponse(200, headers, body)
+      if (ctx.isUrlPathEquals('/favicon.ico')) {
+        await this.renderFaviconIco(ctx, target)
       } else {
-        ctx.prepareResponse(200, headers)
+        await next()
       }
-
-      await ctx.sendResponse()
     } catch (error) {
       this.handleException(error, 'faviconIco')
     }
   }
 
-  private robotsTxtMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  protected robotsTxtMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      const { target } = this.getSetupMirrorState(ctx)
+      const target = this.getState(ctx, 'target')
 
-      const foundRoute =
-        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPathEquals('/robots.txt') && target.robotsTxt
-
-      if (!foundRoute) {
-        await next()
-
-        return
-      }
-
-      const body = Buffer.from(target.robotsTxt)
-
-      const headers: HttpHeaders = {
-        'content-type': 'text/plain',
-        'content-length': body.length.toString(),
-        'last-modified': target.updatedAt.toUTCString(),
-        'cache-control': 'public, max-age=691200'
-      }
-
-      if (ctx.isMethod('GET')) {
-        ctx.prepareResponse(200, headers, body)
+      if (ctx.isUrlPathEquals('/robots.txt')) {
+        await this.renderRobotsTxt(ctx, target)
       } else {
-        ctx.prepareResponse(200, headers)
+        await next()
       }
-
-      await ctx.sendResponse()
     } catch (error) {
       this.handleException(error, 'robotsTxt')
     }
   }
 
-  private sitemapXmlMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  protected sitemapXmlMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      const { target } = this.getSetupMirrorState(ctx)
+      const target = this.getState(ctx, 'target')
 
-      const foundRoute =
-        ctx.isMethods(['GET', 'HEAD']) && ctx.isUrlPathEquals('/sitemap.xml') && target.sitemapXml
-
-      if (!foundRoute) {
-        await next()
-
-        return
-      }
-
-      const body = Buffer.from(target.sitemapXml)
-
-      const headers: HttpHeaders = {
-        'content-type': 'application/xml',
-        'content-length': body.length.toString(),
-        'last-modified': target.updatedAt.toUTCString(),
-        'cache-control': 'public, max-age=691200'
-      }
-
-      if (ctx.isMethod('GET')) {
-        ctx.prepareResponse(200, headers, body)
+      if (ctx.isUrlPathEquals('/sitemap.xml')) {
+        await this.renderRobotsTxt(ctx, target)
       } else {
-        ctx.prepareResponse(200, headers)
+        await next()
       }
-
-      await ctx.sendResponse()
     } catch (error) {
       this.handleException(error, 'sitemapXml')
+    }
+  }
+
+  protected async renderPreflightCors(ctx: HttpServerContext): Promise<void> {
+    ctx.setResponseHeaders({
+      'Content-Type': 'text/plain',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': '*',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Expose-Headers': '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400'
+    })
+
+    ctx.setStatus(204)
+
+    await ctx.sendResponse()
+  }
+
+  protected async renderFaviconIco(
+    ctx: HttpServerContext,
+    target: EnabledFullTargetModel
+  ): Promise<void> {
+    if (ctx.isMethods(['GET', 'HEAD'])) {
+      const body = Buffer.from(target.faviconIco, 'base64')
+
+      ctx.setResponseHeaders({
+        'Content-Type': 'image/x-icon',
+        'Content-Length': body.length.toString(),
+        'Last-Modified': target.updatedAt.toUTCString(),
+        'Cache-Control': 'public, max-age=86400'
+      })
+
+      if (ctx.isMethod('GET')) {
+        ctx.setResponseBody(body)
+      }
+
+      ctx.setStatus(200)
+
+      await ctx.sendResponse()
+    } else {
+      this.renderNotFoundPage(ctx, target)
+    }
+  }
+
+  protected async renderRobotsTxt(
+    ctx: HttpServerContext,
+    target: EnabledFullTargetModel
+  ): Promise<void> {
+    if (ctx.isMethods(['GET', 'HEAD'])) {
+      const body = Buffer.from(target.robotsTxt)
+
+      ctx.setResponseHeaders({
+        'Content-Type': 'text/plain',
+        'Content-Length': body.length.toString(),
+        'Last-Modified': target.updatedAt.toUTCString(),
+        'Cache-Control': 'public, max-age=86400'
+      })
+
+      if (ctx.isMethod('GET')) {
+        ctx.setResponseBody(body)
+      }
+
+      ctx.setStatus(200)
+
+      await ctx.sendResponse()
+    } else {
+      this.renderNotFoundPage(ctx, target)
+    }
+  }
+
+  protected async renderSitemapXml(
+    ctx: HttpServerContext,
+    target: EnabledFullTargetModel
+  ): Promise<void> {
+    if (ctx.isMethods(['GET', 'HEAD'])) {
+      const body = Buffer.from(target.sitemapXml)
+
+      ctx.setResponseHeaders({
+        'Content-Type': 'application/xml',
+        'Content-Length': body.length.toString(),
+        'Last-Modified': target.updatedAt.toUTCString(),
+        'Cache-Control': 'public, max-age=86400'
+      })
+
+      if (ctx.isMethod('GET')) {
+        ctx.setResponseBody(body)
+      }
+
+      ctx.setStatus(200)
+
+      await ctx.sendResponse()
+    } else {
+      this.renderNotFoundPage(ctx, target)
     }
   }
 }

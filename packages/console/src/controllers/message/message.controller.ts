@@ -1,9 +1,7 @@
 import { DIContainer } from '@famir/common'
-import { readMessageDataSchema } from '@famir/database'
 import {
   Logger,
   LOGGER,
-  ReadMessageData,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
   ReplServerError,
@@ -12,6 +10,8 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
+import { ReadMessageData } from './message.js'
+import { readMessageDataSchema } from './message.schemas.js'
 import { MESSAGE_SERVICE, type MessageService } from './message.service.js'
 
 export class MessageController extends BaseController {

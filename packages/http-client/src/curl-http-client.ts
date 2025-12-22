@@ -92,8 +92,6 @@ export class CurlHttpClient implements HttpClient {
         })
       }
 
-      //curl.setOpt(Curl.option.MAXFILESIZE_LARGE, request.bodyLimit)
-
       curl.setOpt(Curl.option.HEADER, false)
 
       const responseHeaders: Buffer[] = []

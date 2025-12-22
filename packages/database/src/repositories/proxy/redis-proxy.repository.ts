@@ -2,19 +2,14 @@ import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
-  CreateProxyData,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteProxyData,
-  ListProxiesData,
   Logger,
   LOGGER,
   PROXY_REPOSITORY,
   ProxyModel,
   ProxyRepository,
-  ReadProxyData,
-  SwitchProxyData,
   testProxyModel,
   Validator,
   VALIDATOR
@@ -52,151 +47,139 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     })
   }
 
-  async createProxy(data: CreateProxyData): Promise<ProxyModel> {
+  async create(campaignId: string, proxyId: string, url: string): Promise<ProxyModel> {
     try {
-      const [status, rawValue] = await Promise.all([
-        this.connection.proxy.create_proxy(
-          this.options.prefix,
-          data.campaignId,
-          data.proxyId,
-          data.url
-        ),
+      const [statusReply, rawValue] = await Promise.all([
+        this.connection.proxy.create_proxy(this.options.prefix, campaignId, proxyId, url),
 
-        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId)
+        this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const proxyModel = this.buildProxyModel(rawValue)
+      const model = this.buildProxyModel(rawValue)
 
-      if (!testProxyModel(proxyModel)) {
-        throw new DatabaseError(`ProxyModel lost on create`, {
+      if (!testProxyModel(model)) {
+        throw new DatabaseError(`Proxy lost on create`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { proxyModel })
-
-      return proxyModel
+      return model
     } catch (error) {
-      this.handleException(error, 'createProxy', data)
+      this.handleException(error, 'create', {
+        campaignId,
+        proxyId,
+        url
+      })
     }
   }
 
-  async readProxy(data: ReadProxyData): Promise<ProxyModel | null> {
+  async read(campaignId: string, proxyId: string): Promise<ProxyModel | null> {
     try {
       const rawValue = await this.connection.proxy.read_proxy(
         this.options.prefix,
-        data.campaignId,
-        data.proxyId
+        campaignId,
+        proxyId
       )
 
       return this.buildProxyModel(rawValue)
     } catch (error) {
-      this.handleException(error, 'readProxy', data)
+      this.handleException(error, 'read', { campaignId, proxyId })
     }
   }
 
-  async enableProxy(data: SwitchProxyData): Promise<ProxyModel> {
+  async enable(campaignId: string, proxyId: string): Promise<ProxyModel> {
     try {
-      const [status, rawValue] = await Promise.all([
-        this.connection.proxy.enable_proxy(this.options.prefix, data.campaignId, data.proxyId),
+      const [statusReply, rawValue] = await Promise.all([
+        this.connection.proxy.enable_proxy(this.options.prefix, campaignId, proxyId),
 
-        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId)
+        this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const proxyModel = this.buildProxyModel(rawValue)
+      const model = this.buildProxyModel(rawValue)
 
-      if (!testProxyModel(proxyModel)) {
-        throw new DatabaseError(`ProxyModel lost on enable`, {
+      if (!testProxyModel(model)) {
+        throw new DatabaseError(`Proxy lost on enable`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { proxyModel })
-
-      return proxyModel
+      return model
     } catch (error) {
-      this.handleException(error, 'enableProxy', data)
+      this.handleException(error, 'enable', { campaignId, proxyId })
     }
   }
 
-  async disableProxy(data: SwitchProxyData): Promise<ProxyModel> {
+  async disable(campaignId: string, proxyId: string): Promise<ProxyModel> {
     try {
-      const [status, rawValue] = await Promise.all([
-        this.connection.proxy.disable_proxy(this.options.prefix, data.campaignId, data.proxyId),
+      const [statusReply, rawValue] = await Promise.all([
+        this.connection.proxy.disable_proxy(this.options.prefix, campaignId, proxyId),
 
-        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId)
+        this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const proxyModel = this.buildProxyModel(rawValue)
+      const model = this.buildProxyModel(rawValue)
 
-      if (!testProxyModel(proxyModel)) {
-        throw new DatabaseError(`ProxyModel lost on disable`, {
+      if (!testProxyModel(model)) {
+        throw new DatabaseError(`Proxy lost on disable`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { proxyModel })
-
-      return proxyModel
+      return model
     } catch (error) {
-      this.handleException(error, 'disableProxy', data)
+      this.handleException(error, 'disable', { campaignId, proxyId })
     }
   }
 
-  async deleteProxy(data: DeleteProxyData): Promise<ProxyModel> {
+  async delete(campaignId: string, proxyId: string): Promise<ProxyModel> {
     try {
-      const [rawValue, status] = await Promise.all([
-        this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, data.proxyId),
+      const [rawValue, statusReply] = await Promise.all([
+        this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId),
 
-        this.connection.proxy.delete_proxy(this.options.prefix, data.campaignId, data.proxyId)
+        this.connection.proxy.delete_proxy(this.options.prefix, campaignId, proxyId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const proxyModel = this.buildProxyModel(rawValue)
+      const model = this.buildProxyModel(rawValue)
 
-      if (!testProxyModel(proxyModel)) {
-        throw new DatabaseError(`ProxyModel lost on delete`, {
+      if (!testProxyModel(model)) {
+        throw new DatabaseError(`Proxy lost on delete`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { proxyModel })
-
-      return proxyModel
+      return model
     } catch (error) {
-      this.handleException(error, 'deleteProxy', data)
+      this.handleException(error, 'delete', { campaignId, proxyId })
     }
   }
 
-  async listProxies(data: ListProxiesData): Promise<ProxyModel[] | null> {
+  async list(campaignId: string): Promise<ProxyModel[] | null> {
     try {
-      const index = await this.connection.proxy.read_proxy_index(
-        this.options.prefix,
-        data.campaignId
-      )
+      const index = await this.connection.proxy.read_proxy_index(this.options.prefix, campaignId)
 
       if (index === null) {
         return null
@@ -206,13 +189,13 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const rawValues = await Promise.all(
         index.map((proxyId) =>
-          this.connection.proxy.read_proxy(this.options.prefix, data.campaignId, proxyId)
+          this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
         )
       )
 
       return this.buildProxyCollection(rawValues).filter(testProxyModel)
     } catch (error) {
-      this.handleException(error, 'listProxies', data)
+      this.handleException(error, 'list', { campaignId })
     }
   }
 

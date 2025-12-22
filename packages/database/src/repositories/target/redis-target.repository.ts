@@ -1,24 +1,17 @@
 import { DIContainer } from '@famir/common'
 import {
-  ActionTargetLabelData,
   Config,
   CONFIG,
-  CreateTargetData,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteTargetData,
   FullTargetModel,
-  ListTargetsData,
   Logger,
   LOGGER,
-  ReadTargetData,
-  SwitchTargetData,
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository,
   testTargetModel,
-  UpdateTargetData,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -56,286 +49,299 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     })
   }
 
-  async createTarget(data: CreateTargetData): Promise<TargetModel> {
+  async create(
+    campaignId: string,
+    targetId: string,
+    isLanding: boolean,
+    donorSecure: boolean,
+    donorSub: string,
+    donorDomain: string,
+    donorPort: number,
+    mirrorSecure: boolean,
+    mirrorSub: string,
+    mirrorPort: number,
+    connectTimeout: number,
+    requestTimeout: number,
+    streamingTimeout: number,
+    requestBodyLimit: number,
+    responseBodyLimit: number,
+    mainPage: string,
+    notFoundPage: string,
+    faviconIco: string,
+    robotsTxt: string,
+    sitemapXml: string
+  ): Promise<TargetModel> {
     try {
-      const [status, rawValue] = await Promise.all([
+      const [statusReply, rawValue] = await Promise.all([
         this.connection.target.create_target(
           this.options.prefix,
-          data.campaignId,
-          data.targetId,
-          data.isLanding,
-          data.donorSecure,
-          data.donorSub,
-          data.donorDomain,
-          data.donorPort,
-          data.mirrorSecure,
-          data.mirrorSub,
-          data.mirrorPort,
-          data.connectTimeout,
-          data.requestTimeout,
-          data.streamingTimeout,
-          data.requestBodyLimit,
-          data.responseBodyLimit,
-          data.mainPage,
-          data.notFoundPage,
-          data.faviconIco,
-          data.robotsTxt,
-          data.sitemapXml,
-          data.successRedirectUrl,
-          data.failureRedirectUrl
+          campaignId,
+          targetId,
+          isLanding,
+          donorSecure,
+          donorSub,
+          donorDomain,
+          donorPort,
+          mirrorSecure,
+          mirrorSub,
+          mirrorPort,
+          connectTimeout,
+          requestTimeout,
+          streamingTimeout,
+          requestBodyLimit,
+          responseBodyLimit,
+          mainPage,
+          notFoundPage,
+          faviconIco,
+          robotsTxt,
+          sitemapXml
         ),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
+        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawValue)
+      const model = this.buildTargetModel(rawValue)
 
-      if (!testTargetModel(targetModel)) {
-        throw new DatabaseError(`TargetModel lost on create`, {
+      if (!testTargetModel(model)) {
+        throw new DatabaseError(`Target lost on create`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { targetModel })
-
-      return targetModel
+      return model
     } catch (error) {
-      this.handleException(error, 'createTarget', data)
+      this.handleException(error, 'create', { campaignId, targetId })
     }
   }
 
-  async readTarget(data: ReadTargetData): Promise<FullTargetModel | null> {
+  async read(campaignId: string, targetId: string): Promise<FullTargetModel | null> {
     try {
       const rawValue = await this.connection.target.read_full_target(
         this.options.prefix,
-        data.campaignId,
-        data.targetId
+        campaignId,
+        targetId
       )
 
       return this.buildFullTargetModel(rawValue)
     } catch (error) {
-      this.handleException(error, 'readTarget', data)
+      this.handleException(error, 'read', { campaignId, targetId })
     }
   }
 
-  async updateTarget(data: UpdateTargetData): Promise<TargetModel> {
+  async update(
+    campaignId: string,
+    targetId: string,
+    connectTimeout: number | null | undefined,
+    requestTimeout: number | null | undefined,
+    streamingTimeout: number | null | undefined,
+    requestBodyLimit: number | null | undefined,
+    responseBodyLimit: number | null | undefined,
+    mainPage: string | null | undefined,
+    notFoundPage: string | null | undefined,
+    faviconIco: string | null | undefined,
+    robotsTxt: string | null | undefined,
+    sitemapXml: string | null | undefined
+  ): Promise<TargetModel> {
     try {
-      const [status, rawValue] = await Promise.all([
+      const [statusReply, rawValue] = await Promise.all([
         this.connection.target.update_target(
           this.options.prefix,
-          data.campaignId,
-          data.targetId,
-          data.connectTimeout,
-          data.requestTimeout,
-          data.streamingTimeout,
-          data.requestBodyLimit,
-          data.responseBodyLimit,
-          data.mainPage,
-          data.notFoundPage,
-          data.faviconIco,
-          data.robotsTxt,
-          data.sitemapXml,
-          data.successRedirectUrl,
-          data.failureRedirectUrl
+          campaignId,
+          targetId,
+          connectTimeout,
+          requestTimeout,
+          streamingTimeout,
+          requestBodyLimit,
+          responseBodyLimit,
+          mainPage,
+          notFoundPage,
+          faviconIco,
+          robotsTxt,
+          sitemapXml
         ),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
+        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawValue)
+      const model = this.buildTargetModel(rawValue)
 
-      if (!testTargetModel(targetModel)) {
-        throw new DatabaseError(`TargetModel lost on update`, {
+      if (!testTargetModel(model)) {
+        throw new DatabaseError(`Target lost on update`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { targetModel })
-
-      return targetModel
+      return model
     } catch (error) {
-      this.handleException(error, 'updateTarget', data)
+      this.handleException(error, 'update', { campaignId, targetId })
     }
   }
 
-  async enableTarget(data: SwitchTargetData): Promise<TargetModel> {
+  async enable(campaignId: string, targetId: string): Promise<TargetModel> {
     try {
-      const [status, rawValue] = await Promise.all([
-        this.connection.target.enable_target(this.options.prefix, data.campaignId, data.targetId),
+      const [statusReply, rawValue] = await Promise.all([
+        this.connection.target.enable_target(this.options.prefix, campaignId, targetId),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
+        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawValue)
+      const model = this.buildTargetModel(rawValue)
 
-      if (!testTargetModel(targetModel)) {
-        throw new DatabaseError(`TargetModel lost on enable`, {
+      if (!testTargetModel(model)) {
+        throw new DatabaseError(`Target lost on enable`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { targetModel })
-
-      return targetModel
+      return model
     } catch (error) {
-      this.handleException(error, 'enableTarget', data)
+      this.handleException(error, 'enable', { campaignId, targetId })
     }
   }
 
-  async disableTarget(data: SwitchTargetData): Promise<TargetModel> {
+  async disable(campaignId: string, targetId: string): Promise<TargetModel> {
     try {
-      const [status, rawValue] = await Promise.all([
-        this.connection.target.disable_target(this.options.prefix, data.campaignId, data.targetId),
+      const [statusReply, rawValue] = await Promise.all([
+        this.connection.target.disable_target(this.options.prefix, campaignId, targetId),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
+        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawValue)
+      const model = this.buildTargetModel(rawValue)
 
-      if (!testTargetModel(targetModel)) {
-        throw new DatabaseError(`TargetModel lost on disable`, {
+      if (!testTargetModel(model)) {
+        throw new DatabaseError(`Target lost on disable`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { targetModel })
-
-      return targetModel
+      return model
     } catch (error) {
-      this.handleException(error, 'disableTarget', data)
+      this.handleException(error, 'disable', { campaignId, targetId })
     }
   }
 
-  async appendTargetLabel(data: ActionTargetLabelData): Promise<TargetModel> {
+  async appendLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel> {
     try {
-      const [status, rawValue] = await Promise.all([
+      const [statusReply, rawValue] = await Promise.all([
         this.connection.target.append_target_label(
           this.options.prefix,
-          data.campaignId,
-          data.targetId,
-          data.label
+          campaignId,
+          targetId,
+          label
         ),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
+        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawValue)
+      const model = this.buildTargetModel(rawValue)
 
-      if (!testTargetModel(targetModel)) {
-        throw new DatabaseError(`TargetModel lost on append label`, {
+      if (!testTargetModel(model)) {
+        throw new DatabaseError(`Target lost on append label`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { targetModel })
-
-      return targetModel
+      return model
     } catch (error) {
-      this.handleException(error, 'appendTargetLabel', data)
+      this.handleException(error, 'appendLabel', { campaignId, targetId, label })
     }
   }
 
-  async removeTargetLabel(data: ActionTargetLabelData): Promise<TargetModel> {
+  async removeLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel> {
     try {
-      const [status, rawValue] = await Promise.all([
+      const [statusReply, rawValue] = await Promise.all([
         this.connection.target.remove_target_label(
           this.options.prefix,
-          data.campaignId,
-          data.targetId,
-          data.label
+          campaignId,
+          targetId,
+          label
         ),
 
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId)
+        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawValue)
+      const model = this.buildTargetModel(rawValue)
 
-      if (!testTargetModel(targetModel)) {
-        throw new DatabaseError(`TargetModel lost on remove label`, {
+      if (!testTargetModel(model)) {
+        throw new DatabaseError(`Target lost on remove label`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { targetModel })
-
-      return targetModel
+      return model
     } catch (error) {
-      this.handleException(error, 'removeTargetLabel', data)
+      this.handleException(error, 'removeLabel', { campaignId, targetId, label })
     }
   }
 
-  async deleteTarget(data: DeleteTargetData): Promise<TargetModel> {
+  async delete(campaignId: string, targetId: string): Promise<TargetModel> {
     try {
-      const [rawValue, status] = await Promise.all([
-        this.connection.target.read_target(this.options.prefix, data.campaignId, data.targetId),
+      const [rawValue, statusReply] = await Promise.all([
+        this.connection.target.read_target(this.options.prefix, campaignId, targetId),
 
-        this.connection.target.delete_target(this.options.prefix, data.campaignId, data.targetId)
+        this.connection.target.delete_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const targetModel = this.buildTargetModel(rawValue)
+      const model = this.buildTargetModel(rawValue)
 
-      if (!testTargetModel(targetModel)) {
-        throw new DatabaseError(`TargetModel lost on delete`, {
+      if (!testTargetModel(model)) {
+        throw new DatabaseError(`Target lost on delete`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { targetModel })
-
-      return targetModel
+      return model
     } catch (error) {
-      this.handleException(error, 'deleteTarget', data)
+      this.handleException(error, 'delete', { campaignId, targetId })
     }
   }
 
-  async listTargets(data: ListTargetsData): Promise<TargetModel[] | null> {
+  async list(campaignId: string): Promise<TargetModel[] | null> {
     try {
-      const index = await this.connection.target.read_target_index(
-        this.options.prefix,
-        data.campaignId
-      )
+      const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
 
       if (index === null) {
         return null
@@ -345,13 +351,13 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const rawValues = await Promise.all(
         index.map((targetId) =>
-          this.connection.target.read_target(this.options.prefix, data.campaignId, targetId)
+          this.connection.target.read_target(this.options.prefix, campaignId, targetId)
         )
       )
 
       return this.buildTargetCollection(rawValues).filter(testTargetModel)
     } catch (error) {
-      this.handleException(error, 'listTargets', data)
+      this.handleException(error, 'list', { campaignId })
     }
   }
 
@@ -409,8 +415,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       faviconIco: rawValue.favicon_ico,
       robotsTxt: rawValue.robots_txt,
       sitemapXml: rawValue.sitemap_xml,
-      successRedirectUrl: rawValue.success_redirect_url,
-      failureRedirectUrl: rawValue.failure_redirect_url,
       isEnabled: !!rawValue.is_enabled,
       messageCount: rawValue.message_count,
       createdAt: new Date(rawValue.created_at),

@@ -37,24 +37,24 @@ export class PinoLogger implements Logger {
     })
   }
 
-  debug(msg: string, data: LoggerData = {}) {
-    this.pino.debug(data, msg)
+  debug(mesg: string, data: LoggerData = {}) {
+    this.pino.debug(data, mesg)
   }
 
-  info(msg: string, data: LoggerData = {}) {
-    this.pino.info(data, msg)
+  info(mesg: string, data: LoggerData = {}) {
+    this.pino.info(data, mesg)
   }
 
-  warn(msg: string, data: LoggerData = {}) {
-    this.pino.warn(data, msg)
+  warn(mesg: string, data: LoggerData = {}) {
+    this.pino.warn(data, mesg)
   }
 
-  error(msg: string, data: LoggerData = {}) {
-    this.pino.error(data, msg)
+  error(mesg: string, data: LoggerData = {}) {
+    this.pino.error(data, mesg)
   }
 
-  fatal(msg: string, data: LoggerData = {}) {
-    this.pino.fatal(data, msg)
+  fatal(mesg: string, data: LoggerData = {}) {
+    this.pino.fatal(data, mesg)
   }
 
   private buildOptions(config: LoggerConfig): LoggerOptions {

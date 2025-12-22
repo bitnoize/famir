@@ -30,33 +30,22 @@ export class BuildRequestController extends BaseController {
   }
 
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
-    super(validator, logger, router, 'build-request')
-
-    this.router.addMiddleware(this.defaultMiddleware)
+    super(validator, logger, router)
   }
 
-  private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  addMiddlewares() {
+    this.router.addMiddleware(this.buildRequestMiddleware)
+  }
+
+  protected buildRequestMiddleware: HttpServerMiddleware = async (ctx, next) => {
     try {
-      const { target } = this.getSetupMirrorState(ctx)
-
-      ctx.prepareRequestHeaders()
-
-      ctx.setRequestHeaders({
-        Host: undefined,
-        Connection: undefined,
-        'Keep-Alive': undefined,
-        Upgrade: undefined,
-        Cookie: undefined,
-        'X-Famir-Campaign-Id': undefined,
-        'X-Famir-Target-Id': undefined,
-        'X-Famir-Client-Ip': undefined
-      })
+      const target = this.getState(ctx, 'target')
 
       await ctx.loadRequestBody(target.requestBodyLimit)
 
       await next()
     } catch (error) {
-      this.handleException(error, 'default')
+      this.handleException(error, 'buildRequest')
     }
   }
 }

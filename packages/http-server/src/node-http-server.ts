@@ -178,17 +178,17 @@ export class NodeHttpServer implements HttpServer {
     ): Promise<void> => {
       let index = -1
 
-      const dispatch = async (i: number): Promise<void> => {
-        if (i <= index) {
+      const dispatch = async (idx: number): Promise<void> => {
+        if (idx <= index) {
           throw new Error('Middleware next() called multiple times')
         }
 
-        index = i
+        index = idx
 
-        const middleware = middlewares[i]
+        const middleware = middlewares[idx]
 
         if (middleware) {
-          await middleware(ctx, () => dispatch(i + 1))
+          await middleware(ctx, () => dispatch(idx + 1))
         }
       }
 

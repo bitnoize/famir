@@ -4,7 +4,7 @@
   Create message
 --]]
 local function create_message(keys, args)
-  if not (#keys == 5 and #args == 22) then
+  if not (#keys == 5 and #args == 19) then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -40,23 +40,20 @@ local function create_message(keys, args)
     proxy_id = args[3],
     target_id = args[4],
     session_id = args[5],
-    logs = args[6],
-    method = args[7],
-    url = args[8],
-    is_streaming = args[9],
-    request_headers = args[10],
-    request_cookies = args[11],
-    request_body = args[12],
-    response_headers = args[13],
-    response_cookies = args[14],
-    response_body = args[15],
-    client_ip = args[16],
-    status = tonumber(args[17]),
-    score = tonumber(args[18]),
-    start_time = tonumber(args[19]),
-    finish_time = tonumber(args[20]),
-    connection = args[21],
-    created_at = tonumber(args[22]),
+    method = args[6],
+    url = args[7],
+    is_streaming = args[8],
+    request_headers = args[9],
+    request_body = args[10],
+    response_headers = args[11],
+    response_body = args[12],
+    client_ip = args[13],
+    status = tonumber(args[14]),
+    score = tonumber(args[15]),
+    start_time = tonumber(args[16]),
+    finish_time = tonumber(args[17]),
+    connection = args[18],
+    created_at = tonumber(args[19]),
   }
 
   for field, value in pairs(model) do
@@ -215,15 +212,12 @@ local function read_full_message(keys, args)
     'proxy_id',
     'target_id',
     'session_id',
-    'logs',
     'method',
     'url',
     'is_streaming',
     'request_headers',
-    'request_cookies',
     'request_body',
     'response_headers',
-    'response_cookies',
     'response_body',
     'client_ip',
     'status',
@@ -234,7 +228,7 @@ local function read_full_message(keys, args)
     'created_at'
   )
 
-  if not (#values == 22) then
+  if not (#values == 19) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -244,23 +238,20 @@ local function read_full_message(keys, args)
     proxy_id = values[3],
     target_id = values[4],
     session_id = values[5],
-    logs = values[6],
-    method = values[7],
-    url = values[8],
-    is_streaming = tonumber(values[9]),
-    request_headers = values[10],
-    request_cookies = values[11],
-    request_body = values[12],
-    response_headers = values[13],
-    response_cookies = values[14],
-    response_body = values[15],
-    client_ip = values[16],
-    status = tonumber(values[17]),
-    score = tonumber(values[18]),
-    start_time = tonumber(values[19]),
-    finish_time = tonumber(values[20]),
-    connection = values[21],
-    created_at = tonumber(values[22]),
+    method = values[6],
+    url = values[7],
+    is_streaming = tonumber(values[8]),
+    request_headers = values[9],
+    request_body = values[10],
+    response_headers = values[11],
+    response_body = values[12],
+    client_ip = values[13],
+    status = tonumber(values[14]),
+    score = tonumber(values[15]),
+    start_time = tonumber(values[16]),
+    finish_time = tonumber(values[17]),
+    connection = values[18],
+    created_at = tonumber(values[19]),
   }
 
   for field, value in pairs(model) do
@@ -276,5 +267,5 @@ redis.register_function({
   function_name = 'read_full_message',
   callback = read_full_message,
   flags = { 'no-writes' },
-  description = 'Read full_message',
+  description = 'Read full message',
 })

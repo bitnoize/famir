@@ -34,8 +34,6 @@ export interface FullTargetModel extends TargetModel {
   readonly faviconIco: string
   readonly robotsTxt: string
   readonly sitemapXml: string
-  readonly successRedirectUrl: string
-  readonly failureRedirectUrl: string
 }
 
 export interface EnabledTargetModel extends TargetModel {
@@ -50,4 +48,10 @@ export const testEnabledTargetModel = <T extends TargetModel>(
   value: T
 ): value is T & { isEnabled: true } => {
   return value.isEnabled
+}
+
+export const testTargetHasLabel = (target: FullTargetModel, value: string) => {
+  return target.labels.some((label) => {
+    return Array.isArray(value) ? value.includes(label) : value === label
+  })
 }

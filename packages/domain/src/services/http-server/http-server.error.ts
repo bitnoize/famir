@@ -2,6 +2,7 @@ import { DomainError, DomainErrorOptions } from '../../domain.error.js'
 
 export type HttpServerErrorCode =
   | 'BAD_REQUEST'
+  | 'UNAUTHORIZED'
   | 'FORBIDDEN'
   | 'NOT_FOUND'
   | 'CONFLICT'
@@ -18,6 +19,7 @@ export type HttpServerErrorOptions = DomainErrorOptions & {
 
 const codeToStatusMap = {
   BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,

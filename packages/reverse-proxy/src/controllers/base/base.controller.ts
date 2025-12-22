@@ -1,158 +1,103 @@
 import {
   EnabledFullTargetModel,
-  EnabledProxyModel,
-  EnabledTargetModel,
-  FullCampaignModel,
   HttpServerContext,
   HttpServerError,
   HttpServerRouter,
   Logger,
-  MessageModel,
-  SessionModel,
   Validator
 } from '@famir/domain'
-import {
-  AuthorizeState,
-  CompleteState,
-  ReverseProxyState,
-  SetupMirrorState
-} from '../../reverse-proxy.js'
+import { ReverseProxyState } from '../../reverse-proxy.js'
 
 export abstract class BaseController {
   constructor(
     protected readonly validator: Validator,
     protected readonly logger: Logger,
-    protected readonly router: HttpServerRouter,
-    protected readonly controllerName: string
+    protected readonly router: HttpServerRouter
   ) {}
 
-  //
-  // SetupMirrorState
-  //
+  abstract addMiddlewares(): void
 
-  protected isSetupMirrorState(ctx: HttpServerContext): boolean {
-    const state = ctx.getState<ReverseProxyState>()
-
-    state.isSetupMirror ??= false
-
-    return state.isSetupMirror
-  }
-
-  protected getSetupMirrorState(ctx: HttpServerContext): SetupMirrorState {
-    const state = ctx.getState<ReverseProxyState>()
-
-    state.isSetupMirror ??= false
-
-    if (!state.isSetupMirror) {
-      throw new Error(`SetupMirrorState not exists`)
-    }
-
-    if (!state.campaign) {
-      throw new Error(`SetupMirrorState campaign missing`)
-    }
-
-    if (!state.target) {
-      throw new Error(`SetupMirrorState target missing`)
-    }
-
-    if (!state.targets) {
-      throw new Error(`SetupMirrorState targets missing`)
-    }
-
-    return state as SetupMirrorState
-  }
-
-  protected setSetupMirrorState(
+  protected getState<T extends ReverseProxyState, K extends keyof T>(
     ctx: HttpServerContext,
-    campaign: FullCampaignModel,
-    target: EnabledFullTargetModel,
-    targets: EnabledTargetModel[]
-  ): void {
-    const state = ctx.getState<ReverseProxyState>()
+    key: K
+  ): NonNullable<T[K]> {
+    const state = ctx.state as T
 
-    state.isSetupMirror = true
-    state.campaign = campaign
-    state.target = target
-    state.targets = targets
-  }
-
-  //
-  // AuthorizeState
-  //
-
-  protected isAuthorizeState(ctx: HttpServerContext): boolean {
-    const state = ctx.getState<ReverseProxyState>()
-
-    state.isAuthorize ??= false
-
-    return state.isAuthorize
-  }
-
-  protected getAuthorizeState(ctx: HttpServerContext): AuthorizeState {
-    const state = ctx.getState<ReverseProxyState>()
-
-    state.isAuthorize ??= false
-
-    if (!state.isAuthorize) {
-      throw new Error(`AuthorizeState not exists`)
+    if (state[key] == null) {
+      throw new Error(`State '${String(key)}' missing`)
     }
 
-    if (!state.session) {
-      throw new Error(`AuthorizeState session missing`)
-    }
-
-    if (!state.proxy) {
-      throw new Error(`AuthorizeState proxy missing`)
-    }
-
-    return state as AuthorizeState
+    return state[key]
   }
 
-  protected setAuthorizeState(
+  protected setState<T extends ReverseProxyState, K extends keyof T>(
     ctx: HttpServerContext,
-    session: SessionModel,
-    proxy: EnabledProxyModel
-  ): void {
-    const state = ctx.getState<ReverseProxyState>()
+    key: K,
+    value: T[K]
+  ) {
+    const state = ctx.state as T
 
-    state.isAuthorize = true
-    state.session = session
-    state.proxy = proxy
-  }
-
-  //
-  // CompleteState
-  //
-
-  protected isCompleteState(ctx: HttpServerContext): boolean {
-    const state = ctx.getState<ReverseProxyState>()
-
-    state.isComplete ??= false
-
-    return state.isComplete
-  }
-
-  protected getCompleteState(ctx: HttpServerContext): CompleteState {
-    const state = ctx.getState<ReverseProxyState>()
-
-    state.isComplete ??= false
-
-    if (!state.isComplete) {
-      throw new Error(`CompleteState not exists`)
+    if (state[key]) {
+      throw new Error(`State '${String(key)}' exists`)
     }
 
-    if (!state.message) {
-      throw new Error(`CompleteState message missing`)
-    }
-
-    return state as CompleteState
+    state[key] = value
   }
 
-  protected setCompleteState(ctx: HttpServerContext, message: MessageModel): void {
-    const state = ctx.getState<ReverseProxyState>()
+  protected async renderOriginRedirect(ctx: HttpServerContext): Promise<void> {
+    ctx.setResponseHeader('Location', ctx.originUrl)
 
-    state.isComplete = true
-    state.message = message
+    ctx.setStatus(302)
+
+    await ctx.sendResponse()
+  }
+
+  protected async renderMainRedirect(ctx: HttpServerContext): Promise<void> {
+    ctx.setResponseHeader('Location', '/')
+
+    ctx.setStatus(302)
+
+    await ctx.sendResponse()
+  }
+
+  protected async renderMainPage(
+    ctx: HttpServerContext,
+    target: EnabledFullTargetModel
+  ): Promise<void> {
+    const body = Buffer.from(target.mainPage)
+
+    ctx.setResponseHeaders({
+      'Content-Type': 'text/html',
+      'Content-Length': body.length.toString(),
+      'Last-Modified': target.updatedAt.toUTCString(),
+      'Cache-Control': 'public, max-age=86400'
+    })
+
+    if (ctx.isMethod('GET')) {
+      ctx.setResponseBody(body)
+    }
+
+    ctx.setStatus(200)
+
+    await ctx.sendResponse()
+  }
+
+  protected async renderNotFoundPage(
+    ctx: HttpServerContext,
+    target: EnabledFullTargetModel
+  ): Promise<void> {
+    const body = Buffer.from(target.notFoundPage)
+
+    ctx.setResponseHeaders({
+      'Content-Type': 'text/html',
+      'Content-Length': body.length.toString()
+    })
+
+    ctx.setResponseBody(body)
+
+    ctx.setStatus(404)
+
+    await ctx.sendResponse()
   }
 
   protected handleException(error: unknown, middleware: string): never {

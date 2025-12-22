@@ -21,7 +21,7 @@ local function create_session(keys, args)
   end
 
   if not (redis.call('SCARD', enabled_proxy_index_key) > 0) then
-    return redis.status_reply('SERVICE_UNAVAILABLE No enabled proxies found')
+    return redis.status_reply('NOT_FOUND No enabled proxies found')
   end
 
   local model = {
@@ -163,11 +163,11 @@ local function auth_session(keys, args)
   end
 
   if not (redis.call('EXISTS', session_key) == 1) then
-    return redis.status_reply('NOT_FOUND Session not found')
+    return redis.status_reply('FORBIDDEN Session not found')
   end
 
   if not (redis.call('SCARD', enabled_proxy_index_key) > 0) then
-    return redis.status_reply('SERVICE_UNAVAILABLE No enabled proxies found')
+    return redis.status_reply('NOT_FOUND No enabled proxies found')
   end
 
   local stash = {

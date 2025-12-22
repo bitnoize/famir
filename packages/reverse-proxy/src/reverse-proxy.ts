@@ -21,31 +21,10 @@ export type ReverseProxyConfig = LoggerConfig &
   HttpServerConfig
 
 export interface ReverseProxyState extends HttpState {
-  isSetupMirror?: boolean
   campaign?: FullCampaignModel
+  proxy?: EnabledProxyModel
   target?: EnabledFullTargetModel
   targets?: EnabledTargetModel[]
-  isAuthorize?: boolean
   session?: SessionModel
-  proxy?: EnabledProxyModel
-  isComplete?: boolean
   message?: MessageModel
-}
-
-export interface SetupMirrorState {
-  readonly isSetupMirror: true
-  readonly campaign: FullCampaignModel
-  readonly target: EnabledFullTargetModel
-  readonly targets: EnabledTargetModel[]
-}
-
-export interface AuthorizeState {
-  readonly isAuthorize: true
-  readonly session: SessionModel
-  readonly proxy: EnabledProxyModel
-}
-
-export interface CompleteState {
-  readonly isComplete: true
-  readonly message: MessageModel
 }

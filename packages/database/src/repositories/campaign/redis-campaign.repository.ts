@@ -5,17 +5,13 @@ import {
   CampaignRepository,
   Config,
   CONFIG,
-  CreateCampaignData,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteCampaignData,
   FullCampaignModel,
   Logger,
   LOGGER,
-  ReadCampaignData,
   testCampaignModel,
-  UpdateCampaignData,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -53,129 +49,140 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     })
   }
 
-  async createCampaign(data: CreateCampaignData): Promise<CampaignModel> {
+  async create(
+    campaignId: string,
+    mirrorDomain: string,
+    description: string,
+    landingUpgradePath: string,
+    landingUpgradeParam: string,
+    landingRedirectorParam: string,
+    sessionCookieName: string,
+    sessionExpire: number,
+    newSessionExpire: number,
+    messageExpire: number
+  ): Promise<CampaignModel> {
     try {
-      const [status, rawValue] = await Promise.all([
+      const [statusReply, rawValue] = await Promise.all([
         this.connection.campaign.create_campaign(
           this.options.prefix,
-          data.campaignId,
-          data.mirrorDomain,
-          data.description,
-          data.landingAuthPath,
-          data.landingAuthParam,
-          data.landingLureParam,
-          data.sessionCookieName,
-          data.sessionExpire,
-          data.newSessionExpire,
-          data.messageExpire
+          campaignId,
+          mirrorDomain,
+          description,
+          landingUpgradePath,
+          landingUpgradeParam,
+          landingRedirectorParam,
+          sessionCookieName,
+          sessionExpire,
+          newSessionExpire,
+          messageExpire
         ),
 
-        this.connection.campaign.read_campaign(this.options.prefix, data.campaignId)
+        this.connection.campaign.read_campaign(this.options.prefix, campaignId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const campaignModel = this.buildCampaignModel(rawValue)
+      const model = this.buildCampaignModel(rawValue)
 
-      if (!testCampaignModel(campaignModel)) {
-        throw new DatabaseError(`CampaignModel lost on create`, {
+      if (!testCampaignModel(model)) {
+        throw new DatabaseError(`Campaign lost on create`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { campaignModel })
-
-      return campaignModel
+      return model
     } catch (error) {
-      this.handleException(error, 'createCampaign', data)
+      this.handleException(error, 'create', { campaignId, mirrorDomain })
     }
   }
 
-  async readCampaign(data: ReadCampaignData): Promise<FullCampaignModel | null> {
+  async read(campaignId: string): Promise<FullCampaignModel | null> {
     try {
       const rawValue = await this.connection.campaign.read_full_campaign(
         this.options.prefix,
-        data.campaignId
+        campaignId
       )
 
       return this.buildFullCampaignModel(rawValue)
     } catch (error) {
-      this.handleException(error, 'readCampaign', data)
+      this.handleException(error, 'read', { campaignId })
     }
   }
 
-  async updateCampaign(data: UpdateCampaignData): Promise<CampaignModel> {
+  async update(
+    campaignId: string,
+    description: string | null | undefined,
+    sessionExpire: number | null | undefined,
+    newSessionExpire: number | null | undefined,
+    messageExpire: number | null | undefined
+  ): Promise<CampaignModel> {
     try {
-      const [status, rawValue] = await Promise.all([
+      const [statusReply, rawValue] = await Promise.all([
         this.connection.campaign.update_campaign(
           this.options.prefix,
-          data.campaignId,
-          data.description,
-          data.sessionExpire,
-          data.newSessionExpire,
-          data.messageExpire
+          campaignId,
+          description,
+          sessionExpire,
+          newSessionExpire,
+          messageExpire
         ),
 
-        this.connection.campaign.read_campaign(this.options.prefix, data.campaignId)
+        this.connection.campaign.read_campaign(this.options.prefix, campaignId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const campaignModel = this.buildCampaignModel(rawValue)
+      const model = this.buildCampaignModel(rawValue)
 
-      if (!testCampaignModel(campaignModel)) {
-        throw new DatabaseError(`CampaignModel lost on update`, {
+      if (!testCampaignModel(model)) {
+        throw new DatabaseError(`Campaign lost on update`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { campaignModel })
-
-      return campaignModel
+      return model
     } catch (error) {
-      this.handleException(error, 'updateCampaign', data)
+      this.handleException(error, 'update', { campaignId })
     }
   }
 
-  async deleteCampaign(data: DeleteCampaignData): Promise<CampaignModel> {
+  async delete(campaignId: string): Promise<CampaignModel> {
     try {
-      const [rawValue, status] = await Promise.all([
-        this.connection.campaign.read_campaign(this.options.prefix, data.campaignId),
+      const [rawValue, statusReply] = await Promise.all([
+        this.connection.campaign.read_campaign(this.options.prefix, campaignId),
 
-        this.connection.campaign.delete_campaign(this.options.prefix, data.campaignId)
+        this.connection.campaign.delete_campaign(this.options.prefix, campaignId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const campaignModel = this.buildCampaignModel(rawValue)
+      const model = this.buildCampaignModel(rawValue)
 
-      if (!testCampaignModel(campaignModel)) {
-        throw new DatabaseError(`CampaignModel lost on delete`, {
+      if (!testCampaignModel(model)) {
+        throw new DatabaseError(`Campaign lost on delete`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { campaignModel })
-
-      return campaignModel
+      return model
     } catch (error) {
-      this.handleException(error, 'deleteCampaign', data)
+      this.handleException(error, 'delete', { campaignId })
     }
   }
 
-  async listCampaigns(): Promise<CampaignModel[]> {
+  async list(): Promise<CampaignModel[]> {
     try {
       const index = await this.connection.campaign.read_campaign_index(this.options.prefix)
 
@@ -189,7 +196,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildCampaignCollection(rawValues).filter(testCampaignModel)
     } catch (error) {
-      this.handleException(error, 'listCampaigns', null)
+      this.handleException(error, 'list', null)
     }
   }
 
@@ -221,9 +228,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       campaignId: rawValue.campaign_id,
       mirrorDomain: rawValue.mirror_domain,
       description: rawValue.description,
-      landingAuthPath: rawValue.landing_auth_path,
-      landingAuthParam: rawValue.landing_auth_param,
-      landingLureParam: rawValue.landing_lure_param,
+      landingUpgradePath: rawValue.landing_upgrade_path,
+      landingUpgradeParam: rawValue.landing_upgrade_param,
+      landingRedirectorParam: rawValue.landing_redirector_param,
       sessionCookieName: rawValue.session_cookie_name,
       sessionExpire: rawValue.session_expire,
       newSessionExpire: rawValue.new_session_expire,

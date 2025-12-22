@@ -7,5 +7,5 @@ export const composeSetupMirrorModule = (container: DIContainer) => {
 
   SetupMirrorController.inject(container)
 
-  SetupMirrorController.resolve(container)
+  SetupMirrorController.resolve(container).addMiddlewares()
 }

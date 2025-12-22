@@ -1,5 +1,25 @@
 import { DIContainer } from '@famir/common'
 import {
+  Logger,
+  LOGGER,
+  REPL_SERVER_ROUTER,
+  ReplServerApiCall,
+  ReplServerError,
+  ReplServerRouter,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
+import { BaseController } from '../base/index.js'
+import {
+  ActionTargetLabelData,
+  CreateTargetData,
+  DeleteTargetData,
+  ListTargetsData,
+  ReadTargetData,
+  SwitchTargetData,
+  UpdateTargetData
+} from './target.js'
+import {
   actionTargetLabelDataSchema,
   createTargetDataSchema,
   deleteTargetDataSchema,
@@ -7,25 +27,7 @@ import {
   readTargetDataSchema,
   switchTargetDataSchema,
   updateTargetDataSchema
-} from '@famir/database'
-import {
-  ActionTargetLabelData,
-  CreateTargetData,
-  DeleteTargetData,
-  ListTargetsData,
-  Logger,
-  LOGGER,
-  ReadTargetData,
-  REPL_SERVER_ROUTER,
-  ReplServerApiCall,
-  ReplServerError,
-  ReplServerRouter,
-  SwitchTargetData,
-  UpdateTargetData,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
-import { BaseController } from '../base/index.js'
+} from './target.schemas.js'
 import { TARGET_SERVICE, type TargetService } from './target.service.js'
 
 export class TargetController extends BaseController {

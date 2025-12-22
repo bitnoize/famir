@@ -1,11 +1,4 @@
-import {
-  HttpBody,
-  HttpConnection,
-  HttpHeaders,
-  HttpLog,
-  HttpRequestCookies,
-  HttpResponseCookies
-} from '../../http-proto.js'
+import { HttpBody, HttpConnection, HttpHeaders } from '../../http-proto.js'
 
 export interface MessageModel {
   readonly campaignId: string
@@ -26,12 +19,9 @@ export const testMessageModel = <T extends MessageModel>(value: T | null): value
 }
 
 export interface FullMessageModel extends MessageModel {
-  readonly logs: HttpLog[]
   readonly requestHeaders: HttpHeaders
-  readonly requestCookies: HttpRequestCookies
   readonly requestBody: HttpBody
   readonly responseHeaders: HttpHeaders
-  readonly responseCookies: HttpResponseCookies
   readonly responseBody: HttpBody
   readonly clientIp: string
   readonly startTime: number

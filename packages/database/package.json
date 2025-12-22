@@ -15,9 +15,9 @@
   "dependencies": {
     "@famir/domain": "*",
     "@famir/common": "*",
-    "redis": "^5.6.0"
+    "redis": "^5.10.0"
   },
   "devDependencies": {
-    "@types/node": "^24.0.1"
+    "@types/node": "^25.0.2"
   }
 }

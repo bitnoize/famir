@@ -1,12 +1,7 @@
 import { DIContainer } from '@famir/common'
-import {
-  MESSAGE_REPOSITORY,
-  MessageModel,
-  MessageRepository,
-  ReadMessageData,
-  ReplServerError
-} from '@famir/domain'
+import { MESSAGE_REPOSITORY, MessageModel, MessageRepository, ReplServerError } from '@famir/domain'
 import { BaseService } from '../base/index.js'
+import { ReadMessageData } from './message.js'
 
 export const MESSAGE_SERVICE = Symbol('MessageService')
 
@@ -23,14 +18,14 @@ export class MessageService extends BaseService {
   }
 
   async readMessage(data: ReadMessageData): Promise<MessageModel> {
-    const messageModel = await this.messageRepository.readMessage(data)
+    const model = await this.messageRepository.read(data.campaignId, data.messageId)
 
-    if (!messageModel) {
+    if (!model) {
       throw new ReplServerError(`Message not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return messageModel
+    return model
   }
 }

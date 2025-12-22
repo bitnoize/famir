@@ -1,3 +1,5 @@
 export * from './campaign.controller.js'
+export * from './campaign.js'
 export * from './campaign.module.js'
+export * from './campaign.schemas.js'
 export * from './campaign.service.js'

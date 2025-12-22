@@ -4,5 +4,5 @@ import { WellKnownUrlsController } from './well-known-urls.controller.js'
 export const composeWellKnownUrlsModule = (container: DIContainer) => {
   WellKnownUrlsController.inject(container)
 
-  WellKnownUrlsController.resolve(container)
+  WellKnownUrlsController.resolve(container).addMiddlewares()
 }

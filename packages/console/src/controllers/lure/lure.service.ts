@@ -1,16 +1,13 @@
 import { DIContainer } from '@famir/common'
+import { LURE_REPOSITORY, LureModel, LureRepository, ReplServerError } from '@famir/domain'
+import { BaseService } from '../base/index.js'
 import {
   CreateLureData,
   DeleteLureData,
   ListLuresData,
-  LURE_REPOSITORY,
-  LureModel,
-  LureRepository,
   ReadLureData,
-  ReplServerError,
   SwitchLureData
-} from '@famir/domain'
-import { BaseService } from '../base/index.js'
+} from './lure.js'
 
 export const LURE_SERVICE = Symbol('LureService')
 
@@ -28,27 +25,32 @@ export class LureService extends BaseService {
 
   async createLure(data: CreateLureData): Promise<LureModel> {
     try {
-      return await this.lureRepository.createLure(data)
+      return await this.lureRepository.create(
+        data.campaignId,
+        data.lureId,
+        data.path,
+        data.redirectorId
+      )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
     }
   }
 
   async readLure(data: ReadLureData): Promise<LureModel> {
-    const lureModel = await this.lureRepository.readLure(data)
+    const model = await this.lureRepository.read(data.campaignId, data.lureId)
 
-    if (!lureModel) {
+    if (!model) {
       throw new ReplServerError(`Lure not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return lureModel
+    return model
   }
 
   async enableLure(data: SwitchLureData): Promise<LureModel> {
     try {
-      return await this.lureRepository.enableLure(data)
+      return await this.lureRepository.enable(data.campaignId, data.lureId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
     }
@@ -56,7 +58,7 @@ export class LureService extends BaseService {
 
   async disableLure(data: SwitchLureData): Promise<LureModel> {
     try {
-      return await this.lureRepository.disableLure(data)
+      return await this.lureRepository.disable(data.campaignId, data.lureId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
     }
@@ -64,21 +66,26 @@ export class LureService extends BaseService {
 
   async deleteLure(data: DeleteLureData): Promise<LureModel> {
     try {
-      return await this.lureRepository.deleteLure(data)
+      return await this.lureRepository.delete(
+        data.campaignId,
+        data.lureId,
+        data.path,
+        data.redirectorId
+      )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
     }
   }
 
   async listLures(data: ListLuresData): Promise<LureModel[]> {
-    const lureCollection = await this.lureRepository.listLures(data)
+    const collection = await this.lureRepository.list(data.campaignId)
 
-    if (!lureCollection) {
+    if (!collection) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return lureCollection
+    return collection
   }
 }

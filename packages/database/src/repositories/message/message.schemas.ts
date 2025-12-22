@@ -1,14 +1,12 @@
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
+import { JSONSchemaType } from '@famir/common'
 import {
   HttpConnection,
   HttpHeader,
   HttpHeaders,
-  HttpLog,
   HttpRequestCookie,
   HttpRequestCookies,
   HttpResponseCookie,
-  HttpResponseCookies,
-  ReadMessageData
+  HttpResponseCookies
 } from '@famir/domain'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
@@ -73,15 +71,12 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     'proxy_id',
     'target_id',
     'session_id',
-    'logs',
     'method',
     'url',
     'is_streaming',
     'request_headers',
-    'request_cookies',
     'request_body',
     'response_headers',
-    'response_cookies',
     'response_body',
     'client_ip',
     'status',
@@ -107,9 +102,6 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     session_id: {
       type: 'string'
     },
-    logs: {
-      type: 'string'
-    },
     method: {
       type: 'string'
     },
@@ -122,16 +114,10 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     request_headers: {
       type: 'string'
     },
-    request_cookies: {
-      type: 'string'
-    },
     request_body: {
       type: 'string'
     },
     response_headers: {
-      type: 'string'
-    },
-    response_cookies: {
       type: 'string'
     },
     response_body: {
@@ -160,26 +146,6 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     }
   },
   additionalProperties: false
-} as const
-
-export const messageLogSchema: JSONSchemaType<HttpLog> = {
-  type: 'array',
-  items: [
-    {
-      type: 'string'
-    },
-    {
-      type: 'object'
-    }
-  ],
-  minItems: 2,
-  maxItems: 2,
-  additionalItems: false
-} as const
-
-export const messageLogsSchema: JSONSchemaType<HttpLog[]> = {
-  type: 'array',
-  items: messageLogSchema
 } as const
 
 export const messageHeaderSchema: JSONSchemaType<HttpHeader> = {
@@ -283,16 +249,6 @@ export const messageConnectionSchema: JSONSchemaType<HttpConnection> = {
       type: 'integer',
       nullable: true
     }
-  },
-  additionalProperties: false
-} as const
-
-export const readMessageDataSchema: JSONSchemaType<ReadMessageData> = {
-  type: 'object',
-  required: ['campaignId', 'messageId'],
-  properties: {
-    campaignId: customIdentSchema,
-    messageId: randomIdentSchema
   },
   additionalProperties: false
 } as const

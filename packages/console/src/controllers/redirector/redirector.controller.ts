@@ -1,27 +1,29 @@
 import { DIContainer } from '@famir/common'
 import {
+  Logger,
+  LOGGER,
+  REPL_SERVER_ROUTER,
+  ReplServerApiCall,
+  ReplServerError,
+  ReplServerRouter,
+  Validator,
+  VALIDATOR
+} from '@famir/domain'
+import { BaseController } from '../base/index.js'
+import {
+  CreateRedirectorData,
+  DeleteRedirectorData,
+  ListRedirectorsData,
+  ReadRedirectorData,
+  UpdateRedirectorData
+} from './redirector.js'
+import {
   createRedirectorDataSchema,
   deleteRedirectorDataSchema,
   listRedirectorsDataSchema,
   readRedirectorDataSchema,
   updateRedirectorDataSchema
-} from '@famir/database'
-import {
-  CreateRedirectorData,
-  DeleteRedirectorData,
-  ListRedirectorsData,
-  Logger,
-  LOGGER,
-  ReadRedirectorData,
-  REPL_SERVER_ROUTER,
-  ReplServerApiCall,
-  ReplServerError,
-  ReplServerRouter,
-  UpdateRedirectorData,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
-import { BaseController } from '../base/index.js'
+} from './redirector.schemas.js'
 import { REDIRECTOR_SERVICE, type RedirectorService } from './redirector.service.js'
 
 export class RedirectorController extends BaseController {

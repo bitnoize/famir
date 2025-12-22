@@ -20,9 +20,9 @@ export interface RawCampaign {
 
 export interface RawFullCampaign extends RawCampaign {
   description: string
-  landing_auth_path: string
-  landing_auth_param: string
-  landing_lure_param: string
+  landing_upgrade_path: string
+  landing_upgrade_param: string
+  landing_redirector_param: string
   session_cookie_name: string
   session_expire: number
   new_session_expire: number
@@ -44,9 +44,9 @@ export const campaignFunctions = {
         campaignId: string,
         mirrorDomain: string,
         description: string,
-        landingAuthPath: string,
-        landingAuthParam: string,
-        landingLureParam: string,
+        landingUpgradePath: string,
+        landingUpgradeParam: string,
+        landingRedirectorParam: string,
         sessionCookieName: string,
         sessionExpire: number,
         newSessionExpire: number,
@@ -59,9 +59,9 @@ export const campaignFunctions = {
         parser.push(campaignId)
         parser.push(mirrorDomain)
         parser.push(description)
-        parser.push(landingAuthPath)
-        parser.push(landingAuthParam)
-        parser.push(landingLureParam)
+        parser.push(landingUpgradePath)
+        parser.push(landingUpgradeParam)
+        parser.push(landingRedirectorParam)
         parser.push(sessionCookieName)
         parser.push(sessionExpire.toString())
         parser.push(newSessionExpire.toString())

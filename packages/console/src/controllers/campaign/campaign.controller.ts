@@ -1,25 +1,27 @@
 import { DIContainer } from '@famir/common'
 import {
-  createCampaignDataSchema,
-  deleteCampaignDataSchema,
-  readCampaignDataSchema,
-  updateCampaignDataSchema
-} from '@famir/database'
-import {
-  CreateCampaignData,
-  DeleteCampaignData,
   Logger,
   LOGGER,
-  ReadCampaignData,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
   ReplServerError,
   ReplServerRouter,
-  UpdateCampaignData,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
+import {
+  CreateCampaignData,
+  DeleteCampaignData,
+  ReadCampaignData,
+  UpdateCampaignData
+} from './campaign.js'
+import {
+  createCampaignDataSchema,
+  deleteCampaignDataSchema,
+  readCampaignDataSchema,
+  updateCampaignDataSchema
+} from './campaign.schemas.js'
 import { CAMPAIGN_SERVICE, type CampaignService } from './campaign.service.js'
 
 export const CAMPAIGN_CONTROLLER = Symbol('CampaignController')

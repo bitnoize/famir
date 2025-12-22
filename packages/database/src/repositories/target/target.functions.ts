@@ -37,8 +37,6 @@ export interface RawFullTarget extends RawTarget {
   favicon_ico: string
   robots_txt: string
   sitemap_xml: string
-  success_redirect_url: string
-  failure_redirect_url: string
 }
 
 export const targetFunctions = {
@@ -68,9 +66,7 @@ export const targetFunctions = {
         notFoundPage: string,
         faviconIco: string,
         robotsTxt: string,
-        sitemapXml: string,
-        successRedirectUrl: string,
-        failureRedirectUrl: string
+        sitemapXml: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
@@ -98,8 +94,6 @@ export const targetFunctions = {
         parser.push(faviconIco)
         parser.push(robotsTxt)
         parser.push(sitemapXml)
-        parser.push(successRedirectUrl)
-        parser.push(failureRedirectUrl)
         parser.push(Date.now().toString())
       },
 
@@ -157,9 +151,7 @@ export const targetFunctions = {
         notFoundPage: string | null | undefined,
         faviconIco: string | null | undefined,
         robotsTxt: string | null | undefined,
-        sitemapXml: string | null | undefined,
-        successRedirectUrl: string | null | undefined,
-        failureRedirectUrl: string | null | undefined
+        sitemapXml: string | null | undefined
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
@@ -212,16 +204,6 @@ export const targetFunctions = {
         if (sitemapXml != null) {
           parser.push('sitemap_xml')
           parser.push(sitemapXml)
-        }
-
-        if (successRedirectUrl != null) {
-          parser.push('success_redirect_url')
-          parser.push(successRedirectUrl)
-        }
-
-        if (failureRedirectUrl != null) {
-          parser.push('failure_redirect_url')
-          parser.push(failureRedirectUrl)
         }
 
         parser.push('updated_at')

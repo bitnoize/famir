@@ -1,8 +1,5 @@
 export type HttpState = Record<string, unknown>
 
-export type HttpLogData = Record<string, unknown>
-export type HttpLog = [string, HttpLogData]
-
 export interface HttpRelativeUrl {
   path: string
   search: string

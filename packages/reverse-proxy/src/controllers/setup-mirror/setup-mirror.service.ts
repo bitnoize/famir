@@ -34,54 +34,39 @@ export class SetupMirrorService extends BaseService {
     super()
   }
 
-  async execute(data: SetupMirrorData): Promise<{
-    campaign: FullCampaignModel
-    target: EnabledFullTargetModel
-    targets: EnabledTargetModel[]
-  }> {
-    const [campaign, target] = await Promise.all([
-      this.campaignRepository.readCampaign({
-        campaignId: data.campaignId
-      }),
+  async readCampaignTarget(
+    data: SetupMirrorData
+  ): Promise<[FullCampaignModel, EnabledFullTargetModel]> {
+    const [campaignModel, targetModel] = await Promise.all([
+      this.campaignRepository.read(data.campaignId),
 
-      this.targetRepository.readTarget({
-        campaignId: data.campaignId,
-        targetId: data.targetId
-      })
+      this.targetRepository.read(data.campaignId, data.targetId)
     ])
 
-    if (!campaign) {
-      throw new HttpServerError(`Campaign not found`, {
-        code: 'NOT_FOUND'
+    if (!campaignModel) {
+      throw new HttpServerError(`Read campaign failed`, {
+        code: 'SERVICE_UNAVAILABLE'
       })
     }
 
-    if (!target) {
-      throw new HttpServerError(`Target not found`, {
-        code: 'NOT_FOUND'
+    if (!(targetModel && testEnabledTargetModel(targetModel))) {
+      throw new HttpServerError(`Read target failed`, {
+        code: 'SERVICE_UNAVAILABLE'
       })
     }
 
-    if (!testEnabledTargetModel(target)) {
-      throw new HttpServerError(`Target disabled`, {
-        code: 'NOT_FOUND'
+    return [campaignModel, targetModel]
+  }
+
+  async listTargets(data: SetupMirrorData): Promise<EnabledTargetModel[]> {
+    const collection = await this.targetRepository.list(data.campaignId)
+
+    if (!collection) {
+      throw new HttpServerError(`List targets failed`, {
+        code: 'SERVICE_UNAVAILABLE'
       })
     }
 
-    const targets = await this.targetRepository.listTargets({
-      campaignId: data.campaignId
-    })
-
-    if (!targets) {
-      throw new HttpServerError(`Campaign lost`, {
-        code: 'NOT_FOUND'
-      })
-    }
-
-    return {
-      campaign,
-      target,
-      targets: targets.filter(testEnabledTargetModel)
-    }
+    return collection.filter(testEnabledTargetModel)
   }
 }

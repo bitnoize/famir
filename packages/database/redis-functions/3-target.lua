@@ -4,7 +4,7 @@
   Create target
 --]]
 local function create_target(keys, args)
-  if not (#keys == 5 and #args == 23) then
+  if not (#keys == 5 and #args == 21) then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -43,12 +43,10 @@ local function create_target(keys, args)
     favicon_ico = args[18],
     robots_txt = args[19],
     sitemap_xml = args[20],
-    success_redirect_url = args[21],
-    failure_redirect_url = args[22],
     is_enabled = 0,
     message_count = 0,
-    created_at = tonumber(args[23]),
-    updated_at = tonumber(args[23]),
+    created_at = tonumber(args[21]),
+    updated_at = tonumber(args[21]),
   }
 
   for field, value in pairs(model) do
@@ -247,15 +245,13 @@ local function read_full_target(keys, args)
     'favicon_ico',
     'robots_txt',
     'sitemap_xml',
-    'success_redirect_url',
-    'failure_redirect_url',
     'is_enabled',
     'message_count',
     'created_at',
     'updated_at'
   )
 
-  if not (#values == 26) then
+  if not (#values == 24) then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -281,12 +277,10 @@ local function read_full_target(keys, args)
     favicon_ico = values[18],
     robots_txt = values[19],
     sitemap_xml = values[20],
-    success_redirect_url = values[21],
-    failure_redirect_url = values[22],
-    is_enabled = tonumber(values[23]),
-    message_count = tonumber(values[24]),
-    created_at = tonumber(values[25]),
-    updated_at = tonumber(values[26]),
+    is_enabled = tonumber(values[21]),
+    message_count = tonumber(values[22]),
+    created_at = tonumber(values[23]),
+    updated_at = tonumber(values[24]),
   }
 
   for field, value in pairs(model) do
@@ -417,18 +411,6 @@ local function update_target(keys, args)
 
       if not model.sitemap_xml then
         return redis.error_reply('ERR Wrong model.sitemap_xml')
-      end
-    elseif field == 'success_redirect_url' then
-      model.success_redirect_url = value
-
-      if not model.success_redirect_url then
-        return redis.error_reply('ERR Wrong model.success_redirect_url')
-      end
-    elseif field == 'failure_redirect_url' then
-      model.failure_redirect_url = value
-
-      if not model.failure_redirect_url then
-        return redis.error_reply('ERR Wrong model.failure_redirect_url')
       end
     elseif field == 'updated_at' then
       model.updated_at = tonumber(value)

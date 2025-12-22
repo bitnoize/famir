@@ -1,46 +1,13 @@
 import { LureModel } from '../../models/index.js'
 
-export interface CreateLureData {
-  campaignId: string
-  lureId: string
-  path: string
-  redirectorId: string
-}
-
-export interface ReadLureData {
-  campaignId: string
-  lureId: string
-}
-
-export interface ReadLurePathData {
-  campaignId: string
-  path: string
-}
-
-export interface SwitchLureData {
-  campaignId: string
-  lureId: string
-}
-
-export interface DeleteLureData {
-  campaignId: string
-  lureId: string
-  path: string
-  redirectorId: string
-}
-
-export interface ListLuresData {
-  campaignId: string
-}
-
 export const LURE_REPOSITORY = Symbol('LureRepository')
 
 export interface LureRepository {
-  createLure(data: CreateLureData): Promise<LureModel>
-  readLure(data: ReadLureData): Promise<LureModel | null>
-  readLurePath(data: ReadLurePathData): Promise<LureModel | null>
-  enableLure(data: SwitchLureData): Promise<LureModel>
-  disableLure(data: SwitchLureData): Promise<LureModel>
-  deleteLure(data: DeleteLureData): Promise<LureModel>
-  listLures(data: ListLuresData): Promise<LureModel[] | null>
+  create(campaignId: string, lureId: string, path: string, redirectorId: string): Promise<LureModel>
+  read(campaignId: string, lureId: string): Promise<LureModel | null>
+  readPath(campaignId: string, path: string): Promise<LureModel | null>
+  enable(campaignId: string, lureId: string): Promise<LureModel>
+  disable(campaignId: string, lureId: string): Promise<LureModel>
+  delete(campaignId: string, lureId: string, path: string, redirectorId: string): Promise<LureModel>
+  list(campaignId: string): Promise<LureModel[] | null>
 }

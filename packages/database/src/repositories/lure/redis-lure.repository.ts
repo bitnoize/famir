@@ -2,20 +2,14 @@ import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
-  CreateLureData,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  DeleteLureData,
-  ListLuresData,
   Logger,
   LOGGER,
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
-  ReadLureData,
-  ReadLurePathData,
-  SwitchLureData,
   testLureModel,
   Validator,
   VALIDATOR
@@ -53,62 +47,66 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     })
   }
 
-  async createLure(data: CreateLureData): Promise<LureModel> {
+  async create(
+    campaignId: string,
+    lureId: string,
+    path: string,
+    redirectorId: string
+  ): Promise<LureModel> {
     try {
-      const [status, rawValue] = await Promise.all([
+      const [statusReply, rawValue] = await Promise.all([
         this.connection.lure.create_lure(
           this.options.prefix,
-          data.campaignId,
-          data.lureId,
-          data.path,
-          data.redirectorId
+          campaignId,
+          lureId,
+          path,
+          redirectorId
         ),
 
-        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.lureId)
+        this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const lureModel = this.buildLureModel(rawValue)
+      const model = this.buildLureModel(rawValue)
 
-      if (!testLureModel(lureModel)) {
-        throw new DatabaseError(`LureModel lost on create`, {
+      if (!testLureModel(model)) {
+        throw new DatabaseError(`Lure lost on create`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { lureModel })
-
-      return lureModel
+      return model
     } catch (error) {
-      this.handleException(error, 'createLure', data)
+      this.handleException(error, 'create', {
+        campaignId,
+        lureId,
+        path,
+        redirectorId
+      })
     }
   }
 
-  async readLure(data: ReadLureData): Promise<LureModel | null> {
+  async read(campaignId: string, lureId: string): Promise<LureModel | null> {
     try {
-      const rawValue = await this.connection.lure.read_lure(
-        this.options.prefix,
-        data.campaignId,
-        data.lureId
-      )
+      const rawValue = await this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
 
       return this.buildLureModel(rawValue)
     } catch (error) {
-      this.handleException(error, 'readLure', data)
+      this.handleException(error, 'read', { campaignId, lureId })
     }
   }
 
-  async readLurePath(data: ReadLurePathData): Promise<LureModel | null> {
+  async readPath(campaignId: string, path: string): Promise<LureModel | null> {
     try {
       const lureId = await this.connection.lure.read_lure_path(
         this.options.prefix,
-        data.campaignId,
-        data.path
+        campaignId,
+        path
       )
 
       if (lureId === null) {
@@ -117,117 +115,117 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       this.validateStringReply(lureId)
 
-      const rawValue = await this.connection.lure.read_lure(
-        this.options.prefix,
-        data.campaignId,
-        lureId
-      )
+      const rawValue = await this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
 
       return this.buildLureModel(rawValue)
     } catch (error) {
-      this.handleException(error, 'readLurePath', data)
+      this.handleException(error, 'readPath', { campaignId, path })
     }
   }
 
-  async enableLure(data: SwitchLureData): Promise<LureModel> {
+  async enable(campaignId: string, lureId: string): Promise<LureModel> {
     try {
-      const [status, rawValue] = await Promise.all([
-        this.connection.lure.enable_lure(this.options.prefix, data.campaignId, data.lureId),
+      const [statusReply, rawValue] = await Promise.all([
+        this.connection.lure.enable_lure(this.options.prefix, campaignId, lureId),
 
-        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.lureId)
+        this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const lureModel = this.buildLureModel(rawValue)
+      const model = this.buildLureModel(rawValue)
 
-      if (!testLureModel(lureModel)) {
-        throw new DatabaseError(`LureModel lost on enable`, {
+      if (!testLureModel(model)) {
+        throw new DatabaseError(`Lure lost on enable`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { lureModel })
-
-      return lureModel
+      return model
     } catch (error) {
-      this.handleException(error, 'enableLure', data)
+      this.handleException(error, 'enable', { campaignId, lureId })
     }
   }
 
-  async disableLure(data: SwitchLureData): Promise<LureModel> {
+  async disable(campaignId: string, lureId: string): Promise<LureModel> {
     try {
-      const [status, rawValue] = await Promise.all([
-        this.connection.lure.disable_lure(this.options.prefix, data.campaignId, data.lureId),
+      const [statusReply, rawValue] = await Promise.all([
+        this.connection.lure.disable_lure(this.options.prefix, campaignId, lureId),
 
-        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.lureId)
+        this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const lureModel = this.buildLureModel(rawValue)
+      const model = this.buildLureModel(rawValue)
 
-      if (!testLureModel(lureModel)) {
-        throw new DatabaseError(`LureModel lost on disable`, {
+      if (!testLureModel(model)) {
+        throw new DatabaseError(`Lure lost on disable`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { lureModel })
-
-      return lureModel
+      return model
     } catch (error) {
-      this.handleException(error, 'disableLure', data)
+      this.handleException(error, 'disable', { campaignId, lureId })
     }
   }
 
-  async deleteLure(data: DeleteLureData): Promise<LureModel> {
+  async delete(
+    campaignId: string,
+    lureId: string,
+    path: string,
+    redirectorId: string
+  ): Promise<LureModel> {
     try {
-      const [rawValue, status] = await Promise.all([
-        this.connection.lure.read_lure(this.options.prefix, data.campaignId, data.lureId),
+      const [rawValue, statusReply] = await Promise.all([
+        this.connection.lure.read_lure(this.options.prefix, campaignId, lureId),
 
         this.connection.lure.delete_lure(
           this.options.prefix,
-          data.campaignId,
-          data.lureId,
-          data.path,
-          data.redirectorId
+          campaignId,
+          lureId,
+          path,
+          redirectorId
         )
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const lureModel = this.buildLureModel(rawValue)
+      const model = this.buildLureModel(rawValue)
 
-      if (!testLureModel(lureModel)) {
-        throw new DatabaseError(`LureModel lost on delete`, {
+      if (!testLureModel(model)) {
+        throw new DatabaseError(`Lure lost on delete`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { lureModel })
-
-      return lureModel
+      return model
     } catch (error) {
-      this.handleException(error, 'deleteLure', data)
+      this.handleException(error, 'delete', {
+        campaignId,
+        lureId,
+        path,
+        redirectorId
+      })
     }
   }
 
-  async listLures(data: ListLuresData): Promise<LureModel[] | null> {
+  async list(campaignId: string): Promise<LureModel[] | null> {
     try {
-      const index = await this.connection.lure.read_lure_index(this.options.prefix, data.campaignId)
+      const index = await this.connection.lure.read_lure_index(this.options.prefix, campaignId)
 
       if (index === null) {
         return null
@@ -237,13 +235,13 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const rawValues = await Promise.all(
         index.map((lureId) =>
-          this.connection.lure.read_lure(this.options.prefix, data.campaignId, lureId)
+          this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
         )
       )
 
       return this.buildLureCollection(rawValues).filter(testLureModel)
     } catch (error) {
-      this.handleException(error, 'listLures', data)
+      this.handleException(error, 'list', { campaignId })
     }
   }
 

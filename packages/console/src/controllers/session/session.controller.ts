@@ -1,9 +1,7 @@
 import { DIContainer } from '@famir/common'
-import { readSessionDataSchema } from '@famir/database'
 import {
   Logger,
   LOGGER,
-  ReadSessionData,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
   ReplServerError,
@@ -12,6 +10,8 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
+import { ReadSessionData } from './session.js'
+import { readSessionDataSchema } from './session.schemas.js'
 import { SESSION_SERVICE, type SessionService } from './session.service.js'
 
 export class SessionController extends BaseController {

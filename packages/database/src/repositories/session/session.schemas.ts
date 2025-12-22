@@ -1,5 +1,4 @@
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
-import { ReadSessionData } from '@famir/domain'
+import { JSONSchemaType } from '@famir/common'
 import { RawSession } from './session.functions.js'
 
 export const rawSessionSchema: JSONSchemaType<RawSession> = {
@@ -39,16 +38,6 @@ export const rawSessionSchema: JSONSchemaType<RawSession> = {
     last_auth_at: {
       type: 'integer'
     }
-  },
-  additionalProperties: false
-} as const
-
-export const readSessionDataSchema: JSONSchemaType<ReadSessionData> = {
-  type: 'object',
-  required: ['campaignId', 'sessionId'],
-  properties: {
-    campaignId: customIdentSchema,
-    sessionId: randomIdentSchema
   },
   additionalProperties: false
 } as const

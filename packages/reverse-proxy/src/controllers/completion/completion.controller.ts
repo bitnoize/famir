@@ -9,58 +9,59 @@ import {
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import { type CompleteService, COMPLETE_SERVICE } from './complete.service.js'
+import { type CompletionService, COMPLETION_SERVICE } from './completion.service.js'
 
-export const COMPLETE_CONTROLLER = Symbol('CompleteController')
+export const COMPLETION_CONTROLLER = Symbol('CompletionController')
 
-export class CompleteController extends BaseController {
+export class CompletionController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<CompleteController>(
-      COMPLETE_CONTROLLER,
+    container.registerSingleton<CompletionController>(
+      COMPLETION_CONTROLLER,
       (c) =>
-        new CompleteController(
+        new CompletionController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<CompleteService>(COMPLETE_SERVICE)
+          c.resolve<CompletionService>(COMPLETION_SERVICE)
         )
     )
   }
 
-  static resolve(container: DIContainer): CompleteController {
-    return container.resolve<CompleteController>(COMPLETE_CONTROLLER)
+  static resolve(container: DIContainer): CompletionController {
+    return container.resolve<CompletionController>(COMPLETION_CONTROLLER)
   }
 
   constructor(
     validator: Validator,
     logger: Logger,
     router: HttpServerRouter,
-    protected readonly completeService: CompleteService
+    protected readonly completionService: CompletionService
   ) {
-    super(validator, logger, router, 'complete')
-
-    this.router.addMiddleware(this.defaultMiddleware)
+    super(validator, logger, router)
   }
 
-  private defaultMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      const { campaign, target } = this.getSetupMirrorState(ctx)
-      const { session, proxy } = this.getAuthorizeState(ctx)
+  addMiddlewares() {
+    this.router.addMiddleware(this.completionMiddleware)
+  }
 
-      const { message } = await this.completeService.createMessage({
+  protected completionMiddleware: HttpServerMiddleware = async (ctx, next) => {
+    try {
+      const campaign = this.getState(ctx, 'campaign')
+      const target = this.getState(ctx, 'target')
+      const proxy = this.getState(ctx, 'proxy')
+      const session = this.getState(ctx, 'session')
+
+      const message = await this.completionService.createMessage({
         campaignId: campaign.campaignId,
         proxyId: proxy.proxyId,
         targetId: target.targetId,
         sessionId: session.sessionId,
-        logs: ctx.logs,
         method: ctx.method,
         url: ctx.normalizeUrl(),
         isStreaming: ctx.isStreaming,
         requestHeaders: ctx.requestHeaders,
-        requestCookies: ctx.requestCookies,
         requestBody: ctx.requestBody,
         responseHeaders: ctx.responseHeaders,
-        responseCookies: ctx.responseCookies,
         responseBody: ctx.responseBody,
         clientIp: '',
         status: ctx.status,
@@ -70,11 +71,11 @@ export class CompleteController extends BaseController {
         connection: ctx.connection
       })
 
-      //this.setComplete(ctx, message)
+      this.setState(ctx, 'message', message)
 
       await next()
     } catch (error) {
-      this.handleException(error, 'default')
+      this.handleException(error, 'completion')
     }
   }
 }

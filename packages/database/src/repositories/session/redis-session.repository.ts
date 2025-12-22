@@ -1,20 +1,16 @@
 import { DIContainer, randomIdent } from '@famir/common'
 import {
-  AuthSessionData,
   Config,
   CONFIG,
-  CreateSessionData,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
   Logger,
   LOGGER,
-  ReadSessionData,
   SESSION_REPOSITORY,
   SessionModel,
   SessionRepository,
   testSessionModel,
-  UpgradeSessionData,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -51,121 +47,103 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     })
   }
 
-  async createSession(data: CreateSessionData): Promise<SessionModel> {
+  async create(campaignId: string): Promise<SessionModel> {
+    const sessionId = randomIdent()
+    const secret = randomIdent()
+
     try {
-      const sessionId = randomIdent()
-      const secret = randomIdent()
+      const [statusReply, rawValue] = await Promise.all([
+        this.connection.session.create_session(this.options.prefix, campaignId, sessionId, secret),
 
-      const [status, rawValue] = await Promise.all([
-        this.connection.session.create_session(
-          this.options.prefix,
-          data.campaignId,
-          sessionId,
-          secret
-        ),
-
-        this.connection.session.read_session(this.options.prefix, data.campaignId, sessionId)
+        this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const sessionModel = this.buildSessionModel(rawValue)
+      const model = this.buildSessionModel(rawValue)
 
-      if (!testSessionModel(sessionModel)) {
-        throw new DatabaseError(`SessionModel lost on create`, {
+      if (!testSessionModel(model)) {
+        throw new DatabaseError(`Session lost on create`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { sessionModel })
-
-      return sessionModel
+      return model
     } catch (error) {
-      this.handleException(error, 'createSession', data)
+      this.handleException(error, 'create', { campaignId, sessionId })
     }
   }
 
-  async readSession(data: ReadSessionData): Promise<SessionModel | null> {
+  async read(campaignId: string, sessionId: string): Promise<SessionModel | null> {
     try {
       const rawValue = await this.connection.session.read_session(
         this.options.prefix,
-        data.campaignId,
-        data.sessionId
+        campaignId,
+        sessionId
       )
 
       return this.buildSessionModel(rawValue)
     } catch (error) {
-      this.handleException(error, 'readSession', data)
+      this.handleException(error, 'read', { campaignId, sessionId })
     }
   }
 
-  async authSession(data: AuthSessionData): Promise<SessionModel> {
+  async auth(campaignId: string, sessionId: string): Promise<SessionModel | null> {
     try {
-      const [status, rawValue] = await Promise.all([
-        this.connection.session.auth_session(this.options.prefix, data.campaignId, data.sessionId),
+      const [statusReply, rawValue] = await Promise.all([
+        this.connection.session.auth_session(this.options.prefix, campaignId, sessionId),
 
-        this.connection.session.read_session(this.options.prefix, data.campaignId, data.sessionId)
+        this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const sessionModel = this.buildSessionModel(rawValue)
+      const model = this.buildSessionModel(rawValue)
 
-      if (!testSessionModel(sessionModel)) {
-        throw new DatabaseError(`SessionModel lost on auth`, {
+      if (!testSessionModel(model)) {
+        throw new DatabaseError(`Session lost on auth`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { sessionModel })
-
-      return sessionModel
+      return model
     } catch (error) {
-      this.handleException(error, 'authSession', data)
+      this.handleException(error, 'auth', { campaignId, sessionId })
     }
   }
 
-  async upgradeSession(data: UpgradeSessionData): Promise<SessionModel> {
+  async upgrade(
+    campaignId: string,
+    lureId: string,
+    sessionId: string,
+    secret: string
+  ): Promise<void> {
     try {
-      const [status, rawValue] = await Promise.all([
-        this.connection.session.upgrade_session(
-          this.options.prefix,
-          data.campaignId,
-          data.lureId,
-          data.sessionId,
-          data.secret
-        ),
+      const statusReply = await this.connection.session.upgrade_session(
+        this.options.prefix,
+        campaignId,
+        lureId,
+        sessionId,
+        secret
+      )
 
-        this.connection.session.read_session(this.options.prefix, data.campaignId, data.sessionId)
-      ])
-
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const sessionModel = this.buildSessionModel(rawValue)
-
-      if (!testSessionModel(sessionModel)) {
-        throw new DatabaseError(`SessionModel lost on upgrade`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
-
-      this.logger.info(message, { sessionModel })
-
-      return sessionModel
+      return
     } catch (error) {
-      this.handleException(error, 'upgradeSession', data)
+      this.handleException(error, 'upgrade', { campaignId, lureId, sessionId })
     }
   }
 

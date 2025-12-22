@@ -1,16 +1,32 @@
 import { DIContainer } from '@famir/common'
 import {
+  DatabaseError,
+  DatabaseErrorCode,
+  EnabledLureModel,
+  EnabledProxyModel,
+  FullRedirectorModel,
   HttpServerError,
+  LURE_REPOSITORY,
+  LureRepository,
   PROXY_REPOSITORY,
-  ProxyModel,
   ProxyRepository,
-  ReadSessionData,
+  REDIRECTOR_REPOSITORY,
+  RedirectorRepository,
   SESSION_REPOSITORY,
   SessionModel,
-  SessionRepository
+  SessionRepository,
+  testEnabledLureModel,
+  testEnabledProxyModel
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
-import { CreateSessionData } from './authorize.js'
+import {
+  AuthSessionData,
+  CreateSessionData,
+  ReadLurePathData,
+  ReadProxyData,
+  ReadRedirectorData,
+  UpgradeSessionData
+} from './authorize.js'
 
 export const AUTHORIZE_SERVICE = Symbol('AuthorizeService')
 
@@ -21,6 +37,8 @@ export class AuthorizeService extends BaseService {
       (c) =>
         new AuthorizeService(
           c.resolve<ProxyRepository>(PROXY_REPOSITORY),
+          c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
+          c.resolve<LureRepository>(LURE_REPOSITORY),
           c.resolve<SessionRepository>(SESSION_REPOSITORY)
         )
     )
@@ -28,41 +46,113 @@ export class AuthorizeService extends BaseService {
 
   constructor(
     protected readonly proxyRepository: ProxyRepository,
+    protected readonly redirectorRepository: RedirectorRepository,
+    protected readonly lureRepository: LureRepository,
     protected readonly sessionRepository: SessionRepository
   ) {
     super()
   }
 
-  async createSession(data: CreateSessionData): Promise<{
-    proxy: ProxyModel
-    session: SessionModel
-  }> {
+  async readProxy(data: ReadProxyData): Promise<EnabledProxyModel> {
+    const model = await this.proxyRepository.read(data.campaignId, data.proxyId)
+
+    if (!(model && testEnabledProxyModel(model))) {
+      throw new HttpServerError(`Read proxy failed`, {
+        code: 'SERVICE_UNAVAILABLE'
+      })
+    }
+
+    return model
+  }
+
+  async readRedirector(data: ReadRedirectorData): Promise<FullRedirectorModel> {
+    const model = await this.redirectorRepository.read(data.campaignId, data.redirectorId)
+
+    if (!model) {
+      throw new HttpServerError(`Read redirector failed`, {
+        code: 'SERVICE_UNAVAILABLE'
+      })
+    }
+
+    return model
+  }
+
+  async readLurePath(data: ReadLurePathData): Promise<EnabledLureModel | null> {
+    const model = await this.lureRepository.readPath(data.campaignId, data.path)
+
+    return model && testEnabledLureModel(model) ? model : null
+  }
+
+  async createSession(data: CreateSessionData): Promise<SessionModel> {
     try {
-      const session = await this.sessionRepository.createSession({
-        campaignId: data.campaignId
-      })
-
-      const proxy = await this.proxyRepository.readProxy({
-        campaignId: session.campaignId,
-        proxyId: session.proxyId
-      })
-
-      if (!proxy) {
-        throw new HttpServerError(`Proxy lost on create session`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
-
-      return {
-        session,
-        proxy
-      }
+      return await this.sessionRepository.create(data.campaignId)
     } catch (error) {
-      this.filterDatabaseException(error, ['SERVICE_UNAVAILABLE'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
+
+        if (knownErrorCodes.includes(error.code)) {
+          throw new HttpServerError(`Create session failed`, {
+            cause: error,
+            code: 'SERVICE_UNAVAILABLE'
+          })
+        }
+      }
+
+      throw error
     }
   }
 
-  async readSession(data: ReadSessionData): Promise<SessionModel | null> {
-    return await this.sessionRepository.readSession(data)
+  async authSession(data: AuthSessionData): Promise<SessionModel | null> {
+    try {
+      return await this.sessionRepository.auth(data.campaignId, data.sessionId)
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
+
+        if (knownErrorCodes.includes(error.code)) {
+          throw new HttpServerError(`Auth session failed`, {
+            cause: error,
+            code: `SERVICE_UNAVAILABLE`
+          })
+        }
+
+        if (error.code === 'FORBIDDEN') {
+          return null
+        }
+      }
+
+      throw error
+    }
+  }
+
+  async upgradeSession(data: UpgradeSessionData): Promise<void> {
+    try {
+      await this.sessionRepository.upgrade(
+        data.campaignId,
+        data.lureId,
+        data.sessionId,
+        data.secret
+      )
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
+
+        if (knownErrorCodes.includes(error.code)) {
+          throw new HttpServerError(`Upgrade session failed`, {
+            cause: error,
+            code: `SERVICE_UNAVAILABLE`
+          })
+        }
+
+        if (error.code === 'FORBIDDEN') {
+          throw new HttpServerError(`Upgrade session failed`, {
+            cause: error,
+            code: 'FORBIDDEN'
+          })
+        }
+      }
+
+      throw error
+    }
   }
 }

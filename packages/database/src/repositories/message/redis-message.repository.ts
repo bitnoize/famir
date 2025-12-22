@@ -2,7 +2,6 @@ import { DIContainer, randomIdent } from '@famir/common'
 import {
   Config,
   CONFIG,
-  CreateMessageData,
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
@@ -10,15 +9,11 @@ import {
   HttpBody,
   HttpConnection,
   HttpHeaders,
-  HttpLog,
-  HttpRequestCookies,
-  HttpResponseCookies,
   Logger,
   LOGGER,
   MESSAGE_REPOSITORY,
   MessageModel,
   MessageRepository,
-  ReadMessageData,
   testMessageModel,
   Validator,
   VALIDATOR
@@ -30,9 +25,6 @@ import { RawFullMessage, RawMessage } from './message.functions.js'
 import {
   messageConnectionSchema,
   messageHeadersSchema,
-  messageLogsSchema,
-  messageRequestCookiesSchema,
-  messageResponseCookiesSchema,
   rawFullMessageSchema,
   rawMessageSchema
 } from './message.schemas.js'
@@ -61,100 +53,97 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
     this.validator.addSchemas({
       'database-raw-message': rawMessageSchema,
-      'database-message-logs': messageLogsSchema,
       'database-raw-full-message': rawFullMessageSchema,
       'database-message-headers': messageHeadersSchema,
-      'database-message-request-cookies': messageRequestCookiesSchema,
-      'database-message-response-cookies': messageResponseCookiesSchema,
       'database-message-connection': messageConnectionSchema
     })
   }
 
-  async createMessage(data: CreateMessageData): Promise<MessageModel> {
-    try {
-      const messageId = randomIdent()
+  async create(
+    campaignId: string,
+    proxyId: string,
+    targetId: string,
+    sessionId: string,
+    method: string,
+    url: string,
+    isStreaming: boolean,
+    requestHeaders: HttpHeaders,
+    requestBody: HttpBody,
+    responseHeaders: HttpHeaders,
+    responseBody: HttpBody,
+    clientIp: string,
+    status: number,
+    score: number,
+    startTime: number,
+    finishTime: number,
+    connection: HttpConnection
+  ): Promise<MessageModel> {
+    const messageId = randomIdent()
 
-      const [status, rawValue] = await Promise.all([
+    try {
+      const [statusReply, rawValue] = await Promise.all([
         this.connection.message.create_message(
           this.options.prefix,
-          data.campaignId,
+          campaignId,
           messageId,
-          data.proxyId,
-          data.targetId,
-          data.sessionId,
-          data.logs,
-          data.method,
-          data.url,
-          data.isStreaming,
-          data.requestHeaders,
-          data.requestCookies,
-          data.requestBody,
-          data.responseHeaders,
-          data.responseCookies,
-          data.responseBody,
-          data.clientIp,
-          data.status,
-          data.score,
-          data.startTime,
-          data.finishTime,
-          data.connection
+          proxyId,
+          targetId,
+          sessionId,
+          method,
+          url,
+          isStreaming,
+          requestHeaders,
+          requestBody,
+          responseHeaders,
+          responseBody,
+          clientIp,
+          status,
+          score,
+          startTime,
+          finishTime,
+          connection
         ),
 
-        this.connection.message.read_message(this.options.prefix, data.campaignId, messageId)
+        this.connection.message.read_message(this.options.prefix, campaignId, messageId)
       ])
 
-      const [code, message] = this.parseStatusReply(status)
+      const [code, message] = this.parseStatusReply(statusReply)
 
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
 
-      const messageModel = this.buildMessageModel(rawValue)
+      const model = this.buildMessageModel(rawValue)
 
-      if (!testMessageModel(messageModel)) {
-        throw new DatabaseError(`MessageModel lost on create`, {
+      if (!testMessageModel(model)) {
+        throw new DatabaseError(`Message lost on create`, {
           code: 'INTERNAL_ERROR'
         })
       }
 
-      this.logger.info(message, { messageModel })
-
-      return messageModel
+      return model
     } catch (error) {
-      this.handleException(error, 'createMessage', {
-        ...data,
-        requestBody: data.requestBody.length,
-        responseBody: data.responseBody.length
+      this.handleException(error, 'create', {
+        campaignId,
+        messageId,
+        proxyId,
+        targetId,
+        sessionId
       })
     }
   }
 
-  async readMessage(data: ReadMessageData): Promise<FullMessageModel | null> {
+  async read(campaignId: string, messageId: string): Promise<FullMessageModel | null> {
     try {
       const rawValue = await this.connection.message.read_full_message(
         this.options.prefix,
-        data.campaignId,
-        data.messageId
+        campaignId,
+        messageId
       )
 
       return this.buildFullMessageModel(rawValue)
     } catch (error) {
-      this.handleException(error, 'readMessage', data)
-    }
-  }
-
-  protected parseMessageLogs(value: string): HttpLog[] {
-    try {
-      const logs: unknown = JSON.parse(value)
-
-      this.validator.assertSchema<HttpLog[]>('database-message-logs', logs)
-
-      return logs
-    } catch (error) {
-      throw new DatabaseError(`HttpLogs parse failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
+      this.handleException(error, 'read', { campaignId, messageId })
     }
   }
 
@@ -178,36 +167,6 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       return Buffer.from(value, 'base64')
     } catch (error) {
       throw new DatabaseError(`HttpBody parse failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected parseMessageRequestCookies(value: string): HttpRequestCookies {
-    try {
-      const cookies: unknown = JSON.parse(value)
-
-      this.validator.assertSchema<HttpRequestCookies>('database-message-request-cookies', cookies)
-
-      return cookies
-    } catch (error) {
-      throw new DatabaseError(`HttpRequestCookies parse failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected parseMessageResponseCookies(value: string): HttpResponseCookies {
-    try {
-      const cookies: unknown = JSON.parse(value)
-
-      this.validator.assertSchema<HttpResponseCookies>('database-message-response-cookies', cookies)
-
-      return cookies
-    } catch (error) {
-      throw new DatabaseError(`HttpResponseCookies parse failed`, {
         cause: error,
         code: 'INTERNAL_ERROR'
       })
@@ -264,15 +223,12 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       proxyId: rawValue.proxy_id,
       targetId: rawValue.target_id,
       sessionId: rawValue.session_id,
-      logs: this.parseMessageLogs(rawValue.logs),
       method: rawValue.method,
       url: rawValue.url,
       isStreaming: !!rawValue.is_streaming,
       requestHeaders: this.parseMessageHeaders(rawValue.request_headers),
-      requestCookies: this.parseMessageRequestCookies(rawValue.request_cookies),
       requestBody: this.parseMessageBody(rawValue.request_body),
       responseHeaders: this.parseMessageHeaders(rawValue.response_headers),
-      responseCookies: this.parseMessageResponseCookies(rawValue.response_cookies),
       responseBody: this.parseMessageBody(rawValue.response_body),
       clientIp: rawValue.client_ip,
       status: rawValue.status,

@@ -1,10 +1,4 @@
-import { JSONSchemaType, customIdentSchema } from '@famir/common'
-import {
-  CreateCampaignData,
-  DeleteCampaignData,
-  ReadCampaignData,
-  UpdateCampaignData
-} from '@famir/domain'
+import { JSONSchemaType } from '@famir/common'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 
 export const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
@@ -46,9 +40,9 @@ export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'campaign_id',
     'mirror_domain',
     'description',
-    'landing_auth_path',
-    'landing_auth_param',
-    'landing_lure_param',
+    'landing_upgrade_path',
+    'landing_upgrade_param',
+    'landing_redirector_param',
     'session_cookie_name',
     'session_expire',
     'new_session_expire',
@@ -72,13 +66,13 @@ export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     description: {
       type: 'string'
     },
-    landing_auth_path: {
+    landing_upgrade_path: {
       type: 'string'
     },
-    landing_auth_param: {
+    landing_upgrade_param: {
       type: 'string'
     },
-    landing_lure_param: {
+    landing_redirector_param: {
       type: 'string'
     },
     session_cookie_name: {
@@ -133,19 +127,19 @@ export const campaignDescriptionSchema: JSONSchemaType<string> = {
   maxLength: 1024
 } as const
 
-export const campaignLandingAuthPathSchema: JSONSchemaType<string> = {
+export const campaignLandingUpgradePathSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 3,
   maxLength: 64
 } as const
 
-export const campaignLandingAuthParamSchema: JSONSchemaType<string> = {
+export const campaignLandingUpgradeParamSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 8
 } as const
 
-export const campaignLandingLureParamSchema: JSONSchemaType<string> = {
+export const campaignLandingRedirectorParamSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 8
@@ -173,100 +167,4 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 60 * 1000,
   maximum: 24 * 3600 * 1000
-} as const
-
-export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
-  type: 'object',
-  required: [
-    'campaignId',
-    'mirrorDomain',
-    'description',
-    'landingAuthPath',
-    'landingAuthParam',
-    'landingLureParam',
-    'sessionCookieName',
-    'sessionExpire',
-    'newSessionExpire',
-    'messageExpire'
-  ],
-  properties: {
-    campaignId: customIdentSchema,
-    mirrorDomain: campaignMirrorDomainSchema,
-    description: {
-      ...campaignDescriptionSchema,
-      default: ''
-    },
-    landingAuthPath: {
-      ...campaignLandingAuthPathSchema,
-      default: '/fake-auth'
-    },
-    landingAuthParam: {
-      ...campaignLandingAuthParamSchema,
-      default: 'data'
-    },
-    landingLureParam: {
-      ...campaignLandingLureParamSchema,
-      default: 'data'
-    },
-    sessionCookieName: {
-      ...campaignSessionCookieNameSchema,
-      default: 'fake-sess'
-    },
-    sessionExpire: {
-      ...campaignSessionExpireSchema,
-      default: 24 * 3600 * 1000
-    },
-    newSessionExpire: {
-      ...campaignNewSessionExpireSchema,
-      default: 300 * 1000
-    },
-    messageExpire: {
-      ...campaignMessageExpireSchema,
-      default: 3600 * 1000
-    }
-  },
-  additionalProperties: false
-} as const
-
-export const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
-  type: 'object',
-  required: ['campaignId'],
-  properties: {
-    campaignId: customIdentSchema
-  },
-  additionalProperties: false
-}
-
-export const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
-  type: 'object',
-  required: ['campaignId'],
-  properties: {
-    campaignId: customIdentSchema,
-    description: {
-      ...campaignDescriptionSchema,
-      nullable: true
-    },
-    sessionExpire: {
-      ...campaignSessionExpireSchema,
-      nullable: true
-    },
-    newSessionExpire: {
-      ...campaignNewSessionExpireSchema,
-      nullable: true
-    },
-    messageExpire: {
-      ...campaignMessageExpireSchema,
-      nullable: true
-    }
-  },
-  additionalProperties: false
-} as const
-
-export const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
-  type: 'object',
-  required: ['campaignId'],
-  properties: {
-    campaignId: customIdentSchema
-  },
-  additionalProperties: false
 } as const
