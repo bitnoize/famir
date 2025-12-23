@@ -223,7 +223,7 @@ export class NodeHttpServerContext implements HttpServerContext {
   }
 
   getResponseCookies(): HttpResponseCookies {
-    const header = this.getResponseHeaderArray('Cookie') ?? []
+    const header = this.getResponseHeaderArray('Set-Cookie') ?? []
 
     return this.parseResponseCookies(header)
   }
@@ -231,7 +231,7 @@ export class NodeHttpServerContext implements HttpServerContext {
   setResponseCookies(cookies: HttpResponseCookies) {
     const header = this.formatResponseCookies(cookies)
 
-    this.setResponseHeader('Cookie', header)
+    this.setResponseHeader('Set-Cookie', header)
   }
 
   #responseBody: HttpBody = Buffer.alloc(0)

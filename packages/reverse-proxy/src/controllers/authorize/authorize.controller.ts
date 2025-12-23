@@ -1,7 +1,6 @@
 import { DIContainer, randomIdentSchema } from '@famir/common'
 import {
   EnabledFullTargetModel,
-  EnabledLureModel,
   FullCampaignModel,
   FullRedirectorModel,
   HTTP_SERVER_ROUTER,
@@ -21,6 +20,7 @@ import {
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
 import { LandingRedirectorData, LandingUpgradeData } from './authorize.js'
+import { landingRedirectorDataSchema, landingUpgradeDataSchema } from './authorize.schemas.js'
 import { type AuthorizeService, AUTHORIZE_SERVICE } from './authorize.service.js'
 
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
@@ -54,11 +54,11 @@ export class AuthorizeController extends BaseController {
     super(validator, logger, router)
 
     this.validator.addSchemas({
-      'session-cookie': randomIdentSchema
+      'reverse-proxy-session-cookie': randomIdentSchema,
+      'reverse-proxy-landing-upgrade-data': landingUpgradeDataSchema,
+      'reverse-proxy-landing-redirector-data': landingRedirectorDataSchema
     })
-  }
 
-  addMiddlewares() {
     this.router.addMiddleware(this.authorizeMiddleware)
   }
 
@@ -95,14 +95,14 @@ export class AuthorizeController extends BaseController {
             redirectorId: lure.redirectorId
           })
 
-          await this.landingRedirectorSession(ctx, campaign, redirector, lure)
+          await this.landingRedirectorSession(ctx, campaign, target, redirector)
 
           return
         }
 
         await this.landingAuthSession(ctx, campaign, target, next)
       } else {
-        await this.ordinarySession(ctx, campaign, target, next)
+        await this.regularSession(ctx, campaign, target, next)
       }
     } catch (error) {
       this.handleException(error, 'authorize')
@@ -123,7 +123,7 @@ export class AuthorizeController extends BaseController {
 
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
-    if (sessionCookie == null) {
+    if (!sessionCookie) {
       await this.renderMainRedirect(ctx)
 
       return
@@ -160,7 +160,7 @@ export class AuthorizeController extends BaseController {
 
     await this.authorizeService.upgradeSession({
       campaignId: campaign.campaignId,
-      lureId: landingUpgradeData.lureId,
+      lureId: landingUpgradeData.lure_id,
       sessionId: session.sessionId,
       secret: landingUpgradeData.secret
     })
@@ -173,20 +173,20 @@ export class AuthorizeController extends BaseController {
   private async landingRedirectorSession(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
-    redirector: FullRedirectorModel,
-    lure: EnabledLureModel
+    target: EnabledFullTargetModel,
+    redirector: FullRedirectorModel
   ): Promise<void> {
     const landingRedirectorData = this.parseLandingRedirectorData(ctx, campaign)
 
     if (ctx.isBot()) {
-      await this.renderRedirectorPage(ctx, campaign, redirector, landingRedirectorData)
+      await this.renderRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
 
       return
     }
 
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
-    if (sessionCookie == null) {
+    if (!sessionCookie) {
       const session = await this.authorizeService.createSession({
         campaignId: campaign.campaignId
       })
@@ -219,7 +219,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    await this.renderRedirectorPage(ctx, campaign, redirector, landingRedirectorData, session)
+    await this.renderRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
   }
 
   private async landingAuthSession(
@@ -236,7 +236,7 @@ export class AuthorizeController extends BaseController {
 
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
-    if (sessionCookie == null) {
+    if (!sessionCookie) {
       await this.renderCloakingPage(ctx, target)
 
       return
@@ -280,7 +280,7 @@ export class AuthorizeController extends BaseController {
     await next()
   }
 
-  private async ordinarySession(
+  private async regularSession(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
@@ -294,7 +294,7 @@ export class AuthorizeController extends BaseController {
 
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
-    if (sessionCookie == null) {
+    if (!sessionCookie) {
       const session = await this.authorizeService.createSession({
         campaignId: campaign.campaignId
       })
@@ -380,7 +380,7 @@ export class AuthorizeController extends BaseController {
   }
 
   private testSessionCookie(value: unknown): value is string {
-    return this.validator.guardSchema<string>('session-cookie', value)
+    return this.validator.guardSchema<string>('reverse-proxy-session-cookie', value)
   }
 
   private parseLandingUpgradeData(
@@ -398,11 +398,11 @@ export class AuthorizeController extends BaseController {
 
       const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
 
-      this.validator.assertSchema<LandingUpgradeData>('landing-upgrade-data', data)
+      this.validator.assertSchema<LandingUpgradeData>('reverse-proxy-landing-upgrade-data', data)
 
       return data
     } catch (error) {
-      throw new HttpServerError(`Parse LandingUpgradeData failed`, {
+      throw new HttpServerError(`LandingUpgradeData parse failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })
@@ -424,11 +424,14 @@ export class AuthorizeController extends BaseController {
 
       const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
 
-      this.validator.assertSchema<LandingRedirectorData>('landing-redirector-data', data)
+      this.validator.assertSchema<LandingRedirectorData>(
+        'reverse-proxy-landing-redirector-data',
+        data
+      )
 
       return data
     } catch (error) {
-      throw new HttpServerError(`Parse LandingRedirectorData failed`, {
+      throw new HttpServerError(`LandingRedirectorData parse failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })
@@ -449,212 +452,31 @@ export class AuthorizeController extends BaseController {
   private async renderRedirectorPage(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
+    target: EnabledFullTargetModel,
     redirector: FullRedirectorModel,
-    landingRedirectorData: LandingRedirectorData,
-    session?: SessionModel
+    landingRedirectorData: LandingRedirectorData
   ): Promise<void> {
-    const page = this.templater.render(redirector.page, landingRedirectorData)
+    if (ctx.isMethods(['GET', 'HEAD'])) {
+      const page = this.templater.render(redirector.page, landingRedirectorData)
 
-    const body = Buffer.from(page)
+      const body = Buffer.from(page)
 
-    ctx.setResponseHeaders({
-      'Content-Type': 'text/html',
-      'Content-Length': body.length.toString(),
-      'Last-Modified': redirector.updatedAt.toUTCString(),
-      'Cache-Control': 'public, max-age=86400'
-    })
+      ctx.setResponseHeaders({
+        'Content-Type': 'text/html',
+        'Content-Length': body.length.toString(),
+        'Last-Modified': redirector.updatedAt.toUTCString(),
+        'Cache-Control': 'public, max-age=86400'
+      })
 
-    if (ctx.isMethod('GET')) {
-      ctx.setResponseBody(body)
+      if (ctx.isMethod('GET')) {
+        ctx.setResponseBody(body)
+      }
+
+      ctx.setStatus(200)
+
+      await ctx.sendResponse()
+    } else {
+      await this.renderNotFoundPage(ctx, target)
     }
-
-    ctx.setStatus(200)
-
-    await ctx.sendResponse()
   }
 }
-
-/*
-
-  private landingUpgradeSessionHandler: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      const { campaign, target } = this.getSetupMirrorState(ctx)
-
-      const foundRoute = target.isLanding && ctx.isUrlPathEquals(campaign.landingAuthPath)
-
-      if (!foundRoute) {
-        await next()
-
-        return
-      }
-
-      const isLandingAuthPath = ctx.isUrlPathEquals(campaign.landingAuthPath)
-
-      if (isLandingAuthPath) {
-        if (!ctx.isMethod('GET')) {
-          await this.renderNotFoundPage(ctx, target)
-
-          return
-        }
-
-        const urlQuery = ctx.getUrlQuery()
-
-        if (!urlQuery) {
-          await this.renderNotFoundPage(ctx, target)
-
-          return
-        }
-
-        const landingAuthValue = urlQuery[campaign.landingAuthParam]
-        const landingAuthData = this.parseLandingAuthData(ctx, landingAuthValue)
-
-        if (!landingAuthData) {
-          await this.renderNotFoundPage(ctx, target)
-
-          return
-        }
-
-        const { session, proxy } = await this.authorizeService.upgradeSession({
-          lureId: landingAuthData.lureId,
-          sessionId: landingAuthData.sessionId,
-          sessionSecret: landingAuthData.sessionSecret,
-        })
-
-        if (!session) {
-          this.renderFailureRedirect(ctx, target)
-
-          return
-        }
-
-        ctx.setResponseCookie(campaign.sessionCookieName, {
-          value: session.sessionId,
-          maxAge: Math.round(campaign.sessionExpire / 1000),
-          httpOnly: true
-        })
-      }
-    } catch (error) {
-      this.handleException(error, 'landingUpgradeSession')
-    }
-  }
-
-
-  private transparentAuthMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      this.existsStateCampaign(ctx.state)
-      this.existsStateTarget(ctx.state)
-
-      const { campaign, target } = ctx.state
-
-      if (target.isLanding) {
-        await next()
-
-        return
-      }
-
-      const sessionCookie = ctx.requestCookies[campaign.sessionCookieName]
-
-      if (!sessionCookie) {
-        const { session } = await this.createSessionUseCase({
-          campaignId: campaign.campaignId
-        })
-
-        ctx.responseCookies[campaign.sessionCookieName] = session.sessionId
-        ctx.responseHeaders['location'] = ctx.url
-
-        await ctx.sendResponse(301)
-
-        return
-      }
-
-      const isOk = this.validateSessionCookie(sessionCookie)
-
-      if (!isOk) {
-        ctx.responseCookies[campaign.sessionCookieName] = null
-        ctx.responseHeaders['location'] = ctx.url
-
-        await ctx.sendResponse(301)
-
-        return
-      }
-
-      const { session } = await this.authSessionUseCase({
-        campaignId: campaign.campaignId,
-        sessionCookie
-      })
-
-      if (!session) {
-        ctx.responseCookies[campaign.sessionCookieName] = null
-        ctx.responseHeaders['location'] = ctx.url
-
-        await ctx.sendResponse(301)
-
-        return
-      }
-
-      await next()
-    } catch (error) {
-      this.handleException(error, 'transparentAuth')
-    }
-  }
-
-  private landingAuthMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      this.existsStateCampaign(ctx.state)
-      this.existsStateTarget(ctx.state)
-
-      const { campaign, target } = ctx.state
-
-      if (!this.isLandingAuthRoute(ctx, campaign, target)) {
-      }
-
-      const isFound =
-        ctx.isMethod('GET') &&
-        ctx.isUrlPathEquals(campaign.landingAuthPath) &&
-        target.isLanding
-
-      if (!isFound) {
-        await next()
-
-        return
-      }
-
-      const urlQuery = ctx.getUrlQuery()
-
-      const authParamsValue = urlQuery[campaign.landingAuthParam]
-      const authParamsData = this.parseAuthParamsData(authParamsValue)
-
-      if (!authParamsData) {
-        this.renderNotFoundPage()
-
-        return
-      }
-
-      const { session, proxy } = this.landingAuthUseCase.execute({
-        campaignId: campaign.campaignId,
-        lureId: authParamsData.lureId,
-        sessionId: authParamsData.sessionId,
-        sessionSecret: authParamsData.sessionSecret
-      })
-
-      if (!session) {
-        this.renderFailureRedirect()
-
-        return
-      }
-
-      ctx.setResponseCookie(campaign.sessionCookieName, session.sessionId)
-
-      await next()
-    } catch (error) {
-      this.handleException(error, 'landingAuth')
-    }
-  }
-
-  private isLandingAuthRoute(
-    ctx: HttpServerContext,
-    campaign: CampaignModel,
-    target: EnabledTargetModel
-  ): boolean {
-    return ctx.isMethod('GET') && ctx.isUrlPathEquals(campaign.landingAuthPath) && target.isLanding
-  }
-*/

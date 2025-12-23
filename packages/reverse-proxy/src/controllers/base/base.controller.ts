@@ -15,8 +15,6 @@ export abstract class BaseController {
     protected readonly router: HttpServerRouter
   ) {}
 
-  abstract addMiddlewares(): void
-
   protected getState<T extends ReverseProxyState, K extends keyof T>(
     ctx: HttpServerContext,
     key: K
@@ -64,22 +62,26 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    const body = Buffer.from(target.mainPage)
+    if (ctx.isMethods(['GET', 'HEAD'])) {
+      const body = Buffer.from(target.mainPage)
 
-    ctx.setResponseHeaders({
-      'Content-Type': 'text/html',
-      'Content-Length': body.length.toString(),
-      'Last-Modified': target.updatedAt.toUTCString(),
-      'Cache-Control': 'public, max-age=86400'
-    })
+      ctx.setResponseHeaders({
+        'Content-Type': 'text/html',
+        'Content-Length': body.length.toString(),
+        'Last-Modified': target.updatedAt.toUTCString(),
+        'Cache-Control': 'public, max-age=86400'
+      })
 
-    if (ctx.isMethod('GET')) {
-      ctx.setResponseBody(body)
+      if (ctx.isMethod('GET')) {
+        ctx.setResponseBody(body)
+      }
+
+      ctx.setStatus(200)
+
+      await ctx.sendResponse()
+    } else {
+      await this.renderNotFoundPage(ctx, target)
     }
-
-    ctx.setStatus(200)
-
-    await ctx.sendResponse()
   }
 
   protected async renderNotFoundPage(

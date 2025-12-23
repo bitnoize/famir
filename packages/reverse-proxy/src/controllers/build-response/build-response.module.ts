@@ -7,5 +7,5 @@ export const composeBuildResponseModule = (container: DIContainer) => {
 
   BuildResponseController.inject(container)
 
-  BuildResponseController.resolve(container).addMiddlewares()
+  BuildResponseController.resolve(container)
 }

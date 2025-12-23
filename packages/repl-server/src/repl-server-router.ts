@@ -1,7 +1,5 @@
 import { DIContainer } from '@famir/common'
 import {
-  Logger,
-  LOGGER,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
   ReplServerApiCalls,
@@ -12,17 +10,15 @@ export class ImplReplServerRouter implements ReplServerRouter {
   static inject(container: DIContainer) {
     container.registerSingleton<ReplServerRouter>(
       REPL_SERVER_ROUTER,
-      (c) => new ImplReplServerRouter(c.resolve<Logger>(LOGGER))
+      () => new ImplReplServerRouter()
     )
   }
 
   protected readonly apiCalls: ReplServerApiCalls = {}
 
-  constructor(protected readonly logger: Logger) {}
-
   addApiCall(name: string, apiCall: ReplServerApiCall) {
     if (this.apiCalls[name]) {
-      throw new Error(`ApiCall allready registered`)
+      throw new Error(`ApiCall '${name}' allready exists`)
     }
 
     this.apiCalls[name] = apiCall

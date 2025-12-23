@@ -3,6 +3,7 @@ import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
   RedisDatabaseConnector,
+  RedisDatabaseManager,
   RedisLureRepository,
   RedisMessageRepository,
   RedisProxyRepository,
@@ -28,6 +29,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   PinoLogger.inject(container)
 
   RedisDatabaseConnector.inject(container)
+  RedisDatabaseManager.inject(container)
 
   RedisCampaignRepository.inject(container)
   RedisProxyRepository.inject(container)

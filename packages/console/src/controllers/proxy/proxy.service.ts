@@ -28,6 +28,8 @@ export class ProxyService extends BaseService {
       return await this.proxyRepository.create(data.campaignId, data.proxyId, data.url)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
+
+      throw error
     }
   }
 
@@ -48,6 +50,8 @@ export class ProxyService extends BaseService {
       return await this.proxyRepository.enable(data.campaignId, data.proxyId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
+
+      throw error
     }
   }
 
@@ -56,6 +60,8 @@ export class ProxyService extends BaseService {
       return await this.proxyRepository.disable(data.campaignId, data.proxyId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
+
+      throw error
     }
   }
 
@@ -64,6 +70,8 @@ export class ProxyService extends BaseService {
       return await this.proxyRepository.delete(data.campaignId, data.proxyId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+
+      throw error
     }
   }
 

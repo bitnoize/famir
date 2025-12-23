@@ -3,12 +3,11 @@ import util from 'util'
 
 Object.assign(util.inspect.defaultOptions, {
   depth: 8,
-  colors: true,
   showHidden: false
 })
 
 process.on('unhandledRejection', (reason: string, p: Promise<unknown>) => {
-  console.error(`Unhandled Rejection`, { reason, p })
+  console.error(`Unhandled rejection`, { reason, p })
 
   process.exit(1)
 })

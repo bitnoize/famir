@@ -73,7 +73,7 @@ export class PinoLogger implements Logger {
         transportOptions
       }
     } catch (error) {
-      console.error(`Build options failed`, { error })
+      console.error(`Build logger options failed`, { error })
 
       process.exit(1)
     }

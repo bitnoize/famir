@@ -33,6 +33,8 @@ export class RedirectorService extends BaseService {
       return await this.redirectorRepository.create(data.campaignId, data.redirectorId, data.page)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
+
+      throw error
     }
   }
 
@@ -53,6 +55,8 @@ export class RedirectorService extends BaseService {
       return await this.redirectorRepository.update(data.campaignId, data.redirectorId, data.page)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+
+      throw error
     }
   }
 
@@ -61,6 +65,8 @@ export class RedirectorService extends BaseService {
       return await this.redirectorRepository.delete(data.campaignId, data.redirectorId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+
+      throw error
     }
   }
 

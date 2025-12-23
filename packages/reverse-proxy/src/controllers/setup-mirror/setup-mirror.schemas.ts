@@ -3,10 +3,10 @@ import { SetupMirrorData } from './setup-mirror.js'
 
 export const setupMirrorDataSchema: JSONSchemaType<SetupMirrorData> = {
   type: 'object',
-  required: ['campaignId', 'targetId'],
+  required: ['campaign_id', 'target_id'],
   properties: {
-    campaignId: customIdentSchema,
-    targetId: customIdentSchema
+    campaign_id: customIdentSchema,
+    target_id: customIdentSchema
   },
   additionalProperties: false
 } as const

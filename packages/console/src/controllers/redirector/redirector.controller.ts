@@ -26,6 +26,8 @@ import {
 } from './redirector.schemas.js'
 import { REDIRECTOR_SERVICE, type RedirectorService } from './redirector.service.js'
 
+export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')
+
 export class RedirectorController extends BaseController {
   static inject(container: DIContainer) {
     container.registerSingleton<RedirectorController>(
@@ -50,7 +52,7 @@ export class RedirectorController extends BaseController {
     router: ReplServerRouter,
     protected readonly redirectorService: RedirectorService
   ) {
-    super(validator, logger, router, 'redirector')
+    super(validator, logger, router)
 
     this.validator.addSchemas({
       'console-create-redirector-data': createRedirectorDataSchema,
@@ -172,5 +174,3 @@ export class RedirectorController extends BaseController {
     }
   }
 }
-
-export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')

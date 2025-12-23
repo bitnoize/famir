@@ -72,6 +72,8 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         })
       }
 
+      this.logger.info(message, { session: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'create', { campaignId, sessionId })
@@ -114,6 +116,8 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         })
       }
 
+      this.logger.info(message, { session: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'auth', { campaignId, sessionId })
@@ -140,6 +144,8 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       if (code !== 'OK') {
         throw new DatabaseError(message, { code })
       }
+
+      this.logger.info(message)
 
       return
     } catch (error) {

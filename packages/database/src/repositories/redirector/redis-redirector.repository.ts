@@ -76,6 +76,8 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         })
       }
 
+      this.logger.info(message, { redirector: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'create', { campaignId, redirectorId })
@@ -127,6 +129,8 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         })
       }
 
+      this.logger.info(message, { redirector: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'update', { campaignId, redirectorId })
@@ -154,6 +158,8 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
           code: 'INTERNAL_ERROR'
         })
       }
+
+      this.logger.info(message, { redirector: model })
 
       return model
     } catch (error) {

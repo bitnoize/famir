@@ -42,7 +42,7 @@ export class EnvConfig<T> implements Config<T> {
 
       return data
     } catch (error) {
-      console.error(`Build config error`, { error })
+      console.error(`Build config failed`, { error })
 
       process.exit(1)
     }

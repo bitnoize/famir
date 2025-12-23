@@ -81,7 +81,7 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     'mirror_port',
     'labels',
     'connect_timeout',
-    'request_timeout',
+    'ordinary_timeout',
     'streaming_timeout',
     'request_body_limit',
     'response_body_limit',
@@ -135,7 +135,7 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     connect_timeout: {
       type: 'integer'
     },
-    request_timeout: {
+    ordinary_timeout: {
       type: 'integer'
     },
     streaming_timeout: {
@@ -213,7 +213,7 @@ export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
   maximum: 60 * 1000
 } as const
 
-export const targetRequestTimeoutSchema: JSONSchemaType<number> = {
+export const targetOrdinaryTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1 * 1000,
   maximum: 2 * 60 * 1000

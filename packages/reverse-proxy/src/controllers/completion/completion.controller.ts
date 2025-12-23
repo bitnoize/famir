@@ -38,9 +38,7 @@ export class CompletionController extends BaseController {
     protected readonly completionService: CompletionService
   ) {
     super(validator, logger, router)
-  }
 
-  addMiddlewares() {
     this.router.addMiddleware(this.completionMiddleware)
   }
 

@@ -68,12 +68,6 @@ export interface HttpServerContext {
   setResponseCookies(cookies: HttpResponseCookies): void
   readonly responseBody: HttpBody
   setResponseBody(body: HttpBody): void
-  //prepareResponse(
-  //  status: number,
-  //  headers?: HttpHeaders,
-  //  body?: HttpBody,
-  //  connection?: HttpConnection
-  //): void
   applyResponseWrappers(): void
   sendResponse(): Promise<void>
   readonly status: number

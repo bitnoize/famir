@@ -24,11 +24,10 @@ export const testTargetModel = <T extends TargetModel>(value: T | null): value i
 export interface FullTargetModel extends TargetModel {
   readonly labels: string[]
   readonly connectTimeout: number
-  readonly requestTimeout: number
+  readonly ordinaryTimeout: number
   readonly streamingTimeout: number
   readonly requestBodyLimit: number
   readonly responseBodyLimit: number
-  //checkIp: number // 0 - disabled, 1 - blacklist, 2 - whitelist
   readonly mainPage: string
   readonly notFoundPage: string
   readonly faviconIco: string

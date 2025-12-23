@@ -4,5 +4,5 @@ import { BuildRequestController } from './build-request.controller.js'
 export const composeBuildRequestModule = (container: DIContainer) => {
   BuildRequestController.inject(container)
 
-  BuildRequestController.resolve(container).addMiddlewares()
+  BuildRequestController.resolve(container)
 }

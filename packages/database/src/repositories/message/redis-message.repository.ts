@@ -121,6 +121,8 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         })
       }
 
+      this.logger.info(message, { message: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'create', {

@@ -11,7 +11,7 @@ import {
   testEnabledTargetModel
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
-import { SetupMirrorData } from './setup-mirror.js'
+import { ListTargetsData, ReadCampaignTargetData } from './setup-mirror.js'
 
 export const SETUP_MIRROR_SERVICE = Symbol('SetupMirrorService')
 
@@ -35,7 +35,7 @@ export class SetupMirrorService extends BaseService {
   }
 
   async readCampaignTarget(
-    data: SetupMirrorData
+    data: ReadCampaignTargetData
   ): Promise<[FullCampaignModel, EnabledFullTargetModel]> {
     const [campaignModel, targetModel] = await Promise.all([
       this.campaignRepository.read(data.campaignId),
@@ -44,13 +44,13 @@ export class SetupMirrorService extends BaseService {
     ])
 
     if (!campaignModel) {
-      throw new HttpServerError(`Read campaign failed`, {
+      throw new HttpServerError(`Campaign not found`, {
         code: 'SERVICE_UNAVAILABLE'
       })
     }
 
     if (!(targetModel && testEnabledTargetModel(targetModel))) {
-      throw new HttpServerError(`Read target failed`, {
+      throw new HttpServerError(`Target not found`, {
         code: 'SERVICE_UNAVAILABLE'
       })
     }
@@ -58,11 +58,11 @@ export class SetupMirrorService extends BaseService {
     return [campaignModel, targetModel]
   }
 
-  async listTargets(data: SetupMirrorData): Promise<EnabledTargetModel[]> {
+  async listTargets(data: ListTargetsData): Promise<EnabledTargetModel[]> {
     const collection = await this.targetRepository.list(data.campaignId)
 
     if (!collection) {
-      throw new HttpServerError(`List targets failed`, {
+      throw new HttpServerError(`Campaign not found`, {
         code: 'SERVICE_UNAVAILABLE'
       })
     }

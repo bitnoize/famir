@@ -3,11 +3,11 @@ import {
   Config,
   CONFIG,
   HTTP_CLIENT,
+  HttpBody,
   HttpClient,
   HttpClientError,
   HttpClientErrorCode,
-  HttpClientRequest,
-  HttpClientResponse,
+  HttpClientOrdinaryResponse,
   HttpHeaders,
   Logger,
   LOGGER
@@ -33,8 +33,17 @@ export class CurlHttpClient implements HttpClient {
     this.options = this.buildOptions(config.data)
   }
 
-  forwardRequest(request: HttpClientRequest): Promise<HttpClientResponse> {
-    return new Promise<HttpClientResponse>((resolve, reject) => {
+  ordinaryRequest(
+    proxy: string,
+    method: string,
+    url: string,
+    requestHeaders: HttpHeaders,
+    requestBody: HttpBody,
+    connectTimeout: number,
+    ordinaryTimeout: number,
+    responseBodyLimit: number
+  ): Promise<HttpClientOrdinaryResponse> {
+    return new Promise<HttpClientOrdinaryResponse>((resolve, reject) => {
       const curl = new Curl()
 
       let shouldStop = 0
@@ -47,20 +56,20 @@ export class CurlHttpClient implements HttpClient {
 
       curl.setOpt(Curl.option.DNS_USE_GLOBAL_CACHE, 1)
 
-      curl.setOpt(Curl.option.CONNECTTIMEOUT_MS, request.connectTimeout)
-      curl.setOpt(Curl.option.TIMEOUT_MS, request.timeout)
+      curl.setOpt(Curl.option.CONNECTTIMEOUT_MS, connectTimeout)
+      curl.setOpt(Curl.option.TIMEOUT_MS, ordinaryTimeout)
 
-      curl.setOpt(Curl.option.PROXY, request.proxy)
+      curl.setOpt(Curl.option.PROXY, proxy)
 
-      curl.setOpt(Curl.option.CUSTOMREQUEST, request.method)
-      curl.setOpt(Curl.option.URL, request.url)
+      curl.setOpt(Curl.option.CUSTOMREQUEST, method)
+      curl.setOpt(Curl.option.URL, url)
 
-      curl.setOpt(Curl.option.HTTPHEADER, this.formatHeaders(request.headers))
+      curl.setOpt(Curl.option.HTTPHEADER, this.formatHeaders(requestHeaders))
       curl.setOpt(Curl.option.ACCEPT_ENCODING, '') // Means all encodings!
 
-      if (request.body.length > 0) {
+      if (requestBody.length > 0) {
         curl.setOpt(Curl.option.UPLOAD, true)
-        curl.setOpt(Curl.option.INFILESIZE_LARGE, request.body.length)
+        curl.setOpt(Curl.option.INFILESIZE_LARGE, requestBody.length)
 
         let requestBodyOffset = 0
         curl.setOpt(Curl.option.READFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
@@ -69,13 +78,13 @@ export class CurlHttpClient implements HttpClient {
               return 0
             }
 
-            const chunkSize = Math.min(size * nmemb, request.body.length - requestBodyOffset)
+            const chunkSize = Math.min(size * nmemb, requestBody.length - requestBodyOffset)
 
             if (chunkSize <= 0) {
               return 0
             }
 
-            request.body.copy(buf, 0, requestBodyOffset, requestBodyOffset + chunkSize)
+            requestBody.copy(buf, 0, requestBodyOffset, requestBodyOffset + chunkSize)
 
             requestBodyOffset += chunkSize
 
@@ -133,7 +142,7 @@ export class CurlHttpClient implements HttpClient {
           const chunkSize = size * nmemb
           const chunk = buf.subarray(0, chunkSize)
 
-          if (responseBodySize + chunkSize > request.bodyLimit) {
+          if (responseBodySize + chunkSize > responseBodyLimit) {
             shouldStop = 3
 
             return 0
@@ -178,8 +187,8 @@ export class CurlHttpClient implements HttpClient {
 
           resolve({
             status,
-            headers: this.parseHeaders(responseHeaders),
-            body: Buffer.concat(responseBody),
+            responseHeaders: this.parseHeaders(responseHeaders),
+            responseBody: Buffer.concat(responseBody),
             connection: {
               total_time: typeof totalTime === 'number' ? totalTime : null,
               connect_time: typeof connectTime === 'number' ? connectTime : null,
@@ -206,7 +215,7 @@ export class CurlHttpClient implements HttpClient {
           const errorCode = this.knownCurlCodes[curlCode]
 
           reject(
-            new HttpClientError(`Forward request failed`, {
+            new HttpClientError(`Ordinary request error`, {
               cause: error,
               context: {
                 curlCode
@@ -214,10 +223,10 @@ export class CurlHttpClient implements HttpClient {
               code: errorCode ? errorCode : 'INTERNAL_ERROR'
             })
           )
-        } catch (fatalError) {
+        } catch (criticalError) {
           reject(
-            new HttpClientError(`Curl error event fatal error`, {
-              cause: fatalError,
+            new HttpClientError(`Ordinary request critical error`, {
+              cause: criticalError,
               context: {
                 params: [error, curlCode]
               },
@@ -240,8 +249,17 @@ export class CurlHttpClient implements HttpClient {
   }
 
   /*
-  forwardStreamingRequest(request: HttpClientRequest): Promise<HttpClientStreamingResponse> {
-    return new Promise<HttpClientResponse>((resolve, reject) => {
+  streamingRequest(
+    proxy: string,
+    method: string,
+    url: string,
+    requestHeaders: HttpHeaders,
+    requestBody: HttpBody,
+    connectTimeout: number,
+    streamingTimeout: number,
+    responseBodyLimit: number
+  ): Promise<HttpClientStreamingResponse> {
+    return new Promise<HttpClientStreamingResponse>((resolve, reject) => {
       const curl = new Curl()
 
       curl.perform()

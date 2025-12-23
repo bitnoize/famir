@@ -56,9 +56,9 @@ export const messageFunctions = {
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))
-        parser.pushKey(proxyKey(prefix, campaignId, messageId))
-        parser.pushKey(targetKey(prefix, campaignId, messageId))
-        parser.pushKey(sessionKey(prefix, campaignId, messageId))
+        parser.pushKey(proxyKey(prefix, campaignId, proxyId))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
+        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
 
         parser.push(campaignId)
         parser.push(messageId)

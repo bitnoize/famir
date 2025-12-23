@@ -14,6 +14,8 @@ import { ReadSessionData } from './session.js'
 import { readSessionDataSchema } from './session.schemas.js'
 import { SESSION_SERVICE, type SessionService } from './session.service.js'
 
+export const SESSION_CONTROLLER = Symbol('SessionController')
+
 export class SessionController extends BaseController {
   static inject(container: DIContainer) {
     container.registerSingleton<SessionController>(
@@ -38,7 +40,7 @@ export class SessionController extends BaseController {
     router: ReplServerRouter,
     protected readonly sessionService: SessionService
   ) {
-    super(validator, logger, router, 'session')
+    super(validator, logger, router)
 
     this.validator.addSchemas({
       'console-read-session-data': readSessionDataSchema
@@ -68,5 +70,3 @@ export class SessionController extends BaseController {
     }
   }
 }
-
-export const SESSION_CONTROLLER = Symbol('SessionController')

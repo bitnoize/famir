@@ -1,13 +1,13 @@
 export interface LandingUpgradeData {
-  lureId: string
+  lure_id: string
   secret: string
 }
 
 export interface LandingRedirectorData {
-  title: string
-  description: string
-  image: string
-  url: string
+  og_title?: string
+  og_description?: string
+  og_image?: string
+  og_url?: string
 }
 
 export interface ReadProxyData {

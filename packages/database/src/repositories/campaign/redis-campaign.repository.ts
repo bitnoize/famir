@@ -94,6 +94,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         })
       }
 
+      this.logger.info(message, { campaign: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'create', { campaignId, mirrorDomain })
@@ -148,6 +150,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         })
       }
 
+      this.logger.info(message, { campaign: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'update', { campaignId })
@@ -175,6 +179,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
           code: 'INTERNAL_ERROR'
         })
       }
+
+      this.logger.info(message, { campaign: model })
 
       return model
     } catch (error) {
@@ -256,7 +262,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     try {
       this.validator.assertSchema<RawCampaign>('database-raw-campaign', value)
     } catch (error) {
-      throw new DatabaseError(`RawCampaign validation failed`, {
+      throw new DatabaseError(`RawCampaign validate failed`, {
         cause: error,
         code: 'INTERNAL_ERROR'
       })
@@ -267,7 +273,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     try {
       this.validator.assertSchema<RawFullCampaign>('database-raw-full-campaign', value)
     } catch (error) {
-      throw new DatabaseError(`RawFullCampaign validation failed`, {
+      throw new DatabaseError(`RawFullCampaign validate failed`, {
         cause: error,
         code: 'INTERNAL_ERROR'
       })

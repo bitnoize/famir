@@ -45,7 +45,7 @@ export class NodeHttpServer implements HttpServer {
 
     this.server = http.createServer((req, res) => {
       this.handleServerRequest(req, res).catch((error: unknown) => {
-        this.logger.fatal(`Server unhandled error`, {
+        this.logger.fatal(`HttpServer unhandled error`, {
           error: serializeError(error),
           request: this.dumpRequest(req)
         })
@@ -134,7 +134,7 @@ export class NodeHttpServer implements HttpServer {
         message = error.message
       }
 
-      this.logger.error(`Server request error`, {
+      this.logger.error(`HttpServer request error`, {
         error: serializeError(error),
         request: this.dumpRequest(req)
       })
@@ -154,7 +154,7 @@ export class NodeHttpServer implements HttpServer {
         res.end()
       }
     } catch (criticalError) {
-      this.logger.fatal(`Server critical error`, {
+      this.logger.fatal(`HttpServer request critical error`, {
         criticalError: serializeError(criticalError),
         request: this.dumpRequest(req)
       })

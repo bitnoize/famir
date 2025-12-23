@@ -52,7 +52,7 @@ export class LureController extends BaseController {
     router: ReplServerRouter,
     protected readonly lureService: LureService
   ) {
-    super(validator, logger, router, 'lure')
+    super(validator, logger, router)
 
     this.validator.addSchemas({
       'console-create-lure-data': createLureDataSchema,

@@ -50,7 +50,7 @@ export class CampaignController extends BaseController {
     router: ReplServerRouter,
     protected readonly campaignService: CampaignService
   ) {
-    super(validator, logger, router, 'campaign')
+    super(validator, logger, router)
 
     this.validator.addSchemas({
       'console-create-campaign-data': createCampaignDataSchema,

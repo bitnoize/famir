@@ -33,9 +33,7 @@ export class WellKnownUrlsController extends BaseController {
 
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
     super(validator, logger, router)
-  }
 
-  addMiddlewares() {
     this.router.addMiddleware(this.preflightCorsMiddleware)
     this.router.addMiddleware(this.faviconIcoMiddleware)
     this.router.addMiddleware(this.robotsTxtMiddleware)
@@ -87,7 +85,7 @@ export class WellKnownUrlsController extends BaseController {
       const target = this.getState(ctx, 'target')
 
       if (ctx.isUrlPathEquals('/sitemap.xml')) {
-        await this.renderRobotsTxt(ctx, target)
+        await this.renderSitemapXml(ctx, target)
       } else {
         await next()
       }
@@ -134,7 +132,7 @@ export class WellKnownUrlsController extends BaseController {
 
       await ctx.sendResponse()
     } else {
-      this.renderNotFoundPage(ctx, target)
+      await this.renderNotFoundPage(ctx, target)
     }
   }
 
@@ -160,7 +158,7 @@ export class WellKnownUrlsController extends BaseController {
 
       await ctx.sendResponse()
     } else {
-      this.renderNotFoundPage(ctx, target)
+      await this.renderNotFoundPage(ctx, target)
     }
   }
 
@@ -186,7 +184,7 @@ export class WellKnownUrlsController extends BaseController {
 
       await ctx.sendResponse()
     } else {
-      this.renderNotFoundPage(ctx, target)
+      await this.renderNotFoundPage(ctx, target)
     }
   }
 }

@@ -1,6 +1,7 @@
 export interface CampaignModel {
   readonly campaignId: string
   readonly mirrorDomain: string
+  //checkIp: number // 0 - disabled, 1 - blacklist, 2 - whitelist
   readonly sessionCount: number
   readonly messageCount: number
   readonly createdAt: Date

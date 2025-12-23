@@ -69,6 +69,8 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         })
       }
 
+      this.logger.info(message, { proxy: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'create', {
@@ -115,6 +117,8 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         })
       }
 
+      this.logger.info(message, { proxy: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'enable', { campaignId, proxyId })
@@ -143,6 +147,8 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         })
       }
 
+      this.logger.info(message, { proxy: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'disable', { campaignId, proxyId })
@@ -170,6 +176,8 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
           code: 'INTERNAL_ERROR'
         })
       }
+
+      this.logger.info(message, { proxy: model })
 
       return model
     } catch (error) {

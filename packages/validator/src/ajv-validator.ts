@@ -60,7 +60,7 @@ export class AjvValidator implements Validator {
         }
       })
 
-      throw new ValidatorError(`JSON-Schema validation failed`, {
+      throw new ValidatorError(`JSON-Schema assertion failed`, {
         context: {
           schemaName,
           data

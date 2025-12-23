@@ -61,7 +61,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     mirrorSub: string,
     mirrorPort: number,
     connectTimeout: number,
-    requestTimeout: number,
+    ordinaryTimeout: number,
     streamingTimeout: number,
     requestBodyLimit: number,
     responseBodyLimit: number,
@@ -86,7 +86,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           mirrorSub,
           mirrorPort,
           connectTimeout,
-          requestTimeout,
+          ordinaryTimeout,
           streamingTimeout,
           requestBodyLimit,
           responseBodyLimit,
@@ -114,6 +114,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         })
       }
 
+      this.logger.info(message, { target: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'create', { campaignId, targetId })
@@ -138,7 +140,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     campaignId: string,
     targetId: string,
     connectTimeout: number | null | undefined,
-    requestTimeout: number | null | undefined,
+    ordinaryTimeout: number | null | undefined,
     streamingTimeout: number | null | undefined,
     requestBodyLimit: number | null | undefined,
     responseBodyLimit: number | null | undefined,
@@ -155,7 +157,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           campaignId,
           targetId,
           connectTimeout,
-          requestTimeout,
+          ordinaryTimeout,
           streamingTimeout,
           requestBodyLimit,
           responseBodyLimit,
@@ -182,6 +184,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           code: 'INTERNAL_ERROR'
         })
       }
+
+      this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
@@ -211,6 +215,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         })
       }
 
+      this.logger.info(message, { target: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'enable', { campaignId, targetId })
@@ -238,6 +244,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           code: 'INTERNAL_ERROR'
         })
       }
+
+      this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
@@ -272,6 +280,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         })
       }
 
+      this.logger.info(message, { target: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'appendLabel', { campaignId, targetId, label })
@@ -305,6 +315,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         })
       }
 
+      this.logger.info(message, { target: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'removeLabel', { campaignId, targetId, label })
@@ -332,6 +344,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
           code: 'INTERNAL_ERROR'
         })
       }
+
+      this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
@@ -406,7 +420,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       mirrorPort: rawValue.mirror_port,
       labels: rawValue.labels,
       connectTimeout: rawValue.connect_timeout,
-      requestTimeout: rawValue.request_timeout,
+      ordinaryTimeout: rawValue.ordinary_timeout,
       streamingTimeout: rawValue.streaming_timeout,
       requestBodyLimit: rawValue.request_body_limit,
       responseBodyLimit: rawValue.response_body_limit,

@@ -45,7 +45,7 @@ export class TargetService extends BaseService {
         data.mirrorSub,
         data.mirrorPort,
         data.connectTimeout,
-        data.requestTimeout,
+        data.ordinaryTimeout,
         data.streamingTimeout,
         data.requestBodyLimit,
         data.responseBodyLimit,
@@ -57,6 +57,8 @@ export class TargetService extends BaseService {
       )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
+
+      throw error
     }
   }
 
@@ -78,7 +80,7 @@ export class TargetService extends BaseService {
         data.campaignId,
         data.targetId,
         data.connectTimeout,
-        data.requestTimeout,
+        data.ordinaryTimeout,
         data.streamingTimeout,
         data.requestBodyLimit,
         data.responseBodyLimit,
@@ -90,6 +92,8 @@ export class TargetService extends BaseService {
       )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+
+      throw error
     }
   }
 
@@ -98,6 +102,8 @@ export class TargetService extends BaseService {
       return await this.targetRepository.enable(data.campaignId, data.targetId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
+
+      throw error
     }
   }
 
@@ -106,6 +112,8 @@ export class TargetService extends BaseService {
       return await this.targetRepository.disable(data.campaignId, data.targetId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
+
+      throw error
     }
   }
 
@@ -114,6 +122,8 @@ export class TargetService extends BaseService {
       return await this.targetRepository.appendLabel(data.campaignId, data.targetId, data.label)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
+
+      throw error
     }
   }
 
@@ -122,6 +132,8 @@ export class TargetService extends BaseService {
       return await this.targetRepository.removeLabel(data.campaignId, data.targetId, data.label)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
+
+      throw error
     }
   }
 
@@ -130,6 +142,8 @@ export class TargetService extends BaseService {
       return await this.targetRepository.delete(data.campaignId, data.targetId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+
+      throw error
     }
   }
 

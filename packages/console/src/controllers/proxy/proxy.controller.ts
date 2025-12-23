@@ -52,7 +52,7 @@ export class ProxyController extends BaseController {
     router: ReplServerRouter,
     protected readonly proxyService: ProxyService
   ) {
-    super(validator, logger, router, 'proxy')
+    super(validator, logger, router)
 
     this.validator.addSchemas({
       'console-create-proxy-data': createProxyDataSchema,
@@ -134,7 +134,7 @@ export class ProxyController extends BaseController {
     try {
       this.validator.assertSchema<CreateProxyData>('console-create-proxy-data', value)
     } catch (error) {
-      throw new ReplServerError(`CreateProxyData validation failed`, {
+      throw new ReplServerError(`CreateProxyData validate failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })
@@ -145,7 +145,7 @@ export class ProxyController extends BaseController {
     try {
       this.validator.assertSchema<ReadProxyData>('console-read-proxy-data', value)
     } catch (error) {
-      throw new ReplServerError(`ReadProxyData validation failed`, {
+      throw new ReplServerError(`ReadProxyData validate failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })
@@ -156,7 +156,7 @@ export class ProxyController extends BaseController {
     try {
       this.validator.assertSchema<SwitchProxyData>('console-switch-proxy-data', value)
     } catch (error) {
-      throw new ReplServerError(`SwitchProxyData validation failed`, {
+      throw new ReplServerError(`SwitchProxyData validate failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })
@@ -167,7 +167,7 @@ export class ProxyController extends BaseController {
     try {
       this.validator.assertSchema<DeleteProxyData>('console-delete-proxy-data', value)
     } catch (error) {
-      throw new ReplServerError(`DeleteProxyData validation failed`, {
+      throw new ReplServerError(`DeleteProxyData validate failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })
@@ -178,7 +178,7 @@ export class ProxyController extends BaseController {
     try {
       this.validator.assertSchema<ListProxiesData>('console-list-proxies-data', value)
     } catch (error) {
-      throw new ReplServerError(`ListProxiesData validation failed`, {
+      throw new ReplServerError(`ListProxiesData validate failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })

@@ -2,9 +2,6 @@ import { DIContainer } from '@famir/common'
 import {
   ANALYZE_LOG_QUEUE,
   AnalyzeLogQueue,
-  DatabaseError,
-  DatabaseErrorCode,
-  HttpServerError,
   MESSAGE_REPOSITORY,
   MessageModel,
   MessageRepository
@@ -55,16 +52,7 @@ export class CompletionService extends BaseService {
         data.connection
       )
     } catch (error) {
-      if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
-
-        if (knownErrorCodes.includes(error.code)) {
-          throw new HttpServerError(`Create session failed`, {
-            cause: error,
-            code: `SERVICE_UNAVAILABLE`
-          })
-        }
-      }
+      this.filterDatabaseException(error, ['NOT_FOUND'])
 
       throw error
     }

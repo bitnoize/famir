@@ -3,6 +3,7 @@ import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
+  FullCampaignModel,
   ReplServerError
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
@@ -43,10 +44,12 @@ export class CampaignService extends BaseService {
       )
     } catch (error) {
       this.filterDatabaseException(error, ['CONFLICT'])
+
+      throw error
     }
   }
 
-  async readCampaign(data: ReadCampaignData): Promise<CampaignModel> {
+  async readCampaign(data: ReadCampaignData): Promise<FullCampaignModel> {
     const model = await this.campaignRepository.read(data.campaignId)
 
     if (!model) {
@@ -69,6 +72,8 @@ export class CampaignService extends BaseService {
       )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
+
+      throw error
     }
   }
 
@@ -77,6 +82,8 @@ export class CampaignService extends BaseService {
       return await this.campaignRepository.delete(data.campaignId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+
+      throw error
     }
   }
 

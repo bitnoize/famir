@@ -14,6 +14,8 @@ import { ReadMessageData } from './message.js'
 import { readMessageDataSchema } from './message.schemas.js'
 import { MESSAGE_SERVICE, type MessageService } from './message.service.js'
 
+export const MESSAGE_CONTROLLER = Symbol('MessageController')
+
 export class MessageController extends BaseController {
   static inject(container: DIContainer) {
     container.registerSingleton<MessageController>(
@@ -38,7 +40,7 @@ export class MessageController extends BaseController {
     router: ReplServerRouter,
     protected readonly messageService: MessageService
   ) {
-    super(validator, logger, router, 'message')
+    super(validator, logger, router)
 
     this.validator.addSchemas({
       'console-read-message-data': readMessageDataSchema
@@ -68,5 +70,3 @@ export class MessageController extends BaseController {
     }
   }
 }
-
-export const MESSAGE_CONTROLLER = Symbol('MessageController')

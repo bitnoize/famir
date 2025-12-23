@@ -33,6 +33,8 @@ export class LureService extends BaseService {
       )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
+
+      throw error
     }
   }
 
@@ -53,6 +55,8 @@ export class LureService extends BaseService {
       return await this.lureRepository.enable(data.campaignId, data.lureId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
+
+      throw error
     }
   }
 
@@ -61,6 +65,8 @@ export class LureService extends BaseService {
       return await this.lureRepository.disable(data.campaignId, data.lureId)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])
+
+      throw error
     }
   }
 
@@ -74,6 +80,8 @@ export class LureService extends BaseService {
       )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+
+      throw error
     }
   }
 

@@ -30,6 +30,8 @@ import {
 } from './target.schemas.js'
 import { TARGET_SERVICE, type TargetService } from './target.service.js'
 
+export const TARGET_CONTROLLER = Symbol('TargetController')
+
 export class TargetController extends BaseController {
   static inject(container: DIContainer) {
     container.registerSingleton<TargetController>(
@@ -54,7 +56,7 @@ export class TargetController extends BaseController {
     router: ReplServerRouter,
     protected readonly targetService: TargetService
   ) {
-    super(validator, logger, router, 'target')
+    super(validator, logger, router)
 
     this.validator.addSchemas({
       'console-create-target-data': createTargetDataSchema,
@@ -244,5 +246,3 @@ export class TargetController extends BaseController {
     }
   }
 }
-
-export const TARGET_CONTROLLER = Symbol('TargetController')

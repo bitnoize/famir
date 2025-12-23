@@ -34,7 +34,7 @@ local function create_target(keys, args)
     mirror_sub = args[9],
     mirror_port = tonumber(args[10]),
     connect_timeout = tonumber(args[11]),
-    request_timeout = tonumber(args[12]),
+    ordinary_timeout = tonumber(args[12]),
     streaming_timeout = tonumber(args[13]),
     request_body_limit = tonumber(args[14]),
     response_body_limit = tonumber(args[15]),
@@ -236,7 +236,7 @@ local function read_full_target(keys, args)
     'mirror_sub',
     'mirror_port',
     'connect_timeout',
-    'request_timeout',
+    'ordinary_timeout',
     'streaming_timeout',
     'request_body_limit',
     'response_body_limit',
@@ -268,7 +268,7 @@ local function read_full_target(keys, args)
     mirror_port = tonumber(values[10]),
     labels = redis.call('SMEMBERS', target_labels_key),
     connect_timeout = tonumber(values[11]),
-    request_timeout = tonumber(values[12]),
+    ordinary_timeout = tonumber(values[12]),
     streaming_timeout = tonumber(values[13]),
     request_body_limit = tonumber(values[14]),
     response_body_limit = tonumber(values[15]),
@@ -358,11 +358,11 @@ local function update_target(keys, args)
       if not model.connect_timeout then
         return redis.error_reply('ERR Wrong model.connect_timeout')
       end
-    elseif field == 'request_timeout' then
-      model.request_timeout = tonumber(value)
+    elseif field == 'ordinary_timeout' then
+      model.ordinary_timeout = tonumber(value)
 
-      if not model.request_timeout then
-        return redis.error_reply('ERR Wrong model.request_timeout')
+      if not model.ordinary_timeout then
+        return redis.error_reply('ERR Wrong model.ordinary_timeout')
       end
     elseif field == 'streaming_timeout' then
       model.streaming_timeout = tonumber(value)

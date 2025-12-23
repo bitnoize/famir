@@ -24,9 +24,7 @@ export abstract class RedisBaseRepository {
   }
 
   protected validateStringReply(value: unknown): asserts value is string {
-    const isValid = value != null && typeof value === 'string' && value
-
-    if (!isValid) {
+    if (!(value != null && typeof value === 'string' && value)) {
       throw new DatabaseError(`StringReply validate failed`, {
         code: 'INTERNAL_ERROR'
       })
@@ -34,9 +32,7 @@ export abstract class RedisBaseRepository {
   }
 
   protected validateArrayReply(value: unknown): asserts value is unknown[] {
-    const isValid = value != null && Array.isArray(value)
-
-    if (!isValid) {
+    if (!(value != null && Array.isArray(value))) {
       throw new DatabaseError(`ArrayReply validate failed`, {
         code: 'INTERNAL_ERROR'
       })
@@ -57,7 +53,7 @@ export abstract class RedisBaseRepository {
   }
 
   protected parseStatusReply(value: unknown): [DatabaseStatusCode, string] {
-    if (!(value != null && typeof value === 'string')) {
+    if (!(value != null && typeof value === 'string' && value)) {
       throw new DatabaseError(`StatusReply validate failed`, {
         code: 'INTERNAL_ERROR'
       })
@@ -65,9 +61,7 @@ export abstract class RedisBaseRepository {
 
     const [code, message] = value.split(/\s+(.*)/, 2)
 
-    const isValid = code && message && arrayIncludes(DATABASE_STATUS_CODES, code)
-
-    if (!isValid) {
+    if (!(code && message && arrayIncludes(DATABASE_STATUS_CODES, code))) {
       throw new DatabaseError(`StatusReply parse failed`, {
         code: 'INTERNAL_ERROR'
       })
@@ -84,7 +78,7 @@ export abstract class RedisBaseRepository {
 
       throw error
     } else {
-      throw new DatabaseError(`Database internal error`, {
+      throw new DatabaseError(`Service internal error`, {
         cause: error,
         context: {
           repository: this.repositoryName,

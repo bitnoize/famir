@@ -1,4 +1,5 @@
 export * from './setup-mirror.controller.js'
+export * from './setup-mirror.js'
 export * from './setup-mirror.module.js'
 export * from './setup-mirror.schemas.js'
 export * from './setup-mirror.service.js'

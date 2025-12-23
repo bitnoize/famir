@@ -80,6 +80,8 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         })
       }
 
+      this.logger.info(message, { lure: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'create', {
@@ -145,6 +147,8 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         })
       }
 
+      this.logger.info(message, { lure: model })
+
       return model
     } catch (error) {
       this.handleException(error, 'enable', { campaignId, lureId })
@@ -172,6 +176,8 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
           code: 'INTERNAL_ERROR'
         })
       }
+
+      this.logger.info(message, { lure: model })
 
       return model
     } catch (error) {
@@ -211,6 +217,8 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
           code: 'INTERNAL_ERROR'
         })
       }
+
+      this.logger.info(message, { lure: model })
 
       return model
     } catch (error) {

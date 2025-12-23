@@ -28,7 +28,7 @@ export interface RawTarget {
 export interface RawFullTarget extends RawTarget {
   labels: string[]
   connect_timeout: number
-  request_timeout: number
+  ordinary_timeout: number
   streaming_timeout: number
   request_body_limit: number
   response_body_limit: number
@@ -58,7 +58,7 @@ export const targetFunctions = {
         mirrorSub: string,
         mirrorPort: number,
         connectTimeout: number,
-        requestTimeout: number,
+        ordinaryTimeout: number,
         streamingTimeout: number,
         requestBodyLimit: number,
         responseBodyLimit: number,
@@ -85,7 +85,7 @@ export const targetFunctions = {
         parser.push(mirrorSub)
         parser.push(mirrorPort.toString())
         parser.push(connectTimeout.toString())
-        parser.push(requestTimeout.toString())
+        parser.push(ordinaryTimeout.toString())
         parser.push(streamingTimeout.toString())
         parser.push(requestBodyLimit.toString())
         parser.push(responseBodyLimit.toString())
@@ -143,7 +143,7 @@ export const targetFunctions = {
         campaignId: string,
         targetId: string,
         connectTimeout: number | null | undefined,
-        requestTimeout: number | null | undefined,
+        ordinaryTimeout: number | null | undefined,
         streamingTimeout: number | null | undefined,
         requestBodyLimit: number | null | undefined,
         responseBodyLimit: number | null | undefined,
@@ -161,9 +161,9 @@ export const targetFunctions = {
           parser.push(connectTimeout.toString())
         }
 
-        if (requestTimeout != null) {
-          parser.push('request_timeout')
-          parser.push(requestTimeout.toString())
+        if (ordinaryTimeout != null) {
+          parser.push('ordinary_timeout')
+          parser.push(ordinaryTimeout.toString())
         }
 
         if (streamingTimeout != null) {

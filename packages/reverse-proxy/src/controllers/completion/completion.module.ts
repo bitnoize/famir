@@ -7,5 +7,5 @@ export const composeCompletionModule = (container: DIContainer) => {
 
   CompletionController.inject(container)
 
-  CompletionController.resolve(container).addMiddlewares()
+  CompletionController.resolve(container)
 }

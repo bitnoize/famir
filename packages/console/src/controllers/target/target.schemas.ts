@@ -4,9 +4,9 @@ import {
   targetContentSchema,
   targetDomainSchema,
   targetLabelSchema,
+  targetOrdinaryTimeoutSchema,
   targetPortSchema,
   targetRequestBodyLimitSchema,
-  targetRequestTimeoutSchema,
   targetResponseBodyLimitSchema,
   targetStreamingTimeoutSchema,
   targetSubSchema
@@ -35,7 +35,7 @@ export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     'mirrorSub',
     'mirrorPort',
     'connectTimeout',
-    'requestTimeout',
+    'ordinaryTimeout',
     'streamingTimeout',
     'requestBodyLimit',
     'responseBodyLimit',
@@ -60,8 +60,8 @@ export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
       ...targetConnectTimeoutSchema,
       default: 1 * 1000
     },
-    requestTimeout: {
-      ...targetRequestTimeoutSchema,
+    ordinaryTimeout: {
+      ...targetOrdinaryTimeoutSchema,
       default: 10 * 1000
     },
     streamingTimeout: {
@@ -120,8 +120,8 @@ export const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
       ...targetConnectTimeoutSchema,
       nullable: true
     },
-    requestTimeout: {
-      ...targetRequestTimeoutSchema,
+    ordinaryTimeout: {
+      ...targetOrdinaryTimeoutSchema,
       nullable: true
     },
     streamingTimeout: {

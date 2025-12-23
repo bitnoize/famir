@@ -40,9 +40,7 @@ export class BuildResponseController extends BaseController {
     protected readonly buildResponseService: BuildResponseService
   ) {
     super(validator, logger, router)
-  }
 
-  addMiddlewares() {
     this.router.addMiddleware(this.buildResponseMiddleware)
   }
 
@@ -56,20 +54,20 @@ export class BuildResponseController extends BaseController {
       if (ctx.isStreaming) {
         throw new Error(`Streaming requests not implemented yet :(`)
       } else {
-        const { status, headers, body, connection } =
-          await this.buildResponseService.forwardRequest({
+        const { status, responseHeaders, responseBody, connection } =
+          await this.buildResponseService.ordinaryRequest({
             proxy: proxy.url,
             method: ctx.method,
             url: this.assemblyUrl(target, ctx.normalizeUrl()),
-            headers: ctx.requestHeaders,
-            body: ctx.requestBody,
+            requestHeaders: ctx.requestHeaders,
+            requestBody: ctx.requestBody,
             connectTimeout: target.connectTimeout,
-            timeout: target.requestTimeout,
-            bodyLimit: target.responseBodyLimit
+            ordinaryTimeout: target.ordinaryTimeout,
+            responseBodyLimit: target.responseBodyLimit
           })
 
-        ctx.setResponseHeaders(headers)
-        ctx.setResponseBody(body)
+        ctx.setResponseHeaders(responseHeaders)
+        ctx.setResponseBody(responseBody)
         ctx.setStatus(status)
         //ctx.setConnection(connection)
 

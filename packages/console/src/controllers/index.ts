@@ -1,5 +1,6 @@
 export * from './base/index.js'
 export * from './campaign/index.js'
+export * from './database/index.js'
 export * from './lure/index.js'
 export * from './message/index.js'
 export * from './proxy/index.js'

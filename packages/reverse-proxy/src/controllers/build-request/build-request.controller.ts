@@ -31,9 +31,7 @@ export class BuildRequestController extends BaseController {
 
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
     super(validator, logger, router)
-  }
 
-  addMiddlewares() {
     this.router.addMiddleware(this.buildRequestMiddleware)
   }
 
