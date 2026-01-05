@@ -47,26 +47,13 @@ export class SessionController extends BaseController {
     })
 
     this.router.addApiCall('readSession', this.readSessionApiCall)
+
+    this.logger.debug(`SessionController initialized`)
   }
 
   private readSessionApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateReadSessionData(data)
+    this.validateApiCallData<ReadSessionData>('console-read-session-data', data)
 
-      return await this.sessionService.readSession(data)
-    } catch (error) {
-      this.handleException(error, 'readSession', data)
-    }
-  }
-
-  private validateReadSessionData(value: unknown): asserts value is ReadSessionData {
-    try {
-      this.validator.assertSchema<ReadSessionData>('console-read-session-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ReadSessionData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
+    return await this.sessionService.readSession(data)
   }
 }

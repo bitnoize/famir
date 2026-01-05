@@ -229,7 +229,7 @@ export class AuthorizeController extends BaseController {
     next: HttpServerNextFunction
   ): Promise<void> {
     if (ctx.isBot()) {
-      await this.renderCloakingPage(ctx, target)
+      await this.renderCloakingSite(ctx, target)
 
       return
     }
@@ -237,7 +237,7 @@ export class AuthorizeController extends BaseController {
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
     if (!sessionCookie) {
-      await this.renderCloakingPage(ctx, target)
+      await this.renderCloakingSite(ctx, target)
 
       return
     }
@@ -264,7 +264,7 @@ export class AuthorizeController extends BaseController {
     }
 
     if (!session.isLanding) {
-      await this.renderCloakingPage(ctx, target)
+      await this.renderCloakingSite(ctx, target)
 
       return
     }
@@ -287,7 +287,7 @@ export class AuthorizeController extends BaseController {
     next: HttpServerNextFunction
   ): Promise<void> {
     if (ctx.isBot()) {
-      await this.renderCloakingPage(ctx, target)
+      await this.renderCloakingSite(ctx, target)
 
       return
     }
@@ -438,7 +438,7 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  private async renderCloakingPage(
+  private async renderCloakingSite(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {

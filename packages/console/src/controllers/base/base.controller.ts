@@ -7,6 +7,18 @@ export abstract class BaseController {
     protected readonly router: ReplServerRouter
   ) {}
 
+  protected validateApiCallData<T>(value: unknown): asserts value is T {
+    try {
+      this.validator.assertSchema<T>(schema, value)
+    } catch (error) {
+      throw new ReplServerError(`ApiCall data validate failed`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
+  }
+
+  /*
   protected handleException(error: unknown, apiCall: string, data: unknown): never {
     if (error instanceof ReplServerError) {
       error.context['apiCall'] = apiCall
@@ -24,4 +36,5 @@ export abstract class BaseController {
       })
     }
   }
+  */
 }

@@ -47,26 +47,13 @@ export class MessageController extends BaseController {
     })
 
     this.router.addApiCall('readMessage', this.readMessageApiCall)
+
+    this.logger.debug(`MessageController initialized`)
   }
 
   private readMessageApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateReadMessageData(data)
+    this.validateApiCallData<ReadMessageData>('console-read-message-data', data)
 
-      return await this.messageService.readMessage(data)
-    } catch (error) {
-      this.handleException(error, 'readMessage', data)
-    }
-  }
-
-  private validateReadMessageData(value: unknown): asserts value is ReadMessageData {
-    try {
-      this.validator.assertSchema<ReadMessageData>('console-read-message-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ReadMessageData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
+    return await this.messageService.readMessage(data)
   }
 }

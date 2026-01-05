@@ -12,7 +12,7 @@ import {
   RedisTargetRepository
 } from '@famir/database'
 import { PinoLogger } from '@famir/logger'
-import { ImplReplServerRouter, NodeReplServer } from '@famir/repl-server'
+import { SimpleReplServerRouter, NodeReplServer } from '@famir/repl-server'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeLogQueue, BullWorkflowConnector } from '@famir/workflow'
 import { ConsoleApp } from './console.app.js'
@@ -43,7 +43,7 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   BullAnalyzeLogQueue.inject(container)
 
-  ImplReplServerRouter.inject(container)
+  SimpleReplServerRouter.inject(container)
 
   NodeReplServer.inject(container)
 

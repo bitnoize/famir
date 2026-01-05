@@ -57,6 +57,8 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       'database-message-headers': messageHeadersSchema,
       'database-message-connection': messageConnectionSchema
     })
+
+    this.logger.debug(`MessageRepository initialized`)
   }
 
   async create(
@@ -81,7 +83,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     const messageId = randomIdent()
 
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.message.create_message(
           this.options.prefix,
           campaignId,
@@ -92,40 +94,30 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
           method,
           url,
           isStreaming,
-          requestHeaders,
-          requestBody,
-          responseHeaders,
-          responseBody,
+          this.encodeJson(requestHeaders),
+          this.encodeBase64(requestBody),
+          this.encodeJson(responseHeaders),
+          this.encodeBase64(responseBody),
           clientIp,
           status,
           score,
           startTime,
           finishTime,
-          connection
+          this.encodeJson(connection)
         ),
 
         this.connection.message.read_message(this.options.prefix, campaignId, messageId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildMessageModel(rawValue)
-
-      if (!testMessageModel(model)) {
-        throw new DatabaseError(`Message lost on create`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { message: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'create', {
+      this.raiseError(error, 'create', {
         campaignId,
         messageId,
         proxyId,
@@ -137,136 +129,95 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
   async read(campaignId: string, messageId: string): Promise<FullMessageModel | null> {
     try {
-      const rawValue = await this.connection.message.read_full_message(
+      const rawFullModel = await this.connection.message.read_full_message(
         this.options.prefix,
         campaignId,
         messageId
       )
 
-      return this.buildFullMessageModel(rawValue)
+      return this.buildFullModel(rawFullModel)
     } catch (error) {
-      this.handleException(error, 'read', { campaignId, messageId })
+      this.raiseError(error, 'read', { campaignId, messageId })
     }
   }
 
-  protected parseMessageHeaders(value: string): HttpHeaders {
-    try {
-      const headers: unknown = JSON.parse(value)
-
-      this.validator.assertSchema<HttpHeaders>('database-message-headers', headers)
-
-      return headers
-    } catch (error) {
-      throw new DatabaseError(`HttpHeaders parse failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected parseMessageBody(value: string): HttpBody {
-    try {
-      return Buffer.from(value, 'base64')
-    } catch (error) {
-      throw new DatabaseError(`HttpBody parse failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected parseMessageConnection(value: string): HttpConnection {
-    try {
-      const connection: unknown = JSON.parse(value)
-
-      this.validator.assertSchema<HttpConnection>('database-message-connection', connection)
-
-      return connection
-    } catch (error) {
-      throw new DatabaseError(`HttpConnection parse failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected buildMessageModel(rawValue: unknown): MessageModel | null {
-    if (rawValue === null) {
+  protected buildModel(rawModel: unknown): MessageModel | null {
+    if (rawModel === null) {
       return null
     }
 
-    this.validateRawMessage(rawValue)
+    this.validateRawData<RawMessage>('database-raw-message', rawModel)
 
     return {
-      campaignId: rawValue.campaign_id,
-      messageId: rawValue.message_id,
-      proxyId: rawValue.proxy_id,
-      targetId: rawValue.target_id,
-      sessionId: rawValue.session_id,
-      method: rawValue.method,
-      url: rawValue.url,
-      isStreaming: !!rawValue.is_streaming,
-      status: rawValue.status,
-      score: rawValue.score,
-      createdAt: new Date(rawValue.created_at)
+      campaignId: rawModel.campaign_id,
+      messageId: rawModel.message_id,
+      proxyId: rawModel.proxy_id,
+      targetId: rawModel.target_id,
+      sessionId: rawModel.session_id,
+      method: rawModel.method,
+      url: rawModel.url,
+      isStreaming: !!rawModel.is_streaming,
+      status: rawModel.status,
+      score: rawModel.score,
+      createdAt: new Date(rawModel.created_at)
     }
   }
 
-  protected buildFullMessageModel(rawValue: unknown): FullMessageModel | null {
-    if (rawValue === null) {
+  protected buildModelStrict(rawModel: unknown): MessageModel {
+    const model = this.buildModel(rawModel)
+
+    if (!testMessageModel(model)) {
+      throw new DatabaseError(`Message unexpected lost`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+
+    return model
+  }
+
+  protected buildFullModel(rawFullModel: unknown): FullMessageModel | null {
+    if (rawFullModel === null) {
       return null
     }
 
-    this.validateRawFullMessage(rawValue)
+    this.validateRawData<RawFullMessage>('database-raw-full-message', rawFullModel)
 
     return {
-      campaignId: rawValue.campaign_id,
-      messageId: rawValue.message_id,
-      proxyId: rawValue.proxy_id,
-      targetId: rawValue.target_id,
-      sessionId: rawValue.session_id,
-      method: rawValue.method,
-      url: rawValue.url,
-      isStreaming: !!rawValue.is_streaming,
-      requestHeaders: this.parseMessageHeaders(rawValue.request_headers),
-      requestBody: this.parseMessageBody(rawValue.request_body),
-      responseHeaders: this.parseMessageHeaders(rawValue.response_headers),
-      responseBody: this.parseMessageBody(rawValue.response_body),
-      clientIp: rawValue.client_ip,
-      status: rawValue.status,
-      score: rawValue.score,
-      startTime: rawValue.start_time,
-      finishTime: rawValue.finish_time,
-      connection: this.parseMessageConnection(rawValue.connection),
-      createdAt: new Date(rawValue.created_at)
+      campaignId: rawFullModel.campaign_id,
+      messageId: rawFullModel.message_id,
+      proxyId: rawFullModel.proxy_id,
+      targetId: rawFullModel.target_id,
+      sessionId: rawFullModel.session_id,
+      method: rawFullModel.method,
+      url: rawFullModel.url,
+      isStreaming: !!rawFullModel.is_streaming,
+      requestHeaders: this.parseHttpHeaders(rawFullModel.request_headers),
+      requestBody: this.decodeBase64(rawFullModel.request_body),
+      responseHeaders: this.parseHttpHeaders(rawFullModel.response_headers),
+      responseBody: this.decodeBase64(rawFullModel.response_body),
+      clientIp: rawFullModel.client_ip,
+      status: rawFullModel.status,
+      score: rawFullModel.score,
+      startTime: rawFullModel.start_time,
+      finishTime: rawFullModel.finish_time,
+      connection: this.parseHttpConnection(rawFullModel.connection),
+      createdAt: new Date(rawFullModel.created_at)
     }
   }
 
-  protected buildMessageCollection(rawValues: unknown): Array<MessageModel | null> {
-    this.validateArrayReply(rawValues)
+  protected parseHttpHeaders(value: string): HttpHeaders {
+    const data = this.decodeJson(value)
 
-    return rawValues.map((rawValue) => this.buildMessageModel(rawValue))
+    this.validateRawData<HttpHeaders>('database-message-headers', data)
+
+    return data
   }
 
-  protected validateRawMessage(value: unknown): asserts value is RawMessage {
-    try {
-      this.validator.assertSchema<RawMessage>('database-raw-message', value)
-    } catch (error) {
-      throw new DatabaseError(`RawMessage validate failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
+  protected parseHttpConnection(value: string): HttpConnection {
+    const data = this.decodeJson(value)
 
-  protected validateRawFullMessage(value: unknown): asserts value is RawFullMessage {
-    try {
-      this.validator.assertSchema<RawFullMessage>('database-raw-full-message', value)
-    } catch (error) {
-      throw new DatabaseError(`RawFullMessage validate failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
+    this.validateRawData<HttpConnection>('database-message-connection', data)
+
+    return data
   }
 }

@@ -7,7 +7,6 @@ import {
   REPL_SERVER,
   REPL_SERVER_ROUTER,
   ReplServer,
-  ReplServerApiCalls,
   ReplServerRouter
 } from '@famir/domain'
 import net from 'node:net'
@@ -39,30 +38,13 @@ export class NodeReplServer implements ReplServer {
   ) {
     this.options = this.buildOptions(config.data)
 
-    this.server = net.createServer()
-
-    this.server.on('connection', (socket) => {
-      this.logger.debug(`Server connection event`, {
-        socket: socket.address()
-      })
-
+    this.server = net.createServer((socket) => {
       this.handleServerConnection(socket)
     })
 
-    this.server.on('drop', (data) => {
-      this.logger.debug(`Server drop event`, {
-        socket:
-          data !== undefined
-            ? {
-                family: data.remoteFamily,
-                address: data.remoteAddress,
-                port: data.remotePort
-              }
-            : null
-      })
-    })
-
     this.server.maxConnections = this.options.maxClients
+
+    this.logger.debug(`ReplServer initialized`)
   }
 
   listen(): Promise<void> {
@@ -126,30 +108,20 @@ export class NodeReplServer implements ReplServer {
 
     socket.setTimeout(this.options.socketTimeout)
 
-    socket.on('close', (hadError) => {
-      this.logger.debug(`Socket close event`, {
-        socket: socket.address(),
-        hadError
-      })
-
+    socket.on('close', () => {
       this.clients.delete(socket)
     })
 
-    socket.on('error', (error) => {
-      this.logger.error(`Socket error event`, {
-        socket: socket.address(),
-        error: serializeError(error)
-      })
-
+    socket.on('timeout', () => {
       socket.destroy()
     })
 
-    socket.on('timeout', () => {
-      this.logger.debug(`Socket timeout event`, {
-        socket: socket.address()
-      })
-
+    socket.on('error', (error) => {
       socket.destroy()
+
+      this.logger.error(`ReplServer socket error`, {
+        error: serializeError(error)
+      })
     })
 
     const replServer = repl.start({
@@ -162,7 +134,7 @@ export class NodeReplServer implements ReplServer {
       preview: false,
       writer: (output) =>
         util.inspect(output, {
-          depth: null,
+          depth: 4,
           colors: this.options.useColors
         })
     })
@@ -185,28 +157,10 @@ export class NodeReplServer implements ReplServer {
   }
 
   protected defineReplContext(replServer: repl.REPLServer) {
-    const value: ReplServerApiCalls = {}
-
-    const apiCalls = this.router.getApiCalls()
-
-    Object.entries(apiCalls).forEach(([name, apiCall]) => {
-      value[name] = async (data: unknown): Promise<unknown> => {
-        try {
-          return await apiCall(data)
-        } catch (error) {
-          this.logger.error(`ReplServer ApiCall error`, {
-            error: serializeError(error)
-          })
-
-          throw error
-        }
-      }
-    })
-
     Object.defineProperty(replServer.context, 'famir', {
       configurable: false,
       enumerable: true,
-      value
+      value: this.router.resolve()
     })
   }
 
@@ -238,11 +192,11 @@ export class NodeReplServer implements ReplServer {
 
         socket.write(`Api calls:\n\n`)
 
-        socket.write(
-          util.inspect(this.router.getApiNames(), {
-            colors: this.options.useColors
-          })
-        )
+        //socket.write(
+        //  util.inspect(this.router.getApiNames(), {
+        //    colors: this.options.useColors
+        //  })
+        //)
 
         socket.write(`\n`)
 
@@ -262,3 +216,64 @@ export class NodeReplServer implements ReplServer {
     }
   }
 }
+
+/*
+
+    const api = this.router.resolve((name, apiCall, data) => {
+      try {
+        return await apiCall(data)
+      } catch (error) {
+        const raiseError = this.raiseApiCallError(error, name, data)
+
+        this.logger.error(`ReplServer apiCall error`, {
+          error: serializeError(raiseError)
+        })
+
+        throw raiseError
+      }
+    })
+
+
+
+    const value: ReplServerApiCalls = {}
+
+    const apiCalls = this.router.getApiCalls()
+
+    Object.entries(apiCalls).forEach(([name, apiCall]) => {
+      value[name] = async (data: unknown): Promise<unknown> => {
+        try {
+          return await apiCall(data)
+        } catch (error) {
+          const raiseError = this.raiseApiCallError(error, name, data)
+
+          this.logger.error(`ReplServer apiCall error`, {
+            error: serializeError(raiseError)
+          })
+
+          throw raiseError
+        }
+      }
+    })
+
+
+
+  protected raiseApiCallError(error: unknown, apiCall: string, data: unknown): ReplServerError {
+    if (error instanceof ReplServerError) {
+      error.context['apiCall'] = apiCall
+      error.context['data'] = data
+
+      return error
+    } else {
+      return new ReplServerError(`Server unknown error`, {
+        cause: error,
+        context: {
+          apiCall,
+          data
+        },
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+
+*/

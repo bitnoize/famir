@@ -1,12 +1,5 @@
 import { arrayIncludes } from '@famir/common'
-import {
-  Config,
-  DATABASE_STATUS_CODES,
-  DatabaseError,
-  DatabaseStatusCode,
-  Logger,
-  Validator
-} from '@famir/domain'
+import { Config, DATABASE_STATUS_CODES, DatabaseError, Logger, Validator } from '@famir/domain'
 import { DatabaseConfig, DatabaseRepositoryOptions } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 
@@ -52,7 +45,7 @@ export abstract class RedisBaseRepository {
     }
   }
 
-  protected parseStatusReply(value: unknown): [DatabaseStatusCode, string] {
+  protected handleStatusReply(value: unknown): string {
     if (!(value != null && typeof value === 'string' && value)) {
       throw new DatabaseError(`StatusReply validate failed`, {
         code: 'INTERNAL_ERROR'
@@ -67,10 +60,72 @@ export abstract class RedisBaseRepository {
       })
     }
 
-    return [code, message]
+    if (code !== 'OK') {
+      throw new DatabaseError(message, {
+        code
+      })
+    }
+
+    return message
   }
 
-  protected handleException(error: unknown, method: string, data: object | null): never {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  protected validateRawData<T>(schema: string, value: unknown): asserts value is T {
+    try {
+      this.validator.assertSchema<T>(schema, value)
+    } catch (error) {
+      throw new DatabaseError(`RawData validate failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected decodeJson(value: string): unknown {
+    try {
+      return JSON.parse(value)
+    } catch (error) {
+      throw new DatabaseError(`JSON decode failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected encodeJson(value: object): string {
+    try {
+      return JSON.stringify(value)
+    } catch (error) {
+      throw new DatabaseError(`JSON encode failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected decodeBase64(value: string): Buffer {
+    try {
+      return Buffer.from(value, 'base64')
+    } catch (error) {
+      throw new DatabaseError(`Base64 decode failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected encodeBase64(value: Buffer): string {
+    try {
+      return value.toString('base64')
+    } catch (error) {
+      throw new DatabaseError(`Base64 encode failed`, {
+        cause: error,
+        code: 'INTERNAL_ERROR'
+      })
+    }
+  }
+
+  protected raiseError(error: unknown, method: string, data: unknown): never {
     if (error instanceof DatabaseError) {
       error.context['repository'] = this.repositoryName
       error.context['method'] = method
@@ -78,7 +133,7 @@ export abstract class RedisBaseRepository {
 
       throw error
     } else {
-      throw new DatabaseError(`Service internal error`, {
+      throw new DatabaseError(`Service unknown error`, {
         cause: error,
         context: {
           repository: this.repositoryName,

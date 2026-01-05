@@ -45,35 +45,27 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     this.validator.addSchemas({
       'database-raw-proxy': rawProxySchema
     })
+
+    this.logger.debug(`ProxyRepository initialized`)
   }
 
   async create(campaignId: string, proxyId: string, url: string): Promise<ProxyModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.proxy.create_proxy(this.options.prefix, campaignId, proxyId, url),
 
         this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildProxyModel(rawValue)
-
-      if (!testProxyModel(model)) {
-        throw new DatabaseError(`Proxy lost on create`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { proxy: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'create', {
+      this.raiseError(error, 'create', {
         campaignId,
         proxyId,
         url
@@ -83,105 +75,75 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async read(campaignId: string, proxyId: string): Promise<ProxyModel | null> {
     try {
-      const rawValue = await this.connection.proxy.read_proxy(
+      const rawModel = await this.connection.proxy.read_proxy(
         this.options.prefix,
         campaignId,
         proxyId
       )
 
-      return this.buildProxyModel(rawValue)
+      return this.buildModel(rawModel)
     } catch (error) {
-      this.handleException(error, 'read', { campaignId, proxyId })
+      this.raiseError(error, 'read', { campaignId, proxyId })
     }
   }
 
   async enable(campaignId: string, proxyId: string): Promise<ProxyModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.proxy.enable_proxy(this.options.prefix, campaignId, proxyId),
 
         this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildProxyModel(rawValue)
-
-      if (!testProxyModel(model)) {
-        throw new DatabaseError(`Proxy lost on enable`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { proxy: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'enable', { campaignId, proxyId })
+      this.raiseError(error, 'enable', { campaignId, proxyId })
     }
   }
 
   async disable(campaignId: string, proxyId: string): Promise<ProxyModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.proxy.disable_proxy(this.options.prefix, campaignId, proxyId),
 
         this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildProxyModel(rawValue)
-
-      if (!testProxyModel(model)) {
-        throw new DatabaseError(`Proxy lost on disable`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { proxy: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'disable', { campaignId, proxyId })
+      this.raiseError(error, 'disable', { campaignId, proxyId })
     }
   }
 
   async delete(campaignId: string, proxyId: string): Promise<ProxyModel> {
     try {
-      const [rawValue, statusReply] = await Promise.all([
+      const [rawModel, statusReply] = await Promise.all([
         this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId),
 
         this.connection.proxy.delete_proxy(this.options.prefix, campaignId, proxyId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildProxyModel(rawValue)
-
-      if (!testProxyModel(model)) {
-        throw new DatabaseError(`Proxy lost on delete`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { proxy: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'delete', { campaignId, proxyId })
+      this.raiseError(error, 'delete', { campaignId, proxyId })
     }
   }
 
@@ -195,50 +157,51 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.validateArrayStringsReply(index)
 
-      const rawValues = await Promise.all(
+      const rawCollection = await Promise.all(
         index.map((proxyId) =>
           this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
         )
       )
 
-      return this.buildProxyCollection(rawValues).filter(testProxyModel)
+      return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleException(error, 'list', { campaignId })
+      this.raiseError(error, 'list', { campaignId })
     }
   }
 
-  protected buildProxyModel(rawValue: unknown): ProxyModel | null {
-    if (rawValue === null) {
+  protected buildModel(rawModel: unknown): ProxyModel | null {
+    if (rawModel === null) {
       return null
     }
 
-    this.validateRawProxy(rawValue)
+    this.validateRawData<RawProxy>('database-raw-proxy', rawModel)
 
     return {
-      campaignId: rawValue.campaign_id,
-      proxyId: rawValue.proxy_id,
-      url: rawValue.url,
-      isEnabled: !!rawValue.is_enabled,
-      messageCount: rawValue.message_count,
-      createdAt: new Date(rawValue.created_at),
-      updatedAt: new Date(rawValue.updated_at)
+      campaignId: rawModel.campaign_id,
+      proxyId: rawModel.proxy_id,
+      url: rawModel.url,
+      isEnabled: !!rawModel.is_enabled,
+      messageCount: rawModel.message_count,
+      createdAt: new Date(rawModel.created_at),
+      updatedAt: new Date(rawModel.updated_at)
     }
   }
 
-  protected buildProxyCollection(rawValues: unknown): Array<ProxyModel | null> {
-    this.validateArrayReply(rawValues)
+  protected buildModelStrict(rawModel: unknown): ProxyModel {
+    const model = this.buildModel(rawModel)
 
-    return rawValues.map((rawValue) => this.buildProxyModel(rawValue))
-  }
-
-  protected validateRawProxy(value: unknown): asserts value is RawProxy {
-    try {
-      this.validator.assertSchema<RawProxy>('database-raw-proxy', value)
-    } catch (error) {
-      throw new DatabaseError(`RawProxy validate failed`, {
-        cause: error,
+    if (!testProxyModel(model)) {
+      throw new DatabaseError(`Proxy unexpected lost`, {
         code: 'INTERNAL_ERROR'
       })
     }
+
+    return model
+  }
+
+  protected buildCollection(rawCollection: unknown): ProxyModel[] {
+    this.validateArrayReply(rawCollection)
+
+    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(testProxyModel)
   }
 }

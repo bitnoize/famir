@@ -45,6 +45,8 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     this.validator.addSchemas({
       'database-raw-session': rawSessionSchema
     })
+
+    this.logger.debug(`SessionRepository initialized`)
   }
 
   async create(campaignId: string): Promise<SessionModel> {
@@ -52,75 +54,55 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     const secret = randomIdent()
 
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.session.create_session(this.options.prefix, campaignId, sessionId, secret),
 
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildSessionModel(rawValue)
-
-      if (!testSessionModel(model)) {
-        throw new DatabaseError(`Session lost on create`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { session: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'create', { campaignId, sessionId })
+      this.raiseError(error, 'create', { campaignId, sessionId })
     }
   }
 
   async read(campaignId: string, sessionId: string): Promise<SessionModel | null> {
     try {
-      const rawValue = await this.connection.session.read_session(
+      const rawModel = await this.connection.session.read_session(
         this.options.prefix,
         campaignId,
         sessionId
       )
 
-      return this.buildSessionModel(rawValue)
+      return this.buildModel(rawModel)
     } catch (error) {
-      this.handleException(error, 'read', { campaignId, sessionId })
+      this.raiseError(error, 'read', { campaignId, sessionId })
     }
   }
 
   async auth(campaignId: string, sessionId: string): Promise<SessionModel | null> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.session.auth_session(this.options.prefix, campaignId, sessionId),
 
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildSessionModel(rawValue)
-
-      if (!testSessionModel(model)) {
-        throw new DatabaseError(`Session lost on auth`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { session: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'auth', { campaignId, sessionId })
+      this.raiseError(error, 'auth', { campaignId, sessionId })
     }
   }
 
@@ -139,53 +121,44 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         secret
       )
 
-      const [code, message] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
+      const message = this.handleStatusReply(statusReply)
 
       this.logger.info(message)
 
       return
     } catch (error) {
-      this.handleException(error, 'upgrade', { campaignId, lureId, sessionId })
+      this.raiseError(error, 'upgrade', { campaignId, lureId, sessionId })
     }
   }
 
-  protected buildSessionModel(rawValue: unknown): SessionModel | null {
-    if (rawValue === null) {
+  protected buildModel(rawModel: unknown): SessionModel | null {
+    if (rawModel === null) {
       return null
     }
 
-    this.validateRawSession(rawValue)
+    this.validateRawData<RawSession>('database-raw-session', rawModel)
 
     return {
-      campaignId: rawValue.campaign_id,
-      sessionId: rawValue.session_id,
-      proxyId: rawValue.proxy_id,
-      secret: rawValue.secret,
-      isLanding: !!rawValue.is_landing,
-      messageCount: rawValue.message_count,
-      createdAt: new Date(rawValue.created_at),
-      lastAuthAt: new Date(rawValue.last_auth_at)
+      campaignId: rawModel.campaign_id,
+      sessionId: rawModel.session_id,
+      proxyId: rawModel.proxy_id,
+      secret: rawModel.secret,
+      isLanding: !!rawModel.is_landing,
+      messageCount: rawModel.message_count,
+      createdAt: new Date(rawModel.created_at),
+      lastAuthAt: new Date(rawModel.last_auth_at)
     }
   }
 
-  protected buildSessionCollection(rawValues: unknown): Array<SessionModel | null> {
-    this.validateArrayReply(rawValues)
+  protected buildModelStrict(rawModel: unknown): SessionModel {
+    const model = this.buildModel(rawModel)
 
-    return rawValues.map((rawValue) => this.buildSessionModel(rawValue))
-  }
-
-  protected validateRawSession(value: unknown): asserts value is RawSession {
-    try {
-      this.validator.assertSchema<RawSession>('database-raw-session', value)
-    } catch (error) {
-      throw new DatabaseError(`RawSession validate failed`, {
-        cause: error,
+    if (!testSessionModel(model)) {
+      throw new DatabaseError(`Session unexpected lost`, {
         code: 'INTERNAL_ERROR'
       })
     }
+
+    return model
   }
 }

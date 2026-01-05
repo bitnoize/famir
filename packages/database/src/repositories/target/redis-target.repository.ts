@@ -47,6 +47,8 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       'database-raw-target': rawTargetSchema,
       'database-raw-full-target': rawFullTargetSchema
     })
+
+    this.logger.debug(`TargetRepository initialized`)
   }
 
   async create(
@@ -72,7 +74,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     sitemapXml: string
   ): Promise<TargetModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.target.create_target(
           this.options.prefix,
           campaignId,
@@ -100,39 +102,29 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildTargetModel(rawValue)
-
-      if (!testTargetModel(model)) {
-        throw new DatabaseError(`Target lost on create`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'create', { campaignId, targetId })
+      this.raiseError(error, 'create', { campaignId, targetId })
     }
   }
 
   async read(campaignId: string, targetId: string): Promise<FullTargetModel | null> {
     try {
-      const rawValue = await this.connection.target.read_full_target(
+      const rawFullModel = await this.connection.target.read_full_target(
         this.options.prefix,
         campaignId,
         targetId
       )
 
-      return this.buildFullTargetModel(rawValue)
+      return this.buildFullModel(rawFullModel)
     } catch (error) {
-      this.handleException(error, 'read', { campaignId, targetId })
+      this.raiseError(error, 'read', { campaignId, targetId })
     }
   }
 
@@ -151,7 +143,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     sitemapXml: string | null | undefined
   ): Promise<TargetModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.target.update_target(
           this.options.prefix,
           campaignId,
@@ -171,91 +163,61 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildTargetModel(rawValue)
-
-      if (!testTargetModel(model)) {
-        throw new DatabaseError(`Target lost on update`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'update', { campaignId, targetId })
+      this.raiseError(error, 'update', { campaignId, targetId })
     }
   }
 
   async enable(campaignId: string, targetId: string): Promise<TargetModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.target.enable_target(this.options.prefix, campaignId, targetId),
 
         this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildTargetModel(rawValue)
-
-      if (!testTargetModel(model)) {
-        throw new DatabaseError(`Target lost on enable`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'enable', { campaignId, targetId })
+      this.raiseError(error, 'enable', { campaignId, targetId })
     }
   }
 
   async disable(campaignId: string, targetId: string): Promise<TargetModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.target.disable_target(this.options.prefix, campaignId, targetId),
 
         this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildTargetModel(rawValue)
-
-      if (!testTargetModel(model)) {
-        throw new DatabaseError(`Target lost on disable`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'disable', { campaignId, targetId })
+      this.raiseError(error, 'disable', { campaignId, targetId })
     }
   }
 
   async appendLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.target.append_target_label(
           this.options.prefix,
           campaignId,
@@ -266,31 +228,21 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildTargetModel(rawValue)
-
-      if (!testTargetModel(model)) {
-        throw new DatabaseError(`Target lost on append label`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'appendLabel', { campaignId, targetId, label })
+      this.raiseError(error, 'appendLabel', { campaignId, targetId, label })
     }
   }
 
   async removeLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.target.remove_target_label(
           this.options.prefix,
           campaignId,
@@ -301,55 +253,35 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.connection.target.read_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildTargetModel(rawValue)
-
-      if (!testTargetModel(model)) {
-        throw new DatabaseError(`Target lost on remove label`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'removeLabel', { campaignId, targetId, label })
+      this.raiseError(error, 'removeLabel', { campaignId, targetId, label })
     }
   }
 
   async delete(campaignId: string, targetId: string): Promise<TargetModel> {
     try {
-      const [rawValue, statusReply] = await Promise.all([
+      const [rawModel, statusReply] = await Promise.all([
         this.connection.target.read_target(this.options.prefix, campaignId, targetId),
 
         this.connection.target.delete_target(this.options.prefix, campaignId, targetId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildTargetModel(rawValue)
-
-      if (!testTargetModel(model)) {
-        throw new DatabaseError(`Target lost on delete`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { target: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'delete', { campaignId, targetId })
+      this.raiseError(error, 'delete', { campaignId, targetId })
     }
   }
 
@@ -363,104 +295,94 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.validateArrayStringsReply(index)
 
-      const rawValues = await Promise.all(
+      const rawCollection = await Promise.all(
         index.map((targetId) =>
           this.connection.target.read_target(this.options.prefix, campaignId, targetId)
         )
       )
 
-      return this.buildTargetCollection(rawValues).filter(testTargetModel)
+      return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleException(error, 'list', { campaignId })
+      this.raiseError(error, 'list', { campaignId })
     }
   }
 
-  protected buildTargetModel(rawValue: unknown): TargetModel | null {
-    if (rawValue === null) {
+  protected buildModel(rawModel: unknown): TargetModel | null {
+    if (rawModel === null) {
       return null
     }
 
-    this.validateRawTarget(rawValue)
+    this.validateRawData<RawTarget>('database-raw-target', rawModel)
 
     return {
-      campaignId: rawValue.campaign_id,
-      targetId: rawValue.target_id,
-      isLanding: !!rawValue.is_landing,
-      donorSecure: !!rawValue.donor_secure,
-      donorSub: rawValue.donor_sub,
-      donorDomain: rawValue.donor_domain,
-      donorPort: rawValue.donor_port,
-      mirrorSecure: !!rawValue.mirror_secure,
-      mirrorSub: rawValue.mirror_sub,
-      mirrorPort: rawValue.mirror_port,
-      isEnabled: !!rawValue.is_enabled,
-      messageCount: rawValue.message_count,
-      createdAt: new Date(rawValue.created_at),
-      updatedAt: new Date(rawValue.updated_at)
+      campaignId: rawModel.campaign_id,
+      targetId: rawModel.target_id,
+      isLanding: !!rawModel.is_landing,
+      donorSecure: !!rawModel.donor_secure,
+      donorSub: rawModel.donor_sub,
+      donorDomain: rawModel.donor_domain,
+      donorPort: rawModel.donor_port,
+      mirrorSecure: !!rawModel.mirror_secure,
+      mirrorSub: rawModel.mirror_sub,
+      mirrorPort: rawModel.mirror_port,
+      isEnabled: !!rawModel.is_enabled,
+      messageCount: rawModel.message_count,
+      createdAt: new Date(rawModel.created_at),
+      updatedAt: new Date(rawModel.updated_at)
     }
   }
 
-  protected buildFullTargetModel(rawValue: unknown): FullTargetModel | null {
-    if (rawValue === null) {
+  protected buildModelStrict(rawModel: unknown): TargetModel {
+    const model = this.buildModel(rawModel)
+
+    if (!testTargetModel(model)) {
+      throw new DatabaseError(`Target unexpected lost`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+
+    return model
+  }
+
+  protected buildFullModel(rawFullModel: unknown): FullTargetModel | null {
+    if (rawFullModel === null) {
       return null
     }
 
-    this.validateRawFullTarget(rawValue)
+    this.validateRawData<RawFullTarget>('database-raw-full-target', rawFullModel)
 
     return {
-      campaignId: rawValue.campaign_id,
-      targetId: rawValue.target_id,
-      isLanding: !!rawValue.is_landing,
-      donorSecure: !!rawValue.donor_secure,
-      donorSub: rawValue.donor_sub,
-      donorDomain: rawValue.donor_domain,
-      donorPort: rawValue.donor_port,
-      mirrorSecure: !!rawValue.mirror_secure,
-      mirrorSub: rawValue.mirror_sub,
-      mirrorPort: rawValue.mirror_port,
-      labels: rawValue.labels,
-      connectTimeout: rawValue.connect_timeout,
-      ordinaryTimeout: rawValue.ordinary_timeout,
-      streamingTimeout: rawValue.streaming_timeout,
-      requestBodyLimit: rawValue.request_body_limit,
-      responseBodyLimit: rawValue.response_body_limit,
-      mainPage: rawValue.main_page,
-      notFoundPage: rawValue.not_found_page,
-      faviconIco: rawValue.favicon_ico,
-      robotsTxt: rawValue.robots_txt,
-      sitemapXml: rawValue.sitemap_xml,
-      isEnabled: !!rawValue.is_enabled,
-      messageCount: rawValue.message_count,
-      createdAt: new Date(rawValue.created_at),
-      updatedAt: new Date(rawValue.updated_at)
+      campaignId: rawFullModel.campaign_id,
+      targetId: rawFullModel.target_id,
+      isLanding: !!rawFullModel.is_landing,
+      donorSecure: !!rawFullModel.donor_secure,
+      donorSub: rawFullModel.donor_sub,
+      donorDomain: rawFullModel.donor_domain,
+      donorPort: rawFullModel.donor_port,
+      mirrorSecure: !!rawFullModel.mirror_secure,
+      mirrorSub: rawFullModel.mirror_sub,
+      mirrorPort: rawFullModel.mirror_port,
+      labels: rawFullModel.labels,
+      connectTimeout: rawFullModel.connect_timeout,
+      ordinaryTimeout: rawFullModel.ordinary_timeout,
+      streamingTimeout: rawFullModel.streaming_timeout,
+      requestBodyLimit: rawFullModel.request_body_limit,
+      responseBodyLimit: rawFullModel.response_body_limit,
+      mainPage: rawFullModel.main_page,
+      notFoundPage: rawFullModel.not_found_page,
+      faviconIco: rawFullModel.favicon_ico,
+      robotsTxt: rawFullModel.robots_txt,
+      sitemapXml: rawFullModel.sitemap_xml,
+      isEnabled: !!rawFullModel.is_enabled,
+      messageCount: rawFullModel.message_count,
+      createdAt: new Date(rawFullModel.created_at),
+      updatedAt: new Date(rawFullModel.updated_at)
     }
   }
 
-  protected buildTargetCollection(rawValues: unknown): Array<TargetModel | null> {
-    this.validateArrayReply(rawValues)
+  protected buildCollection(rawCollection: unknown): TargetModel[] {
+    this.validateArrayReply(rawCollection)
 
-    return rawValues.map((rawValue) => this.buildTargetModel(rawValue))
-  }
-
-  protected validateRawTarget(value: unknown): asserts value is RawTarget {
-    try {
-      this.validator.assertSchema<RawTarget>('database-raw-target', value)
-    } catch (error) {
-      throw new DatabaseError(`RawTarget validate failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected validateRawFullTarget(value: unknown): asserts value is RawFullTarget {
-    try {
-      this.validator.assertSchema<RawFullTarget>('database-raw-full-target', value)
-    } catch (error) {
-      throw new DatabaseError(`RawFullTarget validate failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
+    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(testTargetModel)
   }
 }

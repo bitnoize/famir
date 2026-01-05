@@ -68,120 +68,43 @@ export class LureController extends BaseController {
     this.router.addApiCall('disableLure', this.disableLureApiCall)
     this.router.addApiCall('deleteLure', this.deleteLureApiCall)
     this.router.addApiCall('listLures', this.listLuresApiCall)
+
+    this.logger.debug(`LureController initialized`)
   }
 
   private createLureApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateCreateLureData(data)
+    this.validateApiCallData<CreateLureData>('console-create-lure-data', data)
 
-      return await this.lureService.createLure(data)
-    } catch (error) {
-      this.handleException(error, 'createLure', data)
-    }
+    return await this.lureService.createLure(data)
   }
 
   private readLureApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateReadLureData(data)
+    this.validateApiCallData<ReadLureData>('console-read-lure-data', data)
 
-      return await this.lureService.readLure(data)
-    } catch (error) {
-      this.handleException(error, 'readLure', data)
-    }
+    return await this.lureService.readLure(data)
   }
 
   private enableLureApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateSwitchLureData(data)
+    this.validateApiCallData<SwitchLureData>('console-switch-lure-data', data)
 
-      return await this.lureService.enableLure(data)
-    } catch (error) {
-      this.handleException(error, 'enableLure', data)
-    }
+    return await this.lureService.enableLure(data)
   }
 
   private disableLureApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateSwitchLureData(data)
+    this.validateApiCallData<SwitchLureData>('console-switch-lure-data', data)
 
-      return await this.lureService.disableLure(data)
-    } catch (error) {
-      this.handleException(error, 'disableLure', data)
-    }
+    return await this.lureService.disableLure(data)
   }
 
   private deleteLureApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateDeleteLureData(data)
+    this.validateApiCallData<DeleteLureData>('console-delete-lure-data', data)
 
-      return await this.lureService.deleteLure(data)
-    } catch (error) {
-      this.handleException(error, 'deleteLure', data)
-    }
+    return await this.lureService.deleteLure(data)
   }
 
   private listLuresApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateListLuresData(data)
+    this.validateApiCallData<ListLuresData>('console-list-lures-data', data)
 
-      return await this.lureService.listLures(data)
-    } catch (error) {
-      this.handleException(error, 'listLures', data)
-    }
-  }
-
-  private validateCreateLureData(value: unknown): asserts value is CreateLureData {
-    try {
-      this.validator.assertSchema<CreateLureData>('console-create-lure-data', value)
-    } catch (error) {
-      throw new ReplServerError(`CreateLureData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateReadLureData(value: unknown): asserts value is ReadLureData {
-    try {
-      this.validator.assertSchema<ReadLureData>('console-read-lure-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ReadLureData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateSwitchLureData(value: unknown): asserts value is SwitchLureData {
-    try {
-      this.validator.assertSchema<SwitchLureData>('console-switch-lure-data', value)
-    } catch (error) {
-      throw new ReplServerError(`SwitchLureData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateDeleteLureData(value: unknown): asserts value is DeleteLureData {
-    try {
-      this.validator.assertSchema<DeleteLureData>('console-delete-lure-data', value)
-    } catch (error) {
-      throw new ReplServerError(`DeleteLureData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateListLuresData(value: unknown): asserts value is ListLuresData {
-    try {
-      this.validator.assertSchema<ListLuresData>('console-list-lures-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ListLuresData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
+    return await this.lureService.listLures(data)
   }
 }

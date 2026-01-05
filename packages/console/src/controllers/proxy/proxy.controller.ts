@@ -68,120 +68,43 @@ export class ProxyController extends BaseController {
     this.router.addApiCall('disableProxy', this.disableProxyApiCall)
     this.router.addApiCall('deleteProxy', this.deleteProxyApiCall)
     this.router.addApiCall('listProxies', this.listProxiesApiCall)
+
+    this.logger.debug(`MessageController initialized`)
   }
 
   private createProxyApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateCreateProxyData(data)
+    this.validateApiCallData<CreateProxyData>('console-create-proxy-data', data)
 
-      return await this.proxyService.createProxy(data)
-    } catch (error) {
-      this.handleException(error, 'createProxy', data)
-    }
+    return await this.proxyService.createProxy(data)
   }
 
   private readProxyApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateReadProxyData(data)
+    this.validateApiCallData<ReadProxyData>('console-read-proxy-data', data)
 
-      return await this.proxyService.readProxy(data)
-    } catch (error) {
-      this.handleException(error, 'readProxy', data)
-    }
+    return await this.proxyService.readProxy(data)
   }
 
   private enableProxyApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateSwitchProxyData(data)
+    this.validateApiCallData<SwitchProxyData>('console-switch-proxy-data', data)
 
-      return await this.proxyService.enableProxy(data)
-    } catch (error) {
-      this.handleException(error, 'enableProxy', data)
-    }
+    return await this.proxyService.enableProxy(data)
   }
 
   private disableProxyApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateSwitchProxyData(data)
+    this.validateApiCallData<SwitchProxyData>('console-switch-proxy-data', data)
 
-      return await this.proxyService.disableProxy(data)
-    } catch (error) {
-      this.handleException(error, 'disableProxy', data)
-    }
+    return await this.proxyService.disableProxy(data)
   }
 
   private deleteProxyApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateDeleteProxyData(data)
+    this.validateApiCallData<DeleteProxyData>('console-delete-proxy-data', data)
 
-      return await this.proxyService.deleteProxy(data)
-    } catch (error) {
-      this.handleException(error, 'deleteProxy', data)
-    }
+    return await this.proxyService.deleteProxy(data)
   }
 
   private listProxiesApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateListProxiesData(data)
+    this.validateApiCallData<ListProxiesData>('console-list-proxies-data', data)
 
-      return await this.proxyService.listProxies(data)
-    } catch (error) {
-      this.handleException(error, 'listProxies', data)
-    }
-  }
-
-  private validateCreateProxyData(value: unknown): asserts value is CreateProxyData {
-    try {
-      this.validator.assertSchema<CreateProxyData>('console-create-proxy-data', value)
-    } catch (error) {
-      throw new ReplServerError(`CreateProxyData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateReadProxyData(value: unknown): asserts value is ReadProxyData {
-    try {
-      this.validator.assertSchema<ReadProxyData>('console-read-proxy-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ReadProxyData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateSwitchProxyData(value: unknown): asserts value is SwitchProxyData {
-    try {
-      this.validator.assertSchema<SwitchProxyData>('console-switch-proxy-data', value)
-    } catch (error) {
-      throw new ReplServerError(`SwitchProxyData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateDeleteProxyData(value: unknown): asserts value is DeleteProxyData {
-    try {
-      this.validator.assertSchema<DeleteProxyData>('console-delete-proxy-data', value)
-    } catch (error) {
-      throw new ReplServerError(`DeleteProxyData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateListProxiesData(value: unknown): asserts value is ListProxiesData {
-    try {
-      this.validator.assertSchema<ListProxiesData>('console-list-proxies-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ListProxiesData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
+    return await this.proxyService.listProxies(data)
   }
 }

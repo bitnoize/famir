@@ -77,172 +77,61 @@ export class TargetController extends BaseController {
     this.router.addApiCall('removeTargetLabel', this.removeTargetLabelApiCall)
     this.router.addApiCall('deleteTarget', this.deleteTargetApiCall)
     this.router.addApiCall('listTargets', this.listTargetsApiCall)
+
+    this.logger.debug(`TargetController initialized`)
   }
 
   private createTargetApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateCreateTargetData(data)
+    this.validateApiCallData<CreateTargetData>('console-create-target-data', data)
 
-      return await this.targetService.createTarget(data)
-    } catch (error) {
-      this.handleException(error, 'createTarget', data)
-    }
+    return await this.targetService.createTarget(data)
   }
 
   private readTargetApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateReadTargetData(data)
+    this.validateApiCallData<ReadTargetData>('console-read-target-data', data)
 
-      return await this.targetService.readTarget(data)
-    } catch (error) {
-      this.handleException(error, 'readTarget', data)
-    }
+    return await this.targetService.readTarget(data)
   }
 
   private updateTargetApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateUpdateTargetData(data)
+    this.validateApiCallData<UpdateTargetData>('console-update-target-data', data)
 
-      return await this.targetService.updateTarget(data)
-    } catch (error) {
-      this.handleException(error, 'updateTarget', data)
-    }
+    return await this.targetService.updateTarget(data)
   }
 
   private enableTargetApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateSwitchTargetData(data)
+    this.validateApiCallData<UpdateTargetData>('console-switch-target-data', data)
 
-      return await this.targetService.enableTarget(data)
-    } catch (error) {
-      this.handleException(error, 'enableTarget', data)
-    }
+    return await this.targetService.enableTarget(data)
   }
 
   private disableTargetApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateSwitchTargetData(data)
+    this.validateApiCallData<UpdateTargetData>('console-switch-target-data', data)
 
-      return await this.targetService.disableTarget(data)
-    } catch (error) {
-      this.handleException(error, 'disableTarget', data)
-    }
+    return await this.targetService.disableTarget(data)
   }
 
   private appendTargetLabelApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateActionTargetLabelData(data)
+    this.validateApiCallData<ActionTargetLabelData>('console-action-target-label-data', data)
 
-      return await this.targetService.appendTargetLabel(data)
-    } catch (error) {
-      this.handleException(error, 'appendTargetLabel', data)
-    }
+    return await this.targetService.appendTargetLabel(data)
   }
 
   private removeTargetLabelApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateActionTargetLabelData(data)
+    this.validateApiCallData<ActionTargetLabelData>('console-action-target-label-data', data)
 
-      return await this.targetService.removeTargetLabel(data)
-    } catch (error) {
-      this.handleException(error, 'removeTargetLabel', data)
-    }
+    return await this.targetService.removeTargetLabel(data)
   }
 
   private deleteTargetApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateDeleteTargetData(data)
+    this.validateApiCallData<DeleteTargetData>('console-delete-target-data', data)
 
-      return await this.targetService.deleteTarget(data)
-    } catch (error) {
-      this.handleException(error, 'deleteTarget', data)
-    }
+    return await this.targetService.deleteTarget(data)
   }
 
   private listTargetsApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateListTargetsData(data)
+    this.validateApiCallData<ListTargetsData>('console-list-targets-data', data)
 
-      return await this.targetService.listTargets(data)
-    } catch (error) {
-      this.handleException(error, 'listTargets', data)
-    }
-  }
-
-  private validateCreateTargetData(value: unknown): asserts value is CreateTargetData {
-    try {
-      this.validator.assertSchema<CreateTargetData>('console-create-target-data', value)
-    } catch (error) {
-      throw new ReplServerError(`CreateTargetData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateReadTargetData(value: unknown): asserts value is ReadTargetData {
-    try {
-      this.validator.assertSchema<ReadTargetData>('console-read-target-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ReadTargetData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateUpdateTargetData(value: unknown): asserts value is UpdateTargetData {
-    try {
-      this.validator.assertSchema<UpdateTargetData>('console-update-target-data', value)
-    } catch (error) {
-      throw new ReplServerError(`UpdateTargetData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateSwitchTargetData(value: unknown): asserts value is SwitchTargetData {
-    try {
-      this.validator.assertSchema<SwitchTargetData>('console-switch-target-data', value)
-    } catch (error) {
-      throw new ReplServerError(`SwitchTargetData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateActionTargetLabelData(value: unknown): asserts value is ActionTargetLabelData {
-    try {
-      this.validator.assertSchema<ActionTargetLabelData>('console-action-target-label-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ActionTargetLabelData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateDeleteTargetData(value: unknown): asserts value is DeleteTargetData {
-    try {
-      this.validator.assertSchema<DeleteTargetData>('console-delete-target-data', value)
-    } catch (error) {
-      throw new ReplServerError(`DeleteTargetData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateListTargetsData(value: unknown): asserts value is ListTargetsData {
-    try {
-      this.validator.assertSchema<ListTargetsData>('console-list-targets-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ListTargetsData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
+    return await this.targetService.listTargets(data)
   }
 }

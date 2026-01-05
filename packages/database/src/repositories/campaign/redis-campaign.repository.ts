@@ -47,6 +47,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       'database-raw-campaign': rawCampaignSchema,
       'database-raw-full-campaign': rawFullCampaignSchema
     })
+
+    this.logger.debug(`CampaignRepository initialized`)
   }
 
   async create(
@@ -62,7 +64,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     messageExpire: number
   ): Promise<CampaignModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.campaign.create_campaign(
           this.options.prefix,
           campaignId,
@@ -80,38 +82,28 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         this.connection.campaign.read_campaign(this.options.prefix, campaignId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildCampaignModel(rawValue)
-
-      if (!testCampaignModel(model)) {
-        throw new DatabaseError(`Campaign lost on create`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { campaign: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'create', { campaignId, mirrorDomain })
+      this.raiseError(error, 'create', { campaignId, mirrorDomain })
     }
   }
 
   async read(campaignId: string): Promise<FullCampaignModel | null> {
     try {
-      const rawValue = await this.connection.campaign.read_full_campaign(
+      const rawFullModel = await this.connection.campaign.read_full_campaign(
         this.options.prefix,
         campaignId
       )
 
-      return this.buildFullCampaignModel(rawValue)
+      return this.buildFullModel(rawFullModel)
     } catch (error) {
-      this.handleException(error, 'read', { campaignId })
+      this.raiseError(error, 'read', { campaignId })
     }
   }
 
@@ -123,7 +115,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     messageExpire: number | null | undefined
   ): Promise<CampaignModel> {
     try {
-      const [statusReply, rawValue] = await Promise.all([
+      const [statusReply, rawModel] = await Promise.all([
         this.connection.campaign.update_campaign(
           this.options.prefix,
           campaignId,
@@ -136,55 +128,35 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         this.connection.campaign.read_campaign(this.options.prefix, campaignId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildCampaignModel(rawValue)
-
-      if (!testCampaignModel(model)) {
-        throw new DatabaseError(`Campaign lost on update`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { campaign: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'update', { campaignId })
+      this.raiseError(error, 'update', { campaignId })
     }
   }
 
   async delete(campaignId: string): Promise<CampaignModel> {
     try {
-      const [rawValue, statusReply] = await Promise.all([
+      const [rawModel, statusReply] = await Promise.all([
         this.connection.campaign.read_campaign(this.options.prefix, campaignId),
 
         this.connection.campaign.delete_campaign(this.options.prefix, campaignId)
       ])
 
-      const [code, message] = this.parseStatusReply(statusReply)
+      const message = this.handleStatusReply(statusReply)
 
-      if (code !== 'OK') {
-        throw new DatabaseError(message, { code })
-      }
-
-      const model = this.buildCampaignModel(rawValue)
-
-      if (!testCampaignModel(model)) {
-        throw new DatabaseError(`Campaign lost on delete`, {
-          code: 'INTERNAL_ERROR'
-        })
-      }
+      const model = this.buildModelStrict(rawModel)
 
       this.logger.info(message, { campaign: model })
 
       return model
     } catch (error) {
-      this.handleException(error, 'delete', { campaignId })
+      this.raiseError(error, 'delete', { campaignId })
     }
   }
 
@@ -194,89 +166,79 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.validateArrayStringsReply(index)
 
-      const rawValues = await Promise.all(
+      const rawCollection = await Promise.all(
         index.map((campaignId) =>
           this.connection.campaign.read_campaign(this.options.prefix, campaignId)
         )
       )
 
-      return this.buildCampaignCollection(rawValues).filter(testCampaignModel)
+      return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleException(error, 'list', null)
+      this.raiseError(error, 'list', null)
     }
   }
 
-  protected buildCampaignModel(rawValue: unknown): CampaignModel | null {
-    if (rawValue === null) {
+  protected buildModel(rawModel: unknown): CampaignModel | null {
+    if (rawModel === null) {
       return null
     }
 
-    this.validateRawCampaign(rawValue)
+    this.validateRawData<RawCampaign>('database-raw-campaign', rawModel)
 
     return {
-      campaignId: rawValue.campaign_id,
-      mirrorDomain: rawValue.mirror_domain,
-      sessionCount: rawValue.session_count,
-      messageCount: rawValue.message_count,
-      createdAt: new Date(rawValue.created_at),
-      updatedAt: new Date(rawValue.updated_at)
+      campaignId: rawModel.campaign_id,
+      mirrorDomain: rawModel.mirror_domain,
+      sessionCount: rawModel.session_count,
+      messageCount: rawModel.message_count,
+      createdAt: new Date(rawModel.created_at),
+      updatedAt: new Date(rawModel.updated_at)
     }
   }
 
-  protected buildFullCampaignModel(rawValue: unknown): FullCampaignModel | null {
-    if (rawValue === null) {
+  protected buildModelStrict(rawModel: unknown): CampaignModel {
+    const model = this.buildModel(rawModel)
+
+    if (!testCampaignModel(model)) {
+      throw new DatabaseError(`Campaign unexpected lost`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+
+    return model
+  }
+
+  protected buildFullModel(rawFullModel: unknown): FullCampaignModel | null {
+    if (rawFullModel === null) {
       return null
     }
 
-    this.validateRawFullCampaign(rawValue)
+    this.validateRawData<RawFullCampaign>('database-raw-full-campaign', rawFullModel)
 
     return {
-      campaignId: rawValue.campaign_id,
-      mirrorDomain: rawValue.mirror_domain,
-      description: rawValue.description,
-      landingUpgradePath: rawValue.landing_upgrade_path,
-      landingUpgradeParam: rawValue.landing_upgrade_param,
-      landingRedirectorParam: rawValue.landing_redirector_param,
-      sessionCookieName: rawValue.session_cookie_name,
-      sessionExpire: rawValue.session_expire,
-      newSessionExpire: rawValue.new_session_expire,
-      messageExpire: rawValue.message_expire,
-      proxyCount: rawValue.proxy_count,
-      targetCount: rawValue.target_count,
-      redirectorCount: rawValue.redirector_count,
-      lureCount: rawValue.lure_count,
-      sessionCount: rawValue.session_count,
-      messageCount: rawValue.message_count,
-      createdAt: new Date(rawValue.created_at),
-      updatedAt: new Date(rawValue.updated_at)
+      campaignId: rawFullModel.campaign_id,
+      mirrorDomain: rawFullModel.mirror_domain,
+      description: rawFullModel.description,
+      landingUpgradePath: rawFullModel.landing_upgrade_path,
+      landingUpgradeParam: rawFullModel.landing_upgrade_param,
+      landingRedirectorParam: rawFullModel.landing_redirector_param,
+      sessionCookieName: rawFullModel.session_cookie_name,
+      sessionExpire: rawFullModel.session_expire,
+      newSessionExpire: rawFullModel.new_session_expire,
+      messageExpire: rawFullModel.message_expire,
+      proxyCount: rawFullModel.proxy_count,
+      targetCount: rawFullModel.target_count,
+      redirectorCount: rawFullModel.redirector_count,
+      lureCount: rawFullModel.lure_count,
+      sessionCount: rawFullModel.session_count,
+      messageCount: rawFullModel.message_count,
+      createdAt: new Date(rawFullModel.created_at),
+      updatedAt: new Date(rawFullModel.updated_at)
     }
   }
 
-  protected buildCampaignCollection(rawValues: unknown): Array<CampaignModel | null> {
-    this.validateArrayReply(rawValues)
+  protected buildCollection(rawCollection: unknown): CampaignModel[] {
+    this.validateArrayReply(rawCollection)
 
-    return rawValues.map((rawValue) => this.buildCampaignModel(rawValue))
-  }
-
-  protected validateRawCampaign(value: unknown): asserts value is RawCampaign {
-    try {
-      this.validator.assertSchema<RawCampaign>('database-raw-campaign', value)
-    } catch (error) {
-      throw new DatabaseError(`RawCampaign validate failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-  protected validateRawFullCampaign(value: unknown): asserts value is RawFullCampaign {
-    try {
-      this.validator.assertSchema<RawFullCampaign>('database-raw-full-campaign', value)
-    } catch (error) {
-      throw new DatabaseError(`RawFullCampaign validate failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR'
-      })
-    }
+    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(testCampaignModel)
   }
 }

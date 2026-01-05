@@ -1,11 +1,11 @@
 import { DIContainer } from '@famir/common'
 import { HTTP_SERVER_ROUTER, HttpServerMiddleware, HttpServerRouter } from '@famir/domain'
 
-export class ImplHttpServerRouter implements HttpServerRouter {
+export class SimpleHttpServerRouter implements HttpServerRouter {
   static inject(container: DIContainer) {
     container.registerSingleton<HttpServerRouter>(
       HTTP_SERVER_ROUTER,
-      () => new ImplHttpServerRouter()
+      () => new SimpleHttpServerRouter()
     )
   }
 

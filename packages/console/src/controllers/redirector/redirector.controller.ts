@@ -67,110 +67,37 @@ export class RedirectorController extends BaseController {
     this.router.addApiCall('updateRedirector', this.updateRedirectorApiCall)
     this.router.addApiCall('deleteRedirector', this.deleteRedirectorApiCall)
     this.router.addApiCall('listRedirectors', this.listRedirectorsApiCall)
+
+    this.logger.debug(`RedirectorController initialized`)
   }
 
   private createRedirectorApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateCreateRedirectorData(data)
+    this.validateApiCallData<CreateRedirectorData>('console-create-redirector-data', data)
 
-      return await this.redirectorService.createRedirector(data)
-    } catch (error) {
-      this.handleException(error, 'createRedirector', data)
-    }
+    return await this.redirectorService.createRedirector(data)
   }
 
   private readRedirectorApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateReadRedirectorData(data)
+    this.validateApiCallData<ReadRedirectorData>('console-read-redirector-data', data)
 
-      return await this.redirectorService.readRedirector(data)
-    } catch (error) {
-      this.handleException(error, 'readRedirector', data)
-    }
+    return await this.redirectorService.readRedirector(data)
   }
 
   private updateRedirectorApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateUpdateRedirectorData(data)
+    this.validateApiCallData<UpdateRedirectorData>('console-update-redirector-data', data)
 
-      return await this.redirectorService.updateRedirector(data)
-    } catch (error) {
-      this.handleException(error, 'updateRedirector', data)
-    }
+    return await this.redirectorService.updateRedirector(data)
   }
 
   private deleteRedirectorApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateDeleteRedirectorData(data)
+    this.validateApiCallData<DeleteRedirectorData>('console-delete-redirector-data', data)
 
-      return await this.redirectorService.deleteRedirector(data)
-    } catch (error) {
-      this.handleException(error, 'deleteRedirector', data)
-    }
+    return await this.redirectorService.deleteRedirector(data)
   }
 
   private listRedirectorsApiCall: ReplServerApiCall = async (data) => {
-    try {
-      this.validateListRedirectorsData(data)
+    this.validateApiCallData<ListRedirectorsData>('console-list-redirectors-data', data)
 
-      return await this.redirectorService.listRedirectors(data)
-    } catch (error) {
-      this.handleException(error, 'listRedirectors', data)
-    }
-  }
-
-  private validateCreateRedirectorData(value: unknown): asserts value is CreateRedirectorData {
-    try {
-      this.validator.assertSchema<CreateRedirectorData>('console-create-redirector-data', value)
-    } catch (error) {
-      throw new ReplServerError(`CreateRedirectorData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateReadRedirectorData(value: unknown): asserts value is ReadRedirectorData {
-    try {
-      this.validator.assertSchema<ReadRedirectorData>('console-read-redirector-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ReadRedirectorData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateUpdateRedirectorData(value: unknown): asserts value is UpdateRedirectorData {
-    try {
-      this.validator.assertSchema<UpdateRedirectorData>('console-update-redirector-data', value)
-    } catch (error) {
-      throw new ReplServerError(`UpdateRedirectorData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateDeleteRedirectorData(value: unknown): asserts value is DeleteRedirectorData {
-    try {
-      this.validator.assertSchema<DeleteRedirectorData>('console-delete-redirector-data', value)
-    } catch (error) {
-      throw new ReplServerError(`DeleteRedirectorData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  private validateListRedirectorsData(value: unknown): asserts value is ListRedirectorsData {
-    try {
-      this.validator.assertSchema<ListRedirectorsData>('console-list-redirectors-data', value)
-    } catch (error) {
-      throw new ReplServerError(`ListRedirectorsData validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST'
-      })
-    }
+    return await this.redirectorService.listRedirectors(data)
   }
 }

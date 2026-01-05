@@ -41,21 +41,15 @@ export class DatabaseController extends BaseController {
 
     this.router.addApiCall('loadDatabaseFunctions', this.loadDatabaseFunctionsApiCall)
     this.router.addApiCall('cleanupDatabase', this.cleanupDatabaseApiCall)
+
+    this.logger.debug(`DatabaseController initialized`)
   }
 
   private loadDatabaseFunctionsApiCall: ReplServerApiCall = async () => {
-    try {
-      await this.databaseService.loadDatabaseFunctions()
-    } catch (error) {
-      this.handleException(error, 'loadDatabaseFunctions', null)
-    }
+    await this.databaseService.loadDatabaseFunctions()
   }
 
   private cleanupDatabaseApiCall: ReplServerApiCall = async () => {
-    try {
-      await this.databaseService.cleanupDatabase()
-    } catch (error) {
-      this.handleException(error, 'cleanupDatabase', null)
-    }
+    await this.databaseService.cleanupDatabase()
   }
 }

@@ -120,11 +120,11 @@ export class NodeHttpServer implements HttpServer {
         })
       }
     } catch (error) {
-      this.handleException(error, req, res)
+      this.handleRequestError(error, req, res)
     }
   }
 
-  protected handleException(error: unknown, req: http.IncomingMessage, res: http.ServerResponse) {
+  protected handleRequestError(error: unknown, req: http.IncomingMessage, res: http.ServerResponse) {
     let status = 500,
       message = `Internal server error`
 
@@ -134,7 +134,7 @@ export class NodeHttpServer implements HttpServer {
         message = error.message
       }
 
-      this.logger.error(`HttpServer request error`, {
+      this.logger.error(`HttpServer request failed`, {
         error: serializeError(error),
         request: this.dumpRequest(req)
       })
@@ -172,10 +172,7 @@ export class NodeHttpServer implements HttpServer {
   }
 
   protected chainMiddlewares(middlewares: HttpServerMiddleware[]): HttpServerMiddleware {
-    return async (
-      ctx: HttpServerContext
-      //next: HttpServerNextFunction
-    ): Promise<void> => {
+    return async (ctx: HttpServerContext): Promise<void> => {
       let index = -1
 
       const dispatch = async (idx: number): Promise<void> => {
@@ -188,11 +185,37 @@ export class NodeHttpServer implements HttpServer {
         const middleware = middlewares[idx]
 
         if (middleware) {
-          await middleware(ctx, () => dispatch(idx + 1))
+          try {
+            await middleware(ctx, () => dispatch(idx + 1))
+          } catch {
+            const raiseError = this.raiseMiddlewareError(error, name)
+
+            this.logger.error(`HttpServer middleware error`, {
+              error: serializeError(raiseError)
+            })
+
+            throw raiseError
+          }
         }
       }
 
       await dispatch(0)
+    }
+  }
+
+  protected raiseMiddlewareError(error: unknown, middleware: string): HttpServerError {
+    if (error instanceof HttpServerError) {
+      error.context['middleware'] = middleware
+
+      return error
+    } else {
+      return new ReplServerError(`Server unknown error`, {
+        cause: error,
+        context: {
+          middleware,
+        },
+        code: 'INTERNAL_ERROR'
+      })
     }
   }
 
