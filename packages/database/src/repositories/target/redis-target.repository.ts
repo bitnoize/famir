@@ -19,7 +19,7 @@ import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullTarget, RawTarget } from './target.functions.js'
-import { rawFullTargetSchema, rawTargetSchema } from './target.schemas.js'
+import { targetSchemas } from './target.schemas.js'
 
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
   static inject(container: DIContainer) {
@@ -43,10 +43,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   ) {
     super(validator, config, logger, connection, 'target')
 
-    this.validator.addSchemas({
-      'database-raw-target': rawTargetSchema,
-      'database-raw-full-target': rawFullTargetSchema
-    })
+    this.validator.addSchemas(targetSchemas)
 
     this.logger.debug(`TargetRepository initialized`)
   }

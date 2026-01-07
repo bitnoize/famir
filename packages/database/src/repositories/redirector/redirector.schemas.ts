@@ -1,7 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 
-export const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
+const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
   type: 'object',
   required: ['campaign_id', 'redirector_id', 'lure_count', 'created_at', 'updated_at'],
   properties: {
@@ -24,7 +25,7 @@ export const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
   additionalProperties: false
 } as const
 
-export const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
+const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
   type: 'object',
   required: ['campaign_id', 'redirector_id', 'page', 'lure_count', 'created_at', 'updated_at'],
   properties: {
@@ -48,6 +49,11 @@ export const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
     }
   },
   additionalProperties: false
+} as const
+
+export const redirectorSchemas: ValidatorSchemas = {
+  'database-raw-redirector': rawRedirectorSchema,
+  'database-raw-full-redirector': rawFullRedirectorSchema
 } as const
 
 export const redirectorPageSchema: JSONSchemaType<string> = {

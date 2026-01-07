@@ -19,7 +19,7 @@ import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
-import { rawCampaignSchema, rawFullCampaignSchema } from './campaign.schemas.js'
+import { campaignSchemas } from './campaign.schemas.js'
 
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {
   static inject(container: DIContainer) {
@@ -43,10 +43,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
   ) {
     super(validator, config, logger, connection, 'campaign')
 
-    this.validator.addSchemas({
-      'database-raw-campaign': rawCampaignSchema,
-      'database-raw-full-campaign': rawFullCampaignSchema
-    })
+    this.validator.addSchemas(campaignSchemas)
 
     this.logger.debug(`CampaignRepository initialized`)
   }

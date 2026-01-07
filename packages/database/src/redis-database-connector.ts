@@ -51,6 +51,8 @@ export class RedisDatabaseConnector implements DatabaseConnector {
         error: serializeError(error)
       })
     })
+
+    this.logger.debug(`DatabaseConnector initialized`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters

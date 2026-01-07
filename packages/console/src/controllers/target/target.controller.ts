@@ -4,7 +4,6 @@ import {
   LOGGER,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerError,
   ReplServerRouter,
   Validator,
   VALIDATOR
@@ -16,18 +15,9 @@ import {
   DeleteTargetData,
   ListTargetsData,
   ReadTargetData,
-  SwitchTargetData,
   UpdateTargetData
 } from './target.js'
-import {
-  actionTargetLabelDataSchema,
-  createTargetDataSchema,
-  deleteTargetDataSchema,
-  listTargetsDataSchema,
-  readTargetDataSchema,
-  switchTargetDataSchema,
-  updateTargetDataSchema
-} from './target.schemas.js'
+import { targetSchemas } from './target.schemas.js'
 import { TARGET_SERVICE, type TargetService } from './target.service.js'
 
 export const TARGET_CONTROLLER = Symbol('TargetController')
@@ -58,79 +48,71 @@ export class TargetController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas({
-      'console-create-target-data': createTargetDataSchema,
-      'console-read-target-data': readTargetDataSchema,
-      'console-update-target-data': updateTargetDataSchema,
-      'console-switch-target-data': switchTargetDataSchema,
-      'console-action-target-label-data': actionTargetLabelDataSchema,
-      'console-delete-target-data': deleteTargetDataSchema,
-      'console-list-targets-data': listTargetsDataSchema
-    })
+    this.validator.addSchemas(targetSchemas)
 
-    this.router.addApiCall('createTarget', this.createTargetApiCall)
-    this.router.addApiCall('readTarget', this.readTargetApiCall)
-    this.router.addApiCall('updateTarget', this.updateTargetApiCall)
-    this.router.addApiCall('enableTarget', this.enableTargetApiCall)
-    this.router.addApiCall('disableTarget', this.disableTargetApiCall)
-    this.router.addApiCall('appendTargetLabel', this.appendTargetLabelApiCall)
-    this.router.addApiCall('removeTargetLabel', this.removeTargetLabelApiCall)
-    this.router.addApiCall('deleteTarget', this.deleteTargetApiCall)
-    this.router.addApiCall('listTargets', this.listTargetsApiCall)
+    this.router.register('createTarget', this.createTarget)
+    this.router.register('readTarget', this.readTarget)
+    this.router.register('updateTarget', this.updateTarget)
+    this.router.register('enableTarget', this.enableTarget)
+    this.router.register('disableTarget', this.disableTarget)
+    this.router.register('appendTargetLabel', this.appendTargetLabel)
+    this.router.register('removeTargetLabel', this.removeTargetLabel)
+    this.router.register('deleteTarget', this.deleteTarget)
+    this.router.register('listTargets', this.listTargets)
 
     this.logger.debug(`TargetController initialized`)
   }
 
-  private createTargetApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<CreateTargetData>('console-create-target-data', data)
+  private createTarget: ReplServerApiCall = async (data) => {
+    this.validateData<CreateTargetData>('console-create-target-data', data)
 
     return await this.targetService.createTarget(data)
   }
 
-  private readTargetApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ReadTargetData>('console-read-target-data', data)
+  private readTarget: ReplServerApiCall = async (data) => {
+    this.validateData<ReadTargetData>('console-read-target-data', data)
 
     return await this.targetService.readTarget(data)
   }
 
-  private updateTargetApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<UpdateTargetData>('console-update-target-data', data)
+  private updateTarget: ReplServerApiCall = async (data) => {
+    this.validateData<UpdateTargetData>('console-update-target-data', data)
 
     return await this.targetService.updateTarget(data)
   }
 
-  private enableTargetApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<UpdateTargetData>('console-switch-target-data', data)
+  private enableTarget: ReplServerApiCall = async (data) => {
+    this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
     return await this.targetService.enableTarget(data)
   }
 
-  private disableTargetApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<UpdateTargetData>('console-switch-target-data', data)
+  private disableTarget: ReplServerApiCall = async (data) => {
+    this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
     return await this.targetService.disableTarget(data)
   }
 
-  private appendTargetLabelApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ActionTargetLabelData>('console-action-target-label-data', data)
+  private appendTargetLabel: ReplServerApiCall = async (data) => {
+    this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
     return await this.targetService.appendTargetLabel(data)
   }
 
-  private removeTargetLabelApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ActionTargetLabelData>('console-action-target-label-data', data)
+  private removeTargetLabel: ReplServerApiCall = async (data) => {
+    this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
     return await this.targetService.removeTargetLabel(data)
   }
 
-  private deleteTargetApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<DeleteTargetData>('console-delete-target-data', data)
+  private deleteTarget: ReplServerApiCall = async (data) => {
+    this.validateData<DeleteTargetData>('console-delete-target-data', data)
 
     return await this.targetService.deleteTarget(data)
   }
 
-  private listTargetsApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ListTargetsData>('console-list-targets-data', data)
+  private listTargets: ReplServerApiCall = async (data) => {
+    this.validateData<ListTargetsData>('console-list-targets-data', data)
 
     return await this.targetService.listTargets(data)
   }

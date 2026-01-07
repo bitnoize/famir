@@ -1,7 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import { RawFullTarget, RawTarget } from './target.functions.js'
 
-export const rawTargetSchema: JSONSchemaType<RawTarget> = {
+const rawTargetSchema: JSONSchemaType<RawTarget> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -66,7 +67,7 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
   additionalProperties: false
 } as const
 
-export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
+const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -176,6 +177,11 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     }
   },
   additionalProperties: false
+} as const
+
+export const targetSchemas: ValidatorSchemas = {
+  'database-raw-target': rawTargetSchema,
+  'database-raw-full-target': rawFullTargetSchema
 } as const
 
 export const targetSubSchema: JSONSchemaType<string> = {

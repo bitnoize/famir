@@ -1,7 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import { RawLure } from './lure.functions.js'
 
-export const rawLureSchema: JSONSchemaType<RawLure> = {
+const rawLureSchema: JSONSchemaType<RawLure> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -40,6 +41,10 @@ export const rawLureSchema: JSONSchemaType<RawLure> = {
     }
   },
   additionalProperties: false
+} as const
+
+export const lureSchemas: ValidatorSchemas = {
+  'database-raw-lure': rawLureSchema
 } as const
 
 export const lurePathSchema: JSONSchemaType<string> = {

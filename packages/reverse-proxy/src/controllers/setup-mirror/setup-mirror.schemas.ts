@@ -1,4 +1,5 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import { SetupMirrorData } from './setup-mirror.js'
 
 export const setupMirrorDataSchema: JSONSchemaType<SetupMirrorData> = {
@@ -9,4 +10,8 @@ export const setupMirrorDataSchema: JSONSchemaType<SetupMirrorData> = {
     target_id: customIdentSchema
   },
   additionalProperties: false
+} as const
+
+export const setupMirrorSchemas: ValidatorSchemas = {
+  'reverse-proxy-setup-mirror-data': setupMirrorDataSchema
 } as const

@@ -4,7 +4,6 @@ import {
   LOGGER,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerError,
   ReplServerRouter,
   Validator,
   VALIDATOR
@@ -17,13 +16,7 @@ import {
   ReadProxyData,
   SwitchProxyData
 } from './proxy.js'
-import {
-  createProxyDataSchema,
-  deleteProxyDataSchema,
-  listProxiesDataSchema,
-  readProxyDataSchema,
-  switchProxyDataSchema
-} from './proxy.schemas.js'
+import { proxySchemas } from './proxy.schemas.js'
 import { PROXY_SERVICE, type ProxyService } from './proxy.service.js'
 
 export const PROXY_CONTROLLER = Symbol('ProxyController')
@@ -54,56 +47,50 @@ export class ProxyController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas({
-      'console-create-proxy-data': createProxyDataSchema,
-      'console-read-proxy-data': readProxyDataSchema,
-      'console-switch-proxy-data': switchProxyDataSchema,
-      'console-delete-proxy-data': deleteProxyDataSchema,
-      'console-list-proxies-data': listProxiesDataSchema
-    })
+    this.validator.addSchemas(proxySchemas)
 
-    this.router.addApiCall('createProxy', this.createProxyApiCall)
-    this.router.addApiCall('readProxy', this.readProxyApiCall)
-    this.router.addApiCall('enableProxy', this.enableProxyApiCall)
-    this.router.addApiCall('disableProxy', this.disableProxyApiCall)
-    this.router.addApiCall('deleteProxy', this.deleteProxyApiCall)
-    this.router.addApiCall('listProxies', this.listProxiesApiCall)
+    this.router.register('createProxy', this.createProxy)
+    this.router.register('readProxy', this.readProxy)
+    this.router.register('enableProxy', this.enableProxy)
+    this.router.register('disableProxy', this.disableProxy)
+    this.router.register('deleteProxy', this.deleteProxy)
+    this.router.register('listProxies', this.listProxies)
 
     this.logger.debug(`MessageController initialized`)
   }
 
-  private createProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<CreateProxyData>('console-create-proxy-data', data)
+  private createProxy: ReplServerApiCall = async (data) => {
+    this.validateData<CreateProxyData>('console-create-proxy-data', data)
 
     return await this.proxyService.createProxy(data)
   }
 
-  private readProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ReadProxyData>('console-read-proxy-data', data)
+  private readProxy: ReplServerApiCall = async (data) => {
+    this.validateData<ReadProxyData>('console-read-proxy-data', data)
 
     return await this.proxyService.readProxy(data)
   }
 
-  private enableProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<SwitchProxyData>('console-switch-proxy-data', data)
+  private enableProxy: ReplServerApiCall = async (data) => {
+    this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
 
     return await this.proxyService.enableProxy(data)
   }
 
-  private disableProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<SwitchProxyData>('console-switch-proxy-data', data)
+  private disableProxy: ReplServerApiCall = async (data) => {
+    this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
 
     return await this.proxyService.disableProxy(data)
   }
 
-  private deleteProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<DeleteProxyData>('console-delete-proxy-data', data)
+  private deleteProxy: ReplServerApiCall = async (data) => {
+    this.validateData<DeleteProxyData>('console-delete-proxy-data', data)
 
     return await this.proxyService.deleteProxy(data)
   }
 
-  private listProxiesApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ListProxiesData>('console-list-proxies-data', data)
+  private listProxies: ReplServerApiCall = async (data) => {
+    this.validateData<ListProxiesData>('console-list-proxies-data', data)
 
     return await this.proxyService.listProxies(data)
   }

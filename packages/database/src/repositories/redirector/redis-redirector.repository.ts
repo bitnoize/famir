@@ -19,7 +19,7 @@ import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
-import { rawFullRedirectorSchema, rawRedirectorSchema } from './redirector.schemas.js'
+import { redirectorSchemas } from './redirector.schemas.js'
 
 export class RedisRedirectorRepository extends RedisBaseRepository implements RedirectorRepository {
   static inject(container: DIContainer) {
@@ -43,10 +43,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
   ) {
     super(validator, config, logger, connection, 'redirector')
 
-    this.validator.addSchemas({
-      'database-raw-redirector': rawRedirectorSchema,
-      'database-raw-full-redirector': rawFullRedirectorSchema
-    })
+    this.validator.addSchemas(redirectorSchemas)
 
     this.logger.debug(`RedirectorRepository initialized`)
   }

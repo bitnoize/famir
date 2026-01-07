@@ -25,7 +25,9 @@ export class RedisDatabaseManager implements DatabaseManager {
   constructor(
     protected readonly logger: Logger,
     protected readonly connection: RedisDatabaseConnection
-  ) {}
+  ) {
+    this.logger.debug(`DatabaseManager initialized`)
+  }
 
   async loadFunctions(): Promise<void> {
     const dump = getRedisFunctionsDump().toString('binary')

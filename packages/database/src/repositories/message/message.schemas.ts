@@ -1,16 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
-import {
-  HttpConnection,
-  HttpHeader,
-  HttpHeaders,
-  HttpRequestCookie,
-  HttpRequestCookies,
-  HttpResponseCookie,
-  HttpResponseCookies
-} from '@famir/domain'
+import { HttpConnection, HttpHeader, HttpHeaders, ValidatorSchemas } from '@famir/domain'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
-export const rawMessageSchema: JSONSchemaType<RawMessage> = {
+const rawMessageSchema: JSONSchemaType<RawMessage> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -63,7 +55,7 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
   additionalProperties: false
 } as const
 
-export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
+const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -148,7 +140,7 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
   additionalProperties: false
 } as const
 
-export const messageHeaderSchema: JSONSchemaType<HttpHeader> = {
+const messageHeaderSchema: JSONSchemaType<HttpHeader> = {
   type: ['string', 'array'],
   oneOf: [
     {
@@ -163,7 +155,7 @@ export const messageHeaderSchema: JSONSchemaType<HttpHeader> = {
   ]
 } as const
 
-export const messageHeadersSchema: JSONSchemaType<HttpHeaders> = {
+const messageHeadersSchema: JSONSchemaType<HttpHeaders> = {
   type: 'object',
   required: [],
   additionalProperties: {
@@ -172,6 +164,34 @@ export const messageHeadersSchema: JSONSchemaType<HttpHeaders> = {
   }
 } as const
 
+const messageConnectionSchema: JSONSchemaType<HttpConnection> = {
+  type: 'object',
+  required: [],
+  properties: {
+    total_time: {
+      type: 'integer',
+      nullable: true
+    },
+    connect_time: {
+      type: 'integer',
+      nullable: true
+    },
+    http_version: {
+      type: 'integer',
+      nullable: true
+    }
+  },
+  additionalProperties: false
+} as const
+
+export const messageSchemas: ValidatorSchemas = {
+  'database-raw-message': rawMessageSchema,
+  'database-raw-full-message': rawFullMessageSchema,
+  'database-message-headers': messageHeadersSchema,
+  'database-message-connection': messageConnectionSchema
+} as const
+
+/*
 export const messageRequestCookieSchema: JSONSchemaType<HttpRequestCookie> = {
   type: 'string'
 } as const
@@ -232,23 +252,4 @@ export const messageResponseCookiesSchema: JSONSchemaType<HttpResponseCookies> =
     nullable: true
   }
 } as const
-
-export const messageConnectionSchema: JSONSchemaType<HttpConnection> = {
-  type: 'object',
-  required: [],
-  properties: {
-    total_time: {
-      type: 'integer',
-      nullable: true
-    },
-    connect_time: {
-      type: 'integer',
-      nullable: true
-    },
-    http_version: {
-      type: 'integer',
-      nullable: true
-    }
-  },
-  additionalProperties: false
-} as const
+*/

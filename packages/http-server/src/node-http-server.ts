@@ -5,9 +5,7 @@ import {
   HTTP_SERVER,
   HTTP_SERVER_ROUTER,
   HttpServer,
-  HttpServerContext,
   HttpServerError,
-  HttpServerMiddleware,
   HttpServerRouter,
   Logger,
   LOGGER,
@@ -44,13 +42,15 @@ export class NodeHttpServer implements HttpServer {
     this.options = this.buildOptions(config.data)
 
     this.server = http.createServer((req, res) => {
-      this.handleServerRequest(req, res).catch((error: unknown) => {
+      this.handleRequest(req, res).catch((error: unknown) => {
         this.logger.fatal(`HttpServer unhandled error`, {
           error: serializeError(error),
           request: this.dumpRequest(req)
         })
       })
     })
+
+    this.logger.debug(`HttpServer initialized`)
   }
 
   listen(): Promise<void> {
@@ -101,16 +101,14 @@ export class NodeHttpServer implements HttpServer {
     })
   }
 
-  protected async handleServerRequest(
+  protected async handleRequest(
     req: http.IncomingMessage,
     res: http.ServerResponse
   ): Promise<void> {
     try {
       const ctx = new NodeHttpServerContext(req, res)
 
-      const middlewares = this.router.getMiddlewares()
-
-      const middleware = this.chainMiddlewares(middlewares)
+      const middleware = this.router.resolve()
 
       await middleware(ctx, async () => {})
 
@@ -120,11 +118,11 @@ export class NodeHttpServer implements HttpServer {
         })
       }
     } catch (error) {
-      this.handleRequestError(error, req, res)
+      this.handleError(error, req, res)
     }
   }
 
-  protected handleRequestError(error: unknown, req: http.IncomingMessage, res: http.ServerResponse) {
+  protected handleError(error: unknown, req: http.IncomingMessage, res: http.ServerResponse) {
     let status = 500,
       message = `Internal server error`
 
@@ -133,11 +131,6 @@ export class NodeHttpServer implements HttpServer {
         status = error.status
         message = error.message
       }
-
-      this.logger.error(`HttpServer request failed`, {
-        error: serializeError(error),
-        request: this.dumpRequest(req)
-      })
 
       if (!res.headersSent) {
         const errorPage = this.templater.render(this.options.errorPage, {
@@ -153,12 +146,12 @@ export class NodeHttpServer implements HttpServer {
       } else {
         res.end()
       }
-    } catch (criticalError) {
-      this.logger.fatal(`HttpServer request critical error`, {
-        criticalError: serializeError(criticalError),
+
+      this.logger.error(`HttpServer request failed`, {
+        error: serializeError(error),
         request: this.dumpRequest(req)
       })
-
+    } catch (criticalError) {
       if (!res.headersSent) {
         res.writeHead(status, {
           'content-type': 'text/plain'
@@ -168,53 +161,11 @@ export class NodeHttpServer implements HttpServer {
       } else {
         res.end()
       }
-    }
-  }
 
-  protected chainMiddlewares(middlewares: HttpServerMiddleware[]): HttpServerMiddleware {
-    return async (ctx: HttpServerContext): Promise<void> => {
-      let index = -1
-
-      const dispatch = async (idx: number): Promise<void> => {
-        if (idx <= index) {
-          throw new Error('Middleware next() called multiple times')
-        }
-
-        index = idx
-
-        const middleware = middlewares[idx]
-
-        if (middleware) {
-          try {
-            await middleware(ctx, () => dispatch(idx + 1))
-          } catch {
-            const raiseError = this.raiseMiddlewareError(error, name)
-
-            this.logger.error(`HttpServer middleware error`, {
-              error: serializeError(raiseError)
-            })
-
-            throw raiseError
-          }
-        }
-      }
-
-      await dispatch(0)
-    }
-  }
-
-  protected raiseMiddlewareError(error: unknown, middleware: string): HttpServerError {
-    if (error instanceof HttpServerError) {
-      error.context['middleware'] = middleware
-
-      return error
-    } else {
-      return new ReplServerError(`Server unknown error`, {
-        cause: error,
-        context: {
-          middleware,
-        },
-        code: 'INTERNAL_ERROR'
+      this.logger.fatal(`HttpServer request critical error`, {
+        criticalError: serializeError(criticalError),
+        error: serializeError(error),
+        request: this.dumpRequest(req)
       })
     }
   }

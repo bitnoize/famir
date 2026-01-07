@@ -18,7 +18,7 @@ import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawProxy } from './proxy.functions.js'
-import { rawProxySchema } from './proxy.schemas.js'
+import { proxySchemas } from './proxy.schemas.js'
 
 export class RedisProxyRepository extends RedisBaseRepository implements ProxyRepository {
   static inject(container: DIContainer) {
@@ -42,9 +42,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
   ) {
     super(validator, config, logger, connection, 'proxy')
 
-    this.validator.addSchemas({
-      'database-raw-proxy': rawProxySchema
-    })
+    this.validator.addSchemas(proxySchemas)
 
     this.logger.debug(`ProxyRepository initialized`)
   }

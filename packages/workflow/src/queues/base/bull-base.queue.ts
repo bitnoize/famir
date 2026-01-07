@@ -41,7 +41,7 @@ export abstract class BullBaseQueue {
     try {
       return await this.queue.count()
     } catch (error) {
-      this.handleException(error, 'getJobCount', null)
+      this.raiseError(error, 'getJobCount', null)
     }
   }
 
@@ -49,11 +49,11 @@ export abstract class BullBaseQueue {
     try {
       return await this.queue.getJobCounts()
     } catch (error) {
-      this.handleException(error, 'getJobCounts', null)
+      this.raiseError(error, 'getJobCounts', null)
     }
   }
 
-  protected handleException(error: unknown, method: string, data: object | null): never {
+  protected raiseError(error: unknown, method: string, data: unknown): never {
     if (error instanceof WorkflowError) {
       error.context['queue'] = this.queueName
       error.context['method'] = method
@@ -61,7 +61,7 @@ export abstract class BullBaseQueue {
 
       throw error
     } else {
-      throw new WorkflowError(`Workflow internal error`, {
+      throw new WorkflowError(`Service unknown error`, {
         cause: error,
         context: {
           queue: this.queueName,

@@ -1,5 +1,6 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import { proxyUrlSchema } from '@famir/database'
+import { ValidatorSchemas } from '@famir/domain'
 import {
   CreateProxyData,
   DeleteProxyData,
@@ -8,7 +9,7 @@ import {
   SwitchProxyData
 } from './proxy.js'
 
-export const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
+const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
   type: 'object',
   required: ['campaignId', 'proxyId', 'url'],
   properties: {
@@ -19,7 +20,7 @@ export const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
   additionalProperties: false
 } as const
 
-export const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
+const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
   type: 'object',
   required: ['campaignId', 'proxyId'],
   properties: {
@@ -29,7 +30,7 @@ export const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
   additionalProperties: false
 } as const
 
-export const switchProxyDataSchema: JSONSchemaType<SwitchProxyData> = {
+const switchProxyDataSchema: JSONSchemaType<SwitchProxyData> = {
   type: 'object',
   required: ['campaignId', 'proxyId'],
   properties: {
@@ -39,7 +40,7 @@ export const switchProxyDataSchema: JSONSchemaType<SwitchProxyData> = {
   additionalProperties: false
 } as const
 
-export const deleteProxyDataSchema: JSONSchemaType<DeleteProxyData> = {
+const deleteProxyDataSchema: JSONSchemaType<DeleteProxyData> = {
   type: 'object',
   required: ['campaignId', 'proxyId'],
   properties: {
@@ -49,11 +50,19 @@ export const deleteProxyDataSchema: JSONSchemaType<DeleteProxyData> = {
   additionalProperties: false
 } as const
 
-export const listProxiesDataSchema: JSONSchemaType<ListProxiesData> = {
+const listProxiesDataSchema: JSONSchemaType<ListProxiesData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
     campaignId: customIdentSchema
   },
   additionalProperties: false
+} as const
+
+export const proxySchemas: ValidatorSchemas = {
+  'console-create-proxy-data': createProxyDataSchema,
+  'console-read-proxy-data': readProxyDataSchema,
+  'console-switch-proxy-data': switchProxyDataSchema,
+  'console-delete-proxy-data': deleteProxyDataSchema,
+  'console-list-proxies-data': listProxiesDataSchema
 } as const

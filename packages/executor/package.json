@@ -11,8 +11,8 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@famir/domain": "*",
     "@famir/common": "*",
+    "@famir/domain": "*",
     "bullmq": "^5.66.0",
     "ioredis": "^5.8.2"
   },

@@ -4,7 +4,6 @@ import {
   LOGGER,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerError,
   ReplServerRouter,
   Validator,
   VALIDATOR
@@ -17,13 +16,7 @@ import {
   ReadRedirectorData,
   UpdateRedirectorData
 } from './redirector.js'
-import {
-  createRedirectorDataSchema,
-  deleteRedirectorDataSchema,
-  listRedirectorsDataSchema,
-  readRedirectorDataSchema,
-  updateRedirectorDataSchema
-} from './redirector.schemas.js'
+import { redirectorSchemas } from './redirector.schemas.js'
 import { REDIRECTOR_SERVICE, type RedirectorService } from './redirector.service.js'
 
 export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')
@@ -54,49 +47,43 @@ export class RedirectorController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas({
-      'console-create-redirector-data': createRedirectorDataSchema,
-      'console-read-redirector-data': readRedirectorDataSchema,
-      'console-update-redirector-data': updateRedirectorDataSchema,
-      'console-delete-redirector-data': deleteRedirectorDataSchema,
-      'console-list-redirectors-data': listRedirectorsDataSchema
-    })
+    this.validator.addSchemas(redirectorSchemas)
 
-    this.router.addApiCall('createRedirector', this.createRedirectorApiCall)
-    this.router.addApiCall('readRedirector', this.readRedirectorApiCall)
-    this.router.addApiCall('updateRedirector', this.updateRedirectorApiCall)
-    this.router.addApiCall('deleteRedirector', this.deleteRedirectorApiCall)
-    this.router.addApiCall('listRedirectors', this.listRedirectorsApiCall)
+    this.router.register('createRedirector', this.createRedirector)
+    this.router.register('readRedirector', this.readRedirector)
+    this.router.register('updateRedirector', this.updateRedirector)
+    this.router.register('deleteRedirector', this.deleteRedirector)
+    this.router.register('listRedirectors', this.listRedirectors)
 
     this.logger.debug(`RedirectorController initialized`)
   }
 
-  private createRedirectorApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<CreateRedirectorData>('console-create-redirector-data', data)
+  private createRedirector: ReplServerApiCall = async (data) => {
+    this.validateData<CreateRedirectorData>('console-create-redirector-data', data)
 
     return await this.redirectorService.createRedirector(data)
   }
 
-  private readRedirectorApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ReadRedirectorData>('console-read-redirector-data', data)
+  private readRedirector: ReplServerApiCall = async (data) => {
+    this.validateData<ReadRedirectorData>('console-read-redirector-data', data)
 
     return await this.redirectorService.readRedirector(data)
   }
 
-  private updateRedirectorApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<UpdateRedirectorData>('console-update-redirector-data', data)
+  private updateRedirector: ReplServerApiCall = async (data) => {
+    this.validateData<UpdateRedirectorData>('console-update-redirector-data', data)
 
     return await this.redirectorService.updateRedirector(data)
   }
 
-  private deleteRedirectorApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<DeleteRedirectorData>('console-delete-redirector-data', data)
+  private deleteRedirector: ReplServerApiCall = async (data) => {
+    this.validateData<DeleteRedirectorData>('console-delete-redirector-data', data)
 
     return await this.redirectorService.deleteRedirector(data)
   }
 
-  private listRedirectorsApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ListRedirectorsData>('console-list-redirectors-data', data)
+  private listRedirectors: ReplServerApiCall = async (data) => {
+    this.validateData<ListRedirectorsData>('console-list-redirectors-data', data)
 
     return await this.redirectorService.listRedirectors(data)
   }

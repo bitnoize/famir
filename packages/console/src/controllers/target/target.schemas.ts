@@ -11,6 +11,7 @@ import {
   targetStreamingTimeoutSchema,
   targetSubSchema
 } from '@famir/database'
+import { ValidatorSchemas } from '@famir/domain'
 import {
   ActionTargetLabelData,
   CreateTargetData,
@@ -21,7 +22,7 @@ import {
   UpdateTargetData
 } from './target.js'
 
-export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
+const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
   type: 'object',
   required: [
     'campaignId',
@@ -100,7 +101,7 @@ export const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
   additionalProperties: false
 } as const
 
-export const readTargetDataSchema: JSONSchemaType<ReadTargetData> = {
+const readTargetDataSchema: JSONSchemaType<ReadTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {
@@ -110,7 +111,7 @@ export const readTargetDataSchema: JSONSchemaType<ReadTargetData> = {
   additionalProperties: false
 } as const
 
-export const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
+const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {
@@ -160,7 +161,7 @@ export const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
   additionalProperties: false
 } as const
 
-export const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
+const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {
@@ -170,7 +171,7 @@ export const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
   additionalProperties: false
 } as const
 
-export const actionTargetLabelDataSchema: JSONSchemaType<ActionTargetLabelData> = {
+const actionTargetLabelDataSchema: JSONSchemaType<ActionTargetLabelData> = {
   type: 'object',
   required: ['campaignId', 'targetId', 'label'],
   properties: {
@@ -181,7 +182,7 @@ export const actionTargetLabelDataSchema: JSONSchemaType<ActionTargetLabelData> 
   additionalProperties: false
 } as const
 
-export const deleteTargetDataSchema: JSONSchemaType<DeleteTargetData> = {
+const deleteTargetDataSchema: JSONSchemaType<DeleteTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId'],
   properties: {
@@ -191,11 +192,21 @@ export const deleteTargetDataSchema: JSONSchemaType<DeleteTargetData> = {
   additionalProperties: false
 } as const
 
-export const listTargetsDataSchema: JSONSchemaType<ListTargetsData> = {
+const listTargetsDataSchema: JSONSchemaType<ListTargetsData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
     campaignId: customIdentSchema
   },
   additionalProperties: false
+} as const
+
+export const targetSchemas: ValidatorSchemas = {
+  'console-create-target-data': createTargetDataSchema,
+  'console-read-target-data': readTargetDataSchema,
+  'console-update-target-data': updateTargetDataSchema,
+  'console-switch-target-data': switchTargetDataSchema,
+  'console-action-target-label-data': actionTargetLabelDataSchema,
+  'console-delete-target-data': deleteTargetDataSchema,
+  'console-list-targets-data': listTargetsDataSchema
 } as const

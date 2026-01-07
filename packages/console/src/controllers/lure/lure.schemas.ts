@@ -1,5 +1,6 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import { lurePathSchema } from '@famir/database'
+import { ValidatorSchemas } from '@famir/domain'
 import {
   CreateLureData,
   DeleteLureData,
@@ -8,7 +9,7 @@ import {
   SwitchLureData
 } from './lure.js'
 
-export const createLureDataSchema: JSONSchemaType<CreateLureData> = {
+const createLureDataSchema: JSONSchemaType<CreateLureData> = {
   type: 'object',
   required: ['campaignId', 'lureId', 'path', 'redirectorId'],
   properties: {
@@ -20,7 +21,7 @@ export const createLureDataSchema: JSONSchemaType<CreateLureData> = {
   additionalProperties: false
 } as const
 
-export const readLureDataSchema: JSONSchemaType<ReadLureData> = {
+const readLureDataSchema: JSONSchemaType<ReadLureData> = {
   type: 'object',
   required: ['campaignId', 'lureId'],
   properties: {
@@ -30,7 +31,7 @@ export const readLureDataSchema: JSONSchemaType<ReadLureData> = {
   additionalProperties: false
 } as const
 
-export const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
+const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
   type: 'object',
   required: ['campaignId', 'lureId'],
   properties: {
@@ -40,7 +41,7 @@ export const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
   additionalProperties: false
 } as const
 
-export const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
+const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
   type: 'object',
   required: ['campaignId', 'lureId', 'path', 'redirectorId'],
   properties: {
@@ -52,11 +53,19 @@ export const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
   additionalProperties: false
 } as const
 
-export const listLuresDataSchema: JSONSchemaType<ListLuresData> = {
+const listLuresDataSchema: JSONSchemaType<ListLuresData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
     campaignId: customIdentSchema
   },
   additionalProperties: false
+} as const
+
+export const lureSchemas: ValidatorSchemas = {
+  'console-create-lure-data': createLureDataSchema,
+  'console-read-lure-data': readLureDataSchema,
+  'console-switch-lure-data': switchLureDataSchema,
+  'console-delete-lure-data': deleteLureDataSchema,
+  'console-list-lures-data': listLuresDataSchema
 } as const

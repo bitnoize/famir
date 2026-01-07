@@ -10,6 +10,7 @@ import {
   campaignSessionCookieNameSchema,
   campaignSessionExpireSchema
 } from '@famir/database'
+import { ValidatorSchemas } from '@famir/domain'
 import {
   CreateCampaignData,
   DeleteCampaignData,
@@ -17,7 +18,7 @@ import {
   UpdateCampaignData
 } from './campaign.js'
 
-export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
+const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
   type: 'object',
   required: [
     'campaignId',
@@ -70,7 +71,7 @@ export const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
   additionalProperties: false
 } as const
 
-export const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
+const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
@@ -79,7 +80,7 @@ export const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
   additionalProperties: false
 }
 
-export const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
+const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
@@ -104,11 +105,18 @@ export const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
   additionalProperties: false
 } as const
 
-export const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
+const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
     campaignId: customIdentSchema
   },
   additionalProperties: false
+} as const
+
+export const campaignSchemas: ValidatorSchemas = {
+  'console-create-campaign-data': createCampaignDataSchema,
+  'console-read-campaign-data': readCampaignDataSchema,
+  'console-update-campaign-data': updateCampaignDataSchema,
+  'console-delete-campaign-data': deleteCampaignDataSchema
 } as const

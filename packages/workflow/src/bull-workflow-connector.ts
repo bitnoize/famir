@@ -43,6 +43,8 @@ export class BullWorkflowConnector implements WorkflowConnector {
         error: serializeError(error)
       })
     })
+
+    this.logger.debug(`WorkflowConnector initialized`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters

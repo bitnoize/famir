@@ -30,6 +30,8 @@ export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueu
 
   constructor(config: Config<WorkflowConfig>, logger: Logger, connection: BullWorkflowConnection) {
     super(config, logger, connection, ANALYZE_LOG_QUEUE_NAME)
+
+    this.logger.debug(`AnalyzeLogQueue initialized`)
   }
 
   async addJob(data: AnalyzeLogJobData): Promise<string> {
@@ -42,7 +44,7 @@ export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueu
 
       return jobId
     } catch (error) {
-      this.handleException(error, 'addJob', data)
+      this.raiseError(error, 'addJob', data)
     }
   }
 }

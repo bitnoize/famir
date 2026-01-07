@@ -16,11 +16,11 @@ export class SimpleReplServerRouter implements ReplServerRouter {
     )
   }
 
-  constructor(protected readonly logger: Logger) {
-    this.logger.debug(`SimpleServerRouter initialized`)
-  }
+  protected readonly registry = new Map<string, ReplServerApiCall>()
 
-  private readonly registry = new Map<string, ReplServerApiCall>()
+  constructor(protected readonly logger: Logger) {
+    this.logger.debug(`ReplServerRouter initialized`)
+  }
 
   register(name: string, apiCall: ReplServerApiCall) {
     if (this.registry.has(name)) {
@@ -31,16 +31,16 @@ export class SimpleReplServerRouter implements ReplServerRouter {
   }
 
   resolve(): object {
-    const api: Record<string, ReplServerApiCall> = {}
+    const obj: Record<string, ReplServerApiCall> = {}
 
     this.registry.forEach((apiCall, name) => {
-      api[name] = async (data: unknown): Promise<unknown> => {
+      obj[name] = async (data: unknown): Promise<unknown> => {
         try {
           return await apiCall(data)
         } catch (error) {
           const raiseError = this.raiseError(error, name, data)
 
-          this.logger.error(`ReplServer api error`, {
+          this.logger.error(`ReplServer apiCall error`, {
             error: serializeError(raiseError)
           })
 
@@ -49,12 +49,12 @@ export class SimpleReplServerRouter implements ReplServerRouter {
       }
     })
 
-    return api
+    return obj
   }
 
-  protected raiseError(error: unknown, name: string, data: unknown): ReplServerError {
+  protected raiseError(error: unknown, apiCall: string, data: unknown): ReplServerError {
     if (error instanceof ReplServerError) {
-      error.context['name'] = name
+      error.context['apiCall'] = apiCall
       error.context['data'] = data
 
       return error
@@ -62,7 +62,7 @@ export class SimpleReplServerRouter implements ReplServerRouter {
       return new ReplServerError(`Server unknown error`, {
         cause: error,
         context: {
-          name,
+          apiCall,
           data
         },
         code: 'INTERNAL_ERROR'
@@ -70,28 +70,3 @@ export class SimpleReplServerRouter implements ReplServerRouter {
     }
   }
 }
-
-/*
- 
-
-
-
-  private readonly apiCalls = new Map<string, ReplServerApiCall>()
-
-  addApiCall(name: string, apiCall: ReplServerApiCall) {
-    if (this.registry.has(name)) {
-      throw new Error(`ApiCall allready exists: ${name}`)
-    }
-
-    this.registry.set(name, apiCall)
-  }
-
-  getApiCalls(): Map<string, ReplServerApiCall> {
-    return this.apiCalls
-  }
-
-  getApiNames(): string[] {
-    return Object.keys(this.apiCalls)
-  }
-
-*/

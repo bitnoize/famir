@@ -1,7 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import { RawProxy } from './proxy.functions.js'
 
-export const rawProxySchema: JSONSchemaType<RawProxy> = {
+const rawProxySchema: JSONSchemaType<RawProxy> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -36,6 +37,10 @@ export const rawProxySchema: JSONSchemaType<RawProxy> = {
     }
   },
   additionalProperties: false
+} as const
+
+export const proxySchemas: ValidatorSchemas = {
+  'database-raw-proxy': rawProxySchema
 } as const
 
 export const proxyUrlSchema: JSONSchemaType<string> = {

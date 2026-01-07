@@ -1,12 +1,3 @@
-import { HttpServerContext } from './http-server-context.js'
-
-export type HttpServerNextFunction = () => Promise<void>
-
-export type HttpServerMiddleware = (
-  ctx: HttpServerContext,
-  next: HttpServerNextFunction
-) => Promise<void>
-
 export const HTTP_SERVER = Symbol('HttpServer')
 
 export interface HttpServer {

@@ -18,7 +18,7 @@ import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawLure } from './lure.functions.js'
-import { rawLureSchema } from './lure.schemas.js'
+import { lureSchemas } from './lure.schemas.js'
 
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {
   static inject(container: DIContainer) {
@@ -42,9 +42,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
   ) {
     super(validator, config, logger, connection, 'lure')
 
-    this.validator.addSchemas({
-      'database-raw-lure': rawLureSchema
-    })
+    this.validator.addSchemas(lureSchemas)
 
     this.logger.debug(`LureRepository initialized`)
   }

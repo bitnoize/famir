@@ -7,34 +7,15 @@ export abstract class BaseController {
     protected readonly router: ReplServerRouter
   ) {}
 
-  protected validateApiCallData<T>(value: unknown): asserts value is T {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  protected validateData<T>(schema: string, value: unknown): asserts value is T {
     try {
       this.validator.assertSchema<T>(schema, value)
     } catch (error) {
-      throw new ReplServerError(`ApiCall data validate failed`, {
+      throw new ReplServerError(`Data validate failed`, {
         cause: error,
         code: 'BAD_REQUEST'
       })
     }
   }
-
-  /*
-  protected handleException(error: unknown, apiCall: string, data: unknown): never {
-    if (error instanceof ReplServerError) {
-      error.context['apiCall'] = apiCall
-      error.context['data'] = data
-
-      throw error
-    } else {
-      throw new ReplServerError(`Server internal error`, {
-        cause: error,
-        context: {
-          apiCall,
-          data
-        },
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-  */
 }

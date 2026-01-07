@@ -18,7 +18,7 @@ import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawSession } from './session.functions.js'
-import { rawSessionSchema } from './session.schemas.js'
+import { sessionSchemas } from './session.schemas.js'
 
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {
   static inject(container: DIContainer) {
@@ -42,9 +42,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
   ) {
     super(validator, config, logger, connection, 'session')
 
-    this.validator.addSchemas({
-      'database-raw-session': rawSessionSchema
-    })
+    this.validator.addSchemas(sessionSchemas)
 
     this.logger.debug(`SessionRepository initialized`)
   }

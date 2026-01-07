@@ -12,7 +12,7 @@ import {
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
 import { SetupMirrorData } from './setup-mirror.js'
-import { setupMirrorDataSchema } from './setup-mirror.schemas.js'
+import { setupMirrorSchemas } from './setup-mirror.schemas.js'
 import { type SetupMirrorService, SETUP_MIRROR_SERVICE } from './setup-mirror.service.js'
 
 export const SETUP_MIRROR_CONTROLLER = Symbol('SetupMirrorController')
@@ -43,34 +43,28 @@ export class SetupMirrorController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas({
-      'reverse-proxy-setup-mirror-data': setupMirrorDataSchema
-    })
+    this.validator.addSchemas(setupMirrorSchemas)
 
-    this.router.addMiddleware(this.setupMirrorMiddleware)
+    this.router.register('setupMirror', this.setupMirror)
   }
 
-  protected setupMirrorMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      const setupMirrorData = this.parseSetupMirrorData(ctx)
+  protected setupMirror: HttpServerMiddleware = async (ctx, next) => {
+    const setupMirrorData = this.parseSetupMirrorData(ctx)
 
-      const [campaign, target] = await this.setupMirrorService.readCampaignTarget({
-        campaignId: setupMirrorData.campaign_id,
-        targetId: setupMirrorData.target_id
-      })
+    const [campaign, target] = await this.setupMirrorService.readCampaignTarget({
+      campaignId: setupMirrorData.campaign_id,
+      targetId: setupMirrorData.target_id
+    })
 
-      const targets = await this.setupMirrorService.listTargets({
-        campaignId: setupMirrorData.campaign_id
-      })
+    const targets = await this.setupMirrorService.listTargets({
+      campaignId: setupMirrorData.campaign_id
+    })
 
-      this.setState(ctx, 'campaign', campaign)
-      this.setState(ctx, 'target', target)
-      this.setState(ctx, 'targets', targets)
+    this.setState(ctx, 'campaign', campaign)
+    this.setState(ctx, 'target', target)
+    this.setState(ctx, 'targets', targets)
 
-      await next()
-    } catch (error) {
-      this.handleException(error, 'setupMirror')
-    }
+    await next()
   }
 
   protected parseSetupMirrorData(ctx: HttpServerContext): SetupMirrorData {

@@ -1,7 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import { RawSession } from './session.functions.js'
 
-export const rawSessionSchema: JSONSchemaType<RawSession> = {
+const rawSessionSchema: JSONSchemaType<RawSession> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -40,4 +41,8 @@ export const rawSessionSchema: JSONSchemaType<RawSession> = {
     }
   },
   additionalProperties: false
+} as const
+
+export const sessionSchemas: ValidatorSchemas = {
+  'database-raw-session': rawSessionSchema
 } as const

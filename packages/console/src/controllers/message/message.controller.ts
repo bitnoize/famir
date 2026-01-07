@@ -4,14 +4,13 @@ import {
   LOGGER,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerError,
   ReplServerRouter,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
 import { ReadMessageData } from './message.js'
-import { readMessageDataSchema } from './message.schemas.js'
+import { messageSchemas } from './message.schemas.js'
 import { MESSAGE_SERVICE, type MessageService } from './message.service.js'
 
 export const MESSAGE_CONTROLLER = Symbol('MessageController')
@@ -42,17 +41,15 @@ export class MessageController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas({
-      'console-read-message-data': readMessageDataSchema
-    })
+    this.validator.addSchemas(messageSchemas)
 
-    this.router.addApiCall('readMessage', this.readMessageApiCall)
+    this.router.register('readMessage', this.readMessage)
 
     this.logger.debug(`MessageController initialized`)
   }
 
-  private readMessageApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ReadMessageData>('console-read-message-data', data)
+  private readMessage: ReplServerApiCall = async (data) => {
+    this.validateData<ReadMessageData>('console-read-message-data', data)
 
     return await this.messageService.readMessage(data)
   }

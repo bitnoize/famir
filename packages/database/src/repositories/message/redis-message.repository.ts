@@ -22,12 +22,7 @@ import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage, RawMessage } from './message.functions.js'
-import {
-  messageConnectionSchema,
-  messageHeadersSchema,
-  rawFullMessageSchema,
-  rawMessageSchema
-} from './message.schemas.js'
+import { messageSchemas } from './message.schemas.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
   static inject(container: DIContainer) {
@@ -51,12 +46,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
   ) {
     super(validator, config, logger, connection, 'message')
 
-    this.validator.addSchemas({
-      'database-raw-message': rawMessageSchema,
-      'database-raw-full-message': rawFullMessageSchema,
-      'database-message-headers': messageHeadersSchema,
-      'database-message-connection': messageConnectionSchema
-    })
+    this.validator.addSchemas(messageSchemas)
 
     this.logger.debug(`MessageRepository initialized`)
   }

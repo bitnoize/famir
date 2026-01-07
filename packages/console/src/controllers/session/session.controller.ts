@@ -4,14 +4,13 @@ import {
   LOGGER,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
-  ReplServerError,
   ReplServerRouter,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
 import { ReadSessionData } from './session.js'
-import { readSessionDataSchema } from './session.schemas.js'
+import { sessionSchemas } from './session.schemas.js'
 import { SESSION_SERVICE, type SessionService } from './session.service.js'
 
 export const SESSION_CONTROLLER = Symbol('SessionController')
@@ -42,17 +41,15 @@ export class SessionController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas({
-      'console-read-session-data': readSessionDataSchema
-    })
+    this.validator.addSchemas(sessionSchemas)
 
-    this.router.addApiCall('readSession', this.readSessionApiCall)
+    this.router.register('readSession', this.readSession)
 
     this.logger.debug(`SessionController initialized`)
   }
 
-  private readSessionApiCall: ReplServerApiCall = async (data) => {
-    this.validateApiCallData<ReadSessionData>('console-read-session-data', data)
+  private readSession: ReplServerApiCall = async (data) => {
+    this.validateData<ReadSessionData>('console-read-session-data', data)
 
     return await this.sessionService.readSession(data)
   }

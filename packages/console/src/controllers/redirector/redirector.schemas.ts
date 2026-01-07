@@ -1,5 +1,6 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import { redirectorPageSchema } from '@famir/database'
+import { ValidatorSchemas } from '@famir/domain'
 import {
   CreateRedirectorData,
   DeleteRedirectorData,
@@ -10,7 +11,7 @@ import {
 
 const DEFAULT_PAGE = ``
 
-export const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = {
+const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = {
   type: 'object',
   required: ['campaignId', 'redirectorId', 'page'],
   properties: {
@@ -24,7 +25,7 @@ export const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = 
   additionalProperties: false
 } as const
 
-export const readRedirectorDataSchema: JSONSchemaType<ReadRedirectorData> = {
+const readRedirectorDataSchema: JSONSchemaType<ReadRedirectorData> = {
   type: 'object',
   required: ['campaignId', 'redirectorId'],
   properties: {
@@ -34,7 +35,7 @@ export const readRedirectorDataSchema: JSONSchemaType<ReadRedirectorData> = {
   additionalProperties: false
 } as const
 
-export const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
+const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
   type: 'object',
   required: ['campaignId', 'redirectorId'],
   properties: {
@@ -48,7 +49,7 @@ export const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = 
   additionalProperties: false
 } as const
 
-export const deleteRedirectorDataSchema: JSONSchemaType<DeleteRedirectorData> = {
+const deleteRedirectorDataSchema: JSONSchemaType<DeleteRedirectorData> = {
   type: 'object',
   required: ['campaignId', 'redirectorId'],
   properties: {
@@ -58,11 +59,19 @@ export const deleteRedirectorDataSchema: JSONSchemaType<DeleteRedirectorData> = 
   additionalProperties: false
 } as const
 
-export const listRedirectorsDataSchema: JSONSchemaType<ListRedirectorsData> = {
+const listRedirectorsDataSchema: JSONSchemaType<ListRedirectorsData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
     campaignId: customIdentSchema
   },
   additionalProperties: false
+} as const
+
+export const redirectorSchemas: ValidatorSchemas = {
+  'console-create-redirector-data': createRedirectorDataSchema,
+  'console-read-redirector-data': readRedirectorDataSchema,
+  'console-update-redirector-data': updateRedirectorDataSchema,
+  'console-delete-redirector-data': deleteRedirectorDataSchema,
+  'console-list-redirectors-data': listRedirectorsDataSchema
 } as const

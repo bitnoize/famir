@@ -1,5 +1,5 @@
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
-import { AnalyzeLogJobData } from '@famir/domain'
+import { AnalyzeLogJobData, ValidatorSchemas } from '@famir/domain'
 
 export const analyzeLogJobDataSchema: JSONSchemaType<AnalyzeLogJobData> = {
   type: 'object',
@@ -9,4 +9,8 @@ export const analyzeLogJobDataSchema: JSONSchemaType<AnalyzeLogJobData> = {
     messageId: randomIdentSchema
   },
   additionalProperties: false
+} as const
+
+export const analyzeLogSchemas: ValidatorSchemas = {
+  'executor-analyze-log-job-data': analyzeLogJobDataSchema
 } as const

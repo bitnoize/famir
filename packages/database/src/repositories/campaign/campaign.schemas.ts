@@ -1,7 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 
-export const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
+const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -34,7 +35,7 @@ export const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
   additionalProperties: false
 } as const
 
-export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
+const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -113,6 +114,11 @@ export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     }
   },
   additionalProperties: false
+} as const
+
+export const campaignSchemas: ValidatorSchemas = {
+  'database-raw-campaign': rawCampaignSchema,
+  'database-raw-full-campaign': rawFullCampaignSchema
 } as const
 
 export const campaignMirrorDomainSchema: JSONSchemaType<string> = {

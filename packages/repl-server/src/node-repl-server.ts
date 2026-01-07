@@ -39,7 +39,27 @@ export class NodeReplServer implements ReplServer {
     this.options = this.buildOptions(config.data)
 
     this.server = net.createServer((socket) => {
-      this.handleServerConnection(socket)
+      this.clients.add(socket)
+
+      socket.on('close', () => {
+        this.clients.delete(socket)
+      })
+
+      socket.on('timeout', () => {
+        socket.destroy()
+      })
+
+      socket.on('error', (error) => {
+        socket.destroy()
+
+        this.logger.error(`ReplServer socket error`, {
+          error: serializeError(error)
+        })
+      })
+
+      socket.setTimeout(this.options.socketTimeout)
+
+      this.handleConnection(socket)
     })
 
     this.server.maxConnections = this.options.maxClients
@@ -103,105 +123,54 @@ export class NodeReplServer implements ReplServer {
     })
   }
 
-  protected handleServerConnection(socket: net.Socket) {
-    this.clients.add(socket)
-
-    socket.setTimeout(this.options.socketTimeout)
-
-    socket.on('close', () => {
-      this.clients.delete(socket)
-    })
-
-    socket.on('timeout', () => {
-      socket.destroy()
-    })
-
-    socket.on('error', (error) => {
-      socket.destroy()
-
-      this.logger.error(`ReplServer socket error`, {
-        error: serializeError(error)
+  protected handleConnection(socket: net.Socket) {
+    try {
+      const replServer = repl.start({
+        input: socket,
+        output: socket,
+        terminal: true,
+        useGlobal: false,
+        prompt: this.options.prompt,
+        ignoreUndefined: true,
+        preview: false,
+        writer: (output) =>
+          util.inspect(output, {
+            depth: 4,
+            colors: this.options.useColors
+          })
       })
-    })
 
-    const replServer = repl.start({
-      input: socket,
-      output: socket,
-      terminal: true,
-      useGlobal: false,
-      prompt: this.options.prompt,
-      ignoreUndefined: true,
-      preview: false,
-      writer: (output) =>
-        util.inspect(output, {
-          depth: 4,
-          colors: this.options.useColors
-        })
-    })
+      replServer.on('reset', () => {
+        this.defineContext(replServer)
+      })
 
-    replServer.on('reset', () => {
-      this.defineReplContext(replServer)
-    })
+      replServer.on('exit', () => {
+        socket.end(`So long!\n`)
+      })
 
-    replServer.on('exit', () => {
-      socket.end(`So long!\n`)
-    })
+      this.defineContext(replServer)
 
-    this.defineReplContext(replServer)
+      socket.write(`Welcome to Fake-Mirrors REPL!\n`)
 
-    this.defineReplCommands(replServer, socket)
-
-    socket.write(`Welcome to Fake-Mirrors REPL!\n`)
-
-    replServer.displayPrompt()
+      replServer.displayPrompt()
+    } catch (error) {
+      this.handleError(error, socket)
+    }
   }
 
-  protected defineReplContext(replServer: repl.REPLServer) {
+  protected handleError(error: unknown, socket: net.Socket) {
+    socket.end()
+
+    this.logger.error(`ReplServer connection failed`, {
+      error: serializeError(error)
+    })
+  }
+
+  protected defineContext(replServer: repl.REPLServer) {
     Object.defineProperty(replServer.context, 'famir', {
       configurable: false,
       enumerable: true,
       value: this.router.resolve()
-    })
-  }
-
-  protected defineReplCommands(replServer: repl.REPLServer, socket: net.Socket) {
-    replServer.defineCommand('cons', {
-      help: `Show active connections`,
-      action: () => {
-        replServer.clearBufferedCommand()
-
-        socket.write(`Active connections:\n\n`)
-
-        this.clients.forEach((connection) => {
-          const { remoteFamily, remoteAddress, remotePort } = connection
-
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          socket.write(` - ${remoteFamily}:${remoteAddress}:${remotePort}\n`)
-        })
-
-        socket.write(`\n`)
-
-        replServer.displayPrompt()
-      }
-    })
-
-    replServer.defineCommand('apiCalls', {
-      help: `Show Api calls`,
-      action: () => {
-        replServer.clearBufferedCommand()
-
-        socket.write(`Api calls:\n\n`)
-
-        //socket.write(
-        //  util.inspect(this.router.getApiNames(), {
-        //    colors: this.options.useColors
-        //  })
-        //)
-
-        socket.write(`\n`)
-
-        replServer.displayPrompt()
-      }
     })
   }
 
@@ -216,64 +185,3 @@ export class NodeReplServer implements ReplServer {
     }
   }
 }
-
-/*
-
-    const api = this.router.resolve((name, apiCall, data) => {
-      try {
-        return await apiCall(data)
-      } catch (error) {
-        const raiseError = this.raiseApiCallError(error, name, data)
-
-        this.logger.error(`ReplServer apiCall error`, {
-          error: serializeError(raiseError)
-        })
-
-        throw raiseError
-      }
-    })
-
-
-
-    const value: ReplServerApiCalls = {}
-
-    const apiCalls = this.router.getApiCalls()
-
-    Object.entries(apiCalls).forEach(([name, apiCall]) => {
-      value[name] = async (data: unknown): Promise<unknown> => {
-        try {
-          return await apiCall(data)
-        } catch (error) {
-          const raiseError = this.raiseApiCallError(error, name, data)
-
-          this.logger.error(`ReplServer apiCall error`, {
-            error: serializeError(raiseError)
-          })
-
-          throw raiseError
-        }
-      }
-    })
-
-
-
-  protected raiseApiCallError(error: unknown, apiCall: string, data: unknown): ReplServerError {
-    if (error instanceof ReplServerError) {
-      error.context['apiCall'] = apiCall
-      error.context['data'] = data
-
-      return error
-    } else {
-      return new ReplServerError(`Server unknown error`, {
-        cause: error,
-        context: {
-          apiCall,
-          data
-        },
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
-
-
-*/
