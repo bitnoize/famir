@@ -7,8 +7,8 @@ import {
   Logger,
   LOGGER
 } from '@famir/domain'
+import { getRedisFunctions } from './database.redis-functions.js'
 import { RedisDatabaseConnection } from './redis-database-connector.js'
-import { getRedisFunctionsDump } from './redis-functions-dump.js'
 
 export class RedisDatabaseManager implements DatabaseManager {
   static inject(container: DIContainer) {
@@ -30,13 +30,15 @@ export class RedisDatabaseManager implements DatabaseManager {
   }
 
   async loadFunctions(): Promise<void> {
-    const dump = getRedisFunctionsDump().toString('binary')
+    await this.connection.FUNCTION_FLUSH()
 
-    await this.connection.FUNCTION_RESTORE(dump, {
-      mode: 'FLUSH'
-    })
+    const redisFunctions = getRedisFunctions()
 
-    this.logger.warn(`Database functions restored`)
+    for (const redisFunction of redisFunctions) {
+      await this.connection.FUNCTION_LOAD(redisFunction)
+    }
+
+    this.logger.warn(`Database functions loaded`)
   }
 
   async cleanup(): Promise<void> {

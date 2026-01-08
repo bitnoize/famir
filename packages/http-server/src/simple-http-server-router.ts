@@ -31,7 +31,7 @@ export class SimpleHttpServerRouter implements HttpServerRouter {
     this.registry.set(name, middleware)
   }
 
-  resolve(): HttpServerMiddleware {
+  resolve(): (ctx: HttpServerContext) => Promise<void> {
     return async (ctx: HttpServerContext): Promise<void> => {
       let index = -1
 
@@ -61,6 +61,10 @@ export class SimpleHttpServerRouter implements HttpServerRouter {
 
       await dispatch(0)
     }
+  }
+
+  reset() {
+    this.registry.clear()
   }
 
   protected raiseError(error: unknown, middleware: string): HttpServerError {

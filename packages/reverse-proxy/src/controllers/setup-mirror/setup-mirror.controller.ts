@@ -46,18 +46,20 @@ export class SetupMirrorController extends BaseController {
     this.validator.addSchemas(setupMirrorSchemas)
 
     this.router.register('setupMirror', this.setupMirror)
+
+    this.logger.debug(`SetupMirrorController initialized`)
   }
 
   protected setupMirror: HttpServerMiddleware = async (ctx, next) => {
-    const setupMirrorData = this.parseSetupMirrorData(ctx)
+    const data = this.parseSetupMirrorData(ctx)
 
     const [campaign, target] = await this.setupMirrorService.readCampaignTarget({
-      campaignId: setupMirrorData.campaign_id,
-      targetId: setupMirrorData.target_id
+      campaignId: data.campaign_id,
+      targetId: data.target_id
     })
 
     const targets = await this.setupMirrorService.listTargets({
-      campaignId: setupMirrorData.campaign_id
+      campaignId: data.campaign_id
     })
 
     this.setState(ctx, 'campaign', campaign)
@@ -78,7 +80,7 @@ export class SetupMirrorController extends BaseController {
 
       return data
     } catch (error) {
-      throw new HttpServerError(`SetupMirrorData validate failed`, {
+      throw new HttpServerError(`Data validate failed`, {
         cause: error,
         code: 'SERVICE_UNAVAILABLE'
       })

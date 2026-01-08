@@ -1,4 +1,4 @@
-import { DIContainer, randomIdentSchema } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
   EnabledFullTargetModel,
   FullCampaignModel,
@@ -20,7 +20,7 @@ import {
 } from '@famir/domain'
 import { BaseController } from '../base/index.js'
 import { LandingRedirectorData, LandingUpgradeData } from './authorize.js'
-import { landingRedirectorDataSchema, landingUpgradeDataSchema } from './authorize.schemas.js'
+import { authorizeSchemas } from './authorize.schemas.js'
 import { type AuthorizeService, AUTHORIZE_SERVICE } from './authorize.service.js'
 
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
@@ -53,59 +53,51 @@ export class AuthorizeController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas({
-      'reverse-proxy-session-cookie': randomIdentSchema,
-      'reverse-proxy-landing-upgrade-data': landingUpgradeDataSchema,
-      'reverse-proxy-landing-redirector-data': landingRedirectorDataSchema
-    })
+    this.validator.addSchemas(authorizeSchemas)
 
-    this.router.addMiddleware(this.authorizeMiddleware)
+    this.router.register('authorize', this.authorize)
   }
 
-  protected authorizeMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      const campaign = this.getState(ctx, 'campaign')
-      const target = this.getState(ctx, 'target')
+  protected authorize: HttpServerMiddleware = async (ctx, next) => {
+    const campaign = this.getState(ctx, 'campaign')
+    const target = this.getState(ctx, 'target')
 
-      if (target.isLanding) {
-        if (ctx.isUrlPathEquals(campaign.landingUpgradePath)) {
-          if (!ctx.isMethod('GET')) {
-            await this.renderNotFoundPage(ctx, target)
-
-            return
-          }
-
-          await this.landingUpgradeSession(ctx, campaign)
+    if (target.isLanding) {
+      if (ctx.isUrlPathEquals(campaign.landingUpgradePath)) {
+        if (!ctx.isMethod('GET')) {
+          await this.renderNotFoundPage(ctx, target)
 
           return
         }
 
-        const lure = await this.authorizeService.readLurePath({
+        await this.landingUpgradeSession(ctx, campaign)
+
+        return
+      }
+
+      const lure = await this.authorizeService.readLurePath({
+        campaignId: campaign.campaignId,
+        path: ctx.url.path
+      })
+
+      if (lure) {
+        if (!ctx.isMethods(['HEAD', 'GET'])) {
+          await this.renderNotFoundPage(ctx, target)
+        }
+
+        const redirector = await this.authorizeService.readRedirector({
           campaignId: campaign.campaignId,
-          path: ctx.url.path
+          redirectorId: lure.redirectorId
         })
 
-        if (lure) {
-          if (!ctx.isMethods(['HEAD', 'GET'])) {
-            await this.renderNotFoundPage(ctx, target)
-          }
+        await this.landingRedirectorSession(ctx, campaign, target, redirector)
 
-          const redirector = await this.authorizeService.readRedirector({
-            campaignId: campaign.campaignId,
-            redirectorId: lure.redirectorId
-          })
-
-          await this.landingRedirectorSession(ctx, campaign, target, redirector)
-
-          return
-        }
-
-        await this.landingAuthSession(ctx, campaign, target, next)
-      } else {
-        await this.regularSession(ctx, campaign, target, next)
+        return
       }
-    } catch (error) {
-      this.handleException(error, 'authorize')
+
+      await this.landingAuthSession(ctx, campaign, target, next)
+    } else {
+      await this.regularSession(ctx, campaign, target, next)
     }
   }
 

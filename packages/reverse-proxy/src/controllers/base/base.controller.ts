@@ -1,7 +1,6 @@
 import {
   EnabledFullTargetModel,
   HttpServerContext,
-  HttpServerError,
   HttpServerRouter,
   Logger,
   Validator
@@ -100,21 +99,5 @@ export abstract class BaseController {
     ctx.setStatus(404)
 
     await ctx.sendResponse()
-  }
-
-  protected handleException(error: unknown, middleware: string): never {
-    if (error instanceof HttpServerError) {
-      error.context['middleware'] = middleware
-
-      throw error
-    } else {
-      throw new HttpServerError(`Server internal error`, {
-        cause: error,
-        context: {
-          middleware
-        },
-        code: 'INTERNAL_ERROR'
-      })
-    }
   }
 }

@@ -108,9 +108,9 @@ export class NodeHttpServer implements HttpServer {
     try {
       const ctx = new NodeHttpServerContext(req, res)
 
-      const middleware = this.router.resolve()
+      const middlewareChain = this.router.resolve()
 
-      await middleware(ctx, async () => {})
+      await middlewareChain(ctx)
 
       if (!ctx.isComplete) {
         throw new HttpServerError(`Incomplete request`, {

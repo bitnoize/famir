@@ -52,6 +52,10 @@ export class SimpleReplServerRouter implements ReplServerRouter {
     return obj
   }
 
+  reset() {
+    this.registry.clear()
+  }
+
   protected raiseError(error: unknown, apiCall: string, data: unknown): ReplServerError {
     if (error instanceof ReplServerError) {
       error.context['apiCall'] = apiCall

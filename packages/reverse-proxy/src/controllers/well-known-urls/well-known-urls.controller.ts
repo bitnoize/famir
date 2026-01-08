@@ -34,63 +34,49 @@ export class WellKnownUrlsController extends BaseController {
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
     super(validator, logger, router)
 
-    this.router.addMiddleware(this.preflightCorsMiddleware)
-    this.router.addMiddleware(this.faviconIcoMiddleware)
-    this.router.addMiddleware(this.robotsTxtMiddleware)
-    this.router.addMiddleware(this.sitemapXmlMiddleware)
+    this.router.register('preflightCors', this.preflightCors)
+    this.router.register('faviconIco', this.faviconIco)
+    this.router.register('robotsTxt', this.robotsTxt)
+    this.router.register('sitemapXml', this.sitemapXml)
+
+    this.logger.debug(`WellKnownUrlsController initialized`)
   }
 
-  protected preflightCorsMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      if (ctx.isMethod('OPTIONS')) {
-        await this.renderPreflightCors(ctx)
-      } else {
-        await next()
-      }
-    } catch (error) {
-      this.handleException(error, 'preflightCors')
+  protected preflightCors: HttpServerMiddleware = async (ctx, next) => {
+    if (ctx.isMethod('OPTIONS')) {
+      await this.renderPreflightCors(ctx)
+    } else {
+      await next()
     }
   }
 
-  protected faviconIcoMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      const target = this.getState(ctx, 'target')
+  protected faviconIco: HttpServerMiddleware = async (ctx, next) => {
+    const target = this.getState(ctx, 'target')
 
-      if (ctx.isUrlPathEquals('/favicon.ico')) {
-        await this.renderFaviconIco(ctx, target)
-      } else {
-        await next()
-      }
-    } catch (error) {
-      this.handleException(error, 'faviconIco')
+    if (ctx.isUrlPathEquals('/favicon.ico')) {
+      await this.renderFaviconIco(ctx, target)
+    } else {
+      await next()
     }
   }
 
-  protected robotsTxtMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      const target = this.getState(ctx, 'target')
+  protected robotsTxt: HttpServerMiddleware = async (ctx, next) => {
+    const target = this.getState(ctx, 'target')
 
-      if (ctx.isUrlPathEquals('/robots.txt')) {
-        await this.renderRobotsTxt(ctx, target)
-      } else {
-        await next()
-      }
-    } catch (error) {
-      this.handleException(error, 'robotsTxt')
+    if (ctx.isUrlPathEquals('/robots.txt')) {
+      await this.renderRobotsTxt(ctx, target)
+    } else {
+      await next()
     }
   }
 
-  protected sitemapXmlMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      const target = this.getState(ctx, 'target')
+  protected sitemapXml: HttpServerMiddleware = async (ctx, next) => {
+    const target = this.getState(ctx, 'target')
 
-      if (ctx.isUrlPathEquals('/sitemap.xml')) {
-        await this.renderSitemapXml(ctx, target)
-      } else {
-        await next()
-      }
-    } catch (error) {
-      this.handleException(error, 'sitemapXml')
+    if (ctx.isUrlPathEquals('/sitemap.xml')) {
+      await this.renderSitemapXml(ctx, target)
+    } else {
+      await next()
     }
   }
 

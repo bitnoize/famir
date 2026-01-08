@@ -39,41 +39,39 @@ export class CompletionController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.router.addMiddleware(this.completionMiddleware)
+    this.router.register('completion', this.completion)
+
+    this.logger.debug(`CompletionController initialized`)
   }
 
-  protected completionMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      const campaign = this.getState(ctx, 'campaign')
-      const target = this.getState(ctx, 'target')
-      const proxy = this.getState(ctx, 'proxy')
-      const session = this.getState(ctx, 'session')
+  protected completion: HttpServerMiddleware = async (ctx, next) => {
+    const campaign = this.getState(ctx, 'campaign')
+    const target = this.getState(ctx, 'target')
+    const proxy = this.getState(ctx, 'proxy')
+    const session = this.getState(ctx, 'session')
 
-      const message = await this.completionService.createMessage({
-        campaignId: campaign.campaignId,
-        proxyId: proxy.proxyId,
-        targetId: target.targetId,
-        sessionId: session.sessionId,
-        method: ctx.method,
-        url: ctx.normalizeUrl(),
-        isStreaming: ctx.isStreaming,
-        requestHeaders: ctx.requestHeaders,
-        requestBody: ctx.requestBody,
-        responseHeaders: ctx.responseHeaders,
-        responseBody: ctx.responseBody,
-        clientIp: '',
-        status: ctx.status,
-        score: ctx.score,
-        startTime: ctx.startTime,
-        finishTime: ctx.finishTime,
-        connection: ctx.connection
-      })
+    const message = await this.completionService.createMessage({
+      campaignId: campaign.campaignId,
+      proxyId: proxy.proxyId,
+      targetId: target.targetId,
+      sessionId: session.sessionId,
+      method: ctx.method,
+      url: ctx.normalizeUrl(),
+      isStreaming: ctx.isStreaming,
+      requestHeaders: ctx.requestHeaders,
+      requestBody: ctx.requestBody,
+      responseHeaders: ctx.responseHeaders,
+      responseBody: ctx.responseBody,
+      clientIp: '',
+      status: ctx.status,
+      score: ctx.score,
+      startTime: ctx.startTime,
+      finishTime: ctx.finishTime,
+      connection: ctx.connection
+    })
 
-      this.setState(ctx, 'message', message)
+    this.setState(ctx, 'message', message)
 
-      await next()
-    } catch (error) {
-      this.handleException(error, 'completion')
-    }
+    await next()
   }
 }

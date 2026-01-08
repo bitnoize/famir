@@ -41,54 +41,50 @@ export class BuildResponseController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.router.addMiddleware(this.buildResponseMiddleware)
+    this.router.register('buildResponse', this.buildResponse)
   }
 
-  protected buildResponseMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    try {
-      const target = this.getState(ctx, 'target')
-      const proxy = this.getState(ctx, 'proxy')
+  protected buildResponse: HttpServerMiddleware = async (ctx, next) => {
+    const target = this.getState(ctx, 'target')
+    const proxy = this.getState(ctx, 'proxy')
 
-      ctx.applyRequestWrappers()
+    ctx.applyRequestWrappers()
 
-      if (ctx.isStreaming) {
-        throw new Error(`Streaming requests not implemented yet :(`)
-      } else {
-        const { status, responseHeaders, responseBody, connection } =
-          await this.buildResponseService.ordinaryRequest({
-            proxy: proxy.url,
-            method: ctx.method,
-            url: this.assemblyUrl(target, ctx.normalizeUrl()),
-            requestHeaders: ctx.requestHeaders,
-            requestBody: ctx.requestBody,
-            connectTimeout: target.connectTimeout,
-            ordinaryTimeout: target.ordinaryTimeout,
-            responseBodyLimit: target.responseBodyLimit
-          })
-
-        ctx.setResponseHeaders(responseHeaders)
-        ctx.setResponseBody(responseBody)
-        ctx.setStatus(status)
-        //ctx.setConnection(connection)
-
-        /*
-        ctx.setResponseHeaders({
-          Connection: undefined,
-          'Keep-Alive': undefined,
-          Upgrade: undefined,
-          'Set-Cookie': undefined
+    if (ctx.isStreaming) {
+      throw new Error(`Streaming requests not implemented yet :(`)
+    } else {
+      const { status, responseHeaders, responseBody, connection } =
+        await this.buildResponseService.ordinaryRequest({
+          proxy: proxy.url,
+          method: ctx.method,
+          url: this.assemblyUrl(target, ctx.normalizeUrl()),
+          requestHeaders: ctx.requestHeaders,
+          requestBody: ctx.requestBody,
+          connectTimeout: target.connectTimeout,
+          ordinaryTimeout: target.ordinaryTimeout,
+          responseBodyLimit: target.responseBodyLimit
         })
-        */
 
-        ctx.applyResponseWrappers()
+      ctx.setResponseHeaders(responseHeaders)
+      ctx.setResponseBody(responseBody)
+      ctx.setStatus(status)
+      //ctx.setConnection(connection)
 
-        await ctx.sendResponse()
-      }
+      /*
+      ctx.setResponseHeaders({
+        Connection: undefined,
+        'Keep-Alive': undefined,
+        Upgrade: undefined,
+        'Set-Cookie': undefined
+      })
+      */
 
-      await next()
-    } catch (error) {
-      this.handleException(error, 'buildResponse')
+      ctx.applyResponseWrappers()
+
+      await ctx.sendResponse()
     }
+
+    await next()
   }
 
   private assemblyUrl(target: TargetModel, relativeUrl: string): string {

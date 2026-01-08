@@ -1,4 +1,5 @@
 import { JSONSchemaType } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import {
   LOGGER_LOG_LEVELS,
   LOGGER_TRANSPORT_TARGETS,
@@ -6,6 +7,16 @@ import {
   LoggerTransportOptions,
   LoggerTransportTarget
 } from './logger.js'
+
+const loggerTransportOptionsSchema: JSONSchemaType<LoggerTransportOptions> = {
+  type: 'object',
+  required: [],
+  properties: {}
+} as const
+
+export const loggerSchemas: ValidatorSchemas = {
+  'logger-transport-options': loggerTransportOptionsSchema
+} as const
 
 export const configLoggerAppNameSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -28,10 +39,4 @@ export const configLoggerTransportTargetSchema: JSONSchemaType<LoggerTransportTa
 export const configLoggerTransportOptionsSchema: JSONSchemaType<string> = {
   type: 'string',
   default: '{}'
-} as const
-
-export const loggerTransportOptionsSchema: JSONSchemaType<LoggerTransportOptions> = {
-  type: 'object',
-  required: [],
-  properties: {}
 } as const

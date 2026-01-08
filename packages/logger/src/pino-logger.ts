@@ -2,7 +2,7 @@ import { DIContainer } from '@famir/common'
 import { Config, CONFIG, Logger, LOGGER, LoggerData, Validator, VALIDATOR } from '@famir/domain'
 import pino from 'pino'
 import { LoggerConfig, LoggerOptions, LoggerTransportOptions } from './logger.js'
-import { loggerTransportOptionsSchema } from './logger.schemas.js'
+import { loggerSchemas } from './logger.schemas.js'
 
 export class PinoLogger implements Logger {
   static inject(container: DIContainer) {
@@ -20,9 +20,7 @@ export class PinoLogger implements Logger {
     private readonly validator: Validator,
     config: Config<LoggerConfig>
   ) {
-    this.validator.addSchemas({
-      'logger-transport-options': loggerTransportOptionsSchema
-    })
+    this.validator.addSchemas(loggerSchemas)
 
     this.options = this.buildOptions(config.data)
 
@@ -35,6 +33,8 @@ export class PinoLogger implements Logger {
         options: this.options.transportOptions
       }
     })
+
+    this.debug(`Logger initialized`)
   }
 
   debug(mesg: string, data: LoggerData = {}) {

@@ -31,6 +31,8 @@ export class CurlHttpClient implements HttpClient {
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)
+
+    this.logger.debug(`HttpClient initialized`)
   }
 
   ordinaryRequest(

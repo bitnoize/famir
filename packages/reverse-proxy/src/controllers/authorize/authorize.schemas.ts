@@ -1,7 +1,8 @@
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
+import { ValidatorSchemas } from '@famir/domain'
 import { LandingRedirectorData, LandingUpgradeData } from './authorize.js'
 
-export const landingUpgradeDataSchema: JSONSchemaType<LandingUpgradeData> = {
+const landingUpgradeDataSchema: JSONSchemaType<LandingUpgradeData> = {
   type: 'object',
   required: ['lure_id', 'secret'],
   properties: {
@@ -11,7 +12,7 @@ export const landingUpgradeDataSchema: JSONSchemaType<LandingUpgradeData> = {
   additionalProperties: false
 } as const
 
-export const landingRedirectorDataSchema: JSONSchemaType<LandingRedirectorData> = {
+const landingRedirectorDataSchema: JSONSchemaType<LandingRedirectorData> = {
   type: 'object',
   required: [],
   properties: {
@@ -33,4 +34,10 @@ export const landingRedirectorDataSchema: JSONSchemaType<LandingRedirectorData> 
     }
   },
   additionalProperties: false
+} as const
+
+export const authorizeSchemas: ValidatorSchemas = {
+  'reverse-proxy-session-cookie': randomIdentSchema,
+  'reverse-proxy-landing-upgrade-data': landingUpgradeDataSchema,
+  'reverse-proxy-landing-redirector-data': landingRedirectorDataSchema
 } as const

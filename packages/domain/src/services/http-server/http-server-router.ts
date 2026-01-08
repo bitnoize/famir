@@ -11,5 +11,6 @@ export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
 
 export interface HttpServerRouter {
   register(name: string, middleware: HttpServerMiddleware): void
-  resolve(): HttpServerMiddleware
+  resolve(): (ctx: HttpServerContext) => Promise<void>
+  reset(): void
 }
