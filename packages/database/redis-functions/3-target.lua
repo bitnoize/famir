@@ -4,7 +4,7 @@
   Create target
 --]]
 local function create_target(keys, args)
-  if not (#keys == 5 and #args == 21) then
+  if #keys ~= 5 or #args ~= 22 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -14,12 +14,27 @@ local function create_target(keys, args)
   local target_unique_mirror_key = keys[4]
   local target_index_key = keys[5]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
-  if not (redis.call('EXISTS', target_key) == 0) then
+  if redis.call('EXISTS', target_key) ~= 0 then
     return redis.status_reply('CONFLICT Target allready exists')
+  end
+
+  local stash = {
+    lock_code = tonumber(args[22]),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+  }
+
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
   end
 
   local model = {
@@ -29,10 +44,10 @@ local function create_target(keys, args)
     donor_secure = tonumber(args[4]),
     donor_sub = args[5],
     donor_domain = args[6],
-    donor_port = tonumber(args[7]),
+    donor_port = args[7],
     mirror_secure = tonumber(args[8]),
     mirror_sub = args[9],
-    mirror_port = tonumber(args[10]),
+    mirror_port = args[10],
     connect_timeout = tonumber(args[11]),
     ordinary_timeout = tonumber(args[12]),
     streaming_timeout = tonumber(args[13]),
@@ -53,53 +68,47 @@ local function create_target(keys, args)
     if not value then
       return redis.error_reply('ERR Wrong model.' .. field)
     end
-  end
 
-  if not (#model.campaign_id > 0) then
-    return redis.error_reply('ERR Wrong model.campaign_id')
-  end
-
-  if not (#model.target_id > 0) then
-    return redis.error_reply('ERR Wrong model.target_id')
-  end
-
-  if not (#model.donor_sub > 0) then
-    return redis.error_reply('Wrong model.donor_sub')
-  end
-
-  if not (#model.donor_domain > 0) then
-    return redis.error_reply('ERR Wrong model.donor_domain')
-  end
-
-  if not (model.donor_port >= 0) then
-    return redis.error_reply('ERR Wrong model.donor_port')
-  end
-
-  if not (#model.mirror_sub > 0) then
-    return redis.error_reply('ERR Wrong model.mirror_sub')
-  end
-
-  if not (model.mirror_port >= 0) then
-    return redis.error_reply('ERR Wrong model.mirror_port')
+    if
+      (
+        field == 'campaign_id'
+        or field == 'target_id'
+        or field == 'donor_sub'
+        or field == 'donor_domain'
+        or field == 'donor_port'
+        or field == 'mirror_sub'
+        or field == 'mirror_port'
+      ) and value == ''
+    then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
   end
 
   -- stylua: ignore
   local donor = model.campaign_id
     .. '\t' .. model.donor_sub
     .. '\t' .. model.donor_domain
-    .. '\t' .. tostring(model.donor_port)
+    .. '\t' .. model.donor_port
 
   -- stylua: ignore
   local mirror = model.campaign_id
     .. '\t' .. model.mirror_sub
-    .. '\t' .. tostring(model.mirror_port)
+    .. '\t' .. model.mirror_port
 
-  if not (redis.call('SISMEMBER', target_unique_donor_key, donor) == 0) then
+  if redis.call('SISMEMBER', target_unique_donor_key, donor) ~= 0 then
     return redis.status_reply('CONFLICT Target donor allready taken')
   end
 
-  if not (redis.call('SISMEMBER', target_unique_mirror_key, mirror) == 0) then
+  if redis.call('SISMEMBER', target_unique_mirror_key, mirror) ~= 0 then
     return redis.status_reply('CONFLICT Target mirror allready taken')
+  end
+
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
   end
 
   -- Point of no return
@@ -131,18 +140,18 @@ redis.register_function({
   Read target
 --]]
 local function read_target(keys, args)
-  if not (#keys == 2 and #args == 0) then
+  if #keys ~= 2 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local target_key = keys[2]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
+  if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
   end
 
-  if not (redis.call('EXISTS', target_key) == 1) then
+  if redis.call('EXISTS', target_key) ~= 1 then
     return nil
   end
 
@@ -165,7 +174,7 @@ local function read_target(keys, args)
     'updated_at'
   )
 
-  if not (#values == 14) then
+  if #values ~= 14 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -176,7 +185,7 @@ local function read_target(keys, args)
     donor_secure = tonumber(values[4]),
     donor_sub = values[5],
     donor_domain = values[6],
-    donor_port = tonumber(values[7]),
+    donor_port = values[7],
     mirror_secure = tonumber(values[8]),
     mirror_sub = values[9],
     mirror_port = values[10],
@@ -206,7 +215,7 @@ redis.register_function({
   Read full target
 --]]
 local function read_full_target(keys, args)
-  if not (#keys == 3 and #args == 0) then
+  if #keys ~= 3 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -214,11 +223,11 @@ local function read_full_target(keys, args)
   local target_key = keys[2]
   local target_labels_key = keys[3]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
+  if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
   end
 
-  if not (redis.call('EXISTS', target_key) == 1) then
+  if redis.call('EXISTS', target_key) ~= 1 then
     return nil
   end
 
@@ -251,7 +260,7 @@ local function read_full_target(keys, args)
     'updated_at'
   )
 
-  if not (#values == 24) then
+  if #values ~= 24 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -262,10 +271,10 @@ local function read_full_target(keys, args)
     donor_secure = tonumber(values[4]),
     donor_sub = values[5],
     donor_domain = values[6],
-    donor_port = tonumber(values[7]),
+    donor_port = values[7],
     mirror_secure = tonumber(values[8]),
     mirror_sub = values[9],
-    mirror_port = tonumber(values[10]),
+    mirror_port = values[10],
     labels = redis.call('SMEMBERS', target_labels_key),
     connect_timeout = tonumber(values[11]),
     ordinary_timeout = tonumber(values[12]),
@@ -303,14 +312,14 @@ redis.register_function({
   Read target index
 --]]
 local function read_target_index(keys, args)
-  if not (#keys == 2 and #args == 0) then
+  if #keys ~= 2 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local target_index_key = keys[2]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
+  if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
   end
 
@@ -328,19 +337,39 @@ redis.register_function({
   Update target
 --]]
 local function update_target(keys, args)
-  if not (#keys == 2 and #args >= 0 and #args % 2 == 0) then
+  if #keys ~= 2 or #args < 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local target_key = keys[2]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
-  if not (redis.call('EXISTS', target_key) == 1) then
-    return redis.status_reply('NOT_FOUND Target not found')
+  if redis.call('EXISTS', target_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Target not exists')
+  end
+
+  local stash = {
+    lock_code = tonumber(table.remove(args)),
+    updated_at = tonumber(table.remove(args)),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+  }
+
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+  end
+
+  if #args % 2 ~= 0 then
+    return redis.error_reply('ERR Odd number of args')
   end
 
   local model = {}
@@ -354,77 +383,47 @@ local function update_target(keys, args)
 
     if field == 'connect_timeout' then
       model.connect_timeout = tonumber(value)
-
-      if not model.connect_timeout then
-        return redis.error_reply('ERR Wrong model.connect_timeout')
-      end
     elseif field == 'ordinary_timeout' then
       model.ordinary_timeout = tonumber(value)
-
-      if not model.ordinary_timeout then
-        return redis.error_reply('ERR Wrong model.ordinary_timeout')
-      end
     elseif field == 'streaming_timeout' then
       model.streaming_timeout = tonumber(value)
-
-      if not model.streaming_timeout then
-        return redis.error_reply('ERR Wrong model.streaming_timeout')
-      end
     elseif field == 'request_body_limit' then
       model.request_body_limit = tonumber(value)
-
-      if not model.request_body_limit then
-        return redis.error_reply('ERR Wrong model.request_body_limit')
-      end
     elseif field == 'response_body_limit' then
       model.response_body_limit = tonumber(value)
-
-      if not model.response_body_limit then
-        return redis.error_reply('ERR Wrong model.response_body_limit')
-      end
     elseif field == 'main_page' then
       model.main_page = value
-
-      if not model.main_page then
-        return redis.error_reply('ERR Wrong model.main_page')
-      end
     elseif field == 'not_found_page' then
       model.not_found_page = value
-
-      if not model.not_found_page then
-        return redis.error_reply('ERR Wrong model.not_found_page')
-      end
     elseif field == 'favicon_ico' then
       model.favicon_ico = value
-
-      if not model.favicon_ico then
-        return redis.error_reply('ERR Wrong model.favicon_ico')
-      end
     elseif field == 'robots_txt' then
       model.robots_txt = value
-
-      if not model.robots_txt then
-        return redis.error_reply('ERR Wrong model.robots_txt')
-      end
     elseif field == 'sitemap_xml' then
       model.sitemap_xml = value
-
-      if not model.sitemap_xml then
-        return redis.error_reply('ERR Wrong model.sitemap_xml')
-      end
-    elseif field == 'updated_at' then
-      model.updated_at = tonumber(value)
-
-      if not model.updated_at then
-        return redis.error_reply('ERR Wrong model.updated_at')
-      end
     else
       return redis.error_reply('ERR Unknown model.' .. field)
     end
   end
 
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
+  end
+
   if next(model) == nil then
     return redis.status_reply('OK Nothing to update')
+  end
+
+  model.updated_at = stash.updated_at
+
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
   end
 
   -- Point of no return
@@ -451,46 +450,53 @@ redis.register_function({
   Enable target
 --]]
 local function enable_target(keys, args)
-  if not (#keys == 2 and #args == 1) then
+  if #keys ~= 2 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local target_key = keys[2]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND campaign not found')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
-  if not (redis.call('EXISTS', target_key) == 1) then
-    return redis.status_reply('NOT_FOUND target not found')
+  if redis.call('EXISTS', target_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Target not exists')
   end
 
   local stash = {
     updated_at = tonumber(args[1]),
+    lock_code = tonumber(args[2]),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
-  if not stash.updated_at then
-    return redis.error_reply('ERR Wrong stash.updated_at')
-  end
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
 
-  if not stash.is_enabled then
-    return redis.error_reply('ERR Malform stash.is_enabled')
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
   end
 
   if stash.is_enabled ~= 0 then
     return redis.status_reply('OK Target allready enabled')
   end
 
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  end
+
   -- Point of no return
 
-  -- stylua: ignore
-  redis.call(
-    'HSET', target_key,
-    'is_enabled', 1,
-    'updated_at', stash.updated_at
-  )
+  redis.call('HSET', target_key, 'is_enabled', 1, 'updated_at', stash.updated_at)
 
   return redis.status_reply('OK Target enabled')
 end
@@ -505,46 +511,53 @@ redis.register_function({
   Disable target
 --]]
 local function disable_target(keys, args)
-  if not (#keys == 2 and #args == 1) then
+  if #keys ~= 2 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local target_key = keys[2]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND campaign not found')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
-  if not (redis.call('EXISTS', target_key) == 1) then
-    return redis.status_reply('NOT_FOUND target not found')
+  if redis.call('EXISTS', target_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Target not exists')
   end
 
   local stash = {
     updated_at = tonumber(args[1]),
+    lock_code = tonumber(args[2]),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
-  if not stash.updated_at then
-    return redis.error_reply('ERR Wrong stash.updated_at')
-  end
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
 
-  if not stash.is_enabled then
-    return redis.error_reply('ERR Malform stash.is_enabled')
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
   end
 
   if stash.is_enabled == 0 then
     return redis.status_reply('OK Target allready disabled')
   end
 
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  end
+
   -- Point of no return
 
-  -- stylua: ignore
-  redis.call(
-    'HSET', target_key,
-    'is_enabled', 0,
-    'updated_at', stash.updated_at
-  )
+  redis.call('HSET', target_key, 'is_enabled', 0, 'updated_at', stash.updated_at)
 
   return redis.status_reply('OK Target diabled')
 end
@@ -559,7 +572,7 @@ redis.register_function({
   Append target label
 --]]
 local function append_target_label(keys, args)
-  if not (#keys == 3 and #args == 2) then
+  if #keys ~= 3 or #args ~= 3 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -567,30 +580,48 @@ local function append_target_label(keys, args)
   local target_key = keys[2]
   local target_labels_key = keys[3]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
-  if not (redis.call('EXISTS', target_key) == 1) then
-    return redis.status_reply('NOT_FOUND Target not found')
+  if redis.call('EXISTS', target_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Target not exists')
   end
 
   local stash = {
     label = args[1],
     updated_at = tonumber(args[2]),
+    lock_code = tonumber(args[3]),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
   }
 
-  if not (stash.label and #stash.label > 0) then
-    return redis.error_reply('ERR Wrong stash.label')
-  end
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
 
-  if not stash.updated_at then
-    return redis.error_reply('ERR Wrong stash.updated_at')
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'label' and value == '' then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
   end
 
   if redis.call('SISMEMBER', target_labels_key, stash.label) ~= 0 then
-    return redis.status_reply('OK Target label allready appended')
+    return redis.status_reply('OK Target label allready exists')
   end
+
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  end
+
+  -- Point of no return
 
   redis.call('HSET', target_key, 'updated_at', stash.updated_at)
 
@@ -609,7 +640,7 @@ redis.register_function({
   Remove target label
 --]]
 local function remove_target_label(keys, args)
-  if not (#keys == 3 and #args == 2) then
+  if #keys ~= 3 or #args ~= 3 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -617,30 +648,48 @@ local function remove_target_label(keys, args)
   local target_key = keys[2]
   local target_labels_key = keys[3]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
-  if not (redis.call('EXISTS', target_key) == 1) then
-    return redis.status_reply('NOT_FOUND Target not found')
+  if redis.call('EXISTS', target_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Target not exists')
   end
 
   local stash = {
     label = args[1],
     updated_at = tonumber(args[2]),
+    lock_code = tonumber(args[3]),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
   }
 
-  if not (stash.label and #stash.label > 0) then
-    return redis.error_reply('ERR Wrong stash.label')
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'label' and value == '' then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
   end
 
-  if not stash.updated_at then
-    return redis.error_reply('ERR Wrong stash.updated_at')
-  end
-
-  if redis.call('SISMEMBER', target_labels_key, stash.label) == 0 then
+  if redis.call('SISMEMBER', target_labels_key, stash.label) ~= 1 then
     return redis.status_reply('OK Target label not exists')
   end
+
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  end
+
+  -- Point of no return
 
   redis.call('HSET', target_key, 'updated_at', stash.updated_at)
 
@@ -659,7 +708,7 @@ redis.register_function({
   Delete target
 --]]
 local function delete_target(keys, args)
-  if not (#keys == 6 and #args == 0) then
+  if #keys ~= 6 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -670,71 +719,73 @@ local function delete_target(keys, args)
   local target_unique_mirror_key = keys[5]
   local target_index_key = keys[6]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
-  if not (redis.call('EXISTS', target_key) == 1) then
-    return redis.status_reply('NOT_FOUND Target not found')
+  if redis.call('EXISTS', target_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Target not exists')
   end
 
   local stash = {
-    campaign_id = redis.call('HGET', campaign_key, 'campaign_id'),
+    lock_code = tonumber(args[1]),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    campaign_id = redis.call('HGET', target_key, 'campaign_id'),
     target_id = redis.call('HGET', target_key, 'target_id'),
     donor_sub = redis.call('HGET', target_key, 'donor_sub'),
     donor_domain = redis.call('HGET', target_key, 'donor_domain'),
-    donor_port = tonumber(redis.call('HGET', target_key, 'donor_port')),
+    donor_port = redis.call('HGET', target_key, 'donor_port'),
     mirror_sub = redis.call('HGET', target_key, 'mirror_sub'),
-    mirror_port = tonumber(redis.call('HGET', target_key, 'mirror_port')),
+    mirror_port = redis.call('HGET', target_key, 'mirror_port'),
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
-  if not (stash.campaign_id and #stash.campaign_id > 0) then
-    return redis.error_reply('ERR Malform stash.campaign_id')
-  end
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
 
-  if not (stash.target_id and #stash.target_id > 0) then
-    return redis.error_reply('ERR Malform stash.target_id')
-  end
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
 
-  if not (stash.donor_sub and #stash.donor_sub > 0) then
-    return redis.error_reply('ERR Malform stash.dadonor_sub')
-  end
-
-  if not (stash.donor_domain and #stash.donor_domain > 0) then
-    return redis.error_reply('ERR Malform stash.donor_domain')
-  end
-
-  if not (stash.donor_port and stash.donor_port >= 0) then
-    return redis.error_reply('ERR Malform stash.donor_port')
-  end
-
-  if not (stash.mirror_sub and #stash.mirror_sub > 0) then
-    return redis.error_reply('ERR Malform stash.mirror_sub')
-  end
-
-  if not (stash.mirror_port and stash.mirror_port >= 0) then
-    return redis.error_reply('ERR Malform stash.mirror_port')
-  end
-
-  if not stash.is_enabled then
-    return redis.error_reply('ERR Malform stash.is_enabled')
-  end
-
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('FORBIDDEN Target not disabled')
+    if
+      (
+        field == 'campaign_id'
+        or field == 'target_id'
+        or field == 'donor_sub'
+        or field == 'donor_domain'
+        or field == 'donor_port'
+        or field == 'mirror_sub'
+        or field == 'mirror_port'
+      ) and value == ''
+    then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
   end
 
   -- stylua: ignore
   local donor = stash.campaign_id
     .. '\t' .. stash.donor_sub
     .. '\t' .. stash.donor_domain
-    .. '\t' .. tostring(stash.donor_port)
+    .. '\t' .. stash.donor_port
 
   -- stylua: ignore
   local mirror = stash.campaign_id
     .. '\t' .. stash.mirror_sub
-    .. '\t' .. tostring(stash.mirror_port)
+    .. '\t' .. stash.mirror_port
+
+  if stash.is_enabled ~= 0 then
+    return redis.status_reply('FORBIDDEN Target not disabled')
+  end
+
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  end
 
   -- Point of no return
 

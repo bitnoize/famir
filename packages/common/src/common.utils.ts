@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto'
+import { randomBytes, randomInt } from 'crypto'
 import util from 'util'
 
 Object.assign(util.inspect.defaultOptions, {
@@ -33,6 +33,10 @@ export const arrayIncludes = <T extends U, U>(coll: ReadonlyArray<T>, el: U): el
 
 export const randomIdent = (): string => {
   return randomBytes(16).toString('hex')
+}
+
+export const randomLockCode = (): number => {
+  return randomInt(100000, 999999)
 }
 
 export const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const

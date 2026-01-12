@@ -14,6 +14,7 @@ export interface RawCampaign {
   mirror_domain: string
   session_count: number
   message_count: number
+  lock_code: number
   created_at: number
   updated_at: number
 }
@@ -50,7 +51,8 @@ export const campaignFunctions = {
         sessionCookieName: string,
         sessionExpire: number,
         newSessionExpire: number,
-        messageExpire: number
+        messageExpire: number,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignUniqueMirrorDomainKey(prefix))
@@ -66,6 +68,7 @@ export const campaignFunctions = {
         parser.push(sessionExpire.toString())
         parser.push(newSessionExpire.toString())
         parser.push(messageExpire.toString())
+        parser.push(lockCode.toString())
         parser.push(Date.now().toString())
       },
 
@@ -106,6 +109,37 @@ export const campaignFunctions = {
       transformReply: undefined as unknown as () => unknown
     },
 
+    lock_campaign: {
+      NUMBER_OF_KEYS: 1,
+
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        lockCode: number,
+        isForce: boolean
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+
+        parser.push(lockCode.toString())
+        parser.push(isForce ? '1' : '0')
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    unlock_campaign: {
+      NUMBER_OF_KEYS: 1,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockCode: number) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+
+        parser.push(lockCode.toString())
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
     update_campaign: {
       NUMBER_OF_KEYS: 1,
 
@@ -116,7 +150,8 @@ export const campaignFunctions = {
         description: string | null | undefined,
         sessionExpire: number | null | undefined,
         newSessionExpire: number | null | undefined,
-        messageExpire: number | null | undefined
+        messageExpire: number | null | undefined,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
 
@@ -140,8 +175,8 @@ export const campaignFunctions = {
           parser.push(messageExpire.toString())
         }
 
-        parser.push('updated_at')
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -150,7 +185,7 @@ export const campaignFunctions = {
     delete_campaign: {
       NUMBER_OF_KEYS: 7,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockCode: number) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignUniqueMirrorDomainKey(prefix))
         parser.pushKey(campaignIndexKey(prefix))
@@ -158,6 +193,8 @@ export const campaignFunctions = {
         parser.pushKey(targetIndexKey(prefix, campaignId))
         parser.pushKey(redirectorIndexKey(prefix, campaignId))
         parser.pushKey(lureIndexKey(prefix, campaignId))
+
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => unknown

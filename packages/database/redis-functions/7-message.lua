@@ -4,7 +4,7 @@
   Create message
 --]]
 local function create_message(keys, args)
-  if not (#keys == 5 and #args == 19) then
+  if #keys ~= 5 or #args ~= 19 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -14,24 +14,38 @@ local function create_message(keys, args)
   local target_key = keys[4]
   local session_key = keys[5]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
-  if not (redis.call('EXISTS', message_key) == 0) then
+  if redis.call('EXISTS', message_key) ~= 0 then
     return redis.status_reply('CONFLICT Message allready exists')
   end
 
-  if not (redis.call('EXISTS', proxy_key) == 1) then
-    return redis.status_reply('NOT_FOUND Proxy not found')
+  if redis.call('EXISTS', proxy_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Proxy not exists')
   end
 
-  if not (redis.call('EXISTS', target_key) == 1) then
-    return redis.status_reply('NOT_FOUND Target not found')
+  if redis.call('EXISTS', target_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Target not exists')
   end
 
-  if not (redis.call('EXISTS', session_key) == 1) then
-    return redis.status_reply('NOT_FOUND Session not found')
+  if redis.call('EXISTS', session_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Session not exists')
+  end
+
+  local stash = {
+    message_expire = tonumber(redis.call('HGET', campaign_key, 'message_expire')),
+  }
+
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'message_expire' and value <= 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
   end
 
   local model = {
@@ -60,34 +74,18 @@ local function create_message(keys, args)
     if not value then
       return redis.error_reply('ERR Wrong model.' .. field)
     end
-  end
 
-  if not (model.campaign_id and #model.campaign_id > 0) then
-    return redis.error_reply('ERR Wrong model.campaign_id')
-  end
-
-  if not (model.message_id and #model.message_id > 0) then
-    return redis.error_reply('ERR Wrong model.message_id')
-  end
-
-  if not (model.proxy_id and #model.proxy_id > 0) then
-    return redis.error_reply('ERR Wrong model.proxy_id')
-  end
-
-  if not (model.target_id and #model.target_id > 0) then
-    return redis.error_reply('ERR Wrong model.target_id')
-  end
-
-  if not (model.session_id and #model.session_id > 0) then
-    return redis.error_reply('ERR Wrong model.session_id')
-  end
-
-  local stash = {
-    message_expire = tonumber(redis.call('HGET', campaign_key, 'message_expire')),
-  }
-
-  if not (stash.message_expire and stash.message_expire > 0) then
-    return redis.error_reply('ERR Malform stash.message_expire')
+    if
+      (
+        field == 'campaign_id'
+        or field == 'message_id'
+        or field == 'proxy_id'
+        or field == 'target_id'
+        or field == 'session_id'
+      ) and value == ''
+    then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
   end
 
   -- Point of no return
@@ -101,6 +99,7 @@ local function create_message(keys, args)
 
   redis.call('HSET', message_key, unpack(store))
 
+  redis.call('HINCRBY', campaign_key, 'message_count', 1)
   redis.call('HINCRBY', proxy_key, 'message_count', 1)
   redis.call('HINCRBY', target_key, 'message_count', 1)
   redis.call('HINCRBY', session_key, 'message_count', 1)
@@ -120,18 +119,18 @@ redis.register_function({
   Read message
 --]]
 local function read_message(keys, args)
-  if not (#keys == 2 and #args == 0) then
+  if #keys ~= 2 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local message_key = keys[2]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
+  if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
   end
 
-  if not (redis.call('EXISTS', message_key) == 1) then
+  if redis.call('EXISTS', message_key) ~= 1 then
     return nil
   end
 
@@ -151,7 +150,7 @@ local function read_message(keys, args)
     'created_at'
   )
 
-  if not (#values == 11) then
+  if #values ~= 11 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -189,18 +188,18 @@ redis.register_function({
   Read full message
 --]]
 local function read_full_message(keys, args)
-  if not (#keys == 2 and #args == 0) then
+  if #keys ~= 2 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local message_key = keys[2]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
+  if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
   end
 
-  if not (redis.call('EXISTS', message_key) == 1) then
+  if redis.call('EXISTS', message_key) ~= 1 then
     return nil
   end
 
@@ -228,7 +227,7 @@ local function read_full_message(keys, args)
     'created_at'
   )
 
-  if not (#values == 19) then
+  if #values ~= 19 then
     return redis.error_reply('ERR Malform values')
   end
 

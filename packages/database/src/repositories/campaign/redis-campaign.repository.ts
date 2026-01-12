@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, randomLockCode } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
@@ -7,7 +7,6 @@ import {
   CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  DatabaseError,
   FullCampaignModel,
   Logger,
   LOGGER,
@@ -59,33 +58,30 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     sessionExpire: number,
     newSessionExpire: number,
     messageExpire: number
-  ): Promise<CampaignModel> {
+  ): Promise<number> {
+    const lockCode = randomLockCode()
+
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.campaign.create_campaign(
-          this.options.prefix,
-          campaignId,
-          mirrorDomain,
-          description,
-          landingUpgradePath,
-          landingUpgradeParam,
-          landingRedirectorParam,
-          sessionCookieName,
-          sessionExpire,
-          newSessionExpire,
-          messageExpire
-        ),
+      const statusReply = await this.connection.campaign.create_campaign(
+        this.options.prefix,
+        campaignId,
+        mirrorDomain,
+        description,
+        landingUpgradePath,
+        landingUpgradeParam,
+        landingRedirectorParam,
+        sessionCookieName,
+        sessionExpire,
+        newSessionExpire,
+        messageExpire,
+        lockCode
+      )
 
-        this.connection.campaign.read_campaign(this.options.prefix, campaignId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
+      this.logger.info(mesg, { campaign: { campaignId, mirrorDomain } })
 
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { campaign: model })
-
-      return model
+      return lockCode
     } catch (error) {
       this.raiseError(error, 'create', { campaignId, mirrorDomain })
     }
@@ -104,54 +100,81 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  async lock(campaignId: string, isForce: boolean): Promise<number> {
+    const lockCode = randomLockCode()
+
+    try {
+      const statusReply = await this.connection.campaign.lock_campaign(
+        this.options.prefix,
+        campaignId,
+        lockCode,
+        isForce
+      )
+
+      const mesg = this.handleStatusReply(statusReply)
+
+      this.logger.info(mesg, { campaign: { campaignId } })
+
+      return lockCode
+    } catch (error) {
+      this.raiseError(error, 'lock', { campaignId })
+    }
+  }
+
+  async unlock(campaignId: string, lockCode: number): Promise<void> {
+    try {
+      const statusReply = await this.connection.campaign.unlock_campaign(
+        this.options.prefix,
+        campaignId,
+        lockCode
+      )
+
+      const mesg = this.handleStatusReply(statusReply)
+
+      this.logger.info(mesg, { campaign: { campaignId } })
+    } catch (error) {
+      this.raiseError(error, 'unlock', { campaignId })
+    }
+  }
+
   async update(
     campaignId: string,
     description: string | null | undefined,
     sessionExpire: number | null | undefined,
     newSessionExpire: number | null | undefined,
-    messageExpire: number | null | undefined
-  ): Promise<CampaignModel> {
+    messageExpire: number | null | undefined,
+    lockCode: number
+  ): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.campaign.update_campaign(
-          this.options.prefix,
-          campaignId,
-          description,
-          sessionExpire,
-          newSessionExpire,
-          messageExpire
-        ),
+      const statusReply = await this.connection.campaign.update_campaign(
+        this.options.prefix,
+        campaignId,
+        description,
+        sessionExpire,
+        newSessionExpire,
+        messageExpire,
+        lockCode
+      )
 
-        this.connection.campaign.read_campaign(this.options.prefix, campaignId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { campaign: model })
-
-      return model
+      this.logger.info(mesg, { campaign: { campaignId } })
     } catch (error) {
       this.raiseError(error, 'update', { campaignId })
     }
   }
 
-  async delete(campaignId: string): Promise<CampaignModel> {
+  async delete(campaignId: string, lockCode: number): Promise<void> {
     try {
-      const [rawModel, statusReply] = await Promise.all([
-        this.connection.campaign.read_campaign(this.options.prefix, campaignId),
+      const statusReply = await this.connection.campaign.delete_campaign(
+        this.options.prefix,
+        campaignId,
+        lockCode
+      )
 
-        this.connection.campaign.delete_campaign(this.options.prefix, campaignId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { campaign: model })
-
-      return model
+      this.logger.info(mesg, { campaign: { campaignId } })
     } catch (error) {
       this.raiseError(error, 'delete', { campaignId })
     }
@@ -187,21 +210,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       mirrorDomain: rawModel.mirror_domain,
       sessionCount: rawModel.session_count,
       messageCount: rawModel.message_count,
+      isLocked: !!rawModel.lock_code,
       createdAt: new Date(rawModel.created_at),
       updatedAt: new Date(rawModel.updated_at)
     }
-  }
-
-  protected buildModelStrict(rawModel: unknown): CampaignModel {
-    const model = this.buildModel(rawModel)
-
-    if (!testCampaignModel(model)) {
-      throw new DatabaseError(`Campaign unexpected lost`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
-
-    return model
   }
 
   protected buildFullModel(rawFullModel: unknown): FullCampaignModel | null {
@@ -228,6 +240,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       lureCount: rawFullModel.lure_count,
       sessionCount: rawFullModel.session_count,
       messageCount: rawFullModel.message_count,
+      isLocked: !!rawFullModel.lock_code,
       createdAt: new Date(rawFullModel.created_at),
       updatedAt: new Date(rawFullModel.updated_at)
     }

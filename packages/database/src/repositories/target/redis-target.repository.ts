@@ -4,7 +4,6 @@ import {
   CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  DatabaseError,
   FullTargetModel,
   Logger,
   LOGGER,
@@ -68,44 +67,38 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     notFoundPage: string,
     faviconIco: string,
     robotsTxt: string,
-    sitemapXml: string
-  ): Promise<TargetModel> {
+    sitemapXml: string,
+    lockCode: number
+  ): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.target.create_target(
-          this.options.prefix,
-          campaignId,
-          targetId,
-          isLanding,
-          donorSecure,
-          donorSub,
-          donorDomain,
-          donorPort,
-          mirrorSecure,
-          mirrorSub,
-          mirrorPort,
-          connectTimeout,
-          ordinaryTimeout,
-          streamingTimeout,
-          requestBodyLimit,
-          responseBodyLimit,
-          mainPage,
-          notFoundPage,
-          faviconIco,
-          robotsTxt,
-          sitemapXml
-        ),
+      const statusReply = await this.connection.target.create_target(
+        this.options.prefix,
+        campaignId,
+        targetId,
+        isLanding,
+        donorSecure,
+        donorSub,
+        donorDomain,
+        donorPort,
+        mirrorSecure,
+        mirrorSub,
+        mirrorPort,
+        connectTimeout,
+        ordinaryTimeout,
+        streamingTimeout,
+        requestBodyLimit,
+        responseBodyLimit,
+        mainPage,
+        notFoundPage,
+        faviconIco,
+        robotsTxt,
+        sitemapXml,
+        lockCode
+      )
 
-        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { target: model })
-
-      return model
+      this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
       this.raiseError(error, 'create', { campaignId, targetId })
     }
@@ -137,146 +130,127 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     notFoundPage: string | null | undefined,
     faviconIco: string | null | undefined,
     robotsTxt: string | null | undefined,
-    sitemapXml: string | null | undefined
-  ): Promise<TargetModel> {
+    sitemapXml: string | null | undefined,
+    lockCode: number
+  ): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.target.update_target(
-          this.options.prefix,
-          campaignId,
-          targetId,
-          connectTimeout,
-          ordinaryTimeout,
-          streamingTimeout,
-          requestBodyLimit,
-          responseBodyLimit,
-          mainPage,
-          notFoundPage,
-          faviconIco,
-          robotsTxt,
-          sitemapXml
-        ),
+      const statusReply = await this.connection.target.update_target(
+        this.options.prefix,
+        campaignId,
+        targetId,
+        connectTimeout,
+        ordinaryTimeout,
+        streamingTimeout,
+        requestBodyLimit,
+        responseBodyLimit,
+        mainPage,
+        notFoundPage,
+        faviconIco,
+        robotsTxt,
+        sitemapXml,
+        lockCode
+      )
 
-        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { target: model })
-
-      return model
+      this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
       this.raiseError(error, 'update', { campaignId, targetId })
     }
   }
 
-  async enable(campaignId: string, targetId: string): Promise<TargetModel> {
+  async enable(campaignId: string, targetId: string, lockCode: number): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.target.enable_target(this.options.prefix, campaignId, targetId),
+      const statusReply = await this.connection.target.enable_target(
+        this.options.prefix,
+        campaignId,
+        targetId,
+        lockCode
+      )
 
-        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { target: model })
-
-      return model
+      this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
       this.raiseError(error, 'enable', { campaignId, targetId })
     }
   }
 
-  async disable(campaignId: string, targetId: string): Promise<TargetModel> {
+  async disable(campaignId: string, targetId: string, lockCode: number): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.target.disable_target(this.options.prefix, campaignId, targetId),
+      const statusReply = await this.connection.target.disable_target(
+        this.options.prefix,
+        campaignId,
+        targetId,
+        lockCode
+      )
 
-        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { target: model })
-
-      return model
+      this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
       this.raiseError(error, 'disable', { campaignId, targetId })
     }
   }
 
-  async appendLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel> {
+  async appendLabel(
+    campaignId: string,
+    targetId: string,
+    label: string,
+    lockCode: number
+  ): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.target.append_target_label(
-          this.options.prefix,
-          campaignId,
-          targetId,
-          label
-        ),
+      const statusReply = await this.connection.target.append_target_label(
+        this.options.prefix,
+        campaignId,
+        targetId,
+        label,
+        lockCode
+      )
 
-        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { target: model })
-
-      return model
+      this.logger.info(mesg, { target: { campaignId, targetId, label } })
     } catch (error) {
       this.raiseError(error, 'appendLabel', { campaignId, targetId, label })
     }
   }
 
-  async removeLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel> {
+  async removeLabel(
+    campaignId: string,
+    targetId: string,
+    label: string,
+    lockCode: number
+  ): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.target.remove_target_label(
-          this.options.prefix,
-          campaignId,
-          targetId,
-          label
-        ),
+      const statusReply = await this.connection.target.remove_target_label(
+        this.options.prefix,
+        campaignId,
+        targetId,
+        label,
+        lockCode
+      )
 
-        this.connection.target.read_target(this.options.prefix, campaignId, targetId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { target: model })
-
-      return model
+      this.logger.info(mesg, { target: { campaignId, targetId, label } })
     } catch (error) {
       this.raiseError(error, 'removeLabel', { campaignId, targetId, label })
     }
   }
 
-  async delete(campaignId: string, targetId: string): Promise<TargetModel> {
+  async delete(campaignId: string, targetId: string, lockCode: number): Promise<void> {
     try {
-      const [rawModel, statusReply] = await Promise.all([
-        this.connection.target.read_target(this.options.prefix, campaignId, targetId),
+      const statusReply = await this.connection.target.delete_target(
+        this.options.prefix,
+        campaignId,
+        targetId,
+        lockCode
+      )
 
-        this.connection.target.delete_target(this.options.prefix, campaignId, targetId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { target: model })
-
-      return model
+      this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
       this.raiseError(error, 'delete', { campaignId, targetId })
     }
@@ -327,18 +301,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       createdAt: new Date(rawModel.created_at),
       updatedAt: new Date(rawModel.updated_at)
     }
-  }
-
-  protected buildModelStrict(rawModel: unknown): TargetModel {
-    const model = this.buildModel(rawModel)
-
-    if (!testTargetModel(model)) {
-      throw new DatabaseError(`Target unexpected lost`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
-
-    return model
   }
 
   protected buildFullModel(rawFullModel: unknown): FullTargetModel | null {

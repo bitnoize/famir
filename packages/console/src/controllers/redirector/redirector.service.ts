@@ -28,11 +28,16 @@ export class RedirectorService extends BaseService {
     super()
   }
 
-  async createRedirector(data: CreateRedirectorData): Promise<RedirectorModel> {
+  async createRedirector(data: CreateRedirectorData): Promise<void> {
     try {
-      return await this.redirectorRepository.create(data.campaignId, data.redirectorId, data.page)
+      await this.redirectorRepository.create(
+        data.campaignId,
+        data.redirectorId,
+        data.page,
+        data.lockCode
+      )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
       throw error
     }
@@ -50,9 +55,14 @@ export class RedirectorService extends BaseService {
     return model
   }
 
-  async updateRedirector(data: UpdateRedirectorData): Promise<RedirectorModel> {
+  async updateRedirector(data: UpdateRedirectorData): Promise<void> {
     try {
-      return await this.redirectorRepository.update(data.campaignId, data.redirectorId, data.page)
+      await this.redirectorRepository.update(
+        data.campaignId,
+        data.redirectorId,
+        data.page,
+        data.lockCode
+      )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -60,9 +70,9 @@ export class RedirectorService extends BaseService {
     }
   }
 
-  async deleteRedirector(data: DeleteRedirectorData): Promise<RedirectorModel> {
+  async deleteRedirector(data: DeleteRedirectorData): Promise<void> {
     try {
-      return await this.redirectorRepository.delete(data.campaignId, data.redirectorId)
+      await this.redirectorRepository.delete(data.campaignId, data.redirectorId, data.lockCode)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

@@ -14,15 +14,18 @@ export interface CampaignRepository {
     sessionExpire: number,
     newSessionExpire: number,
     messageExpire: number
-  ): Promise<CampaignModel>
+  ): Promise<number>
   read(campaignId: string): Promise<FullCampaignModel | null>
+  lock(campaignId: string, isForce: boolean): Promise<number>
+  unlock(campaignId: string, lockCode: number): Promise<void>
   update(
     campaignId: string,
     description: string | null | undefined,
     sessionExpire: number | null | undefined,
     newSessionExpire: number | null | undefined,
-    messageExpire: number | null | undefined
-  ): Promise<CampaignModel>
-  delete(campaignId: string): Promise<CampaignModel>
+    messageExpire: number | null | undefined,
+    lockCode: number
+  ): Promise<void>
+  delete(campaignId: string, lockCode: number): Promise<void>
   list(): Promise<CampaignModel[]>
 }

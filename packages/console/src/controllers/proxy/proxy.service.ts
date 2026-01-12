@@ -23,11 +23,11 @@ export class ProxyService extends BaseService {
     super()
   }
 
-  async createProxy(data: CreateProxyData): Promise<ProxyModel> {
+  async createProxy(data: CreateProxyData): Promise<void> {
     try {
-      return await this.proxyRepository.create(data.campaignId, data.proxyId, data.url)
+      await this.proxyRepository.create(data.campaignId, data.proxyId, data.url, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
       throw error
     }
@@ -45,29 +45,29 @@ export class ProxyService extends BaseService {
     return model
   }
 
-  async enableProxy(data: SwitchProxyData): Promise<ProxyModel> {
+  async enableProxy(data: SwitchProxyData): Promise<void> {
     try {
-      return await this.proxyRepository.enable(data.campaignId, data.proxyId)
+      await this.proxyRepository.enable(data.campaignId, data.proxyId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
   }
 
-  async disableProxy(data: SwitchProxyData): Promise<ProxyModel> {
+  async disableProxy(data: SwitchProxyData): Promise<void> {
     try {
-      return await this.proxyRepository.disable(data.campaignId, data.proxyId)
+      await this.proxyRepository.disable(data.campaignId, data.proxyId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
   }
 
-  async deleteProxy(data: DeleteProxyData): Promise<ProxyModel> {
+  async deleteProxy(data: DeleteProxyData): Promise<void> {
     try {
-      return await this.proxyRepository.delete(data.campaignId, data.proxyId)
+      await this.proxyRepository.delete(data.campaignId, data.proxyId, data.lockCode)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

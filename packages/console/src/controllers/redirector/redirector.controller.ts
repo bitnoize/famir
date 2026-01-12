@@ -61,7 +61,9 @@ export class RedirectorController extends BaseController {
   private createRedirector: ReplServerApiCall = async (data) => {
     this.validateData<CreateRedirectorData>('console-create-redirector-data', data)
 
-    return await this.redirectorService.createRedirector(data)
+    await this.redirectorService.createRedirector(data)
+
+    return true
   }
 
   private readRedirector: ReplServerApiCall = async (data) => {
@@ -73,13 +75,17 @@ export class RedirectorController extends BaseController {
   private updateRedirector: ReplServerApiCall = async (data) => {
     this.validateData<UpdateRedirectorData>('console-update-redirector-data', data)
 
-    return await this.redirectorService.updateRedirector(data)
+    await this.redirectorService.updateRedirector(data)
+
+    return true
   }
 
   private deleteRedirector: ReplServerApiCall = async (data) => {
     this.validateData<DeleteRedirectorData>('console-delete-redirector-data', data)
 
-    return await this.redirectorService.deleteRedirector(data)
+    await this.redirectorService.deleteRedirector(data)
+
+    return true
   }
 
   private listRedirectors: ReplServerApiCall = async (data) => {

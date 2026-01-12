@@ -4,7 +4,7 @@
   Create campaign
 --]]
 local function create_campaign(keys, args)
-  if not (#keys == 3 and #args == 11) then
+  if #keys ~= 3 or #args ~= 12 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -12,7 +12,7 @@ local function create_campaign(keys, args)
   local campaign_unique_mirror_domain_key = keys[2]
   local campaign_index_key = keys[3]
 
-  if not (redis.call('EXISTS', campaign_key) == 0) then
+  if redis.call('EXISTS', campaign_key) ~= 0 then
     return redis.status_reply('CONFLICT Campaign allready exists')
   end
 
@@ -29,37 +29,33 @@ local function create_campaign(keys, args)
     message_expire = tonumber(args[10]),
     session_count = 0,
     message_count = 0,
-    created_at = tonumber(args[11]),
-    updated_at = tonumber(args[11]),
+    lock_code = tonumber(args[11]),
+    created_at = tonumber(args[12]),
+    updated_at = tonumber(args[12]),
   }
 
   for field, value in pairs(model) do
     if not value then
       return redis.error_reply('ERR Wrong model.' .. field)
     end
+
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
+
+    if (field == 'campaign_id' or field == 'mirror_domain') and value == '' then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
+
+    if
+      (field == 'session_expire' or field == 'new_session_expire' or field == 'message_expire')
+      and value <= 0
+    then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
   end
 
-  if not (#model.campaign_id > 0) then
-    return redis.error_reply('ERR Wrong model.campaign_id')
-  end
-
-  if not (#model.mirror_domain > 0) then
-    return redis.error_reply('ERR Wrong model.mirror_domain')
-  end
-
-  if not (model.session_expire > 0) then
-    return redis.error_reply('ERR Wrong model.session_expire')
-  end
-
-  if not (model.new_session_expire > 0) then
-    return redis.error_reply('ERR Wrong model.new_session_expire')
-  end
-
-  if not (model.message_expire > 0) then
-    return redis.error_reply('ERR Wrong model.message_expire')
-  end
-
-  if not (redis.call('SISMEMBER', campaign_unique_mirror_domain_key, model.mirror_domain) == 0) then
+  if redis.call('SISMEMBER', campaign_unique_mirror_domain_key, model.mirror_domain) ~= 0 then
     return redis.status_reply('CONFLICT Campaign mirror_domain allready taken')
   end
 
@@ -89,13 +85,13 @@ redis.register_function({
   Read campaign
 --]]
 local function read_campaign(keys, args)
-  if not (#keys == 1 and #args == 0) then
+  if #keys ~= 1 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
+  if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
   end
 
@@ -106,11 +102,12 @@ local function read_campaign(keys, args)
     'mirror_domain',
     'session_count',
     'message_count',
+    'lock_code',
     'created_at',
     'updated_at'
   )
 
-  if not (#values == 6) then
+  if #values ~= 7 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -119,8 +116,9 @@ local function read_campaign(keys, args)
     mirror_domain = values[2],
     session_count = tonumber(values[3]),
     message_count = tonumber(values[4]),
-    created_at = tonumber(values[5]),
-    updated_at = tonumber(values[6]),
+    lock_code = tonumber(values[5]),
+    created_at = tonumber(values[6]),
+    updated_at = tonumber(values[7]),
   }
 
   for field, value in pairs(model) do
@@ -143,7 +141,7 @@ redis.register_function({
   Read full campaign
 --]]
 local function read_full_campaign(keys, args)
-  if not (#keys == 5 and #args == 0) then
+  if #keys ~= 5 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -153,7 +151,7 @@ local function read_full_campaign(keys, args)
   local redirector_index_key = keys[4]
   local lure_index_key = keys[5]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
+  if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
   end
 
@@ -172,11 +170,12 @@ local function read_full_campaign(keys, args)
     'message_expire',
     'session_count',
     'message_count',
+    'lock_code',
     'created_at',
     'updated_at'
   )
 
-  if not (#values == 14) then
+  if #values ~= 15 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -197,8 +196,9 @@ local function read_full_campaign(keys, args)
     lure_count = redis.call('ZCARD', lure_index_key),
     session_count = tonumber(values[11]),
     message_count = tonumber(values[12]),
-    created_at = tonumber(values[13]),
-    updated_at = tonumber(values[14]),
+    lock_code = tonumber(values[13]),
+    created_at = tonumber(values[14]),
+    updated_at = tonumber(values[15]),
   }
 
   for field, value in pairs(model) do
@@ -221,7 +221,7 @@ redis.register_function({
   Read campaign index
 --]]
 local function read_campaign_index(keys, args)
-  if not (#keys == 1 and #args == 0) then
+  if #keys ~= 1 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -238,17 +238,134 @@ redis.register_function({
 })
 
 --[[
-  Update campaign
+  Lock campaign
 --]]
-local function update_campaign(keys, args)
-  if not (#keys == 1 and #args >= 0 and #args % 2 == 0) then
+local function lock_campaign(keys, args)
+  if #keys ~= 1 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  local stash = {
+    lock_code = tonumber(args[1]),
+    is_force = tonumber(args[2]),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+  }
+
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+  end
+
+  if stash.orig_lock_code ~= 0 and stash.is_force == 0 then
+    return redis.status_reply('FORBIDDEN Campaign allready locked')
+  end
+
+  -- Point of no return
+
+  redis.call('HSET', campaign_key, 'lock_code', stash.lock_code)
+
+  return redis.status_reply('OK Campaign locked')
+end
+
+redis.register_function({
+  function_name = 'lock_campaign',
+  callback = lock_campaign,
+  description = 'Lock campaign',
+})
+
+--[[
+  Unlock campaign
+--]]
+local function unlock_campaign(keys, args)
+  if #keys ~= 1 or #args ~= 1 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  local stash = {
+    lock_code = tonumber(args[1]),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+  }
+
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+  end
+
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('OK Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  end
+
+  -- Point of no return
+
+  redis.call('HSET', campaign_key, 'lock_code', 0)
+
+  return redis.status_reply('OK Campaign unlocked')
+end
+
+redis.register_function({
+  function_name = 'unlock_campaign',
+  callback = unlock_campaign,
+  description = 'Unlock campaign',
+})
+
+--[[
+  Update campaign
+--]]
+local function update_campaign(keys, args)
+  if #keys ~= 1 or #args < 2 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  local stash = {
+    lock_code = tonumber(table.remove(args)),
+    updated_at = tonumber(table.remove(args)),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+  }
+
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+  end
+
+  if #args % 2 ~= 0 then
+    return redis.error_reply('ERR Odd number of args')
   end
 
   local model = {}
@@ -262,41 +379,35 @@ local function update_campaign(keys, args)
 
     if field == 'description' then
       model.description = value
-
-      if not model.description then
-        return redis.error_reply('ERR Wrong model.description')
-      end
     elseif field == 'session_expire' then
       model.session_expire = tonumber(value)
-
-      if not (model.session_expire and model.session_expire > 0) then
-        return redis.error_reply('ERR Wrong model.session_expire')
-      end
     elseif field == 'new_session_expire' then
       model.new_session_expire = tonumber(value)
-
-      if not (model.new_session_expire and model.new_session_expire > 0) then
-        return redis.error_reply('ERR Wrong model.new_session_expire')
-      end
     elseif field == 'message_expire' then
       model.message_expire = tonumber(value)
-
-      if not (model.message_expire and model.message_expire > 0) then
-        return redis.error_reply('ERR Wrong model.message_expire')
-      end
-    elseif field == 'updated_at' then
-      model.updated_at = tonumber(value)
-
-      if not model.updated_at then
-        return redis.error_reply('ERR Wrong model.updated_at')
-      end
     else
       return redis.error_reply('ERR Unknown model.' .. field)
     end
   end
 
+  for field, value in pairs(model) do
+    if not value then
+      return redis.error_reply('ERR Wrong model.' .. field)
+    end
+  end
+
   if next(model) == nil then
     return redis.status_reply('OK Nothing to update')
+  end
+
+  model.updated_at = stash.updated_at
+
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
   end
 
   -- Point of no return
@@ -323,7 +434,7 @@ redis.register_function({
   Delete campaign
 --]]
 local function delete_campaign(keys, args)
-  if not (#keys == 7 and #args == 0) then
+  if #keys ~= 7 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -335,37 +446,54 @@ local function delete_campaign(keys, args)
   local redirector_index_key = keys[6]
   local lure_index_key = keys[7]
 
-  if not (redis.call('EXISTS', campaign_key) == 1) then
-    return redis.status_reply('NOT_FOUND Campaign not found')
-  end
-
-  if not (redis.call('ZCARD', proxy_index_key) == 0) then
-    return redis.status_reply('FORBIDDEN Campaign proxies exists')
-  end
-
-  if not (redis.call('ZCARD', target_index_key) == 0) then
-    return redis.status_reply('FORBIDDEN Campaign targets exists')
-  end
-
-  if not (redis.call('ZCARD', redirector_index_key) == 0) then
-    return redis.status_reply('FORBIDDEN Campaign redirectors exists')
-  end
-
-  if not (redis.call('ZCARD', lure_index_key) == 0) then
-    return redis.status_reply('FORBIDDEN Campaign lures exists')
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
   local stash = {
+    lock_code = tonumber(args[1]),
+    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
     campaign_id = redis.call('HGET', campaign_key, 'campaign_id'),
     mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
+    is_locked = tonumber(redis.call('HGET', campaign_key, 'is_locked')),
   }
 
-  if not (stash.campaign_id and #stash.campaign_id > 0) then
-    return redis.error_reply('ERR Malform stash.campaign_id')
+  for field, value in pairs(stash) do
+    if not value then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if field == 'lock_code' and value == 0 then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
+
+    if (field == 'campaign_id' or field == 'mirror_domain') and value == '' then
+      return redis.error_reply('ERR Wrong stash.' .. field)
+    end
   end
 
-  if not (stash.mirror_domain and #stash.mirror_domain > 0) then
-    return redis.error_reply('ERR Malform stash.mirror_domain')
+  if redis.call('ZCARD', proxy_index_key) ~= 0 then
+    return redis.status_reply('FORBIDDEN Campaign proxies exists')
+  end
+
+  if redis.call('ZCARD', target_index_key) ~= 0 then
+    return redis.status_reply('FORBIDDEN Campaign targets exists')
+  end
+
+  if redis.call('ZCARD', redirector_index_key) ~= 0 then
+    return redis.status_reply('FORBIDDEN Campaign redirectors exists')
+  end
+
+  if redis.call('ZCARD', lure_index_key) ~= 0 then
+    return redis.status_reply('FORBIDDEN Campaign lures exists')
+  end
+
+  if stash.orig_lock_code == 0 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if stash.orig_lock_code ~= stash.lock_code then
+    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
   end
 
   -- Point of no return

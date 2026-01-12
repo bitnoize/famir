@@ -25,6 +25,9 @@ const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
     message_count: {
       type: 'integer'
     },
+    lock_code: {
+      type: 'integer'
+    },
     created_at: {
       type: 'integer'
     },
@@ -54,6 +57,7 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'lure_count',
     'session_count',
     'message_count',
+    'lock_code',
     'created_at',
     'updated_at'
   ],
@@ -104,6 +108,9 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
       type: 'integer'
     },
     message_count: {
+      type: 'integer'
+    },
+    lock_code: {
       type: 'integer'
     },
     created_at: {
@@ -173,4 +180,11 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 60 * 1000,
   maximum: 24 * 3600 * 1000
+} as const
+
+export const campaignLockCodeSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  not: {
+    const: 0
+  }
 } as const

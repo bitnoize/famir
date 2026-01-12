@@ -4,7 +4,6 @@ import {
   CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  DatabaseError,
   Logger,
   LOGGER,
   PROXY_REPOSITORY,
@@ -47,27 +46,21 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     this.logger.debug(`ProxyRepository initialized`)
   }
 
-  async create(campaignId: string, proxyId: string, url: string): Promise<ProxyModel> {
+  async create(campaignId: string, proxyId: string, url: string, lockCode: number): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.proxy.create_proxy(this.options.prefix, campaignId, proxyId, url),
-
-        this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
-      ])
-
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { proxy: model })
-
-      return model
-    } catch (error) {
-      this.raiseError(error, 'create', {
+      const statusReply = await this.connection.proxy.create_proxy(
+        this.options.prefix,
         campaignId,
         proxyId,
-        url
-      })
+        url,
+        lockCode
+      )
+
+      const mesg = this.handleStatusReply(statusReply)
+
+      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
+    } catch (error) {
+      this.raiseError(error, 'create', { campaignId, proxyId })
     }
   }
 
@@ -85,61 +78,52 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async enable(campaignId: string, proxyId: string): Promise<ProxyModel> {
+  async enable(campaignId: string, proxyId: string, lockCode: number): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.proxy.enable_proxy(this.options.prefix, campaignId, proxyId),
+      const statusReply = await this.connection.proxy.enable_proxy(
+        this.options.prefix,
+        campaignId,
+        proxyId,
+        lockCode
+      )
 
-        this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { proxy: model })
-
-      return model
+      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
       this.raiseError(error, 'enable', { campaignId, proxyId })
     }
   }
 
-  async disable(campaignId: string, proxyId: string): Promise<ProxyModel> {
+  async disable(campaignId: string, proxyId: string, lockCode: number): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.proxy.disable_proxy(this.options.prefix, campaignId, proxyId),
+      const statusReply = await this.connection.proxy.disable_proxy(
+        this.options.prefix,
+        campaignId,
+        proxyId,
+        lockCode
+      )
 
-        this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { proxy: model })
-
-      return model
+      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
       this.raiseError(error, 'disable', { campaignId, proxyId })
     }
   }
 
-  async delete(campaignId: string, proxyId: string): Promise<ProxyModel> {
+  async delete(campaignId: string, proxyId: string, lockCode: number): Promise<void> {
     try {
-      const [rawModel, statusReply] = await Promise.all([
-        this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId),
+      const statusReply = await this.connection.proxy.delete_proxy(
+        this.options.prefix,
+        campaignId,
+        proxyId,
+        lockCode
+      )
 
-        this.connection.proxy.delete_proxy(this.options.prefix, campaignId, proxyId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { proxy: model })
-
-      return model
+      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
       this.raiseError(error, 'delete', { campaignId, proxyId })
     }
@@ -183,18 +167,6 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       createdAt: new Date(rawModel.created_at),
       updatedAt: new Date(rawModel.updated_at)
     }
-  }
-
-  protected buildModelStrict(rawModel: unknown): ProxyModel {
-    const model = this.buildModel(rawModel)
-
-    if (!testProxyModel(model)) {
-      throw new DatabaseError(`Proxy unexpected lost`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
-
-    return model
   }
 
   protected buildCollection(rawCollection: unknown): ProxyModel[] {

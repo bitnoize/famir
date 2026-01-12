@@ -4,6 +4,7 @@ import {
   campaignLandingRedirectorParamSchema,
   campaignLandingUpgradeParamSchema,
   campaignLandingUpgradePathSchema,
+  campaignLockCodeSchema,
   campaignMessageExpireSchema,
   campaignMirrorDomainSchema,
   campaignNewSessionExpireSchema,
@@ -14,7 +15,9 @@ import { ValidatorSchemas } from '@famir/domain'
 import {
   CreateCampaignData,
   DeleteCampaignData,
+  LockCampaignData,
   ReadCampaignData,
+  UnlockCampaignData,
   UpdateCampaignData
 } from './campaign.js'
 
@@ -80,9 +83,32 @@ const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
   additionalProperties: false
 }
 
-const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
+const lockCampaignDataSchema: JSONSchemaType<LockCampaignData> = {
   type: 'object',
   required: ['campaignId'],
+  properties: {
+    campaignId: customIdentSchema,
+    isForce: {
+      type: 'boolean',
+      nullable: true
+    }
+  },
+  additionalProperties: false
+} as const
+
+const unlockCampaignDataSchema: JSONSchemaType<UnlockCampaignData> = {
+  type: 'object',
+  required: ['campaignId', 'lockCode'],
+  properties: {
+    campaignId: customIdentSchema,
+    lockCode: campaignLockCodeSchema
+  },
+  additionalProperties: false
+} as const
+
+const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
+  type: 'object',
+  required: ['campaignId', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
     description: {
@@ -100,16 +126,18 @@ const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
     messageExpire: {
       ...campaignMessageExpireSchema,
       nullable: true
-    }
+    },
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
 
 const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
   type: 'object',
-  required: ['campaignId'],
+  required: ['campaignId', 'lockCode'],
   properties: {
-    campaignId: customIdentSchema
+    campaignId: customIdentSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
@@ -117,6 +145,8 @@ const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
 export const campaignSchemas: ValidatorSchemas = {
   'console-create-campaign-data': createCampaignDataSchema,
   'console-read-campaign-data': readCampaignDataSchema,
+  'console-lock-campaign-data': lockCampaignDataSchema,
+  'console-unlock-campaign-data': unlockCampaignDataSchema,
   'console-update-campaign-data': updateCampaignDataSchema,
   'console-delete-campaign-data': deleteCampaignDataSchema
 } as const

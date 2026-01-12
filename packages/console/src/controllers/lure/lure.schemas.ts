@@ -1,5 +1,5 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
-import { lurePathSchema } from '@famir/database'
+import { campaignLockCodeSchema, lurePathSchema } from '@famir/database'
 import { ValidatorSchemas } from '@famir/domain'
 import {
   CreateLureData,
@@ -11,12 +11,13 @@ import {
 
 const createLureDataSchema: JSONSchemaType<CreateLureData> = {
   type: 'object',
-  required: ['campaignId', 'lureId', 'path', 'redirectorId'],
+  required: ['campaignId', 'lureId', 'path', 'redirectorId', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
     lureId: customIdentSchema,
     path: lurePathSchema,
-    redirectorId: customIdentSchema
+    redirectorId: customIdentSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
@@ -33,22 +34,24 @@ const readLureDataSchema: JSONSchemaType<ReadLureData> = {
 
 const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
   type: 'object',
-  required: ['campaignId', 'lureId'],
+  required: ['campaignId', 'lureId', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
-    lureId: customIdentSchema
+    lureId: customIdentSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
 
 const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
   type: 'object',
-  required: ['campaignId', 'lureId', 'path', 'redirectorId'],
+  required: ['campaignId', 'lureId', 'path', 'redirectorId', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
     lureId: customIdentSchema,
     path: lurePathSchema,
-    redirectorId: customIdentSchema
+    redirectorId: customIdentSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const

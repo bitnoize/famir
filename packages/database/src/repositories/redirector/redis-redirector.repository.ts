@@ -4,7 +4,6 @@ import {
   CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  DatabaseError,
   FullRedirectorModel,
   Logger,
   LOGGER,
@@ -48,26 +47,24 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     this.logger.debug(`RedirectorRepository initialized`)
   }
 
-  async create(campaignId: string, redirectorId: string, page: string): Promise<RedirectorModel> {
+  async create(
+    campaignId: string,
+    redirectorId: string,
+    page: string,
+    lockCode: number
+  ): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.redirector.create_redirector(
-          this.options.prefix,
-          campaignId,
-          redirectorId,
-          page
-        ),
+      const statusReply = await this.connection.redirector.create_redirector(
+        this.options.prefix,
+        campaignId,
+        redirectorId,
+        page,
+        lockCode
+      )
 
-        this.connection.redirector.read_redirector(this.options.prefix, campaignId, redirectorId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { redirector: model })
-
-      return model
+      this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
     } catch (error) {
       this.raiseError(error, 'create', { campaignId, redirectorId })
     }
@@ -90,47 +87,38 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
   async update(
     campaignId: string,
     redirectorId: string,
-    page: string | null | undefined
-  ): Promise<RedirectorModel> {
+    page: string | null | undefined,
+    lockCode: number
+  ): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.redirector.update_redirector(
-          this.options.prefix,
-          campaignId,
-          redirectorId,
-          page
-        ),
+      const statusReply = await this.connection.redirector.update_redirector(
+        this.options.prefix,
+        campaignId,
+        redirectorId,
+        page,
+        lockCode
+      )
 
-        this.connection.redirector.read_redirector(this.options.prefix, campaignId, redirectorId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { redirector: model })
-
-      return model
+      this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
     } catch (error) {
       this.raiseError(error, 'update', { campaignId, redirectorId })
     }
   }
 
-  async delete(campaignId: string, redirectorId: string): Promise<RedirectorModel> {
+  async delete(campaignId: string, redirectorId: string, lockCode: number): Promise<void> {
     try {
-      const [rawModel, statusReply] = await Promise.all([
-        this.connection.redirector.read_redirector(this.options.prefix, campaignId, redirectorId),
+      const statusReply = await this.connection.redirector.delete_redirector(
+        this.options.prefix,
+        campaignId,
+        redirectorId,
+        lockCode
+      )
 
-        this.connection.redirector.delete_redirector(this.options.prefix, campaignId, redirectorId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { redirector: model })
-
-      return model
+      this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
     } catch (error) {
       this.raiseError(error, 'delete', { campaignId, redirectorId })
     }
@@ -175,18 +163,6 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       createdAt: new Date(rawModel.created_at),
       updatedAt: new Date(rawModel.updated_at)
     }
-  }
-
-  protected buildModelStrict(rawModel: unknown): RedirectorModel {
-    const model = this.buildModel(rawModel)
-
-    if (!testRedirectorModel(model)) {
-      throw new DatabaseError(`Redirector unexpected lost`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
-
-    return model
   }
 
   protected buildFullModel(rawFullModel: unknown): FullRedirectorModel | null {

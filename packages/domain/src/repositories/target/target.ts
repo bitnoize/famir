@@ -23,8 +23,9 @@ export interface TargetRepository {
     notFoundPage: string,
     faviconIco: string,
     robotsTxt: string,
-    sitemapXml: string
-  ): Promise<TargetModel>
+    sitemapXml: string,
+    lockCode: number
+  ): Promise<void>
   read(campaignId: string, targetId: string): Promise<FullTargetModel | null>
   update(
     campaignId: string,
@@ -38,12 +39,13 @@ export interface TargetRepository {
     notFoundPage: string | null | undefined,
     faviconIco: string | null | undefined,
     robotsTxt: string | null | undefined,
-    sitemapXml: string | null | undefined
-  ): Promise<TargetModel>
-  enable(campaignId: string, targetId: string): Promise<TargetModel>
-  disable(campaignId: string, targetId: string): Promise<TargetModel>
-  appendLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel>
-  removeLabel(campaignId: string, targetId: string, label: string): Promise<TargetModel>
-  delete(campaignId: string, targetId: string): Promise<TargetModel>
+    sitemapXml: string | null | undefined,
+    lockCode: number
+  ): Promise<void>
+  enable(campaignId: string, targetId: string, lockCode: number): Promise<void>
+  disable(campaignId: string, targetId: string, lockCode: number): Promise<void>
+  appendLabel(campaignId: string, targetId: string, label: string, lockCode: number): Promise<void>
+  removeLabel(campaignId: string, targetId: string, label: string, lockCode: number): Promise<void>
+  delete(campaignId: string, targetId: string, lockCode: number): Promise<void>
   list(campaignId: string): Promise<TargetModel[] | null>
 }

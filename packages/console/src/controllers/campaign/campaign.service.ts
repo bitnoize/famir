@@ -10,7 +10,9 @@ import { BaseService } from '../base/index.js'
 import {
   CreateCampaignData,
   DeleteCampaignData,
+  LockCampaignData,
   ReadCampaignData,
+  UnlockCampaignData,
   UpdateCampaignData
 } from './campaign.js'
 
@@ -28,7 +30,7 @@ export class CampaignService extends BaseService {
     super()
   }
 
-  async createCampaign(data: CreateCampaignData): Promise<CampaignModel> {
+  async createCampaign(data: CreateCampaignData): Promise<number> {
     try {
       return await this.campaignRepository.create(
         data.campaignId,
@@ -61,25 +63,46 @@ export class CampaignService extends BaseService {
     return model
   }
 
-  async updateCampaign(data: UpdateCampaignData): Promise<CampaignModel> {
+  async lockCampaign(data: LockCampaignData): Promise<number> {
     try {
-      return await this.campaignRepository.update(
-        data.campaignId,
-        data.description,
-        data.sessionExpire,
-        data.newSessionExpire,
-        data.messageExpire
-      )
+      return await this.campaignRepository.lock(data.campaignId, data.isForce ?? false)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
   }
 
-  async deleteCampaign(data: DeleteCampaignData): Promise<CampaignModel> {
+  async unlockCampaign(data: UnlockCampaignData): Promise<void> {
     try {
-      return await this.campaignRepository.delete(data.campaignId)
+      await this.campaignRepository.unlock(data.campaignId, data.lockCode)
+    } catch (error) {
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+
+      throw error
+    }
+  }
+
+  async updateCampaign(data: UpdateCampaignData): Promise<void> {
+    try {
+      await this.campaignRepository.update(
+        data.campaignId,
+        data.description,
+        data.sessionExpire,
+        data.newSessionExpire,
+        data.messageExpire,
+        data.lockCode
+      )
+    } catch (error) {
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+
+      throw error
+    }
+  }
+
+  async deleteCampaign(data: DeleteCampaignData): Promise<void> {
+    try {
+      await this.campaignRepository.delete(data.campaignId, data.lockCode)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

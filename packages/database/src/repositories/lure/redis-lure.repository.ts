@@ -4,7 +4,6 @@ import {
   CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  DatabaseError,
   Logger,
   LOGGER,
   LURE_REPOSITORY,
@@ -51,35 +50,24 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     campaignId: string,
     lureId: string,
     path: string,
-    redirectorId: string
-  ): Promise<LureModel> {
+    redirectorId: string,
+    lockCode: number
+  ): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.lure.create_lure(
-          this.options.prefix,
-          campaignId,
-          lureId,
-          path,
-          redirectorId
-        ),
-
-        this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
-      ])
-
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { lure: model })
-
-      return model
-    } catch (error) {
-      this.raiseError(error, 'create', {
+      const statusReply = await this.connection.lure.create_lure(
+        this.options.prefix,
         campaignId,
         lureId,
         path,
-        redirectorId
-      })
+        redirectorId,
+        lockCode
+      )
+
+      const mesg = this.handleStatusReply(statusReply)
+
+      this.logger.info(mesg, { lure: { campaignId, lureId, path, redirectorId } })
+    } catch (error) {
+      this.raiseError(error, 'create', { campaignId, lureId, path, redirectorId })
     }
   }
 
@@ -115,41 +103,35 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async enable(campaignId: string, lureId: string): Promise<LureModel> {
+  async enable(campaignId: string, lureId: string, lockCode: number): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.lure.enable_lure(this.options.prefix, campaignId, lureId),
+      const statusReply = await this.connection.lure.enable_lure(
+        this.options.prefix,
+        campaignId,
+        lureId,
+        lockCode
+      )
 
-        this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { lure: model })
-
-      return model
+      this.logger.info(mesg, { lure: { campaignId, lureId } })
     } catch (error) {
       this.raiseError(error, 'enable', { campaignId, lureId })
     }
   }
 
-  async disable(campaignId: string, lureId: string): Promise<LureModel> {
+  async disable(campaignId: string, lureId: string, lockCode: number): Promise<void> {
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.lure.disable_lure(this.options.prefix, campaignId, lureId),
+      const statusReply = await this.connection.lure.disable_lure(
+        this.options.prefix,
+        campaignId,
+        lureId,
+        lockCode
+      )
 
-        this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
-      ])
+      const mesg = this.handleStatusReply(statusReply)
 
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { lure: model })
-
-      return model
+      this.logger.info(mesg, { lure: { campaignId, lureId } })
     } catch (error) {
       this.raiseError(error, 'disable', { campaignId, lureId })
     }
@@ -159,35 +141,24 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     campaignId: string,
     lureId: string,
     path: string,
-    redirectorId: string
-  ): Promise<LureModel> {
+    redirectorId: string,
+    lockCode: number
+  ): Promise<void> {
     try {
-      const [rawModel, statusReply] = await Promise.all([
-        this.connection.lure.read_lure(this.options.prefix, campaignId, lureId),
-
-        this.connection.lure.delete_lure(
-          this.options.prefix,
-          campaignId,
-          lureId,
-          path,
-          redirectorId
-        )
-      ])
-
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { lure: model })
-
-      return model
-    } catch (error) {
-      this.raiseError(error, 'delete', {
+      const statusReply = await this.connection.lure.delete_lure(
+        this.options.prefix,
         campaignId,
         lureId,
         path,
-        redirectorId
-      })
+        redirectorId,
+        lockCode
+      )
+
+      const mesg = this.handleStatusReply(statusReply)
+
+      this.logger.info(mesg, { lure: { campaignId, lureId, path, redirectorId } })
+    } catch (error) {
+      this.raiseError(error, 'delete', { campaignId, lureId, path, redirectorId })
     }
   }
 
@@ -230,18 +201,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       createdAt: new Date(rawModel.created_at),
       updatedAt: new Date(rawModel.updated_at)
     }
-  }
-
-  protected buildModelStrict(rawModel: unknown): LureModel {
-    const model = this.buildModel(rawModel)
-
-    if (!testLureModel(model)) {
-      throw new DatabaseError(`Lure unexpected lost`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
-
-    return model
   }
 
   protected buildCollection(rawCollection: unknown): LureModel[] {

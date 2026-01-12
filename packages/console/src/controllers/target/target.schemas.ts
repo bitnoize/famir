@@ -1,5 +1,6 @@
 import { JSONSchemaType, booleanSchema, customIdentSchema } from '@famir/common'
 import {
+  campaignLockCodeSchema,
   targetConnectTimeoutSchema,
   targetContentSchema,
   targetDomainSchema,
@@ -44,7 +45,8 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     'notFoundPage',
     'faviconIco',
     'robotsTxt',
-    'sitemapXml'
+    'sitemapXml',
+    'lockCode'
   ],
   properties: {
     campaignId: customIdentSchema,
@@ -96,7 +98,8 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     sitemapXml: {
       ...targetContentSchema,
       default: ''
-    }
+    },
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
@@ -113,7 +116,7 @@ const readTargetDataSchema: JSONSchemaType<ReadTargetData> = {
 
 const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
   type: 'object',
-  required: ['campaignId', 'targetId'],
+  required: ['campaignId', 'targetId', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
@@ -156,38 +159,42 @@ const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
     sitemapXml: {
       ...targetContentSchema,
       nullable: true
-    }
+    },
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
 
 const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
   type: 'object',
-  required: ['campaignId', 'targetId'],
+  required: ['campaignId', 'targetId', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
-    targetId: customIdentSchema
+    targetId: customIdentSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
 
 const actionTargetLabelDataSchema: JSONSchemaType<ActionTargetLabelData> = {
   type: 'object',
-  required: ['campaignId', 'targetId', 'label'],
+  required: ['campaignId', 'targetId', 'label', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
-    label: targetLabelSchema
+    label: targetLabelSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
 
 const deleteTargetDataSchema: JSONSchemaType<DeleteTargetData> = {
   type: 'object',
-  required: ['campaignId', 'targetId'],
+  required: ['campaignId', 'targetId', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
-    targetId: customIdentSchema
+    targetId: customIdentSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const

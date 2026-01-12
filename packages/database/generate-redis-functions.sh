@@ -5,7 +5,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 LUA_SCRIPTS_DIR="${SCRIPT_DIR}/redis-functions"
-SOURCE_FILE_PATH="${SCRIPT_DIR}/src/database.redis-functions.ts"
+SOURCE_FILE_PATH="${SCRIPT_DIR}/src/redis-functions.ts"
 
 PARTS_FILE_PATH=$(mktemp)
 
@@ -13,7 +13,7 @@ rm -f "$PARTS_FILE_PATH"
 
 for lua_script_path in "$LUA_SCRIPTS_DIR"/*.lua; do
   lua_script_name="$(basename "$lua_script_path")"
-  lua_script_data="$(base64 -w 0 "$lua_script_path")"
+  lua_script_data="$(base64 "$lua_script_path")"
 
   echo "  // ${lua_script_name}" >> "$PARTS_FILE_PATH"
   echo "  \`${lua_script_data}\`," >> "$PARTS_FILE_PATH"

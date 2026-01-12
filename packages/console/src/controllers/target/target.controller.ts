@@ -66,7 +66,9 @@ export class TargetController extends BaseController {
   private createTarget: ReplServerApiCall = async (data) => {
     this.validateData<CreateTargetData>('console-create-target-data', data)
 
-    return await this.targetService.createTarget(data)
+    await this.targetService.createTarget(data)
+
+    return true
   }
 
   private readTarget: ReplServerApiCall = async (data) => {
@@ -78,37 +80,49 @@ export class TargetController extends BaseController {
   private updateTarget: ReplServerApiCall = async (data) => {
     this.validateData<UpdateTargetData>('console-update-target-data', data)
 
-    return await this.targetService.updateTarget(data)
+    await this.targetService.updateTarget(data)
+
+    return true
   }
 
   private enableTarget: ReplServerApiCall = async (data) => {
     this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
-    return await this.targetService.enableTarget(data)
+    await this.targetService.enableTarget(data)
+
+    return true
   }
 
   private disableTarget: ReplServerApiCall = async (data) => {
     this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
-    return await this.targetService.disableTarget(data)
+    await this.targetService.disableTarget(data)
+
+    return true
   }
 
   private appendTargetLabel: ReplServerApiCall = async (data) => {
     this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
-    return await this.targetService.appendTargetLabel(data)
+    await this.targetService.appendTargetLabel(data)
+
+    return true
   }
 
   private removeTargetLabel: ReplServerApiCall = async (data) => {
     this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
-    return await this.targetService.removeTargetLabel(data)
+    await this.targetService.removeTargetLabel(data)
+
+    return true
   }
 
   private deleteTarget: ReplServerApiCall = async (data) => {
     this.validateData<DeleteTargetData>('console-delete-target-data', data)
 
-    return await this.targetService.deleteTarget(data)
+    await this.targetService.deleteTarget(data)
+
+    return true
   }
 
   private listTargets: ReplServerApiCall = async (data) => {

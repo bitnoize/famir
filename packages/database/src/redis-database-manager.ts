@@ -7,8 +7,8 @@ import {
   Logger,
   LOGGER
 } from '@famir/domain'
-import { getRedisFunctions } from './database.redis-functions.js'
 import { RedisDatabaseConnection } from './redis-database-connector.js'
+import { getRedisFunctions } from './redis-functions.js'
 
 export class RedisDatabaseManager implements DatabaseManager {
   static inject(container: DIContainer) {

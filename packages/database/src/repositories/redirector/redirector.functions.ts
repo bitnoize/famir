@@ -23,7 +23,8 @@ export const redirectorFunctions = {
         prefix: string,
         campaignId: string,
         redirectorId: string,
-        page: string
+        page: string,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
@@ -33,6 +34,7 @@ export const redirectorFunctions = {
         parser.push(redirectorId)
         parser.push(page)
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -89,7 +91,8 @@ export const redirectorFunctions = {
         prefix: string,
         campaignId: string,
         redirectorId: string,
-        page: string | null | undefined
+        page: string | null | undefined,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
@@ -99,8 +102,8 @@ export const redirectorFunctions = {
           parser.push(page)
         }
 
-        parser.push('updated_at')
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -113,11 +116,14 @@ export const redirectorFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        redirectorId: string
+        redirectorId: string,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
         parser.pushKey(redirectorIndexKey(prefix, campaignId))
+
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => unknown

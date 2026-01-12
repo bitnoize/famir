@@ -1,5 +1,5 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
-import { proxyUrlSchema } from '@famir/database'
+import { campaignLockCodeSchema, proxyUrlSchema } from '@famir/database'
 import { ValidatorSchemas } from '@famir/domain'
 import {
   CreateProxyData,
@@ -11,11 +11,12 @@ import {
 
 const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
   type: 'object',
-  required: ['campaignId', 'proxyId', 'url'],
+  required: ['campaignId', 'proxyId', 'url', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
     proxyId: customIdentSchema,
-    url: proxyUrlSchema
+    url: proxyUrlSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
@@ -32,20 +33,22 @@ const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
 
 const switchProxyDataSchema: JSONSchemaType<SwitchProxyData> = {
   type: 'object',
-  required: ['campaignId', 'proxyId'],
+  required: ['campaignId', 'proxyId', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
-    proxyId: customIdentSchema
+    proxyId: customIdentSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const
 
 const deleteProxyDataSchema: JSONSchemaType<DeleteProxyData> = {
   type: 'object',
-  required: ['campaignId', 'proxyId'],
+  required: ['campaignId', 'proxyId', 'lockCode'],
   properties: {
     campaignId: customIdentSchema,
-    proxyId: customIdentSchema
+    proxyId: customIdentSchema,
+    lockCode: campaignLockCodeSchema
   },
   additionalProperties: false
 } as const

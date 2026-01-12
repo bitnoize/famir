@@ -31,9 +31,9 @@ export class TargetService extends BaseService {
     super()
   }
 
-  async createTarget(data: CreateTargetData): Promise<TargetModel> {
+  async createTarget(data: CreateTargetData): Promise<void> {
     try {
-      return await this.targetRepository.create(
+      await this.targetRepository.create(
         data.campaignId,
         data.targetId,
         data.isLanding,
@@ -53,10 +53,11 @@ export class TargetService extends BaseService {
         data.notFoundPage,
         data.faviconIco,
         data.robotsTxt,
-        data.sitemapXml
+        data.sitemapXml,
+        data.lockCode
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
       throw error
     }
@@ -74,9 +75,9 @@ export class TargetService extends BaseService {
     return model
   }
 
-  async updateTarget(data: UpdateTargetData): Promise<TargetModel> {
+  async updateTarget(data: UpdateTargetData): Promise<void> {
     try {
-      return await this.targetRepository.update(
+      await this.targetRepository.update(
         data.campaignId,
         data.targetId,
         data.connectTimeout,
@@ -88,7 +89,8 @@ export class TargetService extends BaseService {
         data.notFoundPage,
         data.faviconIco,
         data.robotsTxt,
-        data.sitemapXml
+        data.sitemapXml,
+        data.lockCode
       )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
@@ -97,49 +99,59 @@ export class TargetService extends BaseService {
     }
   }
 
-  async enableTarget(data: SwitchTargetData): Promise<TargetModel> {
+  async enableTarget(data: SwitchTargetData): Promise<void> {
     try {
-      return await this.targetRepository.enable(data.campaignId, data.targetId)
+      await this.targetRepository.enable(data.campaignId, data.targetId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
   }
 
-  async disableTarget(data: SwitchTargetData): Promise<TargetModel> {
+  async disableTarget(data: SwitchTargetData): Promise<void> {
     try {
-      return await this.targetRepository.disable(data.campaignId, data.targetId)
+      await this.targetRepository.disable(data.campaignId, data.targetId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
   }
 
-  async appendTargetLabel(data: ActionTargetLabelData): Promise<TargetModel> {
+  async appendTargetLabel(data: ActionTargetLabelData): Promise<void> {
     try {
-      return await this.targetRepository.appendLabel(data.campaignId, data.targetId, data.label)
+      await this.targetRepository.appendLabel(
+        data.campaignId,
+        data.targetId,
+        data.label,
+        data.lockCode
+      )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
   }
 
-  async removeTargetLabel(data: ActionTargetLabelData): Promise<TargetModel> {
+  async removeTargetLabel(data: ActionTargetLabelData): Promise<void> {
     try {
-      return await this.targetRepository.removeLabel(data.campaignId, data.targetId, data.label)
+      await this.targetRepository.removeLabel(
+        data.campaignId,
+        data.targetId,
+        data.label,
+        data.lockCode
+      )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
   }
 
-  async deleteTarget(data: DeleteTargetData): Promise<TargetModel> {
+  async deleteTarget(data: DeleteTargetData): Promise<void> {
     try {
-      return await this.targetRepository.delete(data.campaignId, data.targetId)
+      await this.targetRepository.delete(data.campaignId, data.targetId, data.lockCode)
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

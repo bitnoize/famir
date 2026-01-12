@@ -2,6 +2,7 @@ export interface CreateProxyData {
   campaignId: string
   proxyId: string
   url: string
+  lockCode: number
 }
 
 export interface ReadProxyData {
@@ -12,11 +13,13 @@ export interface ReadProxyData {
 export interface SwitchProxyData {
   campaignId: string
   proxyId: string
+  lockCode: number
 }
 
 export interface DeleteProxyData {
   campaignId: string
   proxyId: string
+  lockCode: number
 }
 
 export interface ListProxiesData {

@@ -66,7 +66,8 @@ export const targetFunctions = {
         notFoundPage: string,
         faviconIco: string,
         robotsTxt: string,
-        sitemapXml: string
+        sitemapXml: string,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
@@ -95,6 +96,7 @@ export const targetFunctions = {
         parser.push(robotsTxt)
         parser.push(sitemapXml)
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => string
@@ -151,7 +153,8 @@ export const targetFunctions = {
         notFoundPage: string | null | undefined,
         faviconIco: string | null | undefined,
         robotsTxt: string | null | undefined,
-        sitemapXml: string | null | undefined
+        sitemapXml: string | null | undefined,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
@@ -206,8 +209,8 @@ export const targetFunctions = {
           parser.push(sitemapXml)
         }
 
-        parser.push('updated_at')
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => string
@@ -216,11 +219,18 @@ export const targetFunctions = {
     enable_target: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        targetId: string,
+        lockCode: number
+      ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
 
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => string
@@ -229,11 +239,18 @@ export const targetFunctions = {
     disable_target: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        targetId: string,
+        lockCode: number
+      ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
 
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => string
@@ -247,7 +264,8 @@ export const targetFunctions = {
         prefix: string,
         campaignId: string,
         targetId: string,
-        label: string
+        label: string,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
@@ -255,6 +273,7 @@ export const targetFunctions = {
 
         parser.push(label.toLowerCase())
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => string
@@ -268,7 +287,8 @@ export const targetFunctions = {
         prefix: string,
         campaignId: string,
         targetId: string,
-        label: string
+        label: string,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
@@ -276,6 +296,7 @@ export const targetFunctions = {
 
         parser.push(label.toLowerCase())
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => string
@@ -284,13 +305,21 @@ export const targetFunctions = {
     delete_target: {
       NUMBER_OF_KEYS: 6,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        targetId: string,
+        lockCode: number
+      ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
         parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
         parser.pushKey(targetUniqueDonorKey(prefix, campaignId))
         parser.pushKey(targetUniqueMirrorKey(prefix, campaignId))
         parser.pushKey(targetIndexKey(prefix, campaignId))
+
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => string

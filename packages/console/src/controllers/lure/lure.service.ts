@@ -23,16 +23,17 @@ export class LureService extends BaseService {
     super()
   }
 
-  async createLure(data: CreateLureData): Promise<LureModel> {
+  async createLure(data: CreateLureData): Promise<void> {
     try {
-      return await this.lureRepository.create(
+      await this.lureRepository.create(
         data.campaignId,
         data.lureId,
         data.path,
-        data.redirectorId
+        data.redirectorId,
+        data.lockCode
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
       throw error
     }
@@ -50,33 +51,34 @@ export class LureService extends BaseService {
     return model
   }
 
-  async enableLure(data: SwitchLureData): Promise<LureModel> {
+  async enableLure(data: SwitchLureData): Promise<void> {
     try {
-      return await this.lureRepository.enable(data.campaignId, data.lureId)
+      await this.lureRepository.enable(data.campaignId, data.lureId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
   }
 
-  async disableLure(data: SwitchLureData): Promise<LureModel> {
+  async disableLure(data: SwitchLureData): Promise<void> {
     try {
-      return await this.lureRepository.disable(data.campaignId, data.lureId)
+      await this.lureRepository.disable(data.campaignId, data.lureId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
   }
 
-  async deleteLure(data: DeleteLureData): Promise<LureModel> {
+  async deleteLure(data: DeleteLureData): Promise<void> {
     try {
-      return await this.lureRepository.delete(
+      await this.lureRepository.delete(
         data.campaignId,
         data.lureId,
         data.path,
-        data.redirectorId
+        data.redirectorId,
+        data.lockCode
       )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])

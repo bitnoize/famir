@@ -29,7 +29,8 @@ export const lureFunctions = {
         campaignId: string,
         lureId: string,
         path: string,
-        redirectorId: string
+        redirectorId: string,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
@@ -42,6 +43,7 @@ export const lureFunctions = {
         parser.push(path)
         parser.push(redirectorId)
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -83,11 +85,18 @@ export const lureFunctions = {
     enable_lure: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lureId: string) {
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        lureId: string,
+        lockCode: number
+      ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
 
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -96,11 +105,18 @@ export const lureFunctions = {
     disable_lure: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lureId: string) {
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        lureId: string,
+        lockCode: number
+      ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
 
         parser.push(Date.now().toString())
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -115,13 +131,16 @@ export const lureFunctions = {
         campaignId: string,
         lureId: string,
         path: string,
-        redirectorId: string
+        redirectorId: string,
+        lockCode: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
         parser.pushKey(lurePathKey(prefix, campaignId, path))
         parser.pushKey(lureIndexKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+
+        parser.push(lockCode.toString())
       },
 
       transformReply: undefined as unknown as () => unknown
