@@ -7,6 +7,7 @@ import {
   REPL_SERVER,
   REPL_SERVER_ROUTER,
   ReplServer,
+  ReplServerError,
   ReplServerRouter
 } from '@famir/domain'
 import net from 'node:net'
@@ -167,10 +168,38 @@ export class NodeReplServer implements ReplServer {
   }
 
   protected defineContext(replServer: repl.REPLServer) {
+    const value: Record<string, unknown> = {}
+
+    const apiCalls = this.router.resolve()
+
+    apiCalls.forEach(([name, apiCall]) => {
+      value[name] = async (data: unknown): Promise<unknown> => {
+        try {
+          return await apiCall(data)
+        } catch (error) {
+          if (error instanceof ReplServerError) {
+            error.context['apiCall'] = name
+            error.context['data'] = data
+
+            throw error
+          } else {
+            throw new ReplServerError(`Server unknown error`, {
+              cause: error,
+              context: {
+                apiCall: name,
+                data
+              },
+              code: 'INTERNAL_ERROR'
+            })
+          }
+        }
+      }
+    })
+
     Object.defineProperty(replServer.context, 'famir', {
       configurable: false,
       enumerable: true,
-      value: this.router.resolve()
+      value: value
     })
   }
 

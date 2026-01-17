@@ -4,7 +4,6 @@ import {
   CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  DatabaseError,
   FullMessageModel,
   HttpBody,
   HttpConnection,
@@ -12,16 +11,14 @@ import {
   Logger,
   LOGGER,
   MESSAGE_REPOSITORY,
-  MessageModel,
   MessageRepository,
-  testMessageModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
 import { DatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { RawFullMessage, RawMessage } from './message.functions.js'
+import { RawFullMessage } from './message.functions.js'
 import { messageSchemas } from './message.schemas.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
@@ -69,51 +66,39 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     startTime: number,
     finishTime: number,
     connection: HttpConnection
-  ): Promise<MessageModel> {
+  ): Promise<string> {
     const messageId = randomIdent()
 
     try {
-      const [statusReply, rawModel] = await Promise.all([
-        this.connection.message.create_message(
-          this.options.prefix,
-          campaignId,
-          messageId,
-          proxyId,
-          targetId,
-          sessionId,
-          method,
-          url,
-          isStreaming,
-          this.encodeJson(requestHeaders),
-          this.encodeBase64(requestBody),
-          this.encodeJson(responseHeaders),
-          this.encodeBase64(responseBody),
-          clientIp,
-          status,
-          score,
-          startTime,
-          finishTime,
-          this.encodeJson(connection)
-        ),
-
-        this.connection.message.read_message(this.options.prefix, campaignId, messageId)
-      ])
-
-      const message = this.handleStatusReply(statusReply)
-
-      const model = this.buildModelStrict(rawModel)
-
-      this.logger.info(message, { message: model })
-
-      return model
-    } catch (error) {
-      this.raiseError(error, 'create', {
+      const statusReply = await this.connection.message.create_message(
+        this.options.prefix,
         campaignId,
         messageId,
         proxyId,
         targetId,
-        sessionId
-      })
+        sessionId,
+        method,
+        url,
+        isStreaming,
+        this.encodeJson(requestHeaders),
+        this.encodeBase64(requestBody),
+        this.encodeJson(responseHeaders),
+        this.encodeBase64(responseBody),
+        clientIp,
+        status,
+        score,
+        startTime,
+        finishTime,
+        this.encodeJson(connection)
+      )
+
+      const mesg = this.handleStatusReply(statusReply)
+
+      this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
+
+      return messageId
+    } catch (error) {
+      this.raiseError(error, 'create', { campaignId, messageId, proxyId, targetId, sessionId })
     }
   }
 
@@ -131,6 +116,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
+  /*
   protected buildModel(rawModel: unknown): MessageModel | null {
     if (rawModel === null) {
       return null
@@ -164,6 +150,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
     return model
   }
+  */
 
   protected buildFullModel(rawFullModel: unknown): FullMessageModel | null {
     if (rawFullModel === null) {
@@ -181,21 +168,21 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       method: rawFullModel.method,
       url: rawFullModel.url,
       isStreaming: !!rawFullModel.is_streaming,
-      requestHeaders: this.parseHttpHeaders(rawFullModel.request_headers),
+      requestHeaders: this.parseHeaders(rawFullModel.request_headers),
       requestBody: this.decodeBase64(rawFullModel.request_body),
-      responseHeaders: this.parseHttpHeaders(rawFullModel.response_headers),
+      responseHeaders: this.parseHeaders(rawFullModel.response_headers),
       responseBody: this.decodeBase64(rawFullModel.response_body),
       clientIp: rawFullModel.client_ip,
       status: rawFullModel.status,
       score: rawFullModel.score,
       startTime: rawFullModel.start_time,
       finishTime: rawFullModel.finish_time,
-      connection: this.parseHttpConnection(rawFullModel.connection),
+      connection: this.parseConnection(rawFullModel.connection),
       createdAt: new Date(rawFullModel.created_at)
     }
   }
 
-  protected parseHttpHeaders(value: string): HttpHeaders {
+  protected parseHeaders(value: string): HttpHeaders {
     const data = this.decodeJson(value)
 
     this.validateRawData<HttpHeaders>('database-message-headers', data)
@@ -203,7 +190,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     return data
   }
 
-  protected parseHttpConnection(value: string): HttpConnection {
+  protected parseConnection(value: string): HttpConnection {
     const data = this.decodeJson(value)
 
     this.validateRawData<HttpConnection>('database-message-connection', data)

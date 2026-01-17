@@ -3,7 +3,6 @@ import {
   ANALYZE_LOG_QUEUE,
   AnalyzeLogQueue,
   MESSAGE_REPOSITORY,
-  MessageModel,
   MessageRepository
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
@@ -30,7 +29,7 @@ export class CompletionService extends BaseService {
     super()
   }
 
-  async createMessage(data: CreateMessageData): Promise<MessageModel> {
+  async createMessage(data: CreateMessageData): Promise<string> {
     try {
       return await this.messageRepository.create(
         data.campaignId,

@@ -48,29 +48,24 @@ export class BuildResponseController extends BaseController {
     const target = this.getState(ctx, 'target')
     const proxy = this.getState(ctx, 'proxy')
 
-    ctx.applyRequestWrappers()
+    const { status, responseHeaders, responseBody, connection } =
+      await this.buildResponseService.ordinaryRequest({
+        proxy: proxy.url,
+        method: ctx.method,
+        url: this.assemblyUrl(target, ctx.url.href),
+        requestHeaders: ctx.requestHeaders,
+        requestBody: Buffer.alloc(0),
+        connectTimeout: target.connectTimeout,
+        ordinaryTimeout: target.ordinaryTimeout,
+        responseBodyLimit: target.responseBodyLimit
+      })
 
-    if (ctx.isStreaming) {
-      throw new Error(`Streaming requests not implemented yet :(`)
-    } else {
-      const { status, responseHeaders, responseBody, connection } =
-        await this.buildResponseService.ordinaryRequest({
-          proxy: proxy.url,
-          method: ctx.method,
-          url: this.assemblyUrl(target, ctx.normalizeUrl()),
-          requestHeaders: ctx.requestHeaders,
-          requestBody: ctx.requestBody,
-          connectTimeout: target.connectTimeout,
-          ordinaryTimeout: target.ordinaryTimeout,
-          responseBodyLimit: target.responseBodyLimit
-        })
+    //ctx.setResponseHeaders(responseHeaders)
+    //ctx.setResponseBody(responseBody)
+    //ctx.setStatus(status)
+    //ctx.setConnection(connection)
 
-      ctx.setResponseHeaders(responseHeaders)
-      ctx.setResponseBody(responseBody)
-      ctx.setStatus(status)
-      //ctx.setConnection(connection)
-
-      /*
+    /*
       ctx.setResponseHeaders({
         Connection: undefined,
         'Keep-Alive': undefined,
@@ -79,10 +74,7 @@ export class BuildResponseController extends BaseController {
       })
       */
 
-      ctx.applyResponseWrappers()
-
-      await ctx.sendResponse()
-    }
+    await ctx.sendResponseBody(status)
 
     await next()
   }

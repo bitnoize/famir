@@ -23,6 +23,7 @@
     "packages/storage",
     "packages/workflow",
     "packages/executor",
+    "packages/http-tools",
     "packages/http-client",
     "packages/http-server",
     "packages/repl-server",

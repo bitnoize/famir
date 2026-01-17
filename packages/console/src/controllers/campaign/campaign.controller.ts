@@ -64,25 +64,25 @@ export class CampaignController extends BaseController {
   private createCampaign: ReplServerApiCall = async (data) => {
     this.validateData<CreateCampaignData>('console-create-campaign-data', data)
 
-    return await this.campaignService.createCampaign(data)
+    return await this.campaignService.create(data)
   }
 
   private readCampaign: ReplServerApiCall = async (data) => {
     this.validateData<ReadCampaignData>('console-read-campaign-data', data)
 
-    return await this.campaignService.readCampaign(data)
+    return await this.campaignService.read(data)
   }
 
   private lockCampaign: ReplServerApiCall = async (data) => {
     this.validateData<LockCampaignData>('console-lock-campaign-data', data)
 
-    return await this.campaignService.lockCampaign(data)
+    return await this.campaignService.lock(data)
   }
 
   private unlockCampaign: ReplServerApiCall = async (data) => {
     this.validateData<UnlockCampaignData>('console-unlock-campaign-data', data)
 
-    await this.campaignService.unlockCampaign(data)
+    await this.campaignService.unlock(data)
 
     return true
   }
@@ -90,7 +90,7 @@ export class CampaignController extends BaseController {
   private updateCampaign: ReplServerApiCall = async (data) => {
     this.validateData<UpdateCampaignData>('console-update-campaign-data', data)
 
-    await this.campaignService.updateCampaign(data)
+    await this.campaignService.update(data)
 
     return true
   }
@@ -98,12 +98,12 @@ export class CampaignController extends BaseController {
   private deleteCampaign: ReplServerApiCall = async (data) => {
     this.validateData<DeleteCampaignData>('console-delete-campaign-data', data)
 
-    await this.campaignService.deleteCampaign(data)
+    await this.campaignService.delete(data)
 
     return true
   }
 
   private listCampaigns: ReplServerApiCall = async () => {
-    return await this.campaignService.listCampaigns()
+    return await this.campaignService.list()
   }
 }

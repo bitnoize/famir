@@ -13,6 +13,7 @@
     { "path": "packages/executor" },
     { "path": "packages/http-client" },
     { "path": "packages/http-server" },
+    { "path": "packages/http-tools" },
     { "path": "packages/repl-server" }
   ]
 }

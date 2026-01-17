@@ -1,6 +1,6 @@
 import { JSONSchemaType } from '@famir/common'
 import { configDatabaseConnectionUrlSchema, configDatabasePrefixSchema } from '@famir/database'
-import { configHttpClientVerboseSchema } from '@famir/http-client'
+import { configHttpClientErrorPageSchema, configHttpClientVerboseSchema } from '@famir/http-client'
 import {
   configHttpServerAddressSchema,
   configHttpServerErrorPageSchema,
@@ -27,6 +27,7 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
     'WORKFLOW_CONNECTION_URL',
     'WORKFLOW_PREFIX',
     'HTTP_CLIENT_VERBOSE',
+    'HTTP_CLIENT_ERROR_PAGE',
     'HTTP_SERVER_ADDRESS',
     'HTTP_SERVER_PORT',
     'HTTP_SERVER_ERROR_PAGE'
@@ -44,6 +45,7 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
     WORKFLOW_CONNECTION_URL: configWorkflowConnectionUrlSchema,
     WORKFLOW_PREFIX: configWorkflowPrefixSchema,
     HTTP_CLIENT_VERBOSE: configHttpClientVerboseSchema,
+    HTTP_CLIENT_ERROR_PAGE: configHttpClientErrorPageSchema,
     HTTP_SERVER_ADDRESS: {
       ...configHttpServerAddressSchema,
       default: '127.0.0.1'

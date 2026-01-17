@@ -17,7 +17,7 @@ export class MessageService extends BaseService {
     super()
   }
 
-  async readMessage(data: ReadMessageData): Promise<MessageModel> {
+  async read(data: ReadMessageData): Promise<MessageModel> {
     const model = await this.messageRepository.read(data.campaignId, data.messageId)
 
     if (!model) {

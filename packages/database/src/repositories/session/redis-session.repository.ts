@@ -58,13 +58,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
       ])
 
-      const message = this.handleStatusReply(statusReply)
+      const mesg = this.handleStatusReply(statusReply)
 
-      const model = this.buildModelStrict(rawModel)
+      this.logger.info(mesg, { session: { campaignId, sessionId } })
 
-      this.logger.info(message, { session: model })
-
-      return model
+      return this.buildModelStrict(rawModel)
     } catch (error) {
       this.raiseError(error, 'create', { campaignId, sessionId })
     }
@@ -84,7 +82,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  async auth(campaignId: string, sessionId: string): Promise<SessionModel | null> {
+  async auth(campaignId: string, sessionId: string): Promise<SessionModel> {
     try {
       const [statusReply, rawModel] = await Promise.all([
         this.connection.session.auth_session(this.options.prefix, campaignId, sessionId),
@@ -92,13 +90,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
       ])
 
-      const message = this.handleStatusReply(statusReply)
+      const mesg = this.handleStatusReply(statusReply)
 
-      const model = this.buildModelStrict(rawModel)
+      this.logger.info(mesg, { session: { campaignId, sessionId } })
 
-      this.logger.info(message, { session: model })
-
-      return model
+      return this.buildModelStrict(rawModel)
     } catch (error) {
       this.raiseError(error, 'auth', { campaignId, sessionId })
     }
@@ -119,11 +115,9 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         secret
       )
 
-      const message = this.handleStatusReply(statusReply)
+      const mesg = this.handleStatusReply(statusReply)
 
-      this.logger.info(message)
-
-      return
+      this.logger.info(mesg, { session: { campaignId, lureId, sessionId } })
     } catch (error) {
       this.raiseError(error, 'upgrade', { campaignId, lureId, sessionId })
     }

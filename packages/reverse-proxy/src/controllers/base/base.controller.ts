@@ -5,6 +5,7 @@ import {
   Logger,
   Validator
 } from '@famir/domain'
+import { setHeader, setHeaders } from '@famir/http-tools'
 import { ReverseProxyState } from '../../reverse-proxy.js'
 
 export abstract class BaseController {
@@ -42,42 +43,36 @@ export abstract class BaseController {
   }
 
   protected async renderOriginRedirect(ctx: HttpServerContext): Promise<void> {
-    ctx.setResponseHeader('Location', ctx.originUrl)
+    setHeader(ctx.responseHeaders, 'Location', ctx.originUrl)
 
-    ctx.setStatus(302)
-
-    await ctx.sendResponse()
+    await ctx.sendResponseBody(302)
   }
 
   protected async renderMainRedirect(ctx: HttpServerContext): Promise<void> {
-    ctx.setResponseHeader('Location', '/')
+    setHeader(ctx.responseHeaders, 'Location', '/')
 
-    ctx.setStatus(302)
-
-    await ctx.sendResponse()
+    await ctx.sendResponseBody(302)
   }
 
   protected async renderMainPage(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.isMethods(['GET', 'HEAD'])) {
+    if (['GET', 'HEAD'].includes(ctx.method)) {
       const body = Buffer.from(target.mainPage)
 
-      ctx.setResponseHeaders({
+      setHeaders(ctx.responseHeaders, {
         'Content-Type': 'text/html',
         'Content-Length': body.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 
-      if (ctx.isMethod('GET')) {
-        ctx.setResponseBody(body)
+      if (ctx.method === 'GET') {
+        await ctx.sendResponseBody(200, body)
+      } else {
+        await ctx.sendResponseBody(200)
       }
-
-      ctx.setStatus(200)
-
-      await ctx.sendResponse()
     } else {
       await this.renderNotFoundPage(ctx, target)
     }
@@ -89,15 +84,11 @@ export abstract class BaseController {
   ): Promise<void> {
     const body = Buffer.from(target.notFoundPage)
 
-    ctx.setResponseHeaders({
+    setHeaders(ctx.responseHeaders, {
       'Content-Type': 'text/html',
       'Content-Length': body.length.toString()
     })
 
-    ctx.setResponseBody(body)
-
-    ctx.setStatus(404)
-
-    await ctx.sendResponse()
+    await ctx.sendResponseBody(404, body)
   }
 }

@@ -10,6 +10,7 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { getHeader } from '@famir/http-tools'
 import { BaseController } from '../base/index.js'
 import { SetupMirrorData } from './setup-mirror.js'
 import { setupMirrorSchemas } from './setup-mirror.schemas.js'
@@ -72,8 +73,8 @@ export class SetupMirrorController extends BaseController {
   protected parseSetupMirrorData(ctx: HttpServerContext): SetupMirrorData {
     try {
       const data = {
-        campaign_id: ctx.getRequestHeader('X-Famir-Campaign-Id'),
-        target_id: ctx.getRequestHeader('X-Famir-Target-Id')
+        campaign_id: getHeader(ctx.requestHeaders, 'X-Famir-Campaign-Id'),
+        target_id: getHeader(ctx.requestHeaders, 'X-Famir-Target-Id')
       }
 
       this.validator.assertSchema<SetupMirrorData>('reverse-proxy-setup-mirror-data', data)

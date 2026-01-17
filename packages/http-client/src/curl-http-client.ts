@@ -323,7 +323,8 @@ export class CurlHttpClient implements HttpClient {
 
   private buildOptions(config: HttpClientConfig): HttpClientOptions {
     return {
-      verbose: config.HTTP_CLIENT_VERBOSE
+      verbose: config.HTTP_CLIENT_VERBOSE,
+      errorPage: config.HTTP_CLIENT_ERROR_PAGE
     }
   }
 }

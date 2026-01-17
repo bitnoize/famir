@@ -18,6 +18,13 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import {
+  getRequestCookies,
+  getResponseCookies,
+  isBot,
+  setHeaders,
+  setResponseCookies
+} from '@famir/http-tools'
 import { BaseController } from '../base/index.js'
 import { LandingRedirectorData, LandingUpgradeData } from './authorize.js'
 import { authorizeSchemas } from './authorize.schemas.js'
@@ -63,34 +70,32 @@ export class AuthorizeController extends BaseController {
     const target = this.getState(ctx, 'target')
 
     if (target.isLanding) {
-      if (ctx.isUrlPathEquals(campaign.landingUpgradePath)) {
-        if (!ctx.isMethod('GET')) {
+      if (ctx.url.pathname === campaign.landingUpgradePath) {
+        if (ctx.method === 'GET') {
+          await this.landingUpgradeSession(ctx, campaign)
+        } else {
           await this.renderNotFoundPage(ctx, target)
-
-          return
         }
-
-        await this.landingUpgradeSession(ctx, campaign)
 
         return
       }
 
       const lure = await this.authorizeService.readLurePath({
         campaignId: campaign.campaignId,
-        path: ctx.url.path
+        path: ctx.url.pathname
       })
 
       if (lure) {
-        if (!ctx.isMethods(['HEAD', 'GET'])) {
+        if (['GET', 'HEAD'].includes(ctx.method)) {
+          const redirector = await this.authorizeService.readRedirector({
+            campaignId: campaign.campaignId,
+            redirectorId: lure.redirectorId
+          })
+
+          await this.landingRedirectorSession(ctx, campaign, target, redirector)
+        } else {
           await this.renderNotFoundPage(ctx, target)
         }
-
-        const redirector = await this.authorizeService.readRedirector({
-          campaignId: campaign.campaignId,
-          redirectorId: lure.redirectorId
-        })
-
-        await this.landingRedirectorSession(ctx, campaign, target, redirector)
 
         return
       }
@@ -107,7 +112,7 @@ export class AuthorizeController extends BaseController {
   ): Promise<void> {
     const landingUpgradeData = this.parseLandingUpgradeData(ctx, campaign)
 
-    if (ctx.isBot()) {
+    if (isBot(ctx.requestHeaders)) {
       await this.renderMainRedirect(ctx)
 
       return
@@ -170,7 +175,7 @@ export class AuthorizeController extends BaseController {
   ): Promise<void> {
     const landingRedirectorData = this.parseLandingRedirectorData(ctx, campaign)
 
-    if (ctx.isBot()) {
+    if (isBot(ctx.requestHeaders)) {
       await this.renderRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
 
       return
@@ -220,7 +225,7 @@ export class AuthorizeController extends BaseController {
     target: EnabledFullTargetModel,
     next: HttpServerNextFunction
   ): Promise<void> {
-    if (ctx.isBot()) {
+    if (isBot(ctx.requestHeaders)) {
       await this.renderCloakingSite(ctx, target)
 
       return
@@ -278,7 +283,7 @@ export class AuthorizeController extends BaseController {
     target: EnabledFullTargetModel,
     next: HttpServerNextFunction
   ): Promise<void> {
-    if (ctx.isBot()) {
+    if (isBot(ctx.requestHeaders)) {
       await this.renderCloakingSite(ctx, target)
 
       return
@@ -334,7 +339,7 @@ export class AuthorizeController extends BaseController {
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): HttpRequestCookie | undefined {
-    const requestCookies = ctx.getRequestCookies()
+    const requestCookies = getRequestCookies(ctx.requestHeaders)
 
     return requestCookies[campaign.sessionCookieName]
   }
@@ -344,7 +349,7 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel,
     session: SessionModel
   ) {
-    const responseCookies = ctx.getResponseCookies()
+    const responseCookies = getResponseCookies(ctx.responseHeaders)
 
     responseCookies[campaign.sessionCookieName] = {
       value: session.sessionId,
@@ -354,11 +359,11 @@ export class AuthorizeController extends BaseController {
       maxAge: Math.round(campaign.sessionExpire / 1000)
     }
 
-    ctx.setResponseCookies(responseCookies)
+    setResponseCookies(ctx.responseHeaders, responseCookies)
   }
 
   private removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
-    const responseCookies = ctx.getResponseCookies()
+    const responseCookies = getResponseCookies(ctx.responseHeaders)
 
     responseCookies[campaign.sessionCookieName] = {
       value: '',
@@ -368,7 +373,7 @@ export class AuthorizeController extends BaseController {
       maxAge: 0
     }
 
-    ctx.setResponseCookies(responseCookies)
+    setResponseCookies(ctx.responseHeaders, responseCookies)
   }
 
   private testSessionCookie(value: unknown): value is string {
@@ -380,9 +385,7 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel
   ): LandingUpgradeData {
     try {
-      const urlQuery = ctx.getUrlQuery()
-
-      const value = urlQuery[campaign.landingUpgradeParam]
+      const value = ctx.url.searchParams.get(campaign.landingUpgradeParam)
 
       if (!(value != null && typeof value === 'string')) {
         throw new Error(`Value is not a string`)
@@ -406,9 +409,7 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel
   ): LandingRedirectorData {
     try {
-      const urlQuery = ctx.getUrlQuery()
-
-      const value = urlQuery[campaign.landingRedirectorParam]
+      const value = ctx.url.searchParams.get(campaign.landingRedirectorParam)
 
       if (!(value != null && typeof value === 'string')) {
         throw new Error(`Value is not a string`)
@@ -434,7 +435,7 @@ export class AuthorizeController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.isUrlPathEquals('/')) {
+    if (ctx.url.pathname === '/') {
       await this.renderMainPage(ctx, target)
     } else {
       await this.renderNotFoundPage(ctx, target)
@@ -448,25 +449,23 @@ export class AuthorizeController extends BaseController {
     redirector: FullRedirectorModel,
     landingRedirectorData: LandingRedirectorData
   ): Promise<void> {
-    if (ctx.isMethods(['GET', 'HEAD'])) {
+    if (['GET', 'HEAD'].includes(ctx.method)) {
       const page = this.templater.render(redirector.page, landingRedirectorData)
 
       const body = Buffer.from(page)
 
-      ctx.setResponseHeaders({
+      setHeaders(ctx.responseHeaders, {
         'Content-Type': 'text/html',
         'Content-Length': body.length.toString(),
         'Last-Modified': redirector.updatedAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 
-      if (ctx.isMethod('GET')) {
-        ctx.setResponseBody(body)
+      if (ctx.method === 'GET') {
+        await ctx.sendResponseBody(200, body)
+      } else {
+        await ctx.sendResponseBody(200)
       }
-
-      ctx.setStatus(200)
-
-      await ctx.sendResponse()
     } else {
       await this.renderNotFoundPage(ctx, target)
     }

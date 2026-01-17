@@ -66,7 +66,7 @@ export class TargetController extends BaseController {
   private createTarget: ReplServerApiCall = async (data) => {
     this.validateData<CreateTargetData>('console-create-target-data', data)
 
-    await this.targetService.createTarget(data)
+    await this.targetService.create(data)
 
     return true
   }
@@ -74,13 +74,13 @@ export class TargetController extends BaseController {
   private readTarget: ReplServerApiCall = async (data) => {
     this.validateData<ReadTargetData>('console-read-target-data', data)
 
-    return await this.targetService.readTarget(data)
+    return await this.targetService.read(data)
   }
 
   private updateTarget: ReplServerApiCall = async (data) => {
     this.validateData<UpdateTargetData>('console-update-target-data', data)
 
-    await this.targetService.updateTarget(data)
+    await this.targetService.update(data)
 
     return true
   }
@@ -88,7 +88,7 @@ export class TargetController extends BaseController {
   private enableTarget: ReplServerApiCall = async (data) => {
     this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
-    await this.targetService.enableTarget(data)
+    await this.targetService.enable(data)
 
     return true
   }
@@ -96,7 +96,7 @@ export class TargetController extends BaseController {
   private disableTarget: ReplServerApiCall = async (data) => {
     this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
-    await this.targetService.disableTarget(data)
+    await this.targetService.disable(data)
 
     return true
   }
@@ -104,7 +104,7 @@ export class TargetController extends BaseController {
   private appendTargetLabel: ReplServerApiCall = async (data) => {
     this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
-    await this.targetService.appendTargetLabel(data)
+    await this.targetService.appendLabel(data)
 
     return true
   }
@@ -112,7 +112,7 @@ export class TargetController extends BaseController {
   private removeTargetLabel: ReplServerApiCall = async (data) => {
     this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
-    await this.targetService.removeTargetLabel(data)
+    await this.targetService.removeLabel(data)
 
     return true
   }
@@ -120,7 +120,7 @@ export class TargetController extends BaseController {
   private deleteTarget: ReplServerApiCall = async (data) => {
     this.validateData<DeleteTargetData>('console-delete-target-data', data)
 
-    await this.targetService.deleteTarget(data)
+    await this.targetService.delete(data)
 
     return true
   }
@@ -128,6 +128,6 @@ export class TargetController extends BaseController {
   private listTargets: ReplServerApiCall = async (data) => {
     this.validateData<ListTargetsData>('console-list-targets-data', data)
 
-    return await this.targetService.listTargets(data)
+    return await this.targetService.list(data)
   }
 }

@@ -62,7 +62,7 @@ export class ProxyController extends BaseController {
   private createProxy: ReplServerApiCall = async (data) => {
     this.validateData<CreateProxyData>('console-create-proxy-data', data)
 
-    await this.proxyService.createProxy(data)
+    await this.proxyService.create(data)
 
     return true
   }
@@ -70,13 +70,13 @@ export class ProxyController extends BaseController {
   private readProxy: ReplServerApiCall = async (data) => {
     this.validateData<ReadProxyData>('console-read-proxy-data', data)
 
-    return await this.proxyService.readProxy(data)
+    return await this.proxyService.read(data)
   }
 
   private enableProxy: ReplServerApiCall = async (data) => {
     this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
 
-    await this.proxyService.enableProxy(data)
+    await this.proxyService.enable(data)
 
     return true
   }
@@ -84,7 +84,7 @@ export class ProxyController extends BaseController {
   private disableProxy: ReplServerApiCall = async (data) => {
     this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
 
-    await this.proxyService.disableProxy(data)
+    await this.proxyService.disable(data)
 
     return true
   }
@@ -92,7 +92,7 @@ export class ProxyController extends BaseController {
   private deleteProxy: ReplServerApiCall = async (data) => {
     this.validateData<DeleteProxyData>('console-delete-proxy-data', data)
 
-    await this.proxyService.deleteProxy(data)
+    await this.proxyService.delete(data)
 
     return true
   }
@@ -100,6 +100,6 @@ export class ProxyController extends BaseController {
   private listProxies: ReplServerApiCall = async (data) => {
     this.validateData<ListProxiesData>('console-list-proxies-data', data)
 
-    return await this.proxyService.listProxies(data)
+    return await this.proxyService.list(data)
   }
 }

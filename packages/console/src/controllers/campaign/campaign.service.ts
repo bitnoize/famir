@@ -30,7 +30,7 @@ export class CampaignService extends BaseService {
     super()
   }
 
-  async createCampaign(data: CreateCampaignData): Promise<number> {
+  async create(data: CreateCampaignData): Promise<number> {
     try {
       return await this.campaignRepository.create(
         data.campaignId,
@@ -51,7 +51,7 @@ export class CampaignService extends BaseService {
     }
   }
 
-  async readCampaign(data: ReadCampaignData): Promise<FullCampaignModel> {
+  async read(data: ReadCampaignData): Promise<FullCampaignModel> {
     const model = await this.campaignRepository.read(data.campaignId)
 
     if (!model) {
@@ -63,7 +63,7 @@ export class CampaignService extends BaseService {
     return model
   }
 
-  async lockCampaign(data: LockCampaignData): Promise<number> {
+  async lock(data: LockCampaignData): Promise<number> {
     try {
       return await this.campaignRepository.lock(data.campaignId, data.isForce ?? false)
     } catch (error) {
@@ -73,7 +73,7 @@ export class CampaignService extends BaseService {
     }
   }
 
-  async unlockCampaign(data: UnlockCampaignData): Promise<void> {
+  async unlock(data: UnlockCampaignData): Promise<void> {
     try {
       await this.campaignRepository.unlock(data.campaignId, data.lockCode)
     } catch (error) {
@@ -83,7 +83,7 @@ export class CampaignService extends BaseService {
     }
   }
 
-  async updateCampaign(data: UpdateCampaignData): Promise<void> {
+  async update(data: UpdateCampaignData): Promise<void> {
     try {
       await this.campaignRepository.update(
         data.campaignId,
@@ -100,7 +100,7 @@ export class CampaignService extends BaseService {
     }
   }
 
-  async deleteCampaign(data: DeleteCampaignData): Promise<void> {
+  async delete(data: DeleteCampaignData): Promise<void> {
     try {
       await this.campaignRepository.delete(data.campaignId, data.lockCode)
     } catch (error) {
@@ -110,7 +110,7 @@ export class CampaignService extends BaseService {
     }
   }
 
-  async listCampaigns(): Promise<CampaignModel[]> {
+  async list(): Promise<CampaignModel[]> {
     return await this.campaignRepository.list()
   }
 }

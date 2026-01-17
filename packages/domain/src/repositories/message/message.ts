@@ -1,5 +1,5 @@
 import { HttpBody, HttpConnection, HttpHeaders } from '../../http-proto.js'
-import { FullMessageModel, MessageModel } from '../../models/index.js'
+import { FullMessageModel } from '../../models/index.js'
 
 export const MESSAGE_REPOSITORY = Symbol('MessageRepository')
 
@@ -22,6 +22,6 @@ export interface MessageRepository {
     startTime: number,
     finishTime: number,
     connection: HttpConnection
-  ): Promise<MessageModel>
+  ): Promise<string>
   read(campaignId: string, messageId: string): Promise<FullMessageModel | null>
 }

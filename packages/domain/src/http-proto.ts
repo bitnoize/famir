@@ -1,11 +1,5 @@
 export type HttpState = Record<string, unknown>
 
-export interface HttpRelativeUrl {
-  path: string
-  search: string
-  hash: string
-}
-
 export type HttpHeader = string | string[]
 
 export type HttpHeaders = Record<string, HttpHeader | undefined>
@@ -27,18 +21,12 @@ export interface HttpResponseCookie {
 
 export type HttpResponseCookies = Record<string, HttpResponseCookie | undefined>
 
-export interface HttpMediaType {
+export interface HttpContentType {
   type: string
   parameters: Record<string, string>
 }
 
 export type HttpBody = Buffer
-
-export interface HttpPlainText {
-  data: string
-}
-
-export type HttpQueryString = Record<string, unknown>
 
 export interface HttpConnection {
   total_time?: number | null | undefined
@@ -46,3 +34,5 @@ export interface HttpConnection {
   http_version?: number | null | undefined
   // ...
 }
+
+export type HttpQueryString = Record<string, unknown>

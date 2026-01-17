@@ -2,7 +2,7 @@
   "name": "@famir/reverse-proxy",
   "type": "module",
   "version": "0.3.3",
-  "description": "ReverseProxy module",
+  "description": "Reverse proxy module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -15,6 +15,7 @@
     "@famir/config": "*",
     "@famir/database": "*",
     "@famir/domain": "*",
+    "@famir/http-tools": "*",
     "@famir/http-client": "*",
     "@famir/http-server": "*",
     "@famir/logger": "*",

@@ -1,9 +1,9 @@
-export type ReplServerApiCall = (data: unknown) => Promise<unknown>
+import { ReplServerApiCall, ReplServerApiCalls } from './repl-server.js'
 
 export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
 
 export interface ReplServerRouter {
   register(name: string, apiCall: ReplServerApiCall): void
-  resolve(): object
+  resolve(): ReplServerApiCalls
   reset(): void
 }

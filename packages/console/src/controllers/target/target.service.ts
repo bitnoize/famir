@@ -31,7 +31,7 @@ export class TargetService extends BaseService {
     super()
   }
 
-  async createTarget(data: CreateTargetData): Promise<void> {
+  async create(data: CreateTargetData): Promise<void> {
     try {
       await this.targetRepository.create(
         data.campaignId,
@@ -63,7 +63,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async readTarget(data: ReadTargetData): Promise<FullTargetModel> {
+  async read(data: ReadTargetData): Promise<FullTargetModel> {
     const model = await this.targetRepository.read(data.campaignId, data.targetId)
 
     if (!model) {
@@ -75,7 +75,7 @@ export class TargetService extends BaseService {
     return model
   }
 
-  async updateTarget(data: UpdateTargetData): Promise<void> {
+  async update(data: UpdateTargetData): Promise<void> {
     try {
       await this.targetRepository.update(
         data.campaignId,
@@ -99,7 +99,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async enableTarget(data: SwitchTargetData): Promise<void> {
+  async enable(data: SwitchTargetData): Promise<void> {
     try {
       await this.targetRepository.enable(data.campaignId, data.targetId, data.lockCode)
     } catch (error) {
@@ -109,7 +109,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async disableTarget(data: SwitchTargetData): Promise<void> {
+  async disable(data: SwitchTargetData): Promise<void> {
     try {
       await this.targetRepository.disable(data.campaignId, data.targetId, data.lockCode)
     } catch (error) {
@@ -119,7 +119,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async appendTargetLabel(data: ActionTargetLabelData): Promise<void> {
+  async appendLabel(data: ActionTargetLabelData): Promise<void> {
     try {
       await this.targetRepository.appendLabel(
         data.campaignId,
@@ -134,7 +134,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async removeTargetLabel(data: ActionTargetLabelData): Promise<void> {
+  async removeLabel(data: ActionTargetLabelData): Promise<void> {
     try {
       await this.targetRepository.removeLabel(
         data.campaignId,
@@ -149,7 +149,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async deleteTarget(data: DeleteTargetData): Promise<void> {
+  async delete(data: DeleteTargetData): Promise<void> {
     try {
       await this.targetRepository.delete(data.campaignId, data.targetId, data.lockCode)
     } catch (error) {
@@ -159,7 +159,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async listTargets(data: ListTargetsData): Promise<TargetModel[]> {
+  async list(data: ListTargetsData): Promise<TargetModel[]> {
     const collection = await this.targetRepository.list(data.campaignId)
 
     if (!collection) {

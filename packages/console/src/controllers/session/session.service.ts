@@ -17,7 +17,7 @@ export class SessionService extends BaseService {
     super()
   }
 
-  async readSession(data: ReadSessionData): Promise<SessionModel> {
+  async read(data: ReadSessionData): Promise<SessionModel> {
     const model = await this.sessionRepository.read(data.campaignId, data.sessionId)
 
     if (!model) {

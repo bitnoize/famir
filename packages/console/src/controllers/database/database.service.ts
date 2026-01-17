@@ -16,11 +16,11 @@ export class DatabaseService extends BaseService {
     super()
   }
 
-  async loadDatabaseFunctions(): Promise<void> {
+  async loadFunctions(): Promise<void> {
     await this.databaseManager.loadFunctions()
   }
 
-  async cleanupDatabase(): Promise<void> {
+  async cleanup(): Promise<void> {
     await this.databaseManager.cleanup()
   }
 }

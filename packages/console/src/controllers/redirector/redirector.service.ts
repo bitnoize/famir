@@ -28,7 +28,7 @@ export class RedirectorService extends BaseService {
     super()
   }
 
-  async createRedirector(data: CreateRedirectorData): Promise<void> {
+  async create(data: CreateRedirectorData): Promise<void> {
     try {
       await this.redirectorRepository.create(
         data.campaignId,
@@ -43,7 +43,7 @@ export class RedirectorService extends BaseService {
     }
   }
 
-  async readRedirector(data: ReadRedirectorData): Promise<RedirectorModel> {
+  async read(data: ReadRedirectorData): Promise<RedirectorModel> {
     const model = await this.redirectorRepository.read(data.campaignId, data.redirectorId)
 
     if (!model) {
@@ -55,7 +55,7 @@ export class RedirectorService extends BaseService {
     return model
   }
 
-  async updateRedirector(data: UpdateRedirectorData): Promise<void> {
+  async update(data: UpdateRedirectorData): Promise<void> {
     try {
       await this.redirectorRepository.update(
         data.campaignId,
@@ -70,7 +70,7 @@ export class RedirectorService extends BaseService {
     }
   }
 
-  async deleteRedirector(data: DeleteRedirectorData): Promise<void> {
+  async delete(data: DeleteRedirectorData): Promise<void> {
     try {
       await this.redirectorRepository.delete(data.campaignId, data.redirectorId, data.lockCode)
     } catch (error) {
@@ -80,7 +80,7 @@ export class RedirectorService extends BaseService {
     }
   }
 
-  async listRedirectors(data: ListRedirectorsData): Promise<RedirectorModel[]> {
+  async list(data: ListRedirectorsData): Promise<RedirectorModel[]> {
     const collection = await this.redirectorRepository.list(data.campaignId)
 
     if (!collection) {

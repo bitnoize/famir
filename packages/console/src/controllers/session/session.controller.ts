@@ -51,6 +51,6 @@ export class SessionController extends BaseController {
   private readSession: ReplServerApiCall = async (data) => {
     this.validateData<ReadSessionData>('console-read-session-data', data)
 
-    return await this.sessionService.readSession(data)
+    return await this.sessionService.read(data)
   }
 }

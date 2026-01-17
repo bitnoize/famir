@@ -51,6 +51,6 @@ export class MessageController extends BaseController {
   private readMessage: ReplServerApiCall = async (data) => {
     this.validateData<ReadMessageData>('console-read-message-data', data)
 
-    return await this.messageService.readMessage(data)
+    return await this.messageService.read(data)
   }
 }

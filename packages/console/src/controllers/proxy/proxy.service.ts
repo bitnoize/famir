@@ -23,7 +23,7 @@ export class ProxyService extends BaseService {
     super()
   }
 
-  async createProxy(data: CreateProxyData): Promise<void> {
+  async create(data: CreateProxyData): Promise<void> {
     try {
       await this.proxyRepository.create(data.campaignId, data.proxyId, data.url, data.lockCode)
     } catch (error) {
@@ -33,7 +33,7 @@ export class ProxyService extends BaseService {
     }
   }
 
-  async readProxy(data: ReadProxyData): Promise<ProxyModel> {
+  async read(data: ReadProxyData): Promise<ProxyModel> {
     const model = await this.proxyRepository.read(data.campaignId, data.proxyId)
 
     if (!model) {
@@ -45,7 +45,7 @@ export class ProxyService extends BaseService {
     return model
   }
 
-  async enableProxy(data: SwitchProxyData): Promise<void> {
+  async enable(data: SwitchProxyData): Promise<void> {
     try {
       await this.proxyRepository.enable(data.campaignId, data.proxyId, data.lockCode)
     } catch (error) {
@@ -55,7 +55,7 @@ export class ProxyService extends BaseService {
     }
   }
 
-  async disableProxy(data: SwitchProxyData): Promise<void> {
+  async disable(data: SwitchProxyData): Promise<void> {
     try {
       await this.proxyRepository.disable(data.campaignId, data.proxyId, data.lockCode)
     } catch (error) {
@@ -65,7 +65,7 @@ export class ProxyService extends BaseService {
     }
   }
 
-  async deleteProxy(data: DeleteProxyData): Promise<void> {
+  async delete(data: DeleteProxyData): Promise<void> {
     try {
       await this.proxyRepository.delete(data.campaignId, data.proxyId, data.lockCode)
     } catch (error) {
@@ -75,7 +75,7 @@ export class ProxyService extends BaseService {
     }
   }
 
-  async listProxies(data: ListProxiesData): Promise<ProxyModel[]> {
+  async list(data: ListProxiesData): Promise<ProxyModel[]> {
     const collection = await this.proxyRepository.list(data.campaignId)
 
     if (!collection) {

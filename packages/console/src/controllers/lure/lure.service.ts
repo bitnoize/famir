@@ -23,7 +23,7 @@ export class LureService extends BaseService {
     super()
   }
 
-  async createLure(data: CreateLureData): Promise<void> {
+  async create(data: CreateLureData): Promise<void> {
     try {
       await this.lureRepository.create(
         data.campaignId,
@@ -39,7 +39,7 @@ export class LureService extends BaseService {
     }
   }
 
-  async readLure(data: ReadLureData): Promise<LureModel> {
+  async read(data: ReadLureData): Promise<LureModel> {
     const model = await this.lureRepository.read(data.campaignId, data.lureId)
 
     if (!model) {
@@ -51,7 +51,7 @@ export class LureService extends BaseService {
     return model
   }
 
-  async enableLure(data: SwitchLureData): Promise<void> {
+  async enable(data: SwitchLureData): Promise<void> {
     try {
       await this.lureRepository.enable(data.campaignId, data.lureId, data.lockCode)
     } catch (error) {
@@ -61,7 +61,7 @@ export class LureService extends BaseService {
     }
   }
 
-  async disableLure(data: SwitchLureData): Promise<void> {
+  async disable(data: SwitchLureData): Promise<void> {
     try {
       await this.lureRepository.disable(data.campaignId, data.lureId, data.lockCode)
     } catch (error) {
@@ -71,7 +71,7 @@ export class LureService extends BaseService {
     }
   }
 
-  async deleteLure(data: DeleteLureData): Promise<void> {
+  async delete(data: DeleteLureData): Promise<void> {
     try {
       await this.lureRepository.delete(
         data.campaignId,
@@ -87,7 +87,7 @@ export class LureService extends BaseService {
     }
   }
 
-  async listLures(data: ListLuresData): Promise<LureModel[]> {
+  async list(data: ListLuresData): Promise<LureModel[]> {
     const collection = await this.lureRepository.list(data.campaignId)
 
     if (!collection) {

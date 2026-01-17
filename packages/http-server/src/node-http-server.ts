@@ -5,6 +5,7 @@ import {
   HTTP_SERVER,
   HTTP_SERVER_ROUTER,
   HttpServer,
+  HttpServerContext,
   HttpServerError,
   HttpServerRouter,
   Logger,
@@ -108,9 +109,9 @@ export class NodeHttpServer implements HttpServer {
     try {
       const ctx = new NodeHttpServerContext(req, res)
 
-      const middlewareChain = this.router.resolve()
+      const middleware = this.chainMiddlewares()
 
-      await middlewareChain(ctx)
+      await middleware(ctx)
 
       if (!ctx.isComplete) {
         throw new HttpServerError(`Incomplete request`, {
@@ -118,11 +119,60 @@ export class NodeHttpServer implements HttpServer {
         })
       }
     } catch (error) {
-      this.handleError(error, req, res)
+      this.handleRequestError(error, req, res)
     }
   }
 
-  protected handleError(error: unknown, req: http.IncomingMessage, res: http.ServerResponse) {
+  // FIXME
+  protected chainMiddlewares(): (ctx: HttpServerContext) => Promise<void> {
+    return async (ctx: HttpServerContext): Promise<void> => {
+      try {
+        let index = -1
+
+        const middlewares = this.router.resolve()
+
+        const dispatch = async (idx: number): Promise<void> => {
+          if (idx <= index) {
+            throw new Error('Middleware next() called multiple times')
+          }
+
+          index = idx
+
+          if (middlewares[idx]) {
+            const [name, middleware] = middlewares[idx]
+
+            ctx.middlewares.push(name)
+
+            await middleware(ctx, async () => {
+              await dispatch(idx + 1)
+            })
+          }
+        }
+
+        await dispatch(0)
+      } catch (error) {
+        if (error instanceof HttpServerError) {
+          error.context['middlewares'] = ctx.middlewares
+
+          throw error
+        } else {
+          throw new HttpServerError(`Server unknown error`, {
+            cause: error,
+            context: {
+              middlewares: ctx.middlewares
+            },
+            code: 'INTERNAL_ERROR'
+          })
+        }
+      }
+    }
+  }
+
+  protected handleRequestError(
+    error: unknown,
+    req: http.IncomingMessage,
+    res: http.ServerResponse
+  ) {
     let status = 500,
       message = `Internal server error`
 
@@ -147,7 +197,7 @@ export class NodeHttpServer implements HttpServer {
         res.end()
       }
 
-      this.logger.error(`HttpServer request failed`, {
+      this.logger.error(`HttpServer request error`, {
         error: serializeError(error),
         request: this.dumpRequest(req)
       })
