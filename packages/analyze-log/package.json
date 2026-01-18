@@ -20,8 +20,5 @@
     "@famir/storage": "*",
     "@famir/workflow": "*",
     "@famir/executor": "*"
-  },
-  "devDependencies": {
-    "@types/node": "^25.0.2"
   }
 }

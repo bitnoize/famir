@@ -24,6 +24,7 @@ Packages
 | [storage](packages/storage) | S3 compatable client |
 | [workflow](packages/workflow) | Workflow queues |
 | [executor](packages/executor) | Executor workers |
+| [http-tools](packages/http-tools) | HTTP tools |
 | [http-client](packages/http-client) | HTTP client |
 | [http-server](packages/http-server) | HTTP server |
 | [repl-server](packages/repl-server) | REPL server |
@@ -43,4 +44,5 @@ Similar projects
 
 - [Evilginx](https://github.com/kgretzky/evilginx2)
 - [Modlishka](https://github.com/drk1wi/Modlishka)
+- [node-http-proxy](https://github.com/http-party/node-http-proxy)
 

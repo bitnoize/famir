@@ -11,10 +11,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "serialize-error": "^12.0.0",
+    "serialize-error": "^13.0.0",
     "ajv": "^8.17.1"
-  },
-  "devDependencies": {
-    "@types/node": "^25.0.2"
   }
 }

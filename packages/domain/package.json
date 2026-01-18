@@ -9,6 +9,5 @@
     "format": "prettier -w \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
     "build": "tsc -b"
-  },
-  "dependencies": {}
+  }
 }

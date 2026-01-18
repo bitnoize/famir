@@ -8,36 +8,19 @@
   "scripts": {
     "format": "npm --ws run format",
     "lint": "npm --ws run lint",
-    "build": "npm --ws run build",
-    "publish": "npm --ws publish",
-    "unpublish": "npm --ws unpublish"
+    "build": "npm --ws run build"
   },
   "workspaces": [
-    "packages/domain",
-    "packages/common",
-    "packages/validator",
-    "packages/config",
-    "packages/logger",
-    "packages/templater",
-    "packages/database",
-    "packages/storage",
-    "packages/workflow",
-    "packages/executor",
-    "packages/http-tools",
-    "packages/http-client",
-    "packages/http-server",
-    "packages/repl-server",
-    "packages/console",
-    "packages/reverse-proxy",
-    "packages/analyze-log"
+    "packages/*"
   ],
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.0",
     "prettier-plugin-organize-imports": "^4.3.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.49.0"
+    "typescript-eslint": "^8.49.0",
+    "@types/node": "^25.0.0"
   }
 }

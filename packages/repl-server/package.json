@@ -13,8 +13,5 @@
   "dependencies": {
     "@famir/domain": "*",
     "@famir/common": "*"
-  },
-  "devDependencies": {
-    "@types/node": "^25.0.2"
   }
 }

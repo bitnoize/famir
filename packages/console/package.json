@@ -21,8 +21,5 @@
     "@famir/storage": "*",
     "@famir/workflow": "*",
     "@famir/repl-server": "*"
-  },
-  "devDependencies": {
-    "@types/node": "^25.0.2"
   }
 }

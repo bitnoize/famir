@@ -13,10 +13,7 @@
   "dependencies": {
     "@famir/common": "*",
     "@famir/domain": "*",
-    "bullmq": "^5.66.0",
+    "bullmq": "^5.66.5",
     "ioredis": "^5.9.1"
-  },
-  "devDependencies": {
-    "@types/node": "^25.0.2"
   }
 }
