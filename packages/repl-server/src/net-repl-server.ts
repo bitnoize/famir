@@ -13,7 +13,7 @@ import {
 import net from 'node:net'
 import repl from 'node:repl'
 import util from 'node:util'
-import { NetReplServerConfig, NetReplServerOptions } from './repl-server.js'
+import { NetReplServerConfig, NetReplServerOptions, replServerDict } from './repl-server.js'
 
 export class NetReplServer implements ReplServer {
   static inject(container: DIContainer) {
@@ -60,7 +60,11 @@ export class NetReplServer implements ReplServer {
 
       socket.setTimeout(this.options.socketTimeout)
 
-      this.handleConnection(socket)
+      this.handleConnection(socket).catch((error: unknown) => {
+        this.logger.error(`ReplServer connection unhandled error`, {
+          error: serializeError(error)
+        })
+      })
     })
 
     this.server.maxConnections = this.options.maxClients
@@ -68,98 +72,28 @@ export class NetReplServer implements ReplServer {
     this.logger.debug(`ReplServer initialized`)
   }
 
-  listen(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const errorHandler = (error: Error) => {
-        this.server.off('listening', listeningHandler)
+  async start(): Promise<void> {
+    await this.listen()
 
-        reject(error)
-      }
-
-      const listeningHandler = () => {
-        this.server.off('error', errorHandler)
-
-        this.logger.debug(`ReplServer listening`)
-
-        resolve()
-      }
-
-      this.server.once('error', errorHandler)
-      this.server.once('listening', listeningHandler)
-
-      this.server.listen(this.options.port, this.options.address)
-    })
+    this.logger.debug(`ReplServer started`)
   }
 
-  close(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const errorHandler = (error: Error) => {
-        this.server.off('close', closeHandler)
+  async stop(): Promise<void> {
+    await this.close()
 
-        reject(error)
-      }
-
-      const closeHandler = () => {
-        this.server.off('error', errorHandler)
-
-        this.logger.info(`ReplServer closed`)
-
-        resolve()
-      }
-
-      this.server.once('error', errorHandler)
-      this.server.once('close', closeHandler)
-
-      this.server.close()
-
-      this.clients.forEach((socket) => {
-        if (!socket.destroyed) {
-          socket.end(`ReplServer stop\n`, () => {
-            socket.destroy()
-          })
-        }
-      })
-
-      this.clients.clear()
-    })
+    this.logger.debug(`ReplServer stopped`)
   }
 
-  protected handleConnection(socket: net.Socket) {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  protected async handleConnection(socket: net.Socket): Promise<void> {
     try {
-      const replServer = repl.start({
-        input: socket,
-        output: socket,
-        terminal: true,
-        useGlobal: false,
-        prompt: this.options.prompt,
-        ignoreUndefined: true,
-        preview: false,
-        writer: (output) =>
-          util.inspect(output, {
-            depth: 4,
-            colors: this.options.useColors
-          })
-      })
-
-      replServer.on('reset', () => {
-        this.defineContext(replServer)
-      })
-
-      replServer.on('exit', () => {
-        socket.end(`So long!\n`)
-      })
-
-      this.defineContext(replServer)
-
-      socket.write(`Welcome to Fake-Mirrors REPL!\n`)
-
-      replServer.displayPrompt()
+      this.replServerStart(socket)
     } catch (error) {
-      this.handleError(error, socket)
+      this.handleConnectionError(error, socket)
     }
   }
 
-  protected handleError(error: unknown, socket: net.Socket) {
+  protected handleConnectionError(error: unknown, socket: net.Socket) {
     socket.end()
 
     this.logger.error(`ReplServer connection failed`, {
@@ -167,7 +101,40 @@ export class NetReplServer implements ReplServer {
     })
   }
 
-  protected defineContext(replServer: repl.REPLServer) {
+  protected replServerStart(socket: net.Socket): repl.REPLServer {
+    const replServer = repl.start({
+      input: socket,
+      output: socket,
+      terminal: true,
+      useGlobal: false,
+      prompt: this.options.prompt,
+      ignoreUndefined: true,
+      preview: false,
+      writer: (output) =>
+        util.inspect(output, {
+          depth: 4,
+          colors: this.options.useColors
+        })
+    })
+
+    replServer.on('reset', (context) => {
+      this.defineContext(context)
+    })
+
+    replServer.on('exit', () => {
+      socket.end(replServerDict.leave + '\n')
+    })
+
+    this.defineContext(replServer.context)
+
+    socket.write(replServerDict.greet + '\n')
+
+    replServer.displayPrompt()
+
+    return replServer
+  }
+
+  protected defineContext(context: object) {
     const value: Record<string, unknown> = {}
 
     const apiCalls = this.router.resolve()
@@ -196,10 +163,62 @@ export class NetReplServer implements ReplServer {
       }
     })
 
-    Object.defineProperty(replServer.context, 'famir', {
+    Object.defineProperty(context, 'famir', {
       configurable: false,
       enumerable: true,
       value: value
+    })
+  }
+
+  protected listen(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const errorHandler = (error: Error) => {
+        this.server.off('listening', listeningHandler)
+
+        reject(error)
+      }
+
+      const listeningHandler = () => {
+        this.server.off('error', errorHandler)
+
+        resolve()
+      }
+
+      this.server.once('error', errorHandler)
+      this.server.once('listening', listeningHandler)
+
+      this.server.listen(this.options.port, this.options.address)
+    })
+  }
+
+  protected close(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const errorHandler = (error: Error) => {
+        this.server.off('close', closeHandler)
+
+        reject(error)
+      }
+
+      const closeHandler = () => {
+        this.server.off('error', errorHandler)
+
+        resolve()
+      }
+
+      this.server.once('error', errorHandler)
+      this.server.once('close', closeHandler)
+
+      this.server.close()
+
+      this.clients.forEach((socket) => {
+        if (!socket.destroyed) {
+          socket.end(`ReplServer stop\n`, () => {
+            socket.destroy()
+          })
+        }
+      })
+
+      this.clients.clear()
     })
   }
 

@@ -44,7 +44,7 @@ export class NodeHttpServer implements HttpServer {
 
     this.server = http.createServer((req, res) => {
       this.handleRequest(req, res).catch((error: unknown) => {
-        this.logger.fatal(`HttpServer unhandled error`, {
+        this.logger.error(`HttpServer request unhandled error`, {
           error: serializeError(error),
           request: this.dumpRequest(req)
         })
@@ -54,52 +54,16 @@ export class NodeHttpServer implements HttpServer {
     this.logger.debug(`HttpServer initialized`)
   }
 
-  listen(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const errorHandler = (error: Error) => {
-        this.server.off('listening', listeningHandler)
+  async start(): Promise<void> {
+    await this.listen()
 
-        reject(error)
-      }
-
-      const listeningHandler = () => {
-        this.server.off('error', errorHandler)
-
-        this.logger.debug(`HttpServer listening`)
-
-        resolve()
-      }
-
-      this.server.once('error', errorHandler)
-      this.server.once('listening', listeningHandler)
-
-      this.server.listen(this.options.port, this.options.address)
-    })
+    this.logger.debug(`HttpServer started`)
   }
 
-  close(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const errorHandler = (error: Error) => {
-        this.server.off('close', closeHandler)
+  async stop(): Promise<void> {
+    await this.close()
 
-        reject(error)
-      }
-
-      const closeHandler = () => {
-        this.server.off('error', errorHandler)
-
-        this.logger.debug(`HttpServer closed`)
-
-        resolve()
-      }
-
-      this.server.once('error', errorHandler)
-      this.server.once('close', closeHandler)
-
-      this.server.close()
-
-      this.server.closeAllConnections()
-    })
+    this.logger.debug(`HttpServer stopped`)
   }
 
   protected async handleRequest(
@@ -120,51 +84,6 @@ export class NodeHttpServer implements HttpServer {
       }
     } catch (error) {
       this.handleRequestError(error, req, res)
-    }
-  }
-
-  // FIXME
-  protected chainMiddlewares(): (ctx: HttpServerContext) => Promise<void> {
-    return async (ctx: HttpServerContext): Promise<void> => {
-      try {
-        let index = -1
-
-        const middlewares = this.router.resolve()
-
-        const dispatch = async (idx: number): Promise<void> => {
-          if (idx <= index) {
-            throw new Error('Middleware next() called multiple times')
-          }
-
-          index = idx
-
-          if (middlewares[idx]) {
-            const [name, middleware] = middlewares[idx]
-
-            ctx.middlewares.push(name)
-
-            await middleware(ctx, async () => {
-              await dispatch(idx + 1)
-            })
-          }
-        }
-
-        await dispatch(0)
-      } catch (error) {
-        if (error instanceof HttpServerError) {
-          error.context['middlewares'] = ctx.middlewares
-
-          throw error
-        } else {
-          throw new HttpServerError(`Server unknown error`, {
-            cause: error,
-            context: {
-              middlewares: ctx.middlewares
-            },
-            code: 'INTERNAL_ERROR'
-          })
-        }
-      }
     }
   }
 
@@ -218,6 +137,95 @@ export class NodeHttpServer implements HttpServer {
         request: this.dumpRequest(req)
       })
     }
+  }
+
+  // FIXME
+  protected chainMiddlewares(): (ctx: HttpServerContext) => Promise<void> {
+    return async (ctx: HttpServerContext): Promise<void> => {
+      try {
+        let index = -1
+
+        const middlewares = this.router.resolve()
+
+        const dispatch = async (idx: number): Promise<void> => {
+          if (idx <= index) {
+            throw new Error('Middleware next() called multiple times')
+          }
+
+          index = idx
+
+          if (middlewares[idx]) {
+            const [name, middleware] = middlewares[idx]
+
+            ctx.middlewares.push(name)
+
+            await middleware(ctx, async () => {
+              await dispatch(idx + 1)
+            })
+          }
+        }
+
+        await dispatch(0)
+      } catch (error) {
+        if (error instanceof HttpServerError) {
+          error.context['middlewares'] = ctx.middlewares
+
+          throw error
+        } else {
+          throw new HttpServerError(`Server unknown error`, {
+            cause: error,
+            context: {
+              middlewares: ctx.middlewares
+            },
+            code: 'INTERNAL_ERROR'
+          })
+        }
+      }
+    }
+  }
+
+  protected listen(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const errorHandler = (error: Error) => {
+        this.server.off('listening', listeningHandler)
+
+        reject(error)
+      }
+
+      const listeningHandler = () => {
+        this.server.off('error', errorHandler)
+
+        resolve()
+      }
+
+      this.server.once('error', errorHandler)
+      this.server.once('listening', listeningHandler)
+
+      this.server.listen(this.options.port, this.options.address)
+    })
+  }
+
+  protected close(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const errorHandler = (error: Error) => {
+        this.server.off('close', closeHandler)
+
+        reject(error)
+      }
+
+      const closeHandler = () => {
+        this.server.off('error', errorHandler)
+
+        resolve()
+      }
+
+      this.server.once('error', errorHandler)
+      this.server.once('close', closeHandler)
+
+      this.server.close()
+
+      this.server.closeAllConnections()
+    })
   }
 
   private buildOptions(config: NodeHttpServerConfig): NodeHttpServerOptions {

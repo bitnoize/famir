@@ -25,3 +25,8 @@ export interface NetReplServerOptions {
   prompt: string
   useColors: boolean
 }
+
+export const replServerDict = {
+  greet: `Welcome to Fake-Mirrors REPL!`,
+  leave: `So long!`
+} as const

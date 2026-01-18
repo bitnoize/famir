@@ -12,7 +12,7 @@ import {
 } from '@famir/domain'
 import repl from 'node:repl'
 import util from 'node:util'
-import { CliReplServerConfig, CliReplServerOptions } from './repl-server.js'
+import { CliReplServerConfig, CliReplServerOptions, replServerDict } from './repl-server.js'
 
 export class CliReplServer implements ReplServer {
   static inject(container: DIContainer) {
@@ -41,8 +41,28 @@ export class CliReplServer implements ReplServer {
 
   protected replServer: repl.REPLServer | null = null
 
-  async listen(): Promise<void> {
-    this.replServer = repl.start({
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async start(): Promise<void> {
+    if (!this.replServer) {
+      this.replServer = this.replServerStart()
+
+      this.logger.debug(`ReplServer started`)
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async stop(): Promise<void> {
+    if (this.replServer) {
+      this.replServer.close()
+
+      this.replServer = null
+
+      this.logger.debug(`ReplServer stopped`)
+    }
+  }
+
+  protected replServerStart(): repl.REPLServer {
+    const replServer = repl.start({
       terminal: true,
       useGlobal: false,
       prompt: this.options.prompt,
@@ -52,37 +72,26 @@ export class CliReplServer implements ReplServer {
         util.inspect(output, {
           depth: 4,
           colors: this.options.useColors
-        }),
-      breakEvalOnSigint: true
+        })
     })
 
-    this.replServer.on('reset', (context) => {
+    replServer.on('reset', (context) => {
       this.defineContext(context)
     })
 
-    this.replServer.on('exit', () => {
-      console.log(`So long!`)
+    replServer.on('exit', () => {
+      console.log(replServerDict.leave)
 
       process.kill(process.pid, 'SIGINT')
     })
 
-    this.defineContext(this.replServer.context)
+    this.defineContext(replServer.context)
 
-    this.logger.debug(`ReplServer listening`)
+    console.log(replServerDict.greet)
 
-    console.log(`Welcome to Fake-Mirrors REPL!`)
+    replServer.displayPrompt()
 
-    this.replServer.displayPrompt()
-  }
-
-  async close(): Promise<void> {
-    if (this.replServer) {
-      this.replServer.close()
-
-      this.replServer = null
-    }
-
-    this.logger.info(`ReplServer closed`)
+    return replServer
   }
 
   protected defineContext(context: object) {

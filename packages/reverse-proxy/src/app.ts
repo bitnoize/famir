@@ -57,7 +57,7 @@ export class App {
     try {
       await this.databaseConnector.connect()
 
-      await this.httpServer.listen()
+      await this.httpServer.start()
 
       this.logger.debug(`App started`)
     } catch (error) {
@@ -71,7 +71,7 @@ export class App {
 
   protected async stop(): Promise<void> {
     try {
-      await this.httpServer.close()
+      await this.httpServer.stop()
 
       await this.analyzeLogQueue.close()
 

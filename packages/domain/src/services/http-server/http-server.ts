@@ -3,10 +3,11 @@ import { HttpBody, HttpHeaders, HttpState } from '../../http-proto.js'
 export const HTTP_SERVER = Symbol('HttpServer')
 
 export interface HttpServer {
-  listen(): Promise<void>
-  close(): Promise<void>
+  start(): Promise<void>
+  stop(): Promise<void>
 }
 
+// FIXME remove from domain
 export interface HttpServerContext {
   readonly state: HttpState
   readonly middlewares: string[]
