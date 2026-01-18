@@ -3,6 +3,7 @@ import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
   RedisDatabaseConnector,
+  RedisDatabaseManager,
   RedisLureRepository,
   RedisMessageRepository,
   RedisProxyRepository,
@@ -10,28 +11,25 @@ import {
   RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
-import { CurlHttpClient } from '@famir/http-client'
-import { ImplHttpServerRouter, NodeHttpServer } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
-import { EtaTemplater } from '@famir/templater'
+import { ImplReplServerRouter, NetReplServer } from '@famir/repl-server'
 import { AjvValidator } from '@famir/validator'
-import { BullAnalyzeLogQueue, BullWorkflowConnector } from '@famir/workflow'
-import { ReverseProxyApp } from './reverse-proxy.app.js'
-import { ReverseProxyConfig } from './reverse-proxy.js'
-import { configReverseProxySchema } from './reverse-proxy.schemas.js'
+import { BullAnalyzeLogQueue, RedisWorkflowConnector } from '@famir/workflow'
+import { App } from '../../app.js'
+import { AppNetConfig } from './net.js'
+import { configAppNetSchema } from './net.schemas.js'
 
-export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {
+export async function bootstrapNet(composer: (container: DIContainer) => void): Promise<void> {
   const container = new DIContainer()
 
   AjvValidator.inject(container)
 
-  EnvConfig.inject<ReverseProxyConfig>(container, configReverseProxySchema)
+  EnvConfig.inject<AppNetConfig>(container, configAppNetSchema)
 
   PinoLogger.inject(container)
 
-  EtaTemplater.inject(container)
-
   RedisDatabaseConnector.inject(container)
+  RedisDatabaseManager.inject(container)
 
   RedisCampaignRepository.inject(container)
   RedisProxyRepository.inject(container)
@@ -41,19 +39,17 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   RedisSessionRepository.inject(container)
   RedisMessageRepository.inject(container)
 
-  BullWorkflowConnector.inject(container)
+  RedisWorkflowConnector.inject(container)
 
   BullAnalyzeLogQueue.inject(container)
 
-  CurlHttpClient.inject(container)
+  ImplReplServerRouter.inject(container)
 
-  ImplHttpServerRouter.inject(container)
+  NetReplServer.inject(container)
 
-  NodeHttpServer.inject(container)
-
-  ReverseProxyApp.inject(container)
+  App.inject(container)
 
   composer(container)
 
-  await ReverseProxyApp.resolve(container).start()
+  await App.resolve(container).start()
 }

@@ -4,33 +4,33 @@ import {
   AnalyzeLogQueue,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  HTTP_SERVER,
-  HttpServer,
   Logger,
   LOGGER,
+  REPL_SERVER,
+  ReplServer,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
 
-export const REVERSE_PROXY_APP = Symbol('ReverseProxyApp')
+export const APP = Symbol('App')
 
-export class ReverseProxyApp {
+export class App {
   static inject(container: DIContainer) {
-    container.registerSingleton<ReverseProxyApp>(
-      REVERSE_PROXY_APP,
+    container.registerSingleton(
+      APP,
       (c) =>
-        new ReverseProxyApp(
+        new App(
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
           c.resolve<AnalyzeLogQueue>(ANALYZE_LOG_QUEUE),
-          c.resolve<HttpServer>(HTTP_SERVER)
+          c.resolve<ReplServer>(REPL_SERVER)
         )
     )
   }
 
-  static resolve(container: DIContainer): ReverseProxyApp {
-    return container.resolve<ReverseProxyApp>(REVERSE_PROXY_APP)
+  static resolve(container: DIContainer): App {
+    return container.resolve(APP)
   }
 
   constructor(
@@ -38,7 +38,7 @@ export class ReverseProxyApp {
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
     protected readonly analyzeLogQueue: AnalyzeLogQueue,
-    protected readonly httpServer: HttpServer
+    protected readonly replServer: ReplServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
       process.once(signal, () => {
@@ -49,13 +49,15 @@ export class ReverseProxyApp {
         })
       })
     })
+
+    this.logger.debug(`App initialized`)
   }
 
   async start(): Promise<void> {
     try {
       await this.databaseConnector.connect()
 
-      await this.httpServer.listen()
+      await this.replServer.listen()
 
       this.logger.debug(`App started`)
     } catch (error) {
@@ -69,7 +71,7 @@ export class ReverseProxyApp {
 
   protected async stop(): Promise<void> {
     try {
-      await this.httpServer.close()
+      await this.replServer.close()
 
       await this.analyzeLogQueue.close()
 

@@ -2,21 +2,25 @@ import { JSONSchemaType } from '@famir/common'
 import { ValidatorSchemas } from '@famir/domain'
 import {
   LOGGER_LOG_LEVELS,
-  LOGGER_TRANSPORT_TARGETS,
   LoggerLogLevel,
-  LoggerTransportOptions,
-  LoggerTransportTarget
+  PINO_LOGGER_TRANSPORT_TARGETS,
+  PinoLoggerTransportOptions,
+  PinoLoggerTransportTarget
 } from './logger.js'
 
-const loggerTransportOptionsSchema: JSONSchemaType<LoggerTransportOptions> = {
+const pinoLoggerTransportOptionsSchema: JSONSchemaType<PinoLoggerTransportOptions> = {
   type: 'object',
   required: [],
   properties: {}
 } as const
 
-export const loggerSchemas: ValidatorSchemas = {
-  'logger-transport-options': loggerTransportOptionsSchema
+export const pinoLoggerSchemas: ValidatorSchemas = {
+  'logger-transport-options': pinoLoggerTransportOptionsSchema
 } as const
+
+//
+// Config
+//
 
 export const configLoggerAppNameSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -30,13 +34,13 @@ export const configLoggerLogLevelSchema: JSONSchemaType<LoggerLogLevel> = {
   default: LOGGER_LOG_LEVELS[1]
 } as const
 
-export const configLoggerTransportTargetSchema: JSONSchemaType<LoggerTransportTarget> = {
+export const configPinoLoggerTransportTargetSchema: JSONSchemaType<PinoLoggerTransportTarget> = {
   type: 'string',
-  enum: LOGGER_TRANSPORT_TARGETS,
-  default: LOGGER_TRANSPORT_TARGETS[0]
+  enum: PINO_LOGGER_TRANSPORT_TARGETS,
+  default: PINO_LOGGER_TRANSPORT_TARGETS[0]
 } as const
 
-export const configLoggerTransportOptionsSchema: JSONSchemaType<string> = {
+export const configPinoLoggerTransportOptionsSchema: JSONSchemaType<string> = {
   type: 'string',
   default: '{}'
 } as const

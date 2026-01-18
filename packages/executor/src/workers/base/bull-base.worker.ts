@@ -1,17 +1,17 @@
 import { serializeError } from '@famir/common'
 import { Config, ExecutorRouter, Logger } from '@famir/domain'
 import { Job, MetricsTime, Worker } from 'bullmq'
-import { BullExecutorConnection } from '../../bull-executor-connector.js'
-import { ExecutorConfig, ExecutorWorkerOptions } from '../../executor.js'
+import { BullExecutorConfig, BullExecutorWorkerOptions } from '../../executor.js'
+import { RedisExecutorConnection } from '../../redis-executor-connector.js'
 
 export abstract class BullBaseWorker {
-  protected readonly options: ExecutorWorkerOptions
+  protected readonly options: BullExecutorWorkerOptions
   protected readonly worker: Worker<unknown, unknown>
 
   constructor(
-    config: Config<ExecutorConfig>,
+    config: Config<BullExecutorConfig>,
     protected readonly logger: Logger,
-    protected readonly connection: BullExecutorConnection,
+    protected readonly connection: RedisExecutorConnection,
     protected readonly router: ExecutorRouter,
     protected readonly queueName: string
   ) {
@@ -102,7 +102,7 @@ export abstract class BullBaseWorker {
     }
   }
 
-  private buildOptions(config: ExecutorConfig): ExecutorWorkerOptions {
+  private buildOptions(config: BullExecutorConfig): BullExecutorWorkerOptions {
     return {
       prefix: config.EXECUTOR_PREFIX,
       concurrency: config.EXECUTOR_CONCURRENCY,

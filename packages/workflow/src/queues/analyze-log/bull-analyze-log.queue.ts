@@ -11,8 +11,8 @@ import {
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
-import { BullWorkflowConnection } from '../../bull-workflow-connector.js'
-import { WorkflowConfig } from '../../workflow.js'
+import { RedisWorkflowConnection } from '../../redis-workflow-connector.js'
+import { BullWorkflowConfig } from '../../workflow.js'
 import { BullBaseQueue } from '../base/index.js'
 
 export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueue {
@@ -21,14 +21,18 @@ export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueu
       ANALYZE_LOG_QUEUE,
       (c) =>
         new BullAnalyzeLogQueue(
-          c.resolve<Config<WorkflowConfig>>(CONFIG),
+          c.resolve<Config<BullWorkflowConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR).connection<BullWorkflowConnection>()
+          c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR).connection<RedisWorkflowConnection>()
         )
     )
   }
 
-  constructor(config: Config<WorkflowConfig>, logger: Logger, connection: BullWorkflowConnection) {
+  constructor(
+    config: Config<BullWorkflowConfig>,
+    logger: Logger,
+    connection: RedisWorkflowConnection
+  ) {
     super(config, logger, connection, ANALYZE_LOG_QUEUE_NAME)
 
     this.logger.debug(`AnalyzeLogQueue initialized`)

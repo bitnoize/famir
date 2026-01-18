@@ -1,25 +1,25 @@
 import { JSONSchemaType } from '@famir/common'
 
-export const configReplServerAddressSchema: JSONSchemaType<string> = {
+export const configNetReplServerAddressSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 128
 } as const
 
-export const configReplServerPortSchema: JSONSchemaType<number> = {
+export const configNetReplServerPortSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 0,
   maximum: 65535
 } as const
 
-export const configReplServerMaxClientsSchema: JSONSchemaType<number> = {
+export const configNetReplServerMaxClientsSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 1,
   maximum: 100,
   default: 10
 } as const
 
-export const configReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
+export const configNetReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 1000,
   maximum: 3600 * 1000,

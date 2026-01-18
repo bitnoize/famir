@@ -1,26 +1,26 @@
 import { DIContainer } from '@famir/common'
 import { Config, CONFIG, Logger, LOGGER, LoggerData, Validator, VALIDATOR } from '@famir/domain'
 import pino from 'pino'
-import { LoggerConfig, LoggerOptions, LoggerTransportOptions } from './logger.js'
-import { loggerSchemas } from './logger.schemas.js'
+import { PinoLoggerConfig, PinoLoggerOptions, PinoLoggerTransportOptions } from './logger.js'
+import { pinoLoggerSchemas } from './logger.schemas.js'
 
 export class PinoLogger implements Logger {
   static inject(container: DIContainer) {
     container.registerSingleton<Logger>(
       LOGGER,
       (c) =>
-        new PinoLogger(c.resolve<Validator>(VALIDATOR), c.resolve<Config<LoggerConfig>>(CONFIG))
+        new PinoLogger(c.resolve<Validator>(VALIDATOR), c.resolve<Config<PinoLoggerConfig>>(CONFIG))
     )
   }
 
-  protected readonly options: LoggerOptions
+  protected readonly options: PinoLoggerOptions
   protected readonly pino: pino.Logger
 
   constructor(
     private readonly validator: Validator,
-    config: Config<LoggerConfig>
+    config: Config<PinoLoggerConfig>
   ) {
-    this.validator.addSchemas(loggerSchemas)
+    this.validator.addSchemas(pinoLoggerSchemas)
 
     this.options = this.buildOptions(config.data)
 
@@ -57,11 +57,11 @@ export class PinoLogger implements Logger {
     this.pino.fatal(data, mesg)
   }
 
-  private buildOptions(config: LoggerConfig): LoggerOptions {
+  private buildOptions(config: PinoLoggerConfig): PinoLoggerOptions {
     try {
       const transportOptions: unknown = JSON.parse(config.LOGGER_TRANSPORT_OPTIONS)
 
-      this.validator.assertSchema<LoggerTransportOptions>(
+      this.validator.assertSchema<PinoLoggerTransportOptions>(
         'logger-transport-options',
         transportOptions
       )

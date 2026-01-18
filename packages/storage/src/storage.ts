@@ -1,4 +1,4 @@
-export interface StorageConfig {
+export interface MinioStorageConfig {
   STORAGE_END_POINT: string
   STORAGE_PORT: number
   STORAGE_USE_SSL: boolean
@@ -6,7 +6,7 @@ export interface StorageConfig {
   STORAGE_SECRET_KEY: string
 }
 
-export interface StorageOptions {
+export interface MinioStorageOptions {
   endPoint: string
   port: number
   useSSL: boolean

@@ -3,7 +3,6 @@ import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
   RedisDatabaseConnector,
-  RedisDatabaseManager,
   RedisLureRepository,
   RedisMessageRepository,
   RedisProxyRepository,
@@ -11,25 +10,28 @@ import {
   RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
+import { CurlHttpClient } from '@famir/http-client'
+import { ImplHttpServerRouter, NodeHttpServer } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
-import { ImplReplServerRouter, NodeReplServer } from '@famir/repl-server'
+import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'
-import { BullAnalyzeLogQueue, BullWorkflowConnector } from '@famir/workflow'
-import { ConsoleApp } from './console.app.js'
-import { ConsoleConfig } from './console.js'
-import { configConsoleSchema } from './console.schemas.js'
+import { BullAnalyzeLogQueue, RedisWorkflowConnector } from '@famir/workflow'
+import { App } from '../../app.js'
+import { AppDefaultConfig } from './default.js'
+import { configAppDefaultSchema } from './default.schemas.js'
 
-export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {
+export async function bootstrapDefault(composer: (container: DIContainer) => void): Promise<void> {
   const container = new DIContainer()
 
   AjvValidator.inject(container)
 
-  EnvConfig.inject<ConsoleConfig>(container, configConsoleSchema)
+  EnvConfig.inject<AppDefaultConfig>(container, configAppDefaultSchema)
 
   PinoLogger.inject(container)
 
+  EtaTemplater.inject(container)
+
   RedisDatabaseConnector.inject(container)
-  RedisDatabaseManager.inject(container)
 
   RedisCampaignRepository.inject(container)
   RedisProxyRepository.inject(container)
@@ -39,17 +41,19 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
   RedisSessionRepository.inject(container)
   RedisMessageRepository.inject(container)
 
-  BullWorkflowConnector.inject(container)
+  RedisWorkflowConnector.inject(container)
 
   BullAnalyzeLogQueue.inject(container)
 
-  ImplReplServerRouter.inject(container)
+  CurlHttpClient.inject(container)
 
-  NodeReplServer.inject(container)
+  ImplHttpServerRouter.inject(container)
 
-  ConsoleApp.inject(container)
+  NodeHttpServer.inject(container)
+
+  App.inject(container)
 
   composer(container)
 
-  await ConsoleApp.resolve(container).start()
+  await App.resolve(container).start()
 }

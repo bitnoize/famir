@@ -13,21 +13,24 @@ import {
   LOGGER
 } from '@famir/domain'
 import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
-import { HttpClientConfig, HttpClientOptions } from './http-client.js'
+import { CurlHttpClientConfig, CurlHttpClientOptions } from './http-client.js'
 
 export class CurlHttpClient implements HttpClient {
   static inject(container: DIContainer) {
     container.registerSingleton<HttpClient>(
       HTTP_CLIENT,
       (c) =>
-        new CurlHttpClient(c.resolve<Config<HttpClientConfig>>(CONFIG), c.resolve<Logger>(LOGGER))
+        new CurlHttpClient(
+          c.resolve<Config<CurlHttpClientConfig>>(CONFIG),
+          c.resolve<Logger>(LOGGER)
+        )
     )
   }
 
-  protected readonly options: HttpClientOptions
+  protected readonly options: CurlHttpClientOptions
 
   constructor(
-    config: Config<HttpClientConfig>,
+    config: Config<CurlHttpClientConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)
@@ -321,7 +324,7 @@ export class CurlHttpClient implements HttpClient {
     return curlHeaders
   }
 
-  private buildOptions(config: HttpClientConfig): HttpClientOptions {
+  private buildOptions(config: CurlHttpClientConfig): CurlHttpClientOptions {
     return {
       verbose: config.HTTP_CLIENT_VERBOSE,
       errorPage: config.HTTP_CLIENT_ERROR_PAGE

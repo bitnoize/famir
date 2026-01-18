@@ -9,7 +9,7 @@ import {
 } from '@famir/domain'
 import { createClient, RedisClientType } from 'redis'
 import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
-import { DatabaseConfig, DatabaseConnectorOptions } from './database.js'
+import { RedisDatabaseConfig, RedisDatabaseConnectorOptions } from './database.js'
 
 export type RedisDatabaseConnection = RedisClientType<
   Record<string, never>, // Modules
@@ -24,17 +24,17 @@ export class RedisDatabaseConnector implements DatabaseConnector {
       DATABASE_CONNECTOR,
       (c) =>
         new RedisDatabaseConnector(
-          c.resolve<Config<DatabaseConfig>>(CONFIG),
+          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER)
         )
     )
   }
 
-  protected readonly options: DatabaseConnectorOptions
+  protected readonly options: RedisDatabaseConnectorOptions
   protected readonly redis: RedisDatabaseConnection
 
   constructor(
-    config: Config<DatabaseConfig>,
+    config: Config<RedisDatabaseConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)
@@ -72,7 +72,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     this.logger.debug(`Database closed`)
   }
 
-  private buildOptions(config: DatabaseConfig): DatabaseConnectorOptions {
+  private buildOptions(config: RedisDatabaseConfig): RedisDatabaseConnectorOptions {
     return {
       connectionUrl: config.DATABASE_CONNECTION_URL
     }

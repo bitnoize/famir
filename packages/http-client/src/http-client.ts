@@ -1,9 +1,9 @@
-export interface HttpClientConfig {
+export interface CurlHttpClientConfig {
   HTTP_CLIENT_VERBOSE: boolean
   HTTP_CLIENT_ERROR_PAGE: string
 }
 
-export interface HttpClientOptions {
+export interface CurlHttpClientOptions {
   verbose: boolean
   errorPage: string
 }

@@ -12,8 +12,8 @@ import {
   Logger,
   LOGGER
 } from '@famir/domain'
-import { BullExecutorConnection } from '../../bull-executor-connector.js'
-import { ExecutorConfig } from '../../executor.js'
+import { BullExecutorConfig } from '../../executor.js'
+import { RedisExecutorConnection } from '../../redis-executor-connector.js'
 import { BullBaseWorker } from '../base/index.js'
 
 export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWorker {
@@ -22,18 +22,18 @@ export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWo
       ANALYZE_LOG_WORKER,
       (c) =>
         new BullAnalyzeLogWorker(
-          c.resolve<Config<ExecutorConfig>>(CONFIG),
+          c.resolve<Config<BullExecutorConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR).connection<BullExecutorConnection>(),
+          c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR).connection<RedisExecutorConnection>(),
           c.resolve<ExecutorRouter>(EXECUTOR_ROUTER)
         )
     )
   }
 
   constructor(
-    config: Config<ExecutorConfig>,
+    config: Config<BullExecutorConfig>,
     logger: Logger,
-    connection: BullExecutorConnection,
+    connection: RedisExecutorConnection,
     router: ExecutorRouter
   ) {
     super(config, logger, connection, router, ANALYZE_LOG_QUEUE_NAME)

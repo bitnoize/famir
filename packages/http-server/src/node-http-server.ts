@@ -14,7 +14,7 @@ import {
   Templater
 } from '@famir/domain'
 import http from 'node:http'
-import { HttpServerConfig, HttpServerOptions } from './http-server.js'
+import { NodeHttpServerConfig, NodeHttpServerOptions } from './http-server.js'
 import { NodeHttpServerContext } from './node-http-server-context.js'
 
 export class NodeHttpServer implements HttpServer {
@@ -23,7 +23,7 @@ export class NodeHttpServer implements HttpServer {
       HTTP_SERVER,
       (c) =>
         new NodeHttpServer(
-          c.resolve<Config<HttpServerConfig>>(CONFIG),
+          c.resolve<Config<NodeHttpServerConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
@@ -31,11 +31,11 @@ export class NodeHttpServer implements HttpServer {
     )
   }
 
-  protected readonly options: HttpServerOptions
+  protected readonly options: NodeHttpServerOptions
   protected readonly server: http.Server
 
   constructor(
-    config: Config<HttpServerConfig>,
+    config: Config<NodeHttpServerConfig>,
     protected readonly logger: Logger,
     protected readonly templater: Templater,
     protected readonly router: HttpServerRouter
@@ -220,7 +220,7 @@ export class NodeHttpServer implements HttpServer {
     }
   }
 
-  private buildOptions(config: HttpServerConfig): HttpServerOptions {
+  private buildOptions(config: NodeHttpServerConfig): NodeHttpServerOptions {
     return {
       address: config.HTTP_SERVER_ADDRESS,
       port: config.HTTP_SERVER_PORT,

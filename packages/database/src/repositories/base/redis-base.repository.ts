@@ -1,14 +1,14 @@
 import { arrayIncludes } from '@famir/common'
 import { Config, DATABASE_STATUS_CODES, DatabaseError, Logger, Validator } from '@famir/domain'
-import { DatabaseConfig, DatabaseRepositoryOptions } from '../../database.js'
+import { RedisDatabaseConfig, RedisDatabaseRepositoryOptions } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 
 export abstract class RedisBaseRepository {
-  protected readonly options: DatabaseRepositoryOptions
+  protected readonly options: RedisDatabaseRepositoryOptions
 
   constructor(
     protected readonly validator: Validator,
-    config: Config<DatabaseConfig>,
+    config: Config<RedisDatabaseConfig>,
     protected readonly logger: Logger,
     protected readonly connection: RedisDatabaseConnection,
     protected readonly repositoryName: string
@@ -145,7 +145,7 @@ export abstract class RedisBaseRepository {
     }
   }
 
-  private buildOptions(config: DatabaseConfig): DatabaseRepositoryOptions {
+  private buildOptions(config: RedisDatabaseConfig): RedisDatabaseRepositoryOptions {
     return {
       prefix: config.DATABASE_PREFIX
     }

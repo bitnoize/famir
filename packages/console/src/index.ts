@@ -1,5 +1,3 @@
-export * from './console.app.js'
-export * from './console.js'
-export * from './console.loader.js'
-export * from './console.schemas.js'
+export * from './app.js'
 export * from './controllers/index.js'
+export * from './loaders/index.js'

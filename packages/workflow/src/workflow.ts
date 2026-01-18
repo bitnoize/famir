@@ -1,12 +1,12 @@
-export interface WorkflowConfig {
+export interface BullWorkflowConfig {
   WORKFLOW_CONNECTION_URL: string
   WORKFLOW_PREFIX: string
 }
 
-export interface WorkflowConnectorOptions {
+export interface RedisWorkflowConnectorOptions {
   connectionUrl: string
 }
 
-export interface WorkflowQueueOptions {
+export interface BullWorkflowQueueOptions {
   prefix: string
 }

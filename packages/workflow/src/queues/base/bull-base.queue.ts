@@ -1,17 +1,17 @@
 import { serializeError } from '@famir/common'
 import { Config, Logger, WorkflowError } from '@famir/domain'
 import { Queue } from 'bullmq'
-import { BullWorkflowConnection } from '../../bull-workflow-connector.js'
-import { WorkflowConfig, WorkflowQueueOptions } from '../../workflow.js'
+import { RedisWorkflowConnection } from '../../redis-workflow-connector.js'
+import { BullWorkflowConfig, BullWorkflowQueueOptions } from '../../workflow.js'
 
 export abstract class BullBaseQueue {
-  protected readonly options: WorkflowQueueOptions
+  protected readonly options: BullWorkflowQueueOptions
   protected readonly queue: Queue<unknown, unknown>
 
   constructor(
-    config: Config<WorkflowConfig>,
+    config: Config<BullWorkflowConfig>,
     protected readonly logger: Logger,
-    protected readonly connection: BullWorkflowConnection,
+    protected readonly connection: RedisWorkflowConnection,
     protected readonly queueName: string
   ) {
     this.options = this.buildOptions(config.data)
@@ -73,7 +73,7 @@ export abstract class BullBaseQueue {
     }
   }
 
-  private buildOptions(config: WorkflowConfig): WorkflowQueueOptions {
+  private buildOptions(config: BullWorkflowConfig): BullWorkflowQueueOptions {
     return {
       prefix: config.WORKFLOW_PREFIX
     }

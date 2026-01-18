@@ -7,21 +7,21 @@ import {
   RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
-import { BullAnalyzeLogWorker, BullExecutorConnector, ImplExecutorRouter } from '@famir/executor'
+import { BullAnalyzeLogWorker, ImplExecutorRouter, RedisExecutorConnector } from '@famir/executor'
 import { PinoLogger } from '@famir/logger'
 import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
-import { BullWorkflowConnector } from '@famir/workflow'
-import { AnalyzeLogApp } from './analyze-log.app.js'
-import { AnalyzeLogConfig } from './analyze-log.js'
-import { configAnalyzeLogSchema } from './analyze-log.schemas.js'
+import { RedisWorkflowConnector } from '@famir/workflow'
+import { App } from '../../app.js'
+import { AppDefaultConfig } from './default.js'
+import { configAppDefaultSchema } from './default.schemas.js'
 
-export async function bootstrap(composer: (container: DIContainer) => void): Promise<void> {
+export async function bootstrapDefault(composer: (container: DIContainer) => void): Promise<void> {
   const container = new DIContainer()
 
   AjvValidator.inject(container)
 
-  EnvConfig.inject<AnalyzeLogConfig>(container, configAnalyzeLogSchema)
+  EnvConfig.inject<AppDefaultConfig>(container, configAppDefaultSchema)
 
   PinoLogger.inject(container)
 
@@ -34,17 +34,17 @@ export async function bootstrap(composer: (container: DIContainer) => void): Pro
 
   MinioStorage.inject(container)
 
-  BullWorkflowConnector.inject(container)
+  RedisWorkflowConnector.inject(container)
 
-  BullExecutorConnector.inject(container)
+  RedisExecutorConnector.inject(container)
 
   ImplExecutorRouter.inject(container, ['analyze-log'])
 
   BullAnalyzeLogWorker.inject(container)
 
-  AnalyzeLogApp.inject(container)
+  App.inject(container)
 
   composer(container)
 
-  await AnalyzeLogApp.resolve(container).start()
+  await App.resolve(container).start()
 }

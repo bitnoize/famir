@@ -14,7 +14,7 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { DatabaseConfig } from '../../database.js'
+import { RedisDatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
@@ -27,7 +27,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       (c) =>
         new RedisCampaignRepository(
           c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<DatabaseConfig>>(CONFIG),
+          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
         )
@@ -36,7 +36,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   constructor(
     validator: Validator,
-    config: Config<DatabaseConfig>,
+    config: Config<RedisDatabaseConfig>,
     logger: Logger,
     connection: RedisDatabaseConnection
   ) {

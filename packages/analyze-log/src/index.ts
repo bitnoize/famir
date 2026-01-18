@@ -1,5 +1,3 @@
-export * from './analyze-log.app.js'
-export * from './analyze-log.js'
-export * from './analyze-log.loader.js'
-export * from './analyze-log.schemas.js'
+export * from './app.js'
 export * from './controllers/index.js'
+export * from './loaders/index.js'

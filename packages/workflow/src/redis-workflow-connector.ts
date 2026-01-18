@@ -2,41 +2,40 @@ import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
-  EXECUTOR_CONNECTOR,
-  ExecutorConnector,
   Logger,
-  LOGGER
+  LOGGER,
+  WORKFLOW_CONNECTOR,
+  WorkflowConnector
 } from '@famir/domain'
 import { Redis } from 'ioredis'
-import { ExecutorConfig, ExecutorConnectorOptions } from './executor.js'
+import { BullWorkflowConfig, RedisWorkflowConnectorOptions } from './workflow.js'
 
-export type BullExecutorConnection = Redis
+export type RedisWorkflowConnection = Redis
 
-export class BullExecutorConnector implements ExecutorConnector {
+export class RedisWorkflowConnector implements WorkflowConnector {
   static inject(container: DIContainer) {
-    container.registerSingleton<ExecutorConnector>(
-      EXECUTOR_CONNECTOR,
+    container.registerSingleton<WorkflowConnector>(
+      WORKFLOW_CONNECTOR,
       (c) =>
-        new BullExecutorConnector(
-          c.resolve<Config<ExecutorConfig>>(CONFIG),
+        new RedisWorkflowConnector(
+          c.resolve<Config<BullWorkflowConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER)
         )
     )
   }
 
-  protected readonly options: ExecutorConnectorOptions
-  private readonly redis: BullExecutorConnection
+  protected readonly options: RedisWorkflowConnectorOptions
+  protected readonly redis: RedisWorkflowConnection
 
   constructor(
-    config: Config<ExecutorConfig>,
+    config: Config<BullWorkflowConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)
 
     this.redis = new Redis(this.options.connectionUrl, {
       //lazyConnect: true,
-      connectionName: 'executor',
-      maxRetriesPerRequest: null
+      connectionName: 'workflow'
     })
 
     this.redis.on('error', (error) => {
@@ -44,6 +43,8 @@ export class BullExecutorConnector implements ExecutorConnector {
         error: serializeError(error)
       })
     })
+
+    this.logger.debug(`WorkflowConnector initialized`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -54,18 +55,18 @@ export class BullExecutorConnector implements ExecutorConnector {
   //async connect(): Promise<void> {
   //  await this.redis.connect()
   //
-  //  this.logger.debug(`Executor connected`)
+  //  this.logger.debug(`Workflow connected`)
   //}
 
   async close(): Promise<void> {
     await this.redis.quit()
 
-    this.logger.debug(`Executor closed`)
+    this.logger.debug(`Workflow closed`)
   }
 
-  private buildOptions(config: ExecutorConfig): ExecutorConnectorOptions {
+  private buildOptions(config: BullWorkflowConfig): RedisWorkflowConnectorOptions {
     return {
-      connectionUrl: config.EXECUTOR_CONNECTION_URL
+      connectionUrl: config.WORKFLOW_CONNECTION_URL
     }
   }
 }

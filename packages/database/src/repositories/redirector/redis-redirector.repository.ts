@@ -14,7 +14,7 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { DatabaseConfig } from '../../database.js'
+import { RedisDatabaseConfig } from '../../database.js'
 import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
@@ -27,7 +27,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       (c) =>
         new RedisRedirectorRepository(
           c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<DatabaseConfig>>(CONFIG),
+          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
         )
@@ -36,7 +36,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
   constructor(
     validator: Validator,
-    config: Config<DatabaseConfig>,
+    config: Config<RedisDatabaseConfig>,
     logger: Logger,
     connection: RedisDatabaseConnection
   ) {

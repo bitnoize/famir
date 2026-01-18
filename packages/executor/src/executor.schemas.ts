@@ -1,32 +1,32 @@
 import { JSONSchemaType } from '@famir/common'
 
-export const configExecutorConnectionUrlSchema: JSONSchemaType<string> = {
+export const configRedisExecutorConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 128,
   default: 'redis://localhost:6379/1'
 } as const
 
-export const configExecutorPrefixSchema: JSONSchemaType<string> = {
+export const configRedisExecutorPrefixSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 128,
   default: 'bull'
 } as const
 
-export const configExecutorConcurrencySchema: JSONSchemaType<number> = {
+export const configBullExecutorConcurrencySchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,
   maximum: 100
 } as const
 
-export const configExecutorLimiterMaxSchema: JSONSchemaType<number> = {
+export const configBullExecutorLimiterMaxSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,
   maximum: 1000
 } as const
 
-export const configExecutorLimiterDurationSchema: JSONSchemaType<number> = {
+export const configBullExecutorLimiterDurationSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,
   maximum: 3600 * 1000

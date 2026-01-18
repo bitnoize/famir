@@ -1,5 +1,8 @@
 import { JSONSchemaType } from '@famir/common'
-import { configDatabaseConnectionUrlSchema, configDatabasePrefixSchema } from '@famir/database'
+import {
+  configRedisDatabaseConnectionUrlSchema,
+  configRedisDatabasePrefixSchema
+} from '@famir/database'
 import { configHttpClientErrorPageSchema, configHttpClientVerboseSchema } from '@famir/http-client'
 import {
   configHttpServerAddressSchema,
@@ -9,13 +12,16 @@ import {
 import {
   configLoggerAppNameSchema,
   configLoggerLogLevelSchema,
-  configLoggerTransportOptionsSchema,
-  configLoggerTransportTargetSchema
+  configPinoLoggerTransportOptionsSchema,
+  configPinoLoggerTransportTargetSchema
 } from '@famir/logger'
-import { configWorkflowConnectionUrlSchema, configWorkflowPrefixSchema } from '@famir/workflow'
-import { ReverseProxyConfig } from './reverse-proxy.js'
+import {
+  configRedisWorkflowConnectionUrlSchema,
+  configRedisWorkflowPrefixSchema
+} from '@famir/workflow'
+import { AppDefaultConfig } from './default.js'
 
-export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
+export const configAppDefaultSchema: JSONSchemaType<AppDefaultConfig> = {
   type: 'object',
   required: [
     'LOGGER_APP_NAME',
@@ -38,12 +44,12 @@ export const configReverseProxySchema: JSONSchemaType<ReverseProxyConfig> = {
       default: 'reverse-proxy'
     },
     LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
-    LOGGER_TRANSPORT_TARGET: configLoggerTransportTargetSchema,
-    LOGGER_TRANSPORT_OPTIONS: configLoggerTransportOptionsSchema,
-    DATABASE_CONNECTION_URL: configDatabaseConnectionUrlSchema,
-    DATABASE_PREFIX: configDatabasePrefixSchema,
-    WORKFLOW_CONNECTION_URL: configWorkflowConnectionUrlSchema,
-    WORKFLOW_PREFIX: configWorkflowPrefixSchema,
+    LOGGER_TRANSPORT_TARGET: configPinoLoggerTransportTargetSchema,
+    LOGGER_TRANSPORT_OPTIONS: configPinoLoggerTransportOptionsSchema,
+    DATABASE_CONNECTION_URL: configRedisDatabaseConnectionUrlSchema,
+    DATABASE_PREFIX: configRedisDatabasePrefixSchema,
+    WORKFLOW_CONNECTION_URL: configRedisWorkflowConnectionUrlSchema,
+    WORKFLOW_PREFIX: configRedisWorkflowPrefixSchema,
     HTTP_CLIENT_VERBOSE: configHttpClientVerboseSchema,
     HTTP_CLIENT_ERROR_PAGE: configHttpClientErrorPageSchema,
     HTTP_SERVER_ADDRESS: {

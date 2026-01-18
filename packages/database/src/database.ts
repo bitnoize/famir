@@ -1,12 +1,12 @@
-export interface DatabaseConfig {
+export interface RedisDatabaseConfig {
   DATABASE_CONNECTION_URL: string
   DATABASE_PREFIX: string
 }
 
-export interface DatabaseConnectorOptions {
+export interface RedisDatabaseConnectorOptions {
   connectionUrl: string
 }
 
-export interface DatabaseRepositoryOptions {
+export interface RedisDatabaseRepositoryOptions {
   prefix: string
 }

@@ -1,21 +1,22 @@
 import { DIContainer } from '@famir/common'
 import { Config, CONFIG, Logger, LOGGER, Storage, STORAGE } from '@famir/domain'
 import { Client as MinioClient } from 'minio'
-import { StorageConfig, StorageOptions } from './storage.js'
+import { MinioStorageConfig, MinioStorageOptions } from './storage.js'
 
 export class MinioStorage implements Storage {
   static inject(container: DIContainer) {
     container.registerSingleton<Storage>(
       STORAGE,
-      (c) => new MinioStorage(c.resolve<Config<StorageConfig>>(CONFIG), c.resolve<Logger>(LOGGER))
+      (c) =>
+        new MinioStorage(c.resolve<Config<MinioStorageConfig>>(CONFIG), c.resolve<Logger>(LOGGER))
     )
   }
 
-  protected readonly options: StorageOptions
+  protected readonly options: MinioStorageOptions
   protected readonly minio: MinioClient
 
   constructor(
-    config: Config<StorageConfig>,
+    config: Config<MinioStorageConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)
@@ -31,7 +32,7 @@ export class MinioStorage implements Storage {
     this.logger.debug(`Storage initialized`)
   }
 
-  private buildOptions(config: StorageConfig): StorageOptions {
+  private buildOptions(config: MinioStorageConfig): MinioStorageOptions {
     return {
       endPoint: config.STORAGE_END_POINT,
       port: config.STORAGE_PORT,

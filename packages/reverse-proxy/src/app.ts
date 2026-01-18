@@ -1,49 +1,44 @@
 import { DIContainer, serializeError, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
-  ANALYZE_LOG_WORKER,
-  AnalyzeLogWorker,
+  ANALYZE_LOG_QUEUE,
+  AnalyzeLogQueue,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  EXECUTOR_CONNECTOR,
-  ExecutorConnector,
+  HTTP_SERVER,
+  HttpServer,
   Logger,
   LOGGER,
-  Validator,
-  VALIDATOR,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
-import { analyzeLogJobDataSchema } from '@famir/workflow'
 
-export const ANALYZE_LOG_APP = Symbol('AnalyzeLogApp')
+export const APP = Symbol('App')
 
-export class AnalyzeLogApp {
+export class App {
   static inject(container: DIContainer) {
-    container.registerSingleton<AnalyzeLogApp>(
-      ANALYZE_LOG_APP,
+    container.registerSingleton(
+      APP,
       (c) =>
-        new AnalyzeLogApp(
-          c.resolve<Validator>(VALIDATOR),
+        new App(
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
-          c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR),
-          c.resolve<AnalyzeLogWorker>(ANALYZE_LOG_WORKER)
+          c.resolve<AnalyzeLogQueue>(ANALYZE_LOG_QUEUE),
+          c.resolve<HttpServer>(HTTP_SERVER)
         )
     )
   }
 
-  static resolve(container: DIContainer): AnalyzeLogApp {
-    return container.resolve<AnalyzeLogApp>(ANALYZE_LOG_APP)
+  static resolve(container: DIContainer): App {
+    return container.resolve(APP)
   }
 
   constructor(
-    protected readonly validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
-    protected readonly executorConnector: ExecutorConnector,
-    protected readonly analyzeLogWorker: AnalyzeLogWorker
+    protected readonly analyzeLogQueue: AnalyzeLogQueue,
+    protected readonly httpServer: HttpServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
       process.once(signal, () => {
@@ -55,18 +50,14 @@ export class AnalyzeLogApp {
       })
     })
 
-    this.validator.addSchemas({
-      'analyze-log-job-data': analyzeLogJobDataSchema
-    })
-
-    this.logger.debug(`AnalyzeLogApp initialized`)
+    this.logger.debug(`App initialized`)
   }
 
   async start(): Promise<void> {
     try {
       await this.databaseConnector.connect()
 
-      await this.analyzeLogWorker.run()
+      await this.httpServer.listen()
 
       this.logger.debug(`App started`)
     } catch (error) {
@@ -80,9 +71,9 @@ export class AnalyzeLogApp {
 
   protected async stop(): Promise<void> {
     try {
-      await this.analyzeLogWorker.close()
+      await this.httpServer.close()
 
-      await this.executorConnector.close()
+      await this.analyzeLogQueue.close()
 
       await this.workflowConnector.close()
 

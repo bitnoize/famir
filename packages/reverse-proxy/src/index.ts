@@ -1,5 +1,3 @@
+export * from './app.js'
 export * from './controllers/index.js'
-export * from './reverse-proxy.app.js'
-export * from './reverse-proxy.js'
-export * from './reverse-proxy.loader.js'
-export * from './reverse-proxy.schemas.js'
+export * from './loaders/index.js'

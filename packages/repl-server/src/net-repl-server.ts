@@ -13,27 +13,27 @@ import {
 import net from 'node:net'
 import repl from 'node:repl'
 import util from 'node:util'
-import { ReplServerConfig, ReplServerOptions } from './repl-server.js'
+import { NetReplServerConfig, NetReplServerOptions } from './repl-server.js'
 
-export class NodeReplServer implements ReplServer {
+export class NetReplServer implements ReplServer {
   static inject(container: DIContainer) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
       (c) =>
-        new NodeReplServer(
-          c.resolve<Config<ReplServerConfig>>(CONFIG),
+        new NetReplServer(
+          c.resolve<Config<NetReplServerConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
         )
     )
   }
 
-  protected readonly options: ReplServerOptions
+  protected readonly options: NetReplServerOptions
   protected readonly server: net.Server
   protected readonly clients = new Set<net.Socket>()
 
   constructor(
-    config: Config<ReplServerConfig>,
+    config: Config<NetReplServerConfig>,
     protected readonly logger: Logger,
     protected readonly router: ReplServerRouter
   ) {
@@ -203,7 +203,7 @@ export class NodeReplServer implements ReplServer {
     })
   }
 
-  private buildOptions(config: ReplServerConfig): ReplServerOptions {
+  private buildOptions(config: NetReplServerConfig): NetReplServerOptions {
     return {
       address: config.REPL_SERVER_ADDRESS,
       port: config.REPL_SERVER_PORT,

@@ -1,44 +1,49 @@
 import { DIContainer, serializeError, SHUTDOWN_SIGNALS } from '@famir/common'
 import {
-  ANALYZE_LOG_QUEUE,
-  AnalyzeLogQueue,
+  ANALYZE_LOG_WORKER,
+  AnalyzeLogWorker,
   DATABASE_CONNECTOR,
   DatabaseConnector,
+  EXECUTOR_CONNECTOR,
+  ExecutorConnector,
   Logger,
   LOGGER,
-  REPL_SERVER,
-  ReplServer,
+  Validator,
+  VALIDATOR,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
 } from '@famir/domain'
+import { analyzeLogJobDataSchema } from '@famir/workflow'
 
-export const CONSOLE_APP = Symbol('ConsoleApp')
+export const APP = Symbol('App')
 
-export class ConsoleApp {
+export class App {
   static inject(container: DIContainer) {
-    container.registerSingleton<ConsoleApp>(
-      CONSOLE_APP,
+    container.registerSingleton(
+      APP,
       (c) =>
-        new ConsoleApp(
+        new App(
+          c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
-          c.resolve<AnalyzeLogQueue>(ANALYZE_LOG_QUEUE),
-          c.resolve<ReplServer>(REPL_SERVER)
+          c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR),
+          c.resolve<AnalyzeLogWorker>(ANALYZE_LOG_WORKER)
         )
     )
   }
 
-  static resolve(container: DIContainer): ConsoleApp {
-    return container.resolve<ConsoleApp>(CONSOLE_APP)
+  static resolve(container: DIContainer): App {
+    return container.resolve(APP)
   }
 
   constructor(
+    protected readonly validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
-    protected readonly analyzeLogQueue: AnalyzeLogQueue,
-    protected readonly replServer: ReplServer
+    protected readonly executorConnector: ExecutorConnector,
+    protected readonly analyzeLogWorker: AnalyzeLogWorker
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
       process.once(signal, () => {
@@ -49,13 +54,19 @@ export class ConsoleApp {
         })
       })
     })
+
+    this.validator.addSchemas({
+      'analyze-log-job-data': analyzeLogJobDataSchema
+    })
+
+    this.logger.debug(`App initialized`)
   }
 
   async start(): Promise<void> {
     try {
       await this.databaseConnector.connect()
 
-      await this.replServer.listen()
+      await this.analyzeLogWorker.run()
 
       this.logger.debug(`App started`)
     } catch (error) {
@@ -69,9 +80,9 @@ export class ConsoleApp {
 
   protected async stop(): Promise<void> {
     try {
-      await this.replServer.close()
+      await this.analyzeLogWorker.close()
 
-      await this.analyzeLogQueue.close()
+      await this.executorConnector.close()
 
       await this.workflowConnector.close()
 

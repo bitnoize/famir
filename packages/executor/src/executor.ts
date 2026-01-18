@@ -1,4 +1,4 @@
-export interface ExecutorConfig {
+export interface BullExecutorConfig {
   EXECUTOR_CONNECTION_URL: string
   EXECUTOR_PREFIX: string
   EXECUTOR_CONCURRENCY: number
@@ -6,11 +6,11 @@ export interface ExecutorConfig {
   EXECUTOR_LIMITER_DURATION: number
 }
 
-export interface ExecutorConnectorOptions {
+export interface RedisExecutorConnectorOptions {
   connectionUrl: string
 }
 
-export interface ExecutorWorkerOptions {
+export interface BullExecutorWorkerOptions {
   prefix: string
   concurrency: number
   limiterMax: number
