@@ -2,6 +2,7 @@ import { HttpBody, HttpConnection, HttpHeaders } from '@famir/domain'
 
 export interface CreateMessageData {
   campaignId: string
+  messageId: string
   proxyId: string
   targetId: string
   sessionId: string

@@ -134,7 +134,7 @@ function formatResponseCookies(cookies: HttpResponseCookies): string {
     }
   })
 
-  return toughCookies.map((toughCookie) => toughCookie.cookieString()).join(';')
+  return toughCookies.map((toughCookie) => toughCookie.toString()).join(';')
 }
 
 export function getRequestCookies(headers: HttpHeaders): HttpRequestCookies {

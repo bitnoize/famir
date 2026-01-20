@@ -1,7 +1,4 @@
-export interface SetupMirrorData {
-  campaign_id: string
-  target_id: string
-}
+export type SetupMirrorHeaders = [string, string]
 
 export interface ReadCampaignTargetData {
   campaignId: string

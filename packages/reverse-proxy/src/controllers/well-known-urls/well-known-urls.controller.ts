@@ -10,14 +10,14 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { setHeaders } from '@famir/http-tools'
+import { isMethod, isUrlPathEquals, setHeaders } from '@famir/http-tools'
 import { BaseController } from '../base/index.js'
 
 export const WELL_KNOWN_URLS_CONTROLLER = Symbol('WellKnownUrlsController')
 
 export class WellKnownUrlsController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<WellKnownUrlsController>(
+    container.registerSingleton(
       WELL_KNOWN_URLS_CONTROLLER,
       (c) =>
         new WellKnownUrlsController(
@@ -29,7 +29,7 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   static resolve(container: DIContainer): WellKnownUrlsController {
-    return container.resolve<WellKnownUrlsController>(WELL_KNOWN_URLS_CONTROLLER)
+    return container.resolve(WELL_KNOWN_URLS_CONTROLLER)
   }
 
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
@@ -44,7 +44,7 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   protected preflightCors: HttpServerMiddleware = async (ctx, next) => {
-    if (ctx.method === 'OPTIONS') {
+    if (isMethod(ctx.method, 'OPTIONS')) {
       await this.renderPreflightCors(ctx)
     } else {
       await next()
@@ -54,7 +54,7 @@ export class WellKnownUrlsController extends BaseController {
   protected faviconIco: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
 
-    if (ctx.url.pathname === '/favicon.ico') {
+    if (isUrlPathEquals(ctx.url, '/favicon.ico')) {
       await this.renderFaviconIco(ctx, target)
     } else {
       await next()
@@ -64,7 +64,7 @@ export class WellKnownUrlsController extends BaseController {
   protected robotsTxt: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
 
-    if (ctx.url.pathname === '/robots.txt') {
+    if (isUrlPathEquals(ctx.url, '/robots.txt')) {
       await this.renderRobotsTxt(ctx, target)
     } else {
       await next()
@@ -74,7 +74,7 @@ export class WellKnownUrlsController extends BaseController {
   protected sitemapXml: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
 
-    if (ctx.url.pathname === '/sitemap.xml') {
+    if (isUrlPathEquals(ctx.url, '/sitemap.xml')) {
       await this.renderSitemapXml(ctx, target)
     } else {
       await next()
@@ -99,7 +99,7 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (['GET', 'HEAD'].includes(ctx.method)) {
+    if (isMethod(ctx.method, ['GET', 'HEAD'])) {
       const body = Buffer.from(target.faviconIco, 'base64')
 
       setHeaders(ctx.responseHeaders, {
@@ -109,7 +109,7 @@ export class WellKnownUrlsController extends BaseController {
         'Cache-Control': 'public, max-age=86400'
       })
 
-      if (ctx.method === 'GET') {
+      if (isMethod(ctx.method, 'GET')) {
         await ctx.sendResponseBody(200, body)
       } else {
         await ctx.sendResponseBody(200)
@@ -123,7 +123,7 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (['GET', 'HEAD'].includes(ctx.method)) {
+    if (isMethod(ctx.method, ['GET', 'HEAD'])) {
       const body = Buffer.from(target.robotsTxt)
 
       setHeaders(ctx.responseHeaders, {
@@ -133,7 +133,7 @@ export class WellKnownUrlsController extends BaseController {
         'Cache-Control': 'public, max-age=86400'
       })
 
-      if (ctx.method === 'GET') {
+      if (isMethod(ctx.method, 'GET')) {
         await ctx.sendResponseBody(200, body)
       } else {
         await ctx.sendResponseBody(200)
@@ -147,7 +147,7 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (['GET', 'HEAD'].includes(ctx.method)) {
+    if (isMethod(ctx.method, ['GET', 'HEAD'])) {
       const body = Buffer.from(target.sitemapXml)
 
       setHeaders(ctx.responseHeaders, {
@@ -157,7 +157,7 @@ export class WellKnownUrlsController extends BaseController {
         'Cache-Control': 'public, max-age=86400'
       })
 
-      if (ctx.method === 'GET') {
+      if (isMethod(ctx.method, 'GET')) {
         await ctx.sendResponseBody(200, body)
       } else {
         await ctx.sendResponseBody(200)

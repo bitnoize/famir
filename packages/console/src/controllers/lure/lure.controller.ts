@@ -23,7 +23,7 @@ export const LURE_CONTROLLER = Symbol('LureController')
 
 export class LureController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<LureController>(
+    container.registerSingleton(
       LURE_CONTROLLER,
       (c) =>
         new LureController(
@@ -36,7 +36,7 @@ export class LureController extends BaseController {
   }
 
   static resolve(container: DIContainer): LureController {
-    return container.resolve<LureController>(LURE_CONTROLLER)
+    return container.resolve(LURE_CONTROLLER)
   }
 
   constructor(

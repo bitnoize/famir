@@ -17,7 +17,7 @@ export const SESSION_CONTROLLER = Symbol('SessionController')
 
 export class SessionController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<SessionController>(
+    container.registerSingleton(
       SESSION_CONTROLLER,
       (c) =>
         new SessionController(
@@ -30,7 +30,7 @@ export class SessionController extends BaseController {
   }
 
   static resolve(container: DIContainer): SessionController {
-    return container.resolve<SessionController>(SESSION_CONTROLLER)
+    return container.resolve(SESSION_CONTROLLER)
   }
 
   constructor(

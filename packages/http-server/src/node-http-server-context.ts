@@ -1,30 +1,55 @@
-import { HttpBody, HttpHeaders, HttpServerContext, HttpServerError, HttpState } from '@famir/domain'
+import {
+  HttpBody,
+  HttpHeaders,
+  HttpMethod,
+  HttpServerContext,
+  HttpServerError,
+  HttpState,
+  HttpUrl,
+  HttpUrlQuery
+} from '@famir/domain'
+import { getMethod, parseUrl, parseUrlQuery, getClientIp } from '@famir/http-tools'
 import http from 'node:http'
-import { URL } from 'node:url'
 
 export class NodeHttpServerContext implements HttpServerContext {
   constructor(
     protected readonly req: http.IncomingMessage,
     protected readonly res: http.ServerResponse
-  ) {
-    this.url = new URL(this.originUrl, 'http://localhost')
-  }
+  ) {}
 
   readonly state: HttpState = {}
 
   readonly middlewares: string[] = []
 
-  get method(): string {
-    return this.req.method ?? 'GET'
+  #method: HttpMethod | null = null
+
+  get method(): HttpMethod {
+    this.#method ??= getMethod(this.req.method)
+
+    return this.#method
   }
 
   get originUrl(): string {
     return this.req.url ?? '/'
   }
 
-  readonly url: URL
+  #url: HttpUrl | null = null
 
-  get requestHeaders(): HttpHeaders {
+  get url(): Readonly<HttpUrl> {
+    this.#url ??= parseUrl(this.originUrl)
+
+    return this.#url
+  }
+
+  #urlQuery: HttpUrlQuery | null = null
+
+  get urlQuery(): Readonly<HttpUrlQuery> {
+    this.#urlQuery ??= parseUrlQuery(this.url)
+
+    return this.#urlQuery
+  }
+
+  get requestHeaders(): Readonly<HttpHeaders> {
     return this.req.headers
   }
 
@@ -109,6 +134,14 @@ export class NodeHttpServerContext implements HttpServerContext {
 
   get status(): number {
     return this.res.statusCode
+  }
+
+  #clientIp: string[] | null = null
+
+  get clientIp(): string[] {
+    this.#clientIp ??= getClientIp(this.requestHeaders)
+
+    return this.#clientIp
   }
 
   readonly startTime: number = Date.now()

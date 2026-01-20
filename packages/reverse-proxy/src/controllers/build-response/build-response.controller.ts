@@ -5,11 +5,10 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
-  TARGET_SUB_ROOT,
-  TargetModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { setHeaders, formatUrl } from '@famir/http-tools'
 import { BaseController } from '../base/index.js'
 import { type BuildResponseService, BUILD_RESPONSE_SERVICE } from './build-response.service.js'
 
@@ -17,7 +16,7 @@ export const BUILD_RESPONSE_CONTROLLER = Symbol('BuildResponseController')
 
 export class BuildResponseController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<BuildResponseController>(
+    container.registerSingleton(
       BUILD_RESPONSE_CONTROLLER,
       (c) =>
         new BuildResponseController(
@@ -30,7 +29,7 @@ export class BuildResponseController extends BaseController {
   }
 
   static resolve(container: DIContainer): BuildResponseController {
-    return container.resolve<BuildResponseController>(BUILD_RESPONSE_CONTROLLER)
+    return container.resolve(BUILD_RESPONSE_CONTROLLER)
   }
 
   constructor(
@@ -47,23 +46,24 @@ export class BuildResponseController extends BaseController {
   protected buildResponse: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
     const proxy = this.getState(ctx, 'proxy')
+    const message = this.getState(ctx, 'message')
 
     const { status, responseHeaders, responseBody, connection } =
       await this.buildResponseService.ordinaryRequest({
         proxy: proxy.url,
-        method: ctx.method,
-        url: this.assemblyUrl(target, ctx.url.href),
-        requestHeaders: ctx.requestHeaders,
-        requestBody: Buffer.alloc(0),
+        method: message.method,
+        url: formatUrl(message.url),
+        requestHeaders: message.requestHeaders,
+        requestBody: message.requestBody,
         connectTimeout: target.connectTimeout,
         ordinaryTimeout: target.ordinaryTimeout,
         responseBodyLimit: target.responseBodyLimit
       })
 
-    //ctx.setResponseHeaders(responseHeaders)
-    //ctx.setResponseBody(responseBody)
-    //ctx.setStatus(status)
-    //ctx.setConnection(connection)
+    message.responseHeaders = responseHeaders
+    message.responseBody = responseBody
+    message.status = status
+    message.connection = connection
 
     /*
       ctx.setResponseHeaders({
@@ -74,20 +74,10 @@ export class BuildResponseController extends BaseController {
       })
       */
 
-    await ctx.sendResponseBody(status)
+    setHeaders(ctx.responseHeaders, message.responseHeaders)
+
+    await ctx.sendResponseBody(message.status, message.responseBody)
 
     await next()
-  }
-
-  private assemblyUrl(target: TargetModel, relativeUrl: string): string {
-    return [
-      target.donorSecure ? 'https:' : 'http:',
-      '//',
-      target.donorSub !== TARGET_SUB_ROOT ? target.donorSub + '.' : '',
-      target.donorDomain,
-      ':',
-      target.donorPort.toString(),
-      relativeUrl
-    ].join('')
   }
 }

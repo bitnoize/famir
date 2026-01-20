@@ -83,9 +83,9 @@ export class AuthorizeService extends BaseService {
     return model && testEnabledLureModel(model) ? model : null
   }
 
-  async createSession(data: CreateSessionData): Promise<SessionModel> {
+  async createSession(data: CreateSessionData): Promise<void> {
     try {
-      return await this.sessionRepository.create(data.campaignId)
+      return await this.sessionRepository.create(data.campaignId, data.sessionId)
     } catch (error) {
       if (error instanceof DatabaseError) {
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']

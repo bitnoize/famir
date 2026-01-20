@@ -1,5 +1,19 @@
 export type HttpState = Record<string, unknown>
 
+export const HTTP_METHODS = ['HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
+export type HttpMethod = (typeof HTTP_METHODS)[number]
+
+export interface HttpUrl {
+  protocol: string
+  hostname: string
+  port: string
+  pathname: string
+  search: string
+  hash: string
+}
+
+export type HttpUrlQuery = Record<string, string | string[] | undefined>
+
 export type HttpHeader = string | string[]
 
 export type HttpHeaders = Record<string, HttpHeader | undefined>

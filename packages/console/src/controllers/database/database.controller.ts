@@ -15,7 +15,7 @@ export const DATABASE_CONTROLLER = Symbol('DatabaseController')
 
 export class DatabaseController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<DatabaseController>(
+    container.registerSingleton(
       DATABASE_CONTROLLER,
       (c) =>
         new DatabaseController(
@@ -28,7 +28,7 @@ export class DatabaseController extends BaseController {
   }
 
   static resolve(container: DIContainer): DatabaseController {
-    return container.resolve<DatabaseController>(DATABASE_CONTROLLER)
+    return container.resolve(DATABASE_CONTROLLER)
   }
 
   constructor(

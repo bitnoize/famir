@@ -6,7 +6,7 @@ import {
   Validator
 } from '@famir/domain'
 import { setHeader, setHeaders } from '@famir/http-tools'
-import { ReverseProxyState } from '../../reverse-proxy.js'
+import { ReverseProxyState } from './base.js'
 
 export abstract class BaseController {
   constructor(

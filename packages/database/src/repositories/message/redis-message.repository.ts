@@ -1,4 +1,4 @@
-import { DIContainer, randomIdent } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
@@ -50,6 +50,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
   async create(
     campaignId: string,
+    messageId: string,
     proxyId: string,
     targetId: string,
     sessionId: string,
@@ -66,9 +67,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     startTime: number,
     finishTime: number,
     connection: HttpConnection
-  ): Promise<string> {
-    const messageId = randomIdent()
-
+  ): Promise<void> {
     try {
       const statusReply = await this.connection.message.create_message(
         this.options.prefix,
@@ -95,8 +94,6 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       const mesg = this.handleStatusReply(statusReply)
 
       this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
-
-      return messageId
     } catch (error) {
       this.raiseError(error, 'create', { campaignId, messageId, proxyId, targetId, sessionId })
     }

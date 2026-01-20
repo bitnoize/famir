@@ -2,7 +2,7 @@ import { HttpHeaders } from '@famir/domain'
 import { isbot } from 'isbot'
 import { getHeader, getHeaderArray } from './headers.js'
 
-function parseClientIps(values: string[]): string[] {
+function parseClientIp(values: string[]): string[] {
   return values
     .join(',')
     .split(',')
@@ -10,10 +10,10 @@ function parseClientIps(values: string[]): string[] {
     .filter((ip) => ip)
 }
 
-export function getClientIps(headers: HttpHeaders): string[] {
+export function getClientIp(headers: HttpHeaders): string[] {
   const values = getHeaderArray(headers, 'X-Forwarded-For') ?? []
 
-  return parseClientIps(values)
+  return parseClientIp(values)
 }
 
 export function isBot(headers: HttpHeaders): boolean {

@@ -29,10 +29,11 @@ export class CompletionService extends BaseService {
     super()
   }
 
-  async createMessage(data: CreateMessageData): Promise<string> {
+  async createMessage(data: CreateMessageData): Promise<void> {
     try {
-      return await this.messageRepository.create(
+      await this.messageRepository.create(
         data.campaignId,
+        data.messageId,
         data.proxyId,
         data.targetId,
         data.sessionId,

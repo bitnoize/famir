@@ -73,9 +73,7 @@ export class NodeHttpServer implements HttpServer {
     try {
       const ctx = new NodeHttpServerContext(req, res)
 
-      const middleware = this.chainMiddlewares()
-
-      await middleware(ctx)
+      await this.chainMiddlewares(ctx)
 
       if (!ctx.isComplete) {
         throw new HttpServerError(`Incomplete request`, {
@@ -139,47 +137,44 @@ export class NodeHttpServer implements HttpServer {
     }
   }
 
-  // FIXME
-  protected chainMiddlewares(): (ctx: HttpServerContext) => Promise<void> {
-    return async (ctx: HttpServerContext): Promise<void> => {
-      try {
-        let index = -1
+  protected async chainMiddlewares(ctx: HttpServerContext): Promise<void> {
+    try {
+      const middlewares = this.router.resolve()
 
-        const middlewares = this.router.resolve()
+      let index = -1
 
-        const dispatch = async (idx: number): Promise<void> => {
-          if (idx <= index) {
-            throw new Error('Middleware next() called multiple times')
-          }
-
-          index = idx
-
-          if (middlewares[idx]) {
-            const [name, middleware] = middlewares[idx]
-
-            ctx.middlewares.push(name)
-
-            await middleware(ctx, async () => {
-              await dispatch(idx + 1)
-            })
-          }
+      const dispatch = async (idx: number): Promise<void> => {
+        if (idx <= index) {
+          throw new Error('Middleware next() called multiple times')
         }
 
-        await dispatch(0)
-      } catch (error) {
-        if (error instanceof HttpServerError) {
-          error.context['middlewares'] = ctx.middlewares
+        index = idx
 
-          throw error
-        } else {
-          throw new HttpServerError(`Server unknown error`, {
-            cause: error,
-            context: {
-              middlewares: ctx.middlewares
-            },
-            code: 'INTERNAL_ERROR'
+        if (middlewares[idx]) {
+          const [name, middleware] = middlewares[idx]
+
+          ctx.middlewares.push(name)
+
+          await middleware(ctx, async () => {
+            await dispatch(idx + 1)
           })
         }
+      }
+
+      await dispatch(0)
+    } catch (error) {
+      if (error instanceof HttpServerError) {
+        error.context['middlewares'] = ctx.middlewares
+
+        throw error
+      } else {
+        throw new HttpServerError(`Server unknown error`, {
+          cause: error,
+          context: {
+            middlewares: ctx.middlewares
+          },
+          code: 'INTERNAL_ERROR'
+        })
       }
     }
   }

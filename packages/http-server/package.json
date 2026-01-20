@@ -13,6 +13,7 @@
   "dependencies": {
     "@famir/common": "*",
     "@famir/domain": "*",
+    "@famir/http-tools": "*",
     "ws": "^8.18.3"
   },
   "devDependencies": {

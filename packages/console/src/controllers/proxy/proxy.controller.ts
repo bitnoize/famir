@@ -23,7 +23,7 @@ export const PROXY_CONTROLLER = Symbol('ProxyController')
 
 export class ProxyController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<ProxyController>(
+    container.registerSingleton(
       PROXY_CONTROLLER,
       (c) =>
         new ProxyController(
@@ -36,7 +36,7 @@ export class ProxyController extends BaseController {
   }
 
   static resolve(container: DIContainer): ProxyController {
-    return container.resolve<ProxyController>(PROXY_CONTROLLER)
+    return container.resolve(PROXY_CONTROLLER)
   }
 
   constructor(

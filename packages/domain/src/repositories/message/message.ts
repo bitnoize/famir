@@ -6,6 +6,7 @@ export const MESSAGE_REPOSITORY = Symbol('MessageRepository')
 export interface MessageRepository {
   create(
     campaignId: string,
+    messageId: string,
     proxyId: string,
     targetId: string,
     sessionId: string,
@@ -22,6 +23,6 @@ export interface MessageRepository {
     startTime: number,
     finishTime: number,
     connection: HttpConnection
-  ): Promise<string>
+  ): Promise<void>
   read(campaignId: string, messageId: string): Promise<FullMessageModel | null>
 }

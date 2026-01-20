@@ -8,6 +8,7 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
+import { formatRelativeUrl } from '@famir/http-tools'
 import { BaseController } from '../base/index.js'
 import { type CompletionService, COMPLETION_SERVICE } from './completion.service.js'
 
@@ -15,7 +16,7 @@ export const COMPLETION_CONTROLLER = Symbol('CompletionController')
 
 export class CompletionController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<CompletionController>(
+    container.registerSingleton(
       COMPLETION_CONTROLLER,
       (c) =>
         new CompletionController(
@@ -28,7 +29,7 @@ export class CompletionController extends BaseController {
   }
 
   static resolve(container: DIContainer): CompletionController {
-    return container.resolve<CompletionController>(COMPLETION_CONTROLLER)
+    return container.resolve(COMPLETION_CONTROLLER)
   }
 
   constructor(
@@ -46,31 +47,31 @@ export class CompletionController extends BaseController {
 
   protected completion: HttpServerMiddleware = async (ctx, next) => {
     const campaign = this.getState(ctx, 'campaign')
-    const target = this.getState(ctx, 'target')
     const proxy = this.getState(ctx, 'proxy')
+    const target = this.getState(ctx, 'target')
     const session = this.getState(ctx, 'session')
+    const message = this.getState(ctx, 'message')
 
-    const messageId = await this.completionService.createMessage({
+    await this.completionService.createMessage({
       campaignId: campaign.campaignId,
+      messageId: message.messageId,
       proxyId: proxy.proxyId,
       targetId: target.targetId,
       sessionId: session.sessionId,
-      method: '',
-      url: '',
+      method: message.method,
+      url: formatRelativeUrl(message.url),
       isStreaming: false,
-      requestHeaders: {},
-      requestBody: Buffer.alloc(0),
-      responseHeaders: {},
-      responseBody: Buffer.alloc(0),
-      clientIp: '',
-      status: 0,
+      requestHeaders: message.requestHeaders,
+      requestBody: message.requestBody,
+      responseHeaders: message.responseHeaders,
+      responseBody: message.responseBody,
+      clientIp: ctx.clientIp.join(' '),
+      status: message.status,
       score: 0,
       startTime: ctx.startTime,
       finishTime: ctx.finishTime,
-      connection: {}
+      connection: message.connection
     })
-
-    //this.setState(ctx, 'message', message)
 
     await next()
   }

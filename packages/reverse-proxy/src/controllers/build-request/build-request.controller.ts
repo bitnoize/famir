@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, randomIdent } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
   HttpServerMiddleware,
@@ -8,13 +8,21 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { BaseController } from '../base/index.js'
+import {
+  getRequestCookies,
+  getTargetDonorHost,
+  refreshTargetDonorUrl,
+  setHeader,
+  setHeaders,
+  setRequestCookies
+} from '@famir/http-tools'
+import { BaseController, ReverseProxyMessage } from '../base/index.js'
 
 export const BUILD_REQUEST_CONTROLLER = Symbol('BuildRequestController')
 
 export class BuildRequestController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<BuildRequestController>(
+    container.registerSingleton(
       BUILD_REQUEST_CONTROLLER,
       (c) =>
         new BuildRequestController(
@@ -26,7 +34,7 @@ export class BuildRequestController extends BaseController {
   }
 
   static resolve(container: DIContainer): BuildRequestController {
-    return container.resolve<BuildRequestController>(BUILD_REQUEST_CONTROLLER)
+    return container.resolve(BUILD_REQUEST_CONTROLLER)
   }
 
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
@@ -38,9 +46,46 @@ export class BuildRequestController extends BaseController {
   }
 
   protected buildRequest: HttpServerMiddleware = async (ctx, next) => {
+    const campaign = this.getState(ctx, 'campaign')
     const target = this.getState(ctx, 'target')
 
-    await ctx.loadRequestBody(target.requestBodyLimit)
+    const requestBody = await ctx.loadRequestBody(target.requestBodyLimit)
+
+    const message: ReverseProxyMessage = {
+      messageId: randomIdent(),
+      method: ctx.method,
+      url: { ...ctx.url },
+      requestHeaders: { ...ctx.requestHeaders },
+      requestBody,
+      responseHeaders: {},
+      responseBody: Buffer.alloc(0),
+      status: 0,
+      connection: {}
+    }
+
+    refreshTargetDonorUrl(message.url, target)
+
+    setHeader(message.requestHeaders, 'Host', getTargetDonorHost(target))
+
+    setHeaders(message.requestHeaders, {
+      'X-Famir-Campaign-Id': undefined,
+      'X-Famir-Target-Id': undefined,
+      'X-Famir-Client-Ip': undefined,
+      'X-Forwarded-For': undefined
+      // ...
+    })
+
+    const requestCookies = getRequestCookies(message.requestHeaders)
+
+    requestCookies[campaign.sessionCookieName] = undefined
+
+    setRequestCookies(message.requestHeaders, requestCookies)
+
+    setHeaders(ctx.responseHeaders, {
+      'X-Famir-Message-Id': message.messageId,
+    })
+
+    this.setState(ctx, 'message', message)
 
     await next()
   }

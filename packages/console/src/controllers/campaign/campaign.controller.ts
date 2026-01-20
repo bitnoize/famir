@@ -24,7 +24,7 @@ export const CAMPAIGN_CONTROLLER = Symbol('CampaignController')
 
 export class CampaignController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<CampaignController>(
+    container.registerSingleton(
       CAMPAIGN_CONTROLLER,
       (c) =>
         new CampaignController(
@@ -37,7 +37,7 @@ export class CampaignController extends BaseController {
   }
 
   static resolve(container: DIContainer): CampaignController {
-    return container.resolve<CampaignController>(CAMPAIGN_CONTROLLER)
+    return container.resolve(CAMPAIGN_CONTROLLER)
   }
 
   constructor(

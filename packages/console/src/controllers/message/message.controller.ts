@@ -17,7 +17,7 @@ export const MESSAGE_CONTROLLER = Symbol('MessageController')
 
 export class MessageController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<MessageController>(
+    container.registerSingleton(
       MESSAGE_CONTROLLER,
       (c) =>
         new MessageController(
@@ -30,7 +30,7 @@ export class MessageController extends BaseController {
   }
 
   static resolve(container: DIContainer): MessageController {
-    return container.resolve<MessageController>(MESSAGE_CONTROLLER)
+    return container.resolve(MESSAGE_CONTROLLER)
   }
 
   constructor(

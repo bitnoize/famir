@@ -24,7 +24,7 @@ export const TARGET_CONTROLLER = Symbol('TargetController')
 
 export class TargetController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<TargetController>(
+    container.registerSingleton(
       TARGET_CONTROLLER,
       (c) =>
         new TargetController(
@@ -37,7 +37,7 @@ export class TargetController extends BaseController {
   }
 
   static resolve(container: DIContainer): TargetController {
-    return container.resolve<TargetController>(TARGET_CONTROLLER)
+    return container.resolve(TARGET_CONTROLLER)
   }
 
   constructor(

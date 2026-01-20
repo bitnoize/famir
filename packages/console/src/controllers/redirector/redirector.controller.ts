@@ -23,7 +23,7 @@ export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')
 
 export class RedirectorController extends BaseController {
   static inject(container: DIContainer) {
-    container.registerSingleton<RedirectorController>(
+    container.registerSingleton(
       REDIRECTOR_CONTROLLER,
       (c) =>
         new RedirectorController(
@@ -36,7 +36,7 @@ export class RedirectorController extends BaseController {
   }
 
   static resolve(container: DIContainer): RedirectorController {
-    return container.resolve<RedirectorController>(REDIRECTOR_CONTROLLER)
+    return container.resolve(REDIRECTOR_CONTROLLER)
   }
 
   constructor(

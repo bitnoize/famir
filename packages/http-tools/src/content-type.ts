@@ -1,15 +1,13 @@
 import { HttpContentType, HttpHeaders } from '@famir/domain'
-import contentTypeLib from 'content-type'
+import contenttype from 'content-type'
 import { getHeader, setHeader } from './headers.js'
 
 export function getContentType(headers: HttpHeaders): HttpContentType {
   const value = getHeader(headers, 'Content-Type') ?? ''
-
-  return contentTypeLib.parse(value)
+  return contenttype.parse(value)
 }
 
 export function setContentType(headers: HttpHeaders, contentType: HttpContentType) {
-  const value = contentTypeLib.format(contentType)
-
+  const value = contenttype.format(contentType)
   setHeader(headers, 'Content-Type', value)
 }

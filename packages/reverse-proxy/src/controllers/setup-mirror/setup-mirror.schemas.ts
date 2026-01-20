@@ -1,17 +1,15 @@
 import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import { ValidatorSchemas } from '@famir/domain'
-import { SetupMirrorData } from './setup-mirror.js'
+import { SetupMirrorHeaders } from './setup-mirror.js'
 
-export const setupMirrorDataSchema: JSONSchemaType<SetupMirrorData> = {
-  type: 'object',
-  required: ['campaign_id', 'target_id'],
-  properties: {
-    campaign_id: customIdentSchema,
-    target_id: customIdentSchema
-  },
-  additionalProperties: false
+export const setupMirrorHeadersSchema: JSONSchemaType<SetupMirrorHeaders> = {
+  type: 'array',
+  items: [customIdentSchema, customIdentSchema],
+  minItems: 2,
+  maxItems: 2,
+  additionalItems: false
 } as const
 
 export const setupMirrorSchemas: ValidatorSchemas = {
-  'reverse-proxy-setup-mirror-data': setupMirrorDataSchema
+  'reverse-proxy-setup-mirror-headers': setupMirrorHeadersSchema
 } as const
