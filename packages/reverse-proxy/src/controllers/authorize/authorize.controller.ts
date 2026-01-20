@@ -1,4 +1,4 @@
-import { DIContainer, randomIdent } from '@famir/common'
+import { DIContainer, isDevelopment, randomIdent } from '@famir/common'
 import {
   EnabledFullTargetModel,
   FullCampaignModel,
@@ -12,7 +12,6 @@ import {
   HttpServerRouter,
   Logger,
   LOGGER,
-  SessionModel,
   TEMPLATER,
   Templater,
   Validator,
@@ -280,10 +279,12 @@ export class AuthorizeController extends BaseController {
       proxyId: session.proxyId
     })
 
-    setHeaders(ctx.responseHeaders, {
-      'X-Famir-Session-Id': session.sessionId,
-      'X-Famir-Proxy-Id': proxy.proxyId,
-    })
+    if (isDevelopment) {
+      setHeaders(ctx.responseHeaders, {
+        'X-Famir-Session-Id': session.sessionId,
+        'X-Famir-Proxy-Id': proxy.proxyId
+      })
+    }
 
     this.setState(ctx, 'proxy', proxy)
     this.setState(ctx, 'session', session)
@@ -348,10 +349,12 @@ export class AuthorizeController extends BaseController {
       proxyId: session.proxyId
     })
 
-    setHeaders(ctx.responseHeaders, {
-      'X-Famir-Session-Id': session.sessionId,
-      'X-Famir-Proxy-Id': proxy.proxyId,
-    })
+    if (isDevelopment) {
+      setHeaders(ctx.responseHeaders, {
+        'X-Famir-Session-Id': session.sessionId,
+        'X-Famir-Proxy-Id': proxy.proxyId
+      })
+    }
 
     this.setState(ctx, 'proxy', proxy)
     this.setState(ctx, 'session', session)

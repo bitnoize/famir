@@ -8,7 +8,7 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { setHeaders, formatUrl } from '@famir/http-tools'
+import { formatUrl, setHeaders } from '@famir/http-tools'
 import { BaseController } from '../base/index.js'
 import { type BuildResponseService, BUILD_RESPONSE_SERVICE } from './build-response.service.js'
 
@@ -65,14 +65,11 @@ export class BuildResponseController extends BaseController {
     message.status = status
     message.connection = connection
 
-    /*
-      ctx.setResponseHeaders({
-        Connection: undefined,
-        'Keep-Alive': undefined,
-        Upgrade: undefined,
-        'Set-Cookie': undefined
-      })
-      */
+    setHeaders(message.responseHeaders, {
+      'proxy-agent': undefined,
+      'content-encoding': undefined,
+      // ...
+    })
 
     setHeaders(ctx.responseHeaders, message.responseHeaders)
 

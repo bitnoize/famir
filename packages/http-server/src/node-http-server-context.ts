@@ -8,7 +8,7 @@ import {
   HttpUrl,
   HttpUrlQuery
 } from '@famir/domain'
-import { getMethod, parseUrl, parseUrlQuery, getClientIp } from '@famir/http-tools'
+import { getClientIp, getMethod, parseUrl, parseUrlQuery } from '@famir/http-tools'
 import http from 'node:http'
 
 export class NodeHttpServerContext implements HttpServerContext {
@@ -113,7 +113,15 @@ export class NodeHttpServerContext implements HttpServerContext {
 
   sendResponseBody(status: number, body: HttpBody = Buffer.alloc(0)): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.res.writeHead(status, this.responseHeaders)
+      Object.entries(this.responseHeaders).forEach(([name, value]) => {
+        if (value == null) {
+          return
+        }
+
+        this.res.setHeader(name, value)
+      })
+
+      this.res.writeHead(status)
 
       this.res.end(body, (error?: Error) => {
         this.#finishTime = Date.now()

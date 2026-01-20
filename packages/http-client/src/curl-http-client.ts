@@ -286,7 +286,7 @@ export class CurlHttpClient implements HttpClient {
       const name = headerStr.substring(0, colonIdx).trim().toLowerCase()
       const value = headerStr.substring(colonIdx + 1).trim()
 
-      if (!(name && value)) {
+      if (!name) {
         return
       }
 

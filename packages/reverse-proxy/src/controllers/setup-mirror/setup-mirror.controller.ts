@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, isDevelopment } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
   HttpServerContext,
@@ -63,10 +63,12 @@ export class SetupMirrorController extends BaseController {
       campaignId
     })
 
-    setHeaders(ctx.responseHeaders, {
-      'X-Famir-Campaign-Id': campaignId,
-      'X-Famir-Target-Id': targetId,
-    })
+    if (isDevelopment) {
+      setHeaders(ctx.responseHeaders, {
+        'X-Famir-Campaign-Id': campaignId,
+        'X-Famir-Target-Id': targetId
+      })
+    }
 
     this.setState(ctx, 'campaign', campaign)
     this.setState(ctx, 'target', target)

@@ -65,7 +65,7 @@ export class CompletionController extends BaseController {
       requestBody: message.requestBody,
       responseHeaders: message.responseHeaders,
       responseBody: message.responseBody,
-      clientIp: ctx.clientIp.join(' '),
+      clientIp: ctx.clientIp.join('\t'),
       status: message.status,
       score: 0,
       startTime: ctx.startTime,

@@ -1,4 +1,4 @@
-import { DIContainer, randomIdent } from '@famir/common'
+import { DIContainer, isDevelopment, randomIdent } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
   HttpServerMiddleware,
@@ -71,7 +71,10 @@ export class BuildRequestController extends BaseController {
       'X-Famir-Campaign-Id': undefined,
       'X-Famir-Target-Id': undefined,
       'X-Famir-Client-Ip': undefined,
-      'X-Forwarded-For': undefined
+      'X-Forwarded-For': undefined,
+      'X-Forwarded-Host': undefined,
+      'X-Forwarded-Proto': undefined,
+      Via: undefined
       // ...
     })
 
@@ -81,9 +84,11 @@ export class BuildRequestController extends BaseController {
 
     setRequestCookies(message.requestHeaders, requestCookies)
 
-    setHeaders(ctx.responseHeaders, {
-      'X-Famir-Message-Id': message.messageId,
-    })
+    if (isDevelopment) {
+      setHeaders(ctx.responseHeaders, {
+        'X-Famir-Message-Id': message.messageId
+      })
+    }
 
     this.setState(ctx, 'message', message)
 
