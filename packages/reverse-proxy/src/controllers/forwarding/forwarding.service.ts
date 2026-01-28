@@ -1,15 +1,15 @@
 import { DIContainer } from '@famir/common'
 import { HTTP_CLIENT, HttpClient, HttpClientOrdinaryResponse } from '@famir/domain'
 import { BaseService } from '../base/index.js'
-import { OrdinaryRequestData } from './build-response.js'
+import { OrdinaryRequestData } from './forwarding.js'
 
-export const BUILD_RESPONSE_SERVICE = Symbol('BuildResponseService')
+export const FORWARDING_SERVICE = Symbol('ForwardingService')
 
-export class BuildResponseService extends BaseService {
+export class ForwardingService extends BaseService {
   static inject(container: DIContainer) {
-    container.registerSingleton<BuildResponseService>(
-      BUILD_RESPONSE_SERVICE,
-      (c) => new BuildResponseService(c.resolve<HttpClient>(HTTP_CLIENT))
+    container.registerSingleton<ForwardingService>(
+      FORWARDING_SERVICE,
+      (c) => new ForwardingService(c.resolve<HttpClient>(HTTP_CLIENT))
     )
   }
 

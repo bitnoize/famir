@@ -46,6 +46,8 @@ export class App {
           this.logger.fatal(`App stop unhandled error`, {
             error: serializeError(error)
           })
+
+          process.exit(2)
         })
       })
     })

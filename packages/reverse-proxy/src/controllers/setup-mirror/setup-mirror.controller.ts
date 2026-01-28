@@ -10,7 +10,6 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { getHeader, setHeaders } from '@famir/http-tools'
 import { BaseController } from '../base/index.js'
 import { SetupMirrorHeaders } from './setup-mirror.js'
 import { setupMirrorSchemas } from './setup-mirror.schemas.js'
@@ -59,20 +58,17 @@ export class SetupMirrorController extends BaseController {
       targetId
     })
 
-    const targets = await this.setupMirrorService.listTargets({
-      campaignId
-    })
-
-    if (isDevelopment) {
-      setHeaders(ctx.responseHeaders, {
-        'X-Famir-Campaign-Id': campaignId,
-        'X-Famir-Target-Id': targetId
-      })
-    }
+    const targets = await this.setupMirrorService.listTargets({ campaignId })
 
     this.setState(ctx, 'campaign', campaign)
     this.setState(ctx, 'target', target)
     this.setState(ctx, 'targets', targets)
+
+    if (isDevelopment) {
+      ctx.responseHeaders
+        .set('X-Famir-Campaign-Id', campaignId)
+        .set('X-Famir-Target-Id', targetId)
+    }
 
     await next()
   }
@@ -80,15 +76,15 @@ export class SetupMirrorController extends BaseController {
   protected parseSetupMirrorHeaders(ctx: HttpServerContext): SetupMirrorHeaders {
     try {
       const headers = [
-        getHeader(ctx.requestHeaders, 'X-Famir-Campaign-Id'),
-        getHeader(ctx.requestHeaders, 'X-Famir-Target-Id')
+        ctx.requestHeaders.getString('X-Famir-Campaign-Id'),
+        ctx.requestHeaders.getString('X-Famir-Target-Id')
       ]
 
       this.validator.assertSchema<SetupMirrorHeaders>('reverse-proxy-setup-mirror-headers', headers)
 
       return headers
     } catch (error) {
-      throw new HttpServerError(`SetupMirrorHeaders validate failed`, {
+      throw new HttpServerError(`Service unavailable`, {
         cause: error,
         code: 'SERVICE_UNAVAILABLE'
       })

@@ -12,17 +12,18 @@ export interface HttpUrl {
   hash: string
 }
 
-export type HttpUrlQuery = Record<string, string | string[] | undefined>
+//export type HttpUrlQuery = Record<string, string | string[] | undefined>
 
 export type HttpHeader = string | string[]
 
 export type HttpHeaders = Record<string, HttpHeader | undefined>
+export type HttpStrictHeaders = Record<string, HttpHeader>
 
-export type HttpRequestCookie = string
+export type HttpCookie = string
 
-export type HttpRequestCookies = Record<string, HttpRequestCookie | undefined>
+export type HttpCookies = Record<string, HttpCookie | undefined>
 
-export interface HttpResponseCookie {
+export interface HttpSetCookie {
   value: string
   expires?: number
   maxAge?: number
@@ -33,7 +34,7 @@ export interface HttpResponseCookie {
   sameSite?: string
 }
 
-export type HttpResponseCookies = Record<string, HttpResponseCookie | undefined>
+export type HttpSetCookies = Record<string, HttpSetCookie | undefined>
 
 export interface HttpContentType {
   type: string

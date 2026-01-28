@@ -7,7 +7,6 @@
   },
   "references": [
     { "path": "../domain" },
-    { "path": "../common" },
-    { "path": "../http-tools" }
+    { "path": "../common" }
   ]
 }

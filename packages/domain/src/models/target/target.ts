@@ -1,3 +1,5 @@
+import { CampaignModel } from '../campaign/index.js'
+
 export const TARGET_SUB_ROOT = '.'
 
 export interface TargetModel {
@@ -49,8 +51,54 @@ export const testEnabledTargetModel = <T extends TargetModel>(
   return value.isEnabled
 }
 
-export const testTargetHasLabel = (target: FullTargetModel, value: string) => {
+export const testTargetHasLabel = (target: FullTargetModel, value: string): boolean => {
   return target.labels.some((label) => {
     return Array.isArray(value) ? value.includes(label) : value === label
   })
+}
+
+export const getTargetDonorProtocol = (target: TargetModel): string => {
+  return target.donorSecure ? 'https:' : 'http:'
+}
+
+export const getTargetDonorHostname = (target: TargetModel): string => {
+  return target.donorSub !== TARGET_SUB_ROOT
+    ? target.donorSub + '.' + target.donorDomain
+    : target.donorDomain
+}
+
+export const getTargetDonorHost = (target: TargetModel): string => {
+  const hostname = getTargetDonorHostname(target)
+
+  if (
+    (!target.donorSecure && target.donorPort === 80) ||
+    (target.donorSecure && target.donorPort === 443)
+  ) {
+    return hostname
+  } else {
+    return hostname + ':' + target.donorPort.toString()
+  }
+}
+
+export const getTargetMirrorProtocol = (target: TargetModel): string => {
+  return target.mirrorSecure ? 'https:' : 'http:'
+}
+
+export const getTargetMirrorHostname = (campaign: CampaignModel, target: TargetModel): string => {
+  return target.mirrorSub !== TARGET_SUB_ROOT
+    ? target.mirrorSub + '.' + campaign.mirrorDomain
+    : campaign.mirrorDomain
+}
+
+export const getTargetMirrorHost = (campaign: CampaignModel, target: TargetModel): string => {
+  const hostname = getTargetMirrorHostname(campaign, target)
+
+  if (
+    (!target.mirrorSecure && target.mirrorPort === 80) ||
+    (target.mirrorSecure && target.mirrorPort === 443)
+  ) {
+    return hostname
+  } else {
+    return hostname + ':' + target.mirrorPort.toString()
+  }
 }

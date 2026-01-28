@@ -14,16 +14,16 @@ import {
   Templater
 } from '@famir/domain'
 import http from 'node:http'
-import { NodeHttpServerConfig, NodeHttpServerOptions } from './http-server.js'
-import { NodeHttpServerContext } from './node-http-server-context.js'
+import { StdHttpServerConfig, StdHttpServerOptions } from './http-server.js'
+import { StdHttpServerContext } from './std-http-server-context.js'
 
-export class NodeHttpServer implements HttpServer {
+export class StdHttpServer implements HttpServer {
   static inject(container: DIContainer) {
     container.registerSingleton<HttpServer>(
       HTTP_SERVER,
       (c) =>
-        new NodeHttpServer(
-          c.resolve<Config<NodeHttpServerConfig>>(CONFIG),
+        new StdHttpServer(
+          c.resolve<Config<StdHttpServerConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
@@ -31,11 +31,11 @@ export class NodeHttpServer implements HttpServer {
     )
   }
 
-  protected readonly options: NodeHttpServerOptions
+  protected readonly options: StdHttpServerOptions
   protected readonly server: http.Server
 
   constructor(
-    config: Config<NodeHttpServerConfig>,
+    config: Config<StdHttpServerConfig>,
     protected readonly logger: Logger,
     protected readonly templater: Templater,
     protected readonly router: HttpServerRouter
@@ -71,7 +71,7 @@ export class NodeHttpServer implements HttpServer {
     res: http.ServerResponse
   ): Promise<void> {
     try {
-      const ctx = new NodeHttpServerContext(req, res)
+      const ctx = new StdHttpServerContext(req, res)
 
       await this.chainMiddlewares(ctx)
 
@@ -223,7 +223,7 @@ export class NodeHttpServer implements HttpServer {
     })
   }
 
-  private buildOptions(config: NodeHttpServerConfig): NodeHttpServerOptions {
+  private buildOptions(config: StdHttpServerConfig): StdHttpServerOptions {
     return {
       address: config.HTTP_SERVER_ADDRESS,
       port: config.HTTP_SERVER_PORT,

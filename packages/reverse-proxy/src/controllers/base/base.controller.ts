@@ -5,7 +5,6 @@ import {
   Logger,
   Validator
 } from '@famir/domain'
-import { setHeader, setHeaders } from '@famir/http-tools'
 import { ReverseProxyState } from './base.js'
 
 export abstract class BaseController {
@@ -43,36 +42,42 @@ export abstract class BaseController {
   }
 
   protected async renderOriginRedirect(ctx: HttpServerContext): Promise<void> {
-    setHeader(ctx.responseHeaders, 'Location', ctx.originUrl)
+    ctx.responseHeaders.set('Location', ctx.url.toString(true))
 
-    await ctx.sendResponseBody(302)
+    ctx.status.set(302)
+
+    await ctx.sendResponse()
   }
 
   protected async renderMainRedirect(ctx: HttpServerContext): Promise<void> {
-    setHeader(ctx.responseHeaders, 'Location', '/')
+    ctx.responseHeaders.set('Location', '/')
 
-    await ctx.sendResponseBody(302)
+    ctx.status.set(302)
+
+    await ctx.sendResponse()
   }
 
   protected async renderMainPage(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (['GET', 'HEAD'].includes(ctx.method)) {
+    if (ctx.method.is(['GET', 'HEAD'])) {
       const body = Buffer.from(target.mainPage)
 
-      setHeaders(ctx.responseHeaders, {
+      ctx.responseHeaders.merge({
         'Content-Type': 'text/html',
         'Content-Length': body.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400'
+        'Cache-Control': 'public, max-age=86400',
       })
 
-      if (ctx.method === 'GET') {
-        await ctx.sendResponseBody(200, body)
-      } else {
-        await ctx.sendResponseBody(200)
+      ctx.status.set(200)
+
+      if (ctx.method.is('GET')) {
+        ctx.responseBody.set(body)
       }
+
+      await ctx.sendResponse()
     } else {
       await this.renderNotFoundPage(ctx, target)
     }
@@ -84,11 +89,15 @@ export abstract class BaseController {
   ): Promise<void> {
     const body = Buffer.from(target.notFoundPage)
 
-    setHeaders(ctx.responseHeaders, {
+    ctx.responseHeaders.merge({
       'Content-Type': 'text/html',
-      'Content-Length': body.length.toString()
+      'Content-Length': body.length.toString(),
     })
 
-    await ctx.sendResponseBody(404, body)
+    ctx.responseBody.set(body)
+
+    ctx.status.set(404)
+
+    await ctx.sendResponse()
   }
 }

@@ -11,12 +11,12 @@ import {
   RedisTargetRepository
 } from '@famir/database'
 import { CurlHttpClient } from '@famir/http-client'
-import { ImplHttpServerRouter, NodeHttpServer } from '@famir/http-server'
+import { StdHttpServerRouter, StdHttpServer } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
 import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeLogQueue, RedisWorkflowConnector } from '@famir/workflow'
-import { App } from '../../app.js'
+import { App } from '../../reverse-proxy.app.js'
 import { AppDefaultConfig } from './default.js'
 import { configAppDefaultSchema } from './default.schemas.js'
 
@@ -47,9 +47,9 @@ export async function bootstrapDefault(composer: (container: DIContainer) => voi
 
   CurlHttpClient.inject(container)
 
-  ImplHttpServerRouter.inject(container)
+  StdHttpServerRouter.inject(container)
 
-  NodeHttpServer.inject(container)
+  StdHttpServer.inject(container)
 
   App.inject(container)
 

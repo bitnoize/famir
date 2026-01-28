@@ -8,7 +8,6 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { formatRelativeUrl } from '@famir/http-tools'
 import { BaseController } from '../base/index.js'
 import { type CompletionService, COMPLETION_SERVICE } from './completion.service.js'
 
@@ -58,19 +57,19 @@ export class CompletionController extends BaseController {
       proxyId: proxy.proxyId,
       targetId: target.targetId,
       sessionId: session.sessionId,
-      method: message.method,
-      url: formatRelativeUrl(message.url),
+      method: message.method.get(),
+      url: message.url.toString(true),
       isStreaming: false,
-      requestHeaders: message.requestHeaders,
-      requestBody: message.requestBody,
-      responseHeaders: message.responseHeaders,
-      responseBody: message.responseBody,
-      clientIp: ctx.clientIp.join('\t'),
-      status: message.status,
+      requestHeaders: message.requestHeaders.toObject(),
+      requestBody: message.requestBody.get(),
+      responseHeaders: message.responseHeaders.toObject(),
+      responseBody: message.responseBody.get(),
+      status: 0,
+      clientIp: ctx.ips.join('\t'),
       score: 0,
       startTime: ctx.startTime,
       finishTime: ctx.finishTime,
-      connection: message.connection
+      connection: {}
     })
 
     await next()

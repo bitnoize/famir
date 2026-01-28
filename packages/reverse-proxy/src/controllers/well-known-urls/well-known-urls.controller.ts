@@ -10,7 +10,6 @@ import {
   Validator,
   VALIDATOR
 } from '@famir/domain'
-import { isMethod, isUrlPathEquals, setHeaders } from '@famir/http-tools'
 import { BaseController } from '../base/index.js'
 
 export const WELL_KNOWN_URLS_CONTROLLER = Symbol('WellKnownUrlsController')
@@ -44,7 +43,7 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   protected preflightCors: HttpServerMiddleware = async (ctx, next) => {
-    if (isMethod(ctx.method, 'OPTIONS')) {
+    if (ctx.method.is('OPTIONS')) {
       await this.renderPreflightCors(ctx)
     } else {
       await next()
@@ -54,7 +53,7 @@ export class WellKnownUrlsController extends BaseController {
   protected faviconIco: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
 
-    if (isUrlPathEquals(ctx.url, '/favicon.ico')) {
+    if (ctx.url.isPathEquals('/favicon.ico')) {
       await this.renderFaviconIco(ctx, target)
     } else {
       await next()
@@ -64,7 +63,7 @@ export class WellKnownUrlsController extends BaseController {
   protected robotsTxt: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
 
-    if (isUrlPathEquals(ctx.url, '/robots.txt')) {
+    if (ctx.url.isPathEquals('/robots.txt')) {
       await this.renderRobotsTxt(ctx, target)
     } else {
       await next()
@@ -74,7 +73,7 @@ export class WellKnownUrlsController extends BaseController {
   protected sitemapXml: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
 
-    if (isUrlPathEquals(ctx.url, '/sitemap.xml')) {
+    if (ctx.url.isPathEquals('/sitemap.xml')) {
       await this.renderSitemapXml(ctx, target)
     } else {
       await next()
@@ -82,7 +81,7 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   protected async renderPreflightCors(ctx: HttpServerContext): Promise<void> {
-    setHeaders(ctx.responseHeaders, {
+    ctx.responseHeaders.merge({
       'Content-Type': 'text/plain',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': '*',
@@ -92,28 +91,32 @@ export class WellKnownUrlsController extends BaseController {
       'Access-Control-Max-Age': '86400'
     })
 
-    await ctx.sendResponseBody(204)
+    ctx.status.set(204)
+
+    await ctx.sendResponse()
   }
 
   protected async renderFaviconIco(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (isMethod(ctx.method, ['GET', 'HEAD'])) {
+    if (ctx.method.is(['GET', 'HEAD'])) {
       const body = Buffer.from(target.faviconIco, 'base64')
 
-      setHeaders(ctx.responseHeaders, {
+      ctx.responseHeaders.merge({
         'Content-Type': 'image/x-icon',
         'Content-Length': body.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400'
+        'Cache-Control': 'public, max-age=86400',
       })
 
-      if (isMethod(ctx.method, 'GET')) {
-        await ctx.sendResponseBody(200, body)
-      } else {
-        await ctx.sendResponseBody(200)
+      ctx.status.set(200)
+
+      if (ctx.method.is('GET')) {
+        ctx.responseBody.set(body)
       }
+
+      await ctx.sendResponse()
     } else {
       await this.renderNotFoundPage(ctx, target)
     }
@@ -123,21 +126,23 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (isMethod(ctx.method, ['GET', 'HEAD'])) {
+    if (ctx.method.is(['GET', 'HEAD'])) {
       const body = Buffer.from(target.robotsTxt)
 
-      setHeaders(ctx.responseHeaders, {
+      ctx.responseHeaders.merge({
         'Content-Type': 'text/plain',
         'Content-Length': body.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400'
+        'Cache-Control': 'public, max-age=86400',
       })
 
-      if (isMethod(ctx.method, 'GET')) {
-        await ctx.sendResponseBody(200, body)
-      } else {
-        await ctx.sendResponseBody(200)
+      ctx.status.set(200)
+
+      if (ctx.method.is('GET')) {
+        ctx.responseBody.set(body)
       }
+
+      await ctx.sendResponse()
     } else {
       await this.renderNotFoundPage(ctx, target)
     }
@@ -147,21 +152,23 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (isMethod(ctx.method, ['GET', 'HEAD'])) {
+    if (ctx.method.is(['GET', 'HEAD'])) {
       const body = Buffer.from(target.sitemapXml)
 
-      setHeaders(ctx.responseHeaders, {
+      ctx.responseHeaders.merge({
         'Content-Type': 'application/xml',
         'Content-Length': body.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400'
+        'Cache-Control': 'public, max-age=86400',
       })
 
-      if (isMethod(ctx.method, 'GET')) {
-        await ctx.sendResponseBody(200, body)
-      } else {
-        await ctx.sendResponseBody(200)
+      ctx.status.set(200)
+
+      if (ctx.method.is('GET')) {
+        ctx.responseBody.set(body)
       }
+
+      await ctx.sendResponse()
     } else {
       await this.renderNotFoundPage(ctx, target)
     }

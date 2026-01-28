@@ -8,11 +8,11 @@ import {
   LOGGER
 } from '@famir/domain'
 
-export class ImplHttpServerRouter implements HttpServerRouter {
+export class StdHttpServerRouter implements HttpServerRouter {
   static inject(container: DIContainer) {
     container.registerSingleton<HttpServerRouter>(
       HTTP_SERVER_ROUTER,
-      (c) => new ImplHttpServerRouter(c.resolve<Logger>(LOGGER))
+      (c) => new StdHttpServerRouter(c.resolve<Logger>(LOGGER))
     )
   }
 

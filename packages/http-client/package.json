@@ -13,7 +13,6 @@
   "dependencies": {
     "@famir/common": "*",
     "@famir/domain": "*",
-    "@famir/http-tools": "*",
     "node-libcurl": "^5.0.1"
   }
 }
