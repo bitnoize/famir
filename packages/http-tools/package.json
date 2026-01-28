@@ -11,7 +11,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "cheerio": "^1.1.2",
+    "cheerio": "^1.2.0",
     "content-type": "^1.0.5",
     "negotiator": "^1.0.0",
     "qs": "^6.14.1",

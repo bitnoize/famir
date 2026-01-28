@@ -11,7 +11,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "serialize-error": "^13.0.0",
-    "ajv": "^8.17.1"
+    "ajv": "^8.17.1",
+    "serialize-error": "^13.0.1"
   }
 }
