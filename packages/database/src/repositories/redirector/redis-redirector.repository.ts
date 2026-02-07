@@ -10,7 +10,6 @@ import {
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository,
-  testRedirectorModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -156,13 +155,13 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
     this.validateRawData<RawRedirector>('database-raw-redirector', rawModel)
 
-    return {
-      campaignId: rawModel.campaign_id,
-      redirectorId: rawModel.redirector_id,
-      lureCount: rawModel.lure_count,
-      createdAt: new Date(rawModel.created_at),
-      updatedAt: new Date(rawModel.updated_at)
-    }
+    return new RedirectorModel(
+      rawModel.campaign_id,
+      rawModel.redirector_id,
+      rawModel.lure_count,
+      new Date(rawModel.created_at),
+      new Date(rawModel.updated_at)
+    )
   }
 
   protected buildFullModel(rawFullModel: unknown): FullRedirectorModel | null {
@@ -172,19 +171,21 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
     this.validateRawData<RawFullRedirector>('database-raw-full-redirector', rawFullModel)
 
-    return {
-      campaignId: rawFullModel.campaign_id,
-      redirectorId: rawFullModel.redirector_id,
-      page: rawFullModel.page,
-      lureCount: rawFullModel.lure_count,
-      createdAt: new Date(rawFullModel.created_at),
-      updatedAt: new Date(rawFullModel.updated_at)
-    }
+    return new FullRedirectorModel(
+      rawFullModel.campaign_id,
+      rawFullModel.redirector_id,
+      rawFullModel.page,
+      rawFullModel.lure_count,
+      new Date(rawFullModel.created_at),
+      new Date(rawFullModel.updated_at)
+    )
   }
 
   protected buildCollection(rawCollection: unknown): RedirectorModel[] {
     this.validateArrayReply(rawCollection)
 
-    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(testRedirectorModel)
+    return rawCollection
+      .map((rawModel) => this.buildModel(rawModel))
+      .filter(RedirectorModel.isNotNull)
   }
 }

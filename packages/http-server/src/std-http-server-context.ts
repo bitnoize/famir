@@ -1,47 +1,54 @@
 import {
-  HttpStatusWrapper,
   HttpBodyWrapper,
   HttpHeadersWrapper,
   HttpMethodWrapper,
   HttpServerContext,
+  HttpServerContextState,
   HttpServerError,
-  HttpState,
+  HttpStatusWrapper,
   HttpUrlWrapper
 } from '@famir/domain'
 import {
   StdHttpBodyWrapper,
   StdHttpHeadersWrapper,
   StdHttpMethodWrapper,
-  StdHttpUrlWrapper,
-  StdHttpStatusWrapper
+  StdHttpStatusWrapper,
+  StdHttpUrlWrapper
 } from '@famir/http-tools'
 import { isbot } from 'isbot'
 import http from 'node:http'
 
 export class StdHttpServerContext implements HttpServerContext {
-  readonly state: HttpState = {}
+  readonly state: HttpServerContextState = {}
   readonly middlewares: string[] = []
 
   constructor(
     protected readonly req: http.IncomingMessage,
     protected readonly res: http.ServerResponse
   ) {
-    this.method = StdHttpMethodWrapper.fromReq(this.req).freeze()
-    this.url = StdHttpUrlWrapper.fromReq(this.req).freeze()
-    this.requestHeaders = StdHttpHeadersWrapper.fromReq(this.req).freeze()
-    this.requestBody = new StdHttpBodyWrapper()
-    this.responseHeaders = StdHttpHeadersWrapper.fromRes(this.res)
-    this.responseBody = new StdHttpBodyWrapper()
-    this.status = new StdHttpStatusWrapper()
+    try {
+      this.method = StdHttpMethodWrapper.fromReq(req)
+      this.url = StdHttpUrlWrapper.fromReq(req).freeze()
+      this.requestHeaders = StdHttpHeadersWrapper.fromReq(req).freeze()
+      this.requestBody = StdHttpBodyWrapper.fromScratch()
+      this.status = StdHttpStatusWrapper.fromScratch()
+      this.responseHeaders = StdHttpHeadersWrapper.fromScratch()
+      this.responseBody = StdHttpBodyWrapper.fromScratch()
+    } catch (error) {
+      throw new HttpServerError(`Bad request`, {
+        cause: error,
+        code: 'BAD_REQUEST'
+      })
+    }
   }
 
   readonly method: HttpMethodWrapper
   readonly url: HttpUrlWrapper
   readonly requestHeaders: HttpHeadersWrapper
   readonly requestBody: HttpBodyWrapper
+  readonly status: HttpStatusWrapper
   readonly responseHeaders: HttpHeadersWrapper
   readonly responseBody: HttpBodyWrapper
-  readonly status: HttpStatusWrapper
 
   loadRequest(bodyLimit: number): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -60,20 +67,23 @@ export class StdHttpServerContext implements HttpServerContext {
               code: 'CONTENT_TOO_LARGE'
             })
           )
-        } else {
-          chunks.push(chunk)
+
+          return
         }
+
+        chunks.push(chunk)
       })
 
       this.req.on('end', () => {
         try {
           const body = Buffer.concat(chunks, totalLength)
-          this.requestBody.set(body)
+
+          this.requestBody.set(body).freeze()
 
           resolve()
         } catch (error) {
           reject(
-            new HttpServerError(`Bad request`, {
+            new HttpServerError(`Parse request error`, {
               cause: error,
               code: 'BAD_REQUEST'
             })
@@ -110,7 +120,7 @@ export class StdHttpServerContext implements HttpServerContext {
 
       if (this.status.isUnknown()) {
         reject(
-          new HttpServerError(`Unknown status`, {
+          new HttpServerError(`Unknown response status`, {
             code: 'INTERNAL_ERROR'
           })
         )
@@ -123,6 +133,7 @@ export class StdHttpServerContext implements HttpServerContext {
       this.res.end(this.responseBody.get(), (error?: Error) => {
         this.responseHeaders.freeze()
         this.responseBody.freeze()
+        this.status.freeze()
 
         this.#finishTime = Date.now()
 
@@ -133,9 +144,11 @@ export class StdHttpServerContext implements HttpServerContext {
               code: 'INTERNAL_ERROR'
             })
           )
-        } else {
-          resolve()
+
+          return
         }
+
+        resolve()
       })
     })
   }

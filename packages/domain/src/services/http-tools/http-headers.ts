@@ -17,7 +17,7 @@ export interface HttpHeadersWrapper {
   add(name: string, value: string): this
   has(name: string): boolean
   delete(names: string | string[]): this
-  merge(headers: HttpHeaders, force?: boolean): this
+  merge(headers: HttpHeaders): this
   reset(): this
   getContentType(): HttpContentType
   setContentType(contentType: HttpContentType): this

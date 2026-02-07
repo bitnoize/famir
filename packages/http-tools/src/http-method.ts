@@ -10,52 +10,28 @@ export class StdHttpMethodWrapper implements HttpMethodWrapper {
     return StdHttpMethodWrapper.fromString(req.method)
   }
 
-  static fromString(str: string): HttpMethodWrapper {
-    if (!arrayIncludes(HTTP_METHODS, str)) {
+  static fromString(value: string): HttpMethodWrapper {
+    value = value.toUpperCase()
+
+    if (!arrayIncludes(HTTP_METHODS, value)) {
       throw new Error(`Method not known`)
     }
 
-    return new StdHttpMethodWrapper(str)
+    return new StdHttpMethodWrapper(value)
   }
 
   #method: HttpMethod
 
-  protected isFrozen: boolean = false
-
   constructor(method: HttpMethod) {
     this.#method = method
-  }
-
-  clone(): HttpMethodWrapper {
-    return new StdHttpMethodWrapper(this.#method)
-  }
-
-  freeze(): this {
-    this.isFrozen ||= true
-
-    return this
   }
 
   get(): HttpMethod {
     return this.#method
   }
 
-  set(method: HttpMethod): this {
-    this.sureNotFrozen('set')
-
-    this.#method = method
-
-    return this
-  }
-
   is(arg: HttpMethod | HttpMethod[]): boolean {
     const methods = Array.isArray(arg) ? arg : [arg]
     return methods.includes(this.#method)
-  }
-
-  protected sureNotFrozen(name: string) {
-    if (this.isFrozen) {
-      throw new Error(`Method frozen on ${name}`)
-    }
   }
 }

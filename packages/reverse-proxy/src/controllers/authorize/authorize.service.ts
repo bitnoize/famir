@@ -7,16 +7,16 @@ import {
   FullRedirectorModel,
   HttpServerError,
   LURE_REPOSITORY,
+  LureModel,
   LureRepository,
   PROXY_REPOSITORY,
+  ProxyModel,
   ProxyRepository,
   REDIRECTOR_REPOSITORY,
   RedirectorRepository,
   SESSION_REPOSITORY,
   SessionModel,
-  SessionRepository,
-  testEnabledLureModel,
-  testEnabledProxyModel
+  SessionRepository
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
 import {
@@ -56,7 +56,7 @@ export class AuthorizeService extends BaseService {
   async readProxy(data: ReadProxyData): Promise<EnabledProxyModel> {
     const model = await this.proxyRepository.read(data.campaignId, data.proxyId)
 
-    if (!(model && testEnabledProxyModel(model))) {
+    if (!(model && ProxyModel.isEnabled(model))) {
       throw new HttpServerError(`Read proxy failed`, {
         code: 'SERVICE_UNAVAILABLE'
       })
@@ -80,12 +80,12 @@ export class AuthorizeService extends BaseService {
   async readLurePath(data: ReadLurePathData): Promise<EnabledLureModel | null> {
     const model = await this.lureRepository.readPath(data.campaignId, data.path)
 
-    return model && testEnabledLureModel(model) ? model : null
+    return model && LureModel.isEnabled(model) ? model : null
   }
 
   async createSession(data: CreateSessionData): Promise<void> {
     try {
-      return await this.sessionRepository.create(data.campaignId, data.sessionId)
+      await this.sessionRepository.create(data.campaignId, data.sessionId)
     } catch (error) {
       if (error instanceof DatabaseError) {
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']

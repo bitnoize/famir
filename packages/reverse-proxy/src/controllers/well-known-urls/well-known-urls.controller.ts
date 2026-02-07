@@ -34,15 +34,41 @@ export class WellKnownUrlsController extends BaseController {
   constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
     super(validator, logger, router)
 
-    this.router.register('preflightCors', this.preflightCors)
-    this.router.register('faviconIco', this.faviconIco)
-    this.router.register('robotsTxt', this.robotsTxt)
-    this.router.register('sitemapXml', this.sitemapXml)
-
     this.logger.debug(`WellKnownUrlsController initialized`)
   }
 
-  protected preflightCors: HttpServerMiddleware = async (ctx, next) => {
+  registerAll(): this {
+    return this.registerPreflightCors()
+      .registerFaviconIco()
+      .registerRobotsTxt()
+      .registerSitemapXml()
+  }
+
+  registerPreflightCors(): this {
+    this.router.register('preflightCors', this.preflightCorsMiddleware)
+
+    return this
+  }
+
+  registerFaviconIco(): this {
+    this.router.register('faviconIco', this.faviconIcoMiddleware)
+
+    return this
+  }
+
+  registerRobotsTxt(): this {
+    this.router.register('robotsTxt', this.robotsTxtMiddleware)
+
+    return this
+  }
+
+  registerSitemapXml(): this {
+    this.router.register('sitemapXml', this.sitemapXmlMiddleware)
+
+    return this
+  }
+
+  private preflightCorsMiddleware: HttpServerMiddleware = async (ctx, next) => {
     if (ctx.method.is('OPTIONS')) {
       await this.renderPreflightCors(ctx)
     } else {
@@ -50,7 +76,7 @@ export class WellKnownUrlsController extends BaseController {
     }
   }
 
-  protected faviconIco: HttpServerMiddleware = async (ctx, next) => {
+  private faviconIcoMiddleware: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
 
     if (ctx.url.isPathEquals('/favicon.ico')) {
@@ -60,7 +86,7 @@ export class WellKnownUrlsController extends BaseController {
     }
   }
 
-  protected robotsTxt: HttpServerMiddleware = async (ctx, next) => {
+  private robotsTxtMiddleware: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
 
     if (ctx.url.isPathEquals('/robots.txt')) {
@@ -70,7 +96,7 @@ export class WellKnownUrlsController extends BaseController {
     }
   }
 
-  protected sitemapXml: HttpServerMiddleware = async (ctx, next) => {
+  private sitemapXmlMiddleware: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
 
     if (ctx.url.isPathEquals('/sitemap.xml')) {
@@ -107,7 +133,7 @@ export class WellKnownUrlsController extends BaseController {
         'Content-Type': 'image/x-icon',
         'Content-Length': body.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400',
+        'Cache-Control': 'public, max-age=86400'
       })
 
       ctx.status.set(200)
@@ -133,7 +159,7 @@ export class WellKnownUrlsController extends BaseController {
         'Content-Type': 'text/plain',
         'Content-Length': body.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400',
+        'Cache-Control': 'public, max-age=86400'
       })
 
       ctx.status.set(200)
@@ -159,7 +185,7 @@ export class WellKnownUrlsController extends BaseController {
         'Content-Type': 'application/xml',
         'Content-Length': body.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400',
+        'Cache-Control': 'public, max-age=86400'
       })
 
       ctx.status.set(200)

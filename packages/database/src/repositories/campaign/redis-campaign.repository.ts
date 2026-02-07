@@ -10,7 +10,6 @@ import {
   FullCampaignModel,
   Logger,
   LOGGER,
-  testCampaignModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -205,15 +204,15 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
     this.validateRawData<RawCampaign>('database-raw-campaign', rawModel)
 
-    return {
-      campaignId: rawModel.campaign_id,
-      mirrorDomain: rawModel.mirror_domain,
-      sessionCount: rawModel.session_count,
-      messageCount: rawModel.message_count,
-      isLocked: !!rawModel.lock_code,
-      createdAt: new Date(rawModel.created_at),
-      updatedAt: new Date(rawModel.updated_at)
-    }
+    return new CampaignModel(
+      rawModel.campaign_id,
+      rawModel.mirror_domain,
+      rawModel.session_count,
+      rawModel.message_count,
+      !!rawModel.lock_code,
+      new Date(rawModel.created_at),
+      new Date(rawModel.updated_at)
+    )
   }
 
   protected buildFullModel(rawFullModel: unknown): FullCampaignModel | null {
@@ -223,32 +222,34 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
     this.validateRawData<RawFullCampaign>('database-raw-full-campaign', rawFullModel)
 
-    return {
-      campaignId: rawFullModel.campaign_id,
-      mirrorDomain: rawFullModel.mirror_domain,
-      description: rawFullModel.description,
-      landingUpgradePath: rawFullModel.landing_upgrade_path,
-      landingUpgradeParam: rawFullModel.landing_upgrade_param,
-      landingRedirectorParam: rawFullModel.landing_redirector_param,
-      sessionCookieName: rawFullModel.session_cookie_name,
-      sessionExpire: rawFullModel.session_expire,
-      newSessionExpire: rawFullModel.new_session_expire,
-      messageExpire: rawFullModel.message_expire,
-      proxyCount: rawFullModel.proxy_count,
-      targetCount: rawFullModel.target_count,
-      redirectorCount: rawFullModel.redirector_count,
-      lureCount: rawFullModel.lure_count,
-      sessionCount: rawFullModel.session_count,
-      messageCount: rawFullModel.message_count,
-      isLocked: !!rawFullModel.lock_code,
-      createdAt: new Date(rawFullModel.created_at),
-      updatedAt: new Date(rawFullModel.updated_at)
-    }
+    return new FullCampaignModel(
+      rawFullModel.campaign_id,
+      rawFullModel.mirror_domain,
+      rawFullModel.description,
+      rawFullModel.landing_upgrade_path,
+      rawFullModel.landing_upgrade_param,
+      rawFullModel.landing_redirector_param,
+      rawFullModel.session_cookie_name,
+      rawFullModel.session_expire,
+      rawFullModel.new_session_expire,
+      rawFullModel.message_expire,
+      rawFullModel.proxy_count,
+      rawFullModel.target_count,
+      rawFullModel.redirector_count,
+      rawFullModel.lure_count,
+      rawFullModel.session_count,
+      rawFullModel.message_count,
+      !!rawFullModel.lock_code,
+      new Date(rawFullModel.created_at),
+      new Date(rawFullModel.updated_at)
+    )
   }
 
   protected buildCollection(rawCollection: unknown): CampaignModel[] {
     this.validateArrayReply(rawCollection)
 
-    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(testCampaignModel)
+    return rawCollection
+      .map((rawModel) => this.buildModel(rawModel))
+      .filter(CampaignModel.isNotNull)
   }
 }

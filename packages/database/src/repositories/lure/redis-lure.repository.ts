@@ -9,7 +9,6 @@ import {
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
-  testLureModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -191,21 +190,21 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
     this.validateRawData<RawLure>('database-raw-lure', rawModel)
 
-    return {
-      campaignId: rawModel.campaign_id,
-      lureId: rawModel.lure_id,
-      path: rawModel.path,
-      redirectorId: rawModel.redirector_id,
-      isEnabled: !!rawModel.is_enabled,
-      sessionCount: rawModel.session_count,
-      createdAt: new Date(rawModel.created_at),
-      updatedAt: new Date(rawModel.updated_at)
-    }
+    return new LureModel(
+      rawModel.campaign_id,
+      rawModel.lure_id,
+      rawModel.path,
+      rawModel.redirector_id,
+      !!rawModel.is_enabled,
+      rawModel.session_count,
+      new Date(rawModel.created_at),
+      new Date(rawModel.updated_at)
+    )
   }
 
   protected buildCollection(rawCollection: unknown): LureModel[] {
     this.validateArrayReply(rawCollection)
 
-    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(testLureModel)
+    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(LureModel.isNotNull)
   }
 }

@@ -45,12 +45,16 @@ export class SetupMirrorController extends BaseController {
 
     this.validator.addSchemas(setupMirrorSchemas)
 
-    this.router.register('setupMirror', this.setupMirror)
-
     this.logger.debug(`SetupMirrorController initialized`)
   }
 
-  protected setupMirror: HttpServerMiddleware = async (ctx, next) => {
+  register(): this {
+    this.router.register('setupMirror', this.setupMirrorMiddleware)
+
+    return this
+  }
+
+  private setupMirrorMiddleware: HttpServerMiddleware = async (ctx, next) => {
     const [campaignId, targetId] = this.parseSetupMirrorHeaders(ctx)
 
     const [campaign, target] = await this.setupMirrorService.readCampaignTarget({
@@ -65,15 +69,13 @@ export class SetupMirrorController extends BaseController {
     this.setState(ctx, 'targets', targets)
 
     if (isDevelopment) {
-      ctx.responseHeaders
-        .set('X-Famir-Campaign-Id', campaignId)
-        .set('X-Famir-Target-Id', targetId)
+      ctx.responseHeaders.set('X-Famir-Campaign-Id', campaignId).set('X-Famir-Target-Id', targetId)
     }
 
     await next()
   }
 
-  protected parseSetupMirrorHeaders(ctx: HttpServerContext): SetupMirrorHeaders {
+  private parseSetupMirrorHeaders(ctx: HttpServerContext): SetupMirrorHeaders {
     try {
       const headers = [
         ctx.requestHeaders.getString('X-Famir-Campaign-Id'),

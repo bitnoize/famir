@@ -5,10 +5,11 @@ export interface HttpUrlWrapper {
   freeze(): this
   get<K extends keyof HttpUrl>(name: K): HttpUrl[K]
   set<K extends keyof HttpUrl>(name: K, value: HttpUrl[K]): this
-  update(url: Partial<HttpUrl>): this
+  merge(url: Partial<HttpUrl>): this
+  reset(): this
   getHost(): string
-  getSearchParams(): HttpQueryString
-  setSearchParams(searchParams: HttpQueryString): this
+  getQueryString(): HttpQueryString
+  setQueryString(queryString: HttpQueryString): this
   isPathEquals(paths: string | string[]): boolean
   isPathUnder(paths: string | string[]): boolean
   isPathMatch(paths: RegExp | RegExp[]): boolean

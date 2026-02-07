@@ -1,4 +1,5 @@
 export interface HttpStatusWrapper {
+  clone(): HttpStatusWrapper
   freeze(): this
   get(): number
   set(status: number): this

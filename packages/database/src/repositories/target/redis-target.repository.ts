@@ -10,7 +10,6 @@ import {
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository,
-  testTargetModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -285,22 +284,22 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
     this.validateRawData<RawTarget>('database-raw-target', rawModel)
 
-    return {
-      campaignId: rawModel.campaign_id,
-      targetId: rawModel.target_id,
-      isLanding: !!rawModel.is_landing,
-      donorSecure: !!rawModel.donor_secure,
-      donorSub: rawModel.donor_sub,
-      donorDomain: rawModel.donor_domain,
-      donorPort: rawModel.donor_port,
-      mirrorSecure: !!rawModel.mirror_secure,
-      mirrorSub: rawModel.mirror_sub,
-      mirrorPort: rawModel.mirror_port,
-      isEnabled: !!rawModel.is_enabled,
-      messageCount: rawModel.message_count,
-      createdAt: new Date(rawModel.created_at),
-      updatedAt: new Date(rawModel.updated_at)
-    }
+    return new TargetModel(
+      rawModel.campaign_id,
+      rawModel.target_id,
+      !!rawModel.is_landing,
+      !!rawModel.donor_secure,
+      rawModel.donor_sub,
+      rawModel.donor_domain,
+      rawModel.donor_port,
+      !!rawModel.mirror_secure,
+      rawModel.mirror_sub,
+      rawModel.mirror_port,
+      !!rawModel.is_enabled,
+      rawModel.message_count,
+      new Date(rawModel.created_at),
+      new Date(rawModel.updated_at)
+    )
   }
 
   protected buildFullModel(rawFullModel: unknown): FullTargetModel | null {
@@ -310,38 +309,38 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
     this.validateRawData<RawFullTarget>('database-raw-full-target', rawFullModel)
 
-    return {
-      campaignId: rawFullModel.campaign_id,
-      targetId: rawFullModel.target_id,
-      isLanding: !!rawFullModel.is_landing,
-      donorSecure: !!rawFullModel.donor_secure,
-      donorSub: rawFullModel.donor_sub,
-      donorDomain: rawFullModel.donor_domain,
-      donorPort: rawFullModel.donor_port,
-      mirrorSecure: !!rawFullModel.mirror_secure,
-      mirrorSub: rawFullModel.mirror_sub,
-      mirrorPort: rawFullModel.mirror_port,
-      labels: rawFullModel.labels,
-      connectTimeout: rawFullModel.connect_timeout,
-      ordinaryTimeout: rawFullModel.ordinary_timeout,
-      streamingTimeout: rawFullModel.streaming_timeout,
-      requestBodyLimit: rawFullModel.request_body_limit,
-      responseBodyLimit: rawFullModel.response_body_limit,
-      mainPage: rawFullModel.main_page,
-      notFoundPage: rawFullModel.not_found_page,
-      faviconIco: rawFullModel.favicon_ico,
-      robotsTxt: rawFullModel.robots_txt,
-      sitemapXml: rawFullModel.sitemap_xml,
-      isEnabled: !!rawFullModel.is_enabled,
-      messageCount: rawFullModel.message_count,
-      createdAt: new Date(rawFullModel.created_at),
-      updatedAt: new Date(rawFullModel.updated_at)
-    }
+    return new FullTargetModel(
+      rawFullModel.campaign_id,
+      rawFullModel.target_id,
+      !!rawFullModel.is_landing,
+      !!rawFullModel.donor_secure,
+      rawFullModel.donor_sub,
+      rawFullModel.donor_domain,
+      rawFullModel.donor_port,
+      !!rawFullModel.mirror_secure,
+      rawFullModel.mirror_sub,
+      rawFullModel.mirror_port,
+      rawFullModel.labels,
+      rawFullModel.connect_timeout,
+      rawFullModel.ordinary_timeout,
+      rawFullModel.streaming_timeout,
+      rawFullModel.request_body_limit,
+      rawFullModel.response_body_limit,
+      rawFullModel.main_page,
+      rawFullModel.not_found_page,
+      rawFullModel.favicon_ico,
+      rawFullModel.robots_txt,
+      rawFullModel.sitemap_xml,
+      !!rawFullModel.is_enabled,
+      rawFullModel.message_count,
+      new Date(rawFullModel.created_at),
+      new Date(rawFullModel.updated_at)
+    )
   }
 
   protected buildCollection(rawCollection: unknown): TargetModel[] {
     this.validateArrayReply(rawCollection)
 
-    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(testTargetModel)
+    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(TargetModel.isNotNull)
   }
 }

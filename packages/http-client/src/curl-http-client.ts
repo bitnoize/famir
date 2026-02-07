@@ -6,8 +6,11 @@ import {
   HttpBody,
   HttpClient,
   HttpClientError,
-  HttpClientErrorCode,
+  HttpClientOrdinaryRequest,
   HttpClientOrdinaryResponse,
+  HttpClientStreamingRequest,
+  HttpClientStreamingResponse,
+  HttpConnection,
   HttpHeaders,
   Logger,
   LOGGER
@@ -38,20 +41,11 @@ export class CurlHttpClient implements HttpClient {
     this.logger.debug(`HttpClient initialized`)
   }
 
-  ordinaryRequest(
-    proxy: string,
-    method: string,
-    url: string,
-    requestHeaders: HttpHeaders,
-    requestBody: HttpBody,
-    connectTimeout: number,
-    ordinaryTimeout: number,
-    responseBodyLimit: number
-  ): Promise<HttpClientOrdinaryResponse> {
+  ordinaryRequest(request: HttpClientOrdinaryRequest): Promise<HttpClientOrdinaryResponse> {
     return new Promise<HttpClientOrdinaryResponse>((resolve, reject) => {
       const curl = new Curl()
 
-      let shouldStop = 0
+      let cancelCode: string | null = null
 
       curl.enable(CurlFeature.NoStorage)
 
@@ -61,35 +55,35 @@ export class CurlHttpClient implements HttpClient {
 
       curl.setOpt(Curl.option.DNS_USE_GLOBAL_CACHE, 1)
 
-      curl.setOpt(Curl.option.CONNECTTIMEOUT_MS, connectTimeout)
-      curl.setOpt(Curl.option.TIMEOUT_MS, ordinaryTimeout)
+      curl.setOpt(Curl.option.CONNECTTIMEOUT_MS, request.connectTimeout)
+      curl.setOpt(Curl.option.TIMEOUT_MS, request.timeout)
 
-      curl.setOpt(Curl.option.PROXY, proxy)
+      curl.setOpt(Curl.option.PROXY, request.proxy)
 
-      curl.setOpt(Curl.option.CUSTOMREQUEST, method)
-      curl.setOpt(Curl.option.URL, url)
+      curl.setOpt(Curl.option.CUSTOMREQUEST, request.method)
+      curl.setOpt(Curl.option.URL, request.url)
 
-      curl.setOpt(Curl.option.HTTPHEADER, this.formatHeaders(requestHeaders))
+      curl.setOpt(Curl.option.HTTPHEADER, this.formatHeaders(request.headers))
       curl.setOpt(Curl.option.ACCEPT_ENCODING, '') // Means all encodings!
 
-      if (requestBody.length > 0) {
+      if (request.body.length > 0) {
         curl.setOpt(Curl.option.UPLOAD, true)
-        curl.setOpt(Curl.option.INFILESIZE_LARGE, requestBody.length)
+        curl.setOpt(Curl.option.INFILESIZE_LARGE, request.body.length)
 
         let requestBodyOffset = 0
         curl.setOpt(Curl.option.READFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
           try {
-            if (shouldStop != 0) {
+            if (cancelCode != null) {
               return 0
             }
 
-            const chunkSize = Math.min(size * nmemb, requestBody.length - requestBodyOffset)
+            const chunkSize = Math.min(size * nmemb, request.body.length - requestBodyOffset)
 
             if (chunkSize <= 0) {
               return 0
             }
 
-            requestBody.copy(buf, 0, requestBodyOffset, requestBodyOffset + chunkSize)
+            request.body.copy(buf, 0, requestBodyOffset, requestBodyOffset + chunkSize)
 
             requestBodyOffset += chunkSize
 
@@ -99,7 +93,7 @@ export class CurlHttpClient implements HttpClient {
               error: serializeError(error)
             })
 
-            shouldStop = 1
+            cancelCode = 'READFUNCTION_ERROR'
 
             return 0
           }
@@ -112,7 +106,7 @@ export class CurlHttpClient implements HttpClient {
 
       curl.setOpt(Curl.option.HEADERFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
         try {
-          if (shouldStop != 0) {
+          if (cancelCode != null) {
             return 0
           }
 
@@ -127,7 +121,7 @@ export class CurlHttpClient implements HttpClient {
             error: serializeError(error)
           })
 
-          shouldStop = 2
+          cancelCode = 'HEADERFUNCTION_ERROR'
 
           return 0
         }
@@ -140,15 +134,15 @@ export class CurlHttpClient implements HttpClient {
 
       curl.setOpt(Curl.option.WRITEFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
         try {
-          if (shouldStop != 0) {
+          if (cancelCode != null) {
             return 0
           }
 
           const chunkSize = size * nmemb
           const chunk = buf.subarray(0, chunkSize)
 
-          if (responseBodySize + chunkSize > responseBodyLimit) {
-            shouldStop = 3
+          if (responseBodySize + chunkSize > request.bodyLimit) {
+            cancelCode = 'CONTENT_TOO_LARGE'
 
             return 0
           }
@@ -163,7 +157,7 @@ export class CurlHttpClient implements HttpClient {
             error: serializeError(error)
           })
 
-          shouldStop = 4
+          cancelCode = 'WRITEFUNCTION_ERROR'
 
           return 0
         }
@@ -171,41 +165,42 @@ export class CurlHttpClient implements HttpClient {
 
       curl.on('end', (status: number) => {
         try {
-          const totalTime = curl.getInfo('TOTAL_TIME_T')
-          const connectTime = curl.getInfo('CONNECT_TIME_T')
-          const httpVersion = curl.getInfo('HTTP_VERSION')
+          const connection = this.parseConnection(curl)
 
           curl.close()
 
-          if (shouldStop != 0) {
-            reject(
-              new HttpClientError(`Response body too large`, {
-                context: {
-                  shouldStop
-                },
-                code: 'BAD_GATEWAY'
-              })
-            )
+          if (cancelCode != null) {
+            const error = new HttpClientError(`Curl perform canceled`, {
+              context: {
+                cancelCode
+              },
+              code: 'INTERNAL_ERROR'
+            })
+
+            resolve({
+              error,
+              status: this.knownCancelCodes[cancelCode] ?? 500,
+              headers: {},
+              body: Buffer.alloc(0),
+              connection
+            })
 
             return
           }
 
           resolve({
+            error: null,
             status,
-            responseHeaders: this.parseHeaders(responseHeaders),
-            responseBody: Buffer.concat(responseBody),
-            connection: {
-              total_time: typeof totalTime === 'number' ? totalTime : null,
-              connect_time: typeof connectTime === 'number' ? connectTime : null,
-              http_version: typeof httpVersion === 'number' ? httpVersion : null
-            }
+            headers: this.parseHeaders(responseHeaders),
+            body: this.parseBody(responseBody),
+            connection
           })
         } catch (error) {
           reject(
             new HttpClientError(`Curl end event error`, {
               cause: error,
               context: {
-                params: [status]
+                status
               },
               code: 'INTERNAL_ERROR'
             })
@@ -217,23 +212,20 @@ export class CurlHttpClient implements HttpClient {
         try {
           curl.close()
 
-          const errorCode = this.knownCurlCodes[curlCode]
-
-          reject(
-            new HttpClientError(`Ordinary request error`, {
-              cause: error,
-              context: {
-                curlCode
-              },
-              code: errorCode ? errorCode : 'INTERNAL_ERROR'
-            })
-          )
+          resolve({
+            error,
+            status: this.knownCurlCodes[curlCode] ?? 500,
+            headers: {},
+            body: Buffer.alloc(0),
+            connection: {}
+          })
         } catch (criticalError) {
           reject(
             new HttpClientError(`Ordinary request critical error`, {
               cause: criticalError,
               context: {
-                params: [error, curlCode]
+                error,
+                curlCode
               },
               code: 'INTERNAL_ERROR'
             })
@@ -245,32 +237,35 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  protected knownCurlCodes: Record<number, HttpClientErrorCode> = {
-    5: 'BAD_GATEWAY', // COULDNT_RESOLVE_PROXY
-    6: 'BAD_GATEWAY', // COULDNT_RESOLVE_HOST
-    7: 'BAD_GATEWAY', // COULDNT_CONNECT
-    28: 'GATEWAY_TIMEOUT', // OPERATION_TIMEDOUT
-    35: 'BAD_GATEWAY' //SSL_CONNECT_ERROR
-  }
-
-  /*
-  streamingRequest(
-    proxy: string,
-    method: string,
-    url: string,
-    requestHeaders: HttpHeaders,
-    requestBody: HttpBody,
-    connectTimeout: number,
-    streamingTimeout: number,
-    responseBodyLimit: number
-  ): Promise<HttpClientStreamingResponse> {
+  streamingRequest(request: HttpClientStreamingRequest): Promise<HttpClientStreamingResponse> {
     return new Promise<HttpClientStreamingResponse>((resolve, reject) => {
-      const curl = new Curl()
-
-      curl.perform()
+      reject(new Error(`Streaming request not supported yet`))
     })
   }
-  */
+
+  protected knownCancelCodes: Record<string, number> = {
+    CONTENT_TOO_LARGE: 502
+  }
+
+  protected knownCurlCodes: Record<number, number> = {
+    5: 502, // COULDNT_RESOLVE_PROXY
+    6: 502, // COULDNT_RESOLVE_HOST
+    7: 502, // COULDNT_CONNECT
+    28: 504, // OPERATION_TIMEDOUT
+    35: 502 //SSL_CONNECT_ERROR
+  }
+
+  protected parseConnection(curl: Curl): HttpConnection {
+    const totalTime = curl.getInfo('TOTAL_TIME_T')
+    const connectTime = curl.getInfo('CONNECT_TIME_T')
+    const httpVersion = curl.getInfo('HTTP_VERSION')
+
+    return {
+      client_total_time: typeof totalTime === 'number' ? totalTime : null,
+      client_connect_time: typeof connectTime === 'number' ? connectTime : null,
+      client_http_version: typeof httpVersion === 'number' ? httpVersion : null
+    }
+  }
 
   protected parseHeaders(curlHeaders: Buffer[]): HttpHeaders {
     const headers: HttpHeaders = {}
@@ -322,6 +317,10 @@ export class CurlHttpClient implements HttpClient {
     })
 
     return curlHeaders
+  }
+
+  protected parseBody(curlBody: Buffer[]): HttpBody {
+    return Buffer.concat(curlBody)
   }
 
   private buildOptions(config: CurlHttpClientConfig): CurlHttpClientOptions {

@@ -1,14 +1,23 @@
 import { HttpStatusWrapper } from '@famir/domain'
 
 export class StdHttpStatusWrapper implements HttpStatusWrapper {
-  #status: number = 0
+  static fromScratch(): HttpStatusWrapper {
+    return new StdHttpStatusWrapper(0)
+  }
 
+  #status: number
   protected isFrozen: boolean = false
 
+  constructor(status: number) {
+    this.#status = status
+  }
+
+  clone(): HttpStatusWrapper {
+    return new StdHttpStatusWrapper(this.#status)
+  }
+
   freeze(): this {
-    if (!this.isFrozen) {
-      this.isFrozen = true
-    }
+    this.isFrozen ||= true
 
     return this
   }
@@ -26,27 +35,27 @@ export class StdHttpStatusWrapper implements HttpStatusWrapper {
   }
 
   isInformation(): boolean {
-    return this.isStatusRange(100, 200)
+    return this.between(100, 200)
   }
 
   isSuccess(): boolean {
-    return this.isStatusRange(200, 300)
+    return this.between(200, 300)
   }
 
   isRedirect(): boolean {
-    return this.isStatusRange(300, 400)
+    return this.between(300, 400)
   }
 
   isClientError(): boolean {
-    return this.isStatusRange(400, 500)
+    return this.between(400, 500)
   }
 
   isServerError(): boolean {
-    return this.isStatusRange( 500, 600)
+    return this.between(500, 600)
   }
 
   isUnknown(): boolean {
-    return !this.isStatusRange(100, 600)
+    return !this.between(100, 600)
   }
 
   reset(): this {
@@ -63,7 +72,7 @@ export class StdHttpStatusWrapper implements HttpStatusWrapper {
     }
   }
 
-  protected isStatusRange(min: number, max: number): boolean {
+  protected between(min: number, max: number): boolean {
     return this.#status >= min && this.#status < max
   }
 }

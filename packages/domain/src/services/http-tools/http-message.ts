@@ -1,52 +1,63 @@
-import { CampaignModel, FullTargetModel } from '../../models/index.js'
-import { HttpBodyWrapper } from './http-body-wrapper.js'
-import { HttpHeadersWrapper } from './http-headers-wrapper.js'
-import { HttpMethodWrapper } from './http-method-wrapper.js'
-import { HttpUrlWrapper } from './http-url-wrapper.js'
-import { HttpStatusWrapper } from './http-status-wrapper.js'
+/*
+import { HttpConnection, HttpPayload, HttpErrors } from '../../http-proto.js'
+import { HttpMethodWrapper } from './http-method.js'
+import { HttpUrlWrapper } from './http-url.js'
+import { HttpHeadersWrapper } from './http-headers.js'
+import { HttpBodyWrapper } from './http-body.js'
+import { HttpStatusWrapper } from './http-status.js'
 
-export interface HttpMessageUrlOptions {
-  rewriteUrl: {
-    schemes: unknown[]
-  }
-  parseQueryString: object
-  formatQueryString: object
+export class HttpMessage {
+  readonly messageId = randomIdent()
+
+  constructor(
+    readonly method: HttpMethodWrapper,
+    readonly url: HttpUrlWrapper,
+    readonly requestHeaders: HttpHeadersWrapper,
+    readonly requestBody: HttpBodyWrapper,
+    readonly status: HttpStatusWrapper,
+    readonly responseHeaders: HttpHeadersWrapper,
+    readonly responseBody: HttpBodyWrapper
+  ) {}
+
+  readonly connection: HttpConnection = {}
+  readonly payload: HttpPayload = {}
+  readonly errors: HttpErrors = []
+  score: number = 0
 }
 
-export type HttpMessageUrlHook = (
-  method: HttpMethodWrapper,
-  url: HttpUrlWrapper,
-  options: HttpMessageUrlOptions
-) => void
-
-export interface HttpMessageHeadersOptions {
-  rewriteUrl: {
-    schemes: unknown[]
-  }
+export interface HttpMessageWrapper {
+  freeze(): this
+  addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this
+  addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this
+  setRequestFrom(
+    url: HttpUrlWrapper,
+    headers: HttpHeadersWrapper,
+    body?: HttpBodyWrapper
+  ): this
+  runRequestInterceptors(withBody: boolean): this
+  getForwardRequest(): HttpMessageForwardRequest
+  addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this
+  addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this
+  setResponseFrom(
+    status: number,
+    headers: HttpStrictHeaders,
+    body?: HttpBody,
+  ): this
+  runResponseInterceptors(withBody: boolean): this
+  setResponseTo(
+    status: HttpStatusWrapper,
+    headers: HttpHeadersWrapper,
+    body?: HttpBodyWrapper,
+  ): this
+  mergeConnection(connection: HttpConnection): this
 }
 
-export type HttpMessageHeadersHook = (
-  method: HttpMethodWrapper,
-  url: HttpUrlWrapper,
-  headers: HttpHeadersWrapper,
-  options: HttpMessageHeadersOptions
-) => void
-
-export interface HttpMessage {
-  readonly messageId: string
-  readonly method: HttpMethodWrapper
-  readonly url: HttpUrlWrapper
-  readonly requestHeaders: HttpHeadersWrapper
-  readonly requestBody: HttpBodyWrapper
-  readonly responseHeaders: HttpHeadersWrapper
-  readonly responseBody: HttpBodyWrapper
-  readonly status: HttpStatusWrapper
-  initRequest(campaign: CampaignModel, target: FullTargetModel): void
-  readonly urlOptions: HttpMessageUrlOptions
-  addUrlHook(name: string, hook: HttpMessageUrlHook): void
-  readonly headersOptions: HttpMessageHeadersOptions
-  addRequestHeadersHook(name: string, hook: HttpMessageHeadersHook): void
-  addResponseHeadersHook(name: string, hook: HttpMessageHeadersHook): void
-  runResponseHooks(): void
-  runRequestHooks(): void
+export interface HttpMessageForwardRequest {
+  method: HttpMethod
+  url: HttpUrl
+  headers: HttpHeaders
+  body: HttpBody
 }
+
+export type HttpMessageInterceptor = (message: HttpMessage) => void
+*/

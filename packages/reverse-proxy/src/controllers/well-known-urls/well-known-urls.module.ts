@@ -1,8 +1,8 @@
 import { DIContainer } from '@famir/common'
 import { WellKnownUrlsController } from './well-known-urls.controller.js'
 
-export const composeWellKnownUrlsModule = (container: DIContainer) => {
+export const composeWellKnownUrlsModule = (container: DIContainer): WellKnownUrlsController => {
   WellKnownUrlsController.inject(container)
 
-  WellKnownUrlsController.resolve(container)
+  return WellKnownUrlsController.resolve(container)
 }

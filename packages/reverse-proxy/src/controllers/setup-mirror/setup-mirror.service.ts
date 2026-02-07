@@ -7,8 +7,8 @@ import {
   FullCampaignModel,
   HttpServerError,
   TARGET_REPOSITORY,
-  TargetRepository,
-  testEnabledTargetModel
+  TargetModel,
+  TargetRepository
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
 import { ListTargetsData, ReadCampaignTargetData } from './setup-mirror.js'
@@ -49,7 +49,7 @@ export class SetupMirrorService extends BaseService {
       })
     }
 
-    if (!(targetModel && testEnabledTargetModel(targetModel))) {
+    if (!(targetModel && TargetModel.isEnabled(targetModel))) {
       throw new HttpServerError(`Target not found`, {
         code: 'SERVICE_UNAVAILABLE'
       })
@@ -67,6 +67,6 @@ export class SetupMirrorService extends BaseService {
       })
     }
 
-    return collection.filter(testEnabledTargetModel)
+    return collection.filter(TargetModel.isEnabled)
   }
 }

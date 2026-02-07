@@ -10,7 +10,6 @@ import {
   SESSION_REPOSITORY,
   SessionModel,
   SessionRepository,
-  testSessionModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -128,22 +127,22 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
     this.validateRawData<RawSession>('database-raw-session', rawModel)
 
-    return {
-      campaignId: rawModel.campaign_id,
-      sessionId: rawModel.session_id,
-      proxyId: rawModel.proxy_id,
-      secret: rawModel.secret,
-      isLanding: !!rawModel.is_landing,
-      messageCount: rawModel.message_count,
-      createdAt: new Date(rawModel.created_at),
-      lastAuthAt: new Date(rawModel.last_auth_at)
-    }
+    return new SessionModel(
+      rawModel.campaign_id,
+      rawModel.session_id,
+      rawModel.proxy_id,
+      rawModel.secret,
+      !!rawModel.is_landing,
+      rawModel.message_count,
+      new Date(rawModel.created_at),
+      new Date(rawModel.last_auth_at)
+    )
   }
 
   protected buildModelStrict(rawModel: unknown): SessionModel {
     const model = this.buildModel(rawModel)
 
-    if (!testSessionModel(model)) {
+    if (!SessionModel.isNotNull(model)) {
       throw new DatabaseError(`Session unexpected lost`, {
         code: 'INTERNAL_ERROR'
       })

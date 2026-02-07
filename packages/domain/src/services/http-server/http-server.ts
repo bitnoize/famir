@@ -1,5 +1,10 @@
-import { HttpBody, HttpState } from '../../http-proto.js'
-import { HttpStatusWrapper, HttpHeadersWrapper, HttpMethodWrapper, HttpUrlWrapper, HttpBodyWrapper } from '../http-tools/index.js'
+import {
+  HttpBodyWrapper,
+  HttpHeadersWrapper,
+  HttpMethodWrapper,
+  HttpStatusWrapper,
+  HttpUrlWrapper
+} from '../http-tools/index.js'
 
 export const HTTP_SERVER = Symbol('HttpServer')
 
@@ -8,16 +13,18 @@ export interface HttpServer {
   stop(): Promise<void>
 }
 
+export type HttpServerContextState = Record<string, unknown>
+
 export interface HttpServerContext {
-  readonly state: HttpState
+  readonly state: HttpServerContextState
   readonly middlewares: string[]
   readonly method: HttpMethodWrapper
   readonly url: HttpUrlWrapper
   readonly requestHeaders: HttpHeadersWrapper
   readonly requestBody: HttpBodyWrapper
+  readonly status: HttpStatusWrapper
   readonly responseHeaders: HttpHeadersWrapper
   readonly responseBody: HttpBodyWrapper
-  readonly status: HttpStatusWrapper
   loadRequest(bodyLimit: number): Promise<void>
   sendResponse(): Promise<void>
   readonly isBot: boolean

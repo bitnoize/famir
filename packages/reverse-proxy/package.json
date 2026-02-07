@@ -15,7 +15,6 @@
     "@famir/config": "*",
     "@famir/database": "*",
     "@famir/domain": "*",
-    "@famir/http-tools": "*",
     "@famir/http-client": "*",
     "@famir/http-server": "*",
     "@famir/logger": "*",

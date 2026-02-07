@@ -9,7 +9,6 @@ import {
   PROXY_REPOSITORY,
   ProxyModel,
   ProxyRepository,
-  testProxyModel,
   Validator,
   VALIDATOR
 } from '@famir/domain'
@@ -158,20 +157,20 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
     this.validateRawData<RawProxy>('database-raw-proxy', rawModel)
 
-    return {
-      campaignId: rawModel.campaign_id,
-      proxyId: rawModel.proxy_id,
-      url: rawModel.url,
-      isEnabled: !!rawModel.is_enabled,
-      messageCount: rawModel.message_count,
-      createdAt: new Date(rawModel.created_at),
-      updatedAt: new Date(rawModel.updated_at)
-    }
+    return new ProxyModel(
+      rawModel.campaign_id,
+      rawModel.proxy_id,
+      rawModel.url,
+      !!rawModel.is_enabled,
+      rawModel.message_count,
+      new Date(rawModel.created_at),
+      new Date(rawModel.updated_at)
+    )
   }
 
   protected buildCollection(rawCollection: unknown): ProxyModel[] {
     this.validateArrayReply(rawCollection)
 
-    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(testProxyModel)
+    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(ProxyModel.isNotNull)
   }
 }

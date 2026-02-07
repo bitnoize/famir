@@ -121,25 +121,25 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
     this.validateRawData<RawMessage>('database-raw-message', rawModel)
 
-    return {
-      campaignId: rawModel.campaign_id,
-      messageId: rawModel.message_id,
-      proxyId: rawModel.proxy_id,
-      targetId: rawModel.target_id,
-      sessionId: rawModel.session_id,
-      method: rawModel.method,
-      url: rawModel.url,
-      isStreaming: !!rawModel.is_streaming,
-      status: rawModel.status,
-      score: rawModel.score,
-      createdAt: new Date(rawModel.created_at)
-    }
+    return new MessageModel(
+      rawModel.campaign_id,
+      rawModel.message_id,
+      rawModel.proxy_id,
+      rawModel.target_id,
+      rawModel.session_id,
+      rawModel.method,
+      rawModel.url,
+      !!rawModel.is_streaming,
+      rawModel.status,
+      rawModel.score,
+      new Date(rawModel.created_at)
+    )
   }
 
   protected buildModelStrict(rawModel: unknown): MessageModel {
     const model = this.buildModel(rawModel)
 
-    if (!testMessageModel(model)) {
+    if (!MessageModel.isNotNull(model)) {
       throw new DatabaseError(`Message unexpected lost`, {
         code: 'INTERNAL_ERROR'
       })
@@ -156,27 +156,27 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
     this.validateRawData<RawFullMessage>('database-raw-full-message', rawFullModel)
 
-    return {
-      campaignId: rawFullModel.campaign_id,
-      messageId: rawFullModel.message_id,
-      proxyId: rawFullModel.proxy_id,
-      targetId: rawFullModel.target_id,
-      sessionId: rawFullModel.session_id,
-      method: rawFullModel.method,
-      url: rawFullModel.url,
-      isStreaming: !!rawFullModel.is_streaming,
-      requestHeaders: this.parseHeaders(rawFullModel.request_headers),
-      requestBody: this.decodeBase64(rawFullModel.request_body),
-      responseHeaders: this.parseHeaders(rawFullModel.response_headers),
-      responseBody: this.decodeBase64(rawFullModel.response_body),
-      clientIp: rawFullModel.client_ip,
-      status: rawFullModel.status,
-      score: rawFullModel.score,
-      startTime: rawFullModel.start_time,
-      finishTime: rawFullModel.finish_time,
-      connection: this.parseConnection(rawFullModel.connection),
-      createdAt: new Date(rawFullModel.created_at)
-    }
+    return new FullMessageModel(
+      rawFullModel.campaign_id,
+      rawFullModel.message_id,
+      rawFullModel.proxy_id,
+      rawFullModel.target_id,
+      rawFullModel.session_id,
+      rawFullModel.method,
+      rawFullModel.url,
+      !!rawFullModel.is_streaming,
+      this.parseHeaders(rawFullModel.request_headers),
+      this.decodeBase64(rawFullModel.request_body),
+      this.parseHeaders(rawFullModel.response_headers),
+      this.decodeBase64(rawFullModel.response_body),
+      rawFullModel.client_ip,
+      rawFullModel.status,
+      rawFullModel.score,
+      rawFullModel.start_time,
+      rawFullModel.finish_time,
+      this.parseConnection(rawFullModel.connection),
+      new Date(rawFullModel.created_at)
+    )
   }
 
   protected parseHeaders(value: string): HttpHeaders {

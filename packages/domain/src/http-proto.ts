@@ -1,5 +1,3 @@
-export type HttpState = Record<string, unknown>
-
 export const HTTP_METHODS = ['HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
 export type HttpMethod = (typeof HTTP_METHODS)[number]
 
@@ -12,15 +10,17 @@ export interface HttpUrl {
   hash: string
 }
 
-//export type HttpUrlQuery = Record<string, string | string[] | undefined>
-
 export type HttpHeader = string | string[]
 
 export type HttpHeaders = Record<string, HttpHeader | undefined>
 export type HttpStrictHeaders = Record<string, HttpHeader>
 
-export type HttpCookie = string
+export interface HttpContentType {
+  type: string
+  parameters: Record<string, string>
+}
 
+export type HttpCookie = string
 export type HttpCookies = Record<string, HttpCookie | undefined>
 
 export interface HttpSetCookie {
@@ -33,21 +33,25 @@ export interface HttpSetCookie {
   httpOnly?: boolean
   sameSite?: string
 }
-
 export type HttpSetCookies = Record<string, HttpSetCookie | undefined>
-
-export interface HttpContentType {
-  type: string
-  parameters: Record<string, string>
-}
 
 export type HttpBody = Buffer
 
-export interface HttpConnection {
-  total_time?: number | null | undefined
-  connect_time?: number | null | undefined
-  http_version?: number | null | undefined
-  // ...
-}
+export type HttpText = string
+
+export type HttpJson = NonNullable<unknown>
 
 export type HttpQueryString = Record<string, unknown>
+export interface HttpParseQueryStringOptions {
+  // ...
+}
+export interface HttpFormatQueryStringOptions {
+  // ..
+}
+
+export type HttpConnection = Record<string, number | string | null | undefined>
+
+export type HttpPayload = Record<string, unknown>
+
+export type HttpError = [unknown, ...string[]]
+export type HttpErrors = HttpError[]

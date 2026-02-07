@@ -11,7 +11,7 @@ import {
   RedisTargetRepository
 } from '@famir/database'
 import { CurlHttpClient } from '@famir/http-client'
-import { StdHttpServerRouter, StdHttpServer } from '@famir/http-server'
+import { StdHttpServer, StdHttpServerRouter } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
 import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'

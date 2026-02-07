@@ -8,32 +8,18 @@ import {
   HttpStrictHeaders
 } from '@famir/domain'
 import contenttype from 'content-type'
-import { IncomingMessage, ServerResponse } from 'node:http'
 import { Cookie } from 'tough-cookie'
 
 export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
-  static fromReq(req: IncomingMessage): HttpHeadersWrapper {
-    const headers: HttpHeaders = { ...req.headers }
-
-    return new StdHttpHeadersWrapper(headers)
+  static fromReq(req: { headers: HttpHeaders }): HttpHeadersWrapper {
+    return new StdHttpHeadersWrapper(req.headers)
   }
 
-  static fromRes(res: ServerResponse): HttpHeadersWrapper {
-    const headers: HttpHeaders = {}
-
-    res.getHeaderNames().forEach((name) => {
-      const value = res.getHeader(name)
-
-      if (value != null) {
-        headers[name] = typeof value === 'string' ? value : value.toString()
-      }
-    })
-
-    return new StdHttpHeadersWrapper(headers)
+  static fromScratch(): HttpHeadersWrapper {
+    return new StdHttpHeadersWrapper({})
   }
 
   #headers: HttpHeaders
-
   protected isFrozen: boolean = false
 
   constructor(headers: HttpHeaders) {
@@ -41,7 +27,7 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
   }
 
   clone(): HttpHeadersWrapper {
-    return new StdHttpHeadersWrapper(this.#headers)
+    return new StdHttpHeadersWrapper({ ...this.#headers })
   }
 
   freeze(): this {
@@ -84,14 +70,14 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     return [value]
   }
 
-  set(name: string, value: HttpHeader | undefined, force = false): this {
+  set(name: string, value: HttpHeader): this {
     this.sureNotFrozen('set')
 
     name = name.toLowerCase()
 
-    if (value != null || force) {
-      this.#headers[name] = value
-    }
+    this.invalidateCacheFor(name)
+
+    this.#headers[name] = value
 
     return this
   }
@@ -104,11 +90,11 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     const curValue = this.#headers[name]
 
     if (curValue == null) {
-      this.#headers[name] = value
+      this.set(name, value)
     } else if (Array.isArray(curValue)) {
-      this.#headers[name] = [...curValue, value]
+      this.set(name, [...curValue, value])
     } else {
-      this.#headers[name] = [curValue, value]
+      this.set(name, [curValue, value])
     }
 
     return this
@@ -126,17 +112,21 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     const names = Array.isArray(arg) ? arg : [arg]
 
     names.forEach((name) => {
-      this.set(name, undefined, true)
+      this.invalidateCacheFor(name)
+
+      this.#headers[name] = undefined
     })
 
     return this
   }
 
-  merge(headers: HttpHeaders, force = false): this {
+  merge(headers: HttpHeaders): this {
     this.sureNotFrozen('merge')
 
     Object.entries(headers).forEach(([name, value]) => {
-      this.set(name, value, force)
+      if (value != null) {
+        this.set(name, value)
+      }
     })
 
     return this
@@ -145,14 +135,26 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
   reset(): this {
     this.sureNotFrozen('reset')
 
+    this.invalidateCacheAll()
+
     this.#headers = {}
 
     return this
   }
 
+  #cacheContentType: HttpContentType | null = null
+
   getContentType(): HttpContentType {
+    if (this.#cacheContentType != null) {
+      return this.#cacheContentType
+    }
+
     const value = this.getString('Content-Type') ?? ''
-    return contenttype.parse(value)
+    const contentType = contenttype.parse(value)
+
+    this.#cacheContentType = contentType
+
+    return contentType
   }
 
   setContentType(contentType: HttpContentType): this {
@@ -161,12 +163,24 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     const value = contenttype.format(contentType)
     this.set('Content-Type', value)
 
+    this.#cacheContentType = contentType
+
     return this
   }
 
+  #cacheCookies: HttpCookies | null = null
+
   getCookies(): HttpCookies {
+    if (this.#cacheCookies != null) {
+      return this.#cacheCookies
+    }
+
     const value = this.getString('Cookie') ?? ''
-    return this.parseCookies(value)
+    const cookies = this.parseCookies(value)
+
+    this.#cacheCookies = cookies
+
+    return cookies
   }
 
   setCookies(cookies: HttpCookies): this {
@@ -175,19 +189,33 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     const value = this.formatCookies(cookies)
     this.set('Cookie', value)
 
+    this.#cacheCookies = cookies
+
     return this
   }
 
+  #cacheSetCookies: HttpSetCookies | null = null
+
   getSetCookies(): HttpSetCookies {
+    if (this.#cacheSetCookies != null) {
+      return this.#cacheSetCookies
+    }
+
     const values = this.getArray('Set-Cookie') ?? []
-    return this.parseSetCookies(values)
+    const setCookies = this.parseSetCookies(values)
+
+    this.#cacheSetCookies = setCookies
+
+    return setCookies
   }
 
-  setSetCookies(cookies: HttpSetCookies): this {
+  setSetCookies(setCookies: HttpSetCookies): this {
     this.sureNotFrozen('setSetCookies')
 
-    const values = this.formatSetCookies(cookies)
+    const values = this.formatSetCookies(setCookies)
     this.set('Set-Cookie', values)
+
+    this.#cacheSetCookies = setCookies
 
     return this
   }
@@ -220,6 +248,22 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     if (this.isFrozen) {
       throw new Error(`Headers frozen on ${name}`)
     }
+  }
+
+  protected invalidateCacheFor(name: string) {
+    if (name === 'content-type') {
+      this.#cacheContentType = null
+    } else if (name === 'cookie') {
+      this.#cacheCookies = null
+    } else if (name === 'set-cookie') {
+      this.#cacheSetCookies = null
+    }
+  }
+
+  protected invalidateCacheAll() {
+    this.#cacheContentType = null
+    this.#cacheCookies = null
+    this.#cacheSetCookies = null
   }
 
   private parseCookies(value: string): HttpCookies {

@@ -5,7 +5,7 @@ import {
   Logger,
   Validator
 } from '@famir/domain'
-import { ReverseProxyState } from './base.js'
+import { ReverseProxyState } from '../../reverse-proxy.js'
 
 export abstract class BaseController {
   constructor(
@@ -68,7 +68,7 @@ export abstract class BaseController {
         'Content-Type': 'text/html',
         'Content-Length': body.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400',
+        'Cache-Control': 'public, max-age=86400'
       })
 
       ctx.status.set(200)
@@ -91,7 +91,7 @@ export abstract class BaseController {
 
     ctx.responseHeaders.merge({
       'Content-Type': 'text/html',
-      'Content-Length': body.length.toString(),
+      'Content-Length': body.length.toString()
     })
 
     ctx.responseBody.set(body)

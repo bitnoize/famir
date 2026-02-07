@@ -80,6 +80,11 @@ export class StdHttpServer implements HttpServer {
           code: 'INTERNAL_ERROR'
         })
       }
+
+      this.logger.debug(`HttpServer request complete`, {
+        request: this.dumpRequest(req),
+        middlewares: ctx.middlewares
+      })
     } catch (error) {
       this.handleRequestError(error, req, res)
     }
@@ -94,6 +99,11 @@ export class StdHttpServer implements HttpServer {
       message = `Internal server error`
 
     try {
+      this.logger.error(`HttpServer request error`, {
+        error: serializeError(error),
+        request: this.dumpRequest(req)
+      })
+
       if (error instanceof HttpServerError) {
         status = error.status
         message = error.message
@@ -113,12 +123,11 @@ export class StdHttpServer implements HttpServer {
       } else {
         res.end()
       }
-
-      this.logger.error(`HttpServer request error`, {
-        error: serializeError(error),
-        request: this.dumpRequest(req)
-      })
     } catch (criticalError) {
+      this.logger.fatal(`HttpServer request critical error`, {
+        criticalError: serializeError(criticalError)
+      })
+
       if (!res.headersSent) {
         res.writeHead(status, {
           'content-type': 'text/plain'
@@ -128,12 +137,6 @@ export class StdHttpServer implements HttpServer {
       } else {
         res.end()
       }
-
-      this.logger.fatal(`HttpServer request critical error`, {
-        criticalError: serializeError(criticalError),
-        error: serializeError(error),
-        request: this.dumpRequest(req)
-      })
     }
   }
 

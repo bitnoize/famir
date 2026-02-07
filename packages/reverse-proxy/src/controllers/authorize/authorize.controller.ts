@@ -54,10 +54,16 @@ export class AuthorizeController extends BaseController {
 
     this.validator.addSchemas(authorizeSchemas)
 
-    this.router.register('authorize', this.authorize)
+    this.logger.debug(`AuthorizeController initialized`)
   }
 
-  protected authorize: HttpServerMiddleware = async (ctx, next) => {
+  register(): this {
+    this.router.register('authorize', this.authorizeMiddleware)
+
+    return this
+  }
+
+  private authorizeMiddleware: HttpServerMiddleware = async (ctx, next) => {
     const campaign = this.getState(ctx, 'campaign')
     const target = this.getState(ctx, 'target')
 
@@ -98,7 +104,7 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  private async landingUpgradeSession(
+  protected async landingUpgradeSession(
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): Promise<void> {
@@ -159,7 +165,7 @@ export class AuthorizeController extends BaseController {
     await this.renderMainRedirect(ctx)
   }
 
-  private async landingRedirectorSession(
+  protected async landingRedirectorSession(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
@@ -216,7 +222,7 @@ export class AuthorizeController extends BaseController {
     await this.renderRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
   }
 
-  private async landingAuthSession(
+  protected async landingAuthSession(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
@@ -282,7 +288,7 @@ export class AuthorizeController extends BaseController {
     await next()
   }
 
-  private async transparentSession(
+  protected async transparentSession(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
@@ -401,11 +407,11 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel
   ): LandingUpgradeData {
     try {
-      const searchParams = ctx.url.getSearchParams()
-      const value = searchParams[campaign.landingUpgradeParam]
+      const queryString = ctx.url.getQueryString()
+      const value = queryString[campaign.landingUpgradeParam]
 
       if (!(value != null && typeof value === 'string')) {
-        throw new Error(`Value is not a string`)
+        throw new Error(`Landing upgrade param is not a string`)
       }
 
       const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
@@ -426,11 +432,11 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel
   ): LandingRedirectorData {
     try {
-      const searchParams = ctx.url.getSearchParams()
-      const value = searchParams[campaign.landingRedirectorParam]
+      const queryString = ctx.url.getQueryString()
+      const value = queryString[campaign.landingRedirectorParam]
 
       if (!(value != null && typeof value === 'string')) {
-        throw new Error(`Value is not a string`)
+        throw new Error(`Landing redirector param is not a string`)
       }
 
       const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
@@ -449,7 +455,7 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  private async renderCloakingSite(
+  protected async renderCloakingSite(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
@@ -460,7 +466,7 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  private async renderRedirectorPage(
+  protected async renderRedirectorPage(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
@@ -476,7 +482,7 @@ export class AuthorizeController extends BaseController {
         'Content-Type': 'text/html',
         'Content-Length': body.length.toString(),
         'Last-Modified': redirector.updatedAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400',
+        'Cache-Control': 'public, max-age=86400'
       })
 
       if (ctx.method.is('GET')) {

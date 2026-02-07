@@ -168,15 +168,19 @@ const messageConnectionSchema: JSONSchemaType<HttpConnection> = {
   type: 'object',
   required: [],
   properties: {
-    total_time: {
+    server_http_version: {
       type: 'integer',
       nullable: true
     },
-    connect_time: {
+    client_total_time: {
       type: 'integer',
       nullable: true
     },
-    http_version: {
+    client_connect_time: {
+      type: 'integer',
+      nullable: true
+    },
+    client_http_version: {
       type: 'integer',
       nullable: true
     }

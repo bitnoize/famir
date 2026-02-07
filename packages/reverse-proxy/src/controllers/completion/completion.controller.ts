@@ -39,37 +39,43 @@ export class CompletionController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.router.register('completion', this.completion)
-
     this.logger.debug(`CompletionController initialized`)
   }
 
-  protected completion: HttpServerMiddleware = async (ctx, next) => {
+  register(): this {
+    this.router.register('completion', this.completionMiddleware)
+
+    return this
+  }
+
+  private completionMiddleware: HttpServerMiddleware = async (ctx, next) => {
     const campaign = this.getState(ctx, 'campaign')
     const proxy = this.getState(ctx, 'proxy')
     const target = this.getState(ctx, 'target')
     const session = this.getState(ctx, 'session')
-    const message = this.getState(ctx, 'message')
+    const forward = this.getState(ctx, 'forward')
 
     await this.completionService.createMessage({
       campaignId: campaign.campaignId,
-      messageId: message.messageId,
+      messageId: forward.message.id,
       proxyId: proxy.proxyId,
       targetId: target.targetId,
       sessionId: session.sessionId,
-      method: message.method.get(),
-      url: message.url.toString(true),
+      method: forward.message.method.get(),
+      url: forward.message.url.toString(true),
       isStreaming: false,
-      requestHeaders: message.requestHeaders.toObject(),
-      requestBody: message.requestBody.get(),
-      responseHeaders: message.responseHeaders.toObject(),
-      responseBody: message.responseBody.get(),
-      status: 0,
-      clientIp: ctx.ips.join('\t'),
-      score: 0,
+      requestHeaders: forward.message.requestHeaders.toObject(),
+      requestBody: forward.message.requestBody.get(),
+      status: forward.message.status.get(),
+      responseHeaders: forward.message.responseHeaders.toObject(),
+      responseBody: forward.message.responseBody.get(),
+      connection: forward.message.connection,
+      //payload: forward.message.payload,
+      //errors: forward.message.errors,
+      score: forward.message.score,
+      clientIp: ctx.ip ?? '',
       startTime: ctx.startTime,
-      finishTime: ctx.finishTime,
-      connection: {}
+      finishTime: ctx.finishTime
     })
 
     await next()
