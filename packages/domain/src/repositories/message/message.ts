@@ -1,4 +1,4 @@
-import { HttpBody, HttpConnection, HttpHeaders } from '../../http-proto.js'
+import { HttpPayload, HttpError, HttpBody, HttpConnection, HttpHeaders } from '../../http-proto.js'
 import { FullMessageModel } from '../../models/index.js'
 
 export const MESSAGE_REPOSITORY = Symbol('MessageRepository')
@@ -10,19 +10,21 @@ export interface MessageRepository {
     proxyId: string,
     targetId: string,
     sessionId: string,
+    kind: string,
     method: string,
     url: string,
-    isStreaming: boolean,
     requestHeaders: HttpHeaders,
     requestBody: HttpBody,
+    status: number,
     responseHeaders: HttpHeaders,
     responseBody: HttpBody,
-    clientIp: string,
-    status: number,
+    connection: HttpConnection,
+    payload: HttpPayload,
+    errors: HttpError[],
     score: number,
+    ip: string,
     startTime: number,
     finishTime: number,
-    connection: HttpConnection
   ): Promise<void>
   read(campaignId: string, messageId: string): Promise<FullMessageModel | null>
 }

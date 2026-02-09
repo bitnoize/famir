@@ -57,7 +57,7 @@ export class TargetService extends BaseService {
         data.lockCode
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
       throw error
     }
@@ -93,7 +93,7 @@ export class TargetService extends BaseService {
         data.lockCode
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
@@ -103,7 +103,7 @@ export class TargetService extends BaseService {
     try {
       await this.targetRepository.enable(data.campaignId, data.targetId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
@@ -113,7 +113,7 @@ export class TargetService extends BaseService {
     try {
       await this.targetRepository.disable(data.campaignId, data.targetId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
@@ -128,7 +128,7 @@ export class TargetService extends BaseService {
         data.lockCode
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
@@ -143,7 +143,7 @@ export class TargetService extends BaseService {
         data.lockCode
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
@@ -153,7 +153,7 @@ export class TargetService extends BaseService {
     try {
       await this.targetRepository.delete(data.campaignId, data.targetId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }

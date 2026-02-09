@@ -55,25 +55,27 @@ export class CompletionController extends BaseController {
     const session = this.getState(ctx, 'session')
     const forward = this.getState(ctx, 'forward')
 
+    const message = forward.message
+
     await this.completionService.createMessage({
       campaignId: campaign.campaignId,
       messageId: forward.message.id,
       proxyId: proxy.proxyId,
       targetId: target.targetId,
       sessionId: session.sessionId,
-      method: forward.message.method.get(),
-      url: forward.message.url.toString(true),
-      isStreaming: false,
-      requestHeaders: forward.message.requestHeaders.toObject(),
-      requestBody: forward.message.requestBody.get(),
-      status: forward.message.status.get(),
-      responseHeaders: forward.message.responseHeaders.toObject(),
-      responseBody: forward.message.responseBody.get(),
-      connection: forward.message.connection,
-      //payload: forward.message.payload,
-      //errors: forward.message.errors,
-      score: forward.message.score,
-      clientIp: ctx.ip ?? '',
+      kind: forward.kind,
+      method: message.method.get(),
+      url: message.url.toRelative(),
+      requestHeaders: message.requestHeaders.toObject(),
+      requestBody: message.requestBody.get(),
+      status: message.status.get(),
+      responseHeaders: message.responseHeaders.toObject(),
+      responseBody: message.responseBody.get(),
+      connection: message.connection,
+      payload: message.payload,
+      errors: message.errors,
+      score: message.score,
+      ip: ctx.ip,
       startTime: ctx.startTime,
       finishTime: ctx.finishTime
     })

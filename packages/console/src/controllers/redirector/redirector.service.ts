@@ -37,7 +37,7 @@ export class RedirectorService extends BaseService {
         data.lockCode
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
       throw error
     }
@@ -64,7 +64,7 @@ export class RedirectorService extends BaseService {
         data.lockCode
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
@@ -74,7 +74,7 @@ export class RedirectorService extends BaseService {
     try {
       await this.redirectorRepository.delete(data.campaignId, data.redirectorId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }

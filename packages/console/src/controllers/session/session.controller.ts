@@ -43,12 +43,16 @@ export class SessionController extends BaseController {
 
     this.validator.addSchemas(sessionSchemas)
 
-    this.router.register('readSession', this.readSession)
-
     this.logger.debug(`SessionController initialized`)
   }
 
-  private readSession: ReplServerApiCall = async (data) => {
+  register(): this {
+    this.router.register('readSession', this.readSessionApiCall)
+
+    return this
+  }
+
+  private readSessionApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ReadSessionData>('console-read-session-data', data)
 
     return await this.sessionService.read(data)

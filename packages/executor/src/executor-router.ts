@@ -26,7 +26,7 @@ export class ImplExecutorRouter implements ExecutorRouter {
     this.map = Object.fromEntries(queueNames.map((queueName) => [queueName, {}]))
   }
 
-  addProcessor(queueName: string, jobName: string, processor: ExecutorProcessor) {
+  addProcessor(queueName: string, jobName: string, processor: ExecutorProcessor): this {
     if (!this.map[queueName]) {
       throw new Error(`Queue not known`)
     }
@@ -36,6 +36,8 @@ export class ImplExecutorRouter implements ExecutorRouter {
     }
 
     this.map[queueName][jobName] = processor
+
+    return this
   }
 
   getProcessor(queueName: string, jobName: string): ExecutorProcessor {

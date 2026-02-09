@@ -14,10 +14,10 @@ export class StdHttpUrlWrapper implements HttpUrlWrapper {
       throw new Error(`Url not defined`)
     }
 
-    return StdHttpUrlWrapper.fromString(req.url)
+    return StdHttpUrlWrapper.fromRelative(req.url)
   }
 
-  static fromString(value: string): HttpUrlWrapper {
+  static fromRelative(value: string): HttpUrlWrapper {
     const parsedUrl = URL.parse(value, 'http://localhost')
 
     if (!parsedUrl) {
@@ -28,6 +28,23 @@ export class StdHttpUrlWrapper implements HttpUrlWrapper {
       protocol: 'http:',
       hostname: 'localhost',
       port: '80',
+      pathname: parsedUrl.pathname,
+      search: parsedUrl.search,
+      hash: parsedUrl.hash
+    })
+  }
+
+  static fromAbsolute(value: string): HttpUrlWrapper {
+    const parsedUrl = URL.parse(value)
+
+    if (!parsedUrl) {
+      throw new Error(`Url parse error`)
+    }
+
+    return new StdHttpUrlWrapper({
+      protocol: parsedUrl.protocol,
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port,
       pathname: parsedUrl.pathname,
       search: parsedUrl.search,
       hash: parsedUrl.hash
@@ -162,12 +179,23 @@ export class StdHttpUrlWrapper implements HttpUrlWrapper {
     return { ...this.#url }
   }
 
-  toString(relative = false): string {
+  toRelative(): string {
+    const { pathname, search, hash } = this.#url
+
+    return [pathname, search, hash].join('')
+  }
+
+  toAbsolute(): string {
     const { protocol, pathname, search, hash } = this.#url
 
-    return relative
-      ? [pathname, search, hash].join('')
-      : [protocol, '//', this.getHost(), pathname, search, hash].join('')
+    return [
+      protocol,
+      '//',
+      this.getHost(),
+      pathname,
+      search,
+      hash
+    ].join('')
   }
 
   protected sureNotFrozen(name: string) {

@@ -49,16 +49,21 @@ export class RedirectorController extends BaseController {
 
     this.validator.addSchemas(redirectorSchemas)
 
-    this.router.register('createRedirector', this.createRedirector)
-    this.router.register('readRedirector', this.readRedirector)
-    this.router.register('updateRedirector', this.updateRedirector)
-    this.router.register('deleteRedirector', this.deleteRedirector)
-    this.router.register('listRedirectors', this.listRedirectors)
-
     this.logger.debug(`RedirectorController initialized`)
   }
 
-  private createRedirector: ReplServerApiCall = async (data) => {
+  register(): this {
+    this.router
+      .register('createRedirector', this.createRedirectorApiCall)
+      .register('readRedirector', this.readRedirectorApiCall)
+      .register('updateRedirector', this.updateRedirectorApiCall)
+      .register('deleteRedirector', this.deleteRedirectorApiCall)
+      .register('listRedirectors', this.listRedirectorsApiCall)
+
+    return this
+  }
+
+  private createRedirectorApiCall: ReplServerApiCall = async (data) => {
     this.validateData<CreateRedirectorData>('console-create-redirector-data', data)
 
     await this.redirectorService.create(data)
@@ -66,13 +71,13 @@ export class RedirectorController extends BaseController {
     return true
   }
 
-  private readRedirector: ReplServerApiCall = async (data) => {
+  private readRedirectorApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ReadRedirectorData>('console-read-redirector-data', data)
 
     return await this.redirectorService.read(data)
   }
 
-  private updateRedirector: ReplServerApiCall = async (data) => {
+  private updateRedirectorApiCall: ReplServerApiCall = async (data) => {
     this.validateData<UpdateRedirectorData>('console-update-redirector-data', data)
 
     await this.redirectorService.update(data)
@@ -80,7 +85,7 @@ export class RedirectorController extends BaseController {
     return true
   }
 
-  private deleteRedirector: ReplServerApiCall = async (data) => {
+  private deleteRedirectorApiCall: ReplServerApiCall = async (data) => {
     this.validateData<DeleteRedirectorData>('console-delete-redirector-data', data)
 
     await this.redirectorService.delete(data)
@@ -88,7 +93,7 @@ export class RedirectorController extends BaseController {
     return true
   }
 
-  private listRedirectors: ReplServerApiCall = async (data) => {
+  private listRedirectorsApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ListRedirectorsData>('console-list-redirectors-data', data)
 
     return await this.redirectorService.list(data)

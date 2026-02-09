@@ -50,36 +50,41 @@ export class CampaignController extends BaseController {
 
     this.validator.addSchemas(campaignSchemas)
 
-    this.router.register('createCampaign', this.createCampaign)
-    this.router.register('readCampaign', this.readCampaign)
-    this.router.register('lockCampaign', this.lockCampaign)
-    this.router.register('unlockCampaign', this.unlockCampaign)
-    this.router.register('updateCampaign', this.updateCampaign)
-    this.router.register('deleteCampaign', this.deleteCampaign)
-    this.router.register('listCampaigns', this.listCampaigns)
-
     this.logger.debug(`CampaignController initialized`)
   }
 
-  private createCampaign: ReplServerApiCall = async (data) => {
+  register(): this {
+    this.router
+      .register('createCampaign', this.createCampaignApiCall)
+      .register('readCampaign', this.readCampaignApiCall)
+      .register('lockCampaign', this.lockCampaignApiCall)
+      .register('unlockCampaign', this.unlockCampaignApiCall)
+      .register('updateCampaign', this.updateCampaignApiCall)
+      .register('deleteCampaign', this.deleteCampaignApiCall)
+      .register('listCampaigns', this.listCampaignsApiCall)
+
+    return this
+  }
+
+  private createCampaignApiCall: ReplServerApiCall = async (data) => {
     this.validateData<CreateCampaignData>('console-create-campaign-data', data)
 
     return await this.campaignService.create(data)
   }
 
-  private readCampaign: ReplServerApiCall = async (data) => {
+  private readCampaignApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ReadCampaignData>('console-read-campaign-data', data)
 
     return await this.campaignService.read(data)
   }
 
-  private lockCampaign: ReplServerApiCall = async (data) => {
+  private lockCampaignApiCall: ReplServerApiCall = async (data) => {
     this.validateData<LockCampaignData>('console-lock-campaign-data', data)
 
     return await this.campaignService.lock(data)
   }
 
-  private unlockCampaign: ReplServerApiCall = async (data) => {
+  private unlockCampaignApiCall: ReplServerApiCall = async (data) => {
     this.validateData<UnlockCampaignData>('console-unlock-campaign-data', data)
 
     await this.campaignService.unlock(data)
@@ -87,7 +92,7 @@ export class CampaignController extends BaseController {
     return true
   }
 
-  private updateCampaign: ReplServerApiCall = async (data) => {
+  private updateCampaignApiCall: ReplServerApiCall = async (data) => {
     this.validateData<UpdateCampaignData>('console-update-campaign-data', data)
 
     await this.campaignService.update(data)
@@ -95,7 +100,7 @@ export class CampaignController extends BaseController {
     return true
   }
 
-  private deleteCampaign: ReplServerApiCall = async (data) => {
+  private deleteCampaignApiCall: ReplServerApiCall = async (data) => {
     this.validateData<DeleteCampaignData>('console-delete-campaign-data', data)
 
     await this.campaignService.delete(data)
@@ -103,7 +108,7 @@ export class CampaignController extends BaseController {
     return true
   }
 
-  private listCampaigns: ReplServerApiCall = async () => {
+  private listCampaignsApiCall: ReplServerApiCall = async () => {
     return await this.campaignService.list()
   }
 }

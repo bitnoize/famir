@@ -1,5 +1,5 @@
 export * from './cli-repl-server.js'
-export * from './impl-repl-server-router.js'
+export * from './std-repl-server-router.js'
 export * from './net-repl-server.js'
 export * from './repl-server.js'
 export * from './repl-server.schemas.js'

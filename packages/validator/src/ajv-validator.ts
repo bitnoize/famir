@@ -17,14 +17,16 @@ export class AjvValidator implements Validator {
       removeAdditional: true,
       allowUnionTypes: true,
       strictTypes: true,
-      strictTuples: true
+      //strictTuples: true
     })
   }
 
-  addSchemas(schemas: ValidatorSchemas) {
+  addSchemas(schemas: ValidatorSchemas): this {
     Object.entries(schemas).forEach(([name, schema]) => {
       this.ajv.addSchema(schema, name)
     })
+
+    return this
   }
 
   protected getValidate<T>(schemaName: string): ValidateFunction<T> {

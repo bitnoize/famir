@@ -124,7 +124,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    if (!this.testSessionCookie(sessionCookie)) {
+    if (!this.checkSessionCookie(sessionCookie)) {
       this.removeSessionCookie(ctx, campaign)
 
       await this.renderMainRedirect(ctx)
@@ -196,7 +196,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    if (!this.testSessionCookie(sessionCookie)) {
+    if (!this.checkSessionCookie(sessionCookie)) {
       this.removeSessionCookie(ctx, campaign)
 
       await this.renderOriginRedirect(ctx)
@@ -242,7 +242,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    if (!this.testSessionCookie(sessionCookie)) {
+    if (!this.checkSessionCookie(sessionCookie)) {
       this.removeSessionCookie(ctx, campaign)
 
       await this.renderOriginRedirect(ctx)
@@ -276,13 +276,13 @@ export class AuthorizeController extends BaseController {
       proxyId: session.proxyId
     })
 
-    this.setState(ctx, 'proxy', proxy)
-    this.setState(ctx, 'session', session)
+    this.setState(ctx, 'proxy', proxy).setState(ctx, 'session', session)
 
     if (isDevelopment) {
-      ctx.responseHeaders
-        .set('X-Famir-Session-Id', session.sessionId)
-        .set('X-Famir-Proxy-Id', proxy.proxyId)
+      ctx.responseHeaders.merge({
+        'X-Famir-Session-Id': session.sessionId,
+        'X-Famir-Proxy-Id': proxy.proxyId
+      })
     }
 
     await next()
@@ -317,7 +317,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    if (!this.testSessionCookie(sessionCookie)) {
+    if (!this.checkSessionCookie(sessionCookie)) {
       this.removeSessionCookie(ctx, campaign)
 
       await this.renderOriginRedirect(ctx)
@@ -345,13 +345,13 @@ export class AuthorizeController extends BaseController {
       proxyId: session.proxyId
     })
 
-    this.setState(ctx, 'proxy', proxy)
-    this.setState(ctx, 'session', session)
+    this.setState(ctx, 'proxy', proxy).setState(ctx, 'session', session)
 
     if (isDevelopment) {
-      ctx.responseHeaders
-        .set('X-Famir-Session-Id', session.sessionId)
-        .set('X-Famir-Proxy-Id', proxy.proxyId)
+      ctx.responseHeaders.merge({
+        'X-Famir-Session-Id': session.sessionId,
+        'X-Famir-Proxy-Id': proxy.proxyId
+      })
     }
 
     await next()
@@ -398,7 +398,7 @@ export class AuthorizeController extends BaseController {
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  private testSessionCookie(value: unknown): value is string {
+  private checkSessionCookie(value: unknown): value is string {
     return this.validator.guardSchema<string>('reverse-proxy-session-cookie', value)
   }
 
@@ -474,22 +474,21 @@ export class AuthorizeController extends BaseController {
     landingRedirectorData: LandingRedirectorData
   ): Promise<void> {
     if (ctx.method.is(['GET', 'HEAD'])) {
-      const page = this.templater.render(redirector.page, landingRedirectorData)
+      ctx.status.set(200)
 
-      const body = Buffer.from(page)
+      const page = this.templater.render(redirector.page, landingRedirectorData)
+      ctx.responseBody.setText(page)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/html',
-        'Content-Length': body.length.toString(),
+        'Content-Length': ctx.responseBody.size.toString(),
         'Last-Modified': redirector.updatedAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 
-      if (ctx.method.is('GET')) {
-        ctx.responseBody.set(body)
+      if (ctx.method.is('HEAD')) {
+        ctx.responseBody.reset()
       }
-
-      ctx.status.set(200)
 
       await ctx.sendResponse()
     } else {

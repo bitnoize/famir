@@ -43,12 +43,16 @@ export class MessageController extends BaseController {
 
     this.validator.addSchemas(messageSchemas)
 
-    this.router.register('readMessage', this.readMessage)
-
     this.logger.debug(`MessageController initialized`)
   }
 
-  private readMessage: ReplServerApiCall = async (data) => {
+  register(): this {
+    this.router.register('readMessage', this.readMessageApiCall)
+
+    return this
+  }
+
+  private readMessageApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ReadMessageData>('console-read-message-data', data)
 
     return await this.messageService.read(data)

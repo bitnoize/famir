@@ -49,17 +49,22 @@ export class LureController extends BaseController {
 
     this.validator.addSchemas(lureSchemas)
 
-    this.router.register('createLure', this.createLure)
-    this.router.register('readLure', this.readLure)
-    this.router.register('enableLure', this.enableLure)
-    this.router.register('disableLure', this.disableLure)
-    this.router.register('deleteLure', this.deleteLure)
-    this.router.register('listLures', this.listLures)
-
     this.logger.debug(`LureController initialized`)
   }
 
-  private createLure: ReplServerApiCall = async (data) => {
+  register(): this {
+    this.router
+      .register('createLure', this.createLureApiCall)
+      .register('readLure', this.readLureApiCall)
+      .register('enableLure', this.enableLureApiCall)
+      .register('disableLure', this.disableLureApiCall)
+      .register('deleteLure', this.deleteLureApiCall)
+      .register('listLures', this.listLuresApiCall)
+
+    return this
+  }
+
+  private createLureApiCall: ReplServerApiCall = async (data) => {
     this.validateData<CreateLureData>('console-create-lure-data', data)
 
     await this.lureService.create(data)
@@ -67,13 +72,13 @@ export class LureController extends BaseController {
     return true
   }
 
-  private readLure: ReplServerApiCall = async (data) => {
+  private readLureApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ReadLureData>('console-read-lure-data', data)
 
     return await this.lureService.read(data)
   }
 
-  private enableLure: ReplServerApiCall = async (data) => {
+  private enableLureApiCall: ReplServerApiCall = async (data) => {
     this.validateData<SwitchLureData>('console-switch-lure-data', data)
 
     await this.lureService.enable(data)
@@ -81,7 +86,7 @@ export class LureController extends BaseController {
     return true
   }
 
-  private disableLure: ReplServerApiCall = async (data) => {
+  private disableLureApiCall: ReplServerApiCall = async (data) => {
     this.validateData<SwitchLureData>('console-switch-lure-data', data)
 
     await this.lureService.disable(data)
@@ -89,7 +94,7 @@ export class LureController extends BaseController {
     return true
   }
 
-  private deleteLure: ReplServerApiCall = async (data) => {
+  private deleteLureApiCall: ReplServerApiCall = async (data) => {
     this.validateData<DeleteLureData>('console-delete-lure-data', data)
 
     await this.lureService.delete(data)
@@ -97,7 +102,7 @@ export class LureController extends BaseController {
     return true
   }
 
-  private listLures: ReplServerApiCall = async (data) => {
+  private listLuresApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ListLuresData>('console-list-lures-data', data)
 
     return await this.lureService.list(data)

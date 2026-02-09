@@ -107,6 +107,8 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   protected async renderPreflightCors(ctx: HttpServerContext): Promise<void> {
+    ctx.status.set(204)
+
     ctx.responseHeaders.merge({
       'Content-Type': 'text/plain',
       'Access-Control-Allow-Origin': '*',
@@ -117,8 +119,6 @@ export class WellKnownUrlsController extends BaseController {
       'Access-Control-Max-Age': '86400'
     })
 
-    ctx.status.set(204)
-
     await ctx.sendResponse()
   }
 
@@ -127,19 +127,19 @@ export class WellKnownUrlsController extends BaseController {
     target: EnabledFullTargetModel
   ): Promise<void> {
     if (ctx.method.is(['GET', 'HEAD'])) {
-      const body = Buffer.from(target.faviconIco, 'base64')
+      ctx.status.set(200)
+
+      ctx.responseBody.setBase64(target.faviconIco)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'image/x-icon',
-        'Content-Length': body.length.toString(),
+        'Content-Length': ctx.responseBody.size.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 
-      ctx.status.set(200)
-
-      if (ctx.method.is('GET')) {
-        ctx.responseBody.set(body)
+      if (ctx.method.is('HEAD')) {
+        ctx.responseBody.reset()
       }
 
       await ctx.sendResponse()
@@ -153,19 +153,19 @@ export class WellKnownUrlsController extends BaseController {
     target: EnabledFullTargetModel
   ): Promise<void> {
     if (ctx.method.is(['GET', 'HEAD'])) {
-      const body = Buffer.from(target.robotsTxt)
+      ctx.status.set(200)
+
+      ctx.responseBody.setText(target.robotsTxt)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/plain',
-        'Content-Length': body.length.toString(),
+        'Content-Length': ctx.responseBody.size.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 
-      ctx.status.set(200)
-
-      if (ctx.method.is('GET')) {
-        ctx.responseBody.set(body)
+      if (ctx.method.is('HEAD')) {
+        ctx.responseBody.reset()
       }
 
       await ctx.sendResponse()
@@ -179,19 +179,19 @@ export class WellKnownUrlsController extends BaseController {
     target: EnabledFullTargetModel
   ): Promise<void> {
     if (ctx.method.is(['GET', 'HEAD'])) {
-      const body = Buffer.from(target.sitemapXml)
+      ctx.status.set(200)
+
+      ctx.responseBody.setText(target.sitemapXml)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'application/xml',
-        'Content-Length': body.length.toString(),
+        'Content-Length': ctx.responseBody.size.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 
-      ctx.status.set(200)
-
-      if (ctx.method.is('GET')) {
-        ctx.responseBody.set(body)
+      if (ctx.method.is('HEAD')) {
+        ctx.responseBody.reset()
       }
 
       await ctx.sendResponse()

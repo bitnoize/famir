@@ -7,11 +7,14 @@ export interface RawMessage {
   proxy_id: string
   target_id: string
   session_id: string
+  kind: string
   method: string
   url: string
-  is_streaming: number
   status: number
   score: number
+  ip: string
+  start_time: number
+  finish_time: number
   created_at: number
 }
 
@@ -20,10 +23,9 @@ export interface RawFullMessage extends RawMessage {
   request_body: string
   response_headers: string
   response_body: string
-  client_ip: string
-  start_time: number
-  finish_time: number
   connection: string
+  payload: string
+  errors: string
 }
 
 export const messageFunctions = {
@@ -39,19 +41,21 @@ export const messageFunctions = {
         proxyId: string,
         targetId: string,
         sessionId: string,
+        kind: string,
         method: string,
         url: string,
-        isStreaming: boolean,
         requestHeaders: string,
         requestBody: string,
+        status: number,
         responseHeaders: string,
         responseBody: string,
-        clientIp: string,
-        status: number,
+        connection: string,
+        payload: string,
+        errors: string,
         score: number,
+        ip: string,
         startTime: number,
         finishTime: number,
-        connection: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))
@@ -64,19 +68,21 @@ export const messageFunctions = {
         parser.push(proxyId)
         parser.push(targetId)
         parser.push(sessionId)
+        parser.push(kind)
         parser.push(method)
         parser.push(url)
-        parser.push(isStreaming ? '1' : '0')
         parser.push(requestHeaders)
         parser.push(requestBody)
+        parser.push(status.toString())
         parser.push(responseHeaders)
         parser.push(responseBody)
-        parser.push(clientIp)
-        parser.push(status.toString())
+        parser.push(connection)
+        parser.push(payload)
+        parser.push(errors)
         parser.push(score.toString())
+        parser.push(ip)
         parser.push(startTime.toString())
         parser.push(finishTime.toString())
-        parser.push(connection)
         parser.push(Date.now().toString())
       },
 

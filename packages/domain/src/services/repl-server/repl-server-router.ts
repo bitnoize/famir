@@ -3,7 +3,7 @@ import { ReplServerApiCall, ReplServerApiCalls } from './repl-server.js'
 export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
 
 export interface ReplServerRouter {
-  register(name: string, apiCall: ReplServerApiCall): void
+  register(name: string, apiCall: ReplServerApiCall): this
   resolve(): ReplServerApiCalls
-  reset(): void
+  reset(): this
 }

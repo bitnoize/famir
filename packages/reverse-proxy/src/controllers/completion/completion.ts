@@ -1,4 +1,4 @@
-import { HttpBody, HttpConnection, HttpHeaders } from '@famir/domain'
+import { HttpBody, HttpConnection, HttpError, HttpHeaders, HttpPayload } from '@famir/domain'
 
 export interface CreateMessageData {
   campaignId: string
@@ -6,17 +6,19 @@ export interface CreateMessageData {
   proxyId: string
   targetId: string
   sessionId: string
+  kind: string
   method: string
   url: string
-  isStreaming: boolean
   requestHeaders: HttpHeaders
   requestBody: HttpBody
+  status: number
   responseHeaders: HttpHeaders
   responseBody: HttpBody
-  clientIp: string
-  status: number
+  connection: HttpConnection
+  payload: HttpPayload
+  errors: HttpError[]
   score: number
+  ip: string
   startTime: number
   finishTime: number
-  connection: HttpConnection
 }

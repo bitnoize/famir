@@ -45,7 +45,7 @@ export class CampaignService extends BaseService {
         data.messageExpire
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['CONFLICT'])
+      this.simpleDatabaseException(error, ['CONFLICT'])
 
       throw error
     }
@@ -67,7 +67,7 @@ export class CampaignService extends BaseService {
     try {
       return await this.campaignRepository.lock(data.campaignId, data.isForce ?? false)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
@@ -77,7 +77,7 @@ export class CampaignService extends BaseService {
     try {
       await this.campaignRepository.unlock(data.campaignId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
@@ -94,7 +94,7 @@ export class CampaignService extends BaseService {
         data.lockCode
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }
@@ -104,7 +104,7 @@ export class CampaignService extends BaseService {
     try {
       await this.campaignRepository.delete(data.campaignId, data.lockCode)
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
       throw error
     }

@@ -39,17 +39,22 @@ export class DatabaseController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.router.register('loadDatabaseFunctions', this.loadDatabaseFunctions)
-    this.router.register('cleanupDatabase', this.cleanupDatabase)
-
     this.logger.debug(`DatabaseController initialized`)
   }
 
-  private loadDatabaseFunctions: ReplServerApiCall = async () => {
+  register(): this {
+    this.router
+      .register('loadDatabaseFunctions', this.loadDatabaseFunctionsApiCall)
+      .register('cleanupDatabase', this.cleanupDatabaseApiCall)
+
+    return this
+  }
+
+  private loadDatabaseFunctionsApiCall: ReplServerApiCall = async () => {
     await this.databaseService.loadFunctions()
   }
 
-  private cleanupDatabase: ReplServerApiCall = async () => {
+  private cleanupDatabaseApiCall: ReplServerApiCall = async () => {
     await this.databaseService.cleanup()
   }
 }

@@ -22,7 +22,7 @@ export class StdHttpServerRouter implements HttpServerRouter {
     this.logger.debug(`HttpServerRouter initialized`)
   }
 
-  register(name: string, middleware: HttpServerMiddleware) {
+  register(name: string, middleware: HttpServerMiddleware): this {
     if (this.registry.has(name)) {
       this.logger.error(`HttpServerRouter middleware allready registered: ${name}`)
     } else {
@@ -30,13 +30,17 @@ export class StdHttpServerRouter implements HttpServerRouter {
 
       this.registry.set(name, middleware)
     }
+
+    return this
   }
 
   resolve(): HttpServerMiddlewares {
     return Array.from(this.registry.entries())
   }
 
-  reset() {
+  reset(): this {
     this.registry.clear()
+
+    return this
   }
 }

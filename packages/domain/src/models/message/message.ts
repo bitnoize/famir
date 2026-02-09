@@ -1,4 +1,4 @@
-import { HttpBody, HttpConnection, HttpHeaders } from '../../http-proto.js'
+import { HttpError, HttpPayload, HttpBody, HttpConnection, HttpHeaders } from '../../http-proto.js'
 
 export class MessageModel {
   static isNotNull = <T extends MessageModel>(model: T | null): model is T => {
@@ -11,11 +11,14 @@ export class MessageModel {
     readonly proxyId: string,
     readonly targetId: string,
     readonly sessionId: string,
+    readonly kind: string,
     readonly method: string,
     readonly url: string,
-    readonly isStreaming: boolean,
     readonly status: number,
     readonly score: number,
+    readonly ip: string,
+    readonly startTime: number,
+    readonly finishTime: number,
     readonly createdAt: Date
   ) {}
 }
@@ -27,19 +30,21 @@ export class FullMessageModel extends MessageModel {
     proxyId: string,
     targetId: string,
     sessionId: string,
+    kind: string,
     method: string,
     url: string,
-    isStreaming: boolean,
     readonly requestHeaders: HttpHeaders,
     readonly requestBody: HttpBody,
+    status: number,
     readonly responseHeaders: HttpHeaders,
     readonly responseBody: HttpBody,
-    readonly clientIp: string,
-    status: number,
-    score: number,
-    readonly startTime: number,
-    readonly finishTime: number,
     readonly connection: HttpConnection,
+    readonly payload: HttpPayload,
+    readonly errors: HttpError[],
+    score: number,
+    ip: string,
+    startTime: number,
+    finishTime: number,
     createdAt: Date
   ) {
     super(
@@ -48,43 +53,15 @@ export class FullMessageModel extends MessageModel {
       proxyId,
       targetId,
       sessionId,
+      kind,
       method,
       url,
-      isStreaming,
       status,
       score,
+      ip,
+      startTime,
+      finishTime,
       createdAt
     )
   }
 }
-
-/*
-export interface MessageModel {
-  readonly campaignId: string
-  readonly messageId: string
-  readonly proxyId: string
-  readonly targetId: string
-  readonly sessionId: string
-  readonly method: string
-  readonly url: string
-  readonly isStreaming: boolean
-  readonly status: number
-  readonly score: number
-  readonly createdAt: Date
-}
-
-export const testMessageModel = <T extends MessageModel>(value: T | null): value is T => {
-  return value != null
-}
-
-export interface FullMessageModel extends MessageModel {
-  readonly requestHeaders: HttpHeaders
-  readonly requestBody: HttpBody
-  readonly responseHeaders: HttpHeaders
-  readonly responseBody: HttpBody
-  readonly clientIp: string
-  readonly startTime: number
-  readonly finishTime: number
-  readonly connection: HttpConnection
-}
-*/

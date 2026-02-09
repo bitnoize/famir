@@ -1,3 +1,5 @@
+export type HttpKind = 'ordinary' | 'streaming-request' | 'streaming-response'
+
 export const HTTP_METHODS = ['HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
 export type HttpMethod = (typeof HTTP_METHODS)[number]
 
@@ -53,5 +55,4 @@ export type HttpConnection = Record<string, number | string | null | undefined>
 
 export type HttpPayload = Record<string, unknown>
 
-export type HttpError = [unknown, ...string[]]
-export type HttpErrors = HttpError[]
+export type HttpError = readonly [object, ...string[]]

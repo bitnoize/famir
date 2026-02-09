@@ -30,8 +30,10 @@ export class EnvConfig<T> implements Config<T> {
     return this.#data
   }
 
-  reset() {
+  reset(): this {
     this.#data = null
+
+    return this
   }
 
   private buildData(): T {

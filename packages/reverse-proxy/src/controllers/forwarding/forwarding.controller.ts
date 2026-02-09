@@ -86,53 +86,59 @@ export class ForwardingController extends BaseController {
     const proxy = this.getState(ctx, 'proxy')
     const forward = this.getState(ctx, 'forward')
 
-    await ctx.loadRequest(target.requestBodyLimit)
-
     const message = forward.freeze().message
 
-    message.url.merge(ctx.url.toObject())
-    message.requestHeaders.merge(ctx.requestHeaders.toObject())
-    message.requestBody.set(ctx.requestBody.get())
-    message.mergeConnection({}) // FIXME
+    if (forward.kind === 'ordinary') {
+      await ctx.loadRequest(target.requestBodyLimit)
 
-    forward.runRequestInterceptors(true)
+      message.url.merge(ctx.url.toObject())
+      message.requestHeaders.merge(ctx.requestHeaders.toObject())
+      message.requestBody.set(ctx.requestBody.get())
+      message.mergeConnection({}) // FIXME
 
-    const response = await this.forwardingService.ordinaryRequest({
-      proxy: proxy.url,
-      method: message.method.get(),
-      url: message.url.toString(true),
-      headers: message.requestHeaders.toObject(),
-      body: message.requestBody.get(),
-      connectTimeout: target.connectTimeout,
-      timeout: target.ordinaryTimeout,
-      bodyLimit: target.responseBodyLimit
-    })
+      forward.runRequestInterceptors(true)
 
-    message.status.set(response.status)
-    message.responseHeaders.merge(response.headers)
-    message.responseBody.set(response.body)
-    message.mergeConnection(response.connection)
+      const response = await this.forwardingService.ordinaryRequest({
+        proxy: proxy.url,
+        method: message.method.get(),
+        url: message.url.toAbsolute(),
+        headers: message.requestHeaders.toObject(),
+        body: message.requestBody.get(),
+        connectTimeout: target.connectTimeout,
+        timeout: target.ordinaryTimeout,
+        bodyLimit: target.responseBodyLimit
+      })
 
-    if (response.error) {
-      message.addError(response.error, 'ordinary-request')
+      message.status.set(response.status)
+      message.responseHeaders.merge(response.headers)
+      message.responseBody.set(response.body)
+      message.mergeConnection(response.connection)
 
-      ctx.status.set(message.status.get())
+      if (response.error) {
+        message.addError(response.error, 'ordinary-request')
 
-      const contentType = ctx.responseHeaders
-        .setContentType({ type: 'text/html', parameters: {} })
-        .getContentType()
+        ctx.status.set(message.status.get())
 
-      ctx.responseBody.setText(`<html></html>`, contentType)
+        const contentType = ctx.responseHeaders
+          .setContentType({ type: 'text/html', parameters: {} })
+          .getContentType()
 
-      await ctx.sendResponse()
-    } else {
-      forward.runResponseInterceptors(true)
+        ctx.responseBody.setText(`<html></html>`, contentType.parameters['charset'])
 
-      ctx.status.set(message.status.get())
-      ctx.responseHeaders.merge(message.responseHeaders.toObject())
-      ctx.responseBody.set(message.responseBody.get())
+        await ctx.sendResponse()
+      } else {
+        forward.runResponseInterceptors(true)
 
-      await ctx.sendResponse()
+        ctx.status.set(message.status.get())
+        ctx.responseHeaders.merge(message.responseHeaders.toObject())
+        ctx.responseBody.set(message.responseBody.get())
+
+        await ctx.sendResponse()
+      }
+    } else if (forward.kind === 'streaming-request') {
+      throw new Error(`Streaming not supported yet`)
+    } else if (forward.kind === 'streaming-response') {
+      throw new Error(`Streaming not supported yet`)
     }
 
     await next()
@@ -151,11 +157,13 @@ export class ForwardingController extends BaseController {
       })
 
       message.requestHeaders.set('Host', target.donorHost()).delete([
-        'X-Famir-Campaign-Id',
-        'X-Famir-Target-Id',
+        'Via',
+        'X-Real-Ip',
         'X-Forwarded-For',
         'X-Forwarded-Host',
-        'X-Forwarded-Proto'
+        'X-Forwarded-Proto',
+        'X-Famir-Campaign-Id',
+        'X-Famir-Target-Id',
         // ...
       ])
 
@@ -167,7 +175,6 @@ export class ForwardingController extends BaseController {
     forward.addResponseHeadInterceptor('cleanup-headers', (message) => {
       message.responseHeaders.delete([
         'Proxy-Agent',
-        'Content-Encoding'
         // ...
       ])
     })

@@ -14,5 +14,6 @@ export interface HttpUrlWrapper {
   isPathUnder(paths: string | string[]): boolean
   isPathMatch(paths: RegExp | RegExp[]): boolean
   toObject(): HttpUrl
-  toString(relative?: boolean): string
+  toRelative(): string
+  toAbsolute(): string
 }

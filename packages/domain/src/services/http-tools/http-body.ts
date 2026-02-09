@@ -1,6 +1,5 @@
 import {
   HttpBody,
-  HttpContentType,
   HttpFormatQueryStringOptions,
   HttpJson,
   HttpParseQueryStringOptions,
@@ -11,17 +10,18 @@ import {
 export interface HttpBodyWrapper {
   clone(): HttpBodyWrapper
   freeze(): this
+  readonly size: number
   get(): HttpBody
   set(body: HttpBody): this
-  readonly size: number
-  getText(contentType: HttpContentType): HttpText
-  setText(text: HttpText, contentType: HttpContentType): this
-  getJson(contentType: HttpContentType): HttpJson
-  setJson(json: HttpJson, contentType: HttpContentType): this
+  getBase64(): string
+  setBase64(str: string): this
+  getText(charset?: string): HttpText
+  setText(text: HttpText, charset?: string): this
+  getJson(charset?: string): HttpJson
+  setJson(json: HttpJson, charset?: string): this
   readonly parseQueryStringOptions: HttpParseQueryStringOptions
   readonly formatQueryStringOptions: HttpFormatQueryStringOptions
-  getQueryString(contentType: HttpContentType): HttpQueryString
-  setQueryString(queryString: HttpQueryString, contentType: HttpContentType): this
+  getQueryString(charset?: string): HttpQueryString
+  setQueryString(queryString: HttpQueryString, charset?: string): this
   reset(): this
-  toBuffer(): Buffer
 }

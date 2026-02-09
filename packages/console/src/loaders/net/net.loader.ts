@@ -12,10 +12,10 @@ import {
   RedisTargetRepository
 } from '@famir/database'
 import { PinoLogger } from '@famir/logger'
-import { ImplReplServerRouter, NetReplServer } from '@famir/repl-server'
+import { StdReplServerRouter, NetReplServer } from '@famir/repl-server'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeLogQueue, RedisWorkflowConnector } from '@famir/workflow'
-import { App } from '../../app.js'
+import { App } from '../../console.app.js'
 import { AppNetConfig } from './net.js'
 import { configAppNetSchema } from './net.schemas.js'
 
@@ -43,7 +43,7 @@ export async function bootstrapNet(composer: (container: DIContainer) => void): 
 
   BullAnalyzeLogQueue.inject(container)
 
-  ImplReplServerRouter.inject(container)
+  StdReplServerRouter.inject(container)
 
   NetReplServer.inject(container)
 

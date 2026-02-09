@@ -7,6 +7,8 @@ import {
   FullMessageModel,
   HttpBody,
   HttpConnection,
+  HttpPayload,
+  HttpError,
   HttpHeaders,
   Logger,
   LOGGER,
@@ -54,19 +56,21 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     proxyId: string,
     targetId: string,
     sessionId: string,
+    kind: string,
     method: string,
     url: string,
-    isStreaming: boolean,
     requestHeaders: HttpHeaders,
     requestBody: HttpBody,
+    status: number,
     responseHeaders: HttpHeaders,
     responseBody: HttpBody,
-    clientIp: string,
-    status: number,
+    connection: HttpConnection,
+    payload: HttpPayload,
+    errors: HttpError[],
     score: number,
+    ip: string,
     startTime: number,
     finishTime: number,
-    connection: HttpConnection
   ): Promise<void> {
     try {
       const statusReply = await this.connection.message.create_message(
@@ -76,19 +80,21 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         proxyId,
         targetId,
         sessionId,
+        kind,
         method,
         url,
-        isStreaming,
         this.encodeJson(requestHeaders),
         this.encodeBase64(requestBody),
+        status,
         this.encodeJson(responseHeaders),
         this.encodeBase64(responseBody),
-        clientIp,
-        status,
+        this.encodeJson(connection),
+        this.encodeJson(payload),
+        this.encodeJson(errors),
         score,
+        ip,
         startTime,
         finishTime,
-        this.encodeJson(connection)
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -127,11 +133,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       rawModel.proxy_id,
       rawModel.target_id,
       rawModel.session_id,
+      rawModel.kind,
       rawModel.method,
       rawModel.url,
-      !!rawModel.is_streaming,
       rawModel.status,
       rawModel.score,
+      rawModel.ip,
+      rawModel.start_time,
+      rawModel.finish_time,
       new Date(rawModel.created_at)
     )
   }
@@ -162,19 +171,21 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       rawFullModel.proxy_id,
       rawFullModel.target_id,
       rawFullModel.session_id,
+      rawFullModel.kind,
       rawFullModel.method,
       rawFullModel.url,
-      !!rawFullModel.is_streaming,
       this.parseHeaders(rawFullModel.request_headers),
       this.decodeBase64(rawFullModel.request_body),
+      rawFullModel.status,
       this.parseHeaders(rawFullModel.response_headers),
       this.decodeBase64(rawFullModel.response_body),
-      rawFullModel.client_ip,
-      rawFullModel.status,
+      this.parseConnection(rawFullModel.connection),
+      this.parsePayload(rawFullModel.payload),
+      this.parseErrors(rawFullModel.errors),
       rawFullModel.score,
+      rawFullModel.ip,
       rawFullModel.start_time,
       rawFullModel.finish_time,
-      this.parseConnection(rawFullModel.connection),
       new Date(rawFullModel.created_at)
     )
   }
@@ -194,4 +205,21 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
     return data
   }
+
+  protected parsePayload(value: string): HttpPayload {
+    const data = this.decodeJson(value)
+
+    this.validateRawData<HttpPayload>('database-message-payload', data)
+
+    return data
+  }
+
+  protected parseErrors(value: string): HttpError[] {
+    const data = this.decodeJson(value)
+
+    this.validateRawData<HttpError[]>('database-message-errors', data)
+
+    return data
+  }
+
 }

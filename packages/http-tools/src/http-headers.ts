@@ -112,6 +112,8 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     const names = Array.isArray(arg) ? arg : [arg]
 
     names.forEach((name) => {
+      name = name.toLowerCase()
+
       this.invalidateCacheFor(name)
 
       this.#headers[name] = undefined

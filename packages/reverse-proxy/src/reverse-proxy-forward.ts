@@ -1,6 +1,7 @@
 import {
   HttpBodyWrapper,
   HttpHeadersWrapper,
+  HttpKind,
   HttpMethodWrapper,
   HttpStatusWrapper,
   HttpUrlWrapper
@@ -39,11 +40,23 @@ export class ReverseProxyForward {
     return this
   }
 
-  private readonly requestHeadInterceptors: Array<[string, ReverseProxyInterceptor]> = []
-  private readonly requestBodyInterceptors: Array<[string, ReverseProxyInterceptor]> = []
+  #kind: HttpKind = 'ordinary'
+
+  get kind(): HttpKind {
+    return this.#kind
+  }
+
+  set kind(kind: HttpKind) {
+    this.sureNotFrozen('setKind')
+
+    this.#kind = kind
+  }
+
+  private requestHeadInterceptors: Array<[string, ReverseProxyInterceptor]> = []
+  private requestBodyInterceptors: Array<[string, ReverseProxyInterceptor]> = []
 
   addRequestHeadInterceptor(name: string, interceptor: ReverseProxyInterceptor): this {
-    this.sureIsNotFrozen('addRequestHeadInterceptor')
+    this.sureNotFrozen('addRequestHeadInterceptor')
 
     this.requestHeadInterceptors.push([name, interceptor])
 
@@ -51,7 +64,7 @@ export class ReverseProxyForward {
   }
 
   addRequestBodyInterceptor(name: string, interceptor: ReverseProxyInterceptor): this {
-    this.sureIsNotFrozen('addRequestBodyInterceptor')
+    this.sureNotFrozen('addRequestBodyInterceptor')
 
     this.requestBodyInterceptors.push([name, interceptor])
 
@@ -87,11 +100,11 @@ export class ReverseProxyForward {
     return this
   }
 
-  private readonly responseHeadInterceptors: Array<[string, ReverseProxyInterceptor]> = []
-  private readonly responseBodyInterceptors: Array<[string, ReverseProxyInterceptor]> = []
+  private responseHeadInterceptors: Array<[string, ReverseProxyInterceptor]> = []
+  private responseBodyInterceptors: Array<[string, ReverseProxyInterceptor]> = []
 
   addResponseHeadInterceptor(name: string, interceptor: ReverseProxyInterceptor): this {
-    this.sureIsNotFrozen('addResponseHeadInterceptor')
+    this.sureNotFrozen('addResponseHeadInterceptor')
 
     this.responseHeadInterceptors.push([name, interceptor])
 
@@ -99,7 +112,7 @@ export class ReverseProxyForward {
   }
 
   addResponseBodyInterceptor(name: string, interceptor: ReverseProxyInterceptor): this {
-    this.sureIsNotFrozen('addResponseBodyInterceptor')
+    this.sureNotFrozen('addResponseBodyInterceptor')
 
     this.responseBodyInterceptors.push([name, interceptor])
 
@@ -135,9 +148,9 @@ export class ReverseProxyForward {
     return this
   }
 
-  protected sureIsNotFrozen(name: string) {
+  protected sureNotFrozen(name: string) {
     if (this.isFrozen) {
-      throw new Error(`Forward frozen on ${name}`)
+      throw new Error(`Forward is frozen on ${name}`)
     }
   }
 

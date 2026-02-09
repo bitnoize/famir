@@ -37,19 +37,21 @@ export class CompletionService extends BaseService {
         data.proxyId,
         data.targetId,
         data.sessionId,
+        data.kind,
         data.method,
         data.url,
-        data.isStreaming,
         data.requestHeaders,
         data.requestBody,
+        data.status,
         data.responseHeaders,
         data.responseBody,
-        data.clientIp,
-        data.status,
+        data.connection,
+        data.payload,
+        data.errors,
         data.score,
+        data.ip,
         data.startTime,
-        data.finishTime,
-        data.connection
+        data.finishTime
       )
     } catch (error) {
       this.filterDatabaseException(error, ['NOT_FOUND'])

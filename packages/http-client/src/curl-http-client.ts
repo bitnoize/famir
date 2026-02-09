@@ -170,7 +170,7 @@ export class CurlHttpClient implements HttpClient {
           curl.close()
 
           if (cancelCode != null) {
-            const error = new HttpClientError(`Curl perform canceled`, {
+            const error = new HttpClientError(`Request canceled`, {
               context: {
                 cancelCode
               },
@@ -188,16 +188,21 @@ export class CurlHttpClient implements HttpClient {
             return
           }
 
-          resolve({
+          const response: HttpClientOrdinaryResponse = {
             error: null,
             status,
             headers: this.parseHeaders(responseHeaders),
             body: this.parseBody(responseBody),
             connection
-          })
+          }
+
+          response.headers['content-length'] = response.body.length.toString()
+          response.headers['content-encoding'] = undefined
+
+          resolve(response)
         } catch (error) {
           reject(
-            new HttpClientError(`Curl end event error`, {
+            new HttpClientError(`Parse response error`, {
               cause: error,
               context: {
                 status
@@ -210,6 +215,8 @@ export class CurlHttpClient implements HttpClient {
 
       curl.on('error', (error: Error, curlCode: CurlCode) => {
         try {
+          const connection = this.parseConnection(curl)
+
           curl.close()
 
           resolve({
@@ -217,11 +224,11 @@ export class CurlHttpClient implements HttpClient {
             status: this.knownCurlCodes[curlCode] ?? 500,
             headers: {},
             body: Buffer.alloc(0),
-            connection: {}
+            connection
           })
         } catch (criticalError) {
           reject(
-            new HttpClientError(`Ordinary request critical error`, {
+            new HttpClientError(`Request critical error`, {
               cause: criticalError,
               context: {
                 error,

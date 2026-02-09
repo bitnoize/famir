@@ -31,7 +31,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     key: K,
     value: T[K]
-  ) {
+  ): this {
     const state = ctx.state as T
 
     if (state[key]) {
@@ -39,20 +39,22 @@ export abstract class BaseController {
     }
 
     state[key] = value
+
+    return this
   }
 
   protected async renderOriginRedirect(ctx: HttpServerContext): Promise<void> {
-    ctx.responseHeaders.set('Location', ctx.url.toString(true))
-
     ctx.status.set(302)
+
+    ctx.responseHeaders.set('Location', ctx.url.toRelative())
 
     await ctx.sendResponse()
   }
 
   protected async renderMainRedirect(ctx: HttpServerContext): Promise<void> {
-    ctx.responseHeaders.set('Location', '/')
-
     ctx.status.set(302)
+
+    ctx.responseHeaders.set('Location', '/')
 
     await ctx.sendResponse()
   }
@@ -62,19 +64,19 @@ export abstract class BaseController {
     target: EnabledFullTargetModel
   ): Promise<void> {
     if (ctx.method.is(['GET', 'HEAD'])) {
-      const body = Buffer.from(target.mainPage)
+      ctx.status.set(200)
+
+      ctx.responseBody.setText(target.mainPage)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/html',
-        'Content-Length': body.length.toString(),
+        'Content-Length': ctx.responseBody.size.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 
-      ctx.status.set(200)
-
-      if (ctx.method.is('GET')) {
-        ctx.responseBody.set(body)
+      if (ctx.method.is('HEAD')) {
+        ctx.responseBody.reset()
       }
 
       await ctx.sendResponse()
@@ -87,16 +89,14 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    const body = Buffer.from(target.notFoundPage)
+    ctx.status.set(404)
+
+    ctx.responseBody.setText(target.notFoundPage)
 
     ctx.responseHeaders.merge({
       'Content-Type': 'text/html',
-      'Content-Length': body.length.toString()
+      'Content-Length': ctx.responseBody.size.toString()
     })
-
-    ctx.responseBody.set(body)
-
-    ctx.status.set(404)
 
     await ctx.sendResponse()
   }

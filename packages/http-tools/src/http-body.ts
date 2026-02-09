@@ -33,6 +33,10 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     return this
   }
 
+  get size(): number {
+    return this.#body.length
+  }
+
   get(): HttpBody {
     return this.#body
   }
@@ -47,18 +51,23 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     return this
   }
 
-  get size(): number {
-    return this.#body.length
+  getBase64(): string {
+    return this.#body.toString('base64')
+  }
+
+  setBase64(value: string): this {
+    this.#body = Buffer.from(value, 'base64')
+
+    return this
   }
 
   #cacheText: string | null = null
 
-  getText(contentType: HttpContentType): HttpText {
+  getText(charset: string = 'utf8'): HttpText {
     if (this.#cacheText != null) {
       return this.#cacheText
     }
 
-    const charset = this.normalizeCharset(contentType)
     const text = iconv.decode(this.#body, charset)
 
     this.#cacheText = text
@@ -66,10 +75,9 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     return text
   }
 
-  setText(text: HttpText, contentType: HttpContentType): this {
+  setText(text: HttpText, charset: string = 'utf8'): this {
     this.sureNotFrozen('setText')
 
-    const charset = this.normalizeCharset(contentType)
     this.#body = iconv.encode(text, charset)
 
     this.#cacheText = text
@@ -79,12 +87,12 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
 
   #cacheJson: HttpJson | null = null
 
-  getJson(contentType: HttpContentType): HttpJson {
+  getJson(charset?: string): HttpJson {
     if (this.#cacheJson != null) {
       return this.#cacheJson
     }
 
-    const text = this.getText(contentType)
+    const text = this.getText(charset)
     const json: unknown = JSON.parse(text)
 
     if (json == null) {
@@ -96,11 +104,11 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     return json
   }
 
-  setJson(json: HttpJson, contentType: HttpContentType): this {
+  setJson(json: HttpJson, charset?: string): this {
     this.sureNotFrozen('setJson')
 
     const text = JSON.stringify(json)
-    this.setText(text, contentType)
+    this.setText(text, charset)
 
     this.#cacheJson = json
 
@@ -112,12 +120,12 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
 
   #cacheQueryString: HttpQueryString | null = null
 
-  getQueryString(contentType: HttpContentType): HttpQueryString {
+  getQueryString(charset?: string): HttpQueryString {
     if (this.#cacheQueryString != null) {
       return this.#cacheQueryString
     }
 
-    const text = this.getText(contentType)
+    const text = this.getText(charset)
     const queryString = qs.parse(text, {
       ...this.parseQueryStringOptions,
       ignoreQueryPrefix: true
@@ -128,14 +136,14 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     return queryString
   }
 
-  setQueryString(queryString: HttpQueryString, contentType: HttpContentType): this {
+  setQueryString(queryString: HttpQueryString, charset?: string): this {
     this.sureNotFrozen('setQueryString')
 
     const text = qs.stringify(queryString, {
       ...this.formatQueryStringOptions,
       addQueryPrefix: true
     })
-    this.setText(text, contentType)
+    this.setText(text, charset)
 
     this.#cacheQueryString = queryString
 
@@ -152,10 +160,6 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     return this
   }
 
-  toBuffer(): Buffer {
-    return Buffer.from(this.#body)
-  }
-
   protected sureNotFrozen(name: string) {
     if (this.isFrozen) {
       throw new Error(`Body frozen on ${name}`)
@@ -166,15 +170,5 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     this.#cacheText = null
     this.#cacheJson = null
     this.#cacheQueryString = null
-  }
-
-  protected normalizeCharset(contentType: HttpContentType): string {
-    const charset = contentType.parameters['charset'] || 'utf8'
-
-    if (!iconv.encodingExists(charset)) {
-      throw new Error(`Body wrong charset`)
-    }
-
-    return charset
   }
 }

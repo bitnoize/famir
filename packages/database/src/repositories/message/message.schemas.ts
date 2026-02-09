@@ -1,5 +1,5 @@
 import { JSONSchemaType } from '@famir/common'
-import { HttpConnection, HttpHeader, HttpHeaders, ValidatorSchemas } from '@famir/domain'
+import { HttpConnection, HttpPayload, HttpError, HttpHeader, HttpHeaders, ValidatorSchemas } from '@famir/domain'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
 const rawMessageSchema: JSONSchemaType<RawMessage> = {
@@ -10,11 +10,14 @@ const rawMessageSchema: JSONSchemaType<RawMessage> = {
     'proxy_id',
     'target_id',
     'session_id',
+    'kind',
     'method',
     'url',
-    'is_streaming',
     'status',
     'score',
+    'ip',
+    'start_time',
+    'finish_time',
     'created_at'
   ],
   properties: {
@@ -33,19 +36,28 @@ const rawMessageSchema: JSONSchemaType<RawMessage> = {
     session_id: {
       type: 'string'
     },
+    kind: {
+      type: 'string'
+    },
     method: {
       type: 'string'
     },
     url: {
       type: 'string'
     },
-    is_streaming: {
-      type: 'integer'
-    },
     status: {
       type: 'integer'
     },
     score: {
+      type: 'integer'
+    },
+    ip: {
+      type: 'string'
+    },
+    start_time: {
+      type: 'integer'
+    },
+    finish_time: {
       type: 'integer'
     },
     created_at: {
@@ -63,19 +75,21 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     'proxy_id',
     'target_id',
     'session_id',
+    'kind',
     'method',
     'url',
-    'is_streaming',
     'request_headers',
     'request_body',
+    'status',
     'response_headers',
     'response_body',
-    'client_ip',
-    'status',
+    'connection',
+    'payload',
+    'errors',
     'score',
+    'ip',
     'start_time',
     'finish_time',
-    'connection',
     'created_at'
   ],
   properties: {
@@ -94,14 +108,14 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     session_id: {
       type: 'string'
     },
+    kind: {
+      type: 'string'
+    },
     method: {
       type: 'string'
     },
     url: {
       type: 'string'
-    },
-    is_streaming: {
-      type: 'integer'
     },
     request_headers: {
       type: 'string'
@@ -109,29 +123,35 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     request_body: {
       type: 'string'
     },
+    status: {
+      type: 'integer'
+    },
     response_headers: {
       type: 'string'
     },
     response_body: {
       type: 'string'
     },
-    client_ip: {
+    connection: {
       type: 'string'
     },
-    status: {
-      type: 'integer'
+    payload: {
+      type: 'string'
+    },
+    errors: {
+      type: 'string'
     },
     score: {
       type: 'integer'
+    },
+    ip: {
+      type: 'string'
     },
     start_time: {
       type: 'integer'
     },
     finish_time: {
       type: 'integer'
-    },
-    connection: {
-      type: 'string'
     },
     created_at: {
       type: 'integer'
@@ -166,31 +186,43 @@ const messageHeadersSchema: JSONSchemaType<HttpHeaders> = {
 
 const messageConnectionSchema: JSONSchemaType<HttpConnection> = {
   type: 'object',
-  required: [],
-  properties: {
-    server_http_version: {
-      type: 'integer',
-      nullable: true
+  additionalProperties: {
+    anyOf: [
+      { type: "number" },
+      { type: "string" },
+    ]
+  }
+} as const
+
+const messagePayloadSchema: JSONSchemaType<HttpPayload> = {
+  type: 'object',
+  additionalProperties: true
+} as const
+
+const messageErrorSchema: JSONSchemaType<HttpError> = {
+  type: 'array',
+  minItems: 1,
+  maxItems: 10,
+  items: [
+    {
+      type: 'object',
     },
-    client_total_time: {
-      type: 'integer',
-      nullable: true
-    },
-    client_connect_time: {
-      type: 'integer',
-      nullable: true
-    },
-    client_http_version: {
-      type: 'integer',
-      nullable: true
-    }
-  },
-  additionalProperties: false
+  ],
+  additionalItems: {
+    type: 'string'
+  }
+} as const
+
+const messageErrorsSchema: JSONSchemaType<HttpError[]> = {
+  type: 'array',
+  items: messageErrorSchema
 } as const
 
 export const messageSchemas: ValidatorSchemas = {
   'database-raw-message': rawMessageSchema,
   'database-raw-full-message': rawFullMessageSchema,
   'database-message-headers': messageHeadersSchema,
-  'database-message-connection': messageConnectionSchema
+  'database-message-connection': messageConnectionSchema,
+  'database-message-payload': messagePayloadSchema,
+  'database-message-errors': messageErrorsSchema,
 } as const

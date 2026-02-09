@@ -28,8 +28,7 @@ export interface HttpServerContext {
   loadRequest(bodyLimit: number): Promise<void>
   sendResponse(): Promise<void>
   readonly isBot: boolean
-  readonly ips: string[]
-  readonly ip: string | undefined
+  readonly ip: string
   readonly startTime: number
   readonly finishTime: number
   readonly isComplete: boolean

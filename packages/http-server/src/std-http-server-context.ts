@@ -167,26 +167,8 @@ export class StdHttpServerContext implements HttpServerContext {
     return this.#isBot
   }
 
-  #ips: string[] | null = null
-
-  get ips(): string[] {
-    if (this.#ips != null) {
-      return this.#ips
-    }
-
-    const value = this.requestHeaders.getArray('X-Forwarded-For') ?? []
-
-    this.#ips = value
-      .join(',')
-      .split(',')
-      .map((ip) => ip.trim())
-      .filter((ip) => ip)
-
-    return this.#ips
-  }
-
-  get ip(): string | undefined {
-    return this.ips[0] != null ? this.ips[0] : undefined
+  get ip(): string {
+    return this.requestHeaders.getString('X-Real-Ip') ?? ''
   }
 
   readonly startTime: number = Date.now()

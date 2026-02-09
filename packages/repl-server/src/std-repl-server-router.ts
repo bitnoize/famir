@@ -8,11 +8,11 @@ import {
   ReplServerRouter
 } from '@famir/domain'
 
-export class ImplReplServerRouter implements ReplServerRouter {
+export class StdReplServerRouter implements ReplServerRouter {
   static inject(container: DIContainer) {
     container.registerSingleton<ReplServerRouter>(
       REPL_SERVER_ROUTER,
-      (c) => new ImplReplServerRouter(c.resolve<Logger>(LOGGER))
+      (c) => new StdReplServerRouter(c.resolve<Logger>(LOGGER))
     )
   }
 
@@ -22,7 +22,7 @@ export class ImplReplServerRouter implements ReplServerRouter {
     this.logger.debug(`ReplServerRouter initialized`)
   }
 
-  register(name: string, apiCall: ReplServerApiCall) {
+  register(name: string, apiCall: ReplServerApiCall): this {
     if (this.registry.has(name)) {
       this.logger.error(`ReplServerRouter apiCall allready registered: ${name}`)
     } else {
@@ -30,13 +30,17 @@ export class ImplReplServerRouter implements ReplServerRouter {
 
       this.registry.set(name, apiCall)
     }
+
+    return this
   }
 
   resolve(): ReplServerApiCalls {
     return Array.from(this.registry.entries())
   }
 
-  reset() {
+  reset(): this {
     this.registry.clear()
+
+    return this
   }
 }

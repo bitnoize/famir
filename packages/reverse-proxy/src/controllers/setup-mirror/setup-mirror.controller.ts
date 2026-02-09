@@ -65,11 +65,14 @@ export class SetupMirrorController extends BaseController {
     const targets = await this.setupMirrorService.listTargets({ campaignId })
 
     this.setState(ctx, 'campaign', campaign)
-    this.setState(ctx, 'target', target)
-    this.setState(ctx, 'targets', targets)
+      .setState(ctx, 'target', target)
+      .setState(ctx, 'targets', targets)
 
     if (isDevelopment) {
-      ctx.responseHeaders.set('X-Famir-Campaign-Id', campaignId).set('X-Famir-Target-Id', targetId)
+      ctx.responseHeaders.merge({
+        'X-Famir-Campaign-Id': campaignId,
+        'X-Famir-Target-Id': targetId
+      })
     }
 
     await next()

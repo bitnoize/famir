@@ -50,20 +50,25 @@ export class TargetController extends BaseController {
 
     this.validator.addSchemas(targetSchemas)
 
-    this.router.register('createTarget', this.createTarget)
-    this.router.register('readTarget', this.readTarget)
-    this.router.register('updateTarget', this.updateTarget)
-    this.router.register('enableTarget', this.enableTarget)
-    this.router.register('disableTarget', this.disableTarget)
-    this.router.register('appendTargetLabel', this.appendTargetLabel)
-    this.router.register('removeTargetLabel', this.removeTargetLabel)
-    this.router.register('deleteTarget', this.deleteTarget)
-    this.router.register('listTargets', this.listTargets)
-
     this.logger.debug(`TargetController initialized`)
   }
 
-  private createTarget: ReplServerApiCall = async (data) => {
+  register(): this {
+    this.router
+      .register('createTarget', this.createTargetApiCall)
+      .register('readTarget', this.readTargetApiCall)
+      .register('updateTarget', this.updateTargetApiCall)
+      .register('enableTarget', this.enableTargetApiCall)
+      .register('disableTarget', this.disableTargetApiCall)
+      .register('appendTargetLabel', this.appendTargetLabelApiCall)
+      .register('removeTargetLabel', this.removeTargetLabelApiCall)
+      .register('deleteTarget', this.deleteTargetApiCall)
+      .register('listTargets', this.listTargetsApiCall)
+
+    return this
+  }
+
+  private createTargetApiCall: ReplServerApiCall = async (data) => {
     this.validateData<CreateTargetData>('console-create-target-data', data)
 
     await this.targetService.create(data)
@@ -71,13 +76,13 @@ export class TargetController extends BaseController {
     return true
   }
 
-  private readTarget: ReplServerApiCall = async (data) => {
+  private readTargetApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ReadTargetData>('console-read-target-data', data)
 
     return await this.targetService.read(data)
   }
 
-  private updateTarget: ReplServerApiCall = async (data) => {
+  private updateTargetApiCall: ReplServerApiCall = async (data) => {
     this.validateData<UpdateTargetData>('console-update-target-data', data)
 
     await this.targetService.update(data)
@@ -85,7 +90,7 @@ export class TargetController extends BaseController {
     return true
   }
 
-  private enableTarget: ReplServerApiCall = async (data) => {
+  private enableTargetApiCall: ReplServerApiCall = async (data) => {
     this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
     await this.targetService.enable(data)
@@ -93,7 +98,7 @@ export class TargetController extends BaseController {
     return true
   }
 
-  private disableTarget: ReplServerApiCall = async (data) => {
+  private disableTargetApiCall: ReplServerApiCall = async (data) => {
     this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
     await this.targetService.disable(data)
@@ -101,7 +106,7 @@ export class TargetController extends BaseController {
     return true
   }
 
-  private appendTargetLabel: ReplServerApiCall = async (data) => {
+  private appendTargetLabelApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
     await this.targetService.appendLabel(data)
@@ -109,7 +114,7 @@ export class TargetController extends BaseController {
     return true
   }
 
-  private removeTargetLabel: ReplServerApiCall = async (data) => {
+  private removeTargetLabelApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
     await this.targetService.removeLabel(data)
@@ -117,7 +122,7 @@ export class TargetController extends BaseController {
     return true
   }
 
-  private deleteTarget: ReplServerApiCall = async (data) => {
+  private deleteTargetApiCall: ReplServerApiCall = async (data) => {
     this.validateData<DeleteTargetData>('console-delete-target-data', data)
 
     await this.targetService.delete(data)
@@ -125,7 +130,7 @@ export class TargetController extends BaseController {
     return true
   }
 
-  private listTargets: ReplServerApiCall = async (data) => {
+  private listTargetsApiCall: ReplServerApiCall = async (data) => {
     this.validateData<ListTargetsData>('console-list-targets-data', data)
 
     return await this.targetService.list(data)
