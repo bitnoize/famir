@@ -2,29 +2,35 @@ import { DIContainer } from '@famir/common'
 import {
   ANALYZE_LOG_QUEUE,
   AnalyzeLogQueue,
+  HTTP_CLIENT,
+  HttpClient,
+  HttpClientOrdinaryRequest,
+  HttpClientOrdinaryResponse,
   MESSAGE_REPOSITORY,
   MessageRepository
 } from '@famir/domain'
 import { BaseService } from '../base/index.js'
-import { CreateMessageData } from './completion.js'
+import { CreateMessageData } from './round-trip.js'
 
-export const COMPLETION_SERVICE = Symbol('CompletionService')
+export const ROUND_TRIP_SERVICE = Symbol('RoundTripService')
 
-export class CompletionService extends BaseService {
+export class RoundTripService extends BaseService {
   static inject(container: DIContainer) {
-    container.registerSingleton<CompletionService>(
-      COMPLETION_SERVICE,
+    container.registerSingleton<RoundTripService>(
+      ROUND_TRIP_SERVICE,
       (c) =>
-        new CompletionService(
+        new RoundTripService(
           c.resolve<MessageRepository>(MESSAGE_REPOSITORY),
-          c.resolve<AnalyzeLogQueue>(ANALYZE_LOG_QUEUE)
+          c.resolve<AnalyzeLogQueue>(ANALYZE_LOG_QUEUE),
+          c.resolve<HttpClient>(HTTP_CLIENT)
         )
     )
   }
 
   constructor(
     protected readonly messageRepository: MessageRepository,
-    protected readonly analyzeLogQueue: AnalyzeLogQueue
+    protected readonly analyzeLogQueue: AnalyzeLogQueue,
+    protected readonly httpClient: HttpClient
   ) {
     super()
   }
@@ -58,5 +64,9 @@ export class CompletionService extends BaseService {
 
       throw error
     }
+  }
+
+  async ordinaryRequest(request: HttpClientOrdinaryRequest): Promise<HttpClientOrdinaryResponse> {
+    return await this.httpClient.ordinaryRequest(request)
   }
 }

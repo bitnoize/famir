@@ -7,7 +7,6 @@ import {
   HttpCookie,
   HttpServerContext,
   HttpServerError,
-  HttpServerMiddleware,
   HttpServerNextFunction,
   HttpServerRouter,
   Logger,
@@ -57,51 +56,47 @@ export class AuthorizeController extends BaseController {
     this.logger.debug(`AuthorizeController initialized`)
   }
 
-  register(): this {
-    this.router.register('authorize', this.authorizeMiddleware)
+  use() {
+    this.router.register('authorize', async (ctx, next) => {
+      const campaign = this.getState(ctx, 'campaign')
+      const target = this.getState(ctx, 'target')
 
-    return this
-  }
+      if (target.isLanding) {
+        if (ctx.url.isPathEquals(campaign.landingUpgradePath)) {
+          if (ctx.method.is('GET')) {
+            await this.landingUpgradeSession(ctx, campaign)
+          } else {
+            await this.renderNotFoundPage(ctx, target)
+          }
 
-  private authorizeMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    const campaign = this.getState(ctx, 'campaign')
-    const target = this.getState(ctx, 'target')
-
-    if (target.isLanding) {
-      if (ctx.url.isPathEquals(campaign.landingUpgradePath)) {
-        if (ctx.method.is('GET')) {
-          await this.landingUpgradeSession(ctx, campaign)
-        } else {
-          await this.renderNotFoundPage(ctx, target)
+          return
         }
 
-        return
-      }
+        const lure = await this.authorizeService.readLurePath({
+          campaignId: campaign.campaignId,
+          path: ctx.url.get('pathname')
+        })
 
-      const lure = await this.authorizeService.readLurePath({
-        campaignId: campaign.campaignId,
-        path: ctx.url.get('pathname')
-      })
+        if (lure) {
+          if (ctx.method.is(['GET', 'HEAD'])) {
+            const redirector = await this.authorizeService.readRedirector({
+              campaignId: campaign.campaignId,
+              redirectorId: lure.redirectorId
+            })
 
-      if (lure) {
-        if (ctx.method.is(['GET', 'HEAD'])) {
-          const redirector = await this.authorizeService.readRedirector({
-            campaignId: campaign.campaignId,
-            redirectorId: lure.redirectorId
-          })
+            await this.landingRedirectorSession(ctx, campaign, target, redirector)
+          } else {
+            await this.renderNotFoundPage(ctx, target)
+          }
 
-          await this.landingRedirectorSession(ctx, campaign, target, redirector)
-        } else {
-          await this.renderNotFoundPage(ctx, target)
+          return
         }
 
-        return
+        await this.landingAuthSession(ctx, campaign, target, next)
+      } else {
+        await this.transparentSession(ctx, campaign, target, next)
       }
-
-      await this.landingAuthSession(ctx, campaign, target, next)
-    } else {
-      await this.transparentSession(ctx, campaign, target, next)
-    }
+    })
   }
 
   protected async landingUpgradeSession(
@@ -276,7 +271,8 @@ export class AuthorizeController extends BaseController {
       proxyId: session.proxyId
     })
 
-    this.setState(ctx, 'proxy', proxy).setState(ctx, 'session', session)
+    this.setState(ctx, 'proxy', proxy)
+    this.setState(ctx, 'session', session)
 
     if (isDevelopment) {
       ctx.responseHeaders.merge({
@@ -345,7 +341,8 @@ export class AuthorizeController extends BaseController {
       proxyId: session.proxyId
     })
 
-    this.setState(ctx, 'proxy', proxy).setState(ctx, 'session', session)
+    this.setState(ctx, 'proxy', proxy)
+    this.setState(ctx, 'session', session)
 
     if (isDevelopment) {
       ctx.responseHeaders.merge({

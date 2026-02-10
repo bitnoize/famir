@@ -165,8 +165,6 @@ export class CurlHttpClient implements HttpClient {
 
       curl.on('end', (status: number) => {
         try {
-          const connection = this.parseConnection(curl)
-
           curl.close()
 
           if (cancelCode != null) {
@@ -182,7 +180,7 @@ export class CurlHttpClient implements HttpClient {
               status: this.knownCancelCodes[cancelCode] ?? 500,
               headers: {},
               body: Buffer.alloc(0),
-              connection
+              connection: {}
             })
 
             return
@@ -193,7 +191,7 @@ export class CurlHttpClient implements HttpClient {
             status,
             headers: this.parseHeaders(responseHeaders),
             body: this.parseBody(responseBody),
-            connection
+            connection: {}
           }
 
           response.headers['content-length'] = response.body.length.toString()

@@ -50,12 +50,26 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     return this
   }
 
+  #cacheBase64: string | null = null
+
   getBase64(): string {
-    return this.#body.toString('base64')
+    if (this.#cacheBase64 != null) {
+      return this.#cacheBase64
+    }
+
+    const base64 = this.get().toString('base64')
+
+    this.#cacheBase64 = base64
+
+    return base64
   }
 
-  setBase64(value: string): this {
-    this.#body = Buffer.from(value, 'base64')
+  setBase64(base64: string): this {
+    this.sureNotFrozen('setBase64')
+
+    this.set(Buffer.from(base64, 'base64'))
+
+    this.#cacheBase64 = base64
 
     return this
   }
@@ -67,7 +81,7 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
       return this.#cacheText
     }
 
-    const text = iconv.decode(this.#body, charset)
+    const text = iconv.decode(this.get(), charset)
 
     this.#cacheText = text
 
@@ -77,7 +91,7 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
   setText(text: HttpText, charset: string = 'utf8'): this {
     this.sureNotFrozen('setText')
 
-    this.#body = iconv.encode(text, charset)
+    this.set(iconv.encode(text, charset))
 
     this.#cacheText = text
 
@@ -95,7 +109,7 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     const json: unknown = JSON.parse(text)
 
     if (json == null) {
-      throw new Error(`Body wrong json value`)
+      throw new Error(`Body wrong json`)
     }
 
     this.#cacheJson = json
@@ -114,8 +128,12 @@ export class StdHttpBodyWrapper implements HttpBodyWrapper {
     return this
   }
 
-  readonly parseQueryStringOptions: HttpParseQueryStringOptions = {}
-  readonly formatQueryStringOptions: HttpFormatQueryStringOptions = {}
+  readonly parseQueryStringOptions: HttpParseQueryStringOptions = {
+    // ...
+  }
+  readonly formatQueryStringOptions: HttpFormatQueryStringOptions = {
+    // ...
+  }
 
   #cacheQueryString: HttpQueryString | null = null
 

@@ -44,4 +44,14 @@ export class ReverseProxyMessage {
   }
 
   score: number = 0
+
+  /*
+  protected rewriteUrl(
+    data: string,
+    rev: boolean,
+    rules: ReplaceUrlRule[],
+    schemes: ReplaceUrlScheme[]
+  ) {
+  }
+  */
 }

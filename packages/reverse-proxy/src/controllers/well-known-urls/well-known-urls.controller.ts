@@ -3,7 +3,6 @@ import {
   EnabledFullTargetModel,
   HTTP_SERVER_ROUTER,
   HttpServerContext,
-  HttpServerMiddleware,
   HttpServerRouter,
   Logger,
   LOGGER,
@@ -37,73 +36,57 @@ export class WellKnownUrlsController extends BaseController {
     this.logger.debug(`WellKnownUrlsController initialized`)
   }
 
-  registerAll(): this {
-    return this.registerPreflightCors()
-      .registerFaviconIco()
-      .registerRobotsTxt()
-      .registerSitemapXml()
+  useAll() {
+    this.usePreflightCors()
+    this.useFaviconIco()
+    this.useRobotsTxt()
+    this.useSitemapXml()
   }
 
-  registerPreflightCors(): this {
-    this.router.register('preflightCors', this.preflightCorsMiddleware)
-
-    return this
+  usePreflightCors() {
+    this.router.register('preflight-cors', async (ctx, next) => {
+      if (ctx.method.is('OPTIONS')) {
+        await this.renderPreflightCors(ctx)
+      } else {
+        await next()
+      }
+    })
   }
 
-  registerFaviconIco(): this {
-    this.router.register('faviconIco', this.faviconIcoMiddleware)
+  useFaviconIco() {
+    this.router.register('favicon-ico', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
 
-    return this
+      if (ctx.url.isPathEquals('/favicon.ico')) {
+        await this.renderFaviconIco(ctx, target)
+      } else {
+        await next()
+      }
+    })
   }
 
-  registerRobotsTxt(): this {
-    this.router.register('robotsTxt', this.robotsTxtMiddleware)
+  useRobotsTxt() {
+    this.router.register('robots-txt', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
 
-    return this
+      if (ctx.url.isPathEquals('/robots.txt')) {
+        await this.renderRobotsTxt(ctx, target)
+      } else {
+        await next()
+      }
+    })
   }
 
-  registerSitemapXml(): this {
-    this.router.register('sitemapXml', this.sitemapXmlMiddleware)
+  useSitemapXml() {
+    this.router.register('sitemap-xml', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
 
-    return this
-  }
-
-  private preflightCorsMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    if (ctx.method.is('OPTIONS')) {
-      await this.renderPreflightCors(ctx)
-    } else {
-      await next()
-    }
-  }
-
-  private faviconIcoMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    const target = this.getState(ctx, 'target')
-
-    if (ctx.url.isPathEquals('/favicon.ico')) {
-      await this.renderFaviconIco(ctx, target)
-    } else {
-      await next()
-    }
-  }
-
-  private robotsTxtMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    const target = this.getState(ctx, 'target')
-
-    if (ctx.url.isPathEquals('/robots.txt')) {
-      await this.renderRobotsTxt(ctx, target)
-    } else {
-      await next()
-    }
-  }
-
-  private sitemapXmlMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    const target = this.getState(ctx, 'target')
-
-    if (ctx.url.isPathEquals('/sitemap.xml')) {
-      await this.renderSitemapXml(ctx, target)
-    } else {
-      await next()
-    }
+      if (ctx.url.isPathEquals('/sitemap.xml')) {
+        await this.renderSitemapXml(ctx, target)
+      } else {
+        await next()
+      }
+    })
   }
 
   protected async renderPreflightCors(ctx: HttpServerContext): Promise<void> {

@@ -24,7 +24,7 @@ export class StdHttpServerRouter implements HttpServerRouter {
 
   register(name: string, middleware: HttpServerMiddleware): this {
     if (this.registry.has(name)) {
-      this.logger.error(`HttpServerRouter middleware allready registered: ${name}`)
+      this.logger.error(`HttpServerRouter middleware already registered: ${name}`)
     } else {
       this.logger.info(`HttpServerRouter register middleware: ${name}`)
 

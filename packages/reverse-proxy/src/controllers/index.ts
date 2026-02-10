@@ -1,6 +1,5 @@
 export * from './authorize/index.js'
 export * from './base/index.js'
-export * from './completion/index.js'
-export * from './forwarding/index.js'
+export * from './round-trip/index.js'
 export * from './setup-mirror/index.js'
 export * from './well-known-urls/index.js'

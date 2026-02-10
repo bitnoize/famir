@@ -3,7 +3,6 @@ import {
   HTTP_SERVER_ROUTER,
   HttpServerContext,
   HttpServerError,
-  HttpServerMiddleware,
   HttpServerRouter,
   Logger,
   LOGGER,
@@ -48,34 +47,30 @@ export class SetupMirrorController extends BaseController {
     this.logger.debug(`SetupMirrorController initialized`)
   }
 
-  register(): this {
-    this.router.register('setupMirror', this.setupMirrorMiddleware)
+  use() {
+    this.router.register('setup-mirror', async (ctx, next) => {
+      const [campaignId, targetId] = this.parseSetupMirrorHeaders(ctx)
 
-    return this
-  }
-
-  private setupMirrorMiddleware: HttpServerMiddleware = async (ctx, next) => {
-    const [campaignId, targetId] = this.parseSetupMirrorHeaders(ctx)
-
-    const [campaign, target] = await this.setupMirrorService.readCampaignTarget({
-      campaignId,
-      targetId
-    })
-
-    const targets = await this.setupMirrorService.listTargets({ campaignId })
-
-    this.setState(ctx, 'campaign', campaign)
-      .setState(ctx, 'target', target)
-      .setState(ctx, 'targets', targets)
-
-    if (isDevelopment) {
-      ctx.responseHeaders.merge({
-        'X-Famir-Campaign-Id': campaignId,
-        'X-Famir-Target-Id': targetId
+      const [campaign, target] = await this.setupMirrorService.readCampaignTarget({
+        campaignId,
+        targetId
       })
-    }
 
-    await next()
+      const targets = await this.setupMirrorService.listTargets({ campaignId })
+
+      this.setState(ctx, 'campaign', campaign)
+      this.setState(ctx, 'target', target)
+      this.setState(ctx, 'targets', targets)
+
+      if (isDevelopment) {
+        ctx.responseHeaders.merge({
+          'X-Famir-Campaign-Id': campaignId,
+          'X-Famir-Target-Id': targetId
+        })
+      }
+
+      await next()
+    })
   }
 
   private parseSetupMirrorHeaders(ctx: HttpServerContext): SetupMirrorHeaders {

@@ -152,7 +152,7 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     }
 
     const value = this.getString('Content-Type') ?? ''
-    const contentType = contenttype.parse(value)
+    const contentType = contenttype.parse(value.trim())
 
     this.#cacheContentType = contentType
 
@@ -272,9 +272,7 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     const cookies: HttpCookies = {}
 
     value.split(';').forEach((rawCookie) => {
-      const toughCookie = Cookie.parse(rawCookie, {
-        //loose: true
-      })
+      const toughCookie = Cookie.parse(rawCookie.trim())
 
       if (toughCookie) {
         cookies[toughCookie.key] = toughCookie.value
@@ -308,9 +306,7 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
       .join(';')
       .split(';')
       .forEach((rawCookie) => {
-        const toughCookie = Cookie.parse(rawCookie, {
-          //loose: true
-        })
+        const toughCookie = Cookie.parse(rawCookie.trim())
 
         if (!toughCookie) {
           return

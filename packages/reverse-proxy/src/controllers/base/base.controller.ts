@@ -31,7 +31,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     key: K,
     value: T[K]
-  ): this {
+  ) {
     const state = ctx.state as T
 
     if (state[key]) {
@@ -39,8 +39,6 @@ export abstract class BaseController {
     }
 
     state[key] = value
-
-    return this
   }
 
   protected async renderOriginRedirect(ctx: HttpServerContext): Promise<void> {
