@@ -1,5 +1,5 @@
-import { JSONSchemaType, customIdentSchema } from '@famir/common'
-import { campaignLockCodeSchema, redirectorPageSchema } from '@famir/database'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
+import { redirectorPageSchema } from '@famir/database'
 import { ValidatorSchemas } from '@famir/domain'
 import {
   CreateRedirectorData,
@@ -13,7 +13,7 @@ const DEFAULT_PAGE = ``
 
 const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = {
   type: 'object',
-  required: ['campaignId', 'redirectorId', 'page', 'lockCode'],
+  required: ['campaignId', 'redirectorId', 'page', 'lockSecret'],
   properties: {
     campaignId: customIdentSchema,
     redirectorId: customIdentSchema,
@@ -21,7 +21,7 @@ const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = {
       ...redirectorPageSchema,
       default: DEFAULT_PAGE
     },
-    lockCode: campaignLockCodeSchema
+    lockSecret: randomIdentSchema
   },
   additionalProperties: false
 } as const
@@ -38,7 +38,7 @@ const readRedirectorDataSchema: JSONSchemaType<ReadRedirectorData> = {
 
 const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
   type: 'object',
-  required: ['campaignId', 'redirectorId', 'lockCode'],
+  required: ['campaignId', 'redirectorId', 'lockSecret'],
   properties: {
     campaignId: customIdentSchema,
     redirectorId: customIdentSchema,
@@ -46,18 +46,18 @@ const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
       ...redirectorPageSchema,
       nullable: true
     },
-    lockCode: campaignLockCodeSchema
+    lockSecret: randomIdentSchema
   },
   additionalProperties: false
 } as const
 
 const deleteRedirectorDataSchema: JSONSchemaType<DeleteRedirectorData> = {
   type: 'object',
-  required: ['campaignId', 'redirectorId', 'lockCode'],
+  required: ['campaignId', 'redirectorId', 'lockSecret'],
   properties: {
     campaignId: customIdentSchema,
     redirectorId: customIdentSchema,
-    lockCode: campaignLockCodeSchema
+    lockSecret: randomIdentSchema
   },
   additionalProperties: false
 } as const

@@ -188,14 +188,7 @@ export class StdHttpUrlWrapper implements HttpUrlWrapper {
   toAbsolute(): string {
     const { protocol, pathname, search, hash } = this.#url
 
-    return [
-      protocol,
-      '//',
-      this.getHost(),
-      pathname,
-      search,
-      hash
-    ].join('')
+    return [protocol, '//', this.getHost(), pathname, search, hash].join('')
   }
 
   protected sureNotFrozen(name: string) {

@@ -43,25 +43,13 @@ export class ForwardingController extends BaseController {
     this.logger.debug(`ForwardingController initialized`)
   }
 
-  registerPrepare(): this {
-    this.router.register('prepare', this.prepareMiddleware)
+  registerInitForward(): this {
+    this.router.register('prepare', this.initForwardMiddleware)
 
     return this
   }
 
-  registerExecute(): this {
-    this.router.register('execute', this.executeMiddleware)
-
-    return this
-  }
-
-  registerDefaultIntercetors(): this {
-    this.router.register('defaultIntercetors', this.defaultIntercetorsMiddleware)
-
-    return this
-  }
-
-  private prepareMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  private initForwardMiddleware: HttpServerMiddleware = async (ctx, next) => {
     const forward = new ReverseProxyForward(
       ctx.method,
       ctx.url.clone(),
@@ -81,7 +69,13 @@ export class ForwardingController extends BaseController {
     await next()
   }
 
-  private executeMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  registerExecForward(): this {
+    this.router.register('exec-forward', this.execForwardMiddleware)
+
+    return this
+  }
+
+  private execForwardMiddleware: HttpServerMiddleware = async (ctx, next) => {
     const target = this.getState(ctx, 'target')
     const proxy = this.getState(ctx, 'proxy')
     const forward = this.getState(ctx, 'forward')
@@ -135,46 +129,58 @@ export class ForwardingController extends BaseController {
 
         await ctx.sendResponse()
       }
-    } else if (forward.kind === 'streaming-request') {
+    } else if (forward.kind === 'stream-request') {
       throw new Error(`Streaming not supported yet`)
-    } else if (forward.kind === 'streaming-response') {
+    } else if (forward.kind === 'stream-response') {
       throw new Error(`Streaming not supported yet`)
     }
 
     await next()
   }
 
-  private defaultIntercetorsMiddleware: HttpServerMiddleware = async (ctx, next) => {
+  registerBasicTransforms(): this {
+    this.router.register('basicTransforms', this.basicTransformsMiddleware)
+
+    return this
+  }
+
+  private basicTransformsMiddleware: HttpServerMiddleware = async (ctx, next) => {
     const campaign = this.getState(ctx, 'campaign')
     const target = this.getState(ctx, 'target')
     const forward = this.getState(ctx, 'forward')
 
-    forward.addRequestHeadInterceptor('replace-target-donor-url', (message) => {
+    forward.addRequestHeadInterceptor('target-donor-url', (message) => {
       message.url.merge({
         protocol: target.donorProtocol(),
         hostname: target.donorHostname(),
         port: target.donorPort.toString()
       })
 
-      message.requestHeaders.set('Host', target.donorHost()).delete([
+      message.requestHeaders.set('Host', target.donorHost())
+    })
+
+    forward.addRequestHeadInterceptor('remove-session-cookie', (message) => {
+      const requestCookies = message.requestHeaders.getCookies()
+      requestCookies[campaign.sessionCookieName] = undefined
+      message.requestHeaders.setCookies(requestCookies)
+    })
+
+    forward.addRequestHeadInterceptor('cleanup-headers', (message) => {
+      message.requestHeaders.delete([
         'Via',
         'X-Real-Ip',
         'X-Forwarded-For',
         'X-Forwarded-Host',
         'X-Forwarded-Proto',
         'X-Famir-Campaign-Id',
-        'X-Famir-Target-Id',
+        'X-Famir-Target-Id'
         // ...
       ])
-
-      const requestCookies = message.requestHeaders.getCookies()
-      requestCookies[campaign.sessionCookieName] = undefined
-      message.requestHeaders.setCookies(requestCookies)
     })
 
     forward.addResponseHeadInterceptor('cleanup-headers', (message) => {
       message.responseHeaders.delete([
-        'Proxy-Agent',
+        'Proxy-Agent'
         // ...
       ])
     })

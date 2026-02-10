@@ -1,6 +1,7 @@
 import { CommandParser } from '@redis/client'
 import {
   campaignKey,
+  campaignLockKey,
   enabledProxyIndexKey,
   proxyIndexKey,
   proxyKey,
@@ -20,7 +21,7 @@ export interface RawProxy {
 export const proxyFunctions = {
   proxy: {
     create_proxy: {
-      NUMBER_OF_KEYS: 4,
+      NUMBER_OF_KEYS: 5,
 
       parseCommand(
         parser: CommandParser,
@@ -28,9 +29,10 @@ export const proxyFunctions = {
         campaignId: string,
         proxyId: string,
         url: string,
-        lockCode: number
+        lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(proxyKey(prefix, campaignId, proxyId))
         parser.pushKey(proxyUniqueUrlKey(prefix, campaignId))
         parser.pushKey(proxyIndexKey(prefix, campaignId))
@@ -39,7 +41,7 @@ export const proxyFunctions = {
         parser.push(proxyId)
         parser.push(url)
         parser.push(Date.now().toString())
-        parser.push(lockCode.toString())
+        parser.push(lockSecret)
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -68,48 +70,6 @@ export const proxyFunctions = {
     },
 
     enable_proxy: {
-      NUMBER_OF_KEYS: 3,
-
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        proxyId: string,
-        lockCode: number
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(proxyKey(prefix, campaignId, proxyId))
-        parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
-
-        parser.push(Date.now().toString())
-        parser.push(lockCode.toString())
-      },
-
-      transformReply: undefined as unknown as () => unknown
-    },
-
-    disable_proxy: {
-      NUMBER_OF_KEYS: 3,
-
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        proxyId: string,
-        lockCode: number
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(proxyKey(prefix, campaignId, proxyId))
-        parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
-
-        parser.push(Date.now().toString())
-        parser.push(lockCode.toString())
-      },
-
-      transformReply: undefined as unknown as () => unknown
-    },
-
-    delete_proxy: {
       NUMBER_OF_KEYS: 4,
 
       parseCommand(
@@ -117,14 +77,59 @@ export const proxyFunctions = {
         prefix: string,
         campaignId: string,
         proxyId: string,
-        lockCode: number
+        lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLockKey(prefix, campaignId))
+        parser.pushKey(proxyKey(prefix, campaignId, proxyId))
+        parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
+
+        parser.push(Date.now().toString())
+        parser.push(lockSecret)
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    disable_proxy: {
+      NUMBER_OF_KEYS: 4,
+
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        proxyId: string,
+        lockSecret: string
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLockKey(prefix, campaignId))
+        parser.pushKey(proxyKey(prefix, campaignId, proxyId))
+        parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
+
+        parser.push(Date.now().toString())
+        parser.push(lockSecret)
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    delete_proxy: {
+      NUMBER_OF_KEYS: 5,
+
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        proxyId: string,
+        lockSecret: string
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(proxyKey(prefix, campaignId, proxyId))
         parser.pushKey(proxyUniqueUrlKey(prefix, campaignId))
         parser.pushKey(proxyIndexKey(prefix, campaignId))
 
-        parser.push(lockCode.toString())
+        parser.push(lockSecret)
       },
 
       transformReply: undefined as unknown as () => unknown

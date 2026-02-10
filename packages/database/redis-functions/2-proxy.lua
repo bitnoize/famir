@@ -4,17 +4,22 @@
   Create proxy
 --]]
 local function create_proxy(keys, args)
-  if #keys ~= 4 or #args ~= 5 then
+  if #keys ~= 5 or #args ~= 5 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local proxy_key = keys[2]
-  local proxy_unique_url_key = keys[3]
-  local proxy_index_key = keys[4]
+  local campaign_lock_key = keys[2]
+  local proxy_key = keys[3]
+  local proxy_unique_url_key = keys[4]
+  local proxy_index_key = keys[5]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', proxy_key) ~= 0 then
@@ -22,8 +27,8 @@ local function create_proxy(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(args[5]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[5],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
   for field, value in pairs(stash) do
@@ -31,7 +36,7 @@ local function create_proxy(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -60,12 +65,8 @@ local function create_proxy(keys, args)
     return redis.status_reply('CONFLICT Proxy url allready taken')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -182,16 +183,21 @@ redis.register_function({
   Enable proxy
 --]]
 local function enable_proxy(keys, args)
-  if #keys ~= 3 or #args ~= 2 then
+  if #keys ~= 4 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local proxy_key = keys[2]
-  local enabled_proxy_index_key = keys[3]
+  local campaign_lock_key = keys[2]
+  local proxy_key = keys[3]
+  local enabled_proxy_index_key = keys[4]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', proxy_key) ~= 1 then
@@ -200,8 +206,8 @@ local function enable_proxy(keys, args)
 
   local stash = {
     updated_at = tonumber(args[1]),
-    lock_code = tonumber(args[2]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[2],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
@@ -211,11 +217,10 @@ local function enable_proxy(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
-    end
-
-    if field == 'proxy_id' and value == '' then
+    if
+      (field == 'lock_secret' or field == 'orig_lock_secret' or field == 'proxy_id')
+      and value == ''
+    then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -224,12 +229,8 @@ local function enable_proxy(keys, args)
     return redis.status_reply('OK Proxy allready enabled')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -251,16 +252,21 @@ redis.register_function({
   Disable proxy
 --]]
 local function disable_proxy(keys, args)
-  if #keys ~= 3 or #args ~= 2 then
+  if #keys ~= 4 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local proxy_key = keys[2]
-  local enabled_proxy_index_key = keys[3]
+  local campaign_lock_key = keys[2]
+  local proxy_key = keys[3]
+  local enabled_proxy_index_key = keys[4]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', proxy_key) ~= 1 then
@@ -269,8 +275,8 @@ local function disable_proxy(keys, args)
 
   local stash = {
     updated_at = tonumber(args[1]),
-    lock_code = tonumber(args[2]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[2],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
@@ -280,11 +286,10 @@ local function disable_proxy(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
-    end
-
-    if field == 'proxy_id' and value == '' then
+    if
+      (field == 'lock_secret' or field == 'orig_lock_secret' or field == 'proxy_id')
+      and value == ''
+    then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -293,12 +298,8 @@ local function disable_proxy(keys, args)
     return redis.status_reply('OK Proxy allready disabled')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -320,17 +321,22 @@ redis.register_function({
   Delete proxy
 --]]
 local function delete_proxy(keys, args)
-  if #keys ~= 4 or #args ~= 1 then
+  if #keys ~= 5 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local proxy_key = keys[2]
-  local proxy_unique_url_key = keys[3]
-  local proxy_index_key = keys[4]
+  local campaign_lock_key = keys[2]
+  local proxy_key = keys[3]
+  local proxy_unique_url_key = keys[4]
+  local proxy_index_key = keys[5]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', proxy_key) ~= 1 then
@@ -338,8 +344,8 @@ local function delete_proxy(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(args[1]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[1],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     url = redis.call('HGET', proxy_key, 'url'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
@@ -350,11 +356,14 @@ local function delete_proxy(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
-    end
-
-    if (field == 'proxy_id' or field == 'url') and value == '' then
+    if
+      (
+        field == 'lock_secret'
+        or field == 'orig_lock_secret'
+        or field == 'proxy_id'
+        or field == 'url'
+      ) and value == ''
+    then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -363,12 +372,8 @@ local function delete_proxy(keys, args)
     return redis.status_reply('FORBIDDEN Proxy not disabled')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return

@@ -1,5 +1,12 @@
 import { JSONSchemaType } from '@famir/common'
-import { HttpConnection, HttpPayload, HttpError, HttpHeader, HttpHeaders, ValidatorSchemas } from '@famir/domain'
+import {
+  HttpConnection,
+  HttpError,
+  HttpHeader,
+  HttpHeaders,
+  HttpPayload,
+  ValidatorSchemas
+} from '@famir/domain'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
 const rawMessageSchema: JSONSchemaType<RawMessage> = {
@@ -187,10 +194,7 @@ const messageHeadersSchema: JSONSchemaType<HttpHeaders> = {
 const messageConnectionSchema: JSONSchemaType<HttpConnection> = {
   type: 'object',
   additionalProperties: {
-    anyOf: [
-      { type: "number" },
-      { type: "string" },
-    ]
+    anyOf: [{ type: 'number' }, { type: 'string' }]
   }
 } as const
 
@@ -205,8 +209,8 @@ const messageErrorSchema: JSONSchemaType<HttpError> = {
   maxItems: 10,
   items: [
     {
-      type: 'object',
-    },
+      type: 'object'
+    }
   ],
   additionalItems: {
     type: 'string'
@@ -224,5 +228,5 @@ export const messageSchemas: ValidatorSchemas = {
   'database-message-headers': messageHeadersSchema,
   'database-message-connection': messageConnectionSchema,
   'database-message-payload': messagePayloadSchema,
-  'database-message-errors': messageErrorsSchema,
+  'database-message-errors': messageErrorsSchema
 } as const

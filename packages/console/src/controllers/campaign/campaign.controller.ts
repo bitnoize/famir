@@ -69,7 +69,9 @@ export class CampaignController extends BaseController {
   private createCampaignApiCall: ReplServerApiCall = async (data) => {
     this.validateData<CreateCampaignData>('console-create-campaign-data', data)
 
-    return await this.campaignService.create(data)
+    await this.campaignService.create(data)
+
+    return true
   }
 
   private readCampaignApiCall: ReplServerApiCall = async (data) => {

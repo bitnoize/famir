@@ -1,4 +1,4 @@
-export type HttpKind = 'ordinary' | 'streaming-request' | 'streaming-response'
+export type HttpKind = 'ordinary' | 'stream-request' | 'stream-response'
 
 export const HTTP_METHODS = ['HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
 export type HttpMethod = (typeof HTTP_METHODS)[number]

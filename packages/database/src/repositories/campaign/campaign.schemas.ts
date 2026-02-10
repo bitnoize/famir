@@ -25,9 +25,6 @@ const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
     message_count: {
       type: 'integer'
     },
-    lock_code: {
-      type: 'integer'
-    },
     created_at: {
       type: 'integer'
     },
@@ -44,6 +41,7 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'campaign_id',
     'mirror_domain',
     'description',
+    'lock_timeout',
     'landing_upgrade_path',
     'landing_upgrade_param',
     'landing_redirector_param',
@@ -51,13 +49,13 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'session_expire',
     'new_session_expire',
     'message_expire',
+    'is_locked',
     'proxy_count',
     'target_count',
     'redirector_count',
     'lure_count',
     'session_count',
     'message_count',
-    'lock_code',
     'created_at',
     'updated_at'
   ],
@@ -70,6 +68,9 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     },
     description: {
       type: 'string'
+    },
+    lock_timeout: {
+      type: 'integer'
     },
     landing_upgrade_path: {
       type: 'string'
@@ -92,6 +93,9 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     message_expire: {
       type: 'integer'
     },
+    is_locked: {
+      type: 'integer'
+    },
     proxy_count: {
       type: 'integer'
     },
@@ -108,9 +112,6 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
       type: 'integer'
     },
     message_count: {
-      type: 'integer'
-    },
-    lock_code: {
       type: 'integer'
     },
     created_at: {
@@ -138,6 +139,12 @@ export const campaignDescriptionSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 0,
   maxLength: 1024
+} as const
+
+export const campaignLockTimeoutSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  minimum: 60 * 1000,
+  maximum: 3600 * 1000
 } as const
 
 export const campaignLandingUpgradePathSchema: JSONSchemaType<string> = {
@@ -180,11 +187,4 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 60 * 1000,
   maximum: 24 * 3600 * 1000
-} as const
-
-export const campaignLockCodeSchema: JSONSchemaType<number> = {
-  type: 'integer',
-  not: {
-    const: 0
-  }
 } as const

@@ -54,7 +54,7 @@ export class TargetService extends BaseService {
         data.faviconIco,
         data.robotsTxt,
         data.sitemapXml,
-        data.lockCode
+        data.lockSecret
       )
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
@@ -90,7 +90,7 @@ export class TargetService extends BaseService {
         data.faviconIco,
         data.robotsTxt,
         data.sitemapXml,
-        data.lockCode
+        data.lockSecret
       )
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
@@ -101,7 +101,7 @@ export class TargetService extends BaseService {
 
   async enable(data: SwitchTargetData): Promise<void> {
     try {
-      await this.targetRepository.enable(data.campaignId, data.targetId, data.lockCode)
+      await this.targetRepository.enable(data.campaignId, data.targetId, data.lockSecret)
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -111,7 +111,7 @@ export class TargetService extends BaseService {
 
   async disable(data: SwitchTargetData): Promise<void> {
     try {
-      await this.targetRepository.disable(data.campaignId, data.targetId, data.lockCode)
+      await this.targetRepository.disable(data.campaignId, data.targetId, data.lockSecret)
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -125,7 +125,7 @@ export class TargetService extends BaseService {
         data.campaignId,
         data.targetId,
         data.label,
-        data.lockCode
+        data.lockSecret
       )
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
@@ -140,7 +140,7 @@ export class TargetService extends BaseService {
         data.campaignId,
         data.targetId,
         data.label,
-        data.lockCode
+        data.lockSecret
       )
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
@@ -151,7 +151,7 @@ export class TargetService extends BaseService {
 
   async delete(data: DeleteTargetData): Promise<void> {
     try {
-      await this.targetRepository.delete(data.campaignId, data.targetId, data.lockCode)
+      await this.targetRepository.delete(data.campaignId, data.targetId, data.lockSecret)
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

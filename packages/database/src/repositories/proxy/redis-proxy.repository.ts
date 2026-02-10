@@ -45,14 +45,19 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     this.logger.debug(`ProxyRepository initialized`)
   }
 
-  async create(campaignId: string, proxyId: string, url: string, lockCode: number): Promise<void> {
+  async create(
+    campaignId: string,
+    proxyId: string,
+    url: string,
+    lockSecret: string
+  ): Promise<void> {
     try {
       const statusReply = await this.connection.proxy.create_proxy(
         this.options.prefix,
         campaignId,
         proxyId,
         url,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -77,13 +82,13 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async enable(campaignId: string, proxyId: string, lockCode: number): Promise<void> {
+  async enable(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.proxy.enable_proxy(
         this.options.prefix,
         campaignId,
         proxyId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -94,13 +99,13 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async disable(campaignId: string, proxyId: string, lockCode: number): Promise<void> {
+  async disable(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.proxy.disable_proxy(
         this.options.prefix,
         campaignId,
         proxyId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -111,13 +116,13 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  async delete(campaignId: string, proxyId: string, lockCode: number): Promise<void> {
+  async delete(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.proxy.delete_proxy(
         this.options.prefix,
         campaignId,
         proxyId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)

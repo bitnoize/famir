@@ -7,6 +7,7 @@ export interface CampaignRepository {
     campaignId: string,
     mirrorDomain: string,
     description: string,
+    lockTimeout: number,
     landingUpgradePath: string,
     landingUpgradeParam: string,
     landingRedirectorParam: string,
@@ -14,18 +15,18 @@ export interface CampaignRepository {
     sessionExpire: number,
     newSessionExpire: number,
     messageExpire: number
-  ): Promise<number>
+  ): Promise<void>
   read(campaignId: string): Promise<FullCampaignModel | null>
-  lock(campaignId: string, isForce: boolean): Promise<number>
-  unlock(campaignId: string, lockCode: number): Promise<void>
+  lock(campaignId: string): Promise<string>
+  unlock(campaignId: string, lockSecret: string): Promise<void>
   update(
     campaignId: string,
     description: string | null | undefined,
     sessionExpire: number | null | undefined,
     newSessionExpire: number | null | undefined,
     messageExpire: number | null | undefined,
-    lockCode: number
+    lockSecret: string
   ): Promise<void>
-  delete(campaignId: string, lockCode: number): Promise<void>
+  delete(campaignId: string, lockSecret: string): Promise<void>
   list(): Promise<CampaignModel[]>
 }

@@ -4,18 +4,23 @@
   Create target
 --]]
 local function create_target(keys, args)
-  if #keys ~= 5 or #args ~= 22 then
+  if #keys ~= 6 or #args ~= 22 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local target_key = keys[2]
-  local target_unique_donor_key = keys[3]
-  local target_unique_mirror_key = keys[4]
-  local target_index_key = keys[5]
+  local campaign_lock_key = keys[2]
+  local target_key = keys[3]
+  local target_unique_donor_key = keys[4]
+  local target_unique_mirror_key = keys[5]
+  local target_index_key = keys[6]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', target_key) ~= 0 then
@@ -23,8 +28,8 @@ local function create_target(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(args[22]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[22],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
   for field, value in pairs(stash) do
@@ -32,7 +37,7 @@ local function create_target(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -103,12 +108,8 @@ local function create_target(keys, args)
     return redis.status_reply('CONFLICT Target mirror allready taken')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -337,15 +338,20 @@ redis.register_function({
   Update target
 --]]
 local function update_target(keys, args)
-  if #keys ~= 2 or #args < 2 then
+  if #keys ~= 3 or #args < 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local target_key = keys[2]
+  local campaign_lock_key = keys[2]
+  local target_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', target_key) ~= 1 then
@@ -353,9 +359,9 @@ local function update_target(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(table.remove(args)),
+    lock_secret = table.remove(args),
     updated_at = tonumber(table.remove(args)),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
   for field, value in pairs(stash) do
@@ -363,7 +369,7 @@ local function update_target(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -418,12 +424,8 @@ local function update_target(keys, args)
 
   model.updated_at = stash.updated_at
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -450,15 +452,20 @@ redis.register_function({
   Enable target
 --]]
 local function enable_target(keys, args)
-  if #keys ~= 2 or #args ~= 2 then
+  if #keys ~= 3 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local target_key = keys[2]
+  local campaign_lock_key = keys[2]
+  local target_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', target_key) ~= 1 then
@@ -467,8 +474,8 @@ local function enable_target(keys, args)
 
   local stash = {
     updated_at = tonumber(args[1]),
-    lock_code = tonumber(args[2]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[2],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
@@ -477,7 +484,7 @@ local function enable_target(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -486,12 +493,8 @@ local function enable_target(keys, args)
     return redis.status_reply('OK Target allready enabled')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -511,15 +514,20 @@ redis.register_function({
   Disable target
 --]]
 local function disable_target(keys, args)
-  if #keys ~= 2 or #args ~= 2 then
+  if #keys ~= 3 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local target_key = keys[2]
+  local campaign_lock_key = keys[2]
+  local target_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', target_key) ~= 1 then
@@ -528,8 +536,8 @@ local function disable_target(keys, args)
 
   local stash = {
     updated_at = tonumber(args[1]),
-    lock_code = tonumber(args[2]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[2],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
@@ -538,7 +546,7 @@ local function disable_target(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -547,12 +555,8 @@ local function disable_target(keys, args)
     return redis.status_reply('OK Target allready disabled')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -572,16 +576,21 @@ redis.register_function({
   Append target label
 --]]
 local function append_target_label(keys, args)
-  if #keys ~= 3 or #args ~= 3 then
+  if #keys ~= 4 or #args ~= 3 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local target_key = keys[2]
-  local target_labels_key = keys[3]
+  local campaign_lock_key = keys[2]
+  local target_key = keys[3]
+  local target_labels_key = keys[4]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', target_key) ~= 1 then
@@ -591,8 +600,8 @@ local function append_target_label(keys, args)
   local stash = {
     label = args[1],
     updated_at = tonumber(args[2]),
-    lock_code = tonumber(args[3]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[3],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
   for field, value in pairs(stash) do
@@ -600,11 +609,9 @@ local function append_target_label(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
-    end
-
-    if field == 'label' and value == '' then
+    if
+      (field == 'label' or field == 'lock_secret' or field == 'orig_lock_secret') and value == ''
+    then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -613,12 +620,8 @@ local function append_target_label(keys, args)
     return redis.status_reply('OK Target label allready exists')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -640,16 +643,21 @@ redis.register_function({
   Remove target label
 --]]
 local function remove_target_label(keys, args)
-  if #keys ~= 3 or #args ~= 3 then
+  if #keys ~= 4 or #args ~= 3 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local target_key = keys[2]
-  local target_labels_key = keys[3]
+  local campaign_lock_key = keys[2]
+  local target_key = keys[3]
+  local target_labels_key = keys[4]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', target_key) ~= 1 then
@@ -659,8 +667,8 @@ local function remove_target_label(keys, args)
   local stash = {
     label = args[1],
     updated_at = tonumber(args[2]),
-    lock_code = tonumber(args[3]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[3],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
   for field, value in pairs(stash) do
@@ -668,11 +676,9 @@ local function remove_target_label(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
-    end
-
-    if field == 'label' and value == '' then
+    if
+      (field == 'label' or field == 'lock_secret' or field == 'orig_lock_secret') and value == ''
+    then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -681,12 +687,8 @@ local function remove_target_label(keys, args)
     return redis.status_reply('OK Target label not exists')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -708,19 +710,24 @@ redis.register_function({
   Delete target
 --]]
 local function delete_target(keys, args)
-  if #keys ~= 6 or #args ~= 1 then
+  if #keys ~= 7 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local target_key = keys[2]
-  local target_labels_key = keys[3]
-  local target_unique_donor_key = keys[4]
-  local target_unique_mirror_key = keys[5]
-  local target_index_key = keys[6]
+  local campaign_lock_key = keys[2]
+  local target_key = keys[3]
+  local target_labels_key = keys[4]
+  local target_unique_donor_key = keys[5]
+  local target_unique_mirror_key = keys[6]
+  local target_index_key = keys[7]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', target_key) ~= 1 then
@@ -728,8 +735,8 @@ local function delete_target(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(args[1]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[1],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     campaign_id = redis.call('HGET', target_key, 'campaign_id'),
     target_id = redis.call('HGET', target_key, 'target_id'),
     donor_sub = redis.call('HGET', target_key, 'donor_sub'),
@@ -745,13 +752,11 @@ local function delete_target(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
-    end
-
     if
       (
-        field == 'campaign_id'
+        field == 'lock_secret'
+        or field == 'orig_lock_secret'
+        or field == 'campaign_id'
         or field == 'target_id'
         or field == 'donor_sub'
         or field == 'donor_domain'
@@ -779,12 +784,8 @@ local function delete_target(keys, args)
     return redis.status_reply('FORBIDDEN Target not disabled')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return

@@ -7,9 +7,9 @@ import {
   FullMessageModel,
   HttpBody,
   HttpConnection,
-  HttpPayload,
   HttpError,
   HttpHeaders,
+  HttpPayload,
   Logger,
   LOGGER,
   MESSAGE_REPOSITORY,
@@ -70,7 +70,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     score: number,
     ip: string,
     startTime: number,
-    finishTime: number,
+    finishTime: number
   ): Promise<void> {
     try {
       const statusReply = await this.connection.message.create_message(
@@ -94,7 +94,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         score,
         ip,
         startTime,
-        finishTime,
+        finishTime
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -221,5 +221,4 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
     return data
   }
-
 }

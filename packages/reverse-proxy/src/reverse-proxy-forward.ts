@@ -150,13 +150,13 @@ export class ReverseProxyForward {
 
   protected sureNotFrozen(name: string) {
     if (this.isFrozen) {
-      throw new Error(`Forward is frozen on ${name}`)
+      throw new Error(`Forward is frozen on: ${name}`)
     }
   }
 
   protected sureIsFrozen(name: string) {
     if (!this.isFrozen) {
-      throw new Error(`Forward not frozen on ${name}`)
+      throw new Error(`Forward not frozen on: ${name}`)
     }
   }
 }

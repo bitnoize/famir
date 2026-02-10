@@ -50,7 +50,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     campaignId: string,
     redirectorId: string,
     page: string,
-    lockCode: number
+    lockSecret: string
   ): Promise<void> {
     try {
       const statusReply = await this.connection.redirector.create_redirector(
@@ -58,7 +58,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         campaignId,
         redirectorId,
         page,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -87,7 +87,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     campaignId: string,
     redirectorId: string,
     page: string | null | undefined,
-    lockCode: number
+    lockSecret: string
   ): Promise<void> {
     try {
       const statusReply = await this.connection.redirector.update_redirector(
@@ -95,7 +95,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         campaignId,
         redirectorId,
         page,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -106,13 +106,13 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async delete(campaignId: string, redirectorId: string, lockCode: number): Promise<void> {
+  async delete(campaignId: string, redirectorId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.redirector.delete_redirector(
         this.options.prefix,
         campaignId,
         redirectorId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)

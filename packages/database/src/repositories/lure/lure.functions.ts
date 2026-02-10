@@ -1,6 +1,7 @@
 import { CommandParser } from '@redis/client'
 import {
   campaignKey,
+  campaignLockKey,
   lureIndexKey,
   lureKey,
   lurePathKey,
@@ -21,7 +22,7 @@ export interface RawLure {
 export const lureFunctions = {
   lure: {
     create_lure: {
-      NUMBER_OF_KEYS: 5,
+      NUMBER_OF_KEYS: 6,
 
       parseCommand(
         parser: CommandParser,
@@ -30,9 +31,10 @@ export const lureFunctions = {
         lureId: string,
         path: string,
         redirectorId: string,
-        lockCode: number
+        lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
         parser.pushKey(lurePathKey(prefix, campaignId, path))
         parser.pushKey(lureIndexKey(prefix, campaignId))
@@ -43,7 +45,7 @@ export const lureFunctions = {
         parser.push(path)
         parser.push(redirectorId)
         parser.push(Date.now().toString())
-        parser.push(lockCode.toString())
+        parser.push(lockSecret)
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -83,47 +85,49 @@ export const lureFunctions = {
     },
 
     enable_lure: {
-      NUMBER_OF_KEYS: 2,
+      NUMBER_OF_KEYS: 3,
 
       parseCommand(
         parser: CommandParser,
         prefix: string,
         campaignId: string,
         lureId: string,
-        lockCode: number
+        lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
 
         parser.push(Date.now().toString())
-        parser.push(lockCode.toString())
+        parser.push(lockSecret)
       },
 
       transformReply: undefined as unknown as () => unknown
     },
 
     disable_lure: {
-      NUMBER_OF_KEYS: 2,
+      NUMBER_OF_KEYS: 3,
 
       parseCommand(
         parser: CommandParser,
         prefix: string,
         campaignId: string,
         lureId: string,
-        lockCode: number
+        lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
 
         parser.push(Date.now().toString())
-        parser.push(lockCode.toString())
+        parser.push(lockSecret)
       },
 
       transformReply: undefined as unknown as () => unknown
     },
 
     delete_lure: {
-      NUMBER_OF_KEYS: 5,
+      NUMBER_OF_KEYS: 6,
 
       parseCommand(
         parser: CommandParser,
@@ -132,15 +136,16 @@ export const lureFunctions = {
         lureId: string,
         path: string,
         redirectorId: string,
-        lockCode: number
+        lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
         parser.pushKey(lurePathKey(prefix, campaignId, path))
         parser.pushKey(lureIndexKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
 
-        parser.push(lockCode.toString())
+        parser.push(lockSecret)
       },
 
       transformReply: undefined as unknown as () => unknown

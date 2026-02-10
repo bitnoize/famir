@@ -3,7 +3,7 @@ export interface CreateLureData {
   lureId: string
   path: string
   redirectorId: string
-  lockCode: number
+  lockSecret: string
 }
 
 export interface ReadLureData {
@@ -19,7 +19,7 @@ export interface ReadLurePathData {
 export interface SwitchLureData {
   campaignId: string
   lureId: string
-  lockCode: number
+  lockSecret: string
 }
 
 export interface DeleteLureData {
@@ -27,7 +27,7 @@ export interface DeleteLureData {
   lureId: string
   path: string
   redirectorId: string
-  lockCode: number
+  lockSecret: string
 }
 
 export interface ListLuresData {

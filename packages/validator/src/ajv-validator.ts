@@ -16,7 +16,7 @@ export class AjvValidator implements Validator {
       coerceTypes: true,
       removeAdditional: true,
       allowUnionTypes: true,
-      strictTypes: true,
+      strictTypes: true
       //strictTuples: true
     })
   }

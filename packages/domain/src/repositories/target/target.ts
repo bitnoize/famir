@@ -24,7 +24,7 @@ export interface TargetRepository {
     faviconIco: string,
     robotsTxt: string,
     sitemapXml: string,
-    lockCode: number
+    lockSecret: string
   ): Promise<void>
   read(campaignId: string, targetId: string): Promise<FullTargetModel | null>
   update(
@@ -40,12 +40,22 @@ export interface TargetRepository {
     faviconIco: string | null | undefined,
     robotsTxt: string | null | undefined,
     sitemapXml: string | null | undefined,
-    lockCode: number
+    lockSecret: string
   ): Promise<void>
-  enable(campaignId: string, targetId: string, lockCode: number): Promise<void>
-  disable(campaignId: string, targetId: string, lockCode: number): Promise<void>
-  appendLabel(campaignId: string, targetId: string, label: string, lockCode: number): Promise<void>
-  removeLabel(campaignId: string, targetId: string, label: string, lockCode: number): Promise<void>
-  delete(campaignId: string, targetId: string, lockCode: number): Promise<void>
+  enable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
+  disable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
+  appendLabel(
+    campaignId: string,
+    targetId: string,
+    label: string,
+    lockSecret: string
+  ): Promise<void>
+  removeLabel(
+    campaignId: string,
+    targetId: string,
+    label: string,
+    lockSecret: string
+  ): Promise<void>
+  delete(campaignId: string, targetId: string, lockSecret: string): Promise<void>
   list(campaignId: string): Promise<TargetModel[] | null>
 }

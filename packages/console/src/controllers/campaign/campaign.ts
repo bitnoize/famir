@@ -2,6 +2,7 @@ export interface CreateCampaignData {
   campaignId: string
   mirrorDomain: string
   description: string
+  lockTimeout: number
   landingUpgradePath: string
   landingUpgradeParam: string
   landingRedirectorParam: string
@@ -17,12 +18,11 @@ export interface ReadCampaignData {
 
 export interface LockCampaignData {
   campaignId: string
-  isForce?: boolean
 }
 
 export interface UnlockCampaignData {
   campaignId: string
-  lockCode: number
+  lockSecret: string
 }
 
 export interface UpdateCampaignData {
@@ -31,10 +31,10 @@ export interface UpdateCampaignData {
   sessionExpire: number | null | undefined
   newSessionExpire: number | null | undefined
   messageExpire: number | null | undefined
-  lockCode: number
+  lockSecret: string
 }
 
 export interface DeleteCampaignData {
   campaignId: string
-  lockCode: number
+  lockSecret: string
 }

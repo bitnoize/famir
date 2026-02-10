@@ -4,18 +4,23 @@
   Create lure
 --]]
 local function create_lure(keys, args)
-  if #keys ~= 5 or #args ~= 6 then
+  if #keys ~= 6 or #args ~= 6 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local lure_key = keys[2]
-  local lure_path_key = keys[3]
-  local lure_index_key = keys[4]
-  local redirector_key = keys[5]
+  local campaign_lock_key = keys[2]
+  local lure_key = keys[3]
+  local lure_path_key = keys[4]
+  local lure_index_key = keys[5]
+  local redirector_key = keys[6]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', lure_key) ~= 0 then
@@ -31,8 +36,8 @@ local function create_lure(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(args[6]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[6],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
   for field, value in pairs(stash) do
@@ -40,7 +45,7 @@ local function create_lure(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -69,12 +74,8 @@ local function create_lure(keys, args)
     end
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -224,15 +225,20 @@ redis.register_function({
   Enable lure
 --]]
 local function enable_lure(keys, args)
-  if #keys ~= 2 or #args ~= 2 then
+  if #keys ~= 3 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local lure_key = keys[2]
+  local campaign_lock_key = keys[2]
+  local lure_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', lure_key) ~= 1 then
@@ -241,8 +247,8 @@ local function enable_lure(keys, args)
 
   local stash = {
     updated_at = tonumber(args[1]),
-    lock_code = tonumber(args[2]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[2],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
@@ -251,7 +257,7 @@ local function enable_lure(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -260,12 +266,8 @@ local function enable_lure(keys, args)
     return redis.status_reply('OK Lure allready enabled')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -285,15 +287,20 @@ redis.register_function({
   Disable lure
 --]]
 local function disable_lure(keys, args)
-  if #keys ~= 2 or #args ~= 2 then
+  if #keys ~= 3 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local lure_key = keys[2]
+  local campaign_lock_key = keys[2]
+  local lure_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', lure_key) ~= 1 then
@@ -302,8 +309,8 @@ local function disable_lure(keys, args)
 
   local stash = {
     updated_at = tonumber(args[1]),
-    lock_code = tonumber(args[2]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[2],
+    orig_lock_secret = redis.call('GET', campaign_key),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
@@ -312,7 +319,7 @@ local function disable_lure(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -321,12 +328,8 @@ local function disable_lure(keys, args)
     return redis.status_reply('OK Lure allready disabled')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -346,18 +349,23 @@ redis.register_function({
   Delete lure
 --]]
 local function delete_lure(keys, args)
-  if #keys ~= 5 or #args ~= 1 then
+  if #keys ~= 6 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local lure_key = keys[2]
-  local lure_path_key = keys[3]
-  local lure_index_key = keys[4]
-  local redirector_key = keys[5]
+  local campaign_lock_key = keys[2]
+  local lure_key = keys[3]
+  local lure_path_key = keys[4]
+  local lure_index_key = keys[5]
+  local redirector_key = keys[6]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', lure_key) ~= 1 then
@@ -369,8 +377,8 @@ local function delete_lure(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(args[1]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[1],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     lure_id = redis.call('HGET', lure_key, 'lure_id'),
     redirector_id = redis.call('HGET', lure_key, 'redirector_id'),
     orig_path_id = redis.call('GET', lure_path_key),
@@ -383,13 +391,11 @@ local function delete_lure(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
-    end
-
     if
       (
-        field == 'lure_id'
+        field == 'lock_secret'
+        or field == 'orig_lock_secret'
+        or field == 'lure_id'
         or field == 'redirector_id'
         or field == 'orig_path_id'
         or field == 'orig_redirector_id'
@@ -411,12 +417,8 @@ local function delete_lure(keys, args)
     return redis.status_reply('FORBIDDEN Lure not disabled')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return

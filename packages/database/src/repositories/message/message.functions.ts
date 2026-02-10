@@ -55,7 +55,7 @@ export const messageFunctions = {
         score: number,
         ip: string,
         startTime: number,
-        finishTime: number,
+        finishTime: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))

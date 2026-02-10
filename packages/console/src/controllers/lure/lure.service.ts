@@ -30,7 +30,7 @@ export class LureService extends BaseService {
         data.lureId,
         data.path,
         data.redirectorId,
-        data.lockCode
+        data.lockSecret
       )
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
@@ -53,7 +53,7 @@ export class LureService extends BaseService {
 
   async enable(data: SwitchLureData): Promise<void> {
     try {
-      await this.lureRepository.enable(data.campaignId, data.lureId, data.lockCode)
+      await this.lureRepository.enable(data.campaignId, data.lureId, data.lockSecret)
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -63,7 +63,7 @@ export class LureService extends BaseService {
 
   async disable(data: SwitchLureData): Promise<void> {
     try {
-      await this.lureRepository.disable(data.campaignId, data.lureId, data.lockCode)
+      await this.lureRepository.disable(data.campaignId, data.lureId, data.lockSecret)
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -78,7 +78,7 @@ export class LureService extends BaseService {
         data.lureId,
         data.path,
         data.redirectorId,
-        data.lockCode
+        data.lockSecret
       )
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])

@@ -8,18 +8,18 @@ export interface LureRepository {
     lureId: string,
     path: string,
     redirectorId: string,
-    lockCode: number
+    lockSecret: string
   ): Promise<void>
   read(campaignId: string, lureId: string): Promise<LureModel | null>
   readPath(campaignId: string, path: string): Promise<LureModel | null>
-  enable(campaignId: string, lureId: string, lockCode: number): Promise<void>
-  disable(campaignId: string, lureId: string, lockCode: number): Promise<void>
+  enable(campaignId: string, lureId: string, lockSecret: string): Promise<void>
+  disable(campaignId: string, lureId: string, lockSecret: string): Promise<void>
   delete(
     campaignId: string,
     lureId: string,
     path: string,
     redirectorId: string,
-    lockCode: number
+    lockSecret: string
   ): Promise<void>
   list(campaignId: string): Promise<LureModel[] | null>
 }

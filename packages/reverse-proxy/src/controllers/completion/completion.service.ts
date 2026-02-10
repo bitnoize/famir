@@ -54,7 +54,7 @@ export class CompletionService extends BaseService {
         data.finishTime
       )
     } catch (error) {
-      this.filterDatabaseException(error, ['NOT_FOUND'])
+      this.simpleDatabaseException(error, ['NOT_FOUND'])
 
       throw error
     }

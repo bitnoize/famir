@@ -52,9 +52,13 @@ export class DatabaseController extends BaseController {
 
   private loadDatabaseFunctionsApiCall: ReplServerApiCall = async () => {
     await this.databaseService.loadFunctions()
+
+    return true
   }
 
   private cleanupDatabaseApiCall: ReplServerApiCall = async () => {
     await this.databaseService.cleanup()
+
+    return true
   }
 }

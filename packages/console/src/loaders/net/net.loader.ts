@@ -12,7 +12,7 @@ import {
   RedisTargetRepository
 } from '@famir/database'
 import { PinoLogger } from '@famir/logger'
-import { StdReplServerRouter, NetReplServer } from '@famir/repl-server'
+import { NetReplServer, StdReplServerRouter } from '@famir/repl-server'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeLogQueue, RedisWorkflowConnector } from '@famir/workflow'
 import { App } from '../../console.app.js'

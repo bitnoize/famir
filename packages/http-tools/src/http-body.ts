@@ -1,7 +1,6 @@
 import {
   HttpBody,
   HttpBodyWrapper,
-  HttpContentType,
   HttpFormatQueryStringOptions,
   HttpJson,
   HttpParseQueryStringOptions,

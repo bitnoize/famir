@@ -4,16 +4,21 @@
   Create redirector
 --]]
 local function create_redirector(keys, args)
-  if #keys ~= 3 or #args ~= 5 then
+  if #keys ~= 4 or #args ~= 5 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local redirector_key = keys[2]
-  local redirector_index_key = keys[3]
+  local campaign_lock_key = keys[2]
+  local redirector_key = keys[3]
+  local redirector_index_key = keys[4]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', redirector_key) ~= 0 then
@@ -21,8 +26,8 @@ local function create_redirector(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(args[5]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[5],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
   for field, value in pairs(stash) do
@@ -30,7 +35,7 @@ local function create_redirector(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -54,12 +59,8 @@ local function create_redirector(keys, args)
     end
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -229,15 +230,20 @@ redis.register_function({
   Update redirector
 --]]
 local function update_redirector(keys, args)
-  if #keys ~= 2 or #args < 2 then
+  if #keys ~= 3 or #args < 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local redirector_key = keys[2]
+  local campaign_lock_key = keys[2]
+  local redirector_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', redirector_key) ~= 1 then
@@ -245,9 +251,9 @@ local function update_redirector(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(table.remove(args)),
+    lock_secret = table.remove(args),
     updated_at = tonumber(table.remove(args)),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
   for field, value in pairs(stash) do
@@ -255,7 +261,7 @@ local function update_redirector(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
+    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
   end
@@ -292,12 +298,8 @@ local function update_redirector(keys, args)
 
   model.updated_at = stash.updated_at
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -324,16 +326,21 @@ redis.register_function({
   Delete redirector
 --]]
 local function delete_redirector(keys, args)
-  if #keys ~= 3 or #args ~= 1 then
+  if #keys ~= 4 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local redirector_key = keys[2]
-  local redirector_index_key = keys[3]
+  local campaign_lock_key = keys[2]
+  local redirector_key = keys[3]
+  local redirector_index_key = keys[4]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
   end
 
   if redis.call('EXISTS', redirector_key) ~= 1 then
@@ -341,8 +348,8 @@ local function delete_redirector(keys, args)
   end
 
   local stash = {
-    lock_code = tonumber(args[1]),
-    orig_lock_code = tonumber(redis.call('HGET', campaign_key, 'lock_code')),
+    lock_secret = args[1],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     redirector_id = redis.call('HGET', redirector_key, 'redirector_id'),
     lure_count = tonumber(redis.call('HGET', redirector_key, 'lure_count')),
   }
@@ -352,11 +359,10 @@ local function delete_redirector(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
-    if field == 'lock_code' and value == 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
-    end
-
-    if field == 'redirector_id' and value == '' then
+    if
+      (field == 'lock_secret' or field == 'orig_lock_secret' or field == 'redirector_id')
+      and value == ''
+    then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
 
@@ -369,12 +375,8 @@ local function delete_redirector(keys, args)
     return redis.status_reply('FORBIDDEN Lures exists')
   end
 
-  if stash.orig_lock_code == 0 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if stash.orig_lock_code ~= stash.lock_code then
-    return redis.status_reply('FORBIDDEN Campaign lock_code not match')
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return

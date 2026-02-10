@@ -34,7 +34,7 @@ export class RedirectorService extends BaseService {
         data.campaignId,
         data.redirectorId,
         data.page,
-        data.lockCode
+        data.lockSecret
       )
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
@@ -61,7 +61,7 @@ export class RedirectorService extends BaseService {
         data.campaignId,
         data.redirectorId,
         data.page,
-        data.lockCode
+        data.lockSecret
       )
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
@@ -72,7 +72,7 @@ export class RedirectorService extends BaseService {
 
   async delete(data: DeleteRedirectorData): Promise<void> {
     try {
-      await this.redirectorRepository.delete(data.campaignId, data.redirectorId, data.lockCode)
+      await this.redirectorRepository.delete(data.campaignId, data.redirectorId, data.lockSecret)
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

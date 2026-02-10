@@ -67,7 +67,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     faviconIco: string,
     robotsTxt: string,
     sitemapXml: string,
-    lockCode: number
+    lockSecret: string
   ): Promise<void> {
     try {
       const statusReply = await this.connection.target.create_target(
@@ -92,7 +92,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         faviconIco,
         robotsTxt,
         sitemapXml,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -130,7 +130,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     faviconIco: string | null | undefined,
     robotsTxt: string | null | undefined,
     sitemapXml: string | null | undefined,
-    lockCode: number
+    lockSecret: string
   ): Promise<void> {
     try {
       const statusReply = await this.connection.target.update_target(
@@ -147,7 +147,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         faviconIco,
         robotsTxt,
         sitemapXml,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -158,13 +158,13 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async enable(campaignId: string, targetId: string, lockCode: number): Promise<void> {
+  async enable(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.target.enable_target(
         this.options.prefix,
         campaignId,
         targetId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -175,13 +175,13 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async disable(campaignId: string, targetId: string, lockCode: number): Promise<void> {
+  async disable(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.target.disable_target(
         this.options.prefix,
         campaignId,
         targetId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -196,7 +196,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     campaignId: string,
     targetId: string,
     label: string,
-    lockCode: number
+    lockSecret: string
   ): Promise<void> {
     try {
       const statusReply = await this.connection.target.append_target_label(
@@ -204,7 +204,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         campaignId,
         targetId,
         label,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -219,7 +219,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     campaignId: string,
     targetId: string,
     label: string,
-    lockCode: number
+    lockSecret: string
   ): Promise<void> {
     try {
       const statusReply = await this.connection.target.remove_target_label(
@@ -227,7 +227,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         campaignId,
         targetId,
         label,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -238,13 +238,13 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async delete(campaignId: string, targetId: string, lockCode: number): Promise<void> {
+  async delete(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.target.delete_target(
         this.options.prefix,
         campaignId,
         targetId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)

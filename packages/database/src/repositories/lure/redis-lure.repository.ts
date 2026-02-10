@@ -50,7 +50,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     lureId: string,
     path: string,
     redirectorId: string,
-    lockCode: number
+    lockSecret: string
   ): Promise<void> {
     try {
       const statusReply = await this.connection.lure.create_lure(
@@ -59,7 +59,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lureId,
         path,
         redirectorId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -102,13 +102,13 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async enable(campaignId: string, lureId: string, lockCode: number): Promise<void> {
+  async enable(campaignId: string, lureId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.lure.enable_lure(
         this.options.prefix,
         campaignId,
         lureId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -119,13 +119,13 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async disable(campaignId: string, lureId: string, lockCode: number): Promise<void> {
+  async disable(campaignId: string, lureId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.lure.disable_lure(
         this.options.prefix,
         campaignId,
         lureId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -141,7 +141,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     lureId: string,
     path: string,
     redirectorId: string,
-    lockCode: number
+    lockSecret: string
   ): Promise<void> {
     try {
       const statusReply = await this.connection.lure.delete_lure(
@@ -150,7 +150,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lureId,
         path,
         redirectorId,
-        lockCode
+        lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)

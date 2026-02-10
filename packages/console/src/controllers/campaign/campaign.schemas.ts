@@ -1,10 +1,10 @@
-import { JSONSchemaType, customIdentSchema } from '@famir/common'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
 import {
   campaignDescriptionSchema,
   campaignLandingRedirectorParamSchema,
   campaignLandingUpgradeParamSchema,
   campaignLandingUpgradePathSchema,
-  campaignLockCodeSchema,
+  campaignLockTimeoutSchema,
   campaignMessageExpireSchema,
   campaignMirrorDomainSchema,
   campaignNewSessionExpireSchema,
@@ -41,6 +41,10 @@ const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
     description: {
       ...campaignDescriptionSchema,
       default: ''
+    },
+    lockTimeout: {
+      ...campaignLockTimeoutSchema,
+      default: 300 * 1000
     },
     landingUpgradePath: {
       ...campaignLandingUpgradePathSchema,
@@ -87,28 +91,24 @@ const lockCampaignDataSchema: JSONSchemaType<LockCampaignData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema,
-    isForce: {
-      type: 'boolean',
-      nullable: true
-    }
+    campaignId: customIdentSchema
   },
   additionalProperties: false
 } as const
 
 const unlockCampaignDataSchema: JSONSchemaType<UnlockCampaignData> = {
   type: 'object',
-  required: ['campaignId', 'lockCode'],
+  required: ['campaignId', 'lockSecret'],
   properties: {
     campaignId: customIdentSchema,
-    lockCode: campaignLockCodeSchema
+    lockSecret: randomIdentSchema
   },
   additionalProperties: false
 } as const
 
 const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
   type: 'object',
-  required: ['campaignId', 'lockCode'],
+  required: ['campaignId', 'lockSecret'],
   properties: {
     campaignId: customIdentSchema,
     description: {
@@ -127,17 +127,17 @@ const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
       ...campaignMessageExpireSchema,
       nullable: true
     },
-    lockCode: campaignLockCodeSchema
+    lockSecret: randomIdentSchema
   },
   additionalProperties: false
 } as const
 
 const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
   type: 'object',
-  required: ['campaignId', 'lockCode'],
+  required: ['campaignId', 'lockSecret'],
   properties: {
     campaignId: customIdentSchema,
-    lockCode: campaignLockCodeSchema
+    lockSecret: randomIdentSchema
   },
   additionalProperties: false
 } as const

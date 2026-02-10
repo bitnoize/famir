@@ -1,4 +1,4 @@
-import { HttpError, HttpPayload, HttpBody, HttpConnection, HttpHeaders } from '../../http-proto.js'
+import { HttpBody, HttpConnection, HttpError, HttpHeaders, HttpPayload } from '../../http-proto.js'
 
 export class MessageModel {
   static isNotNull = <T extends MessageModel>(model: T | null): model is T => {

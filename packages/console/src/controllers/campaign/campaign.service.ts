@@ -30,12 +30,13 @@ export class CampaignService extends BaseService {
     super()
   }
 
-  async create(data: CreateCampaignData): Promise<number> {
+  async create(data: CreateCampaignData): Promise<void> {
     try {
-      return await this.campaignRepository.create(
+      await this.campaignRepository.create(
         data.campaignId,
         data.mirrorDomain,
         data.description,
+        data.lockTimeout,
         data.landingUpgradePath,
         data.landingUpgradeParam,
         data.landingRedirectorParam,
@@ -63,9 +64,9 @@ export class CampaignService extends BaseService {
     return model
   }
 
-  async lock(data: LockCampaignData): Promise<number> {
+  async lock(data: LockCampaignData): Promise<string> {
     try {
-      return await this.campaignRepository.lock(data.campaignId, data.isForce ?? false)
+      return await this.campaignRepository.lock(data.campaignId)
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -75,7 +76,7 @@ export class CampaignService extends BaseService {
 
   async unlock(data: UnlockCampaignData): Promise<void> {
     try {
-      await this.campaignRepository.unlock(data.campaignId, data.lockCode)
+      await this.campaignRepository.unlock(data.campaignId, data.lockSecret)
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -91,7 +92,7 @@ export class CampaignService extends BaseService {
         data.sessionExpire,
         data.newSessionExpire,
         data.messageExpire,
-        data.lockCode
+        data.lockSecret
       )
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
@@ -102,7 +103,7 @@ export class CampaignService extends BaseService {
 
   async delete(data: DeleteCampaignData): Promise<void> {
     try {
-      await this.campaignRepository.delete(data.campaignId, data.lockCode)
+      await this.campaignRepository.delete(data.campaignId, data.lockSecret)
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

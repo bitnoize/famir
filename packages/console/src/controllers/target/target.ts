@@ -19,7 +19,7 @@ export interface CreateTargetData {
   faviconIco: string
   robotsTxt: string
   sitemapXml: string
-  lockCode: number
+  lockSecret: string
 }
 
 export interface ReadTargetData {
@@ -40,26 +40,26 @@ export interface UpdateTargetData {
   faviconIco: string | null | undefined
   robotsTxt: string | null | undefined
   sitemapXml: string | null | undefined
-  lockCode: number
+  lockSecret: string
 }
 
 export interface SwitchTargetData {
   campaignId: string
   targetId: string
-  lockCode: number
+  lockSecret: string
 }
 
 export interface ActionTargetLabelData {
   campaignId: string
   targetId: string
   label: string
-  lockCode: number
+  lockSecret: string
 }
 
 export interface DeleteTargetData {
   campaignId: string
   targetId: string
-  lockCode: number
+  lockSecret: string
 }
 
 export interface ListTargetsData {
