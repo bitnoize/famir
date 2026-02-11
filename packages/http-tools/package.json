@@ -11,6 +11,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
+    "@adobe/css-tools": "^4.4.4",
     "cheerio": "^1.2.0",
     "content-type": "^1.0.5",
     "iconv-lite": "^0.7.2",

@@ -7,8 +7,8 @@ import {
   HttpSetCookies,
   HttpStrictHeaders
 } from '@famir/domain'
-import contenttype from 'content-type'
-import { Cookie } from 'tough-cookie'
+import { formatContentType, parseContentType } from './content-type.js'
+import { formatCookies, formatSetCookies, parseCookies, parseSetCookies } from './cookies.js'
 
 export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
   static fromReq(req: { headers: HttpHeaders }): HttpHeadersWrapper {
@@ -37,9 +37,9 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
   }
 
   get(name: string): HttpHeader | undefined {
-    name = name.toLowerCase()
+    const normName = name.toLowerCase()
 
-    return this.#headers[name]
+    return this.#headers[normName]
   }
 
   getString(name: string): string | undefined {
@@ -73,11 +73,11 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
   set(name: string, value: HttpHeader): this {
     this.sureNotFrozen('set')
 
-    name = name.toLowerCase()
+    const normName = name.toLowerCase()
 
-    this.invalidateCacheFor(name)
+    this.invalidateCacheFor(normName)
 
-    this.#headers[name] = value
+    this.#headers[normName] = value
 
     return this
   }
@@ -85,9 +85,7 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
   add(name: string, value: string): this {
     this.sureNotFrozen('add')
 
-    name = name.toLowerCase()
-
-    const curValue = this.#headers[name]
+    const curValue = this.get(name)
 
     if (curValue == null) {
       this.set(name, value)
@@ -101,9 +99,9 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
   }
 
   has(name: string): boolean {
-    name = name.toLowerCase()
+    const normName = name.toLowerCase()
 
-    return name in this.#headers
+    return normName in this.#headers
   }
 
   delete(arg: string | string[]): this {
@@ -112,11 +110,11 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     const names = Array.isArray(arg) ? arg : [arg]
 
     names.forEach((name) => {
-      name = name.toLowerCase()
+      const normName = name.toLowerCase()
 
-      this.invalidateCacheFor(name)
+      this.invalidateCacheFor(normName)
 
-      this.#headers[name] = undefined
+      this.#headers[normName] = undefined
     })
 
     return this
@@ -146,23 +144,25 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
 
   #cacheContentType: HttpContentType | null = null
 
-  getContentType(): HttpContentType {
+  getContentType(): HttpContentType | null {
     if (this.#cacheContentType != null) {
       return this.#cacheContentType
     }
 
-    const value = this.getString('Content-Type') ?? ''
-    const contentType = contenttype.parse(value.trim())
+    const value = this.getString('Content-Type')
+    if (value == null) {
+      return null
+    }
 
-    this.#cacheContentType = contentType
+    this.#cacheContentType = parseContentType(value)
 
-    return contentType
+    return this.#cacheContentType
   }
 
   setContentType(contentType: HttpContentType): this {
     this.sureNotFrozen('setContentType')
 
-    const value = contenttype.format(contentType)
+    const value = formatContentType(contentType)
     this.set('Content-Type', value)
 
     this.#cacheContentType = contentType
@@ -172,23 +172,25 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
 
   #cacheCookies: HttpCookies | null = null
 
-  getCookies(): HttpCookies {
+  getCookies(): HttpCookies | null {
     if (this.#cacheCookies != null) {
       return this.#cacheCookies
     }
 
-    const value = this.getString('Cookie') ?? ''
-    const cookies = this.parseCookies(value)
+    const values = this.getArray('Cookie')
+    if (values == null) {
+      return null
+    }
 
-    this.#cacheCookies = cookies
+    this.#cacheCookies = parseCookies(values)
 
-    return cookies
+    return this.#cacheCookies
   }
 
   setCookies(cookies: HttpCookies): this {
     this.sureNotFrozen('setCookies')
 
-    const value = this.formatCookies(cookies)
+    const value = formatCookies(cookies)
     this.set('Cookie', value)
 
     this.#cacheCookies = cookies
@@ -198,23 +200,25 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
 
   #cacheSetCookies: HttpSetCookies | null = null
 
-  getSetCookies(): HttpSetCookies {
+  getSetCookies(): HttpSetCookies | null {
     if (this.#cacheSetCookies != null) {
       return this.#cacheSetCookies
     }
 
-    const values = this.getArray('Set-Cookie') ?? []
-    const setCookies = this.parseSetCookies(values)
+    const values = this.getArray('Set-Cookie')
+    if (values == null) {
+      return null
+    }
 
-    this.#cacheSetCookies = setCookies
+    this.#cacheSetCookies = parseSetCookies(values)
 
-    return setCookies
+    return this.#cacheSetCookies
   }
 
   setSetCookies(setCookies: HttpSetCookies): this {
     this.sureNotFrozen('setSetCookies')
 
-    const values = this.formatSetCookies(setCookies)
+    const values = formatSetCookies(setCookies)
     this.set('Set-Cookie', values)
 
     this.#cacheSetCookies = setCookies
@@ -266,136 +270,5 @@ export class StdHttpHeadersWrapper implements HttpHeadersWrapper {
     this.#cacheContentType = null
     this.#cacheCookies = null
     this.#cacheSetCookies = null
-  }
-
-  private parseCookies(value: string): HttpCookies {
-    const cookies: HttpCookies = {}
-
-    value.split(';').forEach((rawCookie) => {
-      const toughCookie = Cookie.parse(rawCookie.trim())
-
-      if (toughCookie) {
-        cookies[toughCookie.key] = toughCookie.value
-      }
-    })
-
-    return cookies
-  }
-
-  private formatCookies(cookies: HttpCookies): string {
-    const toughCookies: Cookie[] = []
-
-    Object.entries(cookies).forEach(([name, value]) => {
-      if (value != null) {
-        const toughCookie = new Cookie({
-          key: name,
-          value: value
-        })
-
-        toughCookies.push(toughCookie)
-      }
-    })
-
-    return toughCookies.map((toughCookie) => toughCookie.cookieString()).join(';')
-  }
-
-  private parseSetCookies(values: string[]): HttpSetCookies {
-    const cookies: HttpSetCookies = {}
-
-    values
-      .join(';')
-      .split(';')
-      .forEach((rawCookie) => {
-        const toughCookie = Cookie.parse(rawCookie.trim())
-
-        if (!toughCookie) {
-          return
-        }
-
-        const name = toughCookie.key
-
-        cookies[name] = {
-          value: toughCookie.value
-        }
-
-        // tough-cookie expires: Date | 'Infinity' | null
-        if (toughCookie.expires instanceof Date) {
-          cookies[name].expires = toughCookie.expires.getTime()
-        }
-
-        // tough-cookie maxAge: number | 'Infinity' | '-Infinity' | null
-        if (typeof toughCookie.maxAge === 'number') {
-          cookies[name].maxAge = toughCookie.maxAge
-        }
-
-        if (toughCookie.path != null) {
-          cookies[name].path = toughCookie.path
-        }
-
-        if (toughCookie.domain != null) {
-          cookies[name].domain = toughCookie.domain
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (toughCookie.secure != null) {
-          cookies[name].secure = toughCookie.secure
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (toughCookie.httpOnly != null) {
-          cookies[name].httpOnly = toughCookie.httpOnly
-        }
-
-        if (toughCookie.sameSite != null) {
-          cookies[name].sameSite = toughCookie.sameSite
-        }
-      })
-
-    return cookies
-  }
-
-  private formatSetCookies(cookies: HttpSetCookies): string {
-    const toughCookies: Cookie[] = []
-
-    Object.entries(cookies).forEach(([name, cookie]) => {
-      if (cookie != null) {
-        const toughCookie = new Cookie({
-          key: name,
-          value: cookie.value
-        })
-
-        if (cookie.expires != null) {
-          toughCookie.expires = new Date(cookie.expires)
-        }
-
-        if (cookie.maxAge != null) {
-          toughCookie.maxAge = cookie.maxAge
-        }
-
-        if (cookie.path != null) {
-          toughCookie.path = cookie.path
-        }
-
-        if (cookie.domain != null) {
-          toughCookie.domain = cookie.domain
-        }
-
-        if (cookie.secure != null) {
-          toughCookie.secure = cookie.secure
-        }
-
-        if (cookie.httpOnly != null) {
-          toughCookie.httpOnly = cookie.httpOnly
-        }
-
-        if (cookie.sameSite != null) {
-          toughCookie.sameSite = cookie.sameSite
-        }
-
-        toughCookies.push(toughCookie)
-      }
-    })
-
-    return toughCookies.map((toughCookie) => toughCookie.toString()).join(';')
   }
 }

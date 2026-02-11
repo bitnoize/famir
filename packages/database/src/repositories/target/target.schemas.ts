@@ -14,7 +14,9 @@ const rawTargetSchema: JSONSchemaType<RawTarget> = {
     'donor_port',
     'mirror_secure',
     'mirror_sub',
+    'mirror_domain',
     'mirror_port',
+    'labels',
     'is_enabled',
     'message_count',
     'created_at',
@@ -48,8 +50,17 @@ const rawTargetSchema: JSONSchemaType<RawTarget> = {
     mirror_sub: {
       type: 'string'
     },
+    mirror_domain: {
+      type: 'string'
+    },
     mirror_port: {
       type: 'integer'
+    },
+    labels: {
+      type: 'array',
+      items: {
+        type: 'string'
+      }
     },
     is_enabled: {
       type: 'integer'
@@ -79,6 +90,7 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     'donor_port',
     'mirror_secure',
     'mirror_sub',
+    'mirror_domain',
     'mirror_port',
     'labels',
     'connect_timeout',
@@ -122,6 +134,9 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
       type: 'integer'
     },
     mirror_sub: {
+      type: 'string'
+    },
+    mirror_domain: {
       type: 'string'
     },
     mirror_port: {

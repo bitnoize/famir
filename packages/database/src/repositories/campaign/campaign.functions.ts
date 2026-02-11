@@ -13,6 +13,7 @@ import {
 export interface RawCampaign {
   campaign_id: string
   mirror_domain: string
+  is_locked: number
   session_count: number
   message_count: number
   created_at: number
@@ -29,7 +30,6 @@ export interface RawFullCampaign extends RawCampaign {
   session_expire: number
   new_session_expire: number
   message_expire: number
-  is_locked: number
   proxy_count: number
   target_count: number
   redirector_count: number
@@ -78,10 +78,11 @@ export const campaignFunctions = {
     },
 
     read_campaign: {
-      NUMBER_OF_KEYS: 1,
+      NUMBER_OF_KEYS: 2,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLockKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => unknown

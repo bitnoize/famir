@@ -203,6 +203,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     return new CampaignModel(
       rawModel.campaign_id,
       rawModel.mirror_domain,
+      !!rawModel.is_locked,
       rawModel.session_count,
       rawModel.message_count,
       new Date(rawModel.created_at),

@@ -19,7 +19,9 @@ export interface RawTarget {
   donor_port: number
   mirror_secure: number
   mirror_sub: string
+  mirror_domain: string
   mirror_port: number
+  labels: string[]
   is_enabled: number
   message_count: number
   created_at: number
@@ -27,7 +29,6 @@ export interface RawTarget {
 }
 
 export interface RawFullTarget extends RawTarget {
-  labels: string[]
   connect_timeout: number
   ordinary_timeout: number
   streaming_timeout: number
@@ -105,11 +106,12 @@ export const targetFunctions = {
     },
 
     read_target: {
-      NUMBER_OF_KEYS: 2,
+      NUMBER_OF_KEYS: 3,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
+        parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
       },
 
       transformReply: undefined as unknown as () => RawTarget | null

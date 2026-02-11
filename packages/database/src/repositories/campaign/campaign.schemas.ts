@@ -7,6 +7,7 @@ const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
   required: [
     'campaign_id',
     'mirror_domain',
+    'is_locked',
     'session_count',
     'message_count',
     'created_at',
@@ -18,6 +19,9 @@ const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
     },
     mirror_domain: {
       type: 'string'
+    },
+    is_locked: {
+      type: 'integer'
     },
     session_count: {
       type: 'integer'

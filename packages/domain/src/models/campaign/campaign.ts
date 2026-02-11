@@ -6,6 +6,7 @@ export class CampaignModel {
   constructor(
     readonly campaignId: string,
     readonly mirrorDomain: string,
+    readonly isLocked: boolean,
     readonly sessionCount: number,
     readonly messageCount: number,
     readonly createdAt: Date,
@@ -26,7 +27,7 @@ export class FullCampaignModel extends CampaignModel {
     readonly sessionExpire: number,
     readonly newSessionExpire: number,
     readonly messageExpire: number,
-    readonly isLocked: boolean,
+    isLocked: boolean,
     readonly proxyCount: number,
     readonly targetCount: number,
     readonly redirectorCount: number,
@@ -36,6 +37,6 @@ export class FullCampaignModel extends CampaignModel {
     createdAt: Date,
     updatedAt: Date
   ) {
-    super(campaignId, mirrorDomain, sessionCount, messageCount, createdAt, updatedAt)
+    super(campaignId, mirrorDomain, isLocked, sessionCount, messageCount, createdAt, updatedAt)
   }
 }

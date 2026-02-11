@@ -131,25 +131,28 @@ export class RoundTripController extends BaseController {
   }
 
   useBasicTransforms() {
-    this.router.register('basicTransforms', async (ctx, next) => {
+    this.router.register('basic-transforms', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const forward = this.getState(ctx, 'forward')
 
       forward.addRequestHeadInterceptor('target-donor-url', (message) => {
         message.url.merge({
-          protocol: target.donorProtocol(),
-          hostname: target.donorHostname(),
+          protocol: target.donorProtocol,
+          hostname: target.donorHostname,
           port: target.donorPort.toString()
         })
 
-        message.requestHeaders.set('Host', target.donorHost())
+        message.requestHeaders.set('Host', target.donorHost)
       })
 
       forward.addRequestHeadInterceptor('remove-session-cookie', (message) => {
-        const requestCookies = message.requestHeaders.getCookies()
-        requestCookies[campaign.sessionCookieName] = undefined
-        message.requestHeaders.setCookies(requestCookies)
+        const cookies = message.requestHeaders.getCookies()
+
+        if (cookies) {
+          cookies[campaign.sessionCookieName] = undefined
+          message.requestHeaders.setCookies(cookies)
+        }
       })
 
       forward.addRequestHeadInterceptor('cleanup-headers', (message) => {
@@ -170,6 +173,78 @@ export class RoundTripController extends BaseController {
           'Proxy-Agent'
           // ...
         ])
+      })
+
+      await next()
+    })
+  }
+
+  /*
+  useRewriteHtmlUrl() {
+    this.router.register('rewrite-html-url', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+      const targets = this.getState(ctx, 'targets')
+      const forward = this.getState(ctx, 'forward')
+
+      forward.addRequestBodyInterceptor('rewrite-html-url', (message) => {
+        const contentType = message.responseHeaders.getContentType()
+
+        if (forward.rewriteHtmlUrl.isEnabled && contentType) {
+          if (forward.rewriteHtmlUrls.types.includes(contentType.type)) {
+            const charset = contentType.parameters['charset']
+            const srcText = message.requestBody.getText(charset)
+            const cheerio = cheerioLoad(srcText)
+
+            rewriteHtmlUrls(
+              cheerio,
+              true,
+              targets,
+              forward.rewriteHtmlUrls.schemes,
+              forward.rewriteHtmlUrls.tags
+            )
+
+            const dstText = cheerio.html()
+            message.requestBody.setText(dstText)
+          }
+        }
+      })
+
+      await next()
+    })
+  }
+  */
+
+  useCreateMessage() {
+    this.router.register('create-message', async (ctx, next) => {
+      const campaign = this.getState(ctx, 'campaign')
+      const proxy = this.getState(ctx, 'proxy')
+      const target = this.getState(ctx, 'target')
+      const session = this.getState(ctx, 'session')
+      const forward = this.getState(ctx, 'forward')
+
+      const message = forward.message
+
+      await this.roundTripService.createMessage({
+        campaignId: campaign.campaignId,
+        messageId: forward.message.id,
+        proxyId: proxy.proxyId,
+        targetId: target.targetId,
+        sessionId: session.sessionId,
+        kind: forward.kind,
+        method: message.method.get(),
+        url: message.url.toRelative(),
+        requestHeaders: message.requestHeaders.toObject(),
+        requestBody: message.requestBody.get(),
+        status: message.status.get(),
+        responseHeaders: message.responseHeaders.toObject(),
+        responseBody: message.responseBody.get(),
+        connection: message.connection,
+        payload: message.payload,
+        errors: message.errors,
+        score: message.score,
+        ip: ctx.ip,
+        startTime: ctx.startTime,
+        finishTime: ctx.finishTime
       })
 
       await next()

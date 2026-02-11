@@ -11,13 +11,13 @@ export class StdHttpMethodWrapper implements HttpMethodWrapper {
   }
 
   static fromString(value: string): HttpMethodWrapper {
-    value = value.toUpperCase()
+    const normValue = value.toUpperCase()
 
-    if (!arrayIncludes(HTTP_METHODS, value)) {
+    if (!arrayIncludes(HTTP_METHODS, normValue)) {
       throw new Error(`Method not known`)
     }
 
-    return new StdHttpMethodWrapper(value)
+    return new StdHttpMethodWrapper(normValue)
   }
 
   #method: HttpMethod

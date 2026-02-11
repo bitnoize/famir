@@ -360,7 +360,7 @@ export class AuthorizeController extends BaseController {
   ): HttpCookie | undefined {
     const cookies = ctx.requestHeaders.getCookies()
 
-    return cookies[campaign.sessionCookieName]
+    return cookies ? cookies[campaign.sessionCookieName] : undefined
   }
 
   private persistSessionCookie(
@@ -370,29 +370,33 @@ export class AuthorizeController extends BaseController {
   ) {
     const setCookies = ctx.responseHeaders.getSetCookies()
 
-    setCookies[campaign.sessionCookieName] = {
-      value: sessionCookie,
-      domain: campaign.mirrorDomain,
-      path: '/',
-      httpOnly: true,
-      maxAge: Math.round(campaign.sessionExpire / 1000)
-    }
+    if (setCookies) {
+      setCookies[campaign.sessionCookieName] = {
+        value: sessionCookie,
+        domain: campaign.mirrorDomain,
+        path: '/',
+        httpOnly: true,
+        maxAge: Math.round(campaign.sessionExpire / 1000)
+      }
 
-    ctx.responseHeaders.setSetCookies(setCookies)
+      ctx.responseHeaders.setSetCookies(setCookies)
+    }
   }
 
   private removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
     const setCookies = ctx.responseHeaders.getSetCookies()
 
-    setCookies[campaign.sessionCookieName] = {
-      value: '',
-      domain: campaign.mirrorDomain,
-      path: '/',
-      httpOnly: true,
-      maxAge: 0
-    }
+    if (setCookies) {
+      setCookies[campaign.sessionCookieName] = {
+        value: '',
+        domain: campaign.mirrorDomain,
+        path: '/',
+        httpOnly: true,
+        maxAge: 0
+      }
 
-    ctx.responseHeaders.setSetCookies(setCookies)
+      ctx.responseHeaders.setSetCookies(setCookies)
+    }
   }
 
   private checkSessionCookie(value: unknown): value is string {

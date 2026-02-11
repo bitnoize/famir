@@ -17,6 +17,7 @@
     "@famir/domain": "*",
     "@famir/http-client": "*",
     "@famir/http-server": "*",
+    "@famir/http-tools": "*",
     "@famir/logger": "*",
     "@famir/templater": "*",
     "@famir/validator": "*",

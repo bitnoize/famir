@@ -19,11 +19,11 @@ export interface HttpHeadersWrapper {
   delete(names: string | string[]): this
   merge(headers: HttpHeaders): this
   reset(): this
-  getContentType(): HttpContentType
+  getContentType(): HttpContentType | null
   setContentType(contentType: HttpContentType): this
-  getCookies(): HttpCookies
+  getCookies(): HttpCookies | null
   setCookies(cookies: HttpCookies): this
-  getSetCookies(): HttpSetCookies
+  getSetCookies(): HttpSetCookies | null
   setSetCookies(cookies: HttpSetCookies): this
   toObject(): HttpStrictHeaders
   entries(): Array<[string, HttpHeader]>

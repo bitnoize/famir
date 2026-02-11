@@ -80,11 +80,6 @@ export class StdHttpServer implements HttpServer {
           code: 'INTERNAL_ERROR'
         })
       }
-
-      this.logger.debug(`HttpServer request complete`, {
-        request: this.dumpRequest(req),
-        middlewares: ctx.middlewares
-      })
     } catch (error) {
       this.handleRequestError(error, req, res)
     }

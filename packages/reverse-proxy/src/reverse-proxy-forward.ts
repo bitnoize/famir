@@ -52,6 +52,16 @@ export class ReverseProxyForward {
     this.#kind = kind
   }
 
+  readonly html = {
+    isEnabled: false,
+    types: ['text/html'],
+    schemes: [
+      ['://', true],
+      ['//', false]
+    ],
+    tags: []
+  }
+
   private requestHeadInterceptors: Array<[string, ReverseProxyInterceptor]> = []
   private requestBodyInterceptors: Array<[string, ReverseProxyInterceptor]> = []
 

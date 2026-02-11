@@ -19,12 +19,60 @@ export class TargetModel {
     readonly donorPort: number,
     readonly mirrorSecure: boolean,
     readonly mirrorSub: string,
+    readonly mirrorDomain: string,
     readonly mirrorPort: number,
+    readonly labels: string[],
     readonly isEnabled: boolean,
     readonly messageCount: number,
     readonly createdAt: Date,
     readonly updatedAt: Date
   ) {}
+
+  get donorProtocol(): string {
+    return this.donorSecure ? 'https:' : 'http:'
+  }
+
+  get donorHostname(): string {
+    return this.donorSub !== TARGET_SUB_ROOT
+      ? [this.donorSub, this.donorDomain].join('.')
+      : this.donorDomain
+  }
+
+  get donorHost(): string {
+    if (
+      (!this.donorSecure && this.donorPort === 80) ||
+      (this.donorSecure && this.donorPort === 443)
+    ) {
+      return this.donorHostname
+    } else {
+      return [this.donorHostname, this.donorPort.toString()].join(':')
+    }
+  }
+
+  get mirrorProtocol(): string {
+    return this.mirrorSecure ? 'https:' : 'http:'
+  }
+
+  get mirrorHostname(): string {
+    return this.mirrorSub !== TARGET_SUB_ROOT
+      ? [this.mirrorSub, this.mirrorDomain].join('.')
+      : this.mirrorDomain
+  }
+
+  get mirrorHost(): string {
+    if (
+      (!this.mirrorSecure && this.mirrorPort === 80) ||
+      (this.mirrorSecure && this.mirrorPort === 443)
+    ) {
+      return this.mirrorHostname
+    } else {
+      return [this.mirrorHostname, this.mirrorPort.toString()].join(':')
+    }
+  }
+
+  hasLabel(value: string): boolean {
+    return this.labels.includes(value)
+  }
 }
 
 export class FullTargetModel extends TargetModel {
@@ -38,8 +86,9 @@ export class FullTargetModel extends TargetModel {
     donorPort: number,
     mirrorSecure: boolean,
     mirrorSub: string,
+    mirrorDomain: string,
     mirrorPort: number,
-    readonly labels: string[],
+    labels: string[],
     readonly connectTimeout: number,
     readonly ordinaryTimeout: number,
     readonly streamingTimeout: number,
@@ -65,62 +114,14 @@ export class FullTargetModel extends TargetModel {
       donorPort,
       mirrorSecure,
       mirrorSub,
+      mirrorDomain,
       mirrorPort,
+      labels,
       isEnabled,
       messageCount,
       createdAt,
       updatedAt
     )
-  }
-
-  hasLabel(value: string): boolean {
-    return this.labels.includes(value)
-  }
-
-  donorProtocol(): string {
-    return this.donorSecure ? 'https:' : 'http:'
-  }
-
-  donorHostname(): string {
-    return this.donorSub !== TARGET_SUB_ROOT
-      ? [this.donorSub, this.donorDomain].join('.')
-      : this.donorDomain
-  }
-
-  donorHost(): string {
-    const hostname = this.donorHostname()
-
-    if (
-      (!this.donorSecure && this.donorPort === 80) ||
-      (this.donorSecure && this.donorPort === 443)
-    ) {
-      return hostname
-    } else {
-      return [hostname, this.donorPort.toString()].join(':')
-    }
-  }
-
-  mirrorProtocol(): string {
-    return this.mirrorSecure ? 'https:' : 'http:'
-  }
-
-  mirrorHostname(mirrorDomain: string): string {
-    return this.mirrorSub !== TARGET_SUB_ROOT
-      ? [this.mirrorSub, mirrorDomain].join('.')
-      : mirrorDomain
-  }
-
-  mirrorHost(mirrorDomain: string): string {
-    const hostname = this.mirrorHostname(mirrorDomain)
-
-    if (
-      (!this.mirrorSecure && this.mirrorPort === 80) ||
-      (this.mirrorSecure && this.mirrorPort === 443)
-    ) {
-      return hostname
-    } else {
-      return [hostname, this.mirrorPort.toString()].join(':')
-    }
   }
 }
 

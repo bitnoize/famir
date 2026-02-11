@@ -85,11 +85,12 @@ redis.register_function({
   Read campaign
 --]]
 local function read_campaign(keys, args)
-  if #keys ~= 1 or #args ~= 0 then
+  if #keys ~= 2 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
+  local campaign_lock_key = keys[2]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
@@ -113,6 +114,7 @@ local function read_campaign(keys, args)
   local model = {
     campaign_id = values[1],
     mirror_domain = values[2],
+    is_locked = redis.call('EXISTS', campaign_lock_key),
     session_count = tonumber(values[3]),
     message_count = tonumber(values[4]),
     created_at = tonumber(values[5]),

@@ -15,6 +15,7 @@
     { "path": "../database" },
     { "path": "../workflow" },
     { "path": "../http-client" },
-    { "path": "../http-server" }
+    { "path": "../http-server" },
+    { "path": "../http-tools" }
   ]
 }

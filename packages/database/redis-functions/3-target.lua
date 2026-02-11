@@ -141,12 +141,13 @@ redis.register_function({
   Read target
 --]]
 local function read_target(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
+  if #keys ~= 3 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local target_key = keys[2]
+  local target_labels_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
@@ -189,7 +190,9 @@ local function read_target(keys, args)
     donor_port = values[7],
     mirror_secure = tonumber(values[8]),
     mirror_sub = values[9],
+    mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
     mirror_port = values[10],
+    labels = redis.call('SMEMBERS', target_labels_key),
     is_enabled = tonumber(values[11]),
     message_count = tonumber(values[12]),
     created_at = tonumber(values[13]),
@@ -275,6 +278,7 @@ local function read_full_target(keys, args)
     donor_port = values[7],
     mirror_secure = tonumber(values[8]),
     mirror_sub = values[9],
+    mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
     mirror_port = values[10],
     labels = redis.call('SMEMBERS', target_labels_key),
     connect_timeout = tonumber(values[11]),
