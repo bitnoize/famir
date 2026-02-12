@@ -6,8 +6,7 @@ export interface RewriteUrlTarget {
 }
 
 export type RewriteUrlScheme = [string, boolean] // separator, withProto
-
-export type RewriteUrlHtmlTag = [string, string?] // tag, attrName
+//export type RewriteUrlHtmlTag = [string, string?] // tag, attrName
 
 export function rewriteUrl(
   text: string,

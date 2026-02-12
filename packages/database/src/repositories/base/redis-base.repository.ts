@@ -1,7 +1,14 @@
 import { arrayIncludes } from '@famir/common'
-import { Config, DATABASE_STATUS_CODES, DatabaseError, Logger, Validator } from '@famir/domain'
-import { RedisDatabaseConfig, RedisDatabaseRepositoryOptions } from '../../database.js'
-import { RedisDatabaseConnection } from '../../redis-database-connector.js'
+import { Config } from '@famir/config'
+import { Logger } from '@famir/logger'
+import { Validator } from '@famir/validator'
+import { RedisDatabaseConnection } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
+import {
+  DATABASE_STATUS_CODES,
+  RedisDatabaseConfig,
+  RedisDatabaseRepositoryOptions
+} from '../../database.js'
 
 export abstract class RedisBaseRepository {
   protected readonly options: RedisDatabaseRepositoryOptions

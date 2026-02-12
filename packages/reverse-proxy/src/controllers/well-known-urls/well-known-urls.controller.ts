@@ -1,14 +1,8 @@
 import { DIContainer } from '@famir/common'
-import {
-  EnabledFullTargetModel,
-  HTTP_SERVER_ROUTER,
-  HttpServerContext,
-  HttpServerRouter,
-  Logger,
-  LOGGER,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
+import { EnabledFullTargetModel } from '@famir/database'
+import { HTTP_SERVER_ROUTER, HttpServerContext, HttpServerRouter } from '@famir/http-server'
+import { Logger, LOGGER } from '@famir/logger'
+import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 
 export const WELL_KNOWN_URLS_CONTROLLER = Symbol('WellKnownUrlsController')

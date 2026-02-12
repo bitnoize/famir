@@ -1,5 +1,19 @@
-import { HttpCookies, HttpSetCookies } from '@famir/domain'
-import { Cookie } from 'tough-cookie'
+import { Cookie as ToughCookie } from 'tough-cookie'
+
+export type HttpCookie = string
+export type HttpCookies = Record<string, HttpCookie | undefined>
+
+export interface HttpSetCookie {
+  value: string
+  expires?: number
+  maxAge?: number
+  path?: string
+  domain?: string
+  secure?: boolean
+  httpOnly?: boolean
+  sameSite?: string
+}
+export type HttpSetCookies = Record<string, HttpSetCookie | undefined>
 
 export function parseCookies(values: string[]): HttpCookies {
   const cookies: HttpCookies = {}
@@ -8,7 +22,7 @@ export function parseCookies(values: string[]): HttpCookies {
     .join(';')
     .split(';')
     .forEach((rawCookie) => {
-      const toughCookie = Cookie.parse(rawCookie.trim())
+      const toughCookie = ToughCookie.parse(rawCookie.trim())
 
       if (toughCookie) {
         cookies[toughCookie.key] = toughCookie.value
@@ -19,11 +33,11 @@ export function parseCookies(values: string[]): HttpCookies {
 }
 
 export function formatCookies(cookies: HttpCookies): string {
-  const toughCookies: Cookie[] = []
+  const toughCookies: ToughCookie[] = []
 
   Object.entries(cookies).forEach(([name, value]) => {
     if (value != null) {
-      const toughCookie = new Cookie({
+      const toughCookie = new ToughCookie({
         key: name,
         value: value
       })
@@ -42,7 +56,7 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
     .join(';')
     .split(';')
     .forEach((rawCookie) => {
-      const toughCookie = Cookie.parse(rawCookie.trim())
+      const toughCookie = ToughCookie.parse(rawCookie.trim())
 
       if (!toughCookie) {
         return
@@ -91,11 +105,11 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
 }
 
 export function formatSetCookies(cookies: HttpSetCookies): string {
-  const toughCookies: Cookie[] = []
+  const toughCookies: ToughCookie[] = []
 
   Object.entries(cookies).forEach(([name, cookie]) => {
     if (cookie != null) {
-      const toughCookie = new Cookie({
+      const toughCookie = new ToughCookie({
         key: name,
         value: cookie.value
       })

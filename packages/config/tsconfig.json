@@ -6,7 +6,7 @@
     "outDir": "dist"
   },
   "references": [
-    { "path": "../domain" },
-    { "path": "../common" }
+    { "path": "../common" },
+    { "path": "../validator" }
   ]
 }

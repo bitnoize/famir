@@ -1,5 +1,6 @@
 import { DIContainer } from '@famir/common'
-import { MESSAGE_REPOSITORY, MessageModel, MessageRepository, ReplServerError } from '@famir/domain'
+import { MESSAGE_REPOSITORY, MessageModel, MessageRepository } from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
 import { BaseService } from '../base/index.js'
 import { ReadMessageData } from './message.js'
 

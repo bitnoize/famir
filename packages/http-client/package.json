@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@famir/common": "*",
-    "@famir/domain": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
+    "@famir/http-tools": "*",
     "node-libcurl": "^5.0.1"
   }
 }

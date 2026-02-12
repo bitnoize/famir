@@ -1,3 +1,7 @@
+export const STORAGE = Symbol('Storage')
+
+export interface Storage {}
+
 export interface MinioStorageConfig {
   STORAGE_END_POINT: string
   STORAGE_PORT: number

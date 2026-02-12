@@ -1,6 +1,6 @@
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
 import { proxyUrlSchema } from '@famir/database'
-import { ValidatorSchemas } from '@famir/domain'
+import { ValidatorSchemas } from '@famir/validator'
 import {
   CreateProxyData,
   DeleteProxyData,

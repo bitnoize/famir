@@ -11,7 +11,7 @@ import {
   targetStreamingTimeoutSchema,
   targetSubSchema
 } from '@famir/database'
-import { ValidatorSchemas } from '@famir/domain'
+import { ValidatorSchemas } from '@famir/validator'
 import {
   ActionTargetLabelData,
   CreateTargetData,

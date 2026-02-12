@@ -1,9 +1,0 @@
-import { ReplServerApiCall, ReplServerApiCalls } from './repl-server.js'
-
-export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
-
-export interface ReplServerRouter {
-  register(name: string, apiCall: ReplServerApiCall): this
-  resolve(): ReplServerApiCalls
-  reset(): this
-}

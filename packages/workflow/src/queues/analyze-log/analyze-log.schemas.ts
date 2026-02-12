@@ -1,5 +1,6 @@
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
-import { AnalyzeLogJobData, ValidatorSchemas } from '@famir/domain'
+import { ValidatorSchemas } from '@famir/validator'
+import { AnalyzeLogJobData } from './analyze-log.js'
 
 export const analyzeLogJobDataSchema: JSONSchemaType<AnalyzeLogJobData> = {
   type: 'object',

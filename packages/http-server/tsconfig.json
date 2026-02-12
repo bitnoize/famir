@@ -6,8 +6,10 @@
     "outDir": "dist"
   },
   "references": [
-    { "path": "../domain" },
     { "path": "../common" },
+    { "path": "../config" },
+    { "path": "../logger" },
+    { "path": "../templater" },
     { "path": "../http-tools" }
   ]
 }

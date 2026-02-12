@@ -5,7 +5,6 @@ import {
   EnabledLureModel,
   EnabledProxyModel,
   FullRedirectorModel,
-  HttpServerError,
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
@@ -17,7 +16,8 @@ import {
   SESSION_REPOSITORY,
   SessionModel,
   SessionRepository
-} from '@famir/domain'
+} from '@famir/database'
+import { HttpServerError } from '@famir/http-server'
 import { BaseService } from '../base/index.js'
 import {
   AuthSessionData,

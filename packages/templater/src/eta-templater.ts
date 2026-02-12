@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
-import { TEMPLATER, Templater } from '@famir/domain'
 import { Eta } from 'eta'
+import { TEMPLATER, Templater } from './templater.js'
 
 export class EtaTemplater implements Templater {
   static inject(container: DIContainer) {

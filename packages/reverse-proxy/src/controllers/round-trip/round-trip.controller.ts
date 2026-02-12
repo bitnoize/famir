@@ -1,12 +1,7 @@
 import { DIContainer, isDevelopment } from '@famir/common'
-import {
-  HTTP_SERVER_ROUTER,
-  HttpServerRouter,
-  Logger,
-  LOGGER,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
+import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
+import { Logger, LOGGER } from '@famir/logger'
+import { Validator, VALIDATOR } from '@famir/validator'
 import { ReverseProxyForward } from '../../reverse-proxy-forward.js'
 import { BaseController } from '../base/index.js'
 import { type RoundTripService, ROUND_TRIP_SERVICE } from './round-trip.service.js'

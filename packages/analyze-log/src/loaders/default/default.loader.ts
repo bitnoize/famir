@@ -7,12 +7,12 @@ import {
   RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
-import { BullAnalyzeLogWorker, ImplExecutorRouter, RedisExecutorConnector } from '@famir/executor'
+import { BullAnalyzeLogWorker, ExecutorRouter, RedisExecutorConnector } from '@famir/executor'
 import { PinoLogger } from '@famir/logger'
 import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
 import { RedisWorkflowConnector } from '@famir/workflow'
-import { App } from '../../app.js'
+import { App } from '../../analyze-log.app.js'
 import { AppDefaultConfig } from './default.js'
 import { configAppDefaultSchema } from './default.schemas.js'
 
@@ -38,7 +38,7 @@ export async function bootstrapDefault(composer: (container: DIContainer) => voi
 
   RedisExecutorConnector.inject(container)
 
-  ImplExecutorRouter.inject(container, ['analyze-log'])
+  ExecutorRouter.inject(container, ['analyze-log'])
 
   BullAnalyzeLogWorker.inject(container)
 

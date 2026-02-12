@@ -1,23 +1,19 @@
 import { DIContainer } from '@famir/common'
-import {
-  EXECUTOR_ROUTER,
-  ExecutorError,
-  ExecutorProcessor,
-  ExecutorRouter,
-  ExecutorRouterMap,
-  Logger,
-  LOGGER
-} from '@famir/domain'
+import { Logger, LOGGER } from '@famir/logger'
+import { ExecutorError } from './executor.error.js'
+import { ExecutorProcessor } from './executor.js'
 
-export class ImplExecutorRouter implements ExecutorRouter {
+export const EXECUTOR_ROUTER = Symbol('ExecutorRouter')
+
+export class ExecutorRouter {
   static inject(container: DIContainer, queueNames: string[]) {
     container.registerSingleton<ExecutorRouter>(
       EXECUTOR_ROUTER,
-      (c) => new ImplExecutorRouter(c.resolve<Logger>(LOGGER), queueNames)
+      (c) => new ExecutorRouter(c.resolve<Logger>(LOGGER), queueNames)
     )
   }
 
-  protected readonly map: ExecutorRouterMap
+  protected readonly map: Record<string, Record<string, ExecutorProcessor>>
 
   constructor(
     protected readonly logger: Logger,

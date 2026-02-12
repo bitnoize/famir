@@ -3,9 +3,9 @@ import {
   EnabledProxyModel,
   EnabledTargetModel,
   FullCampaignModel,
-  HttpServerContextState,
   SessionModel
-} from '@famir/domain'
+} from '@famir/database'
+import { HttpServerContextState } from '@famir/http-server'
 import { ReverseProxyForward } from './reverse-proxy-forward.js'
 
 export interface ReverseProxyState extends HttpServerContextState {

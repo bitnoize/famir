@@ -1,5 +1,6 @@
 import { DIContainer } from '@famir/common'
-import { LURE_REPOSITORY, LureModel, LureRepository, ReplServerError } from '@famir/domain'
+import { LURE_REPOSITORY, LureModel, LureRepository } from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
 import { BaseService } from '../base/index.js'
 import {
   CreateLureData,

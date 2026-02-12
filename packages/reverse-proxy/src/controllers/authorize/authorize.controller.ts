@@ -1,21 +1,16 @@
 import { DIContainer, isDevelopment, randomIdent } from '@famir/common'
+import { EnabledFullTargetModel, FullCampaignModel, FullRedirectorModel } from '@famir/database'
 import {
-  EnabledFullTargetModel,
-  FullCampaignModel,
-  FullRedirectorModel,
   HTTP_SERVER_ROUTER,
-  HttpCookie,
   HttpServerContext,
   HttpServerError,
   HttpServerNextFunction,
-  HttpServerRouter,
-  Logger,
-  LOGGER,
-  TEMPLATER,
-  Templater,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
+  HttpServerRouter
+} from '@famir/http-server'
+import { HttpCookie } from '@famir/http-tools'
+import { Logger, LOGGER } from '@famir/logger'
+import { TEMPLATER, Templater } from '@famir/templater'
+import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { LandingRedirectorData, LandingUpgradeData } from './authorize.js'
 import { authorizeSchemas } from './authorize.schemas.js'

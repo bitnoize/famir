@@ -1,12 +1,6 @@
 import { JSONSchemaType } from '@famir/common'
-import {
-  HttpConnection,
-  HttpError,
-  HttpHeader,
-  HttpHeaders,
-  HttpPayload,
-  ValidatorSchemas
-} from '@famir/domain'
+import { HttpConnection, HttpError, HttpHeader, HttpHeaders, HttpPayload } from '@famir/domain'
+import { ValidatorSchemas } from '@famir/validator'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
 const rawMessageSchema: JSONSchemaType<RawMessage> = {

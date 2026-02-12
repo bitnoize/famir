@@ -1,5 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { DATABASE_MANAGER, DatabaseManager } from '@famir/domain'
+import { DATABASE_MANAGER, DatabaseManager } from '@famir/database'
 import { BaseService } from '../base/index.js'
 
 export const DATABASE_SERVICE = Symbol('DatabaseService')

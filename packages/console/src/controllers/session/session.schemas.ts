@@ -1,5 +1,5 @@
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
+import { ValidatorSchemas } from '@famir/validator'
 import { ReadSessionData } from './session.js'
 
 const readSessionDataSchema: JSONSchemaType<ReadSessionData> = {

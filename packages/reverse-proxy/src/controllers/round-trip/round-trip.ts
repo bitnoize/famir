@@ -1,4 +1,12 @@
-import { HttpBody, HttpConnection, HttpError, HttpHeaders, HttpPayload } from '@famir/domain'
+import {
+  MessageBody,
+  MessageConnection,
+  MessageError,
+  MessageHeaders,
+  MessageKind,
+  MessageMethod,
+  MessagePayload
+} from '@famir/database'
 
 export interface CreateMessageData {
   campaignId: string
@@ -6,17 +14,17 @@ export interface CreateMessageData {
   proxyId: string
   targetId: string
   sessionId: string
-  kind: string
-  method: string
+  kind: MessageKind
+  method: MessageMethod
   url: string
-  requestHeaders: HttpHeaders
-  requestBody: HttpBody
+  requestHeaders: MessageHeaders
+  requestBody: MessageBody
   status: number
-  responseHeaders: HttpHeaders
-  responseBody: HttpBody
-  connection: HttpConnection
-  payload: HttpPayload
-  errors: HttpError[]
+  responseHeaders: MessageHeaders
+  responseBody: MessageBody
+  connection: MessageConnection
+  payload: MessagePayload
+  errors: MessageError[]
   score: number
   ip: string
   startTime: number

@@ -4,9 +4,9 @@ export type CheerioAPI = cheerio.CheerioAPI
 export type CheerioOptions = cheerio.CheerioOptions
 
 export function cheerioLoad(
-  content: string,
+  value: string,
   options?: CheerioOptions,
   isDocument?: boolean
 ): CheerioAPI {
-  return cheerio.load(content, options, isDocument)
+  return cheerio.load(value, options, isDocument)
 }

@@ -1,21 +1,17 @@
 import { DIContainer } from '@famir/common'
+import { CONFIG, Config } from '@famir/config'
+import { ProxyModel, ProxyRepository } from '@famir/domain'
+import { LOGGER, Logger } from '@famir/logger'
+import { Validator, VALIDATOR } from '@famir/validator'
 import {
-  Config,
-  CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  Logger,
-  LOGGER,
-  PROXY_REPOSITORY,
-  ProxyModel,
-  ProxyRepository,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
+  RedisDatabaseConnection
+} from '../../database-connector.js'
 import { RedisDatabaseConfig } from '../../database.js'
-import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawProxy } from './proxy.functions.js'
+import { PROXY_REPOSITORY } from './proxy.js'
 import { proxySchemas } from './proxy.schemas.js'
 
 export class RedisProxyRepository extends RedisBaseRepository implements ProxyRepository {

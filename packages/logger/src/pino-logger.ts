@@ -1,7 +1,15 @@
 import { DIContainer } from '@famir/common'
-import { Config, CONFIG, Logger, LOGGER, LoggerData, Validator, VALIDATOR } from '@famir/domain'
+import { Config, CONFIG } from '@famir/config'
+import { Validator, VALIDATOR } from '@famir/validator'
 import pino from 'pino'
-import { PinoLoggerConfig, PinoLoggerOptions, PinoLoggerTransportOptions } from './logger.js'
+import {
+  Logger,
+  LOGGER,
+  LoggerData,
+  PinoLoggerConfig,
+  PinoLoggerOptions,
+  PinoLoggerTransportOptions
+} from './logger.js'
 import { pinoLoggerSchemas } from './logger.schemas.js'
 
 export class PinoLogger implements Logger {
@@ -17,7 +25,7 @@ export class PinoLogger implements Logger {
   protected readonly pino: pino.Logger
 
   constructor(
-    private readonly validator: Validator,
+    protected readonly validator: Validator,
     config: Config<PinoLoggerConfig>
   ) {
     this.validator.addSchemas(pinoLoggerSchemas)

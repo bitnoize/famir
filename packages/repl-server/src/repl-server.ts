@@ -1,3 +1,13 @@
+export const REPL_SERVER = Symbol('ReplServer')
+
+export interface ReplServer {
+  start(): Promise<void>
+  stop(): Promise<void>
+}
+
+export type ReplServerApiCall = (data: unknown) => Promise<unknown>
+export type ReplServerApiCalls = [string, ReplServerApiCall][]
+
 export interface CliReplServerConfig {
   REPL_SERVER_PROMPT: string
   REPL_SERVER_USE_COLORS: boolean

@@ -1,5 +1,6 @@
 import { DIContainer, JSONSchemaType } from '@famir/common'
-import { Config, CONFIG, Validator, VALIDATOR } from '@famir/domain'
+import { Validator, VALIDATOR } from '@famir/validator'
+import { Config, CONFIG } from './config.js'
 
 export class EnvConfig<T> implements Config<T> {
   static inject<C>(container: DIContainer, configSchema: JSONSchemaType<C>) {
@@ -10,7 +11,7 @@ export class EnvConfig<T> implements Config<T> {
   }
 
   constructor(
-    private readonly validator: Validator,
+    protected readonly validator: Validator,
     configSchema: JSONSchemaType<T>
   ) {
     this.validator.addSchemas({

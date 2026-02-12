@@ -5,11 +5,11 @@ import {
   EnabledFullTargetModel,
   EnabledTargetModel,
   FullCampaignModel,
-  HttpServerError,
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository
-} from '@famir/domain'
+} from '@famir/database'
+import { HttpServerError } from '@famir/http-server'
 import { BaseService } from '../base/index.js'
 import { ListTargetsData, ReadCampaignTargetData } from './setup-mirror.js'
 

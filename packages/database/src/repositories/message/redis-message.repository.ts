@@ -1,26 +1,25 @@
 import { DIContainer } from '@famir/common'
+import { CONFIG, Config } from '@famir/config'
 import {
-  Config,
-  CONFIG,
-  DATABASE_CONNECTOR,
-  DatabaseConnector,
   FullMessageModel,
   HttpBody,
   HttpConnection,
   HttpError,
   HttpHeaders,
   HttpPayload,
-  Logger,
-  LOGGER,
-  MESSAGE_REPOSITORY,
-  MessageRepository,
-  Validator,
-  VALIDATOR
+  MessageRepository
 } from '@famir/domain'
+import { LOGGER, Logger } from '@famir/logger'
+import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  RedisDatabaseConnection
+} from '../../database-connector.js'
 import { RedisDatabaseConfig } from '../../database.js'
-import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage } from './message.functions.js'
+import { MESSAGE_REPOSITORY } from './message.js'
 import { messageSchemas } from './message.schemas.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {

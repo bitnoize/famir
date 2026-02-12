@@ -1,16 +1,13 @@
 import { DIContainer, serializeError, SHUTDOWN_SIGNALS } from '@famir/common'
+import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
+import { HTTP_SERVER, HttpServer } from '@famir/http-server'
+import { Logger, LOGGER } from '@famir/logger'
 import {
   ANALYZE_LOG_QUEUE,
   AnalyzeLogQueue,
-  DATABASE_CONNECTOR,
-  DatabaseConnector,
-  HTTP_SERVER,
-  HttpServer,
-  Logger,
-  LOGGER,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
-} from '@famir/domain'
+} from '@famir/workflow'
 
 export const APP = Symbol('App')
 

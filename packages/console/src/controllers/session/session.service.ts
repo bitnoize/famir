@@ -1,5 +1,6 @@
 import { DIContainer } from '@famir/common'
-import { ReplServerError, SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/domain'
+import { SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
 import { BaseService } from '../base/index.js'
 import { ReadSessionData } from './session.js'
 

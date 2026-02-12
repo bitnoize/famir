@@ -3,12 +3,10 @@ import {
   HTTP_SERVER_ROUTER,
   HttpServerContext,
   HttpServerError,
-  HttpServerRouter,
-  Logger,
-  LOGGER,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
+  HttpServerRouter
+} from '@famir/http-server'
+import { Logger, LOGGER } from '@famir/logger'
+import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { SetupMirrorHeaders } from './setup-mirror.js'
 import { setupMirrorSchemas } from './setup-mirror.schemas.js'

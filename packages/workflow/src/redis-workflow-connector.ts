@@ -1,16 +1,13 @@
 import { DIContainer, serializeError } from '@famir/common'
+import { Config, CONFIG } from '@famir/config'
+import { Logger, LOGGER } from '@famir/logger'
+import { Redis } from 'ioredis'
 import {
-  Config,
-  CONFIG,
-  Logger,
-  LOGGER,
+  RedisWorkflowConnection,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
-} from '@famir/domain'
-import { Redis } from 'ioredis'
+} from './workflow-connector.js'
 import { BullWorkflowConfig, RedisWorkflowConnectorOptions } from './workflow.js'
-
-export type RedisWorkflowConnection = Redis
 
 export class RedisWorkflowConnector implements WorkflowConnector {
   static inject(container: DIContainer) {

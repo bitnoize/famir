@@ -1,20 +1,17 @@
 import { DIContainer, serializeError } from '@famir/common'
+import { Config, CONFIG } from '@famir/config'
+import { Logger, LOGGER } from '@famir/logger'
+import { TEMPLATER, Templater } from '@famir/templater'
+import http from 'node:http'
+import { HTTP_SERVER_ROUTER, HttpServerRouter } from './http-server-router.js'
+import { HttpServerError } from './http-server.error.js'
 import {
-  Config,
-  CONFIG,
   HTTP_SERVER,
-  HTTP_SERVER_ROUTER,
   HttpServer,
   HttpServerContext,
-  HttpServerError,
-  HttpServerRouter,
-  Logger,
-  LOGGER,
-  TEMPLATER,
-  Templater
-} from '@famir/domain'
-import http from 'node:http'
-import { StdHttpServerConfig, StdHttpServerOptions } from './http-server.js'
+  StdHttpServerConfig,
+  StdHttpServerOptions
+} from './http-server.js'
 import { StdHttpServerContext } from './std-http-server-context.js'
 
 export class StdHttpServer implements HttpServer {

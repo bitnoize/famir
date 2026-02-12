@@ -1,21 +1,17 @@
 import { DIContainer } from '@famir/common'
+import { CONFIG, Config } from '@famir/config'
+import { LureModel, LureRepository } from '@famir/domain'
+import { LOGGER, Logger } from '@famir/logger'
+import { Validator, VALIDATOR } from '@famir/validator'
 import {
-  Config,
-  CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  Logger,
-  LOGGER,
-  LURE_REPOSITORY,
-  LureModel,
-  LureRepository,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
+  RedisDatabaseConnection
+} from '../../database-connector.js'
 import { RedisDatabaseConfig } from '../../database.js'
-import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawLure } from './lure.functions.js'
+import { LURE_REPOSITORY } from './lure.js'
 import { lureSchemas } from './lure.schemas.js'
 
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {

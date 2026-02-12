@@ -1,13 +1,15 @@
-import { CssStylesheetAST, parse, stringify } from '@adobe/css-tools'
+import * as cssTools from '@adobe/css-tools'
 
-export function parseCss(content: string): CssStylesheetAST {
-  return parse(content, {
+export type CssStylesheetAST = cssTools.CssStylesheetAST
+
+export function parseCss(value: string): CssStylesheetAST {
+  return cssTools.parse(value, {
     silent: false
   })
 }
 
 export function formatCss(ast: CssStylesheetAST): string {
-  return stringify(ast, {
+  return cssTools.stringify(ast, {
     compress: true
   })
 }

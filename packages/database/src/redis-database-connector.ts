@@ -1,22 +1,14 @@
 import { DIContainer, serializeError } from '@famir/common'
+import { Config, CONFIG } from '@famir/config'
+import { Logger, LOGGER } from '@famir/logger'
+import { createClient } from 'redis'
 import {
-  Config,
-  CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  Logger,
-  LOGGER
-} from '@famir/domain'
-import { createClient, RedisClientType } from 'redis'
-import { databaseFunctions, DatabaseFunctions } from './database.functions.js'
+  RedisDatabaseConnection
+} from './database-connector.js'
+import { databaseFunctions } from './database.functions.js'
 import { RedisDatabaseConfig, RedisDatabaseConnectorOptions } from './database.js'
-
-export type RedisDatabaseConnection = RedisClientType<
-  Record<string, never>, // Modules
-  DatabaseFunctions, // Functions
-  Record<string, never>, // Scripts
-  3 // RESP version
->
 
 export class RedisDatabaseConnector implements DatabaseConnector {
   static inject(container: DIContainer) {

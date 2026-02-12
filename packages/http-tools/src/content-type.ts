@@ -1,10 +1,14 @@
-import { HttpContentType } from '@famir/domain'
-import { format, parse } from 'content-type'
+import contenttype from 'content-type'
+
+export interface HttpContentType {
+  type: string
+  parameters: Record<string, string>
+}
 
 export function parseContentType(value: string): HttpContentType {
-  return parse(value.trim())
+  return contenttype.parse(value.trim())
 }
 
 export function formatContentType(contentType: HttpContentType) {
-  return format(contentType)
+  return contenttype.format(contentType)
 }

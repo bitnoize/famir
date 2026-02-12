@@ -1,20 +1,16 @@
 import { DIContainer } from '@famir/common'
+import { Config, CONFIG } from '@famir/config'
+import { Logger, LOGGER } from '@famir/logger'
+import { ANALYZE_LOG_QUEUE_NAME } from '@famir/workflow'
 import {
-  ANALYZE_LOG_QUEUE_NAME,
-  ANALYZE_LOG_WORKER,
-  AnalyzeLogWorker,
-  Config,
-  CONFIG,
   EXECUTOR_CONNECTOR,
-  EXECUTOR_ROUTER,
   ExecutorConnector,
-  ExecutorRouter,
-  Logger,
-  LOGGER
-} from '@famir/domain'
+  RedisExecutorConnection
+} from '../../executor-connector.js'
+import { EXECUTOR_ROUTER, ExecutorRouter } from '../../executor-router.js'
 import { BullExecutorConfig } from '../../executor.js'
-import { RedisExecutorConnection } from '../../redis-executor-connector.js'
 import { BullBaseWorker } from '../base/index.js'
+import { ANALYZE_LOG_WORKER, AnalyzeLogWorker } from './analyze-log.js'
 
 export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWorker {
   static inject(container: DIContainer) {

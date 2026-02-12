@@ -3,9 +3,9 @@ import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
-  FullCampaignModel,
-  ReplServerError
-} from '@famir/domain'
+  FullCampaignModel
+} from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
 import { BaseService } from '../base/index.js'
 import {
   CreateCampaignData,

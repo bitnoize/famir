@@ -1,5 +1,5 @@
 import { JSONSchemaType } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
+import { ValidatorSchemas } from '@famir/validator'
 import { RawLure } from './lure.functions.js'
 
 const rawLureSchema: JSONSchemaType<RawLure> = {

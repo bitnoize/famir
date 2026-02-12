@@ -1,16 +1,13 @@
 import { DIContainer, serializeError } from '@famir/common'
+import { Config, CONFIG } from '@famir/config'
+import { Logger, LOGGER } from '@famir/logger'
+import { Redis } from 'ioredis'
 import {
-  Config,
-  CONFIG,
   EXECUTOR_CONNECTOR,
   ExecutorConnector,
-  Logger,
-  LOGGER
-} from '@famir/domain'
-import { Redis } from 'ioredis'
+  RedisExecutorConnection
+} from './executor-connector.js'
 import { BullExecutorConfig, RedisExecutorConnectorOptions } from './executor.js'
-
-export type RedisExecutorConnection = Redis
 
 export class RedisExecutorConnector implements ExecutorConnector {
   static inject(container: DIContainer) {

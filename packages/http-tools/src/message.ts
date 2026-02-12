@@ -1,0 +1,6 @@
+export const HTTP_KINDS = ['ordinary', 'stream-request', 'stream-response'] as const
+export type HttpKind = (typeof HTTP_KINDS)[number]
+
+export type HttpConnection = Record<string, number | string | null | undefined>
+export type HttpPayload = Record<string, unknown>
+export type HttpError = readonly [object, ...string[]]

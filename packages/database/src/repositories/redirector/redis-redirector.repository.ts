@@ -1,22 +1,17 @@
 import { DIContainer } from '@famir/common'
+import { CONFIG, Config } from '@famir/config'
+import { FullRedirectorModel, RedirectorModel, RedirectorRepository } from '@famir/domain'
+import { LOGGER, Logger } from '@famir/logger'
+import { Validator, VALIDATOR } from '@famir/validator'
 import {
-  Config,
-  CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  FullRedirectorModel,
-  Logger,
-  LOGGER,
-  REDIRECTOR_REPOSITORY,
-  RedirectorModel,
-  RedirectorRepository,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
+  RedisDatabaseConnection
+} from '../../database-connector.js'
 import { RedisDatabaseConfig } from '../../database.js'
-import { RedisDatabaseConnection } from '../../redis-database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
+import { REDIRECTOR_REPOSITORY } from './redirector.js'
 import { redirectorSchemas } from './redirector.schemas.js'
 
 export class RedisRedirectorRepository extends RedisBaseRepository implements RedirectorRepository {

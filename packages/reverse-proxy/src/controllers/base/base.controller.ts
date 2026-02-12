@@ -1,10 +1,7 @@
-import {
-  EnabledFullTargetModel,
-  HttpServerContext,
-  HttpServerRouter,
-  Logger,
-  Validator
-} from '@famir/domain'
+import { EnabledFullTargetModel } from '@famir/database'
+import { HttpServerContext, HttpServerRouter } from '@famir/http-server'
+import { Logger } from '@famir/logger'
+import { Validator } from '@famir/validator'
 import { ReverseProxyState } from '../../reverse-proxy.js'
 
 export abstract class BaseController {

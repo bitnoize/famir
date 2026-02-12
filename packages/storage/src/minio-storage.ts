@@ -1,7 +1,8 @@
 import { DIContainer } from '@famir/common'
-import { Config, CONFIG, Logger, LOGGER, Storage, STORAGE } from '@famir/domain'
+import { Config, CONFIG } from '@famir/config'
+import { Logger, LOGGER } from '@famir/logger'
 import { Client as MinioClient } from 'minio'
-import { MinioStorageConfig, MinioStorageOptions } from './storage.js'
+import { MinioStorageConfig, MinioStorageOptions, Storage, STORAGE } from './storage.js'
 
 export class MinioStorage implements Storage {
   static inject(container: DIContainer) {

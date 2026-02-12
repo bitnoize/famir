@@ -1,4 +1,5 @@
-import { DatabaseError, DatabaseErrorCode, HttpServerError } from '@famir/domain'
+import { DatabaseError, DatabaseErrorCode } from '@famir/database'
+import { HttpServerError } from '@famir/http-server'
 
 export abstract class BaseService {
   protected simpleDatabaseException(error: unknown, knownErrorCodes: DatabaseErrorCode[]) {

@@ -1,19 +1,15 @@
 import { DIContainer } from '@famir/common'
+import { Config, CONFIG } from '@famir/config'
+import { ANALYZE_LOG_QUEUE_NAME, AnalyzeLogJobData, AnalyzeLogQueue } from '@famir/domain'
+import { Logger, LOGGER } from '@famir/logger'
 import {
-  ANALYZE_LOG_QUEUE,
-  ANALYZE_LOG_QUEUE_NAME,
-  AnalyzeLogJobData,
-  AnalyzeLogQueue,
-  Config,
-  CONFIG,
-  Logger,
-  LOGGER,
+  RedisWorkflowConnection,
   WORKFLOW_CONNECTOR,
   WorkflowConnector
-} from '@famir/domain'
-import { RedisWorkflowConnection } from '../../redis-workflow-connector.js'
+} from '../../workflow-connector.js'
 import { BullWorkflowConfig } from '../../workflow.js'
 import { BullBaseQueue } from '../base/index.js'
+import { ANALYZE_LOG_QUEUE } from './analyze-log.js'
 
 export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueue {
   static inject(container: DIContainer) {

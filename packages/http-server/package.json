@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@famir/common": "*",
-    "@famir/domain": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
+    "@famir/templater": "*",
     "@famir/http-tools": "*",
     "isbot": "^5.1.34",
     "ws": "^8.18.3"

@@ -3,7 +3,7 @@ import {
   configRedisDatabaseConnectionUrlSchema,
   configRedisDatabasePrefixSchema
 } from '@famir/database'
-import { configHttpClientErrorPageSchema, configHttpClientVerboseSchema } from '@famir/http-client'
+import { configHttpClientVerboseSchema } from '@famir/http-client'
 import {
   configHttpServerAddressSchema,
   configHttpServerErrorPageSchema,
@@ -33,7 +33,6 @@ export const configAppDefaultSchema: JSONSchemaType<AppDefaultConfig> = {
     'WORKFLOW_CONNECTION_URL',
     'WORKFLOW_PREFIX',
     'HTTP_CLIENT_VERBOSE',
-    'HTTP_CLIENT_ERROR_PAGE',
     'HTTP_SERVER_ADDRESS',
     'HTTP_SERVER_PORT',
     'HTTP_SERVER_ERROR_PAGE'
@@ -51,7 +50,6 @@ export const configAppDefaultSchema: JSONSchemaType<AppDefaultConfig> = {
     WORKFLOW_CONNECTION_URL: configRedisWorkflowConnectionUrlSchema,
     WORKFLOW_PREFIX: configRedisWorkflowPrefixSchema,
     HTTP_CLIENT_VERBOSE: configHttpClientVerboseSchema,
-    HTTP_CLIENT_ERROR_PAGE: configHttpClientErrorPageSchema,
     HTTP_SERVER_ADDRESS: {
       ...configHttpServerAddressSchema,
       default: '127.0.0.1'

@@ -1,4 +1,6 @@
-import { Logger, ReplServerError, ReplServerRouter, Validator } from '@famir/domain'
+import { Logger } from '@famir/logger'
+import { ReplServerError, ReplServerRouter } from '@famir/repl-server'
+import { Validator } from '@famir/validator'
 
 export abstract class BaseController {
   constructor(

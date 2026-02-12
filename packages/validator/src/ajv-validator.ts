@@ -1,6 +1,7 @@
 import { DIContainer } from '@famir/common'
-import { VALIDATOR, Validator, ValidatorError, ValidatorSchemas } from '@famir/domain'
 import { Ajv, ValidateFunction } from 'ajv'
+import { ValidatorError } from './validator.error.js'
+import { VALIDATOR, Validator, ValidatorSchemas } from './validator.js'
 
 export class AjvValidator implements Validator {
   static inject(container: DIContainer) {
@@ -17,7 +18,7 @@ export class AjvValidator implements Validator {
       removeAdditional: true,
       allowUnionTypes: true,
       strictTypes: true
-      //strictTuples: true
+      //strictTuples: true // FIXME
     })
   }
 

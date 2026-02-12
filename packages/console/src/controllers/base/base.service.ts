@@ -1,4 +1,5 @@
-import { DatabaseError, DatabaseErrorCode, ReplServerError } from '@famir/domain'
+import { DatabaseError, DatabaseErrorCode } from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
 
 export abstract class BaseService {
   protected simpleDatabaseException(error: unknown, knownErrorCodes: DatabaseErrorCode[]) {

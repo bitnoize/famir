@@ -1,26 +1,26 @@
 import { randomIdent, serializeError } from '@famir/common'
 import {
-  HttpBodyWrapper,
+  HttpBodyWrap,
   HttpConnection,
   HttpError,
-  HttpHeadersWrapper,
-  HttpMethodWrapper,
+  HttpHeadersWrap,
+  HttpMethodWrap,
   HttpPayload,
-  HttpStatusWrapper,
-  HttpUrlWrapper
-} from '@famir/domain'
+  HttpStatusWrap,
+  HttpUrlWrap
+} from '@famir/http-tools'
 
 export class ReverseProxyMessage {
   readonly id = randomIdent()
 
   constructor(
-    readonly method: HttpMethodWrapper,
-    readonly url: HttpUrlWrapper,
-    readonly requestHeaders: HttpHeadersWrapper,
-    readonly requestBody: HttpBodyWrapper,
-    readonly status: HttpStatusWrapper,
-    readonly responseHeaders: HttpHeadersWrapper,
-    readonly responseBody: HttpBodyWrapper
+    readonly method: HttpMethodWrap,
+    readonly url: HttpUrlWrap,
+    readonly requestHeaders: HttpHeadersWrap,
+    readonly requestBody: HttpBodyWrap,
+    readonly status: HttpStatusWrap,
+    readonly responseHeaders: HttpHeadersWrap,
+    readonly responseBody: HttpBodyWrap
   ) {}
 
   readonly connection: HttpConnection = {}

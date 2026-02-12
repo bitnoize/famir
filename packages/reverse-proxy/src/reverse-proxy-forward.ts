@@ -1,11 +1,11 @@
 import {
-  HttpBodyWrapper,
-  HttpHeadersWrapper,
+  HttpBodyWrap,
+  HttpHeadersWrap,
   HttpKind,
-  HttpMethodWrapper,
-  HttpStatusWrapper,
-  HttpUrlWrapper
-} from '@famir/domain'
+  HttpMethodWrap,
+  HttpStatusWrap,
+  HttpUrlWrap
+} from '@famir/http-tools'
 import { ReverseProxyMessage } from './reverse-proxy-message.js'
 
 export type ReverseProxyInterceptor = (message: ReverseProxyMessage) => void
@@ -15,13 +15,13 @@ export class ReverseProxyForward {
   readonly message: ReverseProxyMessage
 
   constructor(
-    method: HttpMethodWrapper,
-    url: HttpUrlWrapper,
-    requestHeaders: HttpHeadersWrapper,
-    requestBody: HttpBodyWrapper,
-    status: HttpStatusWrapper,
-    responseHeaders: HttpHeadersWrapper,
-    responseBody: HttpBodyWrapper
+    method: HttpMethodWrap,
+    url: HttpUrlWrap,
+    requestHeaders: HttpHeadersWrap,
+    requestBody: HttpBodyWrap,
+    status: HttpStatusWrap,
+    responseHeaders: HttpHeadersWrap,
+    responseBody: HttpBodyWrap
   ) {
     this.message = new ReverseProxyMessage(
       method,

@@ -1,22 +1,19 @@
 import { DIContainer, serializeError } from '@famir/common'
+import { Config, CONFIG } from '@famir/config'
+import { HttpBody, HttpConnection, HttpHeaders } from '@famir/http-tools'
+import { Logger, LOGGER } from '@famir/logger'
+import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
+import { HttpClientError } from './http-client.error.js'
 import {
-  Config,
-  CONFIG,
+  CurlHttpClientConfig,
+  CurlHttpClientOptions,
   HTTP_CLIENT,
-  HttpBody,
   HttpClient,
-  HttpClientError,
   HttpClientOrdinaryRequest,
   HttpClientOrdinaryResponse,
-  HttpClientStreamingRequest,
-  HttpClientStreamingResponse,
-  HttpConnection,
-  HttpHeaders,
-  Logger,
-  LOGGER
-} from '@famir/domain'
-import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
-import { CurlHttpClientConfig, CurlHttpClientOptions } from './http-client.js'
+  HttpClientStreamRequest,
+  HttpClientStreamResponse
+} from './http-client.js'
 
 export class CurlHttpClient implements HttpClient {
   static inject(container: DIContainer) {
@@ -242,9 +239,9 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  streamingRequest(request: HttpClientStreamingRequest): Promise<HttpClientStreamingResponse> {
-    return new Promise<HttpClientStreamingResponse>((resolve, reject) => {
-      reject(new Error(`Streaming request not supported yet`))
+  streamRequest(request: HttpClientStreamRequest): Promise<HttpClientStreamResponse> {
+    return new Promise<HttpClientStreamResponse>((resolve, reject) => {
+      reject(new Error(`Stream request not supported yet`))
     })
   }
 
@@ -330,8 +327,7 @@ export class CurlHttpClient implements HttpClient {
 
   private buildOptions(config: CurlHttpClientConfig): CurlHttpClientOptions {
     return {
-      verbose: config.HTTP_CLIENT_VERBOSE,
-      errorPage: config.HTTP_CLIENT_ERROR_PAGE
+      verbose: config.HTTP_CLIENT_VERBOSE
     }
   }
 }

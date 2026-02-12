@@ -12,7 +12,6 @@
     "start": "node --env-file=../../.env ."
   },
   "dependencies": {
-    "@famir/domain": "*",
     "@famir/common": "*",
     "@famir/validator": "*",
     "@famir/config": "*",

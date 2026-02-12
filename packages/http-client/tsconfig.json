@@ -6,7 +6,9 @@
     "outDir": "dist"
   },
   "references": [
-    { "path": "../domain" },
-    { "path": "../common" }
+    { "path": "../common" },
+    { "path": "../config" },
+    { "path": "../logger" },
+    { "path": "../http-tools" }
   ]
 }

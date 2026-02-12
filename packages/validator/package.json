@@ -11,7 +11,6 @@
     "build": "tsc -b"
   },
   "dependencies": {
-    "@famir/domain": "*",
     "@famir/common": "*",
     "ajv": "^8.17.1"
   }

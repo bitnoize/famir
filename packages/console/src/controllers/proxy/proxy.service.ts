@@ -1,5 +1,6 @@
 import { DIContainer } from '@famir/common'
-import { PROXY_REPOSITORY, ProxyModel, ProxyRepository, ReplServerError } from '@famir/domain'
+import { PROXY_REPOSITORY, ProxyModel, ProxyRepository } from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
 import { BaseService } from '../base/index.js'
 import {
   CreateProxyData,

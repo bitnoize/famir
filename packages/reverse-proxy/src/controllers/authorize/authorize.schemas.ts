@@ -1,5 +1,5 @@
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
-import { ValidatorSchemas } from '@famir/domain'
+import { ValidatorSchemas } from '@famir/validator'
 import { LandingRedirectorData, LandingUpgradeData } from './authorize.js'
 
 const landingUpgradeDataSchema: JSONSchemaType<LandingUpgradeData> = {

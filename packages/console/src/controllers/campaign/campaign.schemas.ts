@@ -11,7 +11,7 @@ import {
   campaignSessionCookieNameSchema,
   campaignSessionExpireSchema
 } from '@famir/database'
-import { ValidatorSchemas } from '@famir/domain'
+import { ValidatorSchemas } from '@famir/validator'
 import {
   CreateCampaignData,
   DeleteCampaignData,

@@ -1,7 +1,6 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/domain" },
     { "path": "packages/common" },
     { "path": "packages/validator" },
     { "path": "packages/config" },

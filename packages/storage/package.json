@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@famir/common": "*",
-    "@famir/domain": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
     "minio": "^8.0.6"
   }
 }

@@ -1,8 +1,10 @@
 import { serializeError } from '@famir/common'
-import { Config, ExecutorRouter, Logger } from '@famir/domain'
+import { Config } from '@famir/config'
+import { Logger } from '@famir/logger'
 import { Job, MetricsTime, Worker } from 'bullmq'
+import { RedisExecutorConnection } from '../../executor-connector.js'
+import { ExecutorRouter } from '../../executor-router.js'
 import { BullExecutorConfig, BullExecutorWorkerOptions } from '../../executor.js'
-import { RedisExecutorConnection } from '../../redis-executor-connector.js'
 
 export abstract class BullBaseWorker {
   protected readonly options: BullExecutorWorkerOptions

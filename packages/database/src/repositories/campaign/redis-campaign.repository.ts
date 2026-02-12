@@ -1,22 +1,17 @@
 import { DIContainer, randomIdent } from '@famir/common'
+import { CONFIG, Config } from '@famir/config'
+import { LOGGER, Logger } from '@famir/logger'
+import { Validator, VALIDATOR } from '@famir/validator'
 import {
-  CAMPAIGN_REPOSITORY,
-  CampaignModel,
-  CampaignRepository,
-  Config,
-  CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
-  FullCampaignModel,
-  Logger,
-  LOGGER,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
+  RedisDatabaseConnection
+} from '../../database-connector.js'
 import { RedisDatabaseConfig } from '../../database.js'
-import { RedisDatabaseConnection } from '../../redis-database-connector.js'
+import { CampaignModel, FullCampaignModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
+import { CAMPAIGN_REPOSITORY, CampaignRepository } from './campaign.js'
 import { campaignSchemas } from './campaign.schemas.js'
 
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {

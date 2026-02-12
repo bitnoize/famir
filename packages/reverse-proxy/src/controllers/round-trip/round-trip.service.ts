@@ -1,14 +1,12 @@
 import { DIContainer } from '@famir/common'
+import { MESSAGE_REPOSITORY, MessageRepository } from '@famir/database'
 import {
-  ANALYZE_LOG_QUEUE,
-  AnalyzeLogQueue,
   HTTP_CLIENT,
   HttpClient,
   HttpClientOrdinaryRequest,
-  HttpClientOrdinaryResponse,
-  MESSAGE_REPOSITORY,
-  MessageRepository
-} from '@famir/domain'
+  HttpClientOrdinaryResponse
+} from '@famir/http-client'
+import { ANALYZE_LOG_QUEUE, AnalyzeLogQueue } from '@famir/workflow'
 import { BaseService } from '../base/index.js'
 import { CreateMessageData } from './round-trip.js'
 

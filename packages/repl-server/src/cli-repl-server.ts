@@ -1,18 +1,17 @@
 import { DIContainer } from '@famir/common'
-import {
-  Config,
-  CONFIG,
-  Logger,
-  LOGGER,
-  REPL_SERVER,
-  REPL_SERVER_ROUTER,
-  ReplServer,
-  ReplServerError,
-  ReplServerRouter
-} from '@famir/domain'
+import { Config, CONFIG } from '@famir/config'
+import { Logger, LOGGER } from '@famir/logger'
 import repl from 'node:repl'
 import util from 'node:util'
-import { CliReplServerConfig, CliReplServerOptions, replServerDict } from './repl-server.js'
+import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
+import { ReplServerError } from './repl-server.error.js'
+import {
+  CliReplServerConfig,
+  CliReplServerOptions,
+  REPL_SERVER,
+  ReplServer,
+  replServerDict
+} from './repl-server.js'
 
 export class CliReplServer implements ReplServer {
   static inject(container: DIContainer) {

@@ -1,7 +1,9 @@
 import { serializeError } from '@famir/common'
-import { Config, Logger, WorkflowError } from '@famir/domain'
+import { Config } from '@famir/config'
+import { Logger } from '@famir/logger'
 import { Queue } from 'bullmq'
-import { RedisWorkflowConnection } from '../../redis-workflow-connector.js'
+import { RedisWorkflowConnection } from '../../workflow-connector.js'
+import { WorkflowError } from '../../workflow.error.js'
 import { BullWorkflowConfig, BullWorkflowQueueOptions } from '../../workflow.js'
 
 export abstract class BullBaseQueue {

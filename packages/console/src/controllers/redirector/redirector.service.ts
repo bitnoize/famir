@@ -1,10 +1,6 @@
 import { DIContainer } from '@famir/common'
-import {
-  REDIRECTOR_REPOSITORY,
-  RedirectorModel,
-  RedirectorRepository,
-  ReplServerError
-} from '@famir/domain'
+import { REDIRECTOR_REPOSITORY, RedirectorModel, RedirectorRepository } from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
 import { BaseService } from '../base/index.js'
 import {
   CreateRedirectorData,

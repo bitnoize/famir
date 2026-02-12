@@ -14,13 +14,12 @@
     "@famir/common": "*",
     "@famir/config": "*",
     "@famir/database": "*",
-    "@famir/domain": "*",
     "@famir/http-client": "*",
     "@famir/http-server": "*",
     "@famir/http-tools": "*",
     "@famir/logger": "*",
-    "@famir/templater": "*",
     "@famir/validator": "*",
+    "@famir/templater": "*",
     "@famir/workflow": "*"
   }
 }

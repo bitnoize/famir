@@ -1,11 +1,6 @@
 import { DIContainer } from '@famir/common'
-import {
-  FullTargetModel,
-  ReplServerError,
-  TARGET_REPOSITORY,
-  TargetModel,
-  TargetRepository
-} from '@famir/domain'
+import { FullTargetModel, TARGET_REPOSITORY, TargetModel, TargetRepository } from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
 import { BaseService } from '../base/index.js'
 import {
   ActionTargetLabelData,

@@ -1,13 +1,7 @@
 import { DIContainer } from '@famir/common'
-import {
-  Logger,
-  LOGGER,
-  REPL_SERVER_ROUTER,
-  ReplServerApiCall,
-  ReplServerRouter,
-  Validator,
-  VALIDATOR
-} from '@famir/domain'
+import { Logger, LOGGER } from '@famir/logger'
+import { REPL_SERVER_ROUTER, ReplServerApiCall, ReplServerRouter } from '@famir/repl-server'
+import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
   CreateProxyData,

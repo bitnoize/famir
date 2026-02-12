@@ -1,13 +1,11 @@
 import { DIContainer } from '@famir/common'
+import { Logger, LOGGER } from '@famir/logger'
 import {
   DATABASE_CONNECTOR,
-  DATABASE_MANAGER,
   DatabaseConnector,
-  DatabaseManager,
-  Logger,
-  LOGGER
-} from '@famir/domain'
-import { RedisDatabaseConnection } from './redis-database-connector.js'
+  RedisDatabaseConnection
+} from './database-connector.js'
+import { DATABASE_MANAGER, DatabaseManager } from './database-manager.js'
 import { getRedisFunctions } from './redis-functions.js'
 
 export class RedisDatabaseManager implements DatabaseManager {
