@@ -9,18 +9,18 @@ import {
   HTTP_SERVER,
   HttpServer,
   HttpServerContext,
-  StdHttpServerConfig,
-  StdHttpServerOptions
+  NativeHttpServerConfig,
+  NativeHttpServerOptions
 } from './http-server.js'
-import { StdHttpServerContext } from './std-http-server-context.js'
+import { NativeHttpServerContext } from './native-http-server-context.js'
 
-export class StdHttpServer implements HttpServer {
+export class NativeHttpServer implements HttpServer {
   static inject(container: DIContainer) {
     container.registerSingleton<HttpServer>(
       HTTP_SERVER,
       (c) =>
-        new StdHttpServer(
-          c.resolve<Config<StdHttpServerConfig>>(CONFIG),
+        new NativeHttpServer(
+          c.resolve<Config<NativeHttpServerConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
@@ -28,11 +28,11 @@ export class StdHttpServer implements HttpServer {
     )
   }
 
-  protected readonly options: StdHttpServerOptions
+  protected readonly options: NativeHttpServerOptions
   protected readonly server: http.Server
 
   constructor(
-    config: Config<StdHttpServerConfig>,
+    config: Config<NativeHttpServerConfig>,
     protected readonly logger: Logger,
     protected readonly templater: Templater,
     protected readonly router: HttpServerRouter
@@ -68,7 +68,7 @@ export class StdHttpServer implements HttpServer {
     res: http.ServerResponse
   ): Promise<void> {
     try {
-      const ctx = new StdHttpServerContext(req, res)
+      const ctx = new NativeHttpServerContext(req, res)
 
       await this.chainMiddlewares(ctx)
 
@@ -218,7 +218,7 @@ export class StdHttpServer implements HttpServer {
     })
   }
 
-  private buildOptions(config: StdHttpServerConfig): StdHttpServerOptions {
+  private buildOptions(config: NativeHttpServerConfig): NativeHttpServerOptions {
     return {
       address: config.HTTP_SERVER_ADDRESS,
       port: config.HTTP_SERVER_PORT,

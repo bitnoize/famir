@@ -6,7 +6,7 @@ import {
   SessionModel
 } from '@famir/database'
 import { HttpServerContextState } from '@famir/http-server'
-import { ReverseProxyForward } from './reverse-proxy-forward.js'
+import { HttpMessage } from '@famir/http-tools'
 
 export interface ReverseProxyState extends HttpServerContextState {
   campaign?: FullCampaignModel
@@ -14,5 +14,5 @@ export interface ReverseProxyState extends HttpServerContextState {
   target?: EnabledFullTargetModel
   targets?: EnabledTargetModel[]
   session?: SessionModel
-  forward?: ReverseProxyForward
+  message?: HttpMessage
 }

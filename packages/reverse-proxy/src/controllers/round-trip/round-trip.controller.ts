@@ -1,8 +1,8 @@
 import { DIContainer, isDevelopment } from '@famir/common'
 import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
+import { HttpMessage } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { ReverseProxyForward } from '../../reverse-proxy-forward.js'
 import { BaseController } from '../base/index.js'
 import { type RoundTripService, ROUND_TRIP_SERVICE } from './round-trip.service.js'
 
@@ -37,9 +37,9 @@ export class RoundTripController extends BaseController {
     this.logger.debug(`RoundTripController initialized`)
   }
 
-  useInitForward() {
-    this.router.register('init-forward', async (ctx, next) => {
-      const forward = new ReverseProxyForward(
+  useInitMessage() {
+    this.router.register('init-message', async (ctx, next) => {
+      const message = new HttpMessage(
         ctx.method,
         ctx.url.clone(),
         ctx.requestHeaders.clone().reset(),
@@ -49,25 +49,25 @@ export class RoundTripController extends BaseController {
         ctx.responseBody.clone().reset()
       )
 
-      this.setState(ctx, 'forward', forward)
+      this.setState(ctx, 'message', message)
 
       if (isDevelopment) {
-        ctx.responseHeaders.set('X-Famir-Message-Id', forward.message.id)
+        ctx.responseHeaders.set('X-Famir-Message-Id', message.id)
       }
 
       await next()
     })
   }
 
-  useExecForward() {
-    this.router.register('exec-forward', async (ctx, next) => {
+  useForwardMessage() {
+    this.router.register('forward-message', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
       const proxy = this.getState(ctx, 'proxy')
-      const forward = this.getState(ctx, 'forward')
+      const message = this.getState(ctx, 'message')
 
-      const message = forward.freeze().message
+      message.freeze()
 
-      if (forward.kind === 'ordinary') {
+      if (message.kind === 'ordinary') {
         await ctx.loadRequest(target.requestBodyLimit)
 
         message.url.merge(ctx.url.toObject())
@@ -75,7 +75,7 @@ export class RoundTripController extends BaseController {
         message.requestBody.set(ctx.requestBody.get())
         message.mergeConnection({}) // FIXME
 
-        forward.runRequestInterceptors(true)
+        message.runRequestInterceptors(true)
 
         const response = await this.roundTripService.ordinaryRequest({
           proxy: proxy.url,
@@ -107,7 +107,7 @@ export class RoundTripController extends BaseController {
 
           await ctx.sendResponse()
         } else {
-          forward.runResponseInterceptors(true)
+          message.runResponseInterceptors(true)
 
           ctx.status.set(message.status.get())
           ctx.responseHeaders.merge(message.responseHeaders.toObject())
@@ -115,9 +115,9 @@ export class RoundTripController extends BaseController {
 
           await ctx.sendResponse()
         }
-      } else if (forward.kind === 'stream-request') {
+      } else if (message.kind === 'stream-request') {
         throw new Error(`Streaming not supported yet`)
-      } else if (forward.kind === 'stream-response') {
+      } else if (message.kind === 'stream-response') {
         throw new Error(`Streaming not supported yet`)
       }
 
@@ -129,9 +129,9 @@ export class RoundTripController extends BaseController {
     this.router.register('basic-transforms', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
-      const forward = this.getState(ctx, 'forward')
+      const message = this.getState(ctx, 'message')
 
-      forward.addRequestHeadInterceptor('target-donor-url', (message) => {
+      message.addRequestHeadInterceptor('target-donor-url', () => {
         message.url.merge({
           protocol: target.donorProtocol,
           hostname: target.donorHostname,
@@ -141,7 +141,7 @@ export class RoundTripController extends BaseController {
         message.requestHeaders.set('Host', target.donorHost)
       })
 
-      forward.addRequestHeadInterceptor('remove-session-cookie', (message) => {
+      message.addRequestHeadInterceptor('remove-session-cookie', () => {
         const cookies = message.requestHeaders.getCookies()
 
         if (cookies) {
@@ -150,7 +150,7 @@ export class RoundTripController extends BaseController {
         }
       })
 
-      forward.addRequestHeadInterceptor('cleanup-headers', (message) => {
+      message.addRequestHeadInterceptor('cleanup-headers', () => {
         message.requestHeaders.delete([
           'Via',
           'X-Real-Ip',
@@ -163,7 +163,7 @@ export class RoundTripController extends BaseController {
         ])
       })
 
-      forward.addResponseHeadInterceptor('cleanup-headers', (message) => {
+      message.addResponseHeadInterceptor('cleanup-headers', () => {
         message.responseHeaders.delete([
           'Proxy-Agent'
           // ...
@@ -215,17 +215,15 @@ export class RoundTripController extends BaseController {
       const proxy = this.getState(ctx, 'proxy')
       const target = this.getState(ctx, 'target')
       const session = this.getState(ctx, 'session')
-      const forward = this.getState(ctx, 'forward')
-
-      const message = forward.message
+      const message = this.getState(ctx, 'message')
 
       await this.roundTripService.createMessage({
         campaignId: campaign.campaignId,
-        messageId: forward.message.id,
+        messageId: message.id,
         proxyId: proxy.proxyId,
         targetId: target.targetId,
         sessionId: session.sessionId,
-        kind: forward.kind,
+        kind: message.kind,
         method: message.method.get(),
         url: message.url.toRelative(),
         requestHeaders: message.requestHeaders.toObject(),

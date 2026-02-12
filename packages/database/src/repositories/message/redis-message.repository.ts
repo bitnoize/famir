@@ -1,14 +1,5 @@
 import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
-import {
-  FullMessageModel,
-  HttpBody,
-  HttpConnection,
-  HttpError,
-  HttpHeaders,
-  HttpPayload,
-  MessageRepository
-} from '@famir/domain'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import {
@@ -17,9 +8,17 @@ import {
   RedisDatabaseConnection
 } from '../../database-connector.js'
 import { RedisDatabaseConfig } from '../../database.js'
+import {
+  FullMessageModel,
+  MessageBody,
+  MessageConnection,
+  MessageError,
+  MessageHeaders,
+  MessagePayload
+} from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage } from './message.functions.js'
-import { MESSAGE_REPOSITORY } from './message.js'
+import { MESSAGE_REPOSITORY, MessageRepository } from './message.js'
 import { messageSchemas } from './message.schemas.js'
 
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
@@ -58,14 +57,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     kind: string,
     method: string,
     url: string,
-    requestHeaders: HttpHeaders,
-    requestBody: HttpBody,
+    requestHeaders: MessageHeaders,
+    requestBody: MessageBody,
     status: number,
-    responseHeaders: HttpHeaders,
-    responseBody: HttpBody,
-    connection: HttpConnection,
-    payload: HttpPayload,
-    errors: HttpError[],
+    responseHeaders: MessageHeaders,
+    responseBody: MessageBody,
+    connection: MessageConnection,
+    payload: MessagePayload,
+    errors: MessageError[],
     score: number,
     ip: string,
     startTime: number,
@@ -189,34 +188,34 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     )
   }
 
-  protected parseHeaders(value: string): HttpHeaders {
+  protected parseHeaders(value: string): MessageHeaders {
     const data = this.decodeJson(value)
 
-    this.validateRawData<HttpHeaders>('database-message-headers', data)
+    this.validateRawData<MessageHeaders>('database-message-headers', data)
 
     return data
   }
 
-  protected parseConnection(value: string): HttpConnection {
+  protected parseConnection(value: string): MessageConnection {
     const data = this.decodeJson(value)
 
-    this.validateRawData<HttpConnection>('database-message-connection', data)
+    this.validateRawData<MessageConnection>('database-message-connection', data)
 
     return data
   }
 
-  protected parsePayload(value: string): HttpPayload {
+  protected parsePayload(value: string): MessagePayload {
     const data = this.decodeJson(value)
 
-    this.validateRawData<HttpPayload>('database-message-payload', data)
+    this.validateRawData<MessagePayload>('database-message-payload', data)
 
     return data
   }
 
-  protected parseErrors(value: string): HttpError[] {
+  protected parseErrors(value: string): MessageError[] {
     const data = this.decodeJson(value)
 
-    this.validateRawData<HttpError[]>('database-message-errors', data)
+    this.validateRawData<MessageError[]>('database-message-errors', data)
 
     return data
   }

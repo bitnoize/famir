@@ -10,7 +10,7 @@ import http from 'node:http'
 import { HttpServerError } from './http-server.error.js'
 import { HttpServerContext, HttpServerContextState } from './http-server.js'
 
-export class StdHttpServerContext implements HttpServerContext {
+export class NativeHttpServerContext implements HttpServerContext {
   readonly state: HttpServerContextState = {}
   readonly middlewares: string[] = []
 

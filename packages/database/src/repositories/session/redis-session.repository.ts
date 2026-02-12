@@ -1,6 +1,5 @@
 import { DIContainer, randomIdent } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
-import { SessionModel, SessionRepository } from '@famir/domain'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import {
@@ -10,9 +9,10 @@ import {
 } from '../../database-connector.js'
 import { DatabaseError } from '../../database.error.js'
 import { RedisDatabaseConfig } from '../../database.js'
+import { SessionModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawSession } from './session.functions.js'
-import { SESSION_REPOSITORY } from './session.js'
+import { SESSION_REPOSITORY, SessionRepository } from './session.js'
 import { sessionSchemas } from './session.schemas.js'
 
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {

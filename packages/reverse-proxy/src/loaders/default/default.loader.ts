@@ -11,7 +11,7 @@ import {
   RedisTargetRepository
 } from '@famir/database'
 import { CurlHttpClient } from '@famir/http-client'
-import { HttpServerRouter, StdHttpServer } from '@famir/http-server'
+import { HttpServerRouter, NativeHttpServer } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
 import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'
@@ -49,7 +49,7 @@ export async function bootstrapDefault(composer: (container: DIContainer) => voi
 
   HttpServerRouter.inject(container)
 
-  StdHttpServer.inject(container)
+  NativeHttpServer.inject(container)
 
   App.inject(container)
 

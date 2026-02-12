@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
-import { LureModel, LureRepository } from '@famir/domain'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import {
@@ -9,9 +8,10 @@ import {
   RedisDatabaseConnection
 } from '../../database-connector.js'
 import { RedisDatabaseConfig } from '../../database.js'
+import { LureModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawLure } from './lure.functions.js'
-import { LURE_REPOSITORY } from './lure.js'
+import { LURE_REPOSITORY, LureRepository } from './lure.js'
 import { lureSchemas } from './lure.schemas.js'
 
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {

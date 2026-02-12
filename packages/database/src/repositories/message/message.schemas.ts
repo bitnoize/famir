@@ -1,6 +1,12 @@
 import { JSONSchemaType } from '@famir/common'
-import { HttpConnection, HttpError, HttpHeader, HttpHeaders, HttpPayload } from '@famir/domain'
 import { ValidatorSchemas } from '@famir/validator'
+import {
+  MessageConnection,
+  MessageError,
+  MessageHeader,
+  MessageHeaders,
+  MessagePayload
+} from '../../models/index.js'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
 const rawMessageSchema: JSONSchemaType<RawMessage> = {
@@ -161,7 +167,7 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
   additionalProperties: false
 } as const
 
-const messageHeaderSchema: JSONSchemaType<HttpHeader> = {
+const messageHeaderSchema: JSONSchemaType<MessageHeader> = {
   type: ['string', 'array'],
   oneOf: [
     {
@@ -176,7 +182,7 @@ const messageHeaderSchema: JSONSchemaType<HttpHeader> = {
   ]
 } as const
 
-const messageHeadersSchema: JSONSchemaType<HttpHeaders> = {
+const messageHeadersSchema: JSONSchemaType<MessageHeaders> = {
   type: 'object',
   required: [],
   additionalProperties: {
@@ -185,19 +191,19 @@ const messageHeadersSchema: JSONSchemaType<HttpHeaders> = {
   }
 } as const
 
-const messageConnectionSchema: JSONSchemaType<HttpConnection> = {
+const messageConnectionSchema: JSONSchemaType<MessageConnection> = {
   type: 'object',
   additionalProperties: {
     anyOf: [{ type: 'number' }, { type: 'string' }]
   }
 } as const
 
-const messagePayloadSchema: JSONSchemaType<HttpPayload> = {
+const messagePayloadSchema: JSONSchemaType<MessagePayload> = {
   type: 'object',
   additionalProperties: true
 } as const
 
-const messageErrorSchema: JSONSchemaType<HttpError> = {
+const messageErrorSchema: JSONSchemaType<MessageError> = {
   type: 'array',
   minItems: 1,
   maxItems: 10,
@@ -211,7 +217,7 @@ const messageErrorSchema: JSONSchemaType<HttpError> = {
   }
 } as const
 
-const messageErrorsSchema: JSONSchemaType<HttpError[]> = {
+const messageErrorsSchema: JSONSchemaType<MessageError[]> = {
   type: 'array',
   items: messageErrorSchema
 } as const

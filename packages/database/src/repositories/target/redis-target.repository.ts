@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
-import { FullTargetModel, TargetModel, TargetRepository } from '@famir/domain'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import {
@@ -9,9 +8,10 @@ import {
   RedisDatabaseConnection
 } from '../../database-connector.js'
 import { RedisDatabaseConfig } from '../../database.js'
+import { FullTargetModel, TargetModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullTarget, RawTarget } from './target.functions.js'
-import { TARGET_REPOSITORY } from './target.js'
+import { TARGET_REPOSITORY, TargetRepository } from './target.js'
 import { targetSchemas } from './target.schemas.js'
 
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {

@@ -1,7 +1,7 @@
-import { AnalyzeLogJobData } from '@famir/domain'
 import { ExecutorError } from '@famir/executor'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
+import { AnalyzeLogJobData } from '@famir/workflow'
 
 export abstract class BaseController {
   constructor(

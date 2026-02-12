@@ -10,22 +10,20 @@ interface Registration<T = unknown> {
 export class DIContainer {
   private readonly registry = new Map<Token, Registration>()
 
-  private register<T>(token: Token, factory: Factory<T>, isSingleton: boolean): this {
+  private register<T>(token: Token, factory: Factory<T>, isSingleton: boolean) {
     if (this.registry.has(token)) {
       throw new Error(`Dependency allready registered: ${token.toString()}`)
     }
 
     this.registry.set(token, { factory, isSingleton, instance: null })
-
-    return this
   }
 
-  registerTransient<T>(token: Token, factory: Factory<T>): this {
-    return this.register(token, factory, false)
+  registerTransient<T>(token: Token, factory: Factory<T>) {
+    this.register(token, factory, false)
   }
 
-  registerSingleton<T>(token: Token, factory: Factory<T>): this {
-    return this.register(token, factory, true)
+  registerSingleton<T>(token: Token, factory: Factory<T>) {
+    this.register(token, factory, true)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -45,9 +43,7 @@ export class DIContainer {
     return registration.instance as T
   }
 
-  reset(): this {
+  reset() {
     this.registry.clear()
-
-    return this
   }
 }
