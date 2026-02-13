@@ -1,10 +1,9 @@
 import { DIContainer } from '@famir/common'
 import { DATABASE_MANAGER, DatabaseManager } from '@famir/database'
-import { BaseService } from '../base/index.js'
 
 export const DATABASE_SERVICE = Symbol('DatabaseService')
 
-export class DatabaseService extends BaseService {
+export class DatabaseService {
   static inject(container: DIContainer) {
     container.registerSingleton<DatabaseService>(
       DATABASE_SERVICE,
@@ -12,9 +11,7 @@ export class DatabaseService extends BaseService {
     )
   }
 
-  constructor(protected readonly databaseManager: DatabaseManager) {
-    super()
-  }
+  constructor(protected readonly databaseManager: DatabaseManager) {}
 
   async loadFunctions(): Promise<true> {
     await this.databaseManager.loadFunctions()

@@ -6,7 +6,7 @@ import {
   SessionModel
 } from '@famir/database'
 import { HttpServerContextState } from '@famir/http-server'
-import { HttpMessage } from '@famir/http-tools'
+import { type HttpMessage } from '@famir/http-tools'
 
 export interface ReverseProxyState extends HttpServerContextState {
   campaign?: FullCampaignModel

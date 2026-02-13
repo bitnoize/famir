@@ -10,8 +10,8 @@ export interface CreateTargetData {
   mirrorSub: string
   mirrorPort: number
   connectTimeout: number
-  ordinaryTimeout: number
-  streamingTimeout: number
+  simpleTimeout: number
+  streamTimeout: number
   requestBodyLimit: number
   responseBodyLimit: number
   mainPage: string
@@ -31,8 +31,8 @@ export interface UpdateTargetData {
   campaignId: string
   targetId: string
   connectTimeout: number | null | undefined
-  ordinaryTimeout: number | null | undefined
-  streamingTimeout: number | null | undefined
+  simpleTimeout: number | null | undefined
+  streamTimeout: number | null | undefined
   requestBodyLimit: number | null | undefined
   responseBodyLimit: number | null | undefined
   mainPage: string | null | undefined

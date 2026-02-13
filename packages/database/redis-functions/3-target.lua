@@ -54,7 +54,7 @@ local function create_target(keys, args)
     mirror_sub = args[9],
     mirror_port = args[10],
     connect_timeout = tonumber(args[11]),
-    ordinary_timeout = tonumber(args[12]),
+    simple_timeout = tonumber(args[12]),
     streaming_timeout = tonumber(args[13]),
     request_body_limit = tonumber(args[14]),
     response_body_limit = tonumber(args[15]),
@@ -249,7 +249,7 @@ local function read_full_target(keys, args)
     'mirror_sub',
     'mirror_port',
     'connect_timeout',
-    'ordinary_timeout',
+    'simple_timeout',
     'streaming_timeout',
     'request_body_limit',
     'response_body_limit',
@@ -282,7 +282,7 @@ local function read_full_target(keys, args)
     mirror_port = values[10],
     labels = redis.call('SMEMBERS', target_labels_key),
     connect_timeout = tonumber(values[11]),
-    ordinary_timeout = tonumber(values[12]),
+    simple_timeout = tonumber(values[12]),
     streaming_timeout = tonumber(values[13]),
     request_body_limit = tonumber(values[14]),
     response_body_limit = tonumber(values[15]),
@@ -393,8 +393,8 @@ local function update_target(keys, args)
 
     if field == 'connect_timeout' then
       model.connect_timeout = tonumber(value)
-    elseif field == 'ordinary_timeout' then
-      model.ordinary_timeout = tonumber(value)
+    elseif field == 'simple_timeout' then
+      model.simple_timeout = tonumber(value)
     elseif field == 'streaming_timeout' then
       model.streaming_timeout = tonumber(value)
     elseif field == 'request_body_limit' then

@@ -181,6 +181,7 @@ export class HttpBodyWrap {
   }
 
   protected invalidateCacheAll() {
+    this.#cacheBase64 = null
     this.#cacheText = null
     this.#cacheJson = null
     this.#cacheQueryString = null

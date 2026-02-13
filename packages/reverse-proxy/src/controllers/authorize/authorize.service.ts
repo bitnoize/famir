@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   DatabaseError,
   DatabaseErrorCode,
@@ -18,7 +18,6 @@ import {
   SessionRepository
 } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
-import { BaseService } from '../base/index.js'
 import {
   AuthSessionData,
   CreateSessionData,
@@ -30,7 +29,7 @@ import {
 
 export const AUTHORIZE_SERVICE = Symbol('AuthorizeService')
 
-export class AuthorizeService extends BaseService {
+export class AuthorizeService {
   static inject(container: DIContainer) {
     container.registerSingleton<AuthorizeService>(
       AUTHORIZE_SERVICE,
@@ -49,9 +48,7 @@ export class AuthorizeService extends BaseService {
     protected readonly redirectorRepository: RedirectorRepository,
     protected readonly lureRepository: LureRepository,
     protected readonly sessionRepository: SessionRepository
-  ) {
-    super()
-  }
+  ) {}
 
   async readProxy(data: ReadProxyData): Promise<EnabledProxyModel> {
     const model = await this.proxyRepository.read(data.campaignId, data.proxyId)
@@ -90,7 +87,7 @@ export class AuthorizeService extends BaseService {
       if (error instanceof DatabaseError) {
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
 
-        if (knownErrorCodes.includes(error.code)) {
+        if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new HttpServerError(`Create session failed`, {
             cause: error,
             code: 'SERVICE_UNAVAILABLE'
@@ -109,7 +106,7 @@ export class AuthorizeService extends BaseService {
       if (error instanceof DatabaseError) {
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
 
-        if (knownErrorCodes.includes(error.code)) {
+        if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new HttpServerError(`Auth session failed`, {
             cause: error,
             code: `SERVICE_UNAVAILABLE`
@@ -137,7 +134,7 @@ export class AuthorizeService extends BaseService {
       if (error instanceof DatabaseError) {
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
 
-        if (knownErrorCodes.includes(error.code)) {
+        if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new HttpServerError(`Upgrade session failed`, {
             cause: error,
             code: `SERVICE_UNAVAILABLE`

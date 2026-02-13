@@ -1,12 +1,13 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
+  DatabaseError,
+  DatabaseErrorCode,
   FullCampaignModel
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { BaseService } from '../base/index.js'
 import {
   CreateCampaignData,
   DeleteCampaignData,
@@ -18,7 +19,7 @@ import {
 
 export const CAMPAIGN_SERVICE = Symbol('CampaignService')
 
-export class CampaignService extends BaseService {
+export class CampaignService {
   static inject(container: DIContainer) {
     container.registerSingleton<CampaignService>(
       CAMPAIGN_SERVICE,
@@ -26,9 +27,7 @@ export class CampaignService extends BaseService {
     )
   }
 
-  constructor(protected readonly campaignRepository: CampaignRepository) {
-    super()
-  }
+  constructor(protected readonly campaignRepository: CampaignRepository) {}
 
   async create(data: CreateCampaignData): Promise<true> {
     try {
@@ -48,7 +47,15 @@ export class CampaignService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['CONFLICT'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['CONFLICT']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -70,7 +77,15 @@ export class CampaignService extends BaseService {
     try {
       return await this.campaignRepository.lock(data.campaignId)
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -82,7 +97,15 @@ export class CampaignService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -101,7 +124,15 @@ export class CampaignService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -113,7 +144,15 @@ export class CampaignService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }

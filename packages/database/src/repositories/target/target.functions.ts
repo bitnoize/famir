@@ -30,8 +30,8 @@ export interface RawTarget {
 
 export interface RawFullTarget extends RawTarget {
   connect_timeout: number
-  ordinary_timeout: number
-  streaming_timeout: number
+  simple_timeout: number
+  stream_timeout: number
   request_body_limit: number
   response_body_limit: number
   main_page: string
@@ -60,8 +60,8 @@ export const targetFunctions = {
         mirrorSub: string,
         mirrorPort: number,
         connectTimeout: number,
-        ordinaryTimeout: number,
-        streamingTimeout: number,
+        simpleTimeout: number,
+        streamTimeout: number,
         requestBodyLimit: number,
         responseBodyLimit: number,
         mainPage: string,
@@ -89,8 +89,8 @@ export const targetFunctions = {
         parser.push(mirrorSub)
         parser.push(mirrorPort.toString())
         parser.push(connectTimeout.toString())
-        parser.push(ordinaryTimeout.toString())
-        parser.push(streamingTimeout.toString())
+        parser.push(simpleTimeout.toString())
+        parser.push(streamTimeout.toString())
         parser.push(requestBodyLimit.toString())
         parser.push(responseBodyLimit.toString())
         parser.push(mainPage)
@@ -149,8 +149,8 @@ export const targetFunctions = {
         campaignId: string,
         targetId: string,
         connectTimeout: number | null | undefined,
-        ordinaryTimeout: number | null | undefined,
-        streamingTimeout: number | null | undefined,
+        simpleTimeout: number | null | undefined,
+        streamTimeout: number | null | undefined,
         requestBodyLimit: number | null | undefined,
         responseBodyLimit: number | null | undefined,
         mainPage: string | null | undefined,
@@ -169,14 +169,14 @@ export const targetFunctions = {
           parser.push(connectTimeout.toString())
         }
 
-        if (ordinaryTimeout != null) {
-          parser.push('ordinary_timeout')
-          parser.push(ordinaryTimeout.toString())
+        if (simpleTimeout != null) {
+          parser.push('simple_timeout')
+          parser.push(simpleTimeout.toString())
         }
 
-        if (streamingTimeout != null) {
-          parser.push('streaming_timeout')
-          parser.push(streamingTimeout.toString())
+        if (streamTimeout != null) {
+          parser.push('stream_timeout')
+          parser.push(streamTimeout.toString())
         }
 
         if (requestBodyLimit != null) {

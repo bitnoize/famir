@@ -3,11 +3,11 @@ import {
   targetContentSchema,
   targetDomainSchema,
   targetLabelSchema,
-  targetOrdinaryTimeoutSchema,
   targetPortSchema,
   targetRequestBodyLimitSchema,
   targetResponseBodyLimitSchema,
-  targetStreamingTimeoutSchema,
+  targetSimpleTimeoutSchema,
+  targetStreamTimeoutSchema,
   targetSubSchema
 } from '@famir/database'
 import {
@@ -41,8 +41,8 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     'mirrorSub',
     'mirrorPort',
     'connectTimeout',
-    'ordinaryTimeout',
-    'streamingTimeout',
+    'simpleTimeout',
+    'streamTimeout',
     'requestBodyLimit',
     'responseBodyLimit',
     'mainPage',
@@ -67,12 +67,12 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
       ...targetConnectTimeoutSchema,
       default: 1 * 1000
     },
-    ordinaryTimeout: {
-      ...targetOrdinaryTimeoutSchema,
+    simpleTimeout: {
+      ...targetSimpleTimeoutSchema,
       default: 10 * 1000
     },
-    streamingTimeout: {
-      ...targetStreamingTimeoutSchema,
+    streamTimeout: {
+      ...targetStreamTimeoutSchema,
       default: 3600 * 1000
     },
     requestBodyLimit: {
@@ -128,12 +128,12 @@ const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
       ...targetConnectTimeoutSchema,
       nullable: true
     },
-    ordinaryTimeout: {
-      ...targetOrdinaryTimeoutSchema,
+    simpleTimeout: {
+      ...targetSimpleTimeoutSchema,
       nullable: true
     },
-    streamingTimeout: {
-      ...targetStreamingTimeoutSchema,
+    streamTimeout: {
+      ...targetStreamTimeoutSchema,
       nullable: true
     },
     requestBodyLimit: {

@@ -1,7 +1,12 @@
-import { DIContainer } from '@famir/common'
-import { PROXY_REPOSITORY, ProxyModel, ProxyRepository } from '@famir/database'
+import { DIContainer, arrayIncludes } from '@famir/common'
+import {
+  DatabaseError,
+  DatabaseErrorCode,
+  PROXY_REPOSITORY,
+  ProxyModel,
+  ProxyRepository
+} from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { BaseService } from '../base/index.js'
 import {
   CreateProxyData,
   DeleteProxyData,
@@ -12,7 +17,7 @@ import {
 
 export const PROXY_SERVICE = Symbol('ProxyService')
 
-export class ProxyService extends BaseService {
+export class ProxyService {
   static inject(container: DIContainer) {
     container.registerSingleton<ProxyService>(
       PROXY_SERVICE,
@@ -20,9 +25,7 @@ export class ProxyService extends BaseService {
     )
   }
 
-  constructor(protected readonly proxyRepository: ProxyRepository) {
-    super()
-  }
+  constructor(protected readonly proxyRepository: ProxyRepository) {}
 
   async create(data: CreateProxyData): Promise<true> {
     try {
@@ -30,7 +33,15 @@ export class ProxyService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -54,7 +65,15 @@ export class ProxyService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -66,7 +85,15 @@ export class ProxyService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -78,7 +105,15 @@ export class ProxyService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }

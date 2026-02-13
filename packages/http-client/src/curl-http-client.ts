@@ -9,8 +9,8 @@ import {
   CurlHttpClientOptions,
   HTTP_CLIENT,
   HttpClient,
-  HttpClientOrdinaryRequest,
-  HttpClientOrdinaryResponse,
+  HttpClientSimpleRequest,
+  HttpClientSimpleResponse,
   HttpClientStreamRequest,
   HttpClientStreamResponse
 } from './http-client.js'
@@ -38,8 +38,8 @@ export class CurlHttpClient implements HttpClient {
     this.logger.debug(`HttpClient initialized`)
   }
 
-  ordinaryRequest(request: HttpClientOrdinaryRequest): Promise<HttpClientOrdinaryResponse> {
-    return new Promise<HttpClientOrdinaryResponse>((resolve, reject) => {
+  simpleRequest(request: HttpClientSimpleRequest): Promise<HttpClientSimpleResponse> {
+    return new Promise<HttpClientSimpleResponse>((resolve, reject) => {
       const curl = new Curl()
 
       let cancelCode: string | null = null
@@ -183,7 +183,7 @@ export class CurlHttpClient implements HttpClient {
             return
           }
 
-          const response: HttpClientOrdinaryResponse = {
+          const response: HttpClientSimpleResponse = {
             error: null,
             status,
             headers: this.parseHeaders(responseHeaders),

@@ -10,12 +10,11 @@ import {
   TargetRepository
 } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
-import { BaseService } from '../base/index.js'
 import { ListTargetsData, ReadCampaignTargetData } from './setup-mirror.js'
 
 export const SETUP_MIRROR_SERVICE = Symbol('SetupMirrorService')
 
-export class SetupMirrorService extends BaseService {
+export class SetupMirrorService {
   static inject(container: DIContainer) {
     container.registerSingleton<SetupMirrorService>(
       SETUP_MIRROR_SERVICE,
@@ -30,9 +29,7 @@ export class SetupMirrorService extends BaseService {
   constructor(
     protected readonly campaignRepository: CampaignRepository,
     protected readonly targetRepository: TargetRepository
-  ) {
-    super()
-  }
+  ) {}
 
   async readCampaignTarget(
     data: ReadCampaignTargetData

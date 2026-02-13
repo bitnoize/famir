@@ -1,7 +1,12 @@
-import { DIContainer } from '@famir/common'
-import { LURE_REPOSITORY, LureModel, LureRepository } from '@famir/database'
+import { DIContainer, arrayIncludes } from '@famir/common'
+import {
+  DatabaseError,
+  DatabaseErrorCode,
+  LURE_REPOSITORY,
+  LureModel,
+  LureRepository
+} from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { BaseService } from '../base/index.js'
 import {
   CreateLureData,
   DeleteLureData,
@@ -12,7 +17,7 @@ import {
 
 export const LURE_SERVICE = Symbol('LureService')
 
-export class LureService extends BaseService {
+export class LureService {
   static inject(container: DIContainer) {
     container.registerSingleton<LureService>(
       LURE_SERVICE,
@@ -20,9 +25,7 @@ export class LureService extends BaseService {
     )
   }
 
-  constructor(protected readonly lureRepository: LureRepository) {
-    super()
-  }
+  constructor(protected readonly lureRepository: LureRepository) {}
 
   async create(data: CreateLureData): Promise<true> {
     try {
@@ -36,7 +39,15 @@ export class LureService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -60,7 +71,15 @@ export class LureService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -72,7 +91,15 @@ export class LureService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -90,7 +117,15 @@ export class LureService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }

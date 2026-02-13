@@ -1,7 +1,12 @@
-import { DIContainer } from '@famir/common'
-import { REDIRECTOR_REPOSITORY, RedirectorModel, RedirectorRepository } from '@famir/database'
+import { DIContainer, arrayIncludes } from '@famir/common'
+import {
+  DatabaseError,
+  DatabaseErrorCode,
+  REDIRECTOR_REPOSITORY,
+  RedirectorModel,
+  RedirectorRepository
+} from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { BaseService } from '../base/index.js'
 import {
   CreateRedirectorData,
   DeleteRedirectorData,
@@ -12,7 +17,7 @@ import {
 
 export const REDIRECTOR_SERVICE = Symbol('RedirectorService')
 
-export class RedirectorService extends BaseService {
+export class RedirectorService {
   static inject(container: DIContainer) {
     container.registerSingleton<RedirectorService>(
       REDIRECTOR_SERVICE,
@@ -20,9 +25,7 @@ export class RedirectorService extends BaseService {
     )
   }
 
-  constructor(protected readonly redirectorRepository: RedirectorRepository) {
-    super()
-  }
+  constructor(protected readonly redirectorRepository: RedirectorRepository) {}
 
   async create(data: CreateRedirectorData): Promise<true> {
     try {
@@ -35,7 +38,15 @@ export class RedirectorService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -64,7 +75,15 @@ export class RedirectorService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -76,7 +95,15 @@ export class RedirectorService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }

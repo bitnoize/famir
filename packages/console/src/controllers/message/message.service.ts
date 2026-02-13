@@ -1,12 +1,11 @@
 import { DIContainer } from '@famir/common'
 import { MESSAGE_REPOSITORY, MessageModel, MessageRepository } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { BaseService } from '../base/index.js'
 import { ReadMessageData } from './message.js'
 
 export const MESSAGE_SERVICE = Symbol('MessageService')
 
-export class MessageService extends BaseService {
+export class MessageService {
   static inject(container: DIContainer) {
     container.registerSingleton<MessageService>(
       MESSAGE_SERVICE,
@@ -14,9 +13,7 @@ export class MessageService extends BaseService {
     )
   }
 
-  constructor(protected readonly messageRepository: MessageRepository) {
-    super()
-  }
+  constructor(protected readonly messageRepository: MessageRepository) {}
 
   async read(data: ReadMessageData): Promise<MessageModel> {
     const model = await this.messageRepository.read(data.campaignId, data.messageId)

@@ -1,7 +1,13 @@
-import { DIContainer } from '@famir/common'
-import { FullTargetModel, TARGET_REPOSITORY, TargetModel, TargetRepository } from '@famir/database'
+import { DIContainer, arrayIncludes } from '@famir/common'
+import {
+  DatabaseError,
+  DatabaseErrorCode,
+  FullTargetModel,
+  TARGET_REPOSITORY,
+  TargetModel,
+  TargetRepository
+} from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { BaseService } from '../base/index.js'
 import {
   ActionTargetLabelData,
   CreateTargetData,
@@ -14,7 +20,7 @@ import {
 
 export const TARGET_SERVICE = Symbol('TargetService')
 
-export class TargetService extends BaseService {
+export class TargetService {
   static inject(container: DIContainer) {
     container.registerSingleton<TargetService>(
       TARGET_SERVICE,
@@ -22,9 +28,7 @@ export class TargetService extends BaseService {
     )
   }
 
-  constructor(protected readonly targetRepository: TargetRepository) {
-    super()
-  }
+  constructor(protected readonly targetRepository: TargetRepository) {}
 
   async create(data: CreateTargetData): Promise<true> {
     try {
@@ -40,8 +44,8 @@ export class TargetService extends BaseService {
         data.mirrorSub,
         data.mirrorPort,
         data.connectTimeout,
-        data.ordinaryTimeout,
-        data.streamingTimeout,
+        data.simpleTimeout,
+        data.streamTimeout,
         data.requestBodyLimit,
         data.responseBodyLimit,
         data.mainPage,
@@ -54,7 +58,15 @@ export class TargetService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -78,8 +90,8 @@ export class TargetService extends BaseService {
         data.campaignId,
         data.targetId,
         data.connectTimeout,
-        data.ordinaryTimeout,
-        data.streamingTimeout,
+        data.simpleTimeout,
+        data.streamTimeout,
         data.requestBodyLimit,
         data.responseBodyLimit,
         data.mainPage,
@@ -92,7 +104,15 @@ export class TargetService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -104,7 +124,15 @@ export class TargetService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -116,7 +144,15 @@ export class TargetService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -133,7 +169,15 @@ export class TargetService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -150,7 +194,15 @@ export class TargetService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }
@@ -162,7 +214,15 @@ export class TargetService extends BaseService {
 
       return true
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code
+          })
+        }
+      }
 
       throw error
     }

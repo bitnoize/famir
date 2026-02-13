@@ -1,18 +1,23 @@
-import { DIContainer } from '@famir/common'
-import { MESSAGE_REPOSITORY, MessageRepository } from '@famir/database'
+import { DIContainer, arrayIncludes } from '@famir/common'
+import {
+  DatabaseError,
+  DatabaseErrorCode,
+  MESSAGE_REPOSITORY,
+  MessageRepository
+} from '@famir/database'
 import {
   HTTP_CLIENT,
   HttpClient,
-  HttpClientOrdinaryRequest,
-  HttpClientOrdinaryResponse
+  HttpClientSimpleRequest,
+  HttpClientSimpleResponse
 } from '@famir/http-client'
+import { HttpServerError } from '@famir/http-server'
 import { ANALYZE_LOG_QUEUE, AnalyzeLogQueue } from '@famir/workflow'
-import { BaseService } from '../base/index.js'
 import { CreateMessageData } from './round-trip.js'
 
 export const ROUND_TRIP_SERVICE = Symbol('RoundTripService')
 
-export class RoundTripService extends BaseService {
+export class RoundTripService {
   static inject(container: DIContainer) {
     container.registerSingleton<RoundTripService>(
       ROUND_TRIP_SERVICE,
@@ -29,9 +34,7 @@ export class RoundTripService extends BaseService {
     protected readonly messageRepository: MessageRepository,
     protected readonly analyzeLogQueue: AnalyzeLogQueue,
     protected readonly httpClient: HttpClient
-  ) {
-    super()
-  }
+  ) {}
 
   async createMessage(data: CreateMessageData): Promise<void> {
     try {
@@ -58,13 +61,22 @@ export class RoundTripService extends BaseService {
         data.finishTime
       )
     } catch (error) {
-      this.simpleDatabaseException(error, ['NOT_FOUND'])
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new HttpServerError(`Create message failed`, {
+            cause: error,
+            code: 'INTERNAL_ERROR'
+          })
+        }
+      }
 
       throw error
     }
   }
 
-  async ordinaryRequest(request: HttpClientOrdinaryRequest): Promise<HttpClientOrdinaryResponse> {
-    return await this.httpClient.ordinaryRequest(request)
+  async simpleRequest(request: HttpClientSimpleRequest): Promise<HttpClientSimpleResponse> {
+    return await this.httpClient.simpleRequest(request)
   }
 }

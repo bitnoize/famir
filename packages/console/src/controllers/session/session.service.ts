@@ -1,12 +1,11 @@
 import { DIContainer } from '@famir/common'
 import { SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { BaseService } from '../base/index.js'
 import { ReadSessionData } from './session.js'
 
 export const SESSION_SERVICE = Symbol('SessionService')
 
-export class SessionService extends BaseService {
+export class SessionService {
   static inject(container: DIContainer) {
     container.registerSingleton<SessionService>(
       SESSION_SERVICE,
@@ -14,9 +13,7 @@ export class SessionService extends BaseService {
     )
   }
 
-  constructor(protected readonly sessionRepository: SessionRepository) {
-    super()
-  }
+  constructor(protected readonly sessionRepository: SessionRepository) {}
 
   async read(data: ReadSessionData): Promise<SessionModel> {
     const model = await this.sessionRepository.read(data.campaignId, data.sessionId)

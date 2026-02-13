@@ -73,7 +73,7 @@ export class NativeHttpServer implements HttpServer {
       await this.chainMiddlewares(ctx)
 
       if (!ctx.isComplete) {
-        throw new HttpServerError(`Incomplete request`, {
+        throw new HttpServerError(`Incomplete response`, {
           code: 'INTERNAL_ERROR'
         })
       }

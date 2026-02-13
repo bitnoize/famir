@@ -20,7 +20,7 @@ export class HttpServerRouter {
 
   register(name: string, middleware: HttpServerMiddleware) {
     if (this.registry.has(name)) {
-      this.logger.error(`Middleware already registered: ${name}`)
+      throw new Error(`Middleware already registered: ${name}`)
     }
 
     this.registry.set(name, middleware)

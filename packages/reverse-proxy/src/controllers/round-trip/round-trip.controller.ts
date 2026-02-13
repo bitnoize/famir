@@ -67,7 +67,7 @@ export class RoundTripController extends BaseController {
 
       message.freeze()
 
-      if (message.kind === 'ordinary') {
+      if (message.kind === 'simple') {
         await ctx.loadRequest(target.requestBodyLimit)
 
         message.url.merge(ctx.url.toObject())
@@ -77,14 +77,14 @@ export class RoundTripController extends BaseController {
 
         message.runRequestInterceptors(true)
 
-        const response = await this.roundTripService.ordinaryRequest({
+        const response = await this.roundTripService.simpleRequest({
           proxy: proxy.url,
           method: message.method.get(),
           url: message.url.toAbsolute(),
           headers: message.requestHeaders.toObject(),
           body: message.requestBody.get(),
           connectTimeout: target.connectTimeout,
-          timeout: target.ordinaryTimeout,
+          timeout: target.simpleTimeout,
           bodyLimit: target.responseBodyLimit
         })
 
@@ -94,7 +94,7 @@ export class RoundTripController extends BaseController {
         message.mergeConnection(response.connection)
 
         if (response.error) {
-          message.addError(response.error, 'ordinary-request')
+          message.addError(response.error, 'simple-request')
 
           ctx.status.set(message.status.get())
 

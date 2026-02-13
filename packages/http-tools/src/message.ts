@@ -5,7 +5,7 @@ import { HttpMethodWrap } from './method.js'
 import { HttpStatusWrap } from './status.js'
 import { HttpUrlWrap } from './url.js'
 
-export const HTTP_KINDS = ['ordinary', 'stream-request', 'stream-response'] as const
+export const HTTP_KINDS = ['simple', 'stream-request', 'stream-response'] as const
 export type HttpKind = (typeof HTTP_KINDS)[number]
 
 export type HttpConnection = Record<string, number | string | null | undefined>
@@ -34,7 +34,7 @@ export class HttpMessage {
     return this
   }
 
-  #kind: HttpKind = 'ordinary'
+  #kind: HttpKind = 'simple'
 
   get kind(): HttpKind {
     return this.#kind

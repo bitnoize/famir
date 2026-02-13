@@ -3,7 +3,7 @@ import { HttpBody, HttpConnection, HttpHeaders } from '@famir/http-tools'
 export const HTTP_CLIENT = Symbol('HttpClient')
 
 export interface HttpClient {
-  ordinaryRequest(request: HttpClientOrdinaryRequest): Promise<HttpClientOrdinaryResponse>
+  simpleRequest(request: HttpClientSimpleRequest): Promise<HttpClientSimpleResponse>
   streamRequest(request: HttpClientStreamRequest): Promise<HttpClientStreamResponse>
 }
 
@@ -18,7 +18,7 @@ export interface HttpClientRequest {
   bodyLimit: number
 }
 
-export type HttpClientOrdinaryRequest = HttpClientRequest & { body: HttpBody }
+export type HttpClientSimpleRequest = HttpClientRequest & { body: HttpBody }
 export type HttpClientStreamRequest = HttpClientRequest & { body: ReadableStream }
 
 export interface HttpClientResponse {
@@ -29,7 +29,7 @@ export interface HttpClientResponse {
   connection: HttpConnection
 }
 
-export type HttpClientOrdinaryResponse = HttpClientResponse & { body: HttpBody }
+export type HttpClientSimpleResponse = HttpClientResponse & { body: HttpBody }
 export type HttpClientStreamResponse = HttpClientResponse & { body: ReadableStream }
 
 export interface CurlHttpClientConfig {
