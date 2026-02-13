@@ -22,12 +22,10 @@ export class AjvValidator implements Validator {
     })
   }
 
-  addSchemas(schemas: ValidatorSchemas): this {
+  addSchemas(schemas: ValidatorSchemas) {
     Object.entries(schemas).forEach(([name, schema]) => {
       this.ajv.addSchema(schema, name)
     })
-
-    return this
   }
 
   protected getValidate<T>(schemaName: string): ValidateFunction<T> {

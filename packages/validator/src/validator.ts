@@ -3,7 +3,7 @@ export { JSONSchemaType } from 'ajv'
 export const VALIDATOR = Symbol('Validator')
 
 export interface Validator {
-  addSchemas(schemas: ValidatorSchemas): this
+  addSchemas(schemas: ValidatorSchemas): void
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   guardSchema<T>(schemaName: string, data: unknown): data is T
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
