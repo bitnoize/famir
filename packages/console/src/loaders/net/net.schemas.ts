@@ -1,4 +1,3 @@
-import { JSONSchemaType } from '@famir/common'
 import {
   configRedisDatabaseConnectionUrlSchema,
   configRedisDatabasePrefixSchema
@@ -24,6 +23,7 @@ import {
   configStorageAccessKeySchema,
   configStorageSecretKeySchema
 } from '@famir/storage'
+import { JSONSchemaType } from '@famir/validator'
 import {
   configRedisWorkflowConnectionUrlSchema,
   configRedisWorkflowPrefixSchema

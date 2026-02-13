@@ -1,5 +1,4 @@
-import { JSONSchemaType } from '@famir/common'
-import { ValidatorSchemas } from '@famir/validator'
+import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 
 const rawCampaignSchema: JSONSchemaType<RawCampaign> = {

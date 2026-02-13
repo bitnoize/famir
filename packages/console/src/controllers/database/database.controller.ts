@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerApiCall, ReplServerRouter } from '@famir/repl-server'
+import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { DATABASE_SERVICE, type DatabaseService } from './database.service.js'
@@ -36,23 +36,13 @@ export class DatabaseController extends BaseController {
     this.logger.debug(`DatabaseController initialized`)
   }
 
-  register(): this {
-    this.router
-      .register('loadDatabaseFunctions', this.loadDatabaseFunctionsApiCall)
-      .register('cleanupDatabase', this.cleanupDatabaseApiCall)
+  use() {
+    this.router.register('loadDatabaseFunctions', async () => {
+      return await this.databaseService.loadFunctions()
+    })
 
-    return this
-  }
-
-  private loadDatabaseFunctionsApiCall: ReplServerApiCall = async () => {
-    await this.databaseService.loadFunctions()
-
-    return true
-  }
-
-  private cleanupDatabaseApiCall: ReplServerApiCall = async () => {
-    await this.databaseService.cleanup()
-
-    return true
+    this.router.register('cleanupDatabase', async () => {
+      return await this.databaseService.cleanup()
+    })
   }
 }

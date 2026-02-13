@@ -1,4 +1,4 @@
-export type ValidatorSchemas = Record<string, object>
+export { JSONSchemaType } from 'ajv'
 
 export const VALIDATOR = Symbol('Validator')
 
@@ -9,3 +9,5 @@ export interface Validator {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   assertSchema<T>(schemaName: string, data: unknown): asserts data is T
 }
+
+export type ValidatorSchemas = Record<string, object>

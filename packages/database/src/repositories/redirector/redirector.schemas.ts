@@ -1,5 +1,4 @@
-import { JSONSchemaType } from '@famir/common'
-import { ValidatorSchemas } from '@famir/validator'
+import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 
 const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {

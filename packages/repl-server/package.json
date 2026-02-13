@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@famir/common": "*",
+    "@famir/validator": "*",
     "@famir/config": "*",
     "@famir/logger": "*"
   }

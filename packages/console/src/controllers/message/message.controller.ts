@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerApiCall, ReplServerRouter } from '@famir/repl-server'
+import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ReadMessageData } from './message.js'
@@ -40,15 +40,11 @@ export class MessageController extends BaseController {
     this.logger.debug(`MessageController initialized`)
   }
 
-  register(): this {
-    this.router.register('readMessage', this.readMessageApiCall)
+  use() {
+    this.router.register('readMessage', async (data) => {
+      this.validateData<ReadMessageData>('console-read-message-data', data)
 
-    return this
-  }
-
-  private readMessageApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<ReadMessageData>('console-read-message-data', data)
-
-    return await this.messageService.read(data)
+      return await this.messageService.read(data)
+    })
   }
 }

@@ -15,25 +15,25 @@ export function rewriteUrl(
   schemes: RewriteUrlScheme[]
 ) {
   targets.forEach((target) => {
-    const [srcSecure, dstSecure] = rev
+    const [fromSecure, toSecure] = rev
       ? [target.mirrorSecure, target.donorSecure]
       : [target.donorSecure, target.mirrorSecure]
 
-    const srcProto = srcSecure ? 'https' : 'http'
-    const dstProto = dstSecure ? 'https' : 'http'
+    const fromProto = fromSecure ? 'https' : 'http'
+    const toProto = toSecure ? 'https' : 'http'
 
-    const [srcHost, dstHost] = rev
+    const [fromHost, toHost] = rev
       ? [target.mirrorHost, target.donorHost]
       : [target.donorHost, target.mirrorHost]
 
     schemes.forEach(([separator, withProto]) => {
       const pattern = withProto
-        ? [srcProto, separator, srcHost].join('')
-        : [separator, srcHost].join('')
+        ? [fromProto, separator, fromHost].join('')
+        : [separator, fromHost].join('')
 
       const replacement = withProto
-        ? [dstProto, separator, dstHost].join('')
-        : [separator, dstHost].join('')
+        ? [toProto, separator, toHost].join('')
+        : [separator, toHost].join('')
 
       text = text.replaceAll(pattern, replacement)
     })

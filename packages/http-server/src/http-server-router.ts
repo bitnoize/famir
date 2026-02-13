@@ -18,25 +18,21 @@ export class HttpServerRouter {
     this.logger.debug(`HttpServerRouter initialized`)
   }
 
-  register(name: string, middleware: HttpServerMiddleware): this {
+  register(name: string, middleware: HttpServerMiddleware) {
     if (this.registry.has(name)) {
-      this.logger.error(`HttpServerRouter middleware already registered: ${name}`)
-    } else {
-      this.logger.info(`HttpServerRouter register middleware: ${name}`)
-
-      this.registry.set(name, middleware)
+      this.logger.error(`Middleware already registered: ${name}`)
     }
 
-    return this
+    this.registry.set(name, middleware)
+
+    this.logger.info(`HttpServerRouter register middleware: ${name}`)
   }
 
   resolve(): HttpServerMiddlewares {
     return Array.from(this.registry.entries())
   }
 
-  reset(): this {
+  reset() {
     this.registry.clear()
-
-    return this
   }
 }

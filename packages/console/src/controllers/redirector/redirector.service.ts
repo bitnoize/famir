@@ -24,7 +24,7 @@ export class RedirectorService extends BaseService {
     super()
   }
 
-  async create(data: CreateRedirectorData): Promise<void> {
+  async create(data: CreateRedirectorData): Promise<true> {
     try {
       await this.redirectorRepository.create(
         data.campaignId,
@@ -32,6 +32,8 @@ export class RedirectorService extends BaseService {
         data.page,
         data.lockSecret
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
@@ -51,7 +53,7 @@ export class RedirectorService extends BaseService {
     return model
   }
 
-  async update(data: UpdateRedirectorData): Promise<void> {
+  async update(data: UpdateRedirectorData): Promise<true> {
     try {
       await this.redirectorRepository.update(
         data.campaignId,
@@ -59,6 +61,8 @@ export class RedirectorService extends BaseService {
         data.page,
         data.lockSecret
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -66,9 +70,11 @@ export class RedirectorService extends BaseService {
     }
   }
 
-  async delete(data: DeleteRedirectorData): Promise<void> {
+  async delete(data: DeleteRedirectorData): Promise<true> {
     try {
       await this.redirectorRepository.delete(data.campaignId, data.redirectorId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

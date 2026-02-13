@@ -26,7 +26,7 @@ export class TargetService extends BaseService {
     super()
   }
 
-  async create(data: CreateTargetData): Promise<void> {
+  async create(data: CreateTargetData): Promise<true> {
     try {
       await this.targetRepository.create(
         data.campaignId,
@@ -51,6 +51,8 @@ export class TargetService extends BaseService {
         data.sitemapXml,
         data.lockSecret
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
@@ -70,7 +72,7 @@ export class TargetService extends BaseService {
     return model
   }
 
-  async update(data: UpdateTargetData): Promise<void> {
+  async update(data: UpdateTargetData): Promise<true> {
     try {
       await this.targetRepository.update(
         data.campaignId,
@@ -87,6 +89,8 @@ export class TargetService extends BaseService {
         data.sitemapXml,
         data.lockSecret
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -94,9 +98,11 @@ export class TargetService extends BaseService {
     }
   }
 
-  async enable(data: SwitchTargetData): Promise<void> {
+  async enable(data: SwitchTargetData): Promise<true> {
     try {
       await this.targetRepository.enable(data.campaignId, data.targetId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -104,9 +110,11 @@ export class TargetService extends BaseService {
     }
   }
 
-  async disable(data: SwitchTargetData): Promise<void> {
+  async disable(data: SwitchTargetData): Promise<true> {
     try {
       await this.targetRepository.disable(data.campaignId, data.targetId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -114,7 +122,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async appendLabel(data: ActionTargetLabelData): Promise<void> {
+  async appendLabel(data: ActionTargetLabelData): Promise<true> {
     try {
       await this.targetRepository.appendLabel(
         data.campaignId,
@@ -122,6 +130,8 @@ export class TargetService extends BaseService {
         data.label,
         data.lockSecret
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -129,7 +139,7 @@ export class TargetService extends BaseService {
     }
   }
 
-  async removeLabel(data: ActionTargetLabelData): Promise<void> {
+  async removeLabel(data: ActionTargetLabelData): Promise<true> {
     try {
       await this.targetRepository.removeLabel(
         data.campaignId,
@@ -137,6 +147,8 @@ export class TargetService extends BaseService {
         data.label,
         data.lockSecret
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -144,9 +156,11 @@ export class TargetService extends BaseService {
     }
   }
 
-  async delete(data: DeleteTargetData): Promise<void> {
+  async delete(data: DeleteTargetData): Promise<true> {
     try {
       await this.targetRepository.delete(data.campaignId, data.targetId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

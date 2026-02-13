@@ -160,7 +160,7 @@ export class NativeHttpServerContext implements HttpServerContext {
   }
 
   get ip(): string {
-    return this.requestHeaders.getString('X-Real-Ip') ?? ''
+    return this.requestHeaders.getString('X-Real-Ip') ?? this.req.socket.remoteAddress ?? ''
   }
 
   readonly startTime: number = Date.now()

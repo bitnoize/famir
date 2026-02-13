@@ -1,4 +1,3 @@
-import { JSONSchemaType, booleanSchema, customIdentSchema, randomIdentSchema } from '@famir/common'
 import {
   targetConnectTimeoutSchema,
   targetContentSchema,
@@ -11,7 +10,13 @@ import {
   targetStreamingTimeoutSchema,
   targetSubSchema
 } from '@famir/database'
-import { ValidatorSchemas } from '@famir/validator'
+import {
+  JSONSchemaType,
+  ValidatorSchemas,
+  booleanSchema,
+  customIdentSchema,
+  randomIdentSchema
+} from '@famir/validator'
 import {
   ActionTargetLabelData,
   CreateTargetData,

@@ -1,5 +1,4 @@
-import { JSONSchemaType, customIdentSchema } from '@famir/common'
-import { ValidatorSchemas } from '@famir/validator'
+import { JSONSchemaType, ValidatorSchemas, customIdentSchema } from '@famir/validator'
 import { SetupMirrorHeaders } from './setup-mirror.js'
 
 export const setupMirrorHeadersSchema: JSONSchemaType<SetupMirrorHeaders> = {

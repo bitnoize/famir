@@ -1,4 +1,3 @@
-import { JSONSchemaType } from '@famir/common'
 import {
   configRedisDatabaseConnectionUrlSchema,
   configRedisDatabasePrefixSchema
@@ -15,6 +14,7 @@ import {
   configPinoLoggerTransportOptionsSchema,
   configPinoLoggerTransportTargetSchema
 } from '@famir/logger'
+import { JSONSchemaType } from '@famir/validator'
 import {
   configRedisWorkflowConnectionUrlSchema,
   configRedisWorkflowPrefixSchema

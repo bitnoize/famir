@@ -12,7 +12,7 @@ export class DIContainer {
 
   private register<T>(token: Token, factory: Factory<T>, isSingleton: boolean) {
     if (this.registry.has(token)) {
-      throw new Error(`Dependency allready registered: ${token.toString()}`)
+      throw new Error(`Dependency already registered: ${token.toString()}`)
     }
 
     this.registry.set(token, { factory, isSingleton, instance: null })

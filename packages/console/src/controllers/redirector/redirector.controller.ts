@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerApiCall, ReplServerRouter } from '@famir/repl-server'
+import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
@@ -46,50 +46,35 @@ export class RedirectorController extends BaseController {
     this.logger.debug(`RedirectorController initialized`)
   }
 
-  register(): this {
-    this.router
-      .register('createRedirector', this.createRedirectorApiCall)
-      .register('readRedirector', this.readRedirectorApiCall)
-      .register('updateRedirector', this.updateRedirectorApiCall)
-      .register('deleteRedirector', this.deleteRedirectorApiCall)
-      .register('listRedirectors', this.listRedirectorsApiCall)
+  use() {
+    this.router.register('createRedirector', async (data) => {
+      this.validateData<CreateRedirectorData>('console-create-redirector-data', data)
 
-    return this
-  }
+      return await this.redirectorService.create(data)
+    })
 
-  private createRedirectorApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<CreateRedirectorData>('console-create-redirector-data', data)
+    this.router.register('readRedirector', async (data) => {
+      this.validateData<ReadRedirectorData>('console-read-redirector-data', data)
 
-    await this.redirectorService.create(data)
+      return await this.redirectorService.read(data)
+    })
 
-    return true
-  }
+    this.router.register('updateRedirector', async (data) => {
+      this.validateData<UpdateRedirectorData>('console-update-redirector-data', data)
 
-  private readRedirectorApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<ReadRedirectorData>('console-read-redirector-data', data)
+      return await this.redirectorService.update(data)
+    })
 
-    return await this.redirectorService.read(data)
-  }
+    this.router.register('deleteRedirector', async (data) => {
+      this.validateData<DeleteRedirectorData>('console-delete-redirector-data', data)
 
-  private updateRedirectorApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<UpdateRedirectorData>('console-update-redirector-data', data)
+      return await this.redirectorService.delete(data)
+    })
 
-    await this.redirectorService.update(data)
+    this.router.register('listRedirectors', async (data) => {
+      this.validateData<ListRedirectorsData>('console-list-redirectors-data', data)
 
-    return true
-  }
-
-  private deleteRedirectorApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<DeleteRedirectorData>('console-delete-redirector-data', data)
-
-    await this.redirectorService.delete(data)
-
-    return true
-  }
-
-  private listRedirectorsApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<ListRedirectorsData>('console-list-redirectors-data', data)
-
-    return await this.redirectorService.list(data)
+      return await this.redirectorService.list(data)
+    })
   }
 }

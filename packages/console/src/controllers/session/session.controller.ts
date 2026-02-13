@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerApiCall, ReplServerRouter } from '@famir/repl-server'
+import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ReadSessionData } from './session.js'
@@ -40,15 +40,11 @@ export class SessionController extends BaseController {
     this.logger.debug(`SessionController initialized`)
   }
 
-  register(): this {
-    this.router.register('readSession', this.readSessionApiCall)
+  use() {
+    this.router.register('readSession', async (data) => {
+      this.validateData<ReadSessionData>('console-read-session-data', data)
 
-    return this
-  }
-
-  private readSessionApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<ReadSessionData>('console-read-session-data', data)
-
-    return await this.sessionService.read(data)
+      return await this.sessionService.read(data)
+    })
   }
 }

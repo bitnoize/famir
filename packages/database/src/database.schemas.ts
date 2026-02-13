@@ -1,4 +1,4 @@
-import { JSONSchemaType } from '@famir/common'
+import { JSONSchemaType } from '@famir/validator'
 
 export const configRedisDatabaseConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',

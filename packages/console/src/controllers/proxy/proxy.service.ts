@@ -24,9 +24,11 @@ export class ProxyService extends BaseService {
     super()
   }
 
-  async create(data: CreateProxyData): Promise<void> {
+  async create(data: CreateProxyData): Promise<true> {
     try {
       await this.proxyRepository.create(data.campaignId, data.proxyId, data.url, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
@@ -46,9 +48,11 @@ export class ProxyService extends BaseService {
     return model
   }
 
-  async enable(data: SwitchProxyData): Promise<void> {
+  async enable(data: SwitchProxyData): Promise<true> {
     try {
       await this.proxyRepository.enable(data.campaignId, data.proxyId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -56,9 +60,11 @@ export class ProxyService extends BaseService {
     }
   }
 
-  async disable(data: SwitchProxyData): Promise<void> {
+  async disable(data: SwitchProxyData): Promise<true> {
     try {
       await this.proxyRepository.disable(data.campaignId, data.proxyId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -66,9 +72,11 @@ export class ProxyService extends BaseService {
     }
   }
 
-  async delete(data: DeleteProxyData): Promise<void> {
+  async delete(data: DeleteProxyData): Promise<true> {
     try {
       await this.proxyRepository.delete(data.campaignId, data.proxyId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

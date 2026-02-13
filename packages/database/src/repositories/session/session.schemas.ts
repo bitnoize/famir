@@ -1,5 +1,4 @@
-import { JSONSchemaType } from '@famir/common'
-import { ValidatorSchemas } from '@famir/validator'
+import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import { RawSession } from './session.functions.js'
 
 const rawSessionSchema: JSONSchemaType<RawSession> = {

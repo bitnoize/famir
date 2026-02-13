@@ -24,7 +24,7 @@ export class LureService extends BaseService {
     super()
   }
 
-  async create(data: CreateLureData): Promise<void> {
+  async create(data: CreateLureData): Promise<true> {
     try {
       await this.lureRepository.create(
         data.campaignId,
@@ -33,6 +33,8 @@ export class LureService extends BaseService {
         data.redirectorId,
         data.lockSecret
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN'])
 
@@ -52,9 +54,11 @@ export class LureService extends BaseService {
     return model
   }
 
-  async enable(data: SwitchLureData): Promise<void> {
+  async enable(data: SwitchLureData): Promise<true> {
     try {
       await this.lureRepository.enable(data.campaignId, data.lureId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -62,9 +66,11 @@ export class LureService extends BaseService {
     }
   }
 
-  async disable(data: SwitchLureData): Promise<void> {
+  async disable(data: SwitchLureData): Promise<true> {
     try {
       await this.lureRepository.disable(data.campaignId, data.lureId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -72,7 +78,7 @@ export class LureService extends BaseService {
     }
   }
 
-  async delete(data: DeleteLureData): Promise<void> {
+  async delete(data: DeleteLureData): Promise<true> {
     try {
       await this.lureRepository.delete(
         data.campaignId,
@@ -81,6 +87,8 @@ export class LureService extends BaseService {
         data.redirectorId,
         data.lockSecret
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

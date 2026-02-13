@@ -1,6 +1,10 @@
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
 import { redirectorPageSchema } from '@famir/database'
-import { ValidatorSchemas } from '@famir/validator'
+import {
+  JSONSchemaType,
+  ValidatorSchemas,
+  customIdentSchema,
+  randomIdentSchema
+} from '@famir/validator'
 import {
   CreateRedirectorData,
   DeleteRedirectorData,

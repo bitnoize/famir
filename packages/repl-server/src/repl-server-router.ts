@@ -18,25 +18,21 @@ export class ReplServerRouter {
     this.logger.debug(`ReplServerRouter initialized`)
   }
 
-  register(name: string, apiCall: ReplServerApiCall): this {
+  register(name: string, apiCall: ReplServerApiCall) {
     if (this.registry.has(name)) {
-      this.logger.error(`ReplServerRouter apiCall allready registered: ${name}`)
-    } else {
-      this.logger.info(`ReplServerRouter register apiCall: ${name}`)
-
-      this.registry.set(name, apiCall)
+      throw new Error(`ApiCall already registered: ${name}`)
     }
 
-    return this
+    this.registry.set(name, apiCall)
+
+    this.logger.info(`ReplServerRouter register apiCall: ${name}`)
   }
 
   resolve(): ReplServerApiCalls {
     return Array.from(this.registry.entries())
   }
 
-  reset(): this {
+  reset() {
     this.registry.clear()
-
-    return this
   }
 }

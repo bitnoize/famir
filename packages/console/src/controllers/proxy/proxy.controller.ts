@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerApiCall, ReplServerRouter } from '@famir/repl-server'
+import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
@@ -46,59 +46,41 @@ export class ProxyController extends BaseController {
     this.logger.debug(`MessageController initialized`)
   }
 
-  register(): this {
-    this.router
-      .register('createProxy', this.createProxyApiCall)
-      .register('readProxy', this.readProxyApiCall)
-      .register('enableProxy', this.enableProxyApiCall)
-      .register('disableProxy', this.disableProxyApiCall)
-      .register('deleteProxy', this.deleteProxyApiCall)
-      .register('listProxies', this.listProxiesApiCall)
+  use() {
+    this.router.register('createProxy', async (data) => {
+      this.validateData<CreateProxyData>('console-create-proxy-data', data)
 
-    return this
-  }
+      return await this.proxyService.create(data)
+    })
 
-  private createProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<CreateProxyData>('console-create-proxy-data', data)
+    this.router.register('readProxy', async (data) => {
+      this.validateData<ReadProxyData>('console-read-proxy-data', data)
 
-    await this.proxyService.create(data)
+      return await this.proxyService.read(data)
+    })
 
-    return true
-  }
+    this.router.register('enableProxy', async (data) => {
+      this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
 
-  private readProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<ReadProxyData>('console-read-proxy-data', data)
+      return await this.proxyService.enable(data)
+    })
 
-    return await this.proxyService.read(data)
-  }
+    this.router.register('disableProxy', async (data) => {
+      this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
 
-  private enableProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
+      return await this.proxyService.disable(data)
+    })
 
-    await this.proxyService.enable(data)
+    this.router.register('deleteProxy', async (data) => {
+      this.validateData<DeleteProxyData>('console-delete-proxy-data', data)
 
-    return true
-  }
+      return await this.proxyService.delete(data)
+    })
 
-  private disableProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
+    this.router.register('listProxies', async (data) => {
+      this.validateData<ListProxiesData>('console-list-proxies-data', data)
 
-    await this.proxyService.disable(data)
-
-    return true
-  }
-
-  private deleteProxyApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<DeleteProxyData>('console-delete-proxy-data', data)
-
-    await this.proxyService.delete(data)
-
-    return true
-  }
-
-  private listProxiesApiCall: ReplServerApiCall = async (data) => {
-    this.validateData<ListProxiesData>('console-list-proxies-data', data)
-
-    return await this.proxyService.list(data)
+      return await this.proxyService.list(data)
+    })
   }
 }

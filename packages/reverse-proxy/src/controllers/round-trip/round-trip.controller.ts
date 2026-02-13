@@ -179,27 +179,27 @@ export class RoundTripController extends BaseController {
     this.router.register('rewrite-html-url', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
       const targets = this.getState(ctx, 'targets')
-      const forward = this.getState(ctx, 'forward')
+      const message = this.getState(ctx, 'message')
 
-      forward.addRequestBodyInterceptor('rewrite-html-url', (message) => {
+      message.addRequestBodyInterceptor('rewrite-html-url', () => {
         const contentType = message.responseHeaders.getContentType()
 
-        if (forward.rewriteHtmlUrl.isEnabled && contentType) {
-          if (forward.rewriteHtmlUrls.types.includes(contentType.type)) {
+        if (message.rewriteHtmlUrl.isEnabled && contentType) {
+          if (message.rewriteHtmlUrls.types.includes(contentType.type)) {
             const charset = contentType.parameters['charset']
-            const srcText = message.requestBody.getText(charset)
-            const cheerio = cheerioLoad(srcText)
+            const fromText = message.requestBody.getText(charset)
+            const cheerio = cheerioLoad(fromText)
 
             rewriteHtmlUrls(
               cheerio,
               true,
               targets,
-              forward.rewriteHtmlUrls.schemes,
-              forward.rewriteHtmlUrls.tags
+              message.rewriteHtmlUrls.schemes,
+              message.rewriteHtmlUrls.tags
             )
 
-            const dstText = cheerio.html()
-            message.requestBody.setText(dstText)
+            const toText = cheerio.html()
+            message.requestBody.setText(toText)
           }
         }
       })

@@ -30,7 +30,7 @@ export class CampaignService extends BaseService {
     super()
   }
 
-  async create(data: CreateCampaignData): Promise<void> {
+  async create(data: CreateCampaignData): Promise<true> {
     try {
       await this.campaignRepository.create(
         data.campaignId,
@@ -45,6 +45,8 @@ export class CampaignService extends BaseService {
         data.newSessionExpire,
         data.messageExpire
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['CONFLICT'])
 
@@ -74,9 +76,11 @@ export class CampaignService extends BaseService {
     }
   }
 
-  async unlock(data: UnlockCampaignData): Promise<void> {
+  async unlock(data: UnlockCampaignData): Promise<true> {
     try {
       await this.campaignRepository.unlock(data.campaignId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -84,7 +88,7 @@ export class CampaignService extends BaseService {
     }
   }
 
-  async update(data: UpdateCampaignData): Promise<void> {
+  async update(data: UpdateCampaignData): Promise<true> {
     try {
       await this.campaignRepository.update(
         data.campaignId,
@@ -94,6 +98,8 @@ export class CampaignService extends BaseService {
         data.messageExpire,
         data.lockSecret
       )
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 
@@ -101,9 +107,11 @@ export class CampaignService extends BaseService {
     }
   }
 
-  async delete(data: DeleteCampaignData): Promise<void> {
+  async delete(data: DeleteCampaignData): Promise<true> {
     try {
       await this.campaignRepository.delete(data.campaignId, data.lockSecret)
+
+      return true
     } catch (error) {
       this.simpleDatabaseException(error, ['NOT_FOUND', 'FORBIDDEN'])
 

@@ -12,7 +12,7 @@ export type HttpConnection = Record<string, number | string | null | undefined>
 export type HttpPayload = Record<string, unknown>
 export type HttpError = readonly [object, ...string[]]
 
-export type HttpMessageInterceptor = () => void
+export type HttpMessageInterceptor = (message: HttpMessage) => void
 
 export class HttpMessage {
   readonly id = randomIdent()
@@ -92,7 +92,7 @@ export class HttpMessage {
 
     for (const [name, interceptor] of this.requestHeadInterceptors) {
       try {
-        interceptor()
+        interceptor(this)
       } catch (error) {
         this.addError(error, 'request-head-interceptor', name)
       }
@@ -104,7 +104,7 @@ export class HttpMessage {
     if (withBody && this.requestBody.size > 0) {
       for (const [name, interceptor] of this.requestBodyInterceptors) {
         try {
-          interceptor()
+          interceptor(this)
         } catch (error) {
           this.addError(error, 'request-body-interceptor', name)
         }
@@ -140,7 +140,7 @@ export class HttpMessage {
 
     for (const [name, interceptor] of this.responseHeadInterceptors) {
       try {
-        interceptor()
+        interceptor(this)
       } catch (error) {
         this.addError(error, 'response-head-interceptor', name)
       }
@@ -152,7 +152,7 @@ export class HttpMessage {
     if (withBody && this.responseBody.size > 0) {
       for (const [name, interceptor] of this.responseBodyInterceptors) {
         try {
-          interceptor()
+          interceptor(this)
         } catch (error) {
           this.addError(error, 'response-body-interceptor', name)
         }

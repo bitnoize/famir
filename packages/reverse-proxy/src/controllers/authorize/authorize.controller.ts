@@ -363,19 +363,17 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel,
     sessionCookie: string
   ) {
-    const setCookies = ctx.responseHeaders.getSetCookies()
+    const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
 
-    if (setCookies) {
-      setCookies[campaign.sessionCookieName] = {
-        value: sessionCookie,
-        domain: campaign.mirrorDomain,
-        path: '/',
-        httpOnly: true,
-        maxAge: Math.round(campaign.sessionExpire / 1000)
-      }
-
-      ctx.responseHeaders.setSetCookies(setCookies)
+    setCookies[campaign.sessionCookieName] = {
+      value: sessionCookie,
+      domain: campaign.mirrorDomain,
+      path: '/',
+      httpOnly: true,
+      maxAge: Math.round(campaign.sessionExpire / 1000)
     }
+
+    ctx.responseHeaders.setSetCookies(setCookies)
   }
 
   private removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {

@@ -23,7 +23,6 @@ const nodeEnv = process.env['NODE_ENV'] || 'development'
 export const isProduction = nodeEnv === 'production'
 export const isDevelopment = nodeEnv === 'development'
 
-export { JSONSchemaType } from 'ajv'
 export { serializeError } from 'serialize-error'
 
 // https://oida.dev/typescript-array-includes/

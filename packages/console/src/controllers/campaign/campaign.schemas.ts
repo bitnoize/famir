@@ -1,4 +1,3 @@
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
 import {
   campaignDescriptionSchema,
   campaignLandingRedirectorParamSchema,
@@ -11,7 +10,12 @@ import {
   campaignSessionCookieNameSchema,
   campaignSessionExpireSchema
 } from '@famir/database'
-import { ValidatorSchemas } from '@famir/validator'
+import {
+  JSONSchemaType,
+  ValidatorSchemas,
+  customIdentSchema,
+  randomIdentSchema
+} from '@famir/validator'
 import {
   CreateCampaignData,
   DeleteCampaignData,
