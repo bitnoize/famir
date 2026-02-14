@@ -162,6 +162,8 @@ export class CurlHttpClient implements HttpClient {
 
       curl.on('end', (status: number) => {
         try {
+          const connection = this.parseConnection(curl)
+
           curl.close()
 
           if (cancelCode != null) {
@@ -177,7 +179,7 @@ export class CurlHttpClient implements HttpClient {
               status: this.knownCancelCodes[cancelCode] ?? 500,
               headers: {},
               body: Buffer.alloc(0),
-              connection: {}
+              connection
             })
 
             return
@@ -188,7 +190,7 @@ export class CurlHttpClient implements HttpClient {
             status,
             headers: this.parseHeaders(responseHeaders),
             body: this.parseBody(responseBody),
-            connection: {}
+            connection
           }
 
           response.headers['content-length'] = response.body.length.toString()
@@ -257,18 +259,6 @@ export class CurlHttpClient implements HttpClient {
     35: 502 //SSL_CONNECT_ERROR
   }
 
-  protected parseConnection(curl: Curl): HttpConnection {
-    const totalTime = curl.getInfo('TOTAL_TIME_T')
-    const connectTime = curl.getInfo('CONNECT_TIME_T')
-    const httpVersion = curl.getInfo('HTTP_VERSION')
-
-    return {
-      client_total_time: typeof totalTime === 'number' ? totalTime : null,
-      client_connect_time: typeof connectTime === 'number' ? connectTime : null,
-      client_http_version: typeof httpVersion === 'number' ? httpVersion : null
-    }
-  }
-
   protected parseHeaders(curlHeaders: Buffer[]): HttpHeaders {
     const headers: HttpHeaders = {}
 
@@ -323,6 +313,26 @@ export class CurlHttpClient implements HttpClient {
 
   protected parseBody(curlBody: Buffer[]): HttpBody {
     return Buffer.concat(curlBody)
+  }
+
+  protected parseConnection(curl: Curl): HttpConnection {
+    try {
+      const totalTime = curl.getInfo('TOTAL_TIME_T')
+      const connectTime = curl.getInfo('CONNECT_TIME_T')
+      const httpVersion = curl.getInfo('HTTP_VERSION')
+
+      return {
+        client_total_time: typeof totalTime === 'number' ? totalTime : null,
+        client_connect_time: typeof connectTime === 'number' ? connectTime : null,
+        client_http_version: typeof httpVersion === 'number' ? httpVersion : null
+      }
+    } catch {
+      return {
+        client_total_time: null,
+        client_connect_time: null,
+        client_http_version: null
+      }
+    }
   }
 
   private buildOptions(config: CurlHttpClientConfig): CurlHttpClientOptions {

@@ -1,16 +1,16 @@
-type Token = string | symbol
-type Factory<T = unknown> = (container: DIContainer) => T
+export type DIToken = string | symbol
+export type DIFactory<T = unknown> = (container: DIContainer) => T
 
-interface Registration<T = unknown> {
-  factory: Factory<T>
+interface DIRegistration<T = unknown> {
+  factory: DIFactory<T>
   isSingleton: boolean
   instance: T | null
 }
 
 export class DIContainer {
-  private readonly registry = new Map<Token, Registration>()
+  protected readonly registry = new Map<DIToken, DIRegistration>()
 
-  private register<T>(token: Token, factory: Factory<T>, isSingleton: boolean) {
+  protected register<T>(token: DIToken, factory: DIFactory<T>, isSingleton: boolean) {
     if (this.registry.has(token)) {
       throw new Error(`Dependency already registered: ${token.toString()}`)
     }
@@ -18,16 +18,16 @@ export class DIContainer {
     this.registry.set(token, { factory, isSingleton, instance: null })
   }
 
-  registerTransient<T>(token: Token, factory: Factory<T>) {
+  registerTransient<T>(token: DIToken, factory: DIFactory<T>) {
     this.register(token, factory, false)
   }
 
-  registerSingleton<T>(token: Token, factory: Factory<T>) {
+  registerSingleton<T>(token: DIToken, factory: DIFactory<T>) {
     this.register(token, factory, true)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  resolve<T>(token: Token): T {
+  resolve<T>(token: DIToken): T {
     const registration = this.registry.get(token)
 
     if (!registration) {
@@ -47,3 +47,5 @@ export class DIContainer {
     this.registry.clear()
   }
 }
+
+export type DIComposer = (container: DIContainer) => void
