@@ -17,7 +17,7 @@ export type HttpServerErrorOptions = CommonErrorOptions & {
   code: HttpServerErrorCode
 }
 
-const codeToStatusMap = {
+const codeToStatusMap: Record<HttpServerErrorCode, number> = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,

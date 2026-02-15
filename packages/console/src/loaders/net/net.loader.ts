@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIComposer, DIContainer } from '@famir/common'
 import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
@@ -19,7 +19,7 @@ import { App } from '../../console.app.js'
 import { AppNetConfig } from './net.js'
 import { configAppNetSchema } from './net.schemas.js'
 
-export async function bootstrapNet(composer: (container: DIContainer) => void): Promise<void> {
+export async function bootstrapNet(composer: DIComposer): Promise<void> {
   const container = new DIContainer()
 
   AjvValidator.inject(container)

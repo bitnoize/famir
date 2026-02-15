@@ -1,5 +1,6 @@
 import {
   HttpBodyWrap,
+  HttpConnection,
   HttpHeadersWrap,
   HttpMethodWrap,
   HttpStatusWrap,
@@ -18,6 +19,7 @@ export type HttpServerContextState = Record<string, unknown>
 export interface HttpServerContext {
   readonly state: HttpServerContextState
   readonly middlewares: string[]
+  readonly errorPage: string
   readonly method: HttpMethodWrap
   readonly url: HttpUrlWrap
   readonly requestHeaders: HttpHeadersWrap
@@ -29,6 +31,7 @@ export interface HttpServerContext {
   sendResponse(): Promise<void>
   readonly isBot: boolean
   readonly ip: string
+  readonly connection: HttpConnection
   readonly startTime: number
   readonly finishTime: number
   readonly isComplete: boolean
@@ -53,3 +56,19 @@ export interface NativeHttpServerOptions {
   port: number
   errorPage: string
 }
+
+export const DEFAULT_ERROR_PAGE = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Error</title>
+  </head>
+  <body>
+    <div>
+      <h1><%= data.status %></h1>
+      <p><%= data.message %></p>
+    </div>
+  </body>
+</html>`

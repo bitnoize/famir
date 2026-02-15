@@ -38,7 +38,7 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   usePreflightCors() {
-    this.router.register('preflight-cors', async (ctx, next) => {
+    this.router.register('preflightCors', async (ctx, next) => {
       if (ctx.method.is('OPTIONS')) {
         await this.renderPreflightCors(ctx)
       } else {
@@ -48,7 +48,7 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   useFaviconIco() {
-    this.router.register('favicon-ico', async (ctx, next) => {
+    this.router.register('faviconIco', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
       if (ctx.url.isPathEquals('/favicon.ico')) {
@@ -60,7 +60,7 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   useRobotsTxt() {
-    this.router.register('robots-txt', async (ctx, next) => {
+    this.router.register('robotsTxt', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
       if (ctx.url.isPathEquals('/robots.txt')) {
@@ -72,7 +72,7 @@ export class WellKnownUrlsController extends BaseController {
   }
 
   useSitemapXml() {
-    this.router.register('sitemap-xml', async (ctx, next) => {
+    this.router.register('sitemapXml', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
       if (ctx.url.isPathEquals('/sitemap.xml')) {

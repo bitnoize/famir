@@ -60,9 +60,13 @@ export class NetReplServer implements ReplServer {
       socket.setTimeout(this.options.socketTimeout)
 
       this.handleConnection(socket).catch((error: unknown) => {
-        this.logger.error(`ReplServer connection unhandled error`, {
+        this.logger.error(`ReplServer critical error`, {
           error: serializeError(error)
         })
+
+        if (!socket.destroyed) {
+          socket.destroy()
+        }
       })
     })
 
@@ -88,16 +92,12 @@ export class NetReplServer implements ReplServer {
     try {
       this.replServerStart(socket)
     } catch (error) {
-      this.handleConnectionError(error, socket)
+      this.logger.error(`ReplServer connection failed`, {
+        error: serializeError(error)
+      })
+
+      socket.end()
     }
-  }
-
-  protected handleConnectionError(error: unknown, socket: net.Socket) {
-    socket.end()
-
-    this.logger.error(`ReplServer connection failed`, {
-      error: serializeError(error)
-    })
   }
 
   protected replServerStart(socket: net.Socket): repl.REPLServer {
@@ -149,7 +149,7 @@ export class NetReplServer implements ReplServer {
 
             throw error
           } else {
-            throw new ReplServerError(`Server unknown error`, {
+            throw new ReplServerError(`Server internal error`, {
               cause: error,
               context: {
                 apiCall: name,

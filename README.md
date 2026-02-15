@@ -14,7 +14,6 @@ Packages
 
 | Package | Description |
 | --- | --- |
-| [domain](packages/domain) | Domain layer |
 | [common](packages/common) | Common utilities |
 | [validator](packages/validator) | Validate data with JSON-Schema |
 | [config](packages/config) | Config infrastructure service |

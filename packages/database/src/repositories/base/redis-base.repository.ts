@@ -140,7 +140,7 @@ export abstract class RedisBaseRepository {
 
       throw error
     } else {
-      throw new DatabaseError(`Service unknown error`, {
+      throw new DatabaseError(`Service internal error`, {
         cause: error,
         context: {
           repository: this.repositoryName,

@@ -8,7 +8,7 @@ export const configNetReplServerAddressSchema: JSONSchemaType<string> = {
 
 export const configNetReplServerPortSchema: JSONSchemaType<number> = {
   type: 'number',
-  minimum: 0,
+  minimum: 1,
   maximum: 65535
 } as const
 

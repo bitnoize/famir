@@ -1,4 +1,5 @@
 import { HttpBody, HttpConnection, HttpHeaders } from '@famir/http-tools'
+import { HttpClientError } from './http-client.error.js'
 
 export const HTTP_CLIENT = Symbol('HttpClient')
 
@@ -22,7 +23,7 @@ export type HttpClientSimpleRequest = HttpClientRequest & { body: HttpBody }
 export type HttpClientStreamRequest = HttpClientRequest & { body: ReadableStream }
 
 export interface HttpClientResponse {
-  error: Error | null
+  error: HttpClientError | null
   status: number
   headers: HttpHeaders
   body: HttpBody | WritableStream

@@ -1,5 +1,6 @@
 import {
   HttpBodyWrap,
+  HttpConnection,
   HttpHeadersWrap,
   HttpMethodWrap,
   HttpStatusWrap,
@@ -16,7 +17,8 @@ export class NativeHttpServerContext implements HttpServerContext {
 
   constructor(
     protected readonly req: http.IncomingMessage,
-    protected readonly res: http.ServerResponse
+    protected readonly res: http.ServerResponse,
+    public readonly errorPage: string
   ) {
     try {
       this.method = HttpMethodWrap.fromReq(req)
@@ -161,6 +163,10 @@ export class NativeHttpServerContext implements HttpServerContext {
 
   get ip(): string {
     return this.requestHeaders.getString('X-Real-Ip') ?? this.req.socket.remoteAddress ?? ''
+  }
+
+  get connection(): HttpConnection {
+    return {}
   }
 
   readonly startTime: number = Date.now()

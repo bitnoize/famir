@@ -1,9 +1,9 @@
-import { DIContainer, serializeError } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { HttpBody, HttpConnection, HttpHeaders } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
-import { HttpClientError } from './http-client.error.js'
+import { HttpClientError, HttpClientErrorCode } from './http-client.error.js'
 import {
   CurlHttpClientConfig,
   CurlHttpClientOptions,
@@ -42,7 +42,7 @@ export class CurlHttpClient implements HttpClient {
     return new Promise<HttpClientSimpleResponse>((resolve, reject) => {
       const curl = new Curl()
 
-      let cancelCode: string | null = null
+      let cancelError: HttpClientError | null = null
 
       curl.enable(CurlFeature.NoStorage)
 
@@ -70,7 +70,7 @@ export class CurlHttpClient implements HttpClient {
         let requestBodyOffset = 0
         curl.setOpt(Curl.option.READFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
           try {
-            if (cancelCode != null) {
+            if (cancelError != null) {
               return 0
             }
 
@@ -86,11 +86,13 @@ export class CurlHttpClient implements HttpClient {
 
             return chunkSize
           } catch (error) {
-            this.logger.error(`HttpClient Curl READFUNCTION error`, {
-              error: serializeError(error)
+            cancelError = new HttpClientError(`Client internal error`, {
+              cause: error,
+              context: {
+                curlFun: 'READFUNCTION'
+              },
+              code: 'INTERNAL_ERROR'
             })
-
-            cancelCode = 'READFUNCTION_ERROR'
 
             return 0
           }
@@ -103,7 +105,7 @@ export class CurlHttpClient implements HttpClient {
 
       curl.setOpt(Curl.option.HEADERFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
         try {
-          if (cancelCode != null) {
+          if (cancelError != null) {
             return 0
           }
 
@@ -114,24 +116,24 @@ export class CurlHttpClient implements HttpClient {
 
           return chunkSize
         } catch (error) {
-          this.logger.error(`HttpClient Curl HEADERFUNCTION error`, {
-            error: serializeError(error)
+          cancelError = new HttpClientError(`Client internal error`, {
+            cause: error,
+            context: {
+              curlFun: 'HEADERFUNCTION'
+            },
+            code: 'INTERNAL_ERROR'
           })
-
-          cancelCode = 'HEADERFUNCTION_ERROR'
 
           return 0
         }
       })
-
-      //curl.setOpt(Curl.option.NOBODY, false)
 
       const responseBody: Buffer[] = []
       let responseBodySize = 0
 
       curl.setOpt(Curl.option.WRITEFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
         try {
-          if (cancelCode != null) {
+          if (cancelError != null) {
             return 0
           }
 
@@ -139,22 +141,25 @@ export class CurlHttpClient implements HttpClient {
           const chunk = buf.subarray(0, chunkSize)
 
           if (responseBodySize + chunkSize > request.bodyLimit) {
-            cancelCode = 'CONTENT_TOO_LARGE'
+            cancelError = new HttpClientError(`Content too large`, {
+              code: 'BAD_GATEWAY'
+            })
 
             return 0
           }
 
           responseBody.push(chunk)
-
           responseBodySize += chunkSize
 
           return chunkSize
         } catch (error) {
-          this.logger.error(`HttpClient Curl WRITEFUNCTION error`, {
-            error: serializeError(error)
+          cancelError = new HttpClientError(`Client internal error`, {
+            cause: error,
+            context: {
+              curlFun: 'WRITEFUNCTION'
+            },
+            code: 'INTERNAL_ERROR'
           })
-
-          cancelCode = 'WRITEFUNCTION_ERROR'
 
           return 0
         }
@@ -166,17 +171,10 @@ export class CurlHttpClient implements HttpClient {
 
           curl.close()
 
-          if (cancelCode != null) {
-            const error = new HttpClientError(`Request canceled`, {
-              context: {
-                cancelCode
-              },
-              code: 'INTERNAL_ERROR'
-            })
-
+          if (cancelError != null) {
             resolve({
-              error,
-              status: this.knownCancelCodes[cancelCode] ?? 500,
+              error: cancelError,
+              status: 0,
               headers: {},
               body: Buffer.alloc(0),
               connection
@@ -199,11 +197,8 @@ export class CurlHttpClient implements HttpClient {
           resolve(response)
         } catch (error) {
           reject(
-            new HttpClientError(`Parse response error`, {
+            new HttpClientError(`Client internal error`, {
               cause: error,
-              context: {
-                status
-              },
               code: 'INTERNAL_ERROR'
             })
           )
@@ -216,16 +211,29 @@ export class CurlHttpClient implements HttpClient {
 
           curl.close()
 
+          const [code, message] = this.knownCurlCodes[curlCode] ?? [
+            'INTERNAL_ERROR',
+            `Client internal error`
+          ]
+
+          const clientError = new HttpClientError(message, {
+            cause: error,
+            context: {
+              curlCode
+            },
+            code
+          })
+
           resolve({
-            error,
-            status: this.knownCurlCodes[curlCode] ?? 500,
+            error: clientError,
+            status: 0,
             headers: {},
             body: Buffer.alloc(0),
             connection
           })
         } catch (criticalError) {
           reject(
-            new HttpClientError(`Request critical error`, {
+            new HttpClientError(`Client critical error`, {
               cause: criticalError,
               context: {
                 error,
@@ -247,16 +255,12 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  protected knownCancelCodes: Record<string, number> = {
-    CONTENT_TOO_LARGE: 502
-  }
-
-  protected knownCurlCodes: Record<number, number> = {
-    5: 502, // COULDNT_RESOLVE_PROXY
-    6: 502, // COULDNT_RESOLVE_HOST
-    7: 502, // COULDNT_CONNECT
-    28: 504, // OPERATION_TIMEDOUT
-    35: 502 //SSL_CONNECT_ERROR
+  protected knownCurlCodes: Record<number, [HttpClientErrorCode, string]> = {
+    5: ['BAD_GATEWAY', `Bad gateway`], // COULDNT_RESOLVE_PROXY
+    6: ['BAD_GATEWAY', `Bad gateway`], // COULDNT_RESOLVE_HOST
+    7: ['BAD_GATEWAY', `Bad gateway`], // COULDNT_CONNECT
+    28: ['GATEWAY_TIMEOUT', `Gateway timeout`], // OPERATION_TIMEDOUT
+    35: ['BAD_GATEWAY', `Bad gateway`] //SSL_CONNECT_ERROR
   }
 
   protected parseHeaders(curlHeaders: Buffer[]): HttpHeaders {

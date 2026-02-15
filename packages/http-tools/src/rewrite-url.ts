@@ -6,7 +6,6 @@ export interface RewriteUrlTarget {
 }
 
 export type RewriteUrlScheme = [string, boolean] // separator, withProto
-//export type RewriteUrlHtmlTag = [string, string?] // tag, attrName
 
 export function rewriteUrl(
   text: string,
@@ -41,33 +40,3 @@ export function rewriteUrl(
 
   return text
 }
-
-/*
-export function rewriteHtmlUrls(
-  $: CheerioAPI,
-  rev: boolean,
-  targets: RewriteUrlsTarget[],
-  schemes: RewriteUrlsScheme[],
-  htmlTags: RewriteUrlsHtmlTag[]
-) {
-  htmlTags.forEach(([tag, attrName]) => {
-    $(tag).each((index, element) => {
-      if (attrName) {
-        const text = $(element).attr(attrName)
-        if (text) {
-          const rewritedText = rewriteTextUrls(text, rev, targets, schemes)
-
-          $(element).attr(attrName, rewritedText)
-        }
-      } else {
-        const text = $(element).text()
-        if (text) {
-          const rewritedText = rewriteTextUrls(text, rev, targets, schemes)
-
-          $(element).text(rewritedText)
-        }
-      }
-    })
-  })
-}
-*/

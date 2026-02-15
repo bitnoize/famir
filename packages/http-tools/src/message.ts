@@ -1,16 +1,17 @@
 import { randomIdent, serializeError } from '@famir/common'
 import { HttpBodyWrap } from './body.js'
+import { CheerioAPI } from './cheerio.js'
+import { HttpContentType, HttpContentTypeName, HttpContentTypes } from './content-type.js'
 import { HttpHeadersWrap } from './headers.js'
 import { HttpMethodWrap } from './method.js'
+import { HttpConnection, HttpError, HttpKind, HttpPayload } from './misc.js'
+import {
+  RewriteUrlScheme,
+  RewriteUrlTarget,
+  rewriteUrl,
+} from './rewrite-url.js'
 import { HttpStatusWrap } from './status.js'
 import { HttpUrlWrap } from './url.js'
-
-export const HTTP_KINDS = ['simple', 'stream-request', 'stream-response'] as const
-export type HttpKind = (typeof HTTP_KINDS)[number]
-
-export type HttpConnection = Record<string, number | string | null | undefined>
-export type HttpPayload = Record<string, unknown>
-export type HttpError = readonly [object, ...string[]]
 
 export type HttpMessageInterceptor = (message: HttpMessage) => void
 
@@ -67,6 +68,55 @@ export class HttpMessage {
   }
 
   score: number = 0
+
+  protected readonly contentTypes: HttpContentTypes = {
+    text: [],
+    html: [],
+    css: [],
+    javascript: [],
+    json: [],
+    xml: [],
+    urlEncoded: []
+  }
+
+  addContentTypes(name: HttpContentTypeName, ...types: string[]): this {
+    this.sureNotFrozen('addContentTypes')
+
+    this.contentTypes[name].push(...types)
+
+    return this
+  }
+
+  isContentType(contentType: HttpContentType, name: HttpContentTypeName): boolean {
+    return this.contentTypes[name].includes(contentType.type)
+  }
+
+  protected readonly rewriteUrlTypes: string[] = []
+
+  addRewriteUrlTypes(...types: string[]): this {
+    this.sureNotFrozen('addRewriteUrlTypes')
+
+    this.rewriteUrlTypes.push(...types)
+
+    return this
+  }
+
+  isRewriteUrlType(contentType: HttpContentType): boolean {
+    return this.rewriteUrlTypes.includes(contentType.type)
+  }
+
+  protected readonly rewriteUrlSchemes: RewriteUrlScheme[] = [
+    ['://', true],
+    ['//', false]
+  ]
+
+  addRewriteUrlSchemes(...schemes: RewriteUrlScheme[]): this {
+    this.sureNotFrozen('addRewriteUrlSchemes')
+
+    this.rewriteUrlSchemes.push(...schemes)
+
+    return this
+  }
 
   private requestHeadInterceptors: Array<[string, HttpMessageInterceptor]> = []
   private requestBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
@@ -162,6 +212,10 @@ export class HttpMessage {
     this.responseBody.freeze()
 
     return this
+  }
+
+  rewriteUrl(text: string, rev: boolean, targets: RewriteUrlTarget[]): string {
+    return rewriteUrl(text, rev, targets, this.rewriteUrlSchemes)
   }
 
   protected sureNotFrozen(name: string) {

@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIComposer, DIContainer } from '@famir/common'
 import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
@@ -20,7 +20,7 @@ import { App } from '../../reverse-proxy.app.js'
 import { AppDefaultConfig } from './default.js'
 import { configAppDefaultSchema } from './default.schemas.js'
 
-export async function bootstrapDefault(composer: (container: DIContainer) => void): Promise<void> {
+export async function bootstrapDefault(composer: DIComposer): Promise<void> {
   const container = new DIContainer()
 
   AjvValidator.inject(container)

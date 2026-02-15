@@ -46,7 +46,7 @@ export class SetupMirrorController extends BaseController {
   }
 
   use() {
-    this.router.register('setup-mirror', async (ctx, next) => {
+    this.router.register('setupMirror', async (ctx, next) => {
       const [campaignId, targetId] = this.parseSetupMirrorHeaders(ctx)
 
       const [campaign, target] = await this.setupMirrorService.readCampaignTarget({

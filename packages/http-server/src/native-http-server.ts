@@ -41,10 +41,21 @@ export class NativeHttpServer implements HttpServer {
 
     this.server = http.createServer((req, res) => {
       this.handleRequest(req, res).catch((error: unknown) => {
-        this.logger.error(`HttpServer request unhandled error`, {
-          error: serializeError(error),
-          request: this.dumpRequest(req)
+        this.logger.error(`HttpServer critical error`, {
+          error: serializeError(error)
         })
+
+        if (!res.writableEnded) {
+          if (!res.headersSent) {
+            res.writeHead(500, {
+              'content-type': 'text/plain'
+            })
+
+            res.end(`Server critical error`)
+          } else {
+            res.end()
+          }
+        }
       })
     })
 
@@ -68,66 +79,40 @@ export class NativeHttpServer implements HttpServer {
     res: http.ServerResponse
   ): Promise<void> {
     try {
-      const ctx = new NativeHttpServerContext(req, res)
+      const ctx = new NativeHttpServerContext(req, res, this.options.errorPage)
 
       await this.chainMiddlewares(ctx)
 
-      if (!ctx.isComplete) {
+      if (!res.writableEnded) {
         throw new HttpServerError(`Incomplete response`, {
           code: 'INTERNAL_ERROR'
         })
       }
     } catch (error) {
-      this.handleRequestError(error, req, res)
-    }
-  }
-
-  protected handleRequestError(
-    error: unknown,
-    req: http.IncomingMessage,
-    res: http.ServerResponse
-  ) {
-    let status = 500,
-      message = `Internal server error`
-
-    try {
       this.logger.error(`HttpServer request error`, {
-        error: serializeError(error),
-        request: this.dumpRequest(req)
+        error: serializeError(error)
       })
 
-      if (error instanceof HttpServerError) {
-        status = error.status
-        message = error.message
-      }
+      if (!res.writableEnded) {
+        if (!res.headersSent) {
+          const [status, message] =
+            error instanceof HttpServerError
+              ? [error.status, error.message]
+              : [500, 'Server internal error']
 
-      if (!res.headersSent) {
-        const errorPage = this.templater.render(this.options.errorPage, {
-          status,
-          message
-        })
+          const errorPage = this.templater.render(this.options.errorPage, {
+            status,
+            message
+          })
 
-        res.writeHead(status, {
-          'content-type': 'text/html'
-        })
+          res.writeHead(status, {
+            'content-type': 'text/html'
+          })
 
-        res.end(errorPage)
-      } else {
-        res.end()
-      }
-    } catch (criticalError) {
-      this.logger.fatal(`HttpServer request critical error`, {
-        criticalError: serializeError(criticalError)
-      })
-
-      if (!res.headersSent) {
-        res.writeHead(status, {
-          'content-type': 'text/plain'
-        })
-
-        res.end(message)
-      } else {
-        res.end()
+          res.end(errorPage)
+        } else {
+          res.end()
+        }
       }
     }
   }
@@ -163,7 +148,7 @@ export class NativeHttpServer implements HttpServer {
 
         throw error
       } else {
-        throw new HttpServerError(`Server unknown error`, {
+        throw new HttpServerError(`Server internal error`, {
           cause: error,
           context: {
             middlewares: ctx.middlewares
@@ -223,14 +208,6 @@ export class NativeHttpServer implements HttpServer {
       address: config.HTTP_SERVER_ADDRESS,
       port: config.HTTP_SERVER_PORT,
       errorPage: config.HTTP_SERVER_ERROR_PAGE
-    }
-  }
-
-  private dumpRequest(req: http.IncomingMessage): object {
-    return {
-      method: req.method,
-      url: req.url,
-      headers: req.headers
     }
   }
 }

@@ -377,19 +377,17 @@ export class AuthorizeController extends BaseController {
   }
 
   private removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
-    const setCookies = ctx.responseHeaders.getSetCookies()
+    const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
 
-    if (setCookies) {
-      setCookies[campaign.sessionCookieName] = {
-        value: '',
-        domain: campaign.mirrorDomain,
-        path: '/',
-        httpOnly: true,
-        maxAge: 0
-      }
-
-      ctx.responseHeaders.setSetCookies(setCookies)
+    setCookies[campaign.sessionCookieName] = {
+      value: '',
+      domain: campaign.mirrorDomain,
+      path: '/',
+      httpOnly: true,
+      maxAge: 0
     }
+
+    ctx.responseHeaders.setSetCookies(setCookies)
   }
 
   private checkSessionCookie(value: unknown): value is string {
@@ -470,8 +468,8 @@ export class AuthorizeController extends BaseController {
     if (ctx.method.is(['GET', 'HEAD'])) {
       ctx.status.set(200)
 
-      const page = this.templater.render(redirector.page, landingRedirectorData)
-      ctx.responseBody.setText(page)
+      const text = this.templater.render(redirector.page, landingRedirectorData)
+      ctx.responseBody.setText(text)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/html',

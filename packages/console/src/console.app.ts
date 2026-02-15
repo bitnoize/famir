@@ -40,7 +40,7 @@ export class App {
     SHUTDOWN_SIGNALS.forEach((signal) => {
       process.once(signal, () => {
         this.stop().catch((error: unknown) => {
-          this.logger.fatal(`App stop unhandled error`, {
+          this.logger.error(`App critical error`, {
             error: serializeError(error)
           })
 

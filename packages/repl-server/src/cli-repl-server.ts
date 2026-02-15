@@ -109,7 +109,7 @@ export class CliReplServer implements ReplServer {
 
             throw error
           } else {
-            throw new ReplServerError(`Server unknown error`, {
+            throw new ReplServerError(`Server internal error`, {
               cause: error,
               context: {
                 apiCall: name,

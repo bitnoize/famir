@@ -63,7 +63,7 @@ export abstract class BullBaseQueue {
 
       throw error
     } else {
-      throw new WorkflowError(`Service unknown error`, {
+      throw new WorkflowError(`Service internal error`, {
         cause: error,
         context: {
           queue: this.queueName,
