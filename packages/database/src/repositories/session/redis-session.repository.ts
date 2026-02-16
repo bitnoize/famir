@@ -47,12 +47,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
     try {
       const [statusReply, rawModel] = await Promise.all([
-        this.connection.session.create_session(
-          this.options.prefix,
-          campaignId,
-          sessionId,
-          secret
-        ),
+        this.connection.session.create_session(this.options.prefix, campaignId, sessionId, secret),
 
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
       ])

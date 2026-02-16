@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@famir/common": "*",
-    "@famir/validator": "*",
     "@famir/config": "*",
     "@famir/logger": "*",
-    "bullmq": "^5.67.2",
+    "@famir/validator": "*",
+    "bullmq": "^5.69.3",
     "ioredis": "^5.9.2"
   }
 }

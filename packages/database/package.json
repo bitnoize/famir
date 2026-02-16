@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@famir/common": "*",
-    "@famir/validator": "*",
     "@famir/config": "*",
     "@famir/logger": "*",
-    "redis": "^5.10.0"
+    "@famir/validator": "*",
+    "redis": "^5.11.0"
   }
 }

@@ -352,7 +352,7 @@ export class AuthorizeController extends BaseController {
 
     setCookies[campaign.sessionCookieName] = {
       value: session.sessionId,
-      domain: campaign.mirrorDomain,
+      domain: '.' + campaign.mirrorDomain,
       path: '/',
       httpOnly: true,
       maxAge: Math.round(campaign.sessionExpire / 1000)
@@ -366,7 +366,7 @@ export class AuthorizeController extends BaseController {
 
     setCookies[campaign.sessionCookieName] = {
       value: '',
-      domain: campaign.mirrorDomain,
+      domain: '.' + campaign.mirrorDomain,
       path: '/',
       httpOnly: true,
       maxAge: 0

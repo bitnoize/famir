@@ -12,6 +12,6 @@
   },
   "dependencies": {
     "@famir/common": "*",
-    "eta": "^4.5.0"
+    "eta": "^4.5.1"
   }
 }

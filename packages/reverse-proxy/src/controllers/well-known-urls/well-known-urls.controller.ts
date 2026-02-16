@@ -125,7 +125,7 @@ export class WellKnownUrlsController extends BaseController {
   }
 }
 
-  /*
+/*
   protected async renderPreflightCors(ctx: HttpServerContext): Promise<void> {
     ctx.status.set(204)
 
@@ -142,5 +142,3 @@ export class WellKnownUrlsController extends BaseController {
     await ctx.sendResponse()
   }
   */
-
-

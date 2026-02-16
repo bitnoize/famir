@@ -1,15 +1,10 @@
 import { randomIdent, serializeError } from '@famir/common'
 import { HttpBodyWrap } from './body.js'
-import { CheerioAPI } from './cheerio.js'
 import { HttpContentType, HttpContentTypeName, HttpContentTypes } from './content-type.js'
 import { HttpHeadersWrap } from './headers.js'
 import { HttpMethodWrap } from './method.js'
 import { HttpConnection, HttpError, HttpKind, HttpPayload } from './misc.js'
-import {
-  RewriteUrlScheme,
-  RewriteUrlTarget,
-  rewriteUrl,
-} from './rewrite-url.js'
+import { RewriteUrlScheme, RewriteUrlTarget, rewriteUrl } from './rewrite-url.js'
 import { HttpStatusWrap } from './status.js'
 import { HttpUrlWrap } from './url.js'
 
