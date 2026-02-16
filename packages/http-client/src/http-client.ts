@@ -4,8 +4,8 @@ import { HttpClientError } from './http-client.error.js'
 export const HTTP_CLIENT = Symbol('HttpClient')
 
 export interface HttpClient {
-  simpleRequest(request: HttpClientSimpleRequest): Promise<HttpClientSimpleResponse>
-  streamRequest(request: HttpClientStreamRequest): Promise<HttpClientStreamResponse>
+  simpleForward(request: HttpClientRequest): Promise<HttpClientSimpleResponse>
+  streamForward(request: HttpClientRequest): Promise<HttpClientStreamResponse>
 }
 
 export interface HttpClientRequest {
@@ -13,14 +13,11 @@ export interface HttpClientRequest {
   method: string
   url: string
   headers: HttpHeaders
-  body: HttpBody | ReadableStream
+  body: HttpBody
   connectTimeout: number
   timeout: number
   bodyLimit: number
 }
-
-export type HttpClientSimpleRequest = HttpClientRequest & { body: HttpBody }
-export type HttpClientStreamRequest = HttpClientRequest & { body: ReadableStream }
 
 export interface HttpClientResponse {
   error: HttpClientError | null

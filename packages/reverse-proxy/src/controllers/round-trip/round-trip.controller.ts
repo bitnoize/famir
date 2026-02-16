@@ -80,7 +80,7 @@ export class RoundTripController extends BaseController {
 
         message.runRequestInterceptors(true)
 
-        const response = await this.roundTripService.simpleRequest({
+        const response = await this.roundTripService.simpleForward({
           proxy: proxy.url,
           method: message.method.get(),
           url: message.url.toAbsolute(),
@@ -97,7 +97,7 @@ export class RoundTripController extends BaseController {
         message.mergeConnection(response.connection)
 
         if (response.error) {
-          message.addError(response.error, 'simple-request')
+          message.addError(response.error, 'simple-forward')
 
           ctx.status.set(response.error.status)
 
@@ -122,9 +122,7 @@ export class RoundTripController extends BaseController {
 
           await ctx.sendResponse()
         }
-      } else if (message.kind === 'stream-request') {
-        throw new Error(`Streaming not supported yet`)
-      } else if (message.kind === 'stream-response') {
+      } else if (message.kind === 'stream') {
         throw new Error(`Streaming not supported yet`)
       }
 
@@ -162,6 +160,8 @@ export class RoundTripController extends BaseController {
         startTime: ctx.startTime,
         finishTime: ctx.finishTime
       })
+
+      //await this.roundTripService.addAnalyzeLogJob()
 
       await next()
     })

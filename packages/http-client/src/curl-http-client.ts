@@ -9,9 +9,8 @@ import {
   CurlHttpClientOptions,
   HTTP_CLIENT,
   HttpClient,
-  HttpClientSimpleRequest,
+  HttpClientRequest,
   HttpClientSimpleResponse,
-  HttpClientStreamRequest,
   HttpClientStreamResponse
 } from './http-client.js'
 
@@ -38,7 +37,7 @@ export class CurlHttpClient implements HttpClient {
     this.logger.debug(`HttpClient initialized`)
   }
 
-  simpleRequest(request: HttpClientSimpleRequest): Promise<HttpClientSimpleResponse> {
+  simpleForward(request: HttpClientRequest): Promise<HttpClientSimpleResponse> {
     return new Promise<HttpClientSimpleResponse>((resolve, reject) => {
       const curl = new Curl()
 
@@ -249,7 +248,7 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  streamRequest(request: HttpClientStreamRequest): Promise<HttpClientStreamResponse> {
+  streamForward(request: HttpClientRequest): Promise<HttpClientStreamResponse> {
     return new Promise<HttpClientStreamResponse>((resolve, reject) => {
       reject(new Error(`Stream request not supported yet`))
     })

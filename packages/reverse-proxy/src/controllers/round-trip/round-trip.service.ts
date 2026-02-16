@@ -8,8 +8,9 @@ import {
 import {
   HTTP_CLIENT,
   HttpClient,
-  HttpClientSimpleRequest,
-  HttpClientSimpleResponse
+  HttpClientRequest,
+  HttpClientSimpleResponse,
+  HttpClientStreamResponse
 } from '@famir/http-client'
 import { HttpServerError } from '@famir/http-server'
 import { ANALYZE_LOG_QUEUE, AnalyzeLogQueue } from '@famir/workflow'
@@ -35,6 +36,14 @@ export class RoundTripService {
     protected readonly analyzeLogQueue: AnalyzeLogQueue,
     protected readonly httpClient: HttpClient
   ) {}
+
+  async simpleForward(request: HttpClientRequest): Promise<HttpClientSimpleResponse> {
+    return await this.httpClient.simpleForward(request)
+  }
+
+  async streamForward(request: HttpClientRequest): Promise<HttpClientStreamResponse> {
+    return await this.httpClient.streamForward(request)
+  }
 
   async createMessage(data: CreateMessageData): Promise<void> {
     try {
@@ -74,9 +83,5 @@ export class RoundTripService {
 
       throw error
     }
-  }
-
-  async simpleRequest(request: HttpClientSimpleRequest): Promise<HttpClientSimpleResponse> {
-    return await this.httpClient.simpleRequest(request)
   }
 }
