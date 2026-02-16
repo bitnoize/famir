@@ -33,7 +33,7 @@ export class HttpBodyWrap {
     return this
   }
 
-  get size(): number {
+  get length(): number {
     return this.#body.length
   }
 

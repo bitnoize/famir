@@ -27,7 +27,6 @@ export interface ReadLurePathData {
 
 export interface CreateSessionData {
   campaignId: string
-  sessionId: string
 }
 
 export interface AuthSessionData {

@@ -65,7 +65,7 @@ export abstract class BaseController {
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/html',
-        'Content-Length': ctx.responseBody.size.toString(),
+        'Content-Length': ctx.responseBody.length.toString(),
         'Last-Modified': target.updatedAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
@@ -90,7 +90,7 @@ export abstract class BaseController {
 
     ctx.responseHeaders.merge({
       'Content-Type': 'text/html',
-      'Content-Length': ctx.responseBody.size.toString()
+      'Content-Length': ctx.responseBody.length.toString()
     })
 
     await ctx.sendResponse()

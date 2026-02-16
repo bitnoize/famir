@@ -149,9 +149,8 @@ export class HttpMessage {
     }
 
     this.url.freeze()
-    this.requestHeaders.freeze()
 
-    if (withBody && this.requestBody.size > 0) {
+    if (withBody && this.requestBody.length > 0) {
       for (const [name, interceptor] of this.requestBodyInterceptors) {
         try {
           interceptor(this)
@@ -161,6 +160,7 @@ export class HttpMessage {
       }
     }
 
+    this.requestHeaders.freeze()
     this.requestBody.freeze()
 
     return this
@@ -197,9 +197,8 @@ export class HttpMessage {
     }
 
     this.status.freeze()
-    this.responseHeaders.freeze()
 
-    if (withBody && this.responseBody.size > 0) {
+    if (withBody && this.responseBody.length > 0) {
       for (const [name, interceptor] of this.responseBodyInterceptors) {
         try {
           interceptor(this)
@@ -209,6 +208,7 @@ export class HttpMessage {
       }
     }
 
+    this.responseHeaders.freeze()
     this.responseBody.freeze()
 
     return this

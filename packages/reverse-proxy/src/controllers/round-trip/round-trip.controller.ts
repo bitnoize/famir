@@ -1,6 +1,6 @@
 import { DIContainer, isDevelopment } from '@famir/common'
 import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
-import { cheerioLoad, HttpMessage } from '@famir/http-tools'
+import { HttpMessage } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -111,7 +111,7 @@ export class RoundTripController extends BaseController {
           const toText = message.rewriteUrl(fromText, true, targets)
           message.requestBody.setText(toText)
 
-          message.requestHeaders.set('Content-Length', message.requestBody.size.toString())
+          message.requestHeaders.set('Content-Length', message.requestBody.length.toString())
         }
       })
 
@@ -132,7 +132,7 @@ export class RoundTripController extends BaseController {
           const toText = message.rewriteUrl(fromText, false, targets)
           message.responseBody.setText(toText)
 
-          message.responseHeaders.set('Content-Length', message.responseBody.size.toString())
+          message.responseHeaders.set('Content-Length', message.responseBody.length.toString())
         }
       })
 
@@ -187,7 +187,7 @@ export class RoundTripController extends BaseController {
 
           ctx.responseHeaders.merge({
             'Content-Type': 'text/html',
-            'Content-Length': ctx.responseBody.size.toString()
+            'Content-Length': ctx.responseBody.length.toString()
           })
 
           await ctx.sendResponse()

@@ -1,5 +1,10 @@
-import { DIContainer, isDevelopment, randomIdent } from '@famir/common'
-import { EnabledFullTargetModel, FullCampaignModel, FullRedirectorModel } from '@famir/database'
+import { DIContainer, isDevelopment } from '@famir/common'
+import {
+  EnabledFullTargetModel,
+  FullCampaignModel,
+  FullRedirectorModel,
+  SessionModel
+} from '@famir/database'
 import {
   HTTP_SERVER_ROUTER,
   HttpServerContext,
@@ -136,7 +141,7 @@ export class AuthorizeController extends BaseController {
     }
 
     if (session.isLanding) {
-      this.persistSessionCookie(ctx, campaign, session.sessionId)
+      this.persistSessionCookie(ctx, campaign, session)
 
       await this.renderMainRedirect(ctx)
 
@@ -150,7 +155,7 @@ export class AuthorizeController extends BaseController {
       secret: landingUpgradeData.secret
     })
 
-    this.persistSessionCookie(ctx, campaign, session.sessionId)
+    this.persistSessionCookie(ctx, campaign, session)
 
     await this.renderMainRedirect(ctx)
   }
@@ -172,14 +177,11 @@ export class AuthorizeController extends BaseController {
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
     if (!sessionCookie) {
-      const sessionId = randomIdent()
-
-      await this.authorizeService.createSession({
-        campaignId: campaign.campaignId,
-        sessionId
+      const session = await this.authorizeService.createSession({
+        campaignId: campaign.campaignId
       })
 
-      this.persistSessionCookie(ctx, campaign, sessionId)
+      this.persistSessionCookie(ctx, campaign, session)
 
       await this.renderOriginRedirect(ctx)
 
@@ -207,7 +209,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    this.persistSessionCookie(ctx, campaign, session.sessionId)
+    this.persistSessionCookie(ctx, campaign, session)
 
     await this.renderRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
   }
@@ -253,7 +255,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    this.persistSessionCookie(ctx, campaign, session.sessionId)
+    this.persistSessionCookie(ctx, campaign, session)
 
     if (!session.isLanding) {
       await this.renderCloakingSite(ctx, target)
@@ -291,45 +293,24 @@ export class AuthorizeController extends BaseController {
       return
     }
 
+    let session: SessionModel | null = null
+
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
-    if (!sessionCookie) {
-      const sessionId = randomIdent()
-
-      await this.authorizeService.createSession({
+    if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
+      session = await this.authorizeService.authSession({
         campaignId: campaign.campaignId,
-        sessionId
+        sessionId: sessionCookie
       })
-
-      this.persistSessionCookie(ctx, campaign, sessionId)
-
-      await this.renderOriginRedirect(ctx)
-
-      return
     }
-
-    if (!this.checkSessionCookie(sessionCookie)) {
-      this.removeSessionCookie(ctx, campaign)
-
-      await this.renderOriginRedirect(ctx)
-
-      return
-    }
-
-    const session = await this.authorizeService.authSession({
-      campaignId: campaign.campaignId,
-      sessionId: sessionCookie
-    })
 
     if (!session) {
-      this.removeSessionCookie(ctx, campaign)
-
-      await this.renderOriginRedirect(ctx)
-
-      return
+      session = await this.authorizeService.createSession({
+        campaignId: campaign.campaignId
+      })
     }
 
-    this.persistSessionCookie(ctx, campaign, session.sessionId)
+    this.persistSessionCookie(ctx, campaign, session)
 
     const proxy = await this.authorizeService.readProxy({
       campaignId: campaign.campaignId,
@@ -358,15 +339,19 @@ export class AuthorizeController extends BaseController {
     return cookies ? cookies[campaign.sessionCookieName] : undefined
   }
 
+  private checkSessionCookie(value: unknown): value is string {
+    return this.validator.guardSchema<string>('reverse-proxy-session-cookie', value)
+  }
+
   private persistSessionCookie(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
-    sessionCookie: string
+    session: SessionModel
   ) {
     const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
 
     setCookies[campaign.sessionCookieName] = {
-      value: sessionCookie,
+      value: session.sessionId,
       domain: campaign.mirrorDomain,
       path: '/',
       httpOnly: true,
@@ -388,10 +373,6 @@ export class AuthorizeController extends BaseController {
     }
 
     ctx.responseHeaders.setSetCookies(setCookies)
-  }
-
-  private checkSessionCookie(value: unknown): value is string {
-    return this.validator.guardSchema<string>('reverse-proxy-session-cookie', value)
   }
 
   private parseLandingUpgradeData(
@@ -473,7 +454,7 @@ export class AuthorizeController extends BaseController {
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/html',
-        'Content-Length': ctx.responseBody.size.toString(),
+        'Content-Length': ctx.responseBody.length.toString(),
         'Last-Modified': redirector.updatedAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })

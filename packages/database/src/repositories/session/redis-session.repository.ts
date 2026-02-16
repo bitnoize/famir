@@ -42,20 +42,26 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     this.logger.debug(`SessionRepository initialized`)
   }
 
-  async create(campaignId: string, sessionId: string): Promise<void> {
-    const secret = randomIdent()
+  async create(campaignId: string): Promise<SessionModel> {
+    const [sessionId, secret] = [randomIdent(), randomIdent()]
 
     try {
-      const statusReply = await this.connection.session.create_session(
-        this.options.prefix,
-        campaignId,
-        sessionId,
-        secret
-      )
+      const [statusReply, rawModel] = await Promise.all([
+        this.connection.session.create_session(
+          this.options.prefix,
+          campaignId,
+          sessionId,
+          secret
+        ),
+
+        this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
+      ])
 
       const mesg = this.handleStatusReply(statusReply)
 
       this.logger.info(mesg, { session: { campaignId, sessionId } })
+
+      return this.buildModelStrict(rawModel)
     } catch (error) {
       this.raiseError(error, 'create', { campaignId, sessionId })
     }
