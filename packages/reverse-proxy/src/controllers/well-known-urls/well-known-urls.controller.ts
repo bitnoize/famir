@@ -30,73 +30,20 @@ export class WellKnownUrlsController extends BaseController {
     this.logger.debug(`WellKnownUrlsController initialized`)
   }
 
-  useAll() {
-    this.usePreflightCors()
-    this.useFaviconIco()
-    this.useRobotsTxt()
-    this.useSitemapXml()
-  }
-
-  usePreflightCors() {
-    this.router.register('preflightCors', async (ctx, next) => {
-      if (ctx.method.is('OPTIONS')) {
-        await this.renderPreflightCors(ctx)
-      } else {
-        await next()
-      }
-    })
-  }
-
-  useFaviconIco() {
-    this.router.register('faviconIco', async (ctx, next) => {
+  use() {
+    this.router.register('well-known-urls', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
       if (ctx.url.isPathEquals('/favicon.ico')) {
         await this.renderFaviconIco(ctx, target)
-      } else {
-        await next()
-      }
-    })
-  }
-
-  useRobotsTxt() {
-    this.router.register('robotsTxt', async (ctx, next) => {
-      const target = this.getState(ctx, 'target')
-
-      if (ctx.url.isPathEquals('/robots.txt')) {
+      } else if (ctx.url.isPathEquals('/robots.txt')) {
         await this.renderRobotsTxt(ctx, target)
-      } else {
-        await next()
-      }
-    })
-  }
-
-  useSitemapXml() {
-    this.router.register('sitemapXml', async (ctx, next) => {
-      const target = this.getState(ctx, 'target')
-
-      if (ctx.url.isPathEquals('/sitemap.xml')) {
+      } else if (ctx.url.isPathEquals('/sitemap.xml')) {
         await this.renderSitemapXml(ctx, target)
       } else {
         await next()
       }
     })
-  }
-
-  protected async renderPreflightCors(ctx: HttpServerContext): Promise<void> {
-    ctx.status.set(204)
-
-    ctx.responseHeaders.merge({
-      'Content-Type': 'text/plain',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': '*',
-      'Access-Control-Allow-Headers': '*',
-      'Access-Control-Expose-Headers': '*',
-      'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Max-Age': '86400'
-    })
-
-    await ctx.sendResponse()
   }
 
   protected async renderFaviconIco(
@@ -177,3 +124,23 @@ export class WellKnownUrlsController extends BaseController {
     }
   }
 }
+
+  /*
+  protected async renderPreflightCors(ctx: HttpServerContext): Promise<void> {
+    ctx.status.set(204)
+
+    ctx.responseHeaders.merge({
+      'Content-Type': 'text/plain',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': '*',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Expose-Headers': '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400'
+    })
+
+    await ctx.sendResponse()
+  }
+  */
+
+

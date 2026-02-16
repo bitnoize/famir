@@ -17,7 +17,7 @@ export type HttpMessageInterceptor = (message: HttpMessage) => void
 
 export class HttpMessage {
   readonly id = randomIdent()
-  protected isFrozen: boolean = false
+  protected isReady: boolean = false
 
   constructor(
     readonly method: HttpMethodWrap,
@@ -29,8 +29,8 @@ export class HttpMessage {
     readonly responseBody: HttpBodyWrap
   ) {}
 
-  freeze(): this {
-    this.isFrozen ||= true
+  ready(): this {
+    this.isReady ||= true
 
     return this
   }
@@ -42,7 +42,7 @@ export class HttpMessage {
   }
 
   set kind(kind: HttpKind) {
-    this.sureNotFrozen('setKind')
+    this.sureNotReady('set kind')
 
     this.#kind = kind
   }
@@ -80,7 +80,7 @@ export class HttpMessage {
   }
 
   addContentTypes(name: HttpContentTypeName, ...types: string[]): this {
-    this.sureNotFrozen('addContentTypes')
+    this.sureNotReady('addContentTypes')
 
     this.contentTypes[name].push(...types)
 
@@ -94,7 +94,7 @@ export class HttpMessage {
   protected readonly rewriteUrlTypes: string[] = []
 
   addRewriteUrlTypes(...types: string[]): this {
-    this.sureNotFrozen('addRewriteUrlTypes')
+    this.sureNotReady('addRewriteUrlTypes')
 
     this.rewriteUrlTypes.push(...types)
 
@@ -111,7 +111,7 @@ export class HttpMessage {
   ]
 
   addRewriteUrlSchemes(...schemes: RewriteUrlScheme[]): this {
-    this.sureNotFrozen('addRewriteUrlSchemes')
+    this.sureNotReady('addRewriteUrlSchemes')
 
     this.rewriteUrlSchemes.push(...schemes)
 
@@ -122,7 +122,7 @@ export class HttpMessage {
   private requestBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
 
   addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
-    this.sureNotFrozen('addRequestHeadInterceptor')
+    this.sureNotReady('addRequestHeadInterceptor')
 
     this.requestHeadInterceptors.push([name, interceptor])
 
@@ -130,7 +130,7 @@ export class HttpMessage {
   }
 
   addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
-    this.sureNotFrozen('addRequestBodyInterceptor')
+    this.sureNotReady('addRequestBodyInterceptor')
 
     this.requestBodyInterceptors.push([name, interceptor])
 
@@ -138,7 +138,7 @@ export class HttpMessage {
   }
 
   runRequestInterceptors(withBody: boolean): this {
-    this.sureIsFrozen('runRequestInterceptors')
+    this.sureIsReady('runRequestInterceptors')
 
     for (const [name, interceptor] of this.requestHeadInterceptors) {
       try {
@@ -170,7 +170,7 @@ export class HttpMessage {
   private responseBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
 
   addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
-    this.sureNotFrozen('addResponseHeadInterceptor')
+    this.sureNotReady('addResponseHeadInterceptor')
 
     this.responseHeadInterceptors.push([name, interceptor])
 
@@ -178,7 +178,7 @@ export class HttpMessage {
   }
 
   addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
-    this.sureNotFrozen('addResponseBodyInterceptor')
+    this.sureNotReady('addResponseBodyInterceptor')
 
     this.responseBodyInterceptors.push([name, interceptor])
 
@@ -186,7 +186,7 @@ export class HttpMessage {
   }
 
   runResponseInterceptors(withBody: boolean): this {
-    this.sureIsFrozen('runResponseInterceptors')
+    this.sureIsReady('runResponseInterceptors')
 
     for (const [name, interceptor] of this.responseHeadInterceptors) {
       try {
@@ -218,15 +218,15 @@ export class HttpMessage {
     return rewriteUrl(text, rev, targets, this.rewriteUrlSchemes)
   }
 
-  protected sureNotFrozen(name: string) {
-    if (this.isFrozen) {
-      throw new Error(`Message is frozen on: ${name}`)
+  protected sureNotReady(name: string) {
+    if (this.isReady) {
+      throw new Error(`Message is ready on: ${name}`)
     }
   }
 
-  protected sureIsFrozen(name: string) {
-    if (!this.isFrozen) {
-      throw new Error(`Message not frozen on: ${name}`)
+  protected sureIsReady(name: string) {
+    if (!this.isReady) {
+      throw new Error(`Message not ready on: ${name}`)
     }
   }
 }

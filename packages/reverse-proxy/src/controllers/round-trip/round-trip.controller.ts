@@ -40,8 +40,8 @@ export class RoundTripController extends BaseController {
     this.logger.debug(`RoundTripController initialized`)
   }
 
-  useInitMessage() {
-    this.router.register('initMessage', async (ctx, next) => {
+  useInit() {
+    this.router.register('round-trip-init', async (ctx, next) => {
       const message = new HttpMessage(
         ctx.method,
         ctx.url.clone(),
@@ -62,91 +62,13 @@ export class RoundTripController extends BaseController {
     })
   }
 
-  useBasicTransforms() {
-    this.router.register('basicTransforms', async (ctx, next) => {
-      const campaign = this.getState(ctx, 'campaign')
-      const target = this.getState(ctx, 'target')
-      const targets = this.getState(ctx, 'targets')
-      const message = this.getState(ctx, 'message')
-
-      message.addRequestHeadInterceptor('target-donor-url', () => {
-        message.url.merge({
-          protocol: target.donorProtocol,
-          hostname: target.donorHostname,
-          port: target.donorPort.toString()
-        })
-
-        message.requestHeaders.set('Host', target.donorHost)
-      })
-
-      message.addRequestHeadInterceptor('remove-session-cookie', () => {
-        const cookies = message.requestHeaders.getCookies()
-
-        if (cookies) {
-          cookies[campaign.sessionCookieName] = undefined
-          message.requestHeaders.setCookies(cookies)
-        }
-      })
-
-      message.addRequestHeadInterceptor('cleanup-headers', () => {
-        message.requestHeaders.delete([
-          'Via',
-          'X-Real-Ip',
-          'X-Forwarded-For',
-          'X-Forwarded-Host',
-          'X-Forwarded-Proto',
-          'X-Famir-Campaign-Id',
-          'X-Famir-Target-Id'
-          // ...
-        ])
-      })
-
-      message.addRequestBodyInterceptor('rewrite-url', () => {
-        const contentType = message.requestHeaders.getContentType()
-
-        if (contentType && message.isRewriteUrlType(contentType)) {
-          const charset = contentType.parameters['charset']
-          const fromText = message.requestBody.getText(charset)
-
-          const toText = message.rewriteUrl(fromText, true, targets)
-          message.requestBody.setText(toText)
-
-          message.requestHeaders.set('Content-Length', message.requestBody.length.toString())
-        }
-      })
-
-      message.addResponseHeadInterceptor('cleanup-headers', () => {
-        message.responseHeaders.delete([
-          'Proxy-Agent'
-          // ...
-        ])
-      })
-
-      message.addResponseBodyInterceptor('rewrite-url', () => {
-        const contentType = message.responseHeaders.getContentType()
-
-        if (contentType && message.isRewriteUrlType(contentType)) {
-          const charset = contentType.parameters['charset']
-          const fromText = message.responseBody.getText(charset)
-
-          const toText = message.rewriteUrl(fromText, false, targets)
-          message.responseBody.setText(toText)
-
-          message.responseHeaders.set('Content-Length', message.responseBody.length.toString())
-        }
-      })
-
-      await next()
-    })
-  }
-
-  useForwardMessage() {
-    this.router.register('forwardMessage', async (ctx, next) => {
+  useForward() {
+    this.router.register('round-trip-forward', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
       const proxy = this.getState(ctx, 'proxy')
       const message = this.getState(ctx, 'message')
 
-      message.freeze()
+      message.ready()
 
       if (message.kind === 'simple') {
         await ctx.loadRequest(target.requestBodyLimit)
@@ -210,8 +132,8 @@ export class RoundTripController extends BaseController {
     })
   }
 
-  useCreateMessage() {
-    this.router.register('createMessage', async (ctx, next) => {
+  useSaveLog() {
+    this.router.register('round-trip-save-log', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const proxy = this.getState(ctx, 'proxy')
       const target = this.getState(ctx, 'target')
