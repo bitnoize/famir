@@ -7,6 +7,7 @@ import { HTTP_SERVER_ROUTER, HttpServerRouter } from './http-server-router.js'
 import { HttpServerError } from './http-server.error.js'
 import {
   HTTP_SERVER,
+  HTTP_SERVER_ERROR_PAGE,
   HttpServer,
   HttpServerContext,
   NativeHttpServerConfig,
@@ -41,7 +42,7 @@ export class NativeHttpServer implements HttpServer {
 
     this.server = http.createServer((req, res) => {
       this.handleRequest(req, res).catch((error: unknown) => {
-        this.logger.error(`HttpServer critical error`, {
+        this.logger.error(`HttpServer unexpected error`, {
           error: serializeError(error)
         })
 
@@ -51,7 +52,7 @@ export class NativeHttpServer implements HttpServer {
               'content-type': 'text/plain'
             })
 
-            res.end(`Server critical error`)
+            res.end(`Server internal error`)
           } else {
             res.end()
           }
@@ -79,12 +80,15 @@ export class NativeHttpServer implements HttpServer {
     res: http.ServerResponse
   ): Promise<void> {
     try {
-      const ctx = new NativeHttpServerContext(req, res, this.options.errorPage)
+      const ctx = new NativeHttpServerContext(req, res)
 
       await this.chainMiddlewares(ctx)
 
       if (!res.writableEnded) {
-        throw new HttpServerError(`Incomplete response`, {
+        throw new HttpServerError(`Server internal error`, {
+          context: {
+            reason: `No any server response from middlewares`
+          },
           code: 'INTERNAL_ERROR'
         })
       }
@@ -93,18 +97,18 @@ export class NativeHttpServer implements HttpServer {
         error: serializeError(error)
       })
 
+      const [status, message] =
+        error instanceof HttpServerError
+          ? [error.status, error.message]
+          : [500, 'Server internal error']
+
+      const errorPage = this.templater.render(HTTP_SERVER_ERROR_PAGE, {
+        status,
+        message
+      })
+
       if (!res.writableEnded) {
         if (!res.headersSent) {
-          const [status, message] =
-            error instanceof HttpServerError
-              ? [error.status, error.message]
-              : [500, 'Server internal error']
-
-          const errorPage = this.templater.render(this.options.errorPage, {
-            status,
-            message
-          })
-
           res.writeHead(status, {
             'content-type': 'text/html'
           })
@@ -206,8 +210,7 @@ export class NativeHttpServer implements HttpServer {
   private buildOptions(config: NativeHttpServerConfig): NativeHttpServerOptions {
     return {
       address: config.HTTP_SERVER_ADDRESS,
-      port: config.HTTP_SERVER_PORT,
-      errorPage: config.HTTP_SERVER_ERROR_PAGE
+      port: config.HTTP_SERVER_PORT
     }
   }
 }

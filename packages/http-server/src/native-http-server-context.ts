@@ -1,4 +1,5 @@
 import {
+  HttpBody,
   HttpBodyWrap,
   HttpConnection,
   HttpHeadersWrap,
@@ -8,6 +9,7 @@ import {
 } from '@famir/http-tools'
 import { isbot } from 'isbot'
 import http from 'node:http'
+import { Readable, Writable } from 'node:stream'
 import { HttpServerError } from './http-server.error.js'
 import { HttpServerContext, HttpServerContextState } from './http-server.js'
 
@@ -17,9 +19,12 @@ export class NativeHttpServerContext implements HttpServerContext {
 
   constructor(
     protected readonly req: http.IncomingMessage,
-    protected readonly res: http.ServerResponse,
-    public readonly errorPage: string
+    protected readonly res: http.ServerResponse
   ) {
+    this.res.on('finish', () => {
+      this.#finishTime = Date.now()
+    })
+
     try {
       this.method = HttpMethodWrap.fromReq(req)
       this.url = HttpUrlWrap.fromReq(req).freeze()
@@ -31,9 +36,20 @@ export class NativeHttpServerContext implements HttpServerContext {
     } catch (error) {
       throw new HttpServerError(`Bad request`, {
         cause: error,
+        context: {
+          reason: `Context constructor failed`
+        },
         code: 'BAD_REQUEST'
       })
     }
+  }
+
+  get requestStream(): Readable {
+    return this.req
+  }
+
+  get responseStream(): Writable {
+    return this.res
   }
 
   readonly method: HttpMethodWrap
@@ -44,107 +60,39 @@ export class NativeHttpServerContext implements HttpServerContext {
   readonly responseHeaders: HttpHeadersWrap
   readonly responseBody: HttpBodyWrap
 
-  loadRequest(bodyLimit: number): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const chunks: Buffer[] = []
+  async loadRequest(bodyLimit: number): Promise<void> {
+    const body = await this.loadRequestBody(bodyLimit)
 
-      let totalLength = 0
-
-      this.req.on('data', (chunk: Buffer) => {
-        totalLength += chunk.length
-
-        if (totalLength > bodyLimit) {
-          this.req.destroy()
-
-          reject(
-            new HttpServerError(`Content too large`, {
-              code: 'CONTENT_TOO_LARGE'
-            })
-          )
-
-          return
-        }
-
-        chunks.push(chunk)
-      })
-
-      this.req.on('end', () => {
-        try {
-          const body = Buffer.concat(chunks, totalLength)
-
-          this.requestBody.set(body).freeze()
-
-          resolve()
-        } catch (error) {
-          reject(
-            new HttpServerError(`Parse request error`, {
-              cause: error,
-              code: 'BAD_REQUEST'
-            })
-          )
-        }
-      })
-
-      this.req.on('error', (error: Error) => {
-        reject(
-          new HttpServerError(`Load request error`, {
-            cause: error,
-            code: 'BAD_REQUEST'
-          })
-        )
-      })
-
-      this.req.on('close', () => {
-        if (!this.req.complete) {
-          reject(
-            new HttpServerError(`Request closed before complete`, {
-              code: 'BAD_REQUEST'
-            })
-          )
-        }
-      })
-    })
+    this.requestBody.set(body).freeze()
   }
 
-  sendResponse(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.responseHeaders.forEach((name, value) => {
-        this.res.setHeader(name, value)
+  sendHead() {
+    if (this.status.isUnknown()) {
+      throw new HttpServerError(`Server internal error`, {
+        context: {
+          reason: `Unknown response status`,
+          status: this.status.get()
+        },
+        code: 'INTERNAL_ERROR'
       })
+    }
 
-      if (this.status.isUnknown()) {
-        reject(
-          new HttpServerError(`Unknown response status`, {
-            code: 'INTERNAL_ERROR'
-          })
-        )
-
-        return
-      }
-
-      this.res.writeHead(this.status.get())
-
-      this.res.end(this.responseBody.get(), (error?: Error) => {
-        this.responseHeaders.freeze()
-        this.responseBody.freeze()
-        this.status.freeze()
-
-        this.#finishTime = Date.now()
-
-        if (error) {
-          reject(
-            new HttpServerError(`Send response error`, {
-              cause: error,
-              code: 'INTERNAL_ERROR'
-            })
-          )
-
-          return
-        }
-
-        resolve()
-      })
+    this.responseHeaders.forEach((name, value) => {
+      this.res.setHeader(name, value)
     })
+
+    this.res.writeHead(this.status.get())
+
+    this.status.freeze()
+    this.responseHeaders.freeze()
+  }
+
+  async sendResponse(): Promise<void> {
+    this.sendHead()
+
+    await this.sendResponseBody(this.responseBody.get())
+
+    this.responseBody.freeze()
   }
 
   #isBot: boolean | null = null
@@ -179,5 +127,98 @@ export class NativeHttpServerContext implements HttpServerContext {
 
   get isComplete(): boolean {
     return this.res.writableEnded
+  }
+
+  private loadRequestBody(bodyLimit: number): Promise<HttpBody> {
+    return new Promise<HttpBody>((resolve, reject) => {
+      const chunks: Buffer[] = []
+      let totalSize = 0
+
+      this.req.on('data', (chunk: Buffer) => {
+        totalSize += chunk.length
+
+        if (totalSize > bodyLimit) {
+          this.req.destroy()
+
+          reject(
+            new HttpServerError(`Content too large`, {
+              context: {
+                reason: `Request body size limit exceeded`,
+                totalSize,
+                bodyLimit
+              },
+              code: 'CONTENT_TOO_LARGE'
+            })
+          )
+        } else {
+          chunks.push(chunk)
+        }
+      })
+
+      this.req.on('end', () => {
+        try {
+          const body = Buffer.concat(chunks, totalSize)
+
+          resolve(body)
+        } catch (error) {
+          reject(
+            new HttpServerError(`Bad request`, {
+              cause: error,
+              context: {
+                reason: `Concatenate buffer chunks failed`,
+                chunks: chunks.length,
+                totalSize
+              },
+              code: 'BAD_REQUEST'
+            })
+          )
+        }
+      })
+
+      this.req.on('error', (error: Error) => {
+        reject(
+          new HttpServerError(`Bad request`, {
+            cause: error,
+            context: {
+              reason: `Load request body failed`
+            },
+            code: 'BAD_REQUEST'
+          })
+        )
+      })
+
+      this.req.on('close', () => {
+        if (!this.req.complete) {
+          reject(
+            new HttpServerError(`Bad request`, {
+              context: {
+                reason: `Request closed before complete`
+              },
+              code: 'BAD_REQUEST'
+            })
+          )
+        }
+      })
+    })
+  }
+
+  private sendResponseBody(body: HttpBody): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.res.end(body, (error?: Error) => {
+        if (error) {
+          reject(
+            new HttpServerError(`Server internal error`, {
+              cause: error,
+              context: {
+                reason: `Send response body failed`
+              },
+              code: 'INTERNAL_ERROR'
+            })
+          )
+        } else {
+          resolve()
+        }
+      })
+    })
   }
 }

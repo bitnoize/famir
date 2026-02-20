@@ -1,4 +1,4 @@
-export const MESSAGE_KINDS = ['simple', 'stream'] as const
+export const MESSAGE_KINDS = ['simple', 'stream-request', 'stream-response'] as const
 export type MessageKind = (typeof MESSAGE_KINDS)[number]
 
 export const MESSAGE_METHODS = ['HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const

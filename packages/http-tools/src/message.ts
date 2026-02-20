@@ -32,14 +32,19 @@ export class HttpMessage {
 
   #kind: HttpKind = 'simple'
 
-  get kind(): HttpKind {
+  getKind(): HttpKind {
     return this.#kind
   }
 
-  set kind(kind: HttpKind) {
-    this.sureNotReady('set kind')
+  setKind(kind: HttpKind) {
+    this.sureNotReady('setKind')
 
     this.#kind = kind
+  }
+
+  isKind(kind: HttpKind | HttpKind[]): boolean {
+    const values = Array.isArray(kind) ? kind : [kind]
+    return values.includes(this.getKind())
   }
 
   readonly connection: HttpConnection = {}
@@ -132,7 +137,7 @@ export class HttpMessage {
     return this
   }
 
-  runRequestInterceptors(withBody: boolean): this {
+  runRequestInterceptors(): this {
     this.sureIsReady('runRequestInterceptors')
 
     for (const [name, interceptor] of this.requestHeadInterceptors) {
@@ -145,12 +150,14 @@ export class HttpMessage {
 
     this.url.freeze()
 
-    if (withBody && this.requestBody.length > 0) {
-      for (const [name, interceptor] of this.requestBodyInterceptors) {
-        try {
-          interceptor(this)
-        } catch (error) {
-          this.addError(error, 'request-body-interceptor', name)
+    if (this.isKind(['simple', 'stream-response'])) {
+      if (this.requestBody.length > 0) {
+        for (const [name, interceptor] of this.requestBodyInterceptors) {
+          try {
+            interceptor(this)
+          } catch (error) {
+            this.addError(error, 'request-body-interceptor', name)
+          }
         }
       }
     }
@@ -180,7 +187,7 @@ export class HttpMessage {
     return this
   }
 
-  runResponseInterceptors(withBody: boolean): this {
+  runResponseInterceptors(): this {
     this.sureIsReady('runResponseInterceptors')
 
     for (const [name, interceptor] of this.responseHeadInterceptors) {
@@ -193,12 +200,14 @@ export class HttpMessage {
 
     this.status.freeze()
 
-    if (withBody && this.responseBody.length > 0) {
-      for (const [name, interceptor] of this.responseBodyInterceptors) {
-        try {
-          interceptor(this)
-        } catch (error) {
-          this.addError(error, 'response-body-interceptor', name)
+    if (this.isKind(['simple', 'stream-request'])) {
+      if (this.responseBody.length > 0) {
+        for (const [name, interceptor] of this.responseBodyInterceptors) {
+          try {
+            interceptor(this)
+          } catch (error) {
+            this.addError(error, 'response-body-interceptor', name)
+          }
         }
       }
     }

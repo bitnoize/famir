@@ -8,8 +8,9 @@ import {
 import {
   HTTP_CLIENT,
   HttpClient,
-  HttpClientRequest,
+  HttpClientSimpleRequest,
   HttpClientSimpleResponse,
+  HttpClientStreamRequest,
   HttpClientStreamResponse
 } from '@famir/http-client'
 import { HttpServerError } from '@famir/http-server'
@@ -37,12 +38,16 @@ export class RoundTripService {
     protected readonly httpClient: HttpClient
   ) {}
 
-  async simpleForward(request: HttpClientRequest): Promise<HttpClientSimpleResponse> {
+  async simpleForward(request: HttpClientSimpleRequest): Promise<HttpClientSimpleResponse> {
     return await this.httpClient.simpleForward(request)
   }
 
-  async streamForward(request: HttpClientRequest): Promise<HttpClientStreamResponse> {
-    return await this.httpClient.streamForward(request)
+  async streamRequestForward(request: HttpClientStreamRequest): Promise<HttpClientSimpleResponse> {
+    return await this.httpClient.streamRequestForward(request)
+  }
+
+  async streamResponseForward(request: HttpClientSimpleRequest): Promise<HttpClientStreamResponse> {
+    return await this.httpClient.streamResponseForward(request)
   }
 
   async createMessage(data: CreateMessageData): Promise<void> {

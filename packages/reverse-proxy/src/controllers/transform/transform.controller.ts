@@ -88,7 +88,6 @@ export class TransformController extends BaseController {
 
   useFixCors() {
     this.router.register('transform-fix-cors', async (ctx, next) => {
-      const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const message = this.getState(ctx, 'message')
 
@@ -112,7 +111,6 @@ export class TransformController extends BaseController {
 
   useFixCsp() {
     this.router.register('transform-fix-csp', async (ctx, next) => {
-      const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const message = this.getState(ctx, 'message')
 
@@ -135,8 +133,6 @@ export class TransformController extends BaseController {
 
   useRewriteUrl() {
     this.router.register('transform-rewrite-url', async (ctx, next) => {
-      const campaign = this.getState(ctx, 'campaign')
-      const target = this.getState(ctx, 'target')
       const targets = this.getState(ctx, 'targets')
       const message = this.getState(ctx, 'message')
 

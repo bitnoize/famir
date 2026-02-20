@@ -1,4 +1,4 @@
-export const HTTP_KINDS = ['simple', 'stream'] as const
+export const HTTP_KINDS = ['simple', 'stream-request', 'stream-response'] as const
 export type HttpKind = (typeof HTTP_KINDS)[number]
 
 export type HttpConnection = Record<string, number | string | null | undefined>
