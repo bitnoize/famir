@@ -56,8 +56,8 @@ local function create_target(keys, args)
     connect_timeout = tonumber(args[11]),
     simple_timeout = tonumber(args[12]),
     stream_timeout = tonumber(args[13]),
-    request_body_limit = tonumber(args[14]),
-    response_body_limit = tonumber(args[15]),
+    request_size_limit = tonumber(args[14]),
+    response_size_limit = tonumber(args[15]),
     main_page = args[16],
     not_found_page = args[17],
     favicon_ico = args[18],
@@ -251,8 +251,8 @@ local function read_full_target(keys, args)
     'connect_timeout',
     'simple_timeout',
     'stream_timeout',
-    'request_body_limit',
-    'response_body_limit',
+    'request_size_limit',
+    'response_size_limit',
     'main_page',
     'not_found_page',
     'favicon_ico',
@@ -284,8 +284,8 @@ local function read_full_target(keys, args)
     connect_timeout = tonumber(values[11]),
     simple_timeout = tonumber(values[12]),
     stream_timeout = tonumber(values[13]),
-    request_body_limit = tonumber(values[14]),
-    response_body_limit = tonumber(values[15]),
+    request_size_limit = tonumber(values[14]),
+    response_size_limit = tonumber(values[15]),
     main_page = values[16],
     not_found_page = values[17],
     favicon_ico = values[18],
@@ -397,10 +397,10 @@ local function update_target(keys, args)
       model.simple_timeout = tonumber(value)
     elseif field == 'stream_timeout' then
       model.stream_timeout = tonumber(value)
-    elseif field == 'request_body_limit' then
-      model.request_body_limit = tonumber(value)
-    elseif field == 'response_body_limit' then
-      model.response_body_limit = tonumber(value)
+    elseif field == 'request_size_limit' then
+      model.request_size_limit = tonumber(value)
+    elseif field == 'response_size_limit' then
+      model.response_size_limit = tonumber(value)
     elseif field == 'main_page' then
       model.main_page = value
     elseif field == 'not_found_page' then

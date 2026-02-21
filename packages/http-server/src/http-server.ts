@@ -29,7 +29,7 @@ export interface HttpServerContext {
   readonly responseBody: HttpBodyWrap
   readonly requestStream: Readable
   readonly responseStream: Writable
-  loadRequest(bodyLimit: number): Promise<void>
+  loadRequest(sizeLimit: number): Promise<void>
   sendHead(): void
   sendResponse(): Promise<void>
   readonly isBot: boolean

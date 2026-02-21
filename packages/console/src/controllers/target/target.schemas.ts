@@ -4,8 +4,8 @@ import {
   targetDomainSchema,
   targetLabelSchema,
   targetPortSchema,
-  targetRequestBodyLimitSchema,
-  targetResponseBodyLimitSchema,
+  targetRequestSizeLimitSchema,
+  targetResponseSizeLimitSchema,
   targetSimpleTimeoutSchema,
   targetStreamTimeoutSchema,
   targetSubSchema
@@ -43,8 +43,8 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     'connectTimeout',
     'simpleTimeout',
     'streamTimeout',
-    'requestBodyLimit',
-    'responseBodyLimit',
+    'requestSizeLimit',
+    'responseSizeLimit',
     'mainPage',
     'notFoundPage',
     'faviconIco',
@@ -75,12 +75,12 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
       ...targetStreamTimeoutSchema,
       default: 3600 * 1000
     },
-    requestBodyLimit: {
-      ...targetRequestBodyLimitSchema,
+    requestSizeLimit: {
+      ...targetRequestSizeLimitSchema,
       default: 10 * 1024 * 1024
     },
-    responseBodyLimit: {
-      ...targetResponseBodyLimitSchema,
+    responseSizeLimit: {
+      ...targetResponseSizeLimitSchema,
       default: 10 * 1024 * 1024
     },
     mainPage: {
@@ -136,12 +136,12 @@ const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
       ...targetStreamTimeoutSchema,
       nullable: true
     },
-    requestBodyLimit: {
-      ...targetRequestBodyLimitSchema,
+    requestSizeLimit: {
+      ...targetRequestSizeLimitSchema,
       nullable: true
     },
-    responseBodyLimit: {
-      ...targetResponseBodyLimitSchema,
+    responseSizeLimit: {
+      ...targetResponseSizeLimitSchema,
       nullable: true
     },
     mainPage: {

@@ -8,14 +8,18 @@ import {
 import {
   HTTP_CLIENT,
   HttpClient,
-  HttpClientSimpleRequest,
-  HttpClientSimpleResponse,
-  HttpClientStreamRequest,
-  HttpClientStreamResponse
+  HttpClientErrorResult,
+  HttpClientSimpleResult,
+  HttpClientStreamResult
 } from '@famir/http-client'
 import { HttpServerError } from '@famir/http-server'
 import { ANALYZE_LOG_QUEUE, AnalyzeLogQueue } from '@famir/workflow'
-import { CreateMessageData } from './round-trip.js'
+import {
+  CreateMessageData,
+  SimpleForwardData,
+  StreamRequestForwardData,
+  StreamResponseForwardData
+} from './round-trip.js'
 
 export const ROUND_TRIP_SERVICE = Symbol('RoundTripService')
 
@@ -38,16 +42,49 @@ export class RoundTripService {
     protected readonly httpClient: HttpClient
   ) {}
 
-  async simpleForward(request: HttpClientSimpleRequest): Promise<HttpClientSimpleResponse> {
-    return await this.httpClient.simpleForward(request)
+  async simpleForward(
+    data: SimpleForwardData
+  ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
+    return await this.httpClient.simpleForward(
+      data.connectTimeout,
+      data.timeout,
+      data.proxy,
+      data.method,
+      data.url,
+      data.requestHeaders,
+      data.requestBody,
+      data.sizeLimit
+    )
   }
 
-  async streamRequestForward(request: HttpClientStreamRequest): Promise<HttpClientSimpleResponse> {
-    return await this.httpClient.streamRequestForward(request)
+  async streamRequestForward(
+    data: StreamRequestForwardData
+  ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
+    return await this.httpClient.streamRequestForward(
+      data.connectTimeout,
+      data.timeout,
+      data.proxy,
+      data.method,
+      data.url,
+      data.requestHeaders,
+      data.requestStream,
+      data.sizeLimit
+    )
   }
 
-  async streamResponseForward(request: HttpClientSimpleRequest): Promise<HttpClientStreamResponse> {
-    return await this.httpClient.streamResponseForward(request)
+  async streamResponseForward(
+    data: StreamResponseForwardData
+  ): Promise<HttpClientStreamResult | HttpClientErrorResult> {
+    return await this.httpClient.streamResponseForward(
+      data.connectTimeout,
+      data.timeout,
+      data.proxy,
+      data.method,
+      data.url,
+      data.requestHeaders,
+      data.requestBody,
+      data.sizeLimit
+    )
   }
 
   async createMessage(data: CreateMessageData): Promise<void> {

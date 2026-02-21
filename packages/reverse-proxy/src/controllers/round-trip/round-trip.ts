@@ -7,6 +7,32 @@ import {
   MessageMethod,
   MessagePayload
 } from '@famir/database'
+import { HttpBody, HttpHeaders, HttpMethod } from '@famir/http-tools'
+import type { Readable } from 'node:stream'
+
+export interface SimpleForwardData {
+  connectTimeout: number
+  timeout: number
+  proxy: string
+  method: HttpMethod
+  url: string
+  requestHeaders: HttpHeaders
+  requestBody: HttpBody
+  sizeLimit: number
+}
+
+export interface StreamRequestForwardData {
+  connectTimeout: number
+  timeout: number
+  proxy: string
+  method: HttpMethod
+  url: string
+  requestHeaders: HttpHeaders
+  requestStream: Readable
+  sizeLimit: number
+}
+
+export type StreamResponseForwardData = SimpleForwardData
 
 export interface CreateMessageData {
   campaignId: string

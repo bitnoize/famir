@@ -24,10 +24,8 @@ export class HttpMessage {
     readonly responseBody: HttpBodyWrap
   ) {}
 
-  ready(): this {
+  ready() {
     this.isReady ||= true
-
-    return this
   }
 
   #kind: HttpKind = 'simple'
@@ -49,14 +47,12 @@ export class HttpMessage {
 
   readonly connection: HttpConnection = {}
 
-  mergeConnection(connection: HttpConnection): this {
+  mergeConnection(connection: HttpConnection) {
     Object.entries(connection).forEach(([name, value]) => {
       if (value != null) {
         this.connection[name] = value
       }
     })
-
-    return this
   }
 
   readonly payload: HttpPayload = {}
@@ -79,12 +75,10 @@ export class HttpMessage {
     urlEncoded: []
   }
 
-  addContentTypes(name: HttpContentTypeName, ...types: string[]): this {
+  addContentTypes(name: HttpContentTypeName, ...types: string[]) {
     this.sureNotReady('addContentTypes')
 
     this.contentTypes[name].push(...types)
-
-    return this
   }
 
   isContentType(contentType: HttpContentType, name: HttpContentTypeName): boolean {
@@ -93,12 +87,10 @@ export class HttpMessage {
 
   protected readonly rewriteUrlTypes: string[] = []
 
-  addRewriteUrlTypes(...types: string[]): this {
+  addRewriteUrlTypes(...types: string[]) {
     this.sureNotReady('addRewriteUrlTypes')
 
     this.rewriteUrlTypes.push(...types)
-
-    return this
   }
 
   isRewriteUrlType(contentType: HttpContentType): boolean {
@@ -110,35 +102,29 @@ export class HttpMessage {
     ['//', false]
   ]
 
-  addRewriteUrlSchemes(...schemes: RewriteUrlScheme[]): this {
+  addRewriteUrlSchemes(...schemes: RewriteUrlScheme[]) {
     this.sureNotReady('addRewriteUrlSchemes')
 
     this.rewriteUrlSchemes.push(...schemes)
-
-    return this
   }
 
   private requestHeadInterceptors: Array<[string, HttpMessageInterceptor]> = []
   private requestBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
 
-  addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
+  addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addRequestHeadInterceptor')
 
     this.requestHeadInterceptors.push([name, interceptor])
-
-    return this
   }
 
-  addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
+  addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addRequestBodyInterceptor')
 
     this.requestBodyInterceptors.push([name, interceptor])
-
-    return this
   }
 
-  runRequestInterceptors(): this {
-    this.sureIsReady('runRequestInterceptors')
+  runRequestHeadInterceptors() {
+    this.sureIsReady('runRequestHeadInterceptors')
 
     for (const [name, interceptor] of this.requestHeadInterceptors) {
       try {
@@ -149,46 +135,42 @@ export class HttpMessage {
     }
 
     this.url.freeze()
+  }
 
-    if (this.isKind(['simple', 'stream-response'])) {
-      if (this.requestBody.length > 0) {
-        for (const [name, interceptor] of this.requestBodyInterceptors) {
-          try {
-            interceptor(this)
-          } catch (error) {
-            this.addError(error, 'request-body-interceptor', name)
-          }
+  runRequestBodyInterceptors() {
+    this.sureIsReady('runRequestBodyInterceptors')
+
+    if (this.requestBody.length > 0) {
+      for (const [name, interceptor] of this.requestBodyInterceptors) {
+        try {
+          interceptor(this)
+        } catch (error) {
+          this.addError(error, 'request-body-interceptor', name)
         }
       }
     }
 
     this.requestHeaders.freeze()
     this.requestBody.freeze()
-
-    return this
   }
 
   private responseHeadInterceptors: Array<[string, HttpMessageInterceptor]> = []
   private responseBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
 
-  addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
+  addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addResponseHeadInterceptor')
 
     this.responseHeadInterceptors.push([name, interceptor])
-
-    return this
   }
 
-  addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
+  addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addResponseBodyInterceptor')
 
     this.responseBodyInterceptors.push([name, interceptor])
-
-    return this
   }
 
-  runResponseInterceptors(): this {
-    this.sureIsReady('runResponseInterceptors')
+  runResponseHeadInterceptors() {
+    this.sureIsReady('runResponseHeadInterceptors')
 
     for (const [name, interceptor] of this.responseHeadInterceptors) {
       try {
@@ -199,23 +181,23 @@ export class HttpMessage {
     }
 
     this.status.freeze()
+  }
 
-    if (this.isKind(['simple', 'stream-request'])) {
-      if (this.responseBody.length > 0) {
-        for (const [name, interceptor] of this.responseBodyInterceptors) {
-          try {
-            interceptor(this)
-          } catch (error) {
-            this.addError(error, 'response-body-interceptor', name)
-          }
+  runResponseBodyInterceptors() {
+    this.sureIsReady('runResponseBodyInterceptors')
+
+    if (this.responseBody.length > 0) {
+      for (const [name, interceptor] of this.responseBodyInterceptors) {
+        try {
+          interceptor(this)
+        } catch (error) {
+          this.addError(error, 'response-body-interceptor', name)
         }
       }
     }
 
     this.responseHeaders.freeze()
     this.responseBody.freeze()
-
-    return this
   }
 
   rewriteUrl(text: string, rev: boolean, targets: RewriteUrlTarget[]): string {

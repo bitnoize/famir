@@ -60,8 +60,8 @@ export class NativeHttpServerContext implements HttpServerContext {
   readonly responseHeaders: HttpHeadersWrap
   readonly responseBody: HttpBodyWrap
 
-  async loadRequest(bodyLimit: number): Promise<void> {
-    const body = await this.loadRequestBody(bodyLimit)
+  async loadRequest(sizeLimit: number): Promise<void> {
+    const body = await this.loadRequestBody(sizeLimit)
 
     this.requestBody.set(body).freeze()
   }
@@ -129,7 +129,7 @@ export class NativeHttpServerContext implements HttpServerContext {
     return this.res.writableEnded
   }
 
-  private loadRequestBody(bodyLimit: number): Promise<HttpBody> {
+  private loadRequestBody(sizeLimit: number): Promise<HttpBody> {
     return new Promise<HttpBody>((resolve, reject) => {
       const chunks: Buffer[] = []
       let totalSize = 0
@@ -137,7 +137,7 @@ export class NativeHttpServerContext implements HttpServerContext {
       this.req.on('data', (chunk: Buffer) => {
         totalSize += chunk.length
 
-        if (totalSize > bodyLimit) {
+        if (totalSize > sizeLimit) {
           this.req.destroy()
 
           reject(
@@ -145,7 +145,7 @@ export class NativeHttpServerContext implements HttpServerContext {
               context: {
                 reason: `Request body size limit exceeded`,
                 totalSize,
-                bodyLimit
+                sizeLimit
               },
               code: 'CONTENT_TOO_LARGE'
             })
