@@ -2,7 +2,7 @@
   "name": "@famir/reverse-proxy",
   "type": "module",
   "version": "0.3.3",
-  "description": "Reverse proxy module",
+  "description": "Reverse proxy app",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

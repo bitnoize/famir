@@ -2,14 +2,13 @@
   "name": "@famir/console",
   "type": "module",
   "version": "0.3.3",
-  "description": "Console module",
+  "description": "Console app",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "format": "prettier -w \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
-    "build": "tsc -b",
-    "start": "node --env-file=../../.env ."
+    "build": "tsc -b"
   },
   "dependencies": {
     "@famir/common": "*",

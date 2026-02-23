@@ -116,7 +116,11 @@ export class NativeHttpServerContext implements HttpServerContext {
   }
 
   get connection(): HttpConnection {
-    return {}
+    return {
+      server_forwarded_for: this.requestHeaders.getString('X-Forwarded-For') ?? null,
+      server_forwarded_host: this.requestHeaders.getString('X-Forwarded-Host') ?? null,
+      server_forwarded_proto: this.requestHeaders.getString('X-Forwarded-Proto') ?? null
+    }
   }
 
   readonly startTime: number = Date.now()

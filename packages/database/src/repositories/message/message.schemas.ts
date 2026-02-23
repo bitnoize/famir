@@ -202,14 +202,15 @@ const messagePayloadSchema: JSONSchemaType<MessagePayload> = {
   additionalProperties: true
 } as const
 
+// FIXME
 const messageErrorSchema: JSONSchemaType<MessageError> = {
   type: 'array',
-  minItems: 2,
+  minItems: 1,
   maxItems: 10,
   items: [
     {
       type: 'object'
-    },
+    }
   ],
   additionalItems: {
     type: 'string'

@@ -269,8 +269,6 @@ export class RoundTripController extends BaseController {
 
     pipeline(result.responseStream, ctx.responseStream, (error) => {
       if (error) {
-        console.log('RoundTrip pipeline error:', error)
-
         if (!result.responseStream.destroyed) {
           result.responseStream.destroy()
         }

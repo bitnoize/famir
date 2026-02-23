@@ -404,7 +404,7 @@ export class CurlHttpClient implements HttpClient {
     curl.setOpt(Curl.option.CUSTOMREQUEST, method)
     curl.setOpt(Curl.option.URL, url)
 
-    curl.setOpt(Curl.option.HTTPHEADER, this.formatCurlHeaders(requestHeaders))
+    curl.setOpt(Curl.option.HTTPHEADER, this.formatRawHeaders(requestHeaders))
     curl.setOpt(Curl.option.ACCEPT_ENCODING, '') // Means all encodings!
   }
 
@@ -584,7 +584,7 @@ export class CurlHttpClient implements HttpClient {
     return headers
   }
 
-  protected formatCurlHeaders(headers: HttpHeaders): string[] {
+  protected formatRawHeaders(headers: HttpHeaders): string[] {
     const curlHeaders: string[] = []
 
     Object.entries(headers).forEach(([name, value]) => {

@@ -68,9 +68,7 @@ export class TransformController extends BaseController {
           'X-Real-Ip',
           'X-Forwarded-For',
           'X-Forwarded-Host',
-          'X-Forwarded-Proto',
-          'X-Famir-Campaign-Id',
-          'X-Famir-Target-Id'
+          'X-Forwarded-Proto'
           // ...
         ])
       })
