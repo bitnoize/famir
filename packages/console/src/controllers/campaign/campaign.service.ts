@@ -37,8 +37,6 @@ export class CampaignService {
         data.description,
         data.lockTimeout,
         data.landingUpgradePath,
-        data.landingUpgradeParam,
-        data.landingRedirectorParam,
         data.sessionCookieName,
         data.sessionExpire,
         data.newSessionExpire,

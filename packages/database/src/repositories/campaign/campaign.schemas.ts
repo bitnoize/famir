@@ -46,8 +46,6 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'description',
     'lock_timeout',
     'landing_upgrade_path',
-    'landing_upgrade_param',
-    'landing_redirector_param',
     'session_cookie_name',
     'session_expire',
     'new_session_expire',
@@ -76,12 +74,6 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
       type: 'integer'
     },
     landing_upgrade_path: {
-      type: 'string'
-    },
-    landing_upgrade_param: {
-      type: 'string'
-    },
-    landing_redirector_param: {
       type: 'string'
     },
     session_cookie_name: {
@@ -154,18 +146,6 @@ export const campaignLandingUpgradePathSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 3,
   maxLength: 64
-} as const
-
-export const campaignLandingUpgradeParamSchema: JSONSchemaType<string> = {
-  type: 'string',
-  minLength: 1,
-  maxLength: 8
-} as const
-
-export const campaignLandingRedirectorParamSchema: JSONSchemaType<string> = {
-  type: 'string',
-  minLength: 1,
-  maxLength: 8
 } as const
 
 export const campaignSessionCookieNameSchema: JSONSchemaType<string> = {

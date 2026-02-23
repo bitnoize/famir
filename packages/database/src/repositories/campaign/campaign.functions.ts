@@ -24,8 +24,6 @@ export interface RawFullCampaign extends RawCampaign {
   description: string
   lock_timeout: number
   landing_upgrade_path: string
-  landing_upgrade_param: string
-  landing_redirector_param: string
   session_cookie_name: string
   session_expire: number
   new_session_expire: number
@@ -49,8 +47,6 @@ export const campaignFunctions = {
         description: string,
         lockTimeout: number,
         landingUpgradePath: string,
-        landingUpgradeParam: string,
-        landingRedirectorParam: string,
         sessionCookieName: string,
         sessionExpire: number,
         newSessionExpire: number,
@@ -65,8 +61,6 @@ export const campaignFunctions = {
         parser.push(description)
         parser.push(lockTimeout.toString())
         parser.push(landingUpgradePath)
-        parser.push(landingUpgradeParam)
-        parser.push(landingRedirectorParam)
         parser.push(sessionCookieName)
         parser.push(sessionExpire.toString())
         parser.push(newSessionExpire.toString())

@@ -204,12 +204,12 @@ const messagePayloadSchema: JSONSchemaType<MessagePayload> = {
 
 const messageErrorSchema: JSONSchemaType<MessageError> = {
   type: 'array',
-  minItems: 1,
+  minItems: 2,
   maxItems: 10,
   items: [
     {
       type: 'object'
-    }
+    },
   ],
   additionalItems: {
     type: 'string'

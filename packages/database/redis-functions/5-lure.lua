@@ -11,7 +11,7 @@ local function create_lure(keys, args)
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local lure_key = keys[3]
-  local lure_path_key = keys[4]
+  local lure_paths_key = keys[4]
   local lure_index_key = keys[5]
   local redirector_key = keys[6]
 
@@ -25,10 +25,6 @@ local function create_lure(keys, args)
 
   if redis.call('EXISTS', lure_key) ~= 0 then
     return redis.status_reply('CONFLICT Lure allready exists')
-  end
-
-  if redis.call('EXISTS', lure_path_key) ~= 0 then
-    return redis.status_reply('CONFLICT Lure path allready taken')
   end
 
   if redis.call('EXISTS', redirector_key) ~= 1 then
@@ -89,7 +85,7 @@ local function create_lure(keys, args)
 
   redis.call('HSET', lure_key, unpack(store))
 
-  redis.call('SET', lure_path_key, model.lure_id)
+  redis.call('HSET', lure_paths_key, model.path, model.lure_id)
 
   redis.call('ZADD', lure_index_key, model.created_at, model.lure_id)
 
@@ -168,32 +164,44 @@ redis.register_function({
 })
 
 --[[
-  Read lure path
+  Find lure id
 --]]
-local function read_lure_path(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
+local function find_lure_id(keys, args)
+  if #keys ~= 2 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local lure_path_key = keys[2]
+  local lure_paths_key = keys[2]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
   end
 
-  if redis.call('EXISTS', lure_path_key) ~= 1 then
+  local path = args[1]
+
+  if not (path and path ~= '') then
+    return redis.error_reply('ERR Wrong path')
+  end
+
+  if redis.call('HEXISTS', lure_paths_key, path) ~= 1 then
     return nil
   end
 
-  return redis.call('GET', lure_path_key)
+  local lure_id = redis.call('HGET', lure_paths_key, path)
+
+  if not (lure_id and lure_id ~= '') then
+    return redis.error_reply('ERR Malform lure_id')
+  end
+
+  return lure_id
 end
 
 redis.register_function({
-  function_name = 'read_lure_path',
-  callback = read_lure_path,
+  function_name = 'find_lure_id',
+  callback = find_lure_id,
   flags = { 'no-writes' },
-  description = 'Read lure path',
+  description = 'Find lure id',
 })
 
 --[[
@@ -356,7 +364,7 @@ local function delete_lure(keys, args)
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local lure_key = keys[3]
-  local lure_path_key = keys[4]
+  local lure_paths_key = keys[4]
   local lure_index_key = keys[5]
   local redirector_key = keys[6]
 
@@ -380,8 +388,8 @@ local function delete_lure(keys, args)
     lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     lure_id = redis.call('HGET', lure_key, 'lure_id'),
+    path = redis.call('GET', lure_key, 'path'),
     redirector_id = redis.call('HGET', lure_key, 'redirector_id'),
-    orig_path_id = redis.call('GET', lure_path_key),
     orig_redirector_id = redis.call('HGET', redirector_key, 'redirector_id'),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
@@ -396,17 +404,13 @@ local function delete_lure(keys, args)
         field == 'lock_secret'
         or field == 'orig_lock_secret'
         or field == 'lure_id'
+        or field == 'path'
         or field == 'redirector_id'
-        or field == 'orig_path_id'
         or field == 'orig_redirector_id'
       ) and value == ''
     then
       return redis.error_reply('ERR Wrong stash.' .. field)
     end
-  end
-
-  if stash.orig_path_id ~= stash.lure_id then
-    return redis.status_reply('FORBIDDEN Lure path not match')
   end
 
   if stash.orig_redirector_id ~= stash.redirector_id then
@@ -425,7 +429,7 @@ local function delete_lure(keys, args)
 
   redis.call('DEL', lure_key)
 
-  redis.call('DEL', lure_path_key)
+  redis.call('HDEL', lure_paths_key, stash.path)
 
   redis.call('ZREM', lure_index_key, stash.lure_id)
 

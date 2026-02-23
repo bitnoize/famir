@@ -7,6 +7,7 @@ import {
   DatabaseConnector,
   RedisDatabaseConnection
 } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisDatabaseConfig } from '../../database.js'
 import { FullTargetModel, TargetModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
@@ -100,15 +101,40 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async read(campaignId: string, targetId: string): Promise<FullTargetModel | null> {
     try {
-      const rawFullModel = await this.connection.target.read_full_target(
+      const rawModel = await this.connection.target.read_full_target(
         this.options.prefix,
         campaignId,
         targetId
       )
 
-      return this.buildFullModel(rawFullModel)
+      return this.buildFullModel(rawModel)
     } catch (error) {
       this.raiseError(error, 'read', { campaignId, targetId })
+    }
+  }
+
+  async find(mirrorHost: string): Promise<FullTargetModel | null> {
+    try {
+      const targetLink = await this.connection.target.find_target_link(
+        this.options.prefix,
+        mirrorHost
+      )
+
+      if (targetLink === null) {
+        return null
+      }
+
+      const [campaignId, targetId] = this.buildTargetLink(targetLink)
+
+      const rawModel = await this.connection.target.read_full_target(
+        this.options.prefix,
+        campaignId,
+        targetId
+      )
+
+      return this.buildFullModel(rawModel)
+    } catch (error) {
+      this.raiseError(error, 'find', { mirrorHost })
     }
   }
 
@@ -299,40 +325,40 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     )
   }
 
-  protected buildFullModel(rawFullModel: unknown): FullTargetModel | null {
-    if (rawFullModel === null) {
+  protected buildFullModel(rawModel: unknown): FullTargetModel | null {
+    if (rawModel === null) {
       return null
     }
 
-    this.validateRawData<RawFullTarget>('database-raw-full-target', rawFullModel)
+    this.validateRawData<RawFullTarget>('database-raw-full-target', rawModel)
 
     return new FullTargetModel(
-      rawFullModel.campaign_id,
-      rawFullModel.target_id,
-      !!rawFullModel.is_landing,
-      !!rawFullModel.donor_secure,
-      rawFullModel.donor_sub,
-      rawFullModel.donor_domain,
-      rawFullModel.donor_port,
-      !!rawFullModel.mirror_secure,
-      rawFullModel.mirror_sub,
-      rawFullModel.mirror_domain,
-      rawFullModel.mirror_port,
-      rawFullModel.labels,
-      rawFullModel.connect_timeout,
-      rawFullModel.simple_timeout,
-      rawFullModel.stream_timeout,
-      rawFullModel.request_size_limit,
-      rawFullModel.response_size_limit,
-      rawFullModel.main_page,
-      rawFullModel.not_found_page,
-      rawFullModel.favicon_ico,
-      rawFullModel.robots_txt,
-      rawFullModel.sitemap_xml,
-      !!rawFullModel.is_enabled,
-      rawFullModel.message_count,
-      new Date(rawFullModel.created_at),
-      new Date(rawFullModel.updated_at)
+      rawModel.campaign_id,
+      rawModel.target_id,
+      !!rawModel.is_landing,
+      !!rawModel.donor_secure,
+      rawModel.donor_sub,
+      rawModel.donor_domain,
+      rawModel.donor_port,
+      !!rawModel.mirror_secure,
+      rawModel.mirror_sub,
+      rawModel.mirror_domain,
+      rawModel.mirror_port,
+      rawModel.labels,
+      rawModel.connect_timeout,
+      rawModel.simple_timeout,
+      rawModel.stream_timeout,
+      rawModel.request_size_limit,
+      rawModel.response_size_limit,
+      rawModel.main_page,
+      rawModel.not_found_page,
+      rawModel.favicon_ico,
+      rawModel.robots_txt,
+      rawModel.sitemap_xml,
+      !!rawModel.is_enabled,
+      rawModel.message_count,
+      new Date(rawModel.created_at),
+      new Date(rawModel.updated_at)
     )
   }
 
@@ -340,5 +366,19 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     this.validateArrayReply(rawCollection)
 
     return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(TargetModel.isNotNull)
+  }
+
+  protected buildTargetLink(value: unknown): [string, string] {
+    this.validateArrayStringsReply(value)
+
+    const [campaignId, targetId] = value
+
+    if (!(campaignId && targetId)) {
+      throw new DatabaseError(`TargetLink validate failed`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+
+    return [campaignId, targetId]
   }
 }

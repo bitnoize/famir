@@ -19,7 +19,9 @@ export class NativeHttpServerContext implements HttpServerContext {
 
   constructor(
     protected readonly req: http.IncomingMessage,
-    protected readonly res: http.ServerResponse
+    protected readonly res: http.ServerResponse,
+    public readonly verbose: boolean,
+    public readonly errorPage: string
   ) {
     this.res.on('finish', () => {
       this.#finishTime = Date.now()

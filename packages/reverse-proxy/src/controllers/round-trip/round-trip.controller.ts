@@ -1,4 +1,4 @@
-import { DIContainer, isDevelopment } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
   HttpClientBaseResult,
   HttpClientErrorResult,
@@ -6,7 +6,6 @@ import {
   HttpClientStreamResult
 } from '@famir/http-client'
 import {
-  HTTP_SERVER_ERROR_PAGE,
   HTTP_SERVER_ROUTER,
   HttpServerContext,
   HttpServerError,
@@ -67,7 +66,7 @@ export class RoundTripController extends BaseController {
 
       this.setState(ctx, 'message', message)
 
-      if (isDevelopment) {
+      if (ctx.verbose) {
         ctx.responseHeaders.set('X-Famir-Message-Id', message.id)
       }
 
@@ -174,7 +173,7 @@ export class RoundTripController extends BaseController {
 
           message.runResponseHeadInterceptors()
 
-          await this.sendMessageResponseStream(ctx, message, result)
+          this.sendMessageResponseStream(ctx, message, result)
         }
       } else {
         throw new HttpServerError(`Server internal error`, {
@@ -258,25 +257,27 @@ export class RoundTripController extends BaseController {
     await ctx.sendResponse()
   }
 
-  protected async sendMessageResponseStream(
+  protected sendMessageResponseStream(
     ctx: HttpServerContext,
     message: HttpMessage,
     result: HttpClientStreamResult
-  ): Promise<void> {
+  ) {
     ctx.status.set(message.status.get())
     ctx.responseHeaders.merge(message.responseHeaders.toObject())
 
     ctx.sendHead()
 
     pipeline(result.responseStream, ctx.responseStream, (error) => {
-      console.log('RoundTrip pipeline error:', error)
+      if (error) {
+        console.log('RoundTrip pipeline error:', error)
 
-      if (!result.responseStream.destroyed) {
-        result.responseStream.destroy()
-      }
+        if (!result.responseStream.destroyed) {
+          result.responseStream.destroy()
+        }
 
-      if (!ctx.responseStream.writableEnded) {
-        ctx.responseStream.end()
+        if (!ctx.responseStream.writableEnded) {
+          ctx.responseStream.end()
+        }
       }
     })
   }
@@ -298,7 +299,7 @@ export class RoundTripController extends BaseController {
     ctx.status.set(result.error.status)
 
     if (isHtml) {
-      const errorPage = this.templater.render(HTTP_SERVER_ERROR_PAGE, {
+      const errorPage = this.templater.render(ctx.errorPage, {
         status: result.error.status,
         message: result.error.message
       })

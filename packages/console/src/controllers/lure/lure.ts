@@ -25,7 +25,6 @@ export interface SwitchLureData {
 export interface DeleteLureData {
   campaignId: string
   lureId: string
-  path: string
   redirectorId: string
   lockSecret: string
 }

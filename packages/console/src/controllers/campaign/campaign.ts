@@ -4,8 +4,6 @@ export interface CreateCampaignData {
   description: string
   lockTimeout: number
   landingUpgradePath: string
-  landingUpgradeParam: string
-  landingRedirectorParam: string
   sessionCookieName: string
   sessionExpire: number
   newSessionExpire: number

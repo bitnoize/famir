@@ -27,6 +27,7 @@ export interface TargetRepository {
     lockSecret: string
   ): Promise<void>
   read(campaignId: string, targetId: string): Promise<FullTargetModel | null>
+  find(mirrorHost: string): Promise<FullTargetModel | null>
   update(
     campaignId: string,
     targetId: string,

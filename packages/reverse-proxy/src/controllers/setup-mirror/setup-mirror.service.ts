@@ -10,7 +10,7 @@ import {
   TargetRepository
 } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
-import { ListTargetsData, ReadCampaignTargetData } from './setup-mirror.js'
+import { FindTargetData } from './setup-mirror.js'
 
 export const SETUP_MIRROR_SERVICE = Symbol('SetupMirrorService')
 
@@ -31,39 +31,47 @@ export class SetupMirrorService {
     protected readonly targetRepository: TargetRepository
   ) {}
 
-  async readCampaignTarget(
-    data: ReadCampaignTargetData
-  ): Promise<[FullCampaignModel, EnabledFullTargetModel]> {
-    const [campaignModel, targetModel] = await Promise.all([
-      this.campaignRepository.read(data.campaignId),
+  async findTarget(
+    data: FindTargetData
+  ): Promise<[FullCampaignModel, EnabledFullTargetModel, EnabledTargetModel[]]> {
+    const target = await this.targetRepository.find(data.mirrorHost)
 
-      this.targetRepository.read(data.campaignId, data.targetId)
-    ])
-
-    if (!campaignModel) {
-      throw new HttpServerError(`Campaign not found`, {
+    if (!(target && TargetModel.isEnabled(target))) {
+      throw new HttpServerError(`Service unavailable`, {
+        context: {
+          reason: `Target not found`,
+          mirrorHost: data.mirrorHost
+        },
         code: 'SERVICE_UNAVAILABLE'
       })
     }
 
-    if (!(targetModel && TargetModel.isEnabled(targetModel))) {
-      throw new HttpServerError(`Target not found`, {
+    const campaign = await this.campaignRepository.read(target.campaignId)
+
+    if (!campaign) {
+      throw new HttpServerError(`Service unavailable`, {
+        context: {
+          reason: `Target found but campaign not`,
+          campaignId: target.campaignId,
+          targetId: target.targetId
+        },
         code: 'SERVICE_UNAVAILABLE'
       })
     }
 
-    return [campaignModel, targetModel]
-  }
+    const targets = await this.targetRepository.list(target.campaignId)
 
-  async listTargets(data: ListTargetsData): Promise<EnabledTargetModel[]> {
-    const collection = await this.targetRepository.list(data.campaignId)
-
-    if (!collection) {
-      throw new HttpServerError(`Campaign not found`, {
+    if (!targets) {
+      throw new HttpServerError(`Service unavailable`, {
+        context: {
+          reason: `Target found but list fail`,
+          campaignId: target.campaignId,
+          targetId: target.targetId
+        },
         code: 'SERVICE_UNAVAILABLE'
       })
     }
 
-    return collection.filter(TargetModel.isEnabled)
+    return [campaign, target, targets.filter(TargetModel.isEnabled)]
   }
 }

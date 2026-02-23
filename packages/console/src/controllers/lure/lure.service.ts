@@ -110,7 +110,6 @@ export class LureService {
       await this.lureRepository.delete(
         data.campaignId,
         data.lureId,
-        data.path,
         data.redirectorId,
         data.lockSecret
       )

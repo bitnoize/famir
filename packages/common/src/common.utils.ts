@@ -18,11 +18,6 @@ process.on('uncaughtException', (error: unknown) => {
   process.exit(1)
 })
 
-const nodeEnv = process.env['NODE_ENV'] || 'development'
-
-export const isProduction = nodeEnv === 'production'
-export const isDevelopment = nodeEnv === 'development'
-
 export { serializeError } from 'serialize-error'
 
 // https://oida.dev/typescript-array-includes/

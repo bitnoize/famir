@@ -3,7 +3,7 @@ import { Config, CONFIG } from '@famir/config'
 import { HttpBody, HttpConnection, HttpHeaders, HttpKind, HttpMethod } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
-import { Readable, Writable, pipeline, PassThrough } from 'node:stream'
+import { PassThrough, pipeline, Readable } from 'node:stream'
 import { HttpClientError, HttpClientErrorCode } from './http-client.error.js'
 import {
   CurlHttpClientConfig,
@@ -252,7 +252,7 @@ export class CurlHttpClient implements HttpClient {
     requestBody: HttpBody,
     sizeLimit: number
   ): Promise<HttpClientStreamResult | HttpClientErrorResult> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const curl = new Curl()
 
       const state: {
@@ -284,12 +284,16 @@ export class CurlHttpClient implements HttpClient {
 
       curl.on('stream', (stream, status, curlHeaders) => {
         pipeline(stream, state.responseStream, (error) => {
-          if (!state.responseStream.destroyed) {
-            state.responseStream.destroy() // fixme
-          }
+          if (error) {
+            console.log('Stream response error', error)
 
-          if (!stream.destroyed) {
-            stream.destroy() // fixme
+            if (!state.responseStream.destroyed) {
+              state.responseStream.destroy() // fixme
+            }
+
+            if (!stream.destroyed) {
+              stream.destroy() // fixme
+            }
           }
         })
 

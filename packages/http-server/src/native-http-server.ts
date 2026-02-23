@@ -7,7 +7,6 @@ import { HTTP_SERVER_ROUTER, HttpServerRouter } from './http-server-router.js'
 import { HttpServerError } from './http-server.error.js'
 import {
   HTTP_SERVER,
-  HTTP_SERVER_ERROR_PAGE,
   HttpServer,
   HttpServerContext,
   NativeHttpServerConfig,
@@ -80,7 +79,12 @@ export class NativeHttpServer implements HttpServer {
     res: http.ServerResponse
   ): Promise<void> {
     try {
-      const ctx = new NativeHttpServerContext(req, res)
+      const ctx = new NativeHttpServerContext(
+        req,
+        res,
+        this.options.verbose,
+        this.options.errorPage
+      )
 
       await this.chainMiddlewares(ctx)
 
@@ -102,7 +106,7 @@ export class NativeHttpServer implements HttpServer {
           ? [error.status, error.message]
           : [500, 'Server internal error']
 
-      const errorPage = this.templater.render(HTTP_SERVER_ERROR_PAGE, {
+      const errorPage = this.templater.render(this.options.errorPage, {
         status,
         message
       })
@@ -210,7 +214,9 @@ export class NativeHttpServer implements HttpServer {
   private buildOptions(config: NativeHttpServerConfig): NativeHttpServerOptions {
     return {
       address: config.HTTP_SERVER_ADDRESS,
-      port: config.HTTP_SERVER_PORT
+      port: config.HTTP_SERVER_PORT,
+      verbose: config.HTTP_SERVER_VERBOSE,
+      errorPage: config.HTTP_SERVER_ERROR_PAGE
     }
   }
 }

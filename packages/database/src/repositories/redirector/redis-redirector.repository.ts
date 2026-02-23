@@ -66,13 +66,13 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
   async read(campaignId: string, redirectorId: string): Promise<FullRedirectorModel | null> {
     try {
-      const rawFullModel = await this.connection.redirector.read_full_redirector(
+      const rawModel = await this.connection.redirector.read_full_redirector(
         this.options.prefix,
         campaignId,
         redirectorId
       )
 
-      return this.buildFullModel(rawFullModel)
+      return this.buildFullModel(rawModel)
     } catch (error) {
       this.raiseError(error, 'read', { campaignId, redirectorId })
     }
@@ -159,20 +159,20 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     )
   }
 
-  protected buildFullModel(rawFullModel: unknown): FullRedirectorModel | null {
-    if (rawFullModel === null) {
+  protected buildFullModel(rawModel: unknown): FullRedirectorModel | null {
+    if (rawModel === null) {
       return null
     }
 
-    this.validateRawData<RawFullRedirector>('database-raw-full-redirector', rawFullModel)
+    this.validateRawData<RawFullRedirector>('database-raw-full-redirector', rawModel)
 
     return new FullRedirectorModel(
-      rawFullModel.campaign_id,
-      rawFullModel.redirector_id,
-      rawFullModel.page,
-      rawFullModel.lure_count,
-      new Date(rawFullModel.created_at),
-      new Date(rawFullModel.updated_at)
+      rawModel.campaign_id,
+      rawModel.redirector_id,
+      rawModel.page,
+      rawModel.lure_count,
+      new Date(rawModel.created_at),
+      new Date(rawModel.updated_at)
     )
   }
 

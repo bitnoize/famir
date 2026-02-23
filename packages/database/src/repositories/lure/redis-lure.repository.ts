@@ -76,13 +76,9 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  async readPath(campaignId: string, path: string): Promise<LureModel | null> {
+  async find(campaignId: string, path: string): Promise<LureModel | null> {
     try {
-      const lureId = await this.connection.lure.read_lure_path(
-        this.options.prefix,
-        campaignId,
-        path
-      )
+      const lureId = await this.connection.lure.find_lure_id(this.options.prefix, campaignId, path)
 
       if (lureId === null) {
         return null
@@ -94,7 +90,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'readPath', { campaignId, path })
+      this.raiseError(error, 'find', { campaignId, path })
     }
   }
 
@@ -135,7 +131,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
   async delete(
     campaignId: string,
     lureId: string,
-    path: string,
     redirectorId: string,
     lockSecret: string
   ): Promise<void> {
@@ -144,16 +139,15 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         this.options.prefix,
         campaignId,
         lureId,
-        path,
         redirectorId,
         lockSecret
       )
 
       const mesg = this.handleStatusReply(statusReply)
 
-      this.logger.info(mesg, { lure: { campaignId, lureId, path, redirectorId } })
+      this.logger.info(mesg, { lure: { campaignId, lureId, redirectorId } })
     } catch (error) {
-      this.raiseError(error, 'delete', { campaignId, lureId, path, redirectorId })
+      this.raiseError(error, 'delete', { campaignId, lureId, redirectorId })
     }
   }
 

@@ -3,7 +3,12 @@ import {
   configRedisDatabasePrefixSchema
 } from '@famir/database'
 import { configHttpClientVerboseSchema } from '@famir/http-client'
-import { configHttpServerAddressSchema, configHttpServerPortSchema } from '@famir/http-server'
+import {
+  configHttpServerAddressSchema,
+  configHttpServerErrorPageSchema,
+  configHttpServerPortSchema,
+  configHttpServerVerboseSchema
+} from '@famir/http-server'
 import {
   configLoggerAppNameSchema,
   configLoggerLogLevelSchema,
@@ -30,7 +35,9 @@ export const configAppDefaultSchema: JSONSchemaType<AppDefaultConfig> = {
     'WORKFLOW_PREFIX',
     'HTTP_CLIENT_VERBOSE',
     'HTTP_SERVER_ADDRESS',
-    'HTTP_SERVER_PORT'
+    'HTTP_SERVER_PORT',
+    'HTTP_SERVER_VERBOSE',
+    'HTTP_SERVER_ERROR_PAGE'
   ],
   properties: {
     LOGGER_APP_NAME: {
@@ -52,7 +59,9 @@ export const configAppDefaultSchema: JSONSchemaType<AppDefaultConfig> = {
     HTTP_SERVER_PORT: {
       ...configHttpServerPortSchema,
       default: 3000
-    }
+    },
+    HTTP_SERVER_VERBOSE: configHttpServerVerboseSchema,
+    HTTP_SERVER_ERROR_PAGE: configHttpServerErrorPageSchema
   },
   additionalProperties: false
 } as const

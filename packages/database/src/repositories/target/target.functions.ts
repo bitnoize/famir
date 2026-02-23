@@ -5,6 +5,7 @@ import {
   targetIndexKey,
   targetKey,
   targetLabelsKey,
+  targetMirrorHostsKey,
   targetUniqueDonorKey,
   targetUniqueMirrorKey
 } from '../../database.keys.js'
@@ -44,7 +45,7 @@ export interface RawFullTarget extends RawTarget {
 export const targetFunctions = {
   target: {
     create_target: {
-      NUMBER_OF_KEYS: 6,
+      NUMBER_OF_KEYS: 7,
 
       parseCommand(
         parser: CommandParser,
@@ -76,6 +77,7 @@ export const targetFunctions = {
         parser.pushKey(targetKey(prefix, campaignId, targetId))
         parser.pushKey(targetUniqueDonorKey(prefix, campaignId))
         parser.pushKey(targetUniqueMirrorKey(prefix, campaignId))
+        parser.pushKey(targetMirrorHostsKey(prefix))
         parser.pushKey(targetIndexKey(prefix, campaignId))
 
         parser.push(campaignId)
@@ -102,7 +104,7 @@ export const targetFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_target: {
@@ -114,7 +116,7 @@ export const targetFunctions = {
         parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
       },
 
-      transformReply: undefined as unknown as () => RawTarget | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_full_target: {
@@ -126,7 +128,19 @@ export const targetFunctions = {
         parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
       },
 
-      transformReply: undefined as unknown as () => RawTarget | null
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    find_target_link: {
+      NUMBER_OF_KEYS: 1,
+
+      parseCommand(parser: CommandParser, prefix: string, mirrorHost: string) {
+        parser.pushKey(targetMirrorHostsKey(prefix))
+
+        parser.push(mirrorHost)
+      },
+
+      transformReply: undefined as unknown as () => unknown
     },
 
     read_target_index: {
@@ -137,7 +151,7 @@ export const targetFunctions = {
         parser.pushKey(targetIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => string[] | null
+      transformReply: undefined as unknown as () => unknown
     },
 
     update_target: {
@@ -218,7 +232,7 @@ export const targetFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     enable_target: {
@@ -239,7 +253,7 @@ export const targetFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     disable_target: {
@@ -260,7 +274,7 @@ export const targetFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     append_target_label: {
@@ -284,7 +298,7 @@ export const targetFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     remove_target_label: {
@@ -308,11 +322,11 @@ export const targetFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     },
 
     delete_target: {
-      NUMBER_OF_KEYS: 7,
+      NUMBER_OF_KEYS: 8,
 
       parseCommand(
         parser: CommandParser,
@@ -327,12 +341,13 @@ export const targetFunctions = {
         parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
         parser.pushKey(targetUniqueDonorKey(prefix, campaignId))
         parser.pushKey(targetUniqueMirrorKey(prefix, campaignId))
+        parser.pushKey(targetMirrorHostsKey(prefix))
         parser.pushKey(targetIndexKey(prefix, campaignId))
 
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => string
+      transformReply: undefined as unknown as () => unknown
     }
   }
 } as const

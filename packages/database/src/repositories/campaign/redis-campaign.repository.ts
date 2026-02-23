@@ -47,8 +47,6 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     description: string,
     lockTimeout: number,
     landingUpgradePath: string,
-    landingUpgradeParam: string,
-    landingRedirectorParam: string,
     sessionCookieName: string,
     sessionExpire: number,
     newSessionExpire: number,
@@ -62,8 +60,6 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         description,
         lockTimeout,
         landingUpgradePath,
-        landingUpgradeParam,
-        landingRedirectorParam,
         sessionCookieName,
         sessionExpire,
         newSessionExpire,
@@ -80,12 +76,12 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async read(campaignId: string): Promise<FullCampaignModel | null> {
     try {
-      const rawFullModel = await this.connection.campaign.read_full_campaign(
+      const rawModel = await this.connection.campaign.read_full_campaign(
         this.options.prefix,
         campaignId
       )
 
-      return this.buildFullModel(rawFullModel)
+      return this.buildFullModel(rawModel)
     } catch (error) {
       this.raiseError(error, 'read', { campaignId })
     }
@@ -206,34 +202,32 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     )
   }
 
-  protected buildFullModel(rawFullModel: unknown): FullCampaignModel | null {
-    if (rawFullModel === null) {
+  protected buildFullModel(rawModel: unknown): FullCampaignModel | null {
+    if (rawModel === null) {
       return null
     }
 
-    this.validateRawData<RawFullCampaign>('database-raw-full-campaign', rawFullModel)
+    this.validateRawData<RawFullCampaign>('database-raw-full-campaign', rawModel)
 
     return new FullCampaignModel(
-      rawFullModel.campaign_id,
-      rawFullModel.mirror_domain,
-      rawFullModel.description,
-      rawFullModel.lock_timeout,
-      rawFullModel.landing_upgrade_path,
-      rawFullModel.landing_upgrade_param,
-      rawFullModel.landing_redirector_param,
-      rawFullModel.session_cookie_name,
-      rawFullModel.session_expire,
-      rawFullModel.new_session_expire,
-      rawFullModel.message_expire,
-      !!rawFullModel.is_locked,
-      rawFullModel.proxy_count,
-      rawFullModel.target_count,
-      rawFullModel.redirector_count,
-      rawFullModel.lure_count,
-      rawFullModel.session_count,
-      rawFullModel.message_count,
-      new Date(rawFullModel.created_at),
-      new Date(rawFullModel.updated_at)
+      rawModel.campaign_id,
+      rawModel.mirror_domain,
+      rawModel.description,
+      rawModel.lock_timeout,
+      rawModel.landing_upgrade_path,
+      rawModel.session_cookie_name,
+      rawModel.session_expire,
+      rawModel.new_session_expire,
+      rawModel.message_expire,
+      !!rawModel.is_locked,
+      rawModel.proxy_count,
+      rawModel.target_count,
+      rawModel.redirector_count,
+      rawModel.lure_count,
+      rawModel.session_count,
+      rawModel.message_count,
+      new Date(rawModel.created_at),
+      new Date(rawModel.updated_at)
     )
   }
 

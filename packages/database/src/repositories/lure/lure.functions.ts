@@ -4,7 +4,7 @@ import {
   campaignLockKey,
   lureIndexKey,
   lureKey,
-  lurePathKey,
+  lurePathsKey,
   redirectorKey
 } from '../../database.keys.js'
 
@@ -36,7 +36,7 @@ export const lureFunctions = {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
-        parser.pushKey(lurePathKey(prefix, campaignId, path))
+        parser.pushKey(lurePathsKey(prefix, campaignId))
         parser.pushKey(lureIndexKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
 
@@ -62,12 +62,14 @@ export const lureFunctions = {
       transformReply: undefined as unknown as () => unknown
     },
 
-    read_lure_path: {
+    find_lure_id: {
       NUMBER_OF_KEYS: 2,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string, path: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lurePathKey(prefix, campaignId, path))
+        parser.pushKey(lurePathsKey(prefix, campaignId))
+
+        parser.push(path)
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -134,14 +136,13 @@ export const lureFunctions = {
         prefix: string,
         campaignId: string,
         lureId: string,
-        path: string,
         redirectorId: string,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
-        parser.pushKey(lurePathKey(prefix, campaignId, path))
+        parser.pushKey(lurePathsKey(prefix, campaignId))
         parser.pushKey(lureIndexKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
 

@@ -1,7 +1,5 @@
 import {
   campaignDescriptionSchema,
-  campaignLandingRedirectorParamSchema,
-  campaignLandingUpgradeParamSchema,
   campaignLandingUpgradePathSchema,
   campaignLockTimeoutSchema,
   campaignMessageExpireSchema,
@@ -32,8 +30,6 @@ const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
     'mirrorDomain',
     'description',
     'landingUpgradePath',
-    'landingUpgradeParam',
-    'landingRedirectorParam',
     'sessionCookieName',
     'sessionExpire',
     'newSessionExpire',
@@ -53,14 +49,6 @@ const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
     landingUpgradePath: {
       ...campaignLandingUpgradePathSchema,
       default: '/fake-auth'
-    },
-    landingUpgradeParam: {
-      ...campaignLandingUpgradeParamSchema,
-      default: 'data'
-    },
-    landingRedirectorParam: {
-      ...campaignLandingRedirectorParamSchema,
-      default: 'data'
     },
     sessionCookieName: {
       ...campaignSessionCookieNameSchema,

@@ -1,4 +1,4 @@
-import { DIContainer, isDevelopment } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
   EnabledFullTargetModel,
   FullCampaignModel,
@@ -103,7 +103,7 @@ export class AuthorizeController extends BaseController {
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): Promise<void> {
-    const landingUpgradeData = this.parseLandingUpgradeData(ctx, campaign)
+    const landingUpgradeData = this.parseLandingUpgradeData(ctx)
 
     if (ctx.isBot) {
       await this.renderMainRedirect(ctx)
@@ -166,7 +166,7 @@ export class AuthorizeController extends BaseController {
     target: EnabledFullTargetModel,
     redirector: FullRedirectorModel
   ): Promise<void> {
-    const landingRedirectorData = this.parseLandingRedirectorData(ctx, campaign)
+    const landingRedirectorData = this.parseLandingRedirectorData(ctx)
 
     if (ctx.isBot) {
       await this.renderRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
@@ -271,7 +271,7 @@ export class AuthorizeController extends BaseController {
     this.setState(ctx, 'proxy', proxy)
     this.setState(ctx, 'session', session)
 
-    if (isDevelopment) {
+    if (ctx.verbose) {
       ctx.responseHeaders.merge({
         'X-Famir-Session-Id': session.sessionId,
         'X-Famir-Proxy-Id': proxy.proxyId
@@ -320,7 +320,7 @@ export class AuthorizeController extends BaseController {
     this.setState(ctx, 'proxy', proxy)
     this.setState(ctx, 'session', session)
 
-    if (isDevelopment) {
+    if (ctx.verbose) {
       ctx.responseHeaders.merge({
         'X-Famir-Session-Id': session.sessionId,
         'X-Famir-Proxy-Id': proxy.proxyId
@@ -375,16 +375,13 @@ export class AuthorizeController extends BaseController {
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  private parseLandingUpgradeData(
-    ctx: HttpServerContext,
-    campaign: FullCampaignModel
-  ): LandingUpgradeData {
+  private parseLandingUpgradeData(ctx: HttpServerContext): LandingUpgradeData {
     try {
       const queryString = ctx.url.getQueryString()
-      const value = queryString[campaign.landingUpgradeParam]
+      const value = Object.values(queryString)[0]
 
-      if (!(value != null && typeof value === 'string')) {
-        throw new Error(`Landing upgrade param is not a string`)
+      if (!(value && typeof value === 'string')) {
+        throw new Error(`QueryString value is not a string`)
       }
 
       const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
@@ -395,21 +392,21 @@ export class AuthorizeController extends BaseController {
     } catch (error) {
       throw new HttpServerError(`Bad request`, {
         cause: error,
+        context: {
+          reason: `Parse landing upgrade data failed`
+        },
         code: 'BAD_REQUEST'
       })
     }
   }
 
-  private parseLandingRedirectorData(
-    ctx: HttpServerContext,
-    campaign: FullCampaignModel
-  ): LandingRedirectorData {
+  private parseLandingRedirectorData(ctx: HttpServerContext): LandingRedirectorData {
     try {
       const queryString = ctx.url.getQueryString()
-      const value = queryString[campaign.landingRedirectorParam]
+      const value = Object.values(queryString)[0]
 
-      if (!(value != null && typeof value === 'string')) {
-        throw new Error(`Landing redirector param is not a string`)
+      if (!(value && typeof value === 'string')) {
+        throw new Error(`QueryString value is not a string`)
       }
 
       const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
@@ -423,6 +420,9 @@ export class AuthorizeController extends BaseController {
     } catch (error) {
       throw new HttpServerError(`Bad request`, {
         cause: error,
+        context: {
+          reason: `Parse landing redirector data failed`
+        },
         code: 'BAD_REQUEST'
       })
     }

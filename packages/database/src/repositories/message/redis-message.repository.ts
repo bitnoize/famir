@@ -105,13 +105,13 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
   async read(campaignId: string, messageId: string): Promise<FullMessageModel | null> {
     try {
-      const rawFullModel = await this.connection.message.read_full_message(
+      const rawModel = await this.connection.message.read_full_message(
         this.options.prefix,
         campaignId,
         messageId
       )
 
-      return this.buildFullModel(rawFullModel)
+      return this.buildFullModel(rawModel)
     } catch (error) {
       this.raiseError(error, 'read', { campaignId, messageId })
     }
@@ -156,35 +156,35 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
   }
   */
 
-  protected buildFullModel(rawFullModel: unknown): FullMessageModel | null {
-    if (rawFullModel === null) {
+  protected buildFullModel(rawModel: unknown): FullMessageModel | null {
+    if (rawModel === null) {
       return null
     }
 
-    this.validateRawData<RawFullMessage>('database-raw-full-message', rawFullModel)
+    this.validateRawData<RawFullMessage>('database-raw-full-message', rawModel)
 
     return new FullMessageModel(
-      rawFullModel.campaign_id,
-      rawFullModel.message_id,
-      rawFullModel.proxy_id,
-      rawFullModel.target_id,
-      rawFullModel.session_id,
-      rawFullModel.kind,
-      rawFullModel.method,
-      rawFullModel.url,
-      this.parseHeaders(rawFullModel.request_headers),
-      this.decodeBase64(rawFullModel.request_body),
-      rawFullModel.status,
-      this.parseHeaders(rawFullModel.response_headers),
-      this.decodeBase64(rawFullModel.response_body),
-      this.parseConnection(rawFullModel.connection),
-      this.parsePayload(rawFullModel.payload),
-      this.parseErrors(rawFullModel.errors),
-      rawFullModel.score,
-      rawFullModel.ip,
-      rawFullModel.start_time,
-      rawFullModel.finish_time,
-      new Date(rawFullModel.created_at)
+      rawModel.campaign_id,
+      rawModel.message_id,
+      rawModel.proxy_id,
+      rawModel.target_id,
+      rawModel.session_id,
+      rawModel.kind,
+      rawModel.method,
+      rawModel.url,
+      this.parseHeaders(rawModel.request_headers),
+      this.decodeBase64(rawModel.request_body),
+      rawModel.status,
+      this.parseHeaders(rawModel.response_headers),
+      this.decodeBase64(rawModel.response_body),
+      this.parseConnection(rawModel.connection),
+      this.parsePayload(rawModel.payload),
+      this.parseErrors(rawModel.errors),
+      rawModel.score,
+      rawModel.ip,
+      rawModel.start_time,
+      rawModel.finish_time,
+      new Date(rawModel.created_at)
     )
   }
 

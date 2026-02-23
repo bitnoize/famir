@@ -39,7 +39,7 @@ export const targetKey = (prefix: string, campaignId: string, targetId: string) 
 }
 
 export const targetLabelsKey = (prefix: string, campaignId: string, targetId: string) => {
-  return buildKey(prefix, 'target', campaignId, targetId, 'labels')
+  return buildKey(prefix, 'target-labels', campaignId, targetId)
 }
 
 export const targetUniqueDonorKey = (prefix: string, campaignId: string) => {
@@ -48,6 +48,10 @@ export const targetUniqueDonorKey = (prefix: string, campaignId: string) => {
 
 export const targetUniqueMirrorKey = (prefix: string, campaignId: string) => {
   return buildKey(prefix, 'target-unique-mirror', campaignId)
+}
+
+export const targetMirrorHostsKey = (prefix: string) => {
+  return buildKey(prefix, 'target-mirror-hosts')
 }
 
 export const targetIndexKey = (prefix: string, campaignId: string) => {
@@ -66,8 +70,8 @@ export const lureKey = (prefix: string, campaignId: string, lureId: string) => {
   return buildKey(prefix, 'lure', campaignId, lureId)
 }
 
-export const lurePathKey = (prefix: string, campaignId: string, path: string) => {
-  return buildKey(prefix, 'lure-path', campaignId, path)
+export const lurePathsKey = (prefix: string, campaignId: string) => {
+  return buildKey(prefix, 'lure-paths', campaignId)
 }
 
 export const lureIndexKey = (prefix: string, campaignId: string) => {

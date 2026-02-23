@@ -75,7 +75,7 @@ export class AuthorizeService {
   }
 
   async readLurePath(data: ReadLurePathData): Promise<EnabledLureModel | null> {
-    const model = await this.lureRepository.readPath(data.campaignId, data.path)
+    const model = await this.lureRepository.find(data.campaignId, data.path)
 
     return model && LureModel.isEnabled(model) ? model : null
   }

@@ -1,4 +1,4 @@
-import { DIContainer, isDevelopment } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
   HTTP_SERVER_ROUTER,
   HttpServerContext,
@@ -8,8 +8,6 @@ import {
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import { SetupMirrorHeaders } from './setup-mirror.js'
-import { setupMirrorSchemas } from './setup-mirror.schemas.js'
 import { type SetupMirrorService, SETUP_MIRROR_SERVICE } from './setup-mirror.service.js'
 
 export const SETUP_MIRROR_CONTROLLER = Symbol('SetupMirrorController')
@@ -40,30 +38,25 @@ export class SetupMirrorController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas(setupMirrorSchemas)
-
     this.logger.debug(`SetupMirrorController initialized`)
   }
 
   use() {
     this.router.register('setup-mirror', async (ctx, next) => {
-      const [campaignId, targetId] = this.parseSetupMirrorHeaders(ctx)
+      const mirrorHost = this.parseMirrorHost(ctx)
 
-      const [campaign, target] = await this.setupMirrorService.readCampaignTarget({
-        campaignId,
-        targetId
+      const [campaign, target, targets] = await this.setupMirrorService.findTarget({
+        mirrorHost
       })
-
-      const targets = await this.setupMirrorService.listTargets({ campaignId })
 
       this.setState(ctx, 'campaign', campaign)
       this.setState(ctx, 'target', target)
       this.setState(ctx, 'targets', targets)
 
-      if (isDevelopment) {
+      if (ctx.verbose) {
         ctx.responseHeaders.merge({
-          'X-Famir-Campaign-Id': campaignId,
-          'X-Famir-Target-Id': targetId
+          'X-Famir-Campaign-Id': target.campaignId,
+          'X-Famir-Target-Id': target.targetId
         })
       }
 
@@ -71,20 +64,19 @@ export class SetupMirrorController extends BaseController {
     })
   }
 
-  private parseSetupMirrorHeaders(ctx: HttpServerContext): SetupMirrorHeaders {
+  private parseMirrorHost(ctx: HttpServerContext): string {
     try {
-      const headers = [
-        ctx.requestHeaders.getString('X-Famir-Campaign-Id'),
-        ctx.requestHeaders.getString('X-Famir-Target-Id')
-      ]
+      const mirrorHost = ctx.requestHeaders.getString('Host')
 
-      this.validator.assertSchema<SetupMirrorHeaders>('reverse-proxy-setup-mirror-headers', headers)
+      if (!(mirrorHost && /[^:]+:\d+$/.test(mirrorHost))) {
+        throw new Error(`Host header malform`)
+      }
 
-      return headers
+      return mirrorHost
     } catch (error) {
-      throw new HttpServerError(`Service unavailable`, {
+      throw new HttpServerError(`Bad request`, {
         cause: error,
-        code: 'SERVICE_UNAVAILABLE'
+        code: 'BAD_REQUEST'
       })
     }
   }

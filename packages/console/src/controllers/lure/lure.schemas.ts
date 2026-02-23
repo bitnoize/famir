@@ -49,11 +49,10 @@ const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
 
 const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
   type: 'object',
-  required: ['campaignId', 'lureId', 'path', 'redirectorId', 'lockSecret'],
+  required: ['campaignId', 'lureId', 'redirectorId', 'lockSecret'],
   properties: {
     campaignId: customIdentSchema,
     lureId: customIdentSchema,
-    path: lurePathSchema,
     redirectorId: customIdentSchema,
     lockSecret: randomIdentSchema
   },

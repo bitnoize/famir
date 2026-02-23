@@ -132,3 +132,5 @@ export interface EnabledTargetModel extends TargetModel {
 export interface EnabledFullTargetModel extends FullTargetModel {
   isEnabled: true
 }
+
+//export type TargetMirrorHostsModel = Record<string, [string, string]>

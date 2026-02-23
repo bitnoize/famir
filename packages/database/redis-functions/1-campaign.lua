@@ -4,7 +4,7 @@
   Create campaign
 --]]
 local function create_campaign(keys, args)
-  if #keys ~= 3 or #args ~= 12 then
+  if #keys ~= 3 or #args ~= 10 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -22,16 +22,14 @@ local function create_campaign(keys, args)
     description = args[3],
     lock_timeout = tonumber(args[4]),
     landing_upgrade_path = args[5],
-    landing_upgrade_param = args[6],
-    landing_redirector_param = args[7],
-    session_cookie_name = args[8],
-    session_expire = tonumber(args[9]),
-    new_session_expire = tonumber(args[10]),
-    message_expire = tonumber(args[11]),
+    session_cookie_name = args[6],
+    session_expire = tonumber(args[7]),
+    new_session_expire = tonumber(args[8]),
+    message_expire = tonumber(args[9]),
     session_count = 0,
     message_count = 0,
-    created_at = tonumber(args[12]),
-    updated_at = tonumber(args[12]),
+    created_at = tonumber(args[10]),
+    updated_at = tonumber(args[10]),
   }
 
   for field, value in pairs(model) do
@@ -164,8 +162,6 @@ local function read_full_campaign(keys, args)
     'description',
     'lock_timeout',
     'landing_upgrade_path',
-    'landing_upgrade_param',
-    'landing_redirector_param',
     'session_cookie_name',
     'session_expire',
     'new_session_expire',
@@ -176,7 +172,7 @@ local function read_full_campaign(keys, args)
     'updated_at'
   )
 
-  if #values ~= 15 then
+  if #values ~= 13 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -186,21 +182,19 @@ local function read_full_campaign(keys, args)
     description = values[3],
     lock_timeout = tonumber(values[4]),
     landing_upgrade_path = values[5],
-    landing_upgrade_param = values[6],
-    landing_redirector_param = values[7],
-    session_cookie_name = values[8],
-    session_expire = tonumber(values[9]),
-    new_session_expire = tonumber(values[10]),
-    message_expire = tonumber(values[11]),
+    session_cookie_name = values[6],
+    session_expire = tonumber(values[7]),
+    new_session_expire = tonumber(values[8]),
+    message_expire = tonumber(values[9]),
     is_locked = redis.call('EXISTS', campaign_lock_key),
     proxy_count = redis.call('ZCARD', proxy_index_key),
     target_count = redis.call('ZCARD', target_index_key),
     redirector_count = redis.call('ZCARD', redirector_index_key),
     lure_count = redis.call('ZCARD', lure_index_key),
-    session_count = tonumber(values[12]),
-    message_count = tonumber(values[13]),
-    created_at = tonumber(values[14]),
-    updated_at = tonumber(values[15]),
+    session_count = tonumber(values[10]),
+    message_count = tonumber(values[11]),
+    created_at = tonumber(values[12]),
+    updated_at = tonumber(values[13]),
   }
 
   for field, value in pairs(model) do

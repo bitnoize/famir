@@ -21,8 +21,6 @@ export class FullCampaignModel extends CampaignModel {
     readonly description: string,
     readonly lockTimeout: number,
     readonly landingUpgradePath: string,
-    readonly landingUpgradeParam: string,
-    readonly landingRedirectorParam: string,
     readonly sessionCookieName: string,
     readonly sessionExpire: number,
     readonly newSessionExpire: number,

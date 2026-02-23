@@ -11,13 +11,12 @@ export interface LureRepository {
     lockSecret: string
   ): Promise<void>
   read(campaignId: string, lureId: string): Promise<LureModel | null>
-  readPath(campaignId: string, path: string): Promise<LureModel | null>
+  find(campaignId: string, path: string): Promise<LureModel | null>
   enable(campaignId: string, lureId: string, lockSecret: string): Promise<void>
   disable(campaignId: string, lureId: string, lockSecret: string): Promise<void>
   delete(
     campaignId: string,
     lureId: string,
-    path: string,
     redirectorId: string,
     lockSecret: string
   ): Promise<void>
