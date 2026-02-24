@@ -4,7 +4,7 @@ import { PinoLoggerConfig } from '@famir/logger'
 import { MinioStorageConfig } from '@famir/storage'
 import { BullWorkflowConfig } from '@famir/workflow'
 
-export type AppDefaultConfig = PinoLoggerConfig &
+export type AppStdConfig = PinoLoggerConfig &
   RedisDatabaseConfig &
   MinioStorageConfig &
   BullWorkflowConfig &

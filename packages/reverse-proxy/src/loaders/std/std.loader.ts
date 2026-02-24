@@ -17,15 +17,15 @@ import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeLogQueue, RedisWorkflowConnector } from '@famir/workflow'
 import { App } from '../../reverse-proxy.app.js'
-import { AppDefaultConfig } from './default.js'
-import { configAppDefaultSchema } from './default.schemas.js'
+import { AppStdConfig } from './std.js'
+import { configAppStdSchema } from './std.schemas.js'
 
-export async function bootstrapDefault(composer: DIComposer): Promise<void> {
+export async function bootstrapStd(composer: DIComposer): Promise<void> {
   const container = new DIContainer()
 
   AjvValidator.inject(container)
 
-  EnvConfig.inject<AppDefaultConfig>(container, configAppDefaultSchema)
+  EnvConfig.inject<AppStdConfig>(container, configAppStdSchema)
 
   PinoLogger.inject(container)
 

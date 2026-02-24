@@ -27,9 +27,9 @@ import {
   configRedisWorkflowConnectionUrlSchema,
   configRedisWorkflowPrefixSchema
 } from '@famir/workflow'
-import { AppDefaultConfig } from './default.js'
+import { AppStdConfig } from './std.js'
 
-export const configAppDefaultSchema: JSONSchemaType<AppDefaultConfig> = {
+export const configAppStdSchema: JSONSchemaType<AppStdConfig> = {
   type: 'object',
   required: [
     'LOGGER_APP_NAME',

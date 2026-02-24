@@ -4,7 +4,7 @@ import { NativeHttpServerConfig } from '@famir/http-server'
 import { PinoLoggerConfig } from '@famir/logger'
 import { BullWorkflowConfig } from '@famir/workflow'
 
-export type AppDefaultConfig = PinoLoggerConfig &
+export type AppStdConfig = PinoLoggerConfig &
   RedisDatabaseConfig &
   BullWorkflowConfig &
   CurlHttpClientConfig &
