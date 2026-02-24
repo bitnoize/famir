@@ -2,7 +2,7 @@ import { DIContainer } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { ANALYZE_LOG_QUEUE_NAME } from '@famir/workflow'
+import { WEBHOOK_QUEUE_NAME } from '@famir/workflow'
 import {
   EXECUTOR_CONNECTOR,
   ExecutorConnector,
@@ -11,15 +11,15 @@ import {
 import { EXECUTOR_ROUTER, ExecutorRouter } from '../../executor-router.js'
 import { BullExecutorConfig } from '../../executor.js'
 import { BullBaseWorker } from '../base/index.js'
-import { ANALYZE_LOG_WORKER, AnalyzeLogWorker } from './analyze-log.js'
-import { analyzeLogSchemas } from './analyze-log.schemas.js'
+import { WEBHOOK_WORKER, WebhookWorker } from './webhook.js'
+import { webhookSchemas } from './webhook.schemas.js'
 
-export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWorker {
+export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
   static inject(container: DIContainer) {
-    container.registerSingleton<AnalyzeLogWorker>(
-      ANALYZE_LOG_WORKER,
+    container.registerSingleton<WebhookWorker>(
+      WEBHOOK_WORKER,
       (c) =>
-        new BullAnalyzeLogWorker(
+        new BullWebhookWorker(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<BullExecutorConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
@@ -36,10 +36,10 @@ export class BullAnalyzeLogWorker extends BullBaseWorker implements AnalyzeLogWo
     connection: RedisExecutorConnection,
     router: ExecutorRouter
   ) {
-    super(validator, config, logger, connection, router, ANALYZE_LOG_QUEUE_NAME)
+    super(validator, config, logger, connection, router, WEBHOOK_QUEUE_NAME)
 
-    this.validator.addSchemas(analyzeLogSchemas)
+    this.validator.addSchemas(webhookSchemas)
 
-    this.logger.debug(`AnalyzeLogWorker initialized`)
+    this.logger.debug(`WebhookWorker initialized`)
   }
 }

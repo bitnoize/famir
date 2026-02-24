@@ -9,6 +9,7 @@
     { "path": "../common" },
     { "path": "../validator" },
     { "path": "../config" },
-    { "path": "../logger" }
+    { "path": "../logger" },
+    { "path": "../workflow" }
   ]
 }

@@ -220,7 +220,10 @@ export class RoundTripController extends BaseController {
         finishTime: ctx.finishTime
       })
 
-      //await this.roundTripService.addAnalyzeLogJob()
+      await this.roundTripService.addAnalyzeLogJob(message.analyzeLog, {
+        campaignId: campaign.campaignId,
+        messageId: message.id,
+      })
 
       await next()
     })

@@ -4,9 +4,8 @@ import {
   customIdentSchema,
   randomIdentSchema
 } from '@famir/validator'
-import { AnalyzeLogJobData } from '../../jobs/index.js'
+import { AnalyzeLogJobData } from '@famir/workflow'
 
-// FIXME
 export const analyzeLogJobDataSchema: JSONSchemaType<AnalyzeLogJobData> = {
   type: 'object',
   required: ['campaignId', 'messageId'],

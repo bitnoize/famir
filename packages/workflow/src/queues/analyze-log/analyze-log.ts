@@ -8,5 +8,5 @@ export interface AnalyzeLogQueue {
   close(): Promise<void>
   getJobCount(): Promise<number>
   getJobCounts(): Promise<Record<string, number>>
-  addJob(data: AnalyzeLogJobData, name: string): Promise<string>
+  addJob(name: string, data: AnalyzeLogJobData): Promise<void>
 }

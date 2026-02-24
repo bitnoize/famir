@@ -1,6 +1,7 @@
 import { serializeError } from '@famir/common'
 import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
+import { Validator } from '@famir/validator'
 import { Job, MetricsTime, Worker } from 'bullmq'
 import { RedisExecutorConnection } from '../../executor-connector.js'
 import { ExecutorRouter } from '../../executor-router.js'
@@ -12,6 +13,7 @@ export abstract class BullBaseWorker {
   protected readonly worker: Worker<unknown, unknown>
 
   constructor(
+    protected readonly validator: Validator,
     config: Config<BullExecutorConfig>,
     protected readonly logger: Logger,
     protected readonly connection: RedisExecutorConnection,
@@ -19,8 +21,6 @@ export abstract class BullBaseWorker {
     protected readonly queueName: string
   ) {
     this.options = this.buildOptions(config.data)
-
-    this.router.addQueue(this.queueName)
 
     this.worker = new Worker<unknown, unknown>(
       this.queueName,

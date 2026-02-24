@@ -5,25 +5,21 @@ import { ExecutorProcessor } from './executor.js'
 export const EXECUTOR_ROUTER = Symbol('ExecutorRouter')
 
 export class ExecutorRouter {
-  static inject(container: DIContainer) {
+  static inject(container: DIContainer, queueNames: string[]) {
     container.registerSingleton<ExecutorRouter>(
       EXECUTOR_ROUTER,
-      (c) => new ExecutorRouter(c.resolve<Logger>(LOGGER))
+      (c) => new ExecutorRouter(c.resolve<Logger>(LOGGER), queueNames)
     )
   }
 
   protected readonly registry: Record<string, Map<string, ExecutorProcessor>> = {}
 
-  constructor(protected readonly logger: Logger) {
+  constructor(protected readonly logger: Logger, queueNames: string[]) {
+    queueNames.map((queueName) => {
+      this.registry[queueName] = new Map<string, ExecutorProcessor>()
+    })
+
     this.logger.debug(`ExecutorRouter initialized`)
-  }
-
-  addQueue(name: string) {
-    if (this.registry[name]) {
-      throw new Error(`Queue already exists: ${name}`)
-    }
-
-    this.registry[name] = new Map<string, ExecutorProcessor>()
   }
 
   register(queueName: string, jobName: string, processor: ExecutorProcessor) {

@@ -11,7 +11,7 @@ import { BullAnalyzeLogWorker, ExecutorRouter, RedisExecutorConnector } from '@f
 import { PinoLogger } from '@famir/logger'
 import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
-import { RedisWorkflowConnector } from '@famir/workflow'
+import { ANALYZE_LOG_QUEUE_NAME, RedisWorkflowConnector } from '@famir/workflow'
 import { App } from '../../analyze-log.app.js'
 import { AppStdConfig } from './std.js'
 import { configAppStdSchema } from './std.schemas.js'
@@ -38,7 +38,7 @@ export async function bootstrapStd(composer: DIComposer): Promise<void> {
 
   RedisExecutorConnector.inject(container)
 
-  ExecutorRouter.inject(container)
+  ExecutorRouter.inject(container, [ANALYZE_LOG_QUEUE_NAME])
 
   BullAnalyzeLogWorker.inject(container)
 

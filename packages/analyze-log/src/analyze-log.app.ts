@@ -7,8 +7,7 @@ import {
   ExecutorConnector
 } from '@famir/executor'
 import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { analyzeLogJobDataSchema, WORKFLOW_CONNECTOR, WorkflowConnector } from '@famir/workflow'
+import { WORKFLOW_CONNECTOR, WorkflowConnector } from '@famir/workflow'
 
 export const APP = Symbol('App')
 
@@ -18,7 +17,6 @@ export class App {
       APP,
       (c) =>
         new App(
-          c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
@@ -33,7 +31,6 @@ export class App {
   }
 
   constructor(
-    protected readonly validator: Validator,
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
@@ -50,10 +47,6 @@ export class App {
           process.exit(2)
         })
       })
-    })
-
-    this.validator.addSchemas({
-      'analyze-log-job-data': analyzeLogJobDataSchema
     })
 
     this.logger.debug(`App initialized`)

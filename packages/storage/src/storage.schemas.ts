@@ -23,12 +23,19 @@ export const configStorageAccessKeySchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 128,
-  default: 'example'
+  //default: 'example'
 } as const
 
 export const configStorageSecretKeySchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 128,
-  default: 'secret'
+  //default: 'secret'
+} as const
+
+export const configStorageBucketNameSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 1,
+  maxLength: 128,
+  default: 'famir'
 } as const

@@ -34,15 +34,13 @@ export class BullAnalyzeLogQueue extends BullBaseQueue implements AnalyzeLogQueu
     this.logger.debug(`AnalyzeLogQueue initialized`)
   }
 
-  async addJob(data: AnalyzeLogJobData): Promise<string> {
+  async addJob(name: string, data: AnalyzeLogJobData): Promise<void> {
     try {
       const jobId = [data.campaignId, data.messageId].join('-')
 
-      await this.queue.add('default', data, {
+      await this.queue.add(name, data, {
         jobId
       })
-
-      return jobId
     } catch (error) {
       this.raiseError(error, 'addJob', data)
     }

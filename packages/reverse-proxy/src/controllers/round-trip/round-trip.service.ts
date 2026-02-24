@@ -13,7 +13,7 @@ import {
   HttpClientStreamResult
 } from '@famir/http-client'
 import { HttpServerError } from '@famir/http-server'
-import { ANALYZE_LOG_QUEUE, AnalyzeLogQueue } from '@famir/workflow'
+import { ANALYZE_LOG_QUEUE, AnalyzeLogQueue, AnalyzeLogJobData } from '@famir/workflow'
 import {
   CreateMessageData,
   SimpleForwardData,
@@ -125,5 +125,9 @@ export class RoundTripService {
 
       throw error
     }
+  }
+
+  async addAnalyzeLogJob(name: string, data: AnalyzeLogJobData): Promise<void> {
+    await this.analyzeLogQueue.addJob(name, data)
   }
 }

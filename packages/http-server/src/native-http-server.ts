@@ -43,7 +43,7 @@ export class NativeHttpServer implements HttpServer {
       this.handleRequest(req, res).catch((error: unknown) => {
         this.logger.error(`HttpServer unexpected error`, {
           error: serializeError(error),
-          request: this.dumpRequest(req),
+          request: this.dumpRequest(req)
         })
 
         if (!res.writableEnded) {
@@ -100,7 +100,7 @@ export class NativeHttpServer implements HttpServer {
     } catch (error) {
       this.logger.error(`HttpServer request error`, {
         error: serializeError(error),
-        request: this.dumpRequest(req),
+        request: this.dumpRequest(req)
       })
 
       const [status, message] =

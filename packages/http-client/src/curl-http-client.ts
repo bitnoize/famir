@@ -46,19 +46,25 @@ export class CurlHttpClient implements HttpClient {
     url: string,
     requestHeaders: HttpHeaders,
     requestBody: HttpBody,
-    sizeLimit: number
+    responseSizeLimit: number
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
     return new Promise((resolve, reject) => {
+      if (!(connectTimeout > 0 && timeout > 0 && responseSizeLimit > 0)) {
+        reject(new TypeError(`Wrong simpleForward params`))
+      }
+
       const curl = new Curl()
 
       const state: {
         error: HttpClientError | null
         responseHeaders: Buffer[]
         responseBody: Buffer[]
+        responseBodySize: number
       } = {
         error: null,
         responseHeaders: [],
-        responseBody: []
+        responseBody: [],
+        responseBodySize: 0
       }
 
       this.setupCurlOptions(
@@ -76,7 +82,7 @@ export class CurlHttpClient implements HttpClient {
 
       this.setupCurlHeaderfunction(curl, state)
 
-      this.setupCurlWritefunction(curl, state, sizeLimit)
+      this.setupCurlWritefunction(curl, state, responseSizeLimit)
 
       let isResolved = false
 
@@ -95,7 +101,7 @@ export class CurlHttpClient implements HttpClient {
             })
           } else {
             const responseHeaders = this.parseRawHeaders(state.responseHeaders)
-            const responseBody = this.parseRawBody(state.responseBody)
+            const responseBody = this.parseRawBody(state.responseBody, state.responseBodySize)
 
             responseHeaders['content-length'] = responseBody.length.toString()
             responseHeaders['content-encoding'] = undefined
@@ -136,6 +142,8 @@ export class CurlHttpClient implements HttpClient {
         }
       })
 
+      // TODO resolve timeout
+
       curl.perform()
     })
   }
@@ -148,19 +156,25 @@ export class CurlHttpClient implements HttpClient {
     url: string,
     requestHeaders: HttpHeaders,
     requestStream: Readable,
-    sizeLimit: number
+    responseSizeLimit: number
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
     return new Promise((resolve, reject) => {
+      if (!(connectTimeout > 0 && timeout > 0 && responseSizeLimit > 0)) {
+        reject(new TypeError(`Wrong simpleForward params`))
+      }
+
       const curl = new Curl()
 
       const state: {
         error: HttpClientError | null
         responseHeaders: Buffer[]
         responseBody: Buffer[]
+        responseBodySize: number
       } = {
         error: null,
         responseHeaders: [],
-        responseBody: []
+        responseBody: [],
+        responseBodySize: 0
       }
 
       this.setupCurlOptions(
@@ -178,7 +192,7 @@ export class CurlHttpClient implements HttpClient {
 
       this.setupCurlHeaderfunction(curl, state)
 
-      this.setupCurlWritefunction(curl, state, sizeLimit)
+      this.setupCurlWritefunction(curl, state, responseSizeLimit)
 
       let isResolved = false
 
@@ -197,7 +211,7 @@ export class CurlHttpClient implements HttpClient {
             })
           } else {
             const responseHeaders = this.parseRawHeaders(state.responseHeaders)
-            const responseBody = this.parseRawBody(state.responseBody)
+            const responseBody = this.parseRawBody(state.responseBody, state.responseBodySize)
 
             responseHeaders['content-length'] = responseBody.length.toString()
             responseHeaders['content-encoding'] = undefined
@@ -238,6 +252,8 @@ export class CurlHttpClient implements HttpClient {
         }
       })
 
+      // TODO resolve timeout
+
       curl.perform()
     })
   }
@@ -250,9 +266,15 @@ export class CurlHttpClient implements HttpClient {
     url: string,
     requestHeaders: HttpHeaders,
     requestBody: HttpBody,
-    sizeLimit: number
+    responseSizeLimit: number
   ): Promise<HttpClientStreamResult | HttpClientErrorResult> {
     return new Promise((resolve, reject) => {
+      if (!(connectTimeout > 0 && timeout > 0 && responseSizeLimit > 0)) {
+        reject(new TypeError(`Wrong simpleForward params`))
+      }
+
+      // FIXME response size limit
+
       const curl = new Curl()
 
       const state: {
@@ -282,7 +304,7 @@ export class CurlHttpClient implements HttpClient {
 
       let isResolved = false
 
-      curl.on('stream', (stream, status, curlHeaders) => {
+      curl.on('stream', (stream, status) => {
         pipeline(stream, state.responseStream, (error) => {
           if (error) {
             console.log('Stream response error', error)
@@ -313,7 +335,7 @@ export class CurlHttpClient implements HttpClient {
         }
       })
 
-      curl.on('end', (status) => {
+      curl.on('end', () => {
         const connection = this.parseConnection(curl)
 
         curl.close()
@@ -325,7 +347,6 @@ export class CurlHttpClient implements HttpClient {
 
           const clientError = new HttpClientError(`Bad gateway`, {
             context: {
-              method: 'streamResponseForward',
               reason: `Promise still not resolved at 'end' event`
             },
             code: 'INTERNAL_ERROR'
@@ -367,6 +388,8 @@ export class CurlHttpClient implements HttpClient {
         }
       })
 
+      // TODO resolve timeout
+
       curl.perform()
     })
   }
@@ -381,12 +404,12 @@ export class CurlHttpClient implements HttpClient {
     url: string,
     requestHeaders: HttpHeaders
   ) {
-    if (kind === 'simple') {
-      curl.enable(CurlFeature.NoStorage)
-    } else if (kind === 'stream-request') {
+    if (kind === 'stream-request') {
       curl.enable(CurlFeature.NoStorage)
     } else if (kind === 'stream-response') {
       curl.enable(CurlFeature.StreamResponse)
+      curl.enable(CurlFeature.NoStorage)
+    } else {
       curl.enable(CurlFeature.NoStorage)
     }
 
@@ -495,11 +518,10 @@ export class CurlHttpClient implements HttpClient {
     state: {
       error: HttpClientError | null
       responseBody: Buffer[]
+      responseBodySize: number
     },
-    sizeLimit: number
+    responseSizeLimit: number
   ) {
-    let responseBodySize = 0
-
     curl.setOpt(Curl.option.WRITEFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
       try {
         if (state.error) {
@@ -509,12 +531,12 @@ export class CurlHttpClient implements HttpClient {
         const chunkSize = size * nmemb
         const chunk = buf.subarray(0, chunkSize)
 
-        if (responseBodySize + chunkSize > sizeLimit) {
+        if (state.responseBodySize + chunkSize > responseSizeLimit) {
           state.error = new HttpClientError(`Bad gateway`, {
             context: {
               reason: `Response body size limit exceeded`,
-              responseBodySize,
-              sizeLimit
+              responseBodySize: state.responseBodySize,
+              responseSizeLimit
             },
             code: 'BAD_GATEWAY'
           })
@@ -522,7 +544,7 @@ export class CurlHttpClient implements HttpClient {
           return 0
         } else {
           state.responseBody.push(chunk)
-          responseBodySize += chunkSize
+          state.responseBodySize += chunkSize
 
           return chunkSize
         }
@@ -538,6 +560,26 @@ export class CurlHttpClient implements HttpClient {
         return 0
       }
     })
+  }
+
+  protected parseConnection(curl: Curl): HttpConnection {
+    try {
+      const totalTime = curl.getInfo('TOTAL_TIME_T')
+      const connectTime = curl.getInfo('CONNECT_TIME_T')
+      const httpVersion = curl.getInfo('HTTP_VERSION')
+
+      return {
+        client_total_time: typeof totalTime === 'number' ? totalTime : null,
+        client_connect_time: typeof connectTime === 'number' ? connectTime : null,
+        client_http_version: typeof httpVersion === 'number' ? httpVersion : null
+      }
+    } catch {
+      return {
+        client_total_time: null,
+        client_connect_time: null,
+        client_http_version: null
+      }
+    }
   }
 
   protected parseCurlCode(curlCode: number): [HttpClientErrorCode, string] {
@@ -604,27 +646,11 @@ export class CurlHttpClient implements HttpClient {
     return curlHeaders
   }
 
-  protected parseRawBody(curlBody: Buffer[]): HttpBody {
-    return Buffer.concat(curlBody)
-  }
-
-  protected parseConnection(curl: Curl): HttpConnection {
+  protected parseRawBody(chunks: Buffer[], size: number): HttpBody {
     try {
-      const totalTime = curl.getInfo('TOTAL_TIME_T')
-      const connectTime = curl.getInfo('CONNECT_TIME_T')
-      const httpVersion = curl.getInfo('HTTP_VERSION')
-
-      return {
-        client_total_time: typeof totalTime === 'number' ? totalTime : null,
-        client_connect_time: typeof connectTime === 'number' ? connectTime : null,
-        client_http_version: typeof httpVersion === 'number' ? httpVersion : null
-      }
+      return Buffer.concat(chunks, size)
     } catch {
-      return {
-        client_total_time: null,
-        client_connect_time: null,
-        client_http_version: null
-      }
+      return Buffer.alloc(0)
     }
   }
 

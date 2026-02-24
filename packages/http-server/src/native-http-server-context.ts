@@ -62,10 +62,14 @@ export class NativeHttpServerContext implements HttpServerContext {
   readonly responseHeaders: HttpHeadersWrap
   readonly responseBody: HttpBodyWrap
 
-  async loadRequest(sizeLimit: number): Promise<void> {
-    const body = await this.loadRequestBody(sizeLimit)
+  async loadRequest(requestSizeLimit: number): Promise<void> {
+    if (!(requestSizeLimit > 0)) {
+      throw new TypeError(`Wrong loadRequest params`)
+    }
 
-    this.requestBody.set(body).freeze()
+    const requestBody = await this.loadRequestBody(requestSizeLimit)
+
+    this.requestBody.set(requestBody).freeze()
   }
 
   sendHead() {
@@ -135,23 +139,23 @@ export class NativeHttpServerContext implements HttpServerContext {
     return this.res.writableEnded
   }
 
-  private loadRequestBody(sizeLimit: number): Promise<HttpBody> {
+  private loadRequestBody(requestSizeLimit: number): Promise<HttpBody> {
     return new Promise<HttpBody>((resolve, reject) => {
       const chunks: Buffer[] = []
-      let totalSize = 0
+      let requestBodySize = 0
 
       this.req.on('data', (chunk: Buffer) => {
-        totalSize += chunk.length
+        requestBodySize += chunk.length
 
-        if (totalSize > sizeLimit) {
+        if (requestBodySize > requestSizeLimit) {
           this.req.destroy()
 
           reject(
             new HttpServerError(`Content too large`, {
               context: {
                 reason: `Request body size limit exceeded`,
-                totalSize,
-                sizeLimit
+                requestBodySize,
+                requestSizeLimit
               },
               code: 'CONTENT_TOO_LARGE'
             })
@@ -162,26 +166,12 @@ export class NativeHttpServerContext implements HttpServerContext {
       })
 
       this.req.on('end', () => {
-        try {
-          const body = Buffer.concat(chunks, totalSize)
+        const body = this.parseRawBody(chunks, requestBodySize)
 
-          resolve(body)
-        } catch (error) {
-          reject(
-            new HttpServerError(`Bad request`, {
-              cause: error,
-              context: {
-                reason: `Concatenate buffer chunks failed`,
-                chunks: chunks.length,
-                totalSize
-              },
-              code: 'BAD_REQUEST'
-            })
-          )
-        }
+        resolve(body)
       })
 
-      this.req.on('error', (error: Error) => {
+      this.req.on('error', (error) => {
         reject(
           new HttpServerError(`Bad request`, {
             cause: error,
@@ -226,5 +216,13 @@ export class NativeHttpServerContext implements HttpServerContext {
         }
       })
     })
+  }
+
+  protected parseRawBody(chunks: Buffer[], size: number): HttpBody {
+    try {
+      return Buffer.concat(chunks, size)
+    } catch {
+      return Buffer.alloc(0)
+    }
   }
 }
