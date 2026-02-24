@@ -1,11 +1,6 @@
+import { AnalyzeLogJobData } from '../../jobs/index.js'
+
 export const ANALYZE_LOG_QUEUE_NAME = 'analyze-log'
-
-export interface AnalyzeLogJobData {
-  campaignId: string
-  messageId: string
-}
-
-export type AnalyzeLogJobResult = boolean
 
 export const ANALYZE_LOG_QUEUE = Symbol('AnalyzeLogQueue')
 

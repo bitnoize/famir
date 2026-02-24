@@ -1,10 +1,6 @@
+import { WebhookJobData } from '../../jobs/index.js'
+
 export const WEBHOOK_QUEUE_NAME = 'webhook'
-
-export interface WebhookJobData {
-  url: string
-}
-
-export type WebhookJobResult = boolean
 
 export const WEBHOOK_QUEUE = Symbol('WebhookQueue')
 

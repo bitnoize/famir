@@ -20,24 +20,4 @@ export abstract class BaseController {
       })
     }
   }
-
-  protected handleException(error: unknown, processor: string, data: unknown): never {
-    if (error instanceof ExecutorError) {
-      error.context['controller'] = this.controllerName
-      error.context['processor'] = processor
-      error.context['data'] = data
-
-      throw error
-    } else {
-      throw new ExecutorError(`Controller internal error`, {
-        cause: error,
-        context: {
-          controller: this.controllerName,
-          processor,
-          data
-        },
-        code: 'INTERNAL_ERROR'
-      })
-    }
-  }
 }

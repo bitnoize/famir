@@ -1,6 +1,7 @@
 import { DIContainer } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
+import { WebhookJobData } from '../../jobs/index.js'
 import {
   RedisWorkflowConnection,
   WORKFLOW_CONNECTOR,
@@ -8,7 +9,7 @@ import {
 } from '../../workflow-connector.js'
 import { BullWorkflowConfig } from '../../workflow.js'
 import { BullBaseQueue } from '../base/index.js'
-import { WEBHOOK_QUEUE, WEBHOOK_QUEUE_NAME, WebhookJobData, WebhookQueue } from './webhook.js'
+import { WEBHOOK_QUEUE, WEBHOOK_QUEUE_NAME, WebhookQueue } from './webhook.js'
 
 export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
   static inject(container: DIContainer) {

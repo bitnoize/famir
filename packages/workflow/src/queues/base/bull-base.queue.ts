@@ -34,9 +34,7 @@ export abstract class BullBaseQueue {
   async close(): Promise<void> {
     await this.queue.close()
 
-    this.logger.debug(`Queue closed`, {
-      queue: this.queueName
-    })
+    this.logger.debug(`Queue closed: ${this.queueName}`)
   }
 
   async getJobCount(): Promise<number> {

@@ -4,6 +4,7 @@ import { Logger } from '@famir/logger'
 import { Job, MetricsTime, Worker } from 'bullmq'
 import { RedisExecutorConnection } from '../../executor-connector.js'
 import { ExecutorRouter } from '../../executor-router.js'
+import { ExecutorError } from '../../executor.error.js'
 import { BullExecutorConfig, BullExecutorWorkerOptions } from '../../executor.js'
 
 export abstract class BullBaseWorker {
@@ -19,11 +20,19 @@ export abstract class BullBaseWorker {
   ) {
     this.options = this.buildOptions(config.data)
 
+    this.router.addQueue(this.queueName)
+
     this.worker = new Worker<unknown, unknown>(
       this.queueName,
       async (job: Job<unknown, unknown>): Promise<unknown> => {
         try {
-          const processor = this.router.getProcessor(this.queueName, job.name)
+          const processor = this.router.resolve(this.queueName, job.name)
+
+          if (!processor) {
+            throw new ExecutorError(`Processor not exists`, {
+              code: 'UNKNOWN_JOB'
+            })
+          }
 
           return await processor(job.data)
         } catch (error) {
@@ -82,17 +91,13 @@ export abstract class BullBaseWorker {
   async run(): Promise<void> {
     await this.worker.run()
 
-    this.logger.debug(`Worker running`, {
-      queue: this.queueName
-    })
+    this.logger.debug(`Worker running: ${this.queueName}`)
   }
 
   async close(): Promise<void> {
     await this.worker.close()
 
-    this.logger.debug(`Worker closed`, {
-      queue: this.queueName
-    })
+    this.logger.debug(`Worker closed: ${this.queueName}`)
   }
 
   protected dumpJob(job: Job<unknown, unknown>): object {

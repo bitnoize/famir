@@ -1,52 +1,52 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
-import { ExecutorError } from './executor.error.js'
 import { ExecutorProcessor } from './executor.js'
 
 export const EXECUTOR_ROUTER = Symbol('ExecutorRouter')
 
 export class ExecutorRouter {
-  static inject(container: DIContainer, queueNames: string[]) {
+  static inject(container: DIContainer) {
     container.registerSingleton<ExecutorRouter>(
       EXECUTOR_ROUTER,
-      (c) => new ExecutorRouter(c.resolve<Logger>(LOGGER), queueNames)
+      (c) => new ExecutorRouter(c.resolve<Logger>(LOGGER))
     )
   }
 
-  protected readonly map: Record<string, Record<string, ExecutorProcessor>>
+  protected readonly registry: Record<string, Map<string, ExecutorProcessor>> = {}
 
-  constructor(
-    protected readonly logger: Logger,
-    protected readonly queueNames: string[]
-  ) {
-    this.map = Object.fromEntries(queueNames.map((queueName) => [queueName, {}]))
+  constructor(protected readonly logger: Logger) {
+    this.logger.debug(`ExecutorRouter initialized`)
   }
 
-  addProcessor(queueName: string, jobName: string, processor: ExecutorProcessor): this {
-    if (!this.map[queueName]) {
-      throw new Error(`Queue not known`)
+  addQueue(name: string) {
+    if (this.registry[name]) {
+      throw new Error(`Queue already exists: ${name}`)
     }
 
-    if (this.map[queueName][jobName]) {
-      throw new Error(`Queue processor allready registered`)
-    }
-
-    this.map[queueName][jobName] = processor
-
-    return this
+    this.registry[name] = new Map<string, ExecutorProcessor>()
   }
 
-  getProcessor(queueName: string, jobName: string): ExecutorProcessor {
-    if (!this.map[queueName]) {
-      throw new Error(`Queue not known`)
+  register(queueName: string, jobName: string, processor: ExecutorProcessor) {
+    if (!this.registry[queueName]) {
+      throw new Error(`Queue not exists: ${queueName}`)
     }
 
-    if (!this.map[queueName][jobName]) {
-      throw new ExecutorError(`Queue processor not registered`, {
-        code: 'UNKNOWN_JOB'
-      })
+    this.registry[queueName].set(jobName, processor)
+
+    this.logger.info(`ExecutorRouter register processor: ${queueName} => ${jobName}`)
+  }
+
+  resolve(queueName: string, jobName: string): ExecutorProcessor | null {
+    if (!this.registry[queueName]) {
+      throw new Error(`Queue not exists: ${queueName}`)
     }
 
-    return this.map[queueName][jobName]
+    return this.registry[queueName].get(jobName) ?? null
+  }
+
+  reset() {
+    Object.values(this.registry).forEach((registry) => {
+      registry.clear()
+    })
   }
 }

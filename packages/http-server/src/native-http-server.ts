@@ -42,7 +42,8 @@ export class NativeHttpServer implements HttpServer {
     this.server = http.createServer((req, res) => {
       this.handleRequest(req, res).catch((error: unknown) => {
         this.logger.error(`HttpServer unexpected error`, {
-          error: serializeError(error)
+          error: serializeError(error),
+          request: this.dumpRequest(req),
         })
 
         if (!res.writableEnded) {
@@ -98,7 +99,8 @@ export class NativeHttpServer implements HttpServer {
       }
     } catch (error) {
       this.logger.error(`HttpServer request error`, {
-        error: serializeError(error)
+        error: serializeError(error),
+        request: this.dumpRequest(req),
       })
 
       const [status, message] =
@@ -209,6 +211,14 @@ export class NativeHttpServer implements HttpServer {
 
       this.server.closeAllConnections()
     })
+  }
+
+  protected dumpRequest(req: http.IncomingMessage): object {
+    return {
+      method: req.method,
+      url: req.url,
+      headers: req.headers
+    }
   }
 
   private buildOptions(config: NativeHttpServerConfig): NativeHttpServerOptions {

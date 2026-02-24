@@ -1,3 +1,4 @@
+export * from './jobs/index.js'
 export * from './queues/index.js'
 export * from './redis-workflow-connector.js'
 export * from './workflow-connector.js'

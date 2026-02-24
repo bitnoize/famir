@@ -38,7 +38,7 @@ export async function bootstrapDefault(composer: DIComposer): Promise<void> {
 
   RedisExecutorConnector.inject(container)
 
-  ExecutorRouter.inject(container, ['analyze-log'])
+  ExecutorRouter.inject(container)
 
   BullAnalyzeLogWorker.inject(container)
 
