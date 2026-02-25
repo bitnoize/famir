@@ -22,14 +22,14 @@ export const configMinioStorageUseSSLSchema: JSONSchemaType<boolean> = {
 export const configStorageAccessKeySchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
-  maxLength: 128,
+  maxLength: 128
   //default: 'example'
 } as const
 
 export const configStorageSecretKeySchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
-  maxLength: 128,
+  maxLength: 128
   //default: 'secret'
 } as const
 

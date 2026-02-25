@@ -3,49 +3,44 @@ import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
   RedisDatabaseConnector,
-  RedisDatabaseManager,
-  RedisLureRepository,
   RedisMessageRepository,
-  RedisProxyRepository,
-  RedisRedirectorRepository,
   RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
+import { BullAnalyzeWorker, ExecutorRouter, RedisExecutorConnector } from '@famir/executor'
 import { PinoLogger } from '@famir/logger'
-import { CliReplServer, ReplServerRouter } from '@famir/repl-server'
+import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
-import { BullAnalyzeQueue, RedisWorkflowConnector } from '@famir/workflow'
-import { App } from '../../console.app.js'
-import { AppCliConfig } from './cli.js'
-import { configAppCliSchema } from './cli.schemas.js'
+import { ANALYZE_QUEUE_NAME, RedisWorkflowConnector } from '@famir/workflow'
+import { App } from '../../analyze.app.js'
+import { AppStdConfig } from './std.js'
+import { configAppStdSchema } from './std.schemas.js'
 
-export async function bootstrapCli(composer: DIComposer): Promise<void> {
+export async function bootstrapStd(composer: DIComposer): Promise<void> {
   const container = new DIContainer()
 
   AjvValidator.inject(container)
 
-  EnvConfig.inject<AppCliConfig>(container, configAppCliSchema)
+  EnvConfig.inject<AppStdConfig>(container, configAppStdSchema)
 
   PinoLogger.inject(container)
 
   RedisDatabaseConnector.inject(container)
-  RedisDatabaseManager.inject(container)
 
   RedisCampaignRepository.inject(container)
-  RedisProxyRepository.inject(container)
   RedisTargetRepository.inject(container)
-  RedisRedirectorRepository.inject(container)
-  RedisLureRepository.inject(container)
   RedisSessionRepository.inject(container)
   RedisMessageRepository.inject(container)
 
+  MinioStorage.inject(container)
+
   RedisWorkflowConnector.inject(container)
 
-  BullAnalyzeQueue.inject(container)
+  RedisExecutorConnector.inject(container)
 
-  ReplServerRouter.inject(container)
+  ExecutorRouter.inject(container, [ANALYZE_QUEUE_NAME])
 
-  CliReplServer.inject(container)
+  BullAnalyzeWorker.inject(container)
 
   App.inject(container)
 

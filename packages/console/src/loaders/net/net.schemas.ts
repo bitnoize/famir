@@ -21,6 +21,7 @@ import {
   configMinioStoragePortSchema,
   configMinioStorageUseSSLSchema,
   configStorageAccessKeySchema,
+  configStorageBucketNameSchema,
   configStorageSecretKeySchema
 } from '@famir/storage'
 import { JSONSchemaType } from '@famir/validator'
@@ -44,6 +45,7 @@ export const configAppNetSchema: JSONSchemaType<AppNetConfig> = {
     'STORAGE_USE_SSL',
     'STORAGE_ACCESS_KEY',
     'STORAGE_SECRET_KEY',
+    'STORAGE_BUCKET_NAME',
     'WORKFLOW_CONNECTION_URL',
     'WORKFLOW_PREFIX',
     'REPL_SERVER_ADDRESS',
@@ -68,6 +70,7 @@ export const configAppNetSchema: JSONSchemaType<AppNetConfig> = {
     STORAGE_USE_SSL: configMinioStorageUseSSLSchema,
     STORAGE_ACCESS_KEY: configStorageAccessKeySchema,
     STORAGE_SECRET_KEY: configStorageSecretKeySchema,
+    STORAGE_BUCKET_NAME: configStorageBucketNameSchema,
     WORKFLOW_CONNECTION_URL: configRedisWorkflowConnectionUrlSchema,
     WORKFLOW_PREFIX: configRedisWorkflowPrefixSchema,
     REPL_SERVER_ADDRESS: {

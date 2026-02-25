@@ -14,7 +14,10 @@ export class ExecutorRouter {
 
   protected readonly registry: Record<string, Map<string, ExecutorProcessor>> = {}
 
-  constructor(protected readonly logger: Logger, queueNames: string[]) {
+  constructor(
+    protected readonly logger: Logger,
+    queueNames: string[]
+  ) {
     queueNames.map((queueName) => {
       this.registry[queueName] = new Map<string, ExecutorProcessor>()
     })

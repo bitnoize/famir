@@ -1,8 +1,13 @@
 import { DIContainer, serializeError, SHUTDOWN_SIGNALS } from '@famir/common'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
+import {
+  ANALYZE_WORKER,
+  AnalyzeWorker,
+  EXECUTOR_CONNECTOR,
+  ExecutorConnector
+} from '@famir/executor'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER, ReplServer } from '@famir/repl-server'
-import { ANALYZE_QUEUE, AnalyzeQueue, WORKFLOW_CONNECTOR, WorkflowConnector } from '@famir/workflow'
+import { WORKFLOW_CONNECTOR, WorkflowConnector } from '@famir/workflow'
 
 export const APP = Symbol('App')
 
@@ -15,8 +20,8 @@ export class App {
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
-          c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
-          c.resolve<ReplServer>(REPL_SERVER)
+          c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR),
+          c.resolve<AnalyzeWorker>(ANALYZE_WORKER)
         )
     )
   }
@@ -29,8 +34,8 @@ export class App {
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
-    protected readonly analyzeQueue: AnalyzeQueue,
-    protected readonly replServer: ReplServer
+    protected readonly executorConnector: ExecutorConnector,
+    protected readonly analyzeWorker: AnalyzeWorker
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
       process.once(signal, () => {
@@ -51,7 +56,7 @@ export class App {
     try {
       await this.databaseConnector.connect()
 
-      await this.replServer.start()
+      await this.analyzeWorker.run()
 
       this.logger.debug(`App started`)
     } catch (error) {
@@ -65,9 +70,9 @@ export class App {
 
   protected async stop(): Promise<void> {
     try {
-      await this.replServer.stop()
+      await this.analyzeWorker.close()
 
-      await this.analyzeQueue.close()
+      await this.executorConnector.close()
 
       await this.workflowConnector.close()
 

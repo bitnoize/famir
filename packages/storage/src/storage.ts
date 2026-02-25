@@ -2,11 +2,7 @@ export const STORAGE = Symbol('Storage')
 
 export interface Storage {
   get(objectName: string): Promise<Buffer>
-  put(
-    objectName: string,
-    data: Buffer,
-    metaData: Record<string, string>
-  ): Promise<void>
+  put(objectName: string, data: Buffer, metaData: Record<string, string>): Promise<void>
 }
 
 export interface MinioStorageConfig {

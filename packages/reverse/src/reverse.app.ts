@@ -1,7 +1,7 @@
 import { DIContainer, serializeError, SHUTDOWN_SIGNALS } from '@famir/common'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
+import { HTTP_SERVER, HttpServer } from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER, ReplServer } from '@famir/repl-server'
 import { ANALYZE_QUEUE, AnalyzeQueue, WORKFLOW_CONNECTOR, WorkflowConnector } from '@famir/workflow'
 
 export const APP = Symbol('App')
@@ -16,7 +16,7 @@ export class App {
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
           c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
-          c.resolve<ReplServer>(REPL_SERVER)
+          c.resolve<HttpServer>(HTTP_SERVER)
         )
     )
   }
@@ -30,7 +30,7 @@ export class App {
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
     protected readonly analyzeQueue: AnalyzeQueue,
-    protected readonly replServer: ReplServer
+    protected readonly httpServer: HttpServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
       process.once(signal, () => {
@@ -51,7 +51,7 @@ export class App {
     try {
       await this.databaseConnector.connect()
 
-      await this.replServer.start()
+      await this.httpServer.start()
 
       this.logger.debug(`App started`)
     } catch (error) {
@@ -65,7 +65,7 @@ export class App {
 
   protected async stop(): Promise<void> {
     try {
-      await this.replServer.stop()
+      await this.httpServer.stop()
 
       await this.analyzeQueue.close()
 

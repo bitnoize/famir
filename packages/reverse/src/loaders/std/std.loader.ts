@@ -3,7 +3,6 @@ import { EnvConfig } from '@famir/config'
 import {
   RedisCampaignRepository,
   RedisDatabaseConnector,
-  RedisDatabaseManager,
   RedisLureRepository,
   RedisMessageRepository,
   RedisProxyRepository,
@@ -11,25 +10,28 @@ import {
   RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
+import { CurlHttpClient } from '@famir/http-client'
+import { HttpServerRouter, NativeHttpServer } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
-import { CliReplServer, ReplServerRouter } from '@famir/repl-server'
+import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeQueue, RedisWorkflowConnector } from '@famir/workflow'
-import { App } from '../../console.app.js'
-import { AppCliConfig } from './cli.js'
-import { configAppCliSchema } from './cli.schemas.js'
+import { App } from '../../reverse.app.js'
+import { AppStdConfig } from './std.js'
+import { configAppStdSchema } from './std.schemas.js'
 
-export async function bootstrapCli(composer: DIComposer): Promise<void> {
+export async function bootstrapStd(composer: DIComposer): Promise<void> {
   const container = new DIContainer()
 
   AjvValidator.inject(container)
 
-  EnvConfig.inject<AppCliConfig>(container, configAppCliSchema)
+  EnvConfig.inject<AppStdConfig>(container, configAppStdSchema)
 
   PinoLogger.inject(container)
 
+  EtaTemplater.inject(container)
+
   RedisDatabaseConnector.inject(container)
-  RedisDatabaseManager.inject(container)
 
   RedisCampaignRepository.inject(container)
   RedisProxyRepository.inject(container)
@@ -43,9 +45,11 @@ export async function bootstrapCli(composer: DIComposer): Promise<void> {
 
   BullAnalyzeQueue.inject(container)
 
-  ReplServerRouter.inject(container)
+  CurlHttpClient.inject(container)
 
-  CliReplServer.inject(container)
+  HttpServerRouter.inject(container)
+
+  NativeHttpServer.inject(container)
 
   App.inject(container)
 

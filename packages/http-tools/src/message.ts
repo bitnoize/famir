@@ -65,7 +65,7 @@ export class HttpMessage {
 
   score: number = 0
 
-  analyzeLog: string = 'dummy'
+  analyze: string = 'dummy'
 
   protected readonly contentTypes: HttpContentTypes = {
     text: [],

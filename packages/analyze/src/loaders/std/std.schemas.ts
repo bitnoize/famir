@@ -3,12 +3,18 @@ import {
   configRedisDatabasePrefixSchema
 } from '@famir/database'
 import {
+  configBullExecutorConcurrencySchema,
+  configBullExecutorLimiterDurationSchema,
+  configBullExecutorLimiterMaxSchema,
+  configRedisExecutorConnectionUrlSchema,
+  configRedisExecutorPrefixSchema
+} from '@famir/executor'
+import {
   configLoggerAppNameSchema,
   configLoggerLogLevelSchema,
   configPinoLoggerTransportOptionsSchema,
   configPinoLoggerTransportTargetSchema
 } from '@famir/logger'
-import { configReplServerPromptSchema, configReplServerUseColorsSchema } from '@famir/repl-server'
 import {
   configMinioStorageEndPointSchema,
   configMinioStoragePortSchema,
@@ -22,9 +28,9 @@ import {
   configRedisWorkflowConnectionUrlSchema,
   configRedisWorkflowPrefixSchema
 } from '@famir/workflow'
-import { AppCliConfig } from './cli.js'
+import { AppStdConfig } from './std.js'
 
-export const configAppCliSchema: JSONSchemaType<AppCliConfig> = {
+export const configAppStdSchema: JSONSchemaType<AppStdConfig> = {
   type: 'object',
   required: [
     'LOGGER_APP_NAME',
@@ -41,13 +47,16 @@ export const configAppCliSchema: JSONSchemaType<AppCliConfig> = {
     'STORAGE_BUCKET_NAME',
     'WORKFLOW_CONNECTION_URL',
     'WORKFLOW_PREFIX',
-    'REPL_SERVER_PROMPT',
-    'REPL_SERVER_USE_COLORS'
+    'EXECUTOR_CONNECTION_URL',
+    'EXECUTOR_PREFIX',
+    'EXECUTOR_CONCURRENCY',
+    'EXECUTOR_LIMITER_MAX',
+    'EXECUTOR_LIMITER_DURATION'
   ],
   properties: {
     LOGGER_APP_NAME: {
       ...configLoggerAppNameSchema,
-      default: 'console'
+      default: 'analyze'
     },
     LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
     LOGGER_TRANSPORT_TARGET: configPinoLoggerTransportTargetSchema,
@@ -62,8 +71,20 @@ export const configAppCliSchema: JSONSchemaType<AppCliConfig> = {
     STORAGE_BUCKET_NAME: configStorageBucketNameSchema,
     WORKFLOW_CONNECTION_URL: configRedisWorkflowConnectionUrlSchema,
     WORKFLOW_PREFIX: configRedisWorkflowPrefixSchema,
-    REPL_SERVER_PROMPT: configReplServerPromptSchema,
-    REPL_SERVER_USE_COLORS: configReplServerUseColorsSchema
+    EXECUTOR_CONNECTION_URL: configRedisExecutorConnectionUrlSchema,
+    EXECUTOR_PREFIX: configRedisExecutorPrefixSchema,
+    EXECUTOR_CONCURRENCY: {
+      ...configBullExecutorConcurrencySchema,
+      default: 2
+    },
+    EXECUTOR_LIMITER_MAX: {
+      ...configBullExecutorLimiterMaxSchema,
+      default: 1
+    },
+    EXECUTOR_LIMITER_DURATION: {
+      ...configBullExecutorLimiterDurationSchema,
+      default: 1000
+    }
   },
   additionalProperties: false
 } as const

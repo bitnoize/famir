@@ -1,0 +1,23 @@
+{
+  "name": "@famir/analyze",
+  "type": "module",
+  "version": "0.3.3",
+  "description": "Analyze app",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@famir/common": "*",
+    "@famir/validator": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
+    "@famir/database": "*",
+    "@famir/storage": "*",
+    "@famir/workflow": "*",
+    "@famir/executor": "*"
+  }
+}
