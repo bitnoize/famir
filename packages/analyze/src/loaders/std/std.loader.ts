@@ -7,16 +7,24 @@ import {
   RedisSessionRepository,
   RedisTargetRepository
 } from '@famir/database'
-import { BullAnalyzeWorker, ExecutorRouter, RedisExecutorConnector } from '@famir/executor'
+import {
+  BullAnalyzeWorker,
+  ExecutorRouter,
+  ExecutorWorkerSpecs,
+  RedisExecutorConnector
+} from '@famir/executor'
 import { PinoLogger } from '@famir/logger'
 import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
-import { ANALYZE_QUEUE_NAME, RedisWorkflowConnector } from '@famir/workflow'
+import { RedisWorkflowConnector } from '@famir/workflow'
 import { App } from '../../analyze.app.js'
 import { AppStdConfig } from './std.js'
 import { configAppStdSchema } from './std.schemas.js'
 
-export async function bootstrapStd(composer: DIComposer): Promise<void> {
+export async function bootstrapStd(
+  composer: DIComposer,
+  specs: ExecutorWorkerSpecs
+): Promise<void> {
   const container = new DIContainer()
 
   AjvValidator.inject(container)
@@ -38,7 +46,7 @@ export async function bootstrapStd(composer: DIComposer): Promise<void> {
 
   RedisExecutorConnector.inject(container)
 
-  ExecutorRouter.inject(container, [ANALYZE_QUEUE_NAME])
+  ExecutorRouter.inject(container, specs)
 
   BullAnalyzeWorker.inject(container)
 

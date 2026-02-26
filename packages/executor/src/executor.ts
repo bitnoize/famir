@@ -3,9 +3,6 @@ export type ExecutorProcessor = (data: unknown) => Promise<unknown>
 export interface BullExecutorConfig {
   EXECUTOR_CONNECTION_URL: string
   EXECUTOR_PREFIX: string
-  EXECUTOR_CONCURRENCY: number
-  EXECUTOR_LIMITER_MAX: number
-  EXECUTOR_LIMITER_DURATION: number
 }
 
 export interface RedisExecutorConnectorOptions {
@@ -14,7 +11,12 @@ export interface RedisExecutorConnectorOptions {
 
 export interface BullExecutorWorkerOptions {
   prefix: string
-  concurrency: number
-  limiterMax: number
-  limiterDuration: number
 }
+
+export interface ExecutorWorkerSpec {
+  readonly concurrency: number
+  readonly limiterMax: number
+  readonly limiterDuration: number
+}
+
+export type ExecutorWorkerSpecs = Record<string, ExecutorWorkerSpec>

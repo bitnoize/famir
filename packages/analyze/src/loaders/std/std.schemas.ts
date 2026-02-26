@@ -3,9 +3,6 @@ import {
   configRedisDatabasePrefixSchema
 } from '@famir/database'
 import {
-  configBullExecutorConcurrencySchema,
-  configBullExecutorLimiterDurationSchema,
-  configBullExecutorLimiterMaxSchema,
   configRedisExecutorConnectionUrlSchema,
   configRedisExecutorPrefixSchema
 } from '@famir/executor'
@@ -48,10 +45,7 @@ export const configAppStdSchema: JSONSchemaType<AppStdConfig> = {
     'WORKFLOW_CONNECTION_URL',
     'WORKFLOW_PREFIX',
     'EXECUTOR_CONNECTION_URL',
-    'EXECUTOR_PREFIX',
-    'EXECUTOR_CONCURRENCY',
-    'EXECUTOR_LIMITER_MAX',
-    'EXECUTOR_LIMITER_DURATION'
+    'EXECUTOR_PREFIX'
   ],
   properties: {
     LOGGER_APP_NAME: {
@@ -72,19 +66,7 @@ export const configAppStdSchema: JSONSchemaType<AppStdConfig> = {
     WORKFLOW_CONNECTION_URL: configRedisWorkflowConnectionUrlSchema,
     WORKFLOW_PREFIX: configRedisWorkflowPrefixSchema,
     EXECUTOR_CONNECTION_URL: configRedisExecutorConnectionUrlSchema,
-    EXECUTOR_PREFIX: configRedisExecutorPrefixSchema,
-    EXECUTOR_CONCURRENCY: {
-      ...configBullExecutorConcurrencySchema,
-      default: 2
-    },
-    EXECUTOR_LIMITER_MAX: {
-      ...configBullExecutorLimiterMaxSchema,
-      default: 1
-    },
-    EXECUTOR_LIMITER_DURATION: {
-      ...configBullExecutorLimiterDurationSchema,
-      default: 1000
-    }
+    EXECUTOR_PREFIX: configRedisExecutorPrefixSchema
   },
   additionalProperties: false
 } as const

@@ -25,13 +25,4 @@ export class DummyService extends BaseService {
         )
     )
   }
-
-  constructor(
-    storage: Storage,
-    campaignRepository: CampaignRepository,
-    sessionRepository: SessionRepository,
-    messageRepository: MessageRepository
-  ) {
-    super(storage, campaignRepository, sessionRepository, messageRepository)
-  }
 }

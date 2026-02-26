@@ -1,14 +1,14 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
-import { ExecutorProcessor } from './executor.js'
+import { ExecutorProcessor, ExecutorWorkerSpecs } from './executor.js'
 
 export const EXECUTOR_ROUTER = Symbol('ExecutorRouter')
 
 export class ExecutorRouter {
-  static inject(container: DIContainer, queueNames: string[]) {
+  static inject(container: DIContainer, specs: ExecutorWorkerSpecs) {
     container.registerSingleton<ExecutorRouter>(
       EXECUTOR_ROUTER,
-      (c) => new ExecutorRouter(c.resolve<Logger>(LOGGER), queueNames)
+      (c) => new ExecutorRouter(c.resolve<Logger>(LOGGER), specs)
     )
   }
 
@@ -16,9 +16,9 @@ export class ExecutorRouter {
 
   constructor(
     protected readonly logger: Logger,
-    queueNames: string[]
+    public readonly specs: ExecutorWorkerSpecs
   ) {
-    queueNames.map((queueName) => {
+    Object.keys(this.specs).forEach((queueName) => {
       this.registry[queueName] = new Map<string, ExecutorProcessor>()
     })
 
@@ -28,6 +28,10 @@ export class ExecutorRouter {
   register(queueName: string, jobName: string, processor: ExecutorProcessor) {
     if (!this.registry[queueName]) {
       throw new Error(`Queue not exists: ${queueName}`)
+    }
+
+    if (this.registry[queueName].has(jobName)) {
+      throw new Error(`Processor already exists: ${queueName} => ${jobName}`)
     }
 
     this.registry[queueName].set(jobName, processor)
@@ -44,8 +48,8 @@ export class ExecutorRouter {
   }
 
   reset() {
-    Object.values(this.registry).forEach((registry) => {
-      registry.clear()
+    Object.values(this.registry).forEach((value) => {
+      value.clear()
     })
   }
 }

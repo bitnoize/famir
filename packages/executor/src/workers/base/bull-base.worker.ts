@@ -6,10 +6,16 @@ import { Job, MetricsTime, Worker } from 'bullmq'
 import { RedisExecutorConnection } from '../../executor-connector.js'
 import { ExecutorRouter } from '../../executor-router.js'
 import { ExecutorError } from '../../executor.error.js'
-import { BullExecutorConfig, BullExecutorWorkerOptions } from '../../executor.js'
+import {
+  BullExecutorConfig,
+  BullExecutorWorkerOptions,
+  ExecutorWorkerSpec,
+  ExecutorWorkerSpecs
+} from '../../executor.js'
 
 export abstract class BullBaseWorker {
   protected readonly options: BullExecutorWorkerOptions
+  protected readonly spec: ExecutorWorkerSpec
   protected readonly worker: Worker<unknown, unknown>
 
   constructor(
@@ -21,6 +27,8 @@ export abstract class BullBaseWorker {
     protected readonly queueName: string
   ) {
     this.options = this.buildOptions(config.data)
+
+    this.spec = this.getSpec(this.router.specs, this.queueName)
 
     this.worker = new Worker<unknown, unknown>(
       this.queueName,
@@ -48,10 +56,10 @@ export abstract class BullBaseWorker {
       {
         connection: this.connection,
         prefix: this.options.prefix,
-        concurrency: this.options.concurrency,
+        concurrency: this.spec.concurrency,
         limiter: {
-          max: this.options.limiterMax,
-          duration: this.options.limiterDuration
+          max: this.spec.limiterMax,
+          duration: this.spec.limiterDuration
         },
         autorun: false,
         removeOnComplete: {
@@ -111,10 +119,17 @@ export abstract class BullBaseWorker {
 
   private buildOptions(config: BullExecutorConfig): BullExecutorWorkerOptions {
     return {
-      prefix: config.EXECUTOR_PREFIX,
-      concurrency: config.EXECUTOR_CONCURRENCY,
-      limiterMax: config.EXECUTOR_LIMITER_MAX,
-      limiterDuration: config.EXECUTOR_LIMITER_DURATION
+      prefix: config.EXECUTOR_PREFIX
     }
+  }
+
+  private getSpec(specs: ExecutorWorkerSpecs, queueName: string): ExecutorWorkerSpec {
+    const spec = specs[queueName]
+
+    if (!spec) {
+      throw new Error(`ExecutorWorkerSpec not exists: ${queueName}`)
+    }
+
+    return spec
   }
 }
