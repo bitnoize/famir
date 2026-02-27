@@ -59,7 +59,7 @@ export class MinioStorage implements Storage {
     return new Promise((resolve, reject) => {
       const chunks: Buffer[] = []
 
-      stream.on('data', (chunk) => {
+      stream.on('data', (chunk: Buffer) => {
         chunks.push(chunk)
       })
 

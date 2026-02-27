@@ -34,9 +34,9 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
     this.logger.debug(`WebhookQueue initialized`)
   }
 
-  async addJob(data: WebhookJobData): Promise<string> {
+  async addJob(name: string, data: WebhookJobData): Promise<void> {
     try {
-      return ''
+      await this.queue.add(name, data)
     } catch (error) {
       this.raiseError(error, 'addJob', data)
     }

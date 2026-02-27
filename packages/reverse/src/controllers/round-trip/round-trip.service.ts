@@ -53,7 +53,7 @@ export class RoundTripService {
       data.url,
       data.requestHeaders,
       data.requestBody,
-      data.sizeLimit
+      data.responseSizeLimit
     )
   }
 
@@ -68,7 +68,7 @@ export class RoundTripService {
       data.url,
       data.requestHeaders,
       data.requestStream,
-      data.sizeLimit
+      data.responseSizeLimit
     )
   }
 
@@ -83,7 +83,7 @@ export class RoundTripService {
       data.url,
       data.requestHeaders,
       data.requestBody,
-      data.sizeLimit
+      data.responseSizeLimit
     )
   }
 

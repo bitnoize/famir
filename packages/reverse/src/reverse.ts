@@ -6,7 +6,7 @@ import {
   SessionModel
 } from '@famir/database'
 import { HttpServerContextState } from '@famir/http-server'
-import { type HttpMessage } from '@famir/http-tools'
+import { type ReverseMessage } from './reverse-message.js'
 
 export interface ReverseState extends HttpServerContextState {
   campaign?: FullCampaignModel
@@ -14,5 +14,5 @@ export interface ReverseState extends HttpServerContextState {
   target?: EnabledFullTargetModel
   targets?: EnabledTargetModel[]
   session?: SessionModel
-  message?: HttpMessage
+  message?: ReverseMessage
 }

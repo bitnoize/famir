@@ -28,8 +28,8 @@ Packages
 | [http-server](packages/http-server) | HTTP server |
 | [repl-server](packages/repl-server) | REPL server |
 | [console](packages/console) | Console application |
-| [reverse-proxy](packages/reverse-proxy) | Reverse proxy application |
-| [analyze-log](packages/analyze-log) | Analyze log application |
+| [reverse](packages/reverse) | Reverse application |
+| [analyze](packages/analyze) | Analyze application |
 
 
 Disclaimer

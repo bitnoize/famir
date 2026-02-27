@@ -1,16 +1,26 @@
 import { randomIdent, serializeError } from '@famir/common'
-import { HttpBodyWrap } from './body.js'
-import { HttpContentType, HttpContentTypeName, HttpContentTypes } from './content-type.js'
-import { HttpHeadersWrap } from './headers.js'
-import { HttpMethodWrap } from './method.js'
-import { HttpConnection, HttpError, HttpKind, HttpPayload } from './misc.js'
-import { RewriteUrlScheme, RewriteUrlTarget, rewriteUrl } from './rewrite-url.js'
-import { HttpStatusWrap } from './status.js'
-import { HttpUrlWrap } from './url.js'
+import {
+  HttpBodyWrap,
+  HttpConnection,
+  HttpContentType,
+  HttpContentTypeName,
+  HttpContentTypes,
+  HttpError,
+  HttpHeadersWrap,
+  HttpKind,
+  HttpMethodWrap,
+  HttpPayload,
+  HttpStatusWrap,
+  HttpUrlWrap,
+  RewriteUrlScheme,
+  RewriteUrlTarget,
+  rewriteUrl
+} from '@famir/http-tools'
+import { Transform } from 'node:stream'
 
-export type HttpMessageInterceptor = (message: HttpMessage) => void
+export type ReverseMessageInterceptor = (message: ReverseMessage) => void
 
-export class HttpMessage {
+export class ReverseMessage {
   readonly id = randomIdent()
   protected isReady: boolean = false
 
@@ -65,7 +75,7 @@ export class HttpMessage {
 
   score: number = 0
 
-  analyze: string = 'dummy'
+  analyze: string | null = null
 
   protected readonly contentTypes: HttpContentTypes = {
     text: [],
@@ -110,16 +120,16 @@ export class HttpMessage {
     this.rewriteUrlSchemes.push(...schemes)
   }
 
-  private requestHeadInterceptors: Array<[string, HttpMessageInterceptor]> = []
-  private requestBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
+  private requestHeadInterceptors: Array<[string, ReverseMessageInterceptor]> = []
+  private requestBodyInterceptors: Array<[string, ReverseMessageInterceptor]> = []
 
-  addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
+  addRequestHeadInterceptor(name: string, interceptor: ReverseMessageInterceptor) {
     this.sureNotReady('addRequestHeadInterceptor')
 
     this.requestHeadInterceptors.push([name, interceptor])
   }
 
-  addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
+  addRequestBodyInterceptor(name: string, interceptor: ReverseMessageInterceptor) {
     this.sureNotReady('addRequestBodyInterceptor')
 
     this.requestBodyInterceptors.push([name, interceptor])
@@ -156,16 +166,28 @@ export class HttpMessage {
     this.requestBody.freeze()
   }
 
-  private responseHeadInterceptors: Array<[string, HttpMessageInterceptor]> = []
-  private responseBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
+  private requestTransforms: Transform[] = []
 
-  addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
+  addRequestTransform(transform: Transform) {
+    this.sureNotReady('addRequestTransform')
+
+    this.requestTransforms.push(transform)
+  }
+
+  getRequestTransforms(): Readonly<Transform[]> {
+    return this.requestTransforms
+  }
+
+  private responseHeadInterceptors: Array<[string, ReverseMessageInterceptor]> = []
+  private responseBodyInterceptors: Array<[string, ReverseMessageInterceptor]> = []
+
+  addResponseHeadInterceptor(name: string, interceptor: ReverseMessageInterceptor) {
     this.sureNotReady('addResponseHeadInterceptor')
 
     this.responseHeadInterceptors.push([name, interceptor])
   }
 
-  addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
+  addResponseBodyInterceptor(name: string, interceptor: ReverseMessageInterceptor) {
     this.sureNotReady('addResponseBodyInterceptor')
 
     this.responseBodyInterceptors.push([name, interceptor])
@@ -202,19 +224,31 @@ export class HttpMessage {
     this.responseBody.freeze()
   }
 
+  private responseTransforms: Transform[] = []
+
+  addResponseTransform(transform: Transform) {
+    this.sureNotReady('addResponseTransform')
+
+    this.responseTransforms.push(transform)
+  }
+
+  getResponseTransforms(): Readonly<Transform[]> {
+    return this.responseTransforms
+  }
+
   rewriteUrl(text: string, rev: boolean, targets: RewriteUrlTarget[]): string {
     return rewriteUrl(text, rev, targets, this.rewriteUrlSchemes)
   }
 
   protected sureNotReady(name: string) {
     if (this.isReady) {
-      throw new Error(`Message is ready on: ${name}`)
+      throw new Error(`ReverseMessage is ready on: ${name}`)
     }
   }
 
   protected sureIsReady(name: string) {
     if (!this.isReady) {
-      throw new Error(`Message not ready on: ${name}`)
+      throw new Error(`ReverseMessage not ready on: ${name}`)
     }
   }
 }

@@ -5,9 +5,9 @@ import {
   HttpHeadersWrap,
   HttpMethodWrap,
   HttpStatusWrap,
-  HttpUrlWrap
+  HttpUrlWrap,
+  isbot
 } from '@famir/http-tools'
-import { isbot } from 'isbot'
 import http from 'node:http'
 import { Readable, Writable } from 'node:stream'
 import { HttpServerError } from './http-server.error.js'
@@ -160,9 +160,11 @@ export class NativeHttpServerContext implements HttpServerContext {
               code: 'CONTENT_TOO_LARGE'
             })
           )
-        } else {
-          chunks.push(chunk)
+
+          return
         }
+
+        chunks.push(chunk)
       })
 
       this.req.on('end', () => {
@@ -193,6 +195,8 @@ export class NativeHttpServerContext implements HttpServerContext {
               code: 'BAD_REQUEST'
             })
           )
+
+          return
         }
       })
     })
@@ -211,9 +215,11 @@ export class NativeHttpServerContext implements HttpServerContext {
               code: 'INTERNAL_ERROR'
             })
           )
-        } else {
-          resolve()
+
+          return
         }
+
+        resolve()
       })
     })
   }

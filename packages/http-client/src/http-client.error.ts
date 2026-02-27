@@ -1,13 +1,12 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
-export type HttpClientErrorCode = 'INTERNAL_ERROR' | 'BAD_GATEWAY' | 'GATEWAY_TIMEOUT'
+export type HttpClientErrorCode = 'BAD_GATEWAY' | 'GATEWAY_TIMEOUT'
 
 export type HttpClientErrorOptions = CommonErrorOptions & {
   code: HttpClientErrorCode
 }
 
 const codeToStatusMap: Record<HttpClientErrorCode, number> = {
-  INTERNAL_ERROR: 500,
   BAD_GATEWAY: 502,
   GATEWAY_TIMEOUT: 504
 } as const

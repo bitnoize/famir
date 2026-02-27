@@ -13,7 +13,7 @@ export interface HttpClient {
     url: string,
     requestHeaders: HttpHeaders,
     requestBody: HttpBody,
-    sizeLimit: number
+    responseSizeLimit: number
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
   streamRequestForward(
     connectTimeout: number,
@@ -23,7 +23,7 @@ export interface HttpClient {
     url: string,
     requestHeaders: HttpHeaders,
     requestStream: Readable,
-    sizeLimit: number
+    responseSizeLimit: number
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
   streamResponseForward(
     connectTimeout: number,
@@ -33,7 +33,7 @@ export interface HttpClient {
     url: string,
     requestHeaders: HttpHeaders,
     requestBody: HttpBody,
-    sizeLimit: number
+    responseSizeLimit: number
   ): Promise<HttpClientStreamResult | HttpClientErrorResult>
 }
 

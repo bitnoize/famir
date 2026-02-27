@@ -18,7 +18,7 @@ export interface SimpleForwardData {
   url: string
   requestHeaders: HttpHeaders
   requestBody: HttpBody
-  sizeLimit: number
+  responseSizeLimit: number
 }
 
 export interface StreamRequestForwardData {
@@ -29,7 +29,7 @@ export interface StreamRequestForwardData {
   url: string
   requestHeaders: HttpHeaders
   requestStream: Readable
-  sizeLimit: number
+  responseSizeLimit: number
 }
 
 export type StreamResponseForwardData = SimpleForwardData
