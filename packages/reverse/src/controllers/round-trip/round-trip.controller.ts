@@ -6,6 +6,7 @@ import {
   HttpServerError,
   HttpServerRouter
 } from '@famir/http-server'
+import { LimiterTransform } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -79,7 +80,7 @@ export class RoundTripController extends BaseController {
       message.ready()
 
       if (message.isKind('simple')) {
-        await ctx.loadRequest(target.requestSizeLimit)
+        await ctx.loadRequest(target.bodySizeLimit)
 
         message.url.merge(ctx.url.toObject())
         message.requestHeaders.merge(ctx.requestHeaders.toObject())
@@ -91,15 +92,16 @@ export class RoundTripController extends BaseController {
 
         message.runRequestBodyInterceptors()
 
-        const result = await this.roundTripService.simpleForward({
-          connectTimeout: target.connectTimeout,
-          timeout: target.simpleTimeout,
+        const result = await this.roundTripService.forwardSimple({
           proxy: proxy.url,
           method: message.method.get(),
           url: message.url.toAbsolute(),
           requestHeaders: message.requestHeaders.toObject(),
           requestBody: message.requestBody.get(),
-          responseSizeLimit: target.responseSizeLimit
+          connectTimeout: target.connectTimeout,
+          timeout: target.simpleTimeout,
+          headersSizeLimit: target.headersSizeLimit,
+          bodySizeLimit: target.bodySizeLimit
         })
 
         if (result.error) {
@@ -135,26 +137,32 @@ export class RoundTripController extends BaseController {
 
         const requestStream = new PassThrough()
 
+        const limiterTransform = new LimiterTransform(target.bodySizeLimit)
+
         pipelineSync(
           ctx.requestStream,
+          limiterTransform,
           ...message.getRequestTransforms(),
           requestStream,
           (error) => {
             if (error) {
+              this.logger.error(`HttpServer stream pipeline error`, { error })
+
               message.addError(error, 'forward', 'stream-request', 'pipeline')
             }
           }
         )
 
-        const result = await this.roundTripService.streamRequestForward({
-          connectTimeout: target.connectTimeout,
-          timeout: target.streamTimeout,
+        const result = await this.roundTripService.forwardStreamRequest({
           proxy: proxy.url,
           method: message.method.get(),
           url: message.url.toAbsolute(),
           requestHeaders: message.requestHeaders.toObject(),
           requestStream,
-          responseSizeLimit: target.responseSizeLimit
+          connectTimeout: target.connectTimeout,
+          timeout: target.streamTimeout,
+          headersSizeLimit: target.headersSizeLimit,
+          bodySizeLimit: target.bodySizeLimit
         })
 
         if (result.error) {
@@ -182,7 +190,7 @@ export class RoundTripController extends BaseController {
           await ctx.sendResponse()
         }
       } else if (message.isKind('stream-response')) {
-        await ctx.loadRequest(target.requestSizeLimit)
+        await ctx.loadRequest(target.bodySizeLimit)
 
         message.url.merge(ctx.url.toObject())
         message.requestHeaders.merge(ctx.requestHeaders.toObject())
@@ -194,15 +202,15 @@ export class RoundTripController extends BaseController {
 
         message.runRequestBodyInterceptors()
 
-        const result = await this.roundTripService.streamResponseForward({
-          connectTimeout: target.connectTimeout,
-          timeout: target.streamTimeout,
+        const result = await this.roundTripService.forwardStreamResponse({
           proxy: proxy.url,
           method: message.method.get(),
           url: message.url.toAbsolute(),
           requestHeaders: message.requestHeaders.toObject(),
           requestBody: message.requestBody.get(),
-          responseSizeLimit: target.responseSizeLimit
+          connectTimeout: target.connectTimeout,
+          timeout: target.streamTimeout,
+          headersSizeLimit: target.headersSizeLimit
         })
 
         if (result.error) {
@@ -225,12 +233,17 @@ export class RoundTripController extends BaseController {
           ctx.sendHead()
 
           try {
+            const limiterTransform = new LimiterTransform(target.bodySizeLimit)
+
             await pipelineAsync(
               result.responseStream,
+              limiterTransform,
               ...message.getResponseTransforms(),
               ctx.responseStream
             )
           } catch (error) {
+            this.logger.error(`HttpServer stream pipeline error`, { error })
+
             message.addError(error, 'forward', 'stream-response', 'pipeline')
           }
         }

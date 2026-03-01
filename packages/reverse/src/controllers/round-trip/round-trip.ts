@@ -10,29 +10,29 @@ import {
 import { HttpBody, HttpHeaders, HttpMethod } from '@famir/http-tools'
 import type { Readable } from 'node:stream'
 
-export interface SimpleForwardData {
-  connectTimeout: number
-  timeout: number
+export interface ForwardBaseData {
   proxy: string
   method: HttpMethod
   url: string
   requestHeaders: HttpHeaders
+  connectTimeout: number
+  timeout: number
+  headersSizeLimit: number
+}
+
+export interface ForwardSimpleData extends ForwardBaseData {
   requestBody: HttpBody
-  responseSizeLimit: number
+  bodySizeLimit: number
 }
 
-export interface StreamRequestForwardData {
-  connectTimeout: number
-  timeout: number
-  proxy: string
-  method: HttpMethod
-  url: string
-  requestHeaders: HttpHeaders
+export interface ForwardStreamRequestData extends ForwardBaseData {
   requestStream: Readable
-  responseSizeLimit: number
+  bodySizeLimit: number
 }
 
-export type StreamResponseForwardData = SimpleForwardData
+export interface ForwardStreamResponseData extends ForwardBaseData {
+  requestBody: HttpBody
+}
 
 export interface CreateMessageData {
   campaignId: string

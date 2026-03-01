@@ -62,12 +62,12 @@ export class NativeHttpServerContext implements HttpServerContext {
   readonly responseHeaders: HttpHeadersWrap
   readonly responseBody: HttpBodyWrap
 
-  async loadRequest(requestSizeLimit: number): Promise<void> {
-    if (!(requestSizeLimit > 0)) {
+  async loadRequest(bodySizeLimit: number): Promise<void> {
+    if (!(bodySizeLimit > 0)) {
       throw new TypeError(`Wrong loadRequest params`)
     }
 
-    const requestBody = await this.loadRequestBody(requestSizeLimit)
+    const requestBody = await this.loadRequestBody(bodySizeLimit)
 
     this.requestBody.set(requestBody).freeze()
   }
@@ -139,23 +139,19 @@ export class NativeHttpServerContext implements HttpServerContext {
     return this.res.writableEnded
   }
 
-  private loadRequestBody(requestSizeLimit: number): Promise<HttpBody> {
+  private loadRequestBody(bodySizeLimit: number): Promise<HttpBody> {
     return new Promise<HttpBody>((resolve, reject) => {
       const chunks: Buffer[] = []
       let requestBodySize = 0
 
       this.req.on('data', (chunk: Buffer) => {
-        requestBodySize += chunk.length
-
-        if (requestBodySize > requestSizeLimit) {
+        if (requestBodySize + chunk.length > bodySizeLimit) {
           this.req.destroy()
 
           reject(
             new HttpServerError(`Content too large`, {
               context: {
                 reason: `Request body size limit exceeded`,
-                requestBodySize,
-                requestSizeLimit
               },
               code: 'CONTENT_TOO_LARGE'
             })
@@ -165,12 +161,14 @@ export class NativeHttpServerContext implements HttpServerContext {
         }
 
         chunks.push(chunk)
+
+        requestBodySize += chunk.length
       })
 
       this.req.on('end', () => {
-        const body = this.parseRawBody(chunks, requestBodySize)
+        const requestBody = this.parseRawBody(chunks)
 
-        resolve(body)
+        resolve(requestBody)
       })
 
       this.req.on('error', (error) => {
@@ -202,9 +200,9 @@ export class NativeHttpServerContext implements HttpServerContext {
     })
   }
 
-  private sendResponseBody(body: HttpBody): Promise<void> {
+  private sendResponseBody(responseBody: HttpBody): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.res.end(body, (error?: Error) => {
+      this.res.end(responseBody, (error?: Error) => {
         if (error) {
           reject(
             new HttpServerError(`Server internal error`, {
@@ -224,9 +222,9 @@ export class NativeHttpServerContext implements HttpServerContext {
     })
   }
 
-  protected parseRawBody(chunks: Buffer[], size: number): HttpBody {
+  protected parseRawBody(chunks: Buffer[]): HttpBody {
     try {
-      return Buffer.concat(chunks, size)
+      return Buffer.concat(chunks)
     } catch {
       return Buffer.alloc(0)
     }

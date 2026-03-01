@@ -16,9 +16,9 @@ import { HttpServerError } from '@famir/http-server'
 import { ANALYZE_QUEUE, AnalyzeJobData, AnalyzeQueue } from '@famir/workflow'
 import {
   CreateMessageData,
-  SimpleForwardData,
-  StreamRequestForwardData,
-  StreamResponseForwardData
+  ForwardSimpleData,
+  ForwardStreamRequestData,
+  ForwardStreamResponseData
 } from './round-trip.js'
 
 export const ROUND_TRIP_SERVICE = Symbol('RoundTripService')
@@ -42,48 +42,50 @@ export class RoundTripService {
     protected readonly httpClient: HttpClient
   ) {}
 
-  async simpleForward(
-    data: SimpleForwardData
+  async forwardSimple(
+    data: ForwardSimpleData
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
-    return await this.httpClient.simpleForward(
-      data.connectTimeout,
-      data.timeout,
+    return await this.httpClient.simple(
       data.proxy,
       data.method,
       data.url,
       data.requestHeaders,
       data.requestBody,
-      data.responseSizeLimit
+      data.connectTimeout,
+      data.timeout,
+      data.headersSizeLimit,
+      data.bodySizeLimit
     )
   }
 
-  async streamRequestForward(
-    data: StreamRequestForwardData
+  async forwardStreamRequest(
+    data: ForwardStreamRequestData
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
-    return await this.httpClient.streamRequestForward(
-      data.connectTimeout,
-      data.timeout,
+    return await this.httpClient.streamRequest(
       data.proxy,
       data.method,
       data.url,
       data.requestHeaders,
       data.requestStream,
-      data.responseSizeLimit
+      data.connectTimeout,
+      data.timeout,
+      data.headersSizeLimit,
+      data.bodySizeLimit
     )
   }
 
-  async streamResponseForward(
-    data: StreamResponseForwardData
+  async forwardStreamResponse(
+    data: ForwardStreamResponseData
   ): Promise<HttpClientStreamResult | HttpClientErrorResult> {
-    return await this.httpClient.streamResponseForward(
-      data.connectTimeout,
-      data.timeout,
+    return await this.httpClient.streamResponse(
       data.proxy,
       data.method,
       data.url,
       data.requestHeaders,
       data.requestBody,
-      data.responseSizeLimit
+      data.connectTimeout,
+      data.timeout,
+      data.headersSizeLimit
     )
   }
 

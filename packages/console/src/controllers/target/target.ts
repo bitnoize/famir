@@ -12,8 +12,8 @@ export interface CreateTargetData {
   connectTimeout: number
   simpleTimeout: number
   streamTimeout: number
-  requestSizeLimit: number
-  responseSizeLimit: number
+  headersSizeLimit: number
+  bodySizeLimit: number
   mainPage: string
   notFoundPage: string
   faviconIco: string
@@ -33,8 +33,8 @@ export interface UpdateTargetData {
   connectTimeout: number | null | undefined
   simpleTimeout: number | null | undefined
   streamTimeout: number | null | undefined
-  requestSizeLimit: number | null | undefined
-  responseSizeLimit: number | null | undefined
+  headersSizeLimit: number | null | undefined
+  bodySizeLimit: number | null | undefined
   mainPage: string | null | undefined
   notFoundPage: string | null | undefined
   faviconIco: string | null | undefined

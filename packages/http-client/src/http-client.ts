@@ -1,40 +1,72 @@
 import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-tools'
-import type { Readable } from 'node:stream'
+import type { PassThrough, Readable } from 'node:stream'
 import { HttpClientError } from './http-client.error.js'
 
 export const HTTP_CLIENT = Symbol('HttpClient')
 
 export interface HttpClient {
-  simpleForward(
-    connectTimeout: number,
-    timeout: number,
+  simple(
     proxy: string,
     method: HttpMethod,
     url: string,
     requestHeaders: HttpHeaders,
     requestBody: HttpBody,
-    responseSizeLimit: number
-  ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
-  streamRequestForward(
     connectTimeout: number,
     timeout: number,
+    headersSizeLimit: number,
+    bodySizeLimit: number
+  ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
+  streamRequest(
     proxy: string,
     method: HttpMethod,
     url: string,
     requestHeaders: HttpHeaders,
     requestStream: Readable,
-    responseSizeLimit: number
-  ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
-  streamResponseForward(
     connectTimeout: number,
     timeout: number,
+    headersSizeLimit: number,
+    bodySizeLimit: number
+  ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
+  streamResponse(
     proxy: string,
     method: HttpMethod,
     url: string,
     requestHeaders: HttpHeaders,
     requestBody: HttpBody,
-    responseSizeLimit: number
+    connectTimeout: number,
+    timeout: number,
+    headersSizeLimit: number
   ): Promise<HttpClientStreamResult | HttpClientErrorResult>
+}
+
+export interface HttpClientBaseState {
+  error: HttpClientError | null
+  isResolved: boolean
+  proxy: string
+  method: HttpMethod
+  url: string
+  requestHeaders: HttpHeaders
+  responseHeaders: Buffer[]
+  connectTimeout: number
+  timeout: number
+  headersSizeLimit: number
+}
+
+export interface HttpClientSimpleState extends HttpClientBaseState {
+  requestBody: HttpBody
+  responseBody: Buffer[]
+  bodySizeLimit: number
+}
+
+export interface HttpClientStreamRequestState extends HttpClientBaseState {
+  requestStream: Readable
+  responseBody: Buffer[]
+  bodySizeLimit: number
+}
+
+export interface HttpClientStreamResponseState extends HttpClientBaseState {
+  requestBody: HttpBody
+  responseStream: PassThrough
 }
 
 export interface HttpClientErrorResult {

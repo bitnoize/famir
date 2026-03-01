@@ -4,8 +4,8 @@ import {
   targetDomainSchema,
   targetLabelSchema,
   targetPortSchema,
-  targetRequestSizeLimitSchema,
-  targetResponseSizeLimitSchema,
+  targetHeadersSizeLimitSchema,
+  targetBodySizeLimitSchema,
   targetSimpleTimeoutSchema,
   targetStreamTimeoutSchema,
   targetSubSchema
@@ -43,8 +43,8 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     'connectTimeout',
     'simpleTimeout',
     'streamTimeout',
-    'requestSizeLimit',
-    'responseSizeLimit',
+    'headersSizeLimit',
+    'bodySizeLimit',
     'mainPage',
     'notFoundPage',
     'faviconIco',
@@ -65,23 +65,23 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     mirrorPort: targetPortSchema,
     connectTimeout: {
       ...targetConnectTimeoutSchema,
-      default: 1 * 1000
+      default: 10 * 1000 // 10 sec
     },
     simpleTimeout: {
       ...targetSimpleTimeoutSchema,
-      default: 10 * 1000
+      default: 60 * 1000 // 1 min
     },
     streamTimeout: {
       ...targetStreamTimeoutSchema,
-      default: 3600 * 1000
+      default: 300 * 1000 // 5 min
     },
-    requestSizeLimit: {
-      ...targetRequestSizeLimitSchema,
-      default: 10 * 1024 * 1024
+    headersSizeLimit: {
+      ...targetHeadersSizeLimitSchema,
+      default: 10 * 1024 // 10 kb
     },
-    responseSizeLimit: {
-      ...targetResponseSizeLimitSchema,
-      default: 10 * 1024 * 1024
+    bodySizeLimit: {
+      ...targetBodySizeLimitSchema,
+      default: 10 * 1024 * 1024 // 10 mb
     },
     mainPage: {
       ...targetContentSchema,
@@ -136,12 +136,12 @@ const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
       ...targetStreamTimeoutSchema,
       nullable: true
     },
-    requestSizeLimit: {
-      ...targetRequestSizeLimitSchema,
+    headersSizeLimit: {
+      ...targetHeadersSizeLimitSchema,
       nullable: true
     },
-    responseSizeLimit: {
-      ...targetResponseSizeLimitSchema,
+    bodySizeLimit: {
+      ...targetBodySizeLimitSchema,
       nullable: true
     },
     mainPage: {

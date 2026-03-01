@@ -95,8 +95,8 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     'connect_timeout',
     'simple_timeout',
     'stream_timeout',
-    'request_size_limit',
-    'response_size_limit',
+    'headers_size_limit',
+    'body_size_limit',
     'main_page',
     'not_found_page',
     'favicon_ico',
@@ -156,10 +156,10 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     stream_timeout: {
       type: 'integer'
     },
-    request_size_limit: {
+    headers_size_limit: {
       type: 'integer'
     },
-    response_size_limit: {
+    body_size_limit: {
       type: 'integer'
     },
     main_page: {
@@ -235,25 +235,25 @@ export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
 
 export const targetSimpleTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
-  minimum: 1 * 1000,
-  maximum: 2 * 60 * 1000
+  minimum: 1,
+  maximum: 5 * 60 * 1000
 } as const
 
 export const targetStreamTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
-  minimum: 60 * 1000,
-  maximum: 24 * 3600 * 1000
+  minimum: 1,
+  maximum: 3600 * 1000
 } as const
 
-export const targetRequestSizeLimitSchema: JSONSchemaType<number> = {
+export const targetHeadersSizeLimitSchema: JSONSchemaType<number> = {
   type: 'integer',
-  minimum: 1024,
-  maximum: 1024 * 1024 * 1024
+  minimum: 1,
+  maximum: 1024 * 1024
 } as const
 
-export const targetResponseSizeLimitSchema: JSONSchemaType<number> = {
+export const targetBodySizeLimitSchema: JSONSchemaType<number> = {
   type: 'integer',
-  minimum: 1024,
+  minimum: 1,
   maximum: 1024 * 1024 * 1024
 } as const
 

@@ -33,8 +33,8 @@ export interface RawFullTarget extends RawTarget {
   connect_timeout: number
   simple_timeout: number
   stream_timeout: number
-  request_size_limit: number
-  response_size_limit: number
+  headers_size_limit: number
+  body_size_limit: number
   main_page: string
   not_found_page: string
   favicon_ico: string
@@ -63,8 +63,8 @@ export const targetFunctions = {
         connectTimeout: number,
         simpleTimeout: number,
         streamTimeout: number,
-        requestSizeLimit: number,
-        responseSizeLimit: number,
+        headersSizeLimit: number,
+        bodySizeLimit: number,
         mainPage: string,
         notFoundPage: string,
         faviconIco: string,
@@ -93,8 +93,8 @@ export const targetFunctions = {
         parser.push(connectTimeout.toString())
         parser.push(simpleTimeout.toString())
         parser.push(streamTimeout.toString())
-        parser.push(requestSizeLimit.toString())
-        parser.push(responseSizeLimit.toString())
+        parser.push(headersSizeLimit.toString())
+        parser.push(bodySizeLimit.toString())
         parser.push(mainPage)
         parser.push(notFoundPage)
         parser.push(faviconIco)
@@ -165,8 +165,8 @@ export const targetFunctions = {
         connectTimeout: number | null | undefined,
         simpleTimeout: number | null | undefined,
         streamTimeout: number | null | undefined,
-        requestSizeLimit: number | null | undefined,
-        responseSizeLimit: number | null | undefined,
+        headersSizeLimit: number | null | undefined,
+        bodySizeLimit: number | null | undefined,
         mainPage: string | null | undefined,
         notFoundPage: string | null | undefined,
         faviconIco: string | null | undefined,
@@ -193,14 +193,14 @@ export const targetFunctions = {
           parser.push(streamTimeout.toString())
         }
 
-        if (requestSizeLimit != null) {
-          parser.push('request_size_limit')
-          parser.push(requestSizeLimit.toString())
+        if (headersSizeLimit != null) {
+          parser.push('headers_size_limit')
+          parser.push(headersSizeLimit.toString())
         }
 
-        if (responseSizeLimit != null) {
-          parser.push('response_size_limit')
-          parser.push(responseSizeLimit.toString())
+        if (bodySizeLimit != null) {
+          parser.push('body_size_limit')
+          parser.push(bodySizeLimit.toString())
         }
 
         if (mainPage != null) {
