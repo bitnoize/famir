@@ -1,11 +1,11 @@
 import {
+  targetBodySizeLimitSchema,
   targetConnectTimeoutSchema,
   targetContentSchema,
   targetDomainSchema,
+  targetHeadersSizeLimitSchema,
   targetLabelSchema,
   targetPortSchema,
-  targetHeadersSizeLimitSchema,
-  targetBodySizeLimitSchema,
   targetSimpleTimeoutSchema,
   targetStreamTimeoutSchema,
   targetSubSchema
@@ -25,7 +25,7 @@ import {
   ReadTargetData,
   SwitchTargetData,
   UpdateTargetData
-} from './target.js'
+} from '../../services/index.js'
 
 const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
   type: 'object',

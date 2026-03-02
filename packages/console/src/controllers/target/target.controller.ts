@@ -2,17 +2,18 @@ import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { BaseController } from '../base/index.js'
 import {
   ActionTargetLabelData,
   CreateTargetData,
   DeleteTargetData,
   ListTargetsData,
   ReadTargetData,
-  UpdateTargetData
-} from './target.js'
+  TARGET_SERVICE,
+  UpdateTargetData,
+  type TargetService
+} from '../../services/index.js'
+import { BaseController } from '../base/index.js'
 import { targetSchemas } from './target.schemas.js'
-import { TARGET_SERVICE, type TargetService } from './target.service.js'
 
 export const TARGET_CONTROLLER = Symbol('TargetController')
 
@@ -47,7 +48,7 @@ export class TargetController extends BaseController {
     this.logger.debug(`TargetController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('createTarget', async (data) => {
       this.validateData<CreateTargetData>('console-create-target-data', data)
 
@@ -101,5 +102,7 @@ export class TargetController extends BaseController {
 
       return await this.targetService.list(data)
     })
+
+    return this
   }
 }

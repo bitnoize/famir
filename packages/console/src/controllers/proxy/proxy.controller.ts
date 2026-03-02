@@ -2,16 +2,17 @@ import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { BaseController } from '../base/index.js'
 import {
   CreateProxyData,
   DeleteProxyData,
   ListProxiesData,
+  PROXY_SERVICE,
   ReadProxyData,
-  SwitchProxyData
-} from './proxy.js'
+  SwitchProxyData,
+  type ProxyService
+} from '../../services/index.js'
+import { BaseController } from '../base/index.js'
 import { proxySchemas } from './proxy.schemas.js'
-import { PROXY_SERVICE, type ProxyService } from './proxy.service.js'
 
 export const PROXY_CONTROLLER = Symbol('ProxyController')
 
@@ -46,7 +47,7 @@ export class ProxyController extends BaseController {
     this.logger.debug(`MessageController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('createProxy', async (data) => {
       this.validateData<CreateProxyData>('console-create-proxy-data', data)
 
@@ -82,5 +83,7 @@ export class ProxyController extends BaseController {
 
       return await this.proxyService.list(data)
     })
+
+    return this
   }
 }

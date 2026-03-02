@@ -2,7 +2,7 @@ import { DIContainer } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Client as MinioClient } from 'minio'
-import { Readable } from 'node:stream'
+import consumers from 'node:stream/consumers'
 import { StorageError } from './storage.error.js'
 import { MinioStorageConfig, MinioStorageOptions, Storage, STORAGE } from './storage.js'
 
@@ -35,44 +35,28 @@ export class MinioStorage implements Storage {
     this.logger.debug(`Storage initialized`)
   }
 
-  async get(objectName: string): Promise<Buffer> {
+  async getObject(objectName: string): Promise<Buffer> {
     try {
       const stream = await this.minio.getObject(this.options.bucketName, objectName)
 
-      return await this.loadStream(stream)
+      return await consumers.buffer(stream)
     } catch (error) {
-      this.raiseError(error, 'fetch', { objectName })
+      this.raiseError(error, 'getObject', { objectName })
     }
   }
 
-  async put(objectName: string, data: Buffer, metaData: Record<string, string>): Promise<void> {
+  async putObject(
+    objectName: string,
+    data: Buffer,
+    metaData: Record<string, string | undefined>
+  ): Promise<void> {
     try {
       metaData['Content-Length'] = data.length.toString()
 
       await this.minio.putObject(this.options.bucketName, objectName, data, data.length, metaData)
     } catch (error) {
-      this.raiseError(error, 'upload', { objectName })
+      this.raiseError(error, 'putObject', { objectName })
     }
-  }
-
-  protected loadStream(stream: Readable): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const chunks: Buffer[] = []
-
-      stream.on('data', (chunk: Buffer) => {
-        chunks.push(chunk)
-      })
-
-      stream.on('end', () => {
-        const data = Buffer.concat(chunks)
-
-        resolve(data)
-      })
-
-      stream.on('error', (error) => {
-        reject(error)
-      })
-    })
   }
 
   protected raiseError(error: unknown, method: string, data: unknown): never {

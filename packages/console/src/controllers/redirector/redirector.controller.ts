@@ -2,16 +2,17 @@ import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { BaseController } from '../base/index.js'
 import {
   CreateRedirectorData,
   DeleteRedirectorData,
   ListRedirectorsData,
   ReadRedirectorData,
-  UpdateRedirectorData
-} from './redirector.js'
+  REDIRECTOR_SERVICE,
+  UpdateRedirectorData,
+  type RedirectorService
+} from '../../services/index.js'
+import { BaseController } from '../base/index.js'
 import { redirectorSchemas } from './redirector.schemas.js'
-import { REDIRECTOR_SERVICE, type RedirectorService } from './redirector.service.js'
 
 export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')
 
@@ -46,7 +47,7 @@ export class RedirectorController extends BaseController {
     this.logger.debug(`RedirectorController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('createRedirector', async (data) => {
       this.validateData<CreateRedirectorData>('console-create-redirector-data', data)
 
@@ -76,5 +77,7 @@ export class RedirectorController extends BaseController {
 
       return await this.redirectorService.list(data)
     })
+
+    return this
   }
 }

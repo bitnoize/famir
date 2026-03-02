@@ -21,7 +21,7 @@ import {
   ReadCampaignData,
   UnlockCampaignData,
   UpdateCampaignData
-} from './campaign.js'
+} from '../../services/index.js'
 
 const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
   type: 'object',

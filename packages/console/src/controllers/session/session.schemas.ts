@@ -4,7 +4,7 @@ import {
   customIdentSchema,
   randomIdentSchema
 } from '@famir/validator'
-import { ReadSessionData } from './session.js'
+import { ReadSessionData } from '../../services/index.js'
 
 const readSessionDataSchema: JSONSchemaType<ReadSessionData> = {
   type: 'object',

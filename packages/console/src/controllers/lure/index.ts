@@ -1,5 +1,2 @@
 export * from './lure.controller.js'
-export * from './lure.js'
-export * from './lure.module.js'
 export * from './lure.schemas.js'
-export * from './lure.service.js'

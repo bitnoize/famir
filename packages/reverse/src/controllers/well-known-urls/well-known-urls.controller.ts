@@ -30,7 +30,7 @@ export class WellKnownUrlsController extends BaseController {
     this.logger.debug(`WellKnownUrlsController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('well-known-urls', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
@@ -44,6 +44,8 @@ export class WellKnownUrlsController extends BaseController {
         await next()
       }
     })
+
+    return this
   }
 
   protected async renderFaviconIco(

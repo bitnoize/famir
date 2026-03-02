@@ -3,8 +3,13 @@ import { EXECUTOR_ROUTER, ExecutorRouter } from '@famir/executor'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { ANALYZE_QUEUE_NAME } from '@famir/workflow'
+import {
+  READ_MESSAGE_USE_CASE,
+  SAVE_MESSAGE_USE_CASE,
+  type ReadMessageUseCase,
+  type SaveMessageUseCase
+} from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
-import { DUMMY_SERVICE, type DummyService } from './dummy.service.js'
 
 export const DUMMY_CONTROLLER = Symbol('DummyController')
 
@@ -17,7 +22,8 @@ export class DummyController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<ExecutorRouter>(EXECUTOR_ROUTER),
-          c.resolve<DummyService>(DUMMY_SERVICE)
+          c.resolve<ReadMessageUseCase>(READ_MESSAGE_USE_CASE),
+          c.resolve<SaveMessageUseCase>(SAVE_MESSAGE_USE_CASE)
         )
     )
   }
@@ -30,20 +36,23 @@ export class DummyController extends BaseController {
     validator: Validator,
     logger: Logger,
     router: ExecutorRouter,
-    protected readonly dummyService: DummyService
+    protected readonly readMessageUseCase: ReadMessageUseCase,
+    protected readonly saveMessageUseCase: SaveMessageUseCase
   ) {
     super(validator, logger, router)
 
     this.logger.debug(`DummyController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register(ANALYZE_QUEUE_NAME, 'dummy', async (data) => {
       this.validateAnalyzeJobData(data)
 
-      const [campaign, session, message] = await this.dummyService.readMessage(data)
+      const message = await this.readMessageUseCase.execute(data)
 
-      await this.dummyService.saveMessage(message)
+      await this.saveMessageUseCase.execute(message)
     })
+
+    return this
   }
 }

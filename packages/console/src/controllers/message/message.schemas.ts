@@ -4,7 +4,7 @@ import {
   customIdentSchema,
   randomIdentSchema
 } from '@famir/validator'
-import { ReadMessageData } from './message.js'
+import { ReadMessageData } from '../../services/index.js'
 
 const readMessageDataSchema: JSONSchemaType<ReadMessageData> = {
   type: 'object',

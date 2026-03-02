@@ -1,5 +1,2 @@
 export * from './database.controller.js'
-export * from './database.js'
-export * from './database.module.js'
 export * from './database.schemas.js'
-export * from './database.service.js'

@@ -2,10 +2,9 @@ import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
+import { ReadSessionData, SESSION_SERVICE, type SessionService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
-import { ReadSessionData } from './session.js'
 import { sessionSchemas } from './session.schemas.js'
-import { SESSION_SERVICE, type SessionService } from './session.service.js'
 
 export const SESSION_CONTROLLER = Symbol('SessionController')
 
@@ -40,11 +39,13 @@ export class SessionController extends BaseController {
     this.logger.debug(`SessionController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('readSession', async (data) => {
       this.validateData<ReadSessionData>('console-read-session-data', data)
 
       return await this.sessionService.read(data)
     })
+
+    return this
   }
 }

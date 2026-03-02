@@ -151,7 +151,7 @@ export class NativeHttpServerContext implements HttpServerContext {
           reject(
             new HttpServerError(`Content too large`, {
               context: {
-                reason: `Request body size limit exceeded`,
+                reason: `Request body size limit exceeded`
               },
               code: 'CONTENT_TOO_LARGE'
             })

@@ -13,4 +13,8 @@ export class SessionModel {
     readonly createdAt: Date,
     readonly lastAuthAt: Date
   ) {}
+
+  get isNew(): boolean {
+    return this.messageCount <= 1
+  }
 }

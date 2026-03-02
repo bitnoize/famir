@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@famir/common": "*",
-    "@famir/validator": "*",
     "@famir/config": "*",
     "@famir/logger": "*",
-    "minio": "^8.0.6"
+    "@famir/validator": "*",
+    "minio": "^8.0.7"
   }
 }

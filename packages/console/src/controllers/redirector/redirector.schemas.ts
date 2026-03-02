@@ -11,7 +11,7 @@ import {
   ListRedirectorsData,
   ReadRedirectorData,
   UpdateRedirectorData
-} from './redirector.js'
+} from '../../services/index.js'
 
 const DEFAULT_PAGE = ``
 

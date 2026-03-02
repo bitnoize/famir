@@ -2,16 +2,17 @@ import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { BaseController } from '../base/index.js'
 import {
   CreateLureData,
   DeleteLureData,
   ListLuresData,
+  LURE_SERVICE,
   ReadLureData,
-  SwitchLureData
-} from './lure.js'
+  SwitchLureData,
+  type LureService
+} from '../../services/index.js'
+import { BaseController } from '../base/index.js'
 import { lureSchemas } from './lure.schemas.js'
-import { LURE_SERVICE, type LureService } from './lure.service.js'
 
 export const LURE_CONTROLLER = Symbol('LureController')
 
@@ -46,7 +47,7 @@ export class LureController extends BaseController {
     this.logger.debug(`LureController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('createLure', async (data) => {
       this.validateData<CreateLureData>('console-create-lure-data', data)
 
@@ -82,5 +83,7 @@ export class LureController extends BaseController {
 
       return await this.lureService.list(data)
     })
+
+    return this
   }
 }

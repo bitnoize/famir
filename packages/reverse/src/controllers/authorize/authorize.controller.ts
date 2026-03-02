@@ -16,10 +16,21 @@ import { HttpCookie } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  AUTH_SESSION_USE_CASE,
+  type AuthSessionUseCase,
+  CREATE_SESSION_USE_CASE,
+  type CreateSessionUseCase,
+  FIND_LURE_REDIRECTOR_USE_CASE,
+  type FindLureRedirectorUseCase,
+  READ_PROXY_USE_CASE,
+  type ReadProxyUseCase,
+  UPGRADE_SESSION_USE_CASE,
+  type UpgradeSessionUseCase
+} from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
 import { LandingRedirectorData, LandingUpgradeData } from './authorize.js'
 import { authorizeSchemas } from './authorize.schemas.js'
-import { type AuthorizeService, AUTHORIZE_SERVICE } from './authorize.service.js'
 
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
 
@@ -33,7 +44,11 @@ export class AuthorizeController extends BaseController {
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<AuthorizeService>(AUTHORIZE_SERVICE)
+          c.resolve<ReadProxyUseCase>(READ_PROXY_USE_CASE),
+          c.resolve<FindLureRedirectorUseCase>(FIND_LURE_REDIRECTOR_USE_CASE),
+          c.resolve<CreateSessionUseCase>(CREATE_SESSION_USE_CASE),
+          c.resolve<AuthSessionUseCase>(AUTH_SESSION_USE_CASE),
+          c.resolve<UpgradeSessionUseCase>(UPGRADE_SESSION_USE_CASE)
         )
     )
   }
@@ -47,7 +62,11 @@ export class AuthorizeController extends BaseController {
     logger: Logger,
     protected templater: Templater,
     router: HttpServerRouter,
-    protected readonly authorizeService: AuthorizeService
+    protected readonly readProxyUseCase: ReadProxyUseCase,
+    protected readonly findLureRedirectorUseCase: FindLureRedirectorUseCase,
+    protected readonly createSessionUseCase: CreateSessionUseCase,
+    protected readonly authSessionUseCase: AuthSessionUseCase,
+    protected readonly upgradeSessionUseCase: UpgradeSessionUseCase
   ) {
     super(validator, logger, router)
 
@@ -56,7 +75,7 @@ export class AuthorizeController extends BaseController {
     this.logger.debug(`AuthorizeController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('authorize', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
@@ -72,17 +91,14 @@ export class AuthorizeController extends BaseController {
           return
         }
 
-        const lure = await this.authorizeService.readLurePath({
+        const lureRedirector = await this.findLureRedirectorUseCase.execute({
           campaignId: campaign.campaignId,
           path: ctx.url.get('pathname')
         })
 
-        if (lure) {
+        if (lureRedirector) {
           if (ctx.method.is(['GET', 'HEAD'])) {
-            const redirector = await this.authorizeService.readRedirector({
-              campaignId: campaign.campaignId,
-              redirectorId: lure.redirectorId
-            })
+            const [lure, redirector] = lureRedirector
 
             await this.landingRedirectorSession(ctx, campaign, target, redirector)
           } else {
@@ -97,6 +113,8 @@ export class AuthorizeController extends BaseController {
         await this.transparentSession(ctx, campaign, target, next)
       }
     })
+
+    return this
   }
 
   protected async landingUpgradeSession(
@@ -112,7 +130,6 @@ export class AuthorizeController extends BaseController {
     }
 
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
-
     if (!sessionCookie) {
       await this.renderMainRedirect(ctx)
 
@@ -127,7 +144,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    const session = await this.authorizeService.authSession({
+    const session = await this.authSessionUseCase.execute({
       campaignId: campaign.campaignId,
       sessionId: sessionCookie
     })
@@ -148,7 +165,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    await this.authorizeService.upgradeSession({
+    await this.upgradeSessionUseCase.execute({
       campaignId: campaign.campaignId,
       lureId: landingUpgradeData.lure_id,
       sessionId: session.sessionId,
@@ -177,7 +194,7 @@ export class AuthorizeController extends BaseController {
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
     if (!sessionCookie) {
-      const session = await this.authorizeService.createSession({
+      const session = await this.createSessionUseCase.execute({
         campaignId: campaign.campaignId
       })
 
@@ -196,7 +213,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    const session = await this.authorizeService.authSession({
+    const session = await this.authSessionUseCase.execute({
       campaignId: campaign.campaignId,
       sessionId: sessionCookie
     })
@@ -242,7 +259,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    const session = await this.authorizeService.authSession({
+    const session = await this.authSessionUseCase.execute({
       campaignId: campaign.campaignId,
       sessionId: sessionCookie
     })
@@ -263,7 +280,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    const proxy = await this.authorizeService.readProxy({
+    const proxy = await this.readProxyUseCase.execute({
       campaignId: campaign.campaignId,
       proxyId: session.proxyId
     })
@@ -298,21 +315,21 @@ export class AuthorizeController extends BaseController {
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
     if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
-      session = await this.authorizeService.authSession({
+      session = await this.authSessionUseCase.execute({
         campaignId: campaign.campaignId,
         sessionId: sessionCookie
       })
     }
 
     if (!session) {
-      session = await this.authorizeService.createSession({
+      session = await this.createSessionUseCase.execute({
         campaignId: campaign.campaignId
       })
     }
 
     this.persistSessionCookie(ctx, campaign, session)
 
-    const proxy = await this.authorizeService.readProxy({
+    const proxy = await this.readProxyUseCase.execute({
       campaignId: campaign.campaignId,
       proxyId: session.proxyId
     })

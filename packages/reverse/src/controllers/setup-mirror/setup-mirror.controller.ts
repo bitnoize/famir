@@ -7,8 +7,11 @@ import {
 } from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  type FindCampaignTargetUseCase,
+  FIND_CAMPAIGN_TARGET_USE_CASE
+} from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
-import { type SetupMirrorService, SETUP_MIRROR_SERVICE } from './setup-mirror.service.js'
 
 export const SETUP_MIRROR_CONTROLLER = Symbol('SetupMirrorController')
 
@@ -21,7 +24,7 @@ export class SetupMirrorController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<SetupMirrorService>(SETUP_MIRROR_SERVICE)
+          c.resolve<FindCampaignTargetUseCase>(FIND_CAMPAIGN_TARGET_USE_CASE)
         )
     )
   }
@@ -34,18 +37,18 @@ export class SetupMirrorController extends BaseController {
     validator: Validator,
     logger: Logger,
     router: HttpServerRouter,
-    protected readonly setupMirrorService: SetupMirrorService
+    protected readonly findCampaignTargetUseCase: FindCampaignTargetUseCase
   ) {
     super(validator, logger, router)
 
     this.logger.debug(`SetupMirrorController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('setup-mirror', async (ctx, next) => {
       const mirrorHost = this.parseMirrorHost(ctx)
 
-      const [campaign, target, targets] = await this.setupMirrorService.findTarget({
+      const [campaign, target, targets] = await this.findCampaignTargetUseCase.execute({
         mirrorHost
       })
 
@@ -62,6 +65,8 @@ export class SetupMirrorController extends BaseController {
 
       await next()
     })
+
+    return this
   }
 
   private parseMirrorHost(ctx: HttpServerContext): string {
@@ -69,7 +74,7 @@ export class SetupMirrorController extends BaseController {
       const mirrorHost = ctx.requestHeaders.getString('Host')
 
       if (!(mirrorHost && /[^:]+:\d+$/.test(mirrorHost))) {
-        throw new Error(`Host header malform`)
+        throw new Error(`MirrorHost header malform`)
       }
 
       return mirrorHost

@@ -29,14 +29,13 @@ export class TransformController extends BaseController {
     this.logger.debug(`TransformController initialized`)
   }
 
-  useAll() {
-    this.useBasic()
-    this.useFixCors()
-    this.useFixCsp()
-    this.useRewriteUrl()
+  useAll(): this {
+    this.useBasic().useFixCors().useFixCsp().useRewriteUrl()
+
+    return this
   }
 
-  useBasic() {
+  useBasic(): this {
     this.router.register('transform-basic', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
@@ -82,9 +81,11 @@ export class TransformController extends BaseController {
 
       await next()
     })
+
+    return this
   }
 
-  useFixCors() {
+  useFixCors(): this {
     this.router.register('transform-fix-cors', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
       const message = this.getState(ctx, 'message')
@@ -105,9 +106,11 @@ export class TransformController extends BaseController {
 
       await next()
     })
+
+    return this
   }
 
-  useFixCsp() {
+  useFixCsp(): this {
     this.router.register('transform-fix-csp', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
       const message = this.getState(ctx, 'message')
@@ -127,9 +130,11 @@ export class TransformController extends BaseController {
 
       await next()
     })
+
+    return this
   }
 
-  useRewriteUrl() {
+  useRewriteUrl(): this {
     this.router.register('transform-rewrite-url', async (ctx, next) => {
       const targets = this.getState(ctx, 'targets')
       const message = this.getState(ctx, 'message')
@@ -175,5 +180,7 @@ export class TransformController extends BaseController {
 
       await next()
     })
+
+    return this
   }
 }

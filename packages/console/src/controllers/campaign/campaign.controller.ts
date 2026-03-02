@@ -2,17 +2,18 @@ import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { BaseController } from '../base/index.js'
 import {
+  CAMPAIGN_SERVICE,
   CreateCampaignData,
   DeleteCampaignData,
   LockCampaignData,
   ReadCampaignData,
   UnlockCampaignData,
-  UpdateCampaignData
-} from './campaign.js'
+  UpdateCampaignData,
+  type CampaignService
+} from '../../services/index.js'
+import { BaseController } from '../base/index.js'
 import { campaignSchemas } from './campaign.schemas.js'
-import { CAMPAIGN_SERVICE, type CampaignService } from './campaign.service.js'
 
 export const CAMPAIGN_CONTROLLER = Symbol('CampaignController')
 
@@ -47,7 +48,7 @@ export class CampaignController extends BaseController {
     this.logger.debug(`CampaignController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('createCampaign', async (data) => {
       this.validateData<CreateCampaignData>('console-create-campaign-data', data)
 
@@ -87,5 +88,7 @@ export class CampaignController extends BaseController {
     this.router.register('listCampaigns', async () => {
       return await this.campaignService.list()
     })
+
+    return this
   }
 }

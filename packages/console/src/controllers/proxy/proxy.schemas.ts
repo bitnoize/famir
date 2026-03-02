@@ -11,7 +11,7 @@ import {
   ListProxiesData,
   ReadProxyData,
   SwitchProxyData
-} from './proxy.js'
+} from '../../services/index.js'
 
 const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
   type: 'object',

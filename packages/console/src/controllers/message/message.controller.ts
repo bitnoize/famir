@@ -2,10 +2,9 @@ import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
+import { MESSAGE_SERVICE, ReadMessageData, type MessageService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
-import { ReadMessageData } from './message.js'
 import { messageSchemas } from './message.schemas.js'
-import { MESSAGE_SERVICE, type MessageService } from './message.service.js'
 
 export const MESSAGE_CONTROLLER = Symbol('MessageController')
 
@@ -40,11 +39,13 @@ export class MessageController extends BaseController {
     this.logger.debug(`MessageController initialized`)
   }
 
-  use() {
+  use(): this {
     this.router.register('readMessage', async (data) => {
       this.validateData<ReadMessageData>('console-read-message-data', data)
 
       return await this.messageService.read(data)
     })
+
+    return this
   }
 }

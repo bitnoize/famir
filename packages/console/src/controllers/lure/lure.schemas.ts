@@ -11,7 +11,7 @@ import {
   ListLuresData,
   ReadLureData,
   SwitchLureData
-} from './lure.js'
+} from '../../services/index.js'
 
 const createLureDataSchema: JSONSchemaType<CreateLureData> = {
   type: 'object',
