@@ -16,7 +16,8 @@ import { PinoLogger } from '@famir/logger'
 import { EtaTemplater } from '@famir/templater'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeQueue, RedisWorkflowConnector } from '@famir/workflow'
-import { App } from '../../reverse.app.js'
+import { App } from '../../app.js'
+import { autoLoad } from '../../main.js'
 import { AppStdConfig } from './std.js'
 import { configAppStdSchema } from './std.schemas.js'
 
@@ -52,6 +53,8 @@ export async function bootstrapStd(composer: DIComposer): Promise<void> {
   NativeHttpServer.inject(container)
 
   App.inject(container)
+
+  autoLoad(container)
 
   composer(container)
 

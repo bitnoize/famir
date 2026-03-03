@@ -7,6 +7,7 @@ import {
 } from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
+import { ReverseMessage } from '../../reverse-message.js'
 import {
   type FindCampaignTargetUseCase,
   FIND_CAMPAIGN_TARGET_USE_CASE
@@ -52,14 +53,26 @@ export class SetupMirrorController extends BaseController {
         mirrorHost
       })
 
+      const message = new ReverseMessage(
+        ctx.method,
+        ctx.url.clone(),
+        ctx.requestHeaders.clone().reset(),
+        ctx.requestBody.clone().reset(),
+        ctx.status.clone().reset(),
+        ctx.responseHeaders.clone().reset(),
+        ctx.responseBody.clone().reset()
+      )
+
       this.setState(ctx, 'campaign', campaign)
       this.setState(ctx, 'target', target)
       this.setState(ctx, 'targets', targets)
+      this.setState(ctx, 'message', message)
 
       if (ctx.verbose) {
         ctx.responseHeaders.merge({
           'X-Famir-Campaign-Id': target.campaignId,
-          'X-Famir-Target-Id': target.targetId
+          'X-Famir-Target-Id': target.targetId,
+          'X-Famir-Message-Id': message.id
         })
       }
 

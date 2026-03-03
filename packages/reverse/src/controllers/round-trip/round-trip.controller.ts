@@ -22,14 +22,14 @@ import {
 } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
 
-export const FORWARD_CONTROLLER = Symbol('ForwardController')
+export const ROUND_TRIP_CONTROLLER = Symbol('RoundTripController')
 
-export class ForwardController extends BaseController {
+export class RoundTripController extends BaseController {
   static inject(container: DIContainer) {
     container.registerSingleton(
-      FORWARD_CONTROLLER,
+      ROUND_TRIP_CONTROLLER,
       (c) =>
-        new ForwardController(
+        new RoundTripController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -41,8 +41,8 @@ export class ForwardController extends BaseController {
     )
   }
 
-  static resolve(container: DIContainer): ForwardController {
-    return container.resolve(FORWARD_CONTROLLER)
+  static resolve(container: DIContainer): RoundTripController {
+    return container.resolve(ROUND_TRIP_CONTROLLER)
   }
 
   constructor(
@@ -56,11 +56,11 @@ export class ForwardController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.logger.debug(`ForwardController initialized`)
+    this.logger.debug(`RoundTripController initialized`)
   }
 
   use(): this {
-    this.router.register('forward', async (ctx, next) => {
+    this.router.register('round-trip', async (ctx, next) => {
       const proxy = this.getState(ctx, 'proxy')
       const target = this.getState(ctx, 'target')
       const message = this.getState(ctx, 'message')

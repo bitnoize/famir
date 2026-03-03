@@ -15,7 +15,8 @@ import { PinoLogger } from '@famir/logger'
 import { CliReplServer, ReplServerRouter } from '@famir/repl-server'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeQueue, RedisWorkflowConnector } from '@famir/workflow'
-import { App } from '../../console.app.js'
+import { App } from '../../app.js'
+import { autoLoad } from '../../main.js'
 import { AppCliConfig } from './cli.js'
 import { configAppCliSchema } from './cli.schemas.js'
 
@@ -48,6 +49,8 @@ export async function bootstrapCli(composer: DIComposer): Promise<void> {
   CliReplServer.inject(container)
 
   App.inject(container)
+
+  autoLoad(container)
 
   composer(container)
 

@@ -17,7 +17,8 @@ import { PinoLogger } from '@famir/logger'
 import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
 import { RedisWorkflowConnector } from '@famir/workflow'
-import { App } from '../../analyze.app.js'
+import { App } from '../../app.js'
+import { autoLoad } from '../../main.js'
 import { AppStdConfig } from './std.js'
 import { configAppStdSchema } from './std.schemas.js'
 
@@ -51,6 +52,8 @@ export async function bootstrapStd(
   BullAnalyzeWorker.inject(container)
 
   App.inject(container)
+
+  autoLoad(container)
 
   composer(container)
 
