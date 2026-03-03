@@ -87,7 +87,7 @@ export class ReverseMessage {
     urlEncoded: []
   }
 
-  addContentTypes(name: HttpContentTypeName, ...types: string[]) {
+  addContentTypes(name: HttpContentTypeName, types: string[]) {
     this.sureNotReady('addContentTypes')
 
     this.contentTypes[name].push(...types)
@@ -99,7 +99,7 @@ export class ReverseMessage {
 
   protected readonly rewriteUrlTypes: string[] = []
 
-  addRewriteUrlTypes(...types: string[]) {
+  addRewriteUrlTypes(types: string[]) {
     this.sureNotReady('addRewriteUrlTypes')
 
     this.rewriteUrlTypes.push(...types)
@@ -114,7 +114,7 @@ export class ReverseMessage {
     ['//', false]
   ]
 
-  addRewriteUrlSchemes(...schemes: RewriteUrlScheme[]) {
+  addRewriteUrlSchemes(schemes: RewriteUrlScheme[]) {
     this.sureNotReady('addRewriteUrlSchemes')
 
     this.rewriteUrlSchemes.push(...schemes)

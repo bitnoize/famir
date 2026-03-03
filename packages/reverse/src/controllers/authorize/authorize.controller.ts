@@ -81,7 +81,7 @@ export class AuthorizeController extends BaseController {
       const target = this.getState(ctx, 'target')
 
       if (target.isLanding) {
-        if (ctx.url.isPathEquals(campaign.landingUpgradePath)) {
+        if (ctx.url.isPath(campaign.landingUpgradePath)) {
           if (ctx.method.is('GET')) {
             await this.landingUpgradeSession(ctx, campaign)
           } else {
@@ -449,7 +449,7 @@ export class AuthorizeController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.url.isPathEquals('/')) {
+    if (ctx.url.isPath('/')) {
       await this.renderMainPage(ctx, target)
     } else {
       await this.renderNotFoundPage(ctx, target)

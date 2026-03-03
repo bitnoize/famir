@@ -134,9 +134,9 @@ export class RoundTripController extends BaseController {
           requestStream,
           (error) => {
             if (error) {
-              this.logger.error(`HttpServer stream pipeline error`, { error })
-
               message.addError(error, 'forward', 'stream-request', 'pipeline')
+
+              this.logger.warn(`HttpServer request stream pipeline error`, { error })
             }
           }
         )
@@ -230,9 +230,13 @@ export class RoundTripController extends BaseController {
               ctx.responseStream
             )
           } catch (error) {
-            this.logger.error(`HttpServer stream pipeline error`, { error })
-
             message.addError(error, 'forward', 'stream-response', 'pipeline')
+
+            this.logger.warn(`HttpServer response stream pipeline error`, { error })
+
+            if (!ctx.responseStream.writableEnded) {
+              ctx.responseStream.end()
+            }
           }
         }
       } else {

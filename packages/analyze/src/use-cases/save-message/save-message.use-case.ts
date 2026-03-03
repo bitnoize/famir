@@ -18,27 +18,32 @@ export class SaveMessageUseCase {
     const basePath = `${message.campaignId}/${message.sessionId}/${message.messageId}`
 
     const main = Buffer.from(
-      JSON.stringify({
-        campaignId: message.campaignId,
-        messageId: message.messageId,
-        proxyId: message.proxyId,
-        targetId: message.targetId,
-        sessionId: message.sessionId,
-        kind: message.kind,
-        method: message.method,
-        url: message.url,
-        status: message.status,
-        score: message.score,
-        ip: message.ip,
-        startTime: message.startTime,
-        finishTime: message.finishTime
-      })
+      JSON.stringify(
+        {
+          campaignId: message.campaignId,
+          messageId: message.messageId,
+          proxyId: message.proxyId,
+          targetId: message.targetId,
+          sessionId: message.sessionId,
+          kind: message.kind,
+          method: message.method,
+          url: message.url,
+          status: message.status,
+          score: message.score,
+          ip: message.ip,
+          startTime: message.startTime,
+          finishTime: message.finishTime,
+          totalTime: message.totalTime
+        },
+        null,
+        2
+      )
     )
-    await this.storage.putObject(`${basePath}/message.json`, main, {
+    await this.storage.putObject(`${basePath}/main.json`, main, {
       'Content-Type': 'application/json'
     })
 
-    const requestHeaders = Buffer.from(JSON.stringify(message.requestHeaders))
+    const requestHeaders = Buffer.from(JSON.stringify(message.requestHeaders, null, 2))
     await this.storage.putObject(`${basePath}/request-headers.json`, requestHeaders, {
       'Content-Type': 'application/json'
     })
@@ -49,7 +54,7 @@ export class SaveMessageUseCase {
       })
     }
 
-    const responseHeaders = Buffer.from(JSON.stringify(message.responseHeaders))
+    const responseHeaders = Buffer.from(JSON.stringify(message.responseHeaders, null, 2))
     await this.storage.putObject(`${basePath}/response-headers.json`, responseHeaders, {
       'Content-Type': 'application/json'
     })
@@ -60,22 +65,18 @@ export class SaveMessageUseCase {
       })
     }
 
-    if (Object.keys(message.connection).length > 0) {
-      const connection = Buffer.from(JSON.stringify(message.connection))
-      await this.storage.putObject(`${basePath}/connection.json`, connection, {
-        'Content-Type': 'application/json'
-      })
-    }
+    const connection = Buffer.from(JSON.stringify(message.connection, null, 2))
+    await this.storage.putObject(`${basePath}/connection.json`, connection, {
+      'Content-Type': 'application/json'
+    })
 
-    if (Object.keys(message.payload).length > 0) {
-      const payload = Buffer.from(JSON.stringify(message.payload))
-      await this.storage.putObject(`${basePath}/payload.json`, payload, {
-        'Content-Type': 'application/json'
-      })
-    }
+    const payload = Buffer.from(JSON.stringify(message.payload, null, 2))
+    await this.storage.putObject(`${basePath}/payload.json`, payload, {
+      'Content-Type': 'application/json'
+    })
 
     if (message.errors.length > 0) {
-      const errors = Buffer.from(JSON.stringify(message.errors))
+      const errors = Buffer.from(JSON.stringify(message.errors, null, 2))
       await this.storage.putObject(`${basePath}/errors.json`, errors, {
         'Content-Type': 'application/json'
       })

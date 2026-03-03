@@ -141,7 +141,7 @@ export class HttpUrlWrap {
       ...this.parseQueryStringOptions,
       ignoreQueryPrefix: true
       // ...
-    })
+})
 
     this.#cacheQueryString = queryString
 
@@ -163,19 +163,14 @@ export class HttpUrlWrap {
     return this
   }
 
-  isPathEquals(arg: string | string[]): boolean {
-    const paths = Array.isArray(arg) ? arg : [arg]
-    return paths.some((path) => path === this.#url.pathname)
-  }
-
-  isPathUnder(arg: string | string[]): boolean {
-    const paths = Array.isArray(arg) ? arg : [arg]
-    return paths.some((path) => this.#url.pathname.startsWith(path))
-  }
-
-  isPathMatch(arg: RegExp | RegExp[]): boolean {
-    const paths = Array.isArray(arg) ? arg : [arg]
-    return paths.some((path) => path.test(this.#url.pathname))
+  isPath(value: string | RegExp): boolean {
+    if (typeof value === 'string') {
+      return value === this.#url.pathname
+    } else if (value instanceof RegExp) {
+      return value.test(this.#url.pathname)
+    } else {
+      throw new Error(`Test path unknown value`)
+    }
   }
 
   toObject(): HttpUrl {

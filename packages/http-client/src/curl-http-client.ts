@@ -470,7 +470,7 @@ export class CurlHttpClient implements HttpClient {
 
       pipeline(stream, state.responseStream, (error) => {
         if (error) {
-          this.logger.error(`HttpClient stream pipeline error`, { error })
+          this.logger.warn(`HttpClient stream pipeline error`, { error })
         }
       })
 

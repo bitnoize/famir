@@ -4,7 +4,8 @@ import {
   HttpHeadersWrap,
   HttpMethodWrap,
   HttpStatusWrap,
-  HttpUrlWrap
+  HttpUrlWrap,
+  UAResult
 } from '@famir/http-tools'
 import type { Readable, Writable } from 'node:stream'
 
@@ -35,6 +36,7 @@ export interface HttpServerContext {
   sendHead(): void
   sendResponse(): Promise<void>
   readonly isBot: boolean
+  readonly userAgent: UAResult
   readonly ip: string
   readonly connection: HttpConnection
   readonly startTime: number

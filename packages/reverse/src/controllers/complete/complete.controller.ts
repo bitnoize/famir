@@ -49,6 +49,14 @@ export class CompleteController extends BaseController {
       const message = this.getState(ctx, 'message')
 
       if (message.analyze) {
+        message.payload['user-agent'] = ctx.userAgent
+
+        message.payload['request-content-type'] = message.requestHeaders.getContentType()
+        message.payload['request-cookies'] = message.requestHeaders.getCookies()
+
+        message.payload['response-cookies'] = message.responseHeaders.getSetCookies()
+        message.payload['response-content-type'] = message.responseHeaders.getContentType()
+
         await this.createMessageUseCase.execute({
           campaignId: campaign.campaignId,
           messageId: message.id,

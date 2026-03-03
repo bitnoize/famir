@@ -33,8 +33,8 @@ export const autoLoad: DIComposer = (container) => {
   ForwardStreamResponseUseCase.inject(container)
 
   SetupMirrorController.inject(container)
-  AuthorizeController.inject(container)
   WellKnownUrlsController.inject(container)
+  AuthorizeController.inject(container)
   TransformController.inject(container)
   RoundTripController.inject(container)
   CompleteController.inject(container)

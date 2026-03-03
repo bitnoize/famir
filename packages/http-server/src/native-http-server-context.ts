@@ -6,7 +6,9 @@ import {
   HttpMethodWrap,
   HttpStatusWrap,
   HttpUrlWrap,
-  isbot
+  isbot,
+  UAParser,
+  UAResult
 } from '@famir/http-tools'
 import http from 'node:http'
 import { Readable, Writable } from 'node:stream'
@@ -113,6 +115,20 @@ export class NativeHttpServerContext implements HttpServerContext {
     this.#isBot = isbot(value)
 
     return this.#isBot
+  }
+
+  #userAgent: UAResult | null = null
+
+  get userAgent(): UAResult {
+    if (this.#userAgent != null) {
+      return this.#userAgent
+    }
+
+    const value = this.requestHeaders.getString('User-Agent') ?? ''
+
+    this.#userAgent = UAParser(value)
+
+    return this.#userAgent
   }
 
   get ip(): string {

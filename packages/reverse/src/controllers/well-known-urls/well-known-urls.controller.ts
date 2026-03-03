@@ -34,11 +34,11 @@ export class WellKnownUrlsController extends BaseController {
     this.router.register('well-known-urls', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (ctx.url.isPathEquals('/favicon.ico')) {
+      if (ctx.url.isPath('/favicon.ico')) {
         await this.renderFaviconIco(ctx, target)
-      } else if (ctx.url.isPathEquals('/robots.txt')) {
+      } else if (ctx.url.isPath('/robots.txt')) {
         await this.renderRobotsTxt(ctx, target)
-      } else if (ctx.url.isPathEquals('/sitemap.xml')) {
+      } else if (ctx.url.isPath('/sitemap.xml')) {
         await this.renderSitemapXml(ctx, target)
       } else {
         await next()

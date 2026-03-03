@@ -32,6 +32,10 @@ export class MessageModel {
     readonly finishTime: number,
     readonly createdAt: Date
   ) {}
+
+  get totalTime(): number {
+    return this.finishTime > this.startTime ? this.finishTime - this.startTime : 0
+  }
 }
 
 export class FullMessageModel extends MessageModel {
