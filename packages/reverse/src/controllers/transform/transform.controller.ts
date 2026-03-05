@@ -51,6 +51,14 @@ export class TransformController extends BaseController {
           message.requestHeaders.set('Origin', donorOrigin)
         }
 
+        if (message.requestHeaders.has('Referer')) {
+          const oldValue = message.requestHeaders.getString('Referer')
+          if (oldValue) {
+            const newValue = message.rewriteUrl(oldValue, true, targets)
+            message.requestHeaders.set('Referer', newValue)
+          }
+        }
+
         message.requestHeaders.delete([
           'Via',
           'X-Real-Ip',
