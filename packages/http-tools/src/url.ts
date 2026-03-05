@@ -141,7 +141,7 @@ export class HttpUrlWrap {
       ...this.parseQueryStringOptions,
       ignoreQueryPrefix: true
       // ...
-})
+    })
 
     this.#cacheQueryString = queryString
 

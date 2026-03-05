@@ -22,32 +22,45 @@ export class AjvValidator implements Validator {
     })
   }
 
+  getSchema(name: string): object | undefined {
+    return this.ajv.getSchema(name)
+  }
+
+  addSchema(name: string, schema: object) {
+    const existsSchema = this.getSchema(name)
+    if (existsSchema) {
+      throw new Error(`JSON-Schema '${name}' already exists`)
+    }
+
+    this.ajv.addSchema(schema, name)
+  }
+
   addSchemas(schemas: ValidatorSchemas) {
     Object.entries(schemas).forEach(([name, schema]) => {
-      this.ajv.addSchema(schema, name)
+      this.addSchema(name, schema)
     })
   }
 
-  protected getValidate<T>(schemaName: string): ValidateFunction<T> {
-    const validate = this.ajv.getSchema<T>(schemaName)
+  protected getValidate<T>(name: string): ValidateFunction<T> {
+    const validate = this.ajv.getSchema<T>(name)
 
     if (!validate) {
-      throw new Error(`JSON-Schema '${schemaName}' not known`)
+      throw new Error(`JSON-Schema '${name}' not known`)
     }
 
     return validate
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  guardSchema<T>(schemaName: string, data: unknown): data is T {
-    const validate = this.getValidate<T>(schemaName)
+  guardSchema<T>(name: string, data: unknown): data is T {
+    const validate = this.getValidate<T>(name)
 
     return validate(data) ? true : false
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  assertSchema<T>(schemaName: string, data: unknown): asserts data is T {
-    const validate = this.getValidate<T>(schemaName)
+  assertSchema<T>(name: string, data: unknown): asserts data is T {
+    const validate = this.getValidate<T>(name)
 
     if (!validate(data)) {
       const validateErrors = (validate.errors || []).map((error) => {
@@ -63,8 +76,8 @@ export class AjvValidator implements Validator {
 
       throw new ValidatorError(`JSON-Schema assertion failed`, {
         context: {
-          schemaName,
-          data
+          schemaName: name
+          //data
         },
         validateErrors
       })

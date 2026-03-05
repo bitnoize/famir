@@ -8,6 +8,7 @@
   "scripts": {
     "format": "prettier -w \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
+    "test": "node --test dist/**/*.test.js",
     "stylua": "stylua redis-functions",
     "selene": "selene redis-functions",
     "build": "tsc -b"

@@ -34,7 +34,9 @@ export class WellKnownUrlsController extends BaseController {
     this.router.register('well-known-urls', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (ctx.url.isPath('/favicon.ico')) {
+      if (ctx.method.is('OPTIONS')) {
+        await this.sendPreflightCors(ctx)
+      } else if (ctx.url.isPath('/favicon.ico')) {
         await this.sendFaviconIco(ctx, target)
       } else if (ctx.url.isPath('/robots.txt')) {
         await this.sendRobotsTxt(ctx, target)
@@ -46,6 +48,22 @@ export class WellKnownUrlsController extends BaseController {
     })
 
     return this
+  }
+
+  protected async sendPreflightCors(ctx: HttpServerContext): Promise<void> {
+    ctx.status.set(204)
+
+    ctx.responseHeaders.merge({
+      'Content-Type': 'text/plain',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': '*',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Expose-Headers': '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400'
+    })
+
+    await ctx.sendResponse()
   }
 
   protected async sendFaviconIco(
@@ -126,21 +144,3 @@ export class WellKnownUrlsController extends BaseController {
     }
   }
 }
-
-/*
-  protected async sendPreflightCors(ctx: HttpServerContext): Promise<void> {
-    ctx.status.set(204)
-
-    ctx.responseHeaders.merge({
-      'Content-Type': 'text/plain',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': '*',
-      'Access-Control-Allow-Headers': '*',
-      'Access-Control-Expose-Headers': '*',
-      'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Max-Age': '86400'
-    })
-
-    await ctx.sendResponse()
-  }
-  */

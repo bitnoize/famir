@@ -8,7 +8,8 @@
   "scripts": {
     "format": "npm --ws run format",
     "lint": "npm --ws run lint",
-    "build": "npm --ws run build"
+    "build": "npm --ws run build",
+    "test": "npm --ws run test"
   },
   "workspaces": [
     "packages/*"

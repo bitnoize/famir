@@ -52,52 +52,51 @@ export function formatCookies(cookies: HttpCookies): string {
 export function parseSetCookies(values: string[]): HttpSetCookies {
   const cookies: HttpSetCookies = {}
 
-  values
-    .forEach((rawCookie) => {
-      const toughCookie = ToughCookie.parse(rawCookie.trim())
+  values.forEach((rawCookie) => {
+    const toughCookie = ToughCookie.parse(rawCookie.trim())
 
-      if (!toughCookie) {
-        return
-      }
+    if (!toughCookie) {
+      return
+    }
 
-      const name = toughCookie.key
+    const name = toughCookie.key
 
-      cookies[name] = {
-        value: toughCookie.value
-      }
+    cookies[name] = {
+      value: toughCookie.value
+    }
 
-      // tough-cookie expires: Date | 'Infinity' | null
-      if (toughCookie.expires instanceof Date) {
-        cookies[name].expires = toughCookie.expires.getTime()
-      }
+    // tough-cookie expires: Date | 'Infinity' | null
+    if (toughCookie.expires instanceof Date) {
+      cookies[name].expires = toughCookie.expires.getTime()
+    }
 
-      // tough-cookie maxAge: number | 'Infinity' | '-Infinity' | null
-      if (typeof toughCookie.maxAge === 'number') {
-        cookies[name].maxAge = toughCookie.maxAge
-      }
+    // tough-cookie maxAge: number | 'Infinity' | '-Infinity' | null
+    if (typeof toughCookie.maxAge === 'number') {
+      cookies[name].maxAge = toughCookie.maxAge
+    }
 
-      if (toughCookie.path != null) {
-        cookies[name].path = toughCookie.path
-      }
+    if (toughCookie.path != null) {
+      cookies[name].path = toughCookie.path
+    }
 
-      if (toughCookie.domain != null) {
-        cookies[name].domain = toughCookie.domain
-      }
+    if (toughCookie.domain != null) {
+      cookies[name].domain = toughCookie.domain
+    }
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (toughCookie.secure != null) {
-        cookies[name].secure = toughCookie.secure
-      }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (toughCookie.secure != null) {
+      cookies[name].secure = toughCookie.secure
+    }
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (toughCookie.httpOnly != null) {
-        cookies[name].httpOnly = toughCookie.httpOnly
-      }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (toughCookie.httpOnly != null) {
+      cookies[name].httpOnly = toughCookie.httpOnly
+    }
 
-      if (toughCookie.sameSite != null) {
-        cookies[name].sameSite = toughCookie.sameSite
-      }
-    })
+    if (toughCookie.sameSite != null) {
+      cookies[name].sameSite = toughCookie.sameSite
+    }
+  })
 
   return cookies
 }
