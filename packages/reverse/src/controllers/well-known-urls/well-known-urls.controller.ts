@@ -35,11 +35,11 @@ export class WellKnownUrlsController extends BaseController {
       const target = this.getState(ctx, 'target')
 
       if (ctx.url.isPath('/favicon.ico')) {
-        await this.renderFaviconIco(ctx, target)
+        await this.sendFaviconIco(ctx, target)
       } else if (ctx.url.isPath('/robots.txt')) {
-        await this.renderRobotsTxt(ctx, target)
+        await this.sendRobotsTxt(ctx, target)
       } else if (ctx.url.isPath('/sitemap.xml')) {
-        await this.renderSitemapXml(ctx, target)
+        await this.sendSitemapXml(ctx, target)
       } else {
         await next()
       }
@@ -48,7 +48,7 @@ export class WellKnownUrlsController extends BaseController {
     return this
   }
 
-  protected async renderFaviconIco(
+  protected async sendFaviconIco(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
@@ -70,11 +70,11 @@ export class WellKnownUrlsController extends BaseController {
 
       await ctx.sendResponse()
     } else {
-      await this.renderNotFoundPage(ctx, target)
+      await this.sendNotFoundPage(ctx, target)
     }
   }
 
-  protected async renderRobotsTxt(
+  protected async sendRobotsTxt(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
@@ -96,11 +96,11 @@ export class WellKnownUrlsController extends BaseController {
 
       await ctx.sendResponse()
     } else {
-      await this.renderNotFoundPage(ctx, target)
+      await this.sendNotFoundPage(ctx, target)
     }
   }
 
-  protected async renderSitemapXml(
+  protected async sendSitemapXml(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
@@ -122,13 +122,13 @@ export class WellKnownUrlsController extends BaseController {
 
       await ctx.sendResponse()
     } else {
-      await this.renderNotFoundPage(ctx, target)
+      await this.sendNotFoundPage(ctx, target)
     }
   }
 }
 
 /*
-  protected async renderPreflightCors(ctx: HttpServerContext): Promise<void> {
+  protected async sendPreflightCors(ctx: HttpServerContext): Promise<void> {
     ctx.status.set(204)
 
     ctx.responseHeaders.merge({

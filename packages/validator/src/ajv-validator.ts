@@ -18,7 +18,7 @@ export class AjvValidator implements Validator {
       removeAdditional: true,
       allowUnionTypes: true,
       strictTypes: true
-      //strictTuples: true
+      //strictTuples: true // FIXME
     })
   }
 

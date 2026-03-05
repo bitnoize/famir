@@ -93,20 +93,20 @@ export class ReverseMessage {
     this.contentTypes[name].push(...types)
   }
 
-  isContentType(contentType: HttpContentType, name: HttpContentTypeName): boolean {
+  isContentType(name: HttpContentTypeName, contentType: HttpContentType): boolean {
     return this.contentTypes[name].includes(contentType.type)
   }
 
-  protected readonly rewriteUrlTypes: string[] = []
+  protected readonly rewriteUrlContentTypes: string[] = []
 
-  addRewriteUrlTypes(types: string[]) {
-    this.sureNotReady('addRewriteUrlTypes')
+  addRewriteUrlContentTypes(types: string[]) {
+    this.sureNotReady('addRewriteUrlContentTypes')
 
-    this.rewriteUrlTypes.push(...types)
+    this.rewriteUrlContentTypes.push(...types)
   }
 
-  isRewriteUrlType(contentType: HttpContentType): boolean {
-    return this.rewriteUrlTypes.includes(contentType.type)
+  isRewriteUrlContentType(contentType: HttpContentType): boolean {
+    return this.rewriteUrlContentTypes.includes(contentType.type)
   }
 
   protected readonly rewriteUrlSchemes: RewriteUrlScheme[] = [
@@ -161,6 +161,8 @@ export class ReverseMessage {
         }
       }
     }
+
+    this.requestHeaders.set('Content-Length', this.requestBody.length.toString())
 
     this.requestHeaders.freeze()
     this.requestBody.freeze()
@@ -219,6 +221,8 @@ export class ReverseMessage {
         }
       }
     }
+
+    this.responseHeaders.set('Content-Length', this.responseBody.length.toString())
 
     this.responseHeaders.freeze()
     this.responseBody.freeze()

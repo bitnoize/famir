@@ -38,7 +38,7 @@ export abstract class BaseController {
     state[key] = value
   }
 
-  protected async renderOriginRedirect(ctx: HttpServerContext): Promise<void> {
+  protected async sendOriginRedirect(ctx: HttpServerContext): Promise<void> {
     ctx.status.set(302)
 
     ctx.responseHeaders.set('Location', ctx.url.toRelative())
@@ -46,7 +46,7 @@ export abstract class BaseController {
     await ctx.sendResponse()
   }
 
-  protected async renderMainRedirect(ctx: HttpServerContext): Promise<void> {
+  protected async sendMainRedirect(ctx: HttpServerContext): Promise<void> {
     ctx.status.set(302)
 
     ctx.responseHeaders.set('Location', '/')
@@ -54,7 +54,7 @@ export abstract class BaseController {
     await ctx.sendResponse()
   }
 
-  protected async renderMainPage(
+  protected async sendMainPage(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
@@ -76,11 +76,11 @@ export abstract class BaseController {
 
       await ctx.sendResponse()
     } else {
-      await this.renderNotFoundPage(ctx, target)
+      await this.sendNotFoundPage(ctx, target)
     }
   }
 
-  protected async renderNotFoundPage(
+  protected async sendNotFoundPage(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {

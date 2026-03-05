@@ -85,7 +85,7 @@ export class AuthorizeController extends BaseController {
           if (ctx.method.is('GET')) {
             await this.landingUpgradeSession(ctx, campaign)
           } else {
-            await this.renderNotFoundPage(ctx, target)
+            await this.sendNotFoundPage(ctx, target)
           }
 
           return
@@ -102,7 +102,7 @@ export class AuthorizeController extends BaseController {
 
             await this.landingRedirectorSession(ctx, campaign, target, redirector)
           } else {
-            await this.renderNotFoundPage(ctx, target)
+            await this.sendNotFoundPage(ctx, target)
           }
 
           return
@@ -124,14 +124,14 @@ export class AuthorizeController extends BaseController {
     const landingUpgradeData = this.parseLandingUpgradeData(ctx)
 
     if (ctx.isBot) {
-      await this.renderMainRedirect(ctx)
+      await this.sendMainRedirect(ctx)
 
       return
     }
 
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
     if (!sessionCookie) {
-      await this.renderMainRedirect(ctx)
+      await this.sendMainRedirect(ctx)
 
       return
     }
@@ -139,7 +139,7 @@ export class AuthorizeController extends BaseController {
     if (!this.checkSessionCookie(sessionCookie)) {
       this.removeSessionCookie(ctx, campaign)
 
-      await this.renderMainRedirect(ctx)
+      await this.sendMainRedirect(ctx)
 
       return
     }
@@ -152,7 +152,7 @@ export class AuthorizeController extends BaseController {
     if (!session) {
       this.removeSessionCookie(ctx, campaign)
 
-      await this.renderMainRedirect(ctx)
+      await this.sendMainRedirect(ctx)
 
       return
     }
@@ -160,7 +160,7 @@ export class AuthorizeController extends BaseController {
     if (session.isLanding) {
       this.persistSessionCookie(ctx, campaign, session)
 
-      await this.renderMainRedirect(ctx)
+      await this.sendMainRedirect(ctx)
 
       return
     }
@@ -174,7 +174,7 @@ export class AuthorizeController extends BaseController {
 
     this.persistSessionCookie(ctx, campaign, session)
 
-    await this.renderMainRedirect(ctx)
+    await this.sendMainRedirect(ctx)
   }
 
   protected async landingRedirectorSession(
@@ -186,7 +186,7 @@ export class AuthorizeController extends BaseController {
     const landingRedirectorData = this.parseLandingRedirectorData(ctx)
 
     if (ctx.isBot) {
-      await this.renderRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
+      await this.sendRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
 
       return
     }
@@ -200,7 +200,7 @@ export class AuthorizeController extends BaseController {
 
       this.persistSessionCookie(ctx, campaign, session)
 
-      await this.renderOriginRedirect(ctx)
+      await this.sendOriginRedirect(ctx)
 
       return
     }
@@ -208,7 +208,7 @@ export class AuthorizeController extends BaseController {
     if (!this.checkSessionCookie(sessionCookie)) {
       this.removeSessionCookie(ctx, campaign)
 
-      await this.renderOriginRedirect(ctx)
+      await this.sendOriginRedirect(ctx)
 
       return
     }
@@ -221,14 +221,14 @@ export class AuthorizeController extends BaseController {
     if (!session) {
       this.removeSessionCookie(ctx, campaign)
 
-      await this.renderOriginRedirect(ctx)
+      await this.sendOriginRedirect(ctx)
 
       return
     }
 
     this.persistSessionCookie(ctx, campaign, session)
 
-    await this.renderRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
+    await this.sendRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
   }
 
   protected async landingAuthSession(
@@ -238,7 +238,7 @@ export class AuthorizeController extends BaseController {
     next: HttpServerNextFunction
   ): Promise<void> {
     if (ctx.isBot) {
-      await this.renderCloakingSite(ctx, target)
+      await this.sendCloakingSite(ctx, target)
 
       return
     }
@@ -246,7 +246,7 @@ export class AuthorizeController extends BaseController {
     const sessionCookie = this.lookupSessionCookie(ctx, campaign)
 
     if (!sessionCookie) {
-      await this.renderCloakingSite(ctx, target)
+      await this.sendCloakingSite(ctx, target)
 
       return
     }
@@ -254,7 +254,7 @@ export class AuthorizeController extends BaseController {
     if (!this.checkSessionCookie(sessionCookie)) {
       this.removeSessionCookie(ctx, campaign)
 
-      await this.renderOriginRedirect(ctx)
+      await this.sendOriginRedirect(ctx)
 
       return
     }
@@ -267,7 +267,7 @@ export class AuthorizeController extends BaseController {
     if (!session) {
       this.removeSessionCookie(ctx, campaign)
 
-      await this.renderOriginRedirect(ctx)
+      await this.sendOriginRedirect(ctx)
 
       return
     }
@@ -275,7 +275,7 @@ export class AuthorizeController extends BaseController {
     this.persistSessionCookie(ctx, campaign, session)
 
     if (!session.isLanding) {
-      await this.renderCloakingSite(ctx, target)
+      await this.sendCloakingSite(ctx, target)
 
       return
     }
@@ -305,7 +305,7 @@ export class AuthorizeController extends BaseController {
     next: HttpServerNextFunction
   ): Promise<void> {
     if (ctx.isBot) {
-      await this.renderCloakingSite(ctx, target)
+      await this.sendCloakingSite(ctx, target)
 
       return
     }
@@ -445,18 +445,18 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  protected async renderCloakingSite(
+  protected async sendCloakingSite(
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
     if (ctx.url.isPath('/')) {
-      await this.renderMainPage(ctx, target)
+      await this.sendMainPage(ctx, target)
     } else {
-      await this.renderNotFoundPage(ctx, target)
+      await this.sendNotFoundPage(ctx, target)
     }
   }
 
-  protected async renderRedirectorPage(
+  protected async sendRedirectorPage(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
@@ -482,7 +482,7 @@ export class AuthorizeController extends BaseController {
 
       await ctx.sendResponse()
     } else {
-      await this.renderNotFoundPage(ctx, target)
+      await this.sendNotFoundPage(ctx, target)
     }
   }
 }
