@@ -1,5 +1,7 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, randomIdent } from '@famir/common'
 import { DATABASE_MANAGER, DatabaseManager } from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
+import { ActionDatabaseData } from './database.js'
 
 export const DATABASE_SERVICE = Symbol('DatabaseService')
 
@@ -11,17 +13,39 @@ export class DatabaseService {
     )
   }
 
-  constructor(protected readonly databaseManager: DatabaseManager) {}
+  protected confirmSecret: string
 
-  async loadFunctions(): Promise<true> {
+  constructor(protected readonly databaseManager: DatabaseManager) {
+    this.confirmSecret = randomIdent()
+  }
+
+  async loadDatabaseFunctions(data: ActionDatabaseData): Promise<true> {
+    this.checkConfirmSecret(data.confirmSecret)
+
     await this.databaseManager.loadFunctions()
 
     return true
   }
 
-  async cleanup(): Promise<true> {
+  async cleanupDatabase(data: ActionDatabaseData): Promise<true> {
+    this.checkConfirmSecret(data.confirmSecret)
+
     await this.databaseManager.cleanup()
 
     return true
+  }
+
+  protected checkConfirmSecret(confirmSecret: string | undefined) {
+    if (!(confirmSecret && confirmSecret === this.confirmSecret)) {
+      throw new ReplServerError(`Database action canceled`, {
+        context: {
+          reason: `Confirm secret not provided or not match`,
+          confirmSecret: this.confirmSecret
+        },
+        code: 'FORBIDDEN'
+      })
+    }
+
+    this.confirmSecret = randomIdent()
   }
 }

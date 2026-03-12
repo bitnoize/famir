@@ -64,7 +64,21 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async read(campaignId: string, redirectorId: string): Promise<FullRedirectorModel | null> {
+  async read(campaignId: string, redirectorId: string): Promise<RedirectorModel | null> {
+    try {
+      const rawModel = await this.connection.redirector.read_redirector(
+        this.options.prefix,
+        campaignId,
+        redirectorId
+      )
+
+      return this.buildModel(rawModel)
+    } catch (error) {
+      this.raiseError(error, 'read', { campaignId, redirectorId })
+    }
+  }
+
+  async readFull(campaignId: string, redirectorId: string): Promise<FullRedirectorModel | null> {
     try {
       const rawModel = await this.connection.redirector.read_full_redirector(
         this.options.prefix,
@@ -74,7 +88,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'read', { campaignId, redirectorId })
+      this.raiseError(error, 'readFull', { campaignId, redirectorId })
     }
   }
 
@@ -143,6 +157,35 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
+  async listFull(campaignId: string): Promise<FullRedirectorModel[] | null> {
+    try {
+      const index = await this.connection.redirector.read_redirector_index(
+        this.options.prefix,
+        campaignId
+      )
+
+      if (index === null) {
+        return null
+      }
+
+      this.validateArrayStringsReply(index)
+
+      const rawCollection = await Promise.all(
+        index.map((redirectorId) =>
+          this.connection.redirector.read_full_redirector(
+            this.options.prefix,
+            campaignId,
+            redirectorId
+          )
+        )
+      )
+
+      return this.buildFullCollection(rawCollection)
+    } catch (error) {
+      this.raiseError(error, 'listFull', { campaignId })
+    }
+  }
+
   protected buildModel(rawModel: unknown): RedirectorModel | null {
     if (rawModel === null) {
       return null
@@ -181,6 +224,14 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
     return rawCollection
       .map((rawModel) => this.buildModel(rawModel))
+      .filter(RedirectorModel.isNotNull)
+  }
+
+  protected buildFullCollection(rawCollection: unknown): FullRedirectorModel[] {
+    this.validateArrayReply(rawCollection)
+
+    return rawCollection
+      .map((rawModel) => this.buildFullModel(rawModel))
       .filter(RedirectorModel.isNotNull)
   }
 }

@@ -2,6 +2,7 @@ import { DIContainer, arrayIncludes } from '@famir/common'
 import {
   DatabaseError,
   DatabaseErrorCode,
+  FullRedirectorModel,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository
@@ -52,8 +53,8 @@ export class RedirectorService {
     }
   }
 
-  async read(data: ReadRedirectorData): Promise<RedirectorModel> {
-    const model = await this.redirectorRepository.read(data.campaignId, data.redirectorId)
+  async read(data: ReadRedirectorData): Promise<FullRedirectorModel> {
+    const model = await this.redirectorRepository.readFull(data.campaignId, data.redirectorId)
 
     if (!model) {
       throw new ReplServerError(`Redirector not found`, {

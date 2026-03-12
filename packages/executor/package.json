@@ -17,7 +17,7 @@
     "@famir/logger": "*",
     "@famir/validator": "*",
     "@famir/workflow": "*",
-    "bullmq": "^5.70.2",
+    "bullmq": "^5.71.0",
     "ioredis": "^5.9.2"
   }
 }

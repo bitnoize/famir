@@ -244,7 +244,7 @@ local function upgrade_session(keys, args)
   end
 
   if redis.call('EXISTS', session_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Session not exists')
+    return redis.status_reply('FORBIDDEN Session not exists')
   end
 
   local stash = {

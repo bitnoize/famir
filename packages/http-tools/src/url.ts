@@ -34,7 +34,7 @@ export class HttpUrlWrap {
     return new HttpUrlWrap({
       protocol: 'http:',
       hostname: 'localhost',
-      port: '80',
+      port: '',
       pathname: parsedUrl.pathname,
       search: parsedUrl.search,
       hash: parsedUrl.hash
@@ -59,7 +59,6 @@ export class HttpUrlWrap {
   }
 
   #url: HttpUrl
-  protected isFrozen: boolean = false
 
   constructor(url: HttpUrl) {
     this.#url = url
@@ -69,8 +68,14 @@ export class HttpUrlWrap {
     return new HttpUrlWrap({ ...this.#url })
   }
 
+  #isFrozen: boolean = false
+
+  get isFrozen(): boolean {
+    return this.#isFrozen
+  }
+
   freeze(): this {
-    this.isFrozen ||= true
+    this.#isFrozen ||= true
 
     return this
   }
@@ -107,7 +112,7 @@ export class HttpUrlWrap {
     this.#url = {
       protocol: 'http:',
       hostname: 'localhost',
-      port: '80',
+      port: '',
       pathname: '/',
       search: '',
       hash: ''
@@ -119,7 +124,11 @@ export class HttpUrlWrap {
   getHost(): string {
     const { protocol, hostname, port } = this.#url
 
-    if ((protocol === 'http:' && port === '80') || (protocol === 'https:' && port === '443')) {
+    if (
+      !port ||
+      (protocol === 'http:' && port === '80') ||
+      (protocol === 'https:' && port === '443')
+    ) {
       return hostname
     } else {
       return [hostname, port].join(':')

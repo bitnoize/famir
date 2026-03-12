@@ -17,7 +17,6 @@ export class HttpBodyWrap {
   }
 
   #body: HttpBody
-  protected isFrozen: boolean = false
 
   constructor(body: HttpBody) {
     this.#body = body
@@ -27,8 +26,14 @@ export class HttpBodyWrap {
     return new HttpBodyWrap(Buffer.from(this.#body))
   }
 
+  #isFrozen: boolean = false
+
+  get isFrozen(): boolean {
+    return this.#isFrozen
+  }
+
   freeze(): this {
-    this.isFrozen ||= true
+    this.#isFrozen ||= true
 
     return this
   }

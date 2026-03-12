@@ -1,4 +1,4 @@
-import { randomBytes, randomInt } from 'crypto'
+import { randomBytes } from 'crypto'
 import util from 'util'
 
 Object.assign(util.inspect.defaultOptions, {
@@ -29,8 +29,15 @@ export const randomIdent = (): string => {
   return randomBytes(16).toString('hex')
 }
 
-export const randomLockCode = (): number => {
-  return randomInt(100000, 999999)
+export const randomName = (): string => {
+  const chars = 'abcdefghijklmnopqrstuvwxyz'
+
+  const minLength = 2
+  const maxLength = 8
+
+  const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength
+
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
 
 export const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const

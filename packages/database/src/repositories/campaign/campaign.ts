@@ -14,7 +14,8 @@ export interface CampaignRepository {
     newSessionExpire: number,
     messageExpire: number
   ): Promise<void>
-  read(campaignId: string): Promise<FullCampaignModel | null>
+  read(campaignId: string): Promise<CampaignModel | null>
+  readFull(campaignId: string): Promise<FullCampaignModel | null>
   lock(campaignId: string): Promise<string>
   unlock(campaignId: string, lockSecret: string): Promise<void>
   update(
@@ -27,4 +28,5 @@ export interface CampaignRepository {
   ): Promise<void>
   delete(campaignId: string, lockSecret: string): Promise<void>
   list(): Promise<CampaignModel[]>
+  listFull(): Promise<CampaignModel[]>
 }

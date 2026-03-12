@@ -104,7 +104,7 @@ redis.register_function({
   Read lure
 --]]
 local function read_lure(keys, args)
-  if #keys == 2 or #args ~= 0 then
+  if #keys ~= 2 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 

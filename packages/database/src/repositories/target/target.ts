@@ -26,8 +26,10 @@ export interface TargetRepository {
     sitemapXml: string,
     lockSecret: string
   ): Promise<void>
-  read(campaignId: string, targetId: string): Promise<FullTargetModel | null>
-  find(mirrorHost: string): Promise<FullTargetModel | null>
+  read(campaignId: string, targetId: string): Promise<TargetModel | null>
+  readFull(campaignId: string, targetId: string): Promise<FullTargetModel | null>
+  find(mirrorHost: string): Promise<TargetModel | null>
+  findFull(mirrorHost: string): Promise<FullTargetModel | null>
   update(
     campaignId: string,
     targetId: string,
@@ -59,4 +61,5 @@ export interface TargetRepository {
   ): Promise<void>
   delete(campaignId: string, targetId: string, lockSecret: string): Promise<void>
   list(campaignId: string): Promise<TargetModel[] | null>
+  listFull(campaignId: string): Promise<FullTargetModel[] | null>
 }

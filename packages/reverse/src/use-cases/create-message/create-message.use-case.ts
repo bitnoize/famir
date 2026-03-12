@@ -1,10 +1,5 @@
-import { DIContainer, arrayIncludes } from '@famir/common'
-import {
-  DatabaseError,
-  DatabaseErrorCode,
-  MESSAGE_REPOSITORY,
-  MessageRepository
-} from '@famir/database'
+import { DIContainer } from '@famir/common'
+import { DatabaseError, MESSAGE_REPOSITORY, MessageRepository } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
 import { ANALYZE_QUEUE, AnalyzeQueue } from '@famir/workflow'
 import { CreateMessageData } from './create-message.js'
@@ -59,12 +54,13 @@ export class CreateMessageUseCase {
       })
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new HttpServerError(`Create message failed`, {
+        if (error.code === 'NOT_FOUND') {
+          throw new HttpServerError(`Service unavailable`, {
             cause: error,
-            code: 'INTERNAL_ERROR'
+            context: {
+              reason: `Create message failed`
+            },
+            code: 'SERVICE_UNAVAILABLE'
           })
         }
       }

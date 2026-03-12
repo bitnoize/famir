@@ -17,10 +17,10 @@
     "cheerio": "^1.2.0",
     "content-type": "^1.0.5",
     "iconv-lite": "^0.7.2",
-    "isbot": "^5.1.35",
+    "isbot": "^5.1.36",
     "negotiator": "^1.0.0",
     "qs": "^6.15.0",
-    "tough-cookie": "^6.0.0",
+    "tough-cookie": "^6.0.1",
     "ua-parser-js": "^2.0.9"
   },
   "devDependencies": {

@@ -22,7 +22,6 @@ export class HttpHeadersWrap {
   }
 
   #headers: HttpHeaders
-  protected isFrozen: boolean = false
 
   constructor(headers: HttpHeaders) {
     this.#headers = headers
@@ -32,8 +31,14 @@ export class HttpHeadersWrap {
     return new HttpHeadersWrap({ ...this.#headers })
   }
 
+  #isFrozen: boolean = false
+
+  get isFrozen(): boolean {
+    return this.#isFrozen
+  }
+
   freeze(): this {
-    this.isFrozen ||= true
+    this.#isFrozen ||= true
 
     return this
   }

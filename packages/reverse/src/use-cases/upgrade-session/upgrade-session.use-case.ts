@@ -1,10 +1,5 @@
-import { DIContainer, arrayIncludes } from '@famir/common'
-import {
-  DatabaseError,
-  DatabaseErrorCode,
-  SESSION_REPOSITORY,
-  SessionRepository
-} from '@famir/database'
+import { DIContainer } from '@famir/common'
+import { DatabaseError, SESSION_REPOSITORY, SessionRepository } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
 import { UpgradeSessionData } from './upgrade-session.js'
 
@@ -20,7 +15,7 @@ export class UpgradeSessionUseCase {
 
   constructor(protected readonly sessionRepository: SessionRepository) {}
 
-  async execute(data: UpgradeSessionData): Promise<void> {
+  async execute(data: UpgradeSessionData): Promise<boolean> {
     try {
       await this.sessionRepository.upgrade(
         data.campaignId,
@@ -28,22 +23,20 @@ export class UpgradeSessionUseCase {
         data.sessionId,
         data.secret
       )
+
+      return true
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new HttpServerError(`Upgrade session failed`, {
+        if (error.code === 'NOT_FOUND') {
+          throw new HttpServerError(`Not found`, {
             cause: error,
-            code: `SERVICE_UNAVAILABLE`
+            context: {
+              reason: `Upgrade session failed`
+            },
+            code: `NOT_FOUND`
           })
-        }
-
-        if (error.code === 'FORBIDDEN') {
-          throw new HttpServerError(`Upgrade session failed`, {
-            cause: error,
-            code: 'FORBIDDEN'
-          })
+        } else if (error.code === 'FORBIDDEN') {
+          return false
         }
       }
 

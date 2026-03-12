@@ -4,6 +4,7 @@ import {
   DatabaseController,
   LureController,
   MessageController,
+  PhishmapController,
   ProxyController,
   RedirectorController,
   SessionController,
@@ -14,6 +15,7 @@ import {
   DatabaseService,
   LureService,
   MessageService,
+  PhishmapService,
   ProxyService,
   RedirectorService,
   SessionService,
@@ -29,6 +31,7 @@ export const autoLoad: DIComposer = (container) => {
   LureService.inject(container)
   SessionService.inject(container)
   MessageService.inject(container)
+  PhishmapService.inject(container)
 
   DatabaseController.inject(container)
   CampaignController.inject(container)
@@ -38,4 +41,5 @@ export const autoLoad: DIComposer = (container) => {
   LureController.inject(container)
   SessionController.inject(container)
   MessageController.inject(container)
+  PhishmapController.inject(container)
 }

@@ -1,11 +1,5 @@
-import { DIContainer, arrayIncludes } from '@famir/common'
-import {
-  DatabaseError,
-  DatabaseErrorCode,
-  SESSION_REPOSITORY,
-  SessionModel,
-  SessionRepository
-} from '@famir/database'
+import { DIContainer } from '@famir/common'
+import { DatabaseError, SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
 import { AuthSessionData } from './auth-session.js'
 
@@ -26,16 +20,15 @@ export class AuthSessionUseCase {
       return await this.sessionRepository.auth(data.campaignId, data.sessionId)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new HttpServerError(`Auth session failed`, {
+        if (error.code === 'NOT_FOUND') {
+          throw new HttpServerError(`Service unavailable`, {
             cause: error,
+            context: {
+              reason: `Auth session failed`
+            },
             code: `SERVICE_UNAVAILABLE`
           })
-        }
-
-        if (error.code === 'FORBIDDEN') {
+        } else if (error.code === 'FORBIDDEN') {
           return null
         }
       }

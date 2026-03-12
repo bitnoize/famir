@@ -49,6 +49,10 @@ export class TargetModel {
     }
   }
 
+  get donorUrl(): string {
+    return [this.donorProtocol, '//', this.donorHost].join('')
+  }
+
   get mirrorProtocol(): string {
     return this.mirrorSecure ? 'https:' : 'http:'
   }
@@ -68,6 +72,10 @@ export class TargetModel {
     } else {
       return [this.mirrorHostname, this.mirrorPort.toString()].join(':')
     }
+  }
+
+  get mirrorUrl(): string {
+    return [this.mirrorProtocol, '//', this.mirrorHost].join('')
   }
 
   hasLabel(value: string): boolean {
@@ -132,5 +140,3 @@ export interface EnabledTargetModel extends TargetModel {
 export interface EnabledFullTargetModel extends FullTargetModel {
   isEnabled: true
 }
-
-//export type TargetMirrorHostsModel = Record<string, [string, string]>

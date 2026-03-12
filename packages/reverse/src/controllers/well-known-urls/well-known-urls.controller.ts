@@ -70,7 +70,7 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.method.is(['GET', 'HEAD'])) {
+    if (ctx.method.is(['GET', 'HEAD']) && target.faviconIco) {
       ctx.status.set(200)
 
       ctx.responseBody.setBase64(target.faviconIco)
@@ -96,7 +96,7 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.method.is(['GET', 'HEAD'])) {
+    if (ctx.method.is(['GET', 'HEAD']) && target.robotsTxt) {
       ctx.status.set(200)
 
       ctx.responseBody.setText(target.robotsTxt)
@@ -122,7 +122,7 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.method.is(['GET', 'HEAD'])) {
+    if (ctx.method.is(['GET', 'HEAD']) && target.sitemapXml) {
       ctx.status.set(200)
 
       ctx.responseBody.setText(target.sitemapXml)

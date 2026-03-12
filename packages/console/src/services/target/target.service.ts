@@ -73,7 +73,7 @@ export class TargetService {
   }
 
   async read(data: ReadTargetData): Promise<FullTargetModel> {
-    const model = await this.targetRepository.read(data.campaignId, data.targetId)
+    const model = await this.targetRepository.readFull(data.campaignId, data.targetId)
 
     if (!model) {
       throw new ReplServerError(`Target not found`, {

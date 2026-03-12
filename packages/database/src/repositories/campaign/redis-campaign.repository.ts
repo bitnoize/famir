@@ -74,7 +74,17 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  async read(campaignId: string): Promise<FullCampaignModel | null> {
+  async read(campaignId: string): Promise<CampaignModel | null> {
+    try {
+      const rawModel = await this.connection.campaign.read_campaign(this.options.prefix, campaignId)
+
+      return this.buildModel(rawModel)
+    } catch (error) {
+      this.raiseError(error, 'read', { campaignId })
+    }
+  }
+
+  async readFull(campaignId: string): Promise<FullCampaignModel | null> {
     try {
       const rawModel = await this.connection.campaign.read_full_campaign(
         this.options.prefix,
@@ -83,7 +93,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'read', { campaignId })
+      this.raiseError(error, 'readFull', { campaignId })
     }
   }
 
@@ -184,6 +194,24 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  async listFull(): Promise<FullCampaignModel[]> {
+    try {
+      const index = await this.connection.campaign.read_campaign_index(this.options.prefix)
+
+      this.validateArrayStringsReply(index)
+
+      const rawCollection = await Promise.all(
+        index.map((campaignId) =>
+          this.connection.campaign.read_full_campaign(this.options.prefix, campaignId)
+        )
+      )
+
+      return this.buildFullCollection(rawCollection)
+    } catch (error) {
+      this.raiseError(error, 'listFull', null)
+    }
+  }
+
   protected buildModel(rawModel: unknown): CampaignModel | null {
     if (rawModel === null) {
       return null
@@ -236,6 +264,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
     return rawCollection
       .map((rawModel) => this.buildModel(rawModel))
+      .filter(CampaignModel.isNotNull)
+  }
+
+  protected buildFullCollection(rawCollection: unknown): FullCampaignModel[] {
+    this.validateArrayReply(rawCollection)
+
+    return rawCollection
+      .map((rawModel) => this.buildFullModel(rawModel))
       .filter(CampaignModel.isNotNull)
   }
 }

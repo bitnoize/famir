@@ -42,7 +42,7 @@ export const configAppStdSchema: JSONSchemaType<AppStdConfig> = {
   properties: {
     LOGGER_APP_NAME: {
       ...configLoggerAppNameSchema,
-      default: 'reverse-proxy'
+      default: 'reverse'
     },
     LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
     LOGGER_TRANSPORT_TARGET: configPinoLoggerTransportTargetSchema,

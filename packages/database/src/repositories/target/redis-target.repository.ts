@@ -99,7 +99,21 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async read(campaignId: string, targetId: string): Promise<FullTargetModel | null> {
+  async read(campaignId: string, targetId: string): Promise<TargetModel | null> {
+    try {
+      const rawModel = await this.connection.target.read_target(
+        this.options.prefix,
+        campaignId,
+        targetId
+      )
+
+      return this.buildModel(rawModel)
+    } catch (error) {
+      this.raiseError(error, 'read', { campaignId, targetId })
+    }
+  }
+
+  async readFull(campaignId: string, targetId: string): Promise<FullTargetModel | null> {
     try {
       const rawModel = await this.connection.target.read_full_target(
         this.options.prefix,
@@ -109,11 +123,36 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'read', { campaignId, targetId })
+      this.raiseError(error, 'readFull', { campaignId, targetId })
     }
   }
 
-  async find(mirrorHost: string): Promise<FullTargetModel | null> {
+  async find(mirrorHost: string): Promise<TargetModel | null> {
+    try {
+      const targetLink = await this.connection.target.find_target_link(
+        this.options.prefix,
+        mirrorHost
+      )
+
+      if (targetLink === null) {
+        return null
+      }
+
+      const [campaignId, targetId] = this.buildTargetLink(targetLink)
+
+      const rawModel = await this.connection.target.read_target(
+        this.options.prefix,
+        campaignId,
+        targetId
+      )
+
+      return this.buildModel(rawModel)
+    } catch (error) {
+      this.raiseError(error, 'find', { mirrorHost })
+    }
+  }
+
+  async findFull(mirrorHost: string): Promise<FullTargetModel | null> {
     try {
       const targetLink = await this.connection.target.find_target_link(
         this.options.prefix,
@@ -134,7 +173,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'find', { mirrorHost })
+      this.raiseError(error, 'findFull', { mirrorHost })
     }
   }
 
@@ -298,6 +337,28 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
+  async listFull(campaignId: string): Promise<FullTargetModel[] | null> {
+    try {
+      const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
+
+      if (index === null) {
+        return null
+      }
+
+      this.validateArrayStringsReply(index)
+
+      const rawCollection = await Promise.all(
+        index.map((targetId) =>
+          this.connection.target.read_full_target(this.options.prefix, campaignId, targetId)
+        )
+      )
+
+      return this.buildFullCollection(rawCollection)
+    } catch (error) {
+      this.raiseError(error, 'listFull', { campaignId })
+    }
+  }
+
   protected buildModel(rawModel: unknown): TargetModel | null {
     if (rawModel === null) {
       return null
@@ -366,6 +427,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     this.validateArrayReply(rawCollection)
 
     return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(TargetModel.isNotNull)
+  }
+
+  protected buildFullCollection(rawCollection: unknown): FullTargetModel[] {
+    this.validateArrayReply(rawCollection)
+
+    return rawCollection
+      .map((rawModel) => this.buildFullModel(rawModel))
+      .filter(TargetModel.isNotNull)
   }
 
   protected buildTargetLink(value: unknown): [string, string] {

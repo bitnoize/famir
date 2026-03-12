@@ -60,7 +60,7 @@ export class CampaignService {
   }
 
   async read(data: ReadCampaignData): Promise<FullCampaignModel> {
-    const model = await this.campaignRepository.read(data.campaignId)
+    const model = await this.campaignRepository.readFull(data.campaignId)
 
     if (!model) {
       throw new ReplServerError(`Campaign not found`, {

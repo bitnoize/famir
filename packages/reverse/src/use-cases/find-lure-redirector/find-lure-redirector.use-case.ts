@@ -39,11 +39,15 @@ export class FindLureRedirectorUseCase {
       return null
     }
 
-    const redirector = await this.redirectorRepository.read(lure.campaignId, lure.redirectorId)
+    const redirector = await this.redirectorRepository.readFull(lure.campaignId, lure.redirectorId)
 
     if (!redirector) {
-      throw new HttpServerError(`Redirector not found`, {
-        code: 'NOT_FOUND'
+      throw new HttpServerError(`Service unavailable`, {
+        context: {
+          reason: `Read redirector failed`,
+          data
+        },
+        code: 'SERVICE_UNAVAILABLE'
       })
     }
 

@@ -16,14 +16,18 @@ export class ReadProxyUseCase {
   constructor(protected readonly proxyRepository: ProxyRepository) {}
 
   async execute(data: ReadProxyData): Promise<EnabledProxyModel> {
-    const model = await this.proxyRepository.read(data.campaignId, data.proxyId)
+    const proxy = await this.proxyRepository.read(data.campaignId, data.proxyId)
 
-    if (!(model && ProxyModel.isEnabled(model))) {
-      throw new HttpServerError(`Read proxy failed`, {
+    if (!(proxy && ProxyModel.isEnabled(proxy))) {
+      throw new HttpServerError(`Service unavailable`, {
+        context: {
+          reason: `Read proxy failed`,
+          data
+        },
         code: 'SERVICE_UNAVAILABLE'
       })
     }
 
-    return model
+    return proxy
   }
 }

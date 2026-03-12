@@ -4,7 +4,6 @@ export class HttpStatusWrap {
   }
 
   #status: number
-  protected isFrozen: boolean = false
 
   constructor(status: number) {
     this.#status = status
@@ -14,8 +13,14 @@ export class HttpStatusWrap {
     return new HttpStatusWrap(this.#status)
   }
 
+  #isFrozen: boolean = false
+
+  get isFrozen(): boolean {
+    return this.#isFrozen
+  }
+
   freeze(): this {
-    this.isFrozen ||= true
+    this.#isFrozen ||= true
 
     return this
   }

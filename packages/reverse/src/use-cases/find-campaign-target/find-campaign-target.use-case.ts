@@ -34,26 +34,25 @@ export class FindCampaignTargetUseCase {
   async execute(
     data: FindCampaignTargetData
   ): Promise<[FullCampaignModel, EnabledFullTargetModel, EnabledTargetModel[]]> {
-    const target = await this.targetRepository.find(data.mirrorHost)
+    const target = await this.targetRepository.findFull(data.mirrorHost)
 
     if (!(target && TargetModel.isEnabled(target))) {
       throw new HttpServerError(`Service unavailable`, {
         context: {
-          reason: `Target not found`,
-          mirrorHost: data.mirrorHost
+          reason: `Read target failed`,
+          data
         },
         code: 'SERVICE_UNAVAILABLE'
       })
     }
 
-    const campaign = await this.campaignRepository.read(target.campaignId)
+    const campaign = await this.campaignRepository.readFull(target.campaignId)
 
     if (!campaign) {
       throw new HttpServerError(`Service unavailable`, {
         context: {
-          reason: `Target found but campaign not`,
-          campaignId: target.campaignId,
-          targetId: target.targetId
+          reason: `Read campaign failed`,
+          data
         },
         code: 'SERVICE_UNAVAILABLE'
       })
@@ -64,9 +63,8 @@ export class FindCampaignTargetUseCase {
     if (!targets) {
       throw new HttpServerError(`Service unavailable`, {
         context: {
-          reason: `Target found but list fail`,
-          campaignId: target.campaignId,
-          targetId: target.targetId
+          reason: `List targets failed`,
+          data
         },
         code: 'SERVICE_UNAVAILABLE'
       })

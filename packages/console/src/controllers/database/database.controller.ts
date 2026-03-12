@@ -2,8 +2,9 @@ import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { DATABASE_SERVICE, type DatabaseService } from '../../services/index.js'
+import { ActionDatabaseData, DATABASE_SERVICE, type DatabaseService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
+import { databaseSchemas } from './database.schemas.js'
 
 export const DATABASE_CONTROLLER = Symbol('DatabaseController')
 
@@ -33,16 +34,22 @@ export class DatabaseController extends BaseController {
   ) {
     super(validator, logger, router)
 
+    this.validator.addSchemas(databaseSchemas)
+
     this.logger.debug(`DatabaseController initialized`)
   }
 
   use(): this {
-    this.router.register('loadDatabaseFunctions', async () => {
-      return await this.databaseService.loadFunctions()
+    this.router.register('loadDatabaseFunctions', async (data) => {
+      this.validateData<ActionDatabaseData>('console-action-database-data', data)
+
+      return await this.databaseService.loadDatabaseFunctions(data)
     })
 
-    this.router.register('cleanupDatabase', async () => {
-      return await this.databaseService.cleanup()
+    this.router.register('cleanupDatabase', async (data) => {
+      this.validateData<ActionDatabaseData>('console-action-database-data', data)
+
+      return await this.databaseService.cleanupDatabase(data)
     })
 
     return this
