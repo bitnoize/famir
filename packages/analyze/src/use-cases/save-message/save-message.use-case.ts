@@ -15,7 +15,7 @@ export class SaveMessageUseCase {
   constructor(protected readonly storage: Storage) {}
 
   async execute(message: FullMessageModel): Promise<void> {
-    const basePath = `${message.campaignId}/${message.sessionId}/${message.messageId}`
+    const basePath = `analyze/${message.campaignId}/${message.sessionId}/${message.messageId}`
 
     const main = Buffer.from(
       JSON.stringify(

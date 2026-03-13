@@ -37,6 +37,8 @@ export class MinioStorage implements Storage {
 
   async getObject(objectName: string): Promise<Buffer> {
     try {
+      await this.minio.statObject(this.options.bucketName, objectName)
+
       const stream = await this.minio.getObject(this.options.bucketName, objectName)
 
       return await consumers.buffer(stream)

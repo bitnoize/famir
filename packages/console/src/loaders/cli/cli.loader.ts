@@ -1,3 +1,4 @@
+import { MinioStorage } from '@famir/storage'
 import { DIComposer, DIContainer } from '@famir/common'
 import { EnvConfig } from '@famir/config'
 import {
@@ -39,6 +40,8 @@ export async function bootstrapCli(composer: DIComposer): Promise<void> {
   RedisLureRepository.inject(container)
   RedisSessionRepository.inject(container)
   RedisMessageRepository.inject(container)
+
+  MinioStorage.inject(container)
 
   RedisWorkflowConnector.inject(container)
 

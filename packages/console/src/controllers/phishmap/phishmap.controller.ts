@@ -7,6 +7,8 @@ import {
   PHISHMAP_SERVICE,
   PrunePhishmapData,
   RestorePhishmapData,
+  SavePhishmapData,
+  LoadPhishmapData,
   type PhishmapService
 } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
@@ -62,6 +64,18 @@ export class PhishmapController extends BaseController {
       this.validateData<PrunePhishmapData>('console-prune-phishmap-data', data)
 
       return await this.phishmapService.prune(data)
+    })
+
+    this.router.register('loadPhishmap', async (data) => {
+      this.validateData<LoadPhishmapData>('console-load-phishmap-data', data)
+
+      return await this.phishmapService.load(data)
+    })
+
+    this.router.register('savePhishmap', async (data) => {
+      this.validateData<SavePhishmapData>('console-save-phishmap-data', data)
+
+      return await this.phishmapService.save(data)
     })
 
     return this

@@ -29,6 +29,8 @@ import {
   randomIdentSchema
 } from '@famir/validator'
 import {
+  LoadPhishmapData,
+  SavePhishmapData,
   DumpPhishmapData,
   Phishmap,
   PhishmapCampaign,
@@ -244,8 +246,29 @@ const prunePhishmapDataSchema: JSONSchemaType<PrunePhishmapData> = {
   additionalProperties: false
 } as const
 
+const loadPhishmapDataSchema: JSONSchemaType<LoadPhishmapData> = {
+  type: 'object',
+  required: ['filename'],
+  properties: {
+    filename: customIdentSchema,
+  },
+  additionalProperties: false
+} as const
+
+const savePhishmapDataSchema: JSONSchemaType<SavePhishmapData> = {
+  type: 'object',
+  required: ['phishmap', 'filename'],
+  properties: {
+    phishmap: phishmapSchema,
+    filename: customIdentSchema,
+  },
+  additionalProperties: false
+} as const
+
 export const phishmapSchemas: ValidatorSchemas = {
   'console-dump-phishmap-data': dumpPhishmapDataSchema,
   'console-restore-phishmap-data': restorePhishmapDataSchema,
-  'console-prune-phishmap-data': prunePhishmapDataSchema
+  'console-prune-phishmap-data': prunePhishmapDataSchema,
+  'console-load-phishmap-data': loadPhishmapDataSchema,
+  'console-save-phishmap-data': savePhishmapDataSchema,
 } as const
