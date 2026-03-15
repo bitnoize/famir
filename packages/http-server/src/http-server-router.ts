@@ -1,5 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
+import { HttpServerError } from './http-server.error.js'
 import { HttpServerMiddleware, HttpServerMiddlewares } from './http-server.js'
 
 export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
@@ -12,27 +13,74 @@ export class HttpServerRouter {
     )
   }
 
-  protected readonly registry = new Map<string, HttpServerMiddleware>()
+  static resolve(container: DIContainer): HttpServerRouter {
+    return container.resolve(HTTP_SERVER_ROUTER)
+  }
+
+  protected readonly middlewares = new Map<string, HttpServerMiddleware>()
+  protected readonly assets = new Map<string, string>()
 
   constructor(protected readonly logger: Logger) {
     this.logger.debug(`HttpServerRouter initialized`)
   }
 
-  register(name: string, middleware: HttpServerMiddleware) {
-    if (this.registry.has(name)) {
-      throw new Error(`Middleware already registered: ${name}`)
+  #isActive: boolean = false
+
+  get isActive(): boolean {
+    return this.#isActive
+  }
+
+  activate() {
+    this.#isActive = true
+  }
+
+  addMiddleware(name: string, middleware: HttpServerMiddleware) {
+    if (this.isActive) {
+      throw new Error(`Router suddenly active`)
     }
 
-    this.registry.set(name, middleware)
+    if (this.middlewares.has(name)) {
+      throw new Error(`Middleware already exists: ${name}`)
+    }
 
-    this.logger.info(`HttpServerRouter register middleware: ${name}`)
+    this.middlewares.set(name, middleware)
+
+    this.logger.info(`HttpServerRouter add middleware: ${name}`)
   }
 
-  resolve(): HttpServerMiddlewares {
-    return Array.from(this.registry.entries())
+  getMiddlewares(): Readonly<HttpServerMiddlewares> {
+    if (!this.isActive) {
+      throw new HttpServerError(`Router suddenly not active`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+
+    return Array.from(this.middlewares)
   }
 
-  reset() {
-    this.registry.clear()
+  addAssets(entries: [string, string][]) {
+    if (this.isActive) {
+      throw new Error(`Router suddenly active`)
+    }
+
+    for (const [name, data] of entries) {
+      if (this.assets.has(name)) {
+        throw new Error(`Asset already exists: ${name}`)
+      }
+
+      this.assets.set(name, data)
+
+      this.logger.info(`HttpServerRouter add asset: ${name}`)
+    }
+  }
+
+  getAsset(name: string): string | undefined {
+    if (!this.isActive) {
+      throw new HttpServerError(`Router suddenly not active`, {
+        code: 'INTERNAL_ERROR'
+      })
+    }
+
+    return this.assets.get(name)
   }
 }

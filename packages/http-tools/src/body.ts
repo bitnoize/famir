@@ -33,7 +33,7 @@ export class HttpBodyWrap {
   }
 
   freeze(): this {
-    this.#isFrozen ||= true
+    this.#isFrozen = true
 
     return this
   }

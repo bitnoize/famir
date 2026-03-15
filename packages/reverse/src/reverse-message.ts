@@ -22,7 +22,6 @@ export type ReverseMessageInterceptor = (message: ReverseMessage) => void
 
 export class ReverseMessage {
   readonly id = randomIdent()
-  protected isReady: boolean = false
 
   constructor(
     readonly method: HttpMethodWrap,
@@ -34,8 +33,14 @@ export class ReverseMessage {
     readonly responseBody: HttpBodyWrap
   ) {}
 
+  #isReady: boolean = false
+
+  get isReady(): boolean {
+    return this.#isReady
+  }
+
   ready() {
-    this.isReady ||= true
+    this.#isReady = true
   }
 
   #kind: HttpKind = 'simple'

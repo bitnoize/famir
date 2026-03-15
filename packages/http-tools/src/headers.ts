@@ -38,7 +38,7 @@ export class HttpHeadersWrap {
   }
 
   freeze(): this {
-    this.#isFrozen ||= true
+    this.#isFrozen = true
 
     return this
   }
@@ -135,16 +135,6 @@ export class HttpHeadersWrap {
         this.set(name, value)
       }
     })
-
-    return this
-  }
-
-  reset(): this {
-    this.sureNotFrozen('reset')
-
-    this.invalidateCacheAll()
-
-    this.#headers = {}
 
     return this
   }
@@ -253,6 +243,16 @@ export class HttpHeadersWrap {
     this.entries().forEach(([name, value]) => {
       cb(name, value)
     })
+
+    return this
+  }
+
+  reset(): this {
+    this.sureNotFrozen('reset')
+
+    this.invalidateCacheAll()
+
+    this.#headers = {}
 
     return this
   }

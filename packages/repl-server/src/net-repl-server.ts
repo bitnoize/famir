@@ -10,8 +10,9 @@ import {
   NetReplServerConfig,
   NetReplServerOptions,
   REPL_SERVER,
-  ReplServer,
-  replServerDict
+  REPL_SERVER_BANNER_GREET,
+  REPL_SERVER_BANNER_LEAVE,
+  ReplServer
 } from './repl-server.js'
 
 export class NetReplServer implements ReplServer {
@@ -101,6 +102,9 @@ export class NetReplServer implements ReplServer {
   }
 
   protected replServerStart(socket: net.Socket): repl.REPLServer {
+    const bannerGreet = this.router.getAsset('banner-greet.txt') ?? REPL_SERVER_BANNER_GREET
+    const bannerLeave = this.router.getAsset('banner-leave.txt') ?? REPL_SERVER_BANNER_LEAVE
+
     const replServer = repl.start({
       input: socket,
       output: socket,
@@ -121,12 +125,13 @@ export class NetReplServer implements ReplServer {
     })
 
     replServer.on('exit', () => {
-      socket.end(replServerDict.leave + '\n')
+      socket.end(bannerLeave + '\n')
     })
 
     this.defineContext(replServer.context)
+    this.defineCommands(replServer, socket)
 
-    socket.write(replServerDict.greet + '\n')
+    socket.write(bannerGreet + '\n')
 
     replServer.displayPrompt()
 
@@ -134,12 +139,10 @@ export class NetReplServer implements ReplServer {
   }
 
   protected defineContext(context: object) {
-    const value: Record<string, unknown> = {}
+    const apiCalls: Record<string, unknown> = {}
 
-    const apiCalls = this.router.resolve()
-
-    apiCalls.forEach(([name, apiCall]) => {
-      value[name] = async (data: unknown): Promise<unknown> => {
+    this.router.getApiCalls().forEach(([name, apiCall]) => {
+      apiCalls[name] = async (data: unknown): Promise<unknown> => {
         try {
           return await apiCall(data)
         } catch (error) {
@@ -162,10 +165,40 @@ export class NetReplServer implements ReplServer {
       }
     })
 
+    apiCalls['getAsset'] = (name: string): string | undefined => {
+      return this.router.getAsset(name)
+    }
+
+    apiCalls['listAssets'] = (): string[] => {
+      return this.router.listAssets()
+    }
+
     Object.defineProperty(context, 'famir', {
       configurable: false,
       enumerable: true,
-      value: value
+      value: apiCalls
+    })
+  }
+
+  protected defineCommands(replServer: repl.REPLServer, socket: net.Socket) {
+    replServer.defineCommand('conns', {
+      help: `Show connections`,
+      action: () => {
+        replServer.clearBufferedCommand()
+
+        socket.write(`Connections:\n\n`)
+
+        this.clients.forEach((connection) => {
+          const { remoteFamily, remoteAddress, remotePort } = connection
+
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          socket.write(` - ${remoteFamily}:${remoteAddress}:${remotePort}\n`)
+        })
+
+        socket.write(`\n`)
+
+        replServer.displayPrompt()
+      }
     })
   }
 

@@ -5,7 +5,6 @@ import {
 import { configHttpClientVerboseSchema } from '@famir/http-client'
 import {
   configHttpServerAddressSchema,
-  configHttpServerErrorPageSchema,
   configHttpServerPortSchema,
   configHttpServerVerboseSchema
 } from '@famir/http-server'
@@ -36,8 +35,7 @@ export const configAppStdSchema: JSONSchemaType<AppStdConfig> = {
     'HTTP_CLIENT_VERBOSE',
     'HTTP_SERVER_ADDRESS',
     'HTTP_SERVER_PORT',
-    'HTTP_SERVER_VERBOSE',
-    'HTTP_SERVER_ERROR_PAGE'
+    'HTTP_SERVER_VERBOSE'
   ],
   properties: {
     LOGGER_APP_NAME: {
@@ -60,8 +58,7 @@ export const configAppStdSchema: JSONSchemaType<AppStdConfig> = {
       ...configHttpServerPortSchema,
       default: 3000
     },
-    HTTP_SERVER_VERBOSE: configHttpServerVerboseSchema,
-    HTTP_SERVER_ERROR_PAGE: configHttpServerErrorPageSchema
+    HTTP_SERVER_VERBOSE: configHttpServerVerboseSchema
   },
   additionalProperties: false
 } as const

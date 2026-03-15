@@ -4,7 +4,9 @@ import {
   ANALYZE_WORKER,
   AnalyzeWorker,
   EXECUTOR_CONNECTOR,
-  ExecutorConnector
+  EXECUTOR_ROUTER,
+  ExecutorConnector,
+  ExecutorRouter
 } from '@famir/executor'
 import { Logger, LOGGER } from '@famir/logger'
 import { WORKFLOW_CONNECTOR, WorkflowConnector } from '@famir/workflow'
@@ -21,6 +23,7 @@ export class App {
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
           c.resolve<ExecutorConnector>(EXECUTOR_CONNECTOR),
+          c.resolve<ExecutorRouter>(EXECUTOR_ROUTER),
           c.resolve<AnalyzeWorker>(ANALYZE_WORKER)
         )
     )
@@ -35,6 +38,7 @@ export class App {
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
     protected readonly executorConnector: ExecutorConnector,
+    protected readonly router: ExecutorRouter,
     protected readonly analyzeWorker: AnalyzeWorker
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
@@ -54,6 +58,8 @@ export class App {
 
   async start(): Promise<void> {
     try {
+      this.router.activate()
+
       await this.databaseConnector.connect()
 
       await this.analyzeWorker.run()

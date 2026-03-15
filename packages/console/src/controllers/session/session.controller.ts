@@ -39,13 +39,11 @@ export class SessionController extends BaseController {
     this.logger.debug(`SessionController initialized`)
   }
 
-  use(): this {
-    this.router.register('readSession', async (data) => {
+  use() {
+    this.router.addApiCall('readSession', async (data) => {
       this.validateData<ReadSessionData>('console-read-session-data', data)
 
       return await this.sessionService.read(data)
     })
-
-    return this
   }
 }

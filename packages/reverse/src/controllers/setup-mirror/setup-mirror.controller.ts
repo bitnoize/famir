@@ -45,8 +45,8 @@ export class SetupMirrorController extends BaseController {
     this.logger.debug(`SetupMirrorController initialized`)
   }
 
-  use(): this {
-    this.router.register('setup-mirror', async (ctx, next) => {
+  use() {
+    this.router.addMiddleware('setup-mirror', async (ctx, next) => {
       const mirrorHost = this.parseMirrorHost(ctx)
 
       const [campaign, target, targets] = await this.findCampaignTargetUseCase.execute({
@@ -78,8 +78,6 @@ export class SetupMirrorController extends BaseController {
 
       await next()
     })
-
-    return this
   }
 
   private parseMirrorHost(ctx: HttpServerContext): string {

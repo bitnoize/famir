@@ -75,7 +75,7 @@ export class HttpUrlWrap {
   }
 
   freeze(): this {
-    this.#isFrozen ||= true
+    this.#isFrozen = true
 
     return this
   }
@@ -100,23 +100,6 @@ export class HttpUrlWrap {
     Object.entries(url).forEach(([name, value]) => {
       this.set(name as keyof HttpUrl, value)
     })
-
-    return this
-  }
-
-  reset(): this {
-    this.sureNotFrozen('reset')
-
-    this.invalidateCacheAll()
-
-    this.#url = {
-      protocol: 'http:',
-      hostname: 'localhost',
-      port: '',
-      pathname: '/',
-      search: '',
-      hash: ''
-    }
 
     return this
   }
@@ -199,6 +182,23 @@ export class HttpUrlWrap {
       this.#url.search,
       this.#url.hash
     ].join('')
+  }
+
+  reset(): this {
+    this.sureNotFrozen('reset')
+
+    this.invalidateCacheAll()
+
+    this.#url = {
+      protocol: 'http:',
+      hostname: 'localhost',
+      port: '',
+      pathname: '/',
+      search: '',
+      hash: ''
+    }
+
+    return this
   }
 
   protected sureNotFrozen(name: string) {

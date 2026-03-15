@@ -20,7 +20,7 @@ export class HttpStatusWrap {
   }
 
   freeze(): this {
-    this.#isFrozen ||= true
+    this.#isFrozen = true
 
     return this
   }

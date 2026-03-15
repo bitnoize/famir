@@ -1,4 +1,3 @@
-import { MinioStorage } from '@famir/storage'
 import { DIComposer, DIContainer } from '@famir/common'
 import { EnvConfig } from '@famir/config'
 import {
@@ -14,6 +13,7 @@ import {
 } from '@famir/database'
 import { PinoLogger } from '@famir/logger'
 import { NetReplServer, ReplServerRouter } from '@famir/repl-server'
+import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeQueue, RedisWorkflowConnector } from '@famir/workflow'
 import { App } from '../../app.js'

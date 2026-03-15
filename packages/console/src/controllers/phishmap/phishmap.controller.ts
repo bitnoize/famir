@@ -7,8 +7,6 @@ import {
   PHISHMAP_SERVICE,
   PrunePhishmapData,
   RestorePhishmapData,
-  SavePhishmapData,
-  LoadPhishmapData,
   type PhishmapService
 } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
@@ -47,37 +45,23 @@ export class PhishmapController extends BaseController {
     this.logger.debug(`PhishmapController initialized`)
   }
 
-  use(): this {
-    this.router.register('dumpPhishmap', async (data) => {
+  use() {
+    this.router.addApiCall('dumpPhishmap', async (data) => {
       this.validateData<DumpPhishmapData>('console-dump-phishmap-data', data)
 
       return await this.phishmapService.dump(data)
     })
 
-    this.router.register('restorePhishmap', async (data) => {
+    this.router.addApiCall('restorePhishmap', async (data) => {
       this.validateData<RestorePhishmapData>('console-restore-phishmap-data', data)
 
       return await this.phishmapService.restore(data)
     })
 
-    this.router.register('prunePhishmap', async (data) => {
+    this.router.addApiCall('prunePhishmap', async (data) => {
       this.validateData<PrunePhishmapData>('console-prune-phishmap-data', data)
 
       return await this.phishmapService.prune(data)
     })
-
-    this.router.register('loadPhishmap', async (data) => {
-      this.validateData<LoadPhishmapData>('console-load-phishmap-data', data)
-
-      return await this.phishmapService.load(data)
-    })
-
-    this.router.register('savePhishmap', async (data) => {
-      this.validateData<SavePhishmapData>('console-save-phishmap-data', data)
-
-      return await this.phishmapService.save(data)
-    })
-
-    return this
   }
 }

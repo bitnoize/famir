@@ -39,13 +39,11 @@ export class MessageController extends BaseController {
     this.logger.debug(`MessageController initialized`)
   }
 
-  use(): this {
-    this.router.register('readMessage', async (data) => {
+  use() {
+    this.router.addApiCall('readMessage', async (data) => {
       this.validateData<ReadMessageData>('console-read-message-data', data)
 
       return await this.messageService.read(data)
     })
-
-    return this
   }
 }

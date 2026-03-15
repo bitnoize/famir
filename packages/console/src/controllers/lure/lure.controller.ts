@@ -47,43 +47,41 @@ export class LureController extends BaseController {
     this.logger.debug(`LureController initialized`)
   }
 
-  use(): this {
-    this.router.register('createLure', async (data) => {
+  use() {
+    this.router.addApiCall('createLure', async (data) => {
       this.validateData<CreateLureData>('console-create-lure-data', data)
 
       return await this.lureService.create(data)
     })
 
-    this.router.register('readLure', async (data) => {
+    this.router.addApiCall('readLure', async (data) => {
       this.validateData<ReadLureData>('console-read-lure-data', data)
 
       return await this.lureService.read(data)
     })
 
-    this.router.register('enableLure', async (data) => {
+    this.router.addApiCall('enableLure', async (data) => {
       this.validateData<SwitchLureData>('console-switch-lure-data', data)
 
       return await this.lureService.enable(data)
     })
 
-    this.router.register('disableLure', async (data) => {
+    this.router.addApiCall('disableLure', async (data) => {
       this.validateData<SwitchLureData>('console-switch-lure-data', data)
 
       return await this.lureService.disable(data)
     })
 
-    this.router.register('deleteLure', async (data) => {
+    this.router.addApiCall('deleteLure', async (data) => {
       this.validateData<DeleteLureData>('console-delete-lure-data', data)
 
       return await this.lureService.delete(data)
     })
 
-    this.router.register('listLures', async (data) => {
+    this.router.addApiCall('listLures', async (data) => {
       this.validateData<ListLuresData>('console-list-lures-data', data)
 
       return await this.lureService.list(data)
     })
-
-    return this
   }
 }

@@ -7,6 +7,7 @@ import { HTTP_SERVER_ROUTER, HttpServerRouter } from './http-server-router.js'
 import { HttpServerError } from './http-server.error.js'
 import {
   HTTP_SERVER,
+  HTTP_SERVER_ERROR_PAGE,
   HttpServer,
   HttpServerContext,
   NativeHttpServerConfig,
@@ -79,20 +80,17 @@ export class NativeHttpServer implements HttpServer {
     req: http.IncomingMessage,
     res: http.ServerResponse
   ): Promise<void> {
+    const errorPage = this.router.getAsset('error-page.html') ?? HTTP_SERVER_ERROR_PAGE
+
     try {
-      const ctx = new NativeHttpServerContext(
-        req,
-        res,
-        this.options.verbose,
-        this.options.errorPage
-      )
+      const ctx = new NativeHttpServerContext(req, res, this.options.verbose, errorPage)
 
       await this.chainMiddlewares(ctx)
 
       if (!res.writableEnded) {
         throw new HttpServerError(`Server internal error`, {
           context: {
-            reason: `No any server response from middlewares`
+            reason: `No any server response`
           },
           code: 'INTERNAL_ERROR'
         })
@@ -108,10 +106,7 @@ export class NativeHttpServer implements HttpServer {
           ? [error.status, error.message]
           : [500, 'Server internal error']
 
-      const errorPage = this.templater.render(this.options.errorPage, {
-        status,
-        message
-      })
+      const body = this.templater.render(errorPage, { status, message })
 
       if (!res.writableEnded) {
         if (!res.headersSent) {
@@ -119,7 +114,7 @@ export class NativeHttpServer implements HttpServer {
             'content-type': 'text/html'
           })
 
-          res.end(errorPage)
+          res.end(body)
         } else {
           res.end()
         }
@@ -129,7 +124,7 @@ export class NativeHttpServer implements HttpServer {
 
   protected async chainMiddlewares(ctx: HttpServerContext): Promise<void> {
     try {
-      const middlewares = this.router.resolve()
+      const middlewares = this.router.getMiddlewares()
 
       let index = -1
 
@@ -225,8 +220,7 @@ export class NativeHttpServer implements HttpServer {
     return {
       address: config.HTTP_SERVER_ADDRESS,
       port: config.HTTP_SERVER_PORT,
-      verbose: config.HTTP_SERVER_VERBOSE,
-      errorPage: config.HTTP_SERVER_ERROR_PAGE
+      verbose: config.HTTP_SERVER_VERBOSE
     }
   }
 }

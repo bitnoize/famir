@@ -47,37 +47,35 @@ export class RedirectorController extends BaseController {
     this.logger.debug(`RedirectorController initialized`)
   }
 
-  use(): this {
-    this.router.register('createRedirector', async (data) => {
+  use() {
+    this.router.addApiCall('createRedirector', async (data) => {
       this.validateData<CreateRedirectorData>('console-create-redirector-data', data)
 
       return await this.redirectorService.create(data)
     })
 
-    this.router.register('readRedirector', async (data) => {
+    this.router.addApiCall('readRedirector', async (data) => {
       this.validateData<ReadRedirectorData>('console-read-redirector-data', data)
 
       return await this.redirectorService.read(data)
     })
 
-    this.router.register('updateRedirector', async (data) => {
+    this.router.addApiCall('updateRedirector', async (data) => {
       this.validateData<UpdateRedirectorData>('console-update-redirector-data', data)
 
       return await this.redirectorService.update(data)
     })
 
-    this.router.register('deleteRedirector', async (data) => {
+    this.router.addApiCall('deleteRedirector', async (data) => {
       this.validateData<DeleteRedirectorData>('console-delete-redirector-data', data)
 
       return await this.redirectorService.delete(data)
     })
 
-    this.router.register('listRedirectors', async (data) => {
+    this.router.addApiCall('listRedirectors', async (data) => {
       this.validateData<ListRedirectorsData>('console-list-redirectors-data', data)
 
       return await this.redirectorService.list(data)
     })
-
-    return this
   }
 }

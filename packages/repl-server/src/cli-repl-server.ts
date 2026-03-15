@@ -9,8 +9,9 @@ import {
   CliReplServerConfig,
   CliReplServerOptions,
   REPL_SERVER,
-  ReplServer,
-  replServerDict
+  REPL_SERVER_BANNER_GREET,
+  REPL_SERVER_BANNER_LEAVE,
+  ReplServer
 } from './repl-server.js'
 
 export class CliReplServer implements ReplServer {
@@ -61,6 +62,9 @@ export class CliReplServer implements ReplServer {
   }
 
   protected replServerStart(): repl.REPLServer {
+    const bannerGreet = this.router.getAsset('banner-greet.txt') ?? REPL_SERVER_BANNER_GREET
+    const bannerLeave = this.router.getAsset('banner-leave.txt') ?? REPL_SERVER_BANNER_LEAVE
+
     const replServer = repl.start({
       terminal: true,
       useGlobal: false,
@@ -79,14 +83,15 @@ export class CliReplServer implements ReplServer {
     })
 
     replServer.on('exit', () => {
-      console.log(replServerDict.leave)
+      console.log(bannerLeave)
 
       process.kill(process.pid, 'SIGINT')
     })
 
     this.defineContext(replServer.context)
+    //this.defineCommands(replServer)
 
-    console.log(replServerDict.greet)
+    console.log(bannerGreet)
 
     replServer.displayPrompt()
 
@@ -94,12 +99,10 @@ export class CliReplServer implements ReplServer {
   }
 
   protected defineContext(context: object) {
-    const value: Record<string, unknown> = {}
+    const apiCalls: Record<string, unknown> = {}
 
-    const apiCalls = this.router.resolve()
-
-    apiCalls.forEach(([name, apiCall]) => {
-      value[name] = async (data: unknown): Promise<unknown> => {
+    this.router.getApiCalls().forEach(([name, apiCall]) => {
+      apiCalls[name] = async (data: unknown): Promise<unknown> => {
         try {
           return await apiCall(data)
         } catch (error) {
@@ -122,12 +125,22 @@ export class CliReplServer implements ReplServer {
       }
     })
 
+    apiCalls['getAsset'] = (name: string): string | undefined => {
+      return this.router.getAsset(name)
+    }
+
+    apiCalls['listAssets'] = (): string[] => {
+      return this.router.listAssets()
+    }
+
     Object.defineProperty(context, 'famir', {
       configurable: false,
       enumerable: true,
-      value: value
+      value: apiCalls
     })
   }
+
+  //protected defineCommands(replServer: repl.REPLServer) {}
 
   private buildOptions(config: CliReplServerConfig): CliReplServerOptions {
     return {

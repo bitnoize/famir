@@ -61,8 +61,8 @@ export class RoundTripController extends BaseController {
     this.logger.debug(`RoundTripController initialized`)
   }
 
-  use(): this {
-    this.router.register('round-trip', async (ctx, next) => {
+  use() {
+    this.router.addMiddleware('round-trip', async (ctx, next) => {
       const proxy = this.getState(ctx, 'proxy')
       const target = this.getState(ctx, 'target')
       const message = this.getState(ctx, 'message')
@@ -87,8 +87,6 @@ export class RoundTripController extends BaseController {
 
       await next()
     })
-
-    return this
   }
 
   protected async forwardSimple(

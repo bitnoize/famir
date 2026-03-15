@@ -75,8 +75,8 @@ export class AuthorizeController extends BaseController {
     this.logger.debug(`AuthorizeController initialized`)
   }
 
-  use(): this {
-    this.router.register('authorize', async (ctx, next) => {
+  use() {
+    this.router.addMiddleware('authorize', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
 
@@ -103,8 +103,6 @@ export class AuthorizeController extends BaseController {
         await this.transparentSession(ctx, campaign, target, next)
       }
     })
-
-    return this
   }
 
   protected async landingUpgradeSession(

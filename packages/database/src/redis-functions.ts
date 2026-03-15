@@ -1,8 +1,8 @@
 // Auto-generated file. Do not edit manually!
 
 // prettier-ignore
-const REDIS_FUNCTIONS = [
-  // 1-campaign.lua
+const REDIS_FUNCTIONS: string[] = [
+  '1-campaign.lua',
   `IyFsdWEgbmFtZT1jYW1wYWlnbgoKLS1bWwogIENyZWF0ZSBjYW1wYWlnbgotLV1dCmxvY2FsIGZ1
 bmN0aW9uIGNyZWF0ZV9jYW1wYWlnbihrZXlzLCBhcmdzKQogIGlmICNrZXlzIH49IDMgb3IgI2Fy
 Z3Mgfj0gMTAgdGhlbgogICAgcmV0dXJuIHJlZGlzLmVycm9yX3JlcGx5KCdFUlIgV3JvbmcgZnVu
@@ -235,7 +235,7 @@ T0sgQ2FtcGFpZ24gZGVsZXRlZCcpCmVuZAoKcmVkaXMucmVnaXN0ZXJfZnVuY3Rpb24oewogIGZ1
 bmN0aW9uX25hbWUgPSAnZGVsZXRlX2NhbXBhaWduJywKICBjYWxsYmFjayA9IGRlbGV0ZV9jYW1w
 YWlnbiwKICBkZXNjcmlwdGlvbiA9ICdEZWxldGUgY2FtcGFpZ24nLAp9KQo=`,
 
-  // 2-proxy.lua
+  '2-proxy.lua',
   `IyFsdWEgbmFtZT1wcm94eQoKLS1bWwogIENyZWF0ZSBwcm94eQotLV1dCmxvY2FsIGZ1bmN0aW9u
 IGNyZWF0ZV9wcm94eShrZXlzLCBhcmdzKQogIGlmICNrZXlzIH49IDUgb3IgI2FyZ3Mgfj0gNSB0
 aGVuCiAgICByZXR1cm4gcmVkaXMuZXJyb3JfcmVwbHkoJ0VSUiBXcm9uZyBmdW5jdGlvbiB1c2Un
@@ -408,7 +408,7 @@ ZWRpcy5zdGF0dXNfcmVwbHkoJ09LIFByb3h5IGRlbGV0ZWQnKQplbmQKCnJlZGlzLnJlZ2lzdGVy
 X2Z1bmN0aW9uKHsKICBmdW5jdGlvbl9uYW1lID0gJ2RlbGV0ZV9wcm94eScsCiAgY2FsbGJhY2sg
 PSBkZWxldGVfcHJveHksCiAgZGVzY3JpcHRpb24gPSAnRGVsZXRlIHByb3h5JywKfSkK`,
 
-  // 3-target.lua
+  '3-target.lua',
   `IyFsdWEgbmFtZT10YXJnZXQKCi0tW1sKICBDcmVhdGUgdGFyZ2V0Ci0tXV0KbG9jYWwgZnVuY3Rp
 b24gY3JlYXRlX3RhcmdldChrZXlzLCBhcmdzKQogIGlmICNrZXlzIH49IDcgb3IgI2FyZ3Mgfj0g
 MjIgdGhlbgogICAgcmV0dXJuIHJlZGlzLmVycm9yX3JlcGx5KCdFUlIgV3JvbmcgZnVuY3Rpb24g
@@ -818,7 +818,7 @@ dGF0dXNfcmVwbHkoJ09LIFRhcmdldCBkZWxldGVkJykKZW5kCgpyZWRpcy5yZWdpc3Rlcl9mdW5j
 dGlvbih7CiAgZnVuY3Rpb25fbmFtZSA9ICdkZWxldGVfdGFyZ2V0JywKICBjYWxsYmFjayA9IGRl
 bGV0ZV90YXJnZXQsCiAgZGVzY3JpcHRpb24gPSAnRGVsZXRlIHRhcmdldCcsCn0pCg==`,
 
-  // 4-redirector.lua
+  '4-redirector.lua',
   `IyFsdWEgbmFtZT1yZWRpcmVjdG9yCgotLVtbCiAgQ3JlYXRlIHJlZGlyZWN0b3IKLS1dXQpsb2Nh
 bCBmdW5jdGlvbiBjcmVhdGVfcmVkaXJlY3RvcihrZXlzLCBhcmdzKQogIGlmICNrZXlzIH49IDQg
 b3IgI2FyZ3Mgfj0gNSB0aGVuCiAgICByZXR1cm4gcmVkaXMuZXJyb3JfcmVwbHkoJ0VSUiBXcm9u
@@ -985,7 +985,7 @@ SyBSZWRpcmVjdG9yIGRlbGV0ZWQnKQplbmQKCnJlZGlzLnJlZ2lzdGVyX2Z1bmN0aW9uKHsKICBm
 dW5jdGlvbl9uYW1lID0gJ2RlbGV0ZV9yZWRpcmVjdG9yJywKICBjYWxsYmFjayA9IGRlbGV0ZV9y
 ZWRpcmVjdG9yLAogIGRlc2NyaXB0aW9uID0gJ0RlbGV0ZSB0YXJnZXQnLAp9KQo=`,
 
-  // 5-lure.lua
+  '5-lure.lua',
   `IyFsdWEgbmFtZT1sdXJlCgotLVtbCiAgQ3JlYXRlIGx1cmUKLS1dXQpsb2NhbCBmdW5jdGlvbiBj
 cmVhdGVfbHVyZShrZXlzLCBhcmdzKQogIGlmICNrZXlzIH49IDYgb3IgI2FyZ3Mgfj0gNiB0aGVu
 CiAgICByZXR1cm4gcmVkaXMuZXJyb3JfcmVwbHkoJ0VSUiBXcm9uZyBmdW5jdGlvbiB1c2UnKQog
@@ -1178,7 +1178,7 @@ c19yZXBseSgnT0sgTHVyZSBkZWxldGVkJykKZW5kCgpyZWRpcy5yZWdpc3Rlcl9mdW5jdGlvbih7
 CiAgZnVuY3Rpb25fbmFtZSA9ICdkZWxldGVfbHVyZScsCiAgY2FsbGJhY2sgPSBkZWxldGVfbHVy
 ZSwKICBkZXNjcmlwdGlvbiA9ICdEZWxldGUgbHVyZScsCn0pCg==`,
 
-  // 6-session.lua
+  '6-session.lua',
   `IyFsdWEgbmFtZT1zZXNzaW9uCgotLVtbCiAgQ3JlYXRlIHNlc3Npb24KLS1dXQpsb2NhbCBmdW5j
 dGlvbiBjcmVhdGVfc2Vzc2lvbihrZXlzLCBhcmdzKQogIGlmICNrZXlzIH49IDMgb3IgI2FyZ3Mg
 fj0gNCB0aGVuCiAgICByZXR1cm4gcmVkaXMuZXJyb3JfcmVwbHkoJ0VSUiBXcm9uZyBmdW5jdGlv
@@ -1304,7 +1304,7 @@ ZXBseSgnT0sgU2Vzc2lvbiB1cGdyYWRlZCcpCmVuZAoKcmVkaXMucmVnaXN0ZXJfZnVuY3Rpb24o
 ewogIGZ1bmN0aW9uX25hbWUgPSAndXBncmFkZV9zZXNzaW9uJywKICBjYWxsYmFjayA9IHVwZ3Jh
 ZGVfc2Vzc2lvbiwKICBkZXNjcmlwdGlvbiA9ICdVcGdyYWRlIHNlc3Npb24nLAp9KQo=`,
 
-  // 7-message.lua
+  '7-message.lua',
   `IyFsdWEgbmFtZT1tZXNzYWdlCgotLVtbCiAgQ3JlYXRlIG1lc3NhZ2UKLS1dXQpsb2NhbCBmdW5j
 dGlvbiBjcmVhdGVfbWVzc2FnZShrZXlzLCBhcmdzKQogIGlmICNrZXlzIH49IDUgb3IgI2FyZ3Mg
 fj0gMjEgdGhlbgogICAgcmV0dXJuIHJlZGlzLmVycm9yX3JlcGx5KCdFUlIgV3JvbmcgZnVuY3Rp
@@ -1419,6 +1419,18 @@ c3NhZ2UsCiAgZmxhZ3MgPSB7ICduby13cml0ZXMnIH0sCiAgZGVzY3JpcHRpb24gPSAnUmVhZCBm
 dWxsIG1lc3NhZ2UnLAp9KQo=`,
 ]
 
-export function getRedisFunctions(): string[] {
-  return REDIS_FUNCTIONS.map((data) => Buffer.from(data, 'base64').toString())
+export function getRedisFunctions(): [string, string][] {
+  const entries: [string, string][] = []
+
+  for (let idx = 0; idx < REDIS_FUNCTIONS.length; idx += 2) {
+    const name = REDIS_FUNCTIONS[idx]
+    const body = REDIS_FUNCTIONS[idx + 1]
+
+    if (name && body) {
+      const data = Buffer.from(body, 'base64').toString()
+      entries.push([name, data])
+    }
+  }
+
+  return entries
 }

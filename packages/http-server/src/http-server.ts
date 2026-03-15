@@ -56,12 +56,86 @@ export interface NativeHttpServerConfig {
   HTTP_SERVER_ADDRESS: string
   HTTP_SERVER_PORT: number
   HTTP_SERVER_VERBOSE: boolean
-  HTTP_SERVER_ERROR_PAGE: string
 }
 
 export interface NativeHttpServerOptions {
   address: string
   port: number
   verbose: boolean
-  errorPage: string
 }
+
+export const HTTP_SERVER_ERROR_PAGE = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Error</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background-color: #f4f4f4;
+      color: #2c3e50;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .error-card {
+      max-width: 560px;
+      width: 100%;
+      background: white;
+      padding: 2.5rem 2rem;
+      border-radius: 20px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      border: 1px solid #eaeef2;
+    }
+
+    .error-status {
+      font-size: 6rem;
+      font-weight: 600;
+      line-height: 1.1;
+      color: #3a4a5a;
+      letter-spacing: -2px;
+      margin-bottom: 0.75rem;
+    }
+
+    .error-message {
+      font-size: 1.8rem;
+      font-weight: 350;
+      color: #4f5f6f;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #e0e6eb;
+      padding-bottom: 1.5rem;
+      word-break: break-word;
+    }
+
+    @media (max-width: 480px) {
+      .status {
+          font-size: 4.5rem;
+      }
+      .message {
+          font-size: 1.5rem;
+      }
+      .error-card {
+          padding: 2rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="error-card">
+    <div class="error-status"><%= data.status %></div>
+    <div class="error-message"><%= data.message %></div>
+  </div>
+</body>
+</html>`

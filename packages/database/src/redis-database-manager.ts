@@ -30,13 +30,11 @@ export class RedisDatabaseManager implements DatabaseManager {
   async loadFunctions(): Promise<void> {
     await this.connection.FUNCTION_FLUSH()
 
-    const redisFunctions = getRedisFunctions()
+    for (const [name, data] of getRedisFunctions()) {
+      this.logger.info(`Load redis functions: ${name}`)
 
-    for (const redisFunction of redisFunctions) {
-      await this.connection.FUNCTION_LOAD(redisFunction)
+      await this.connection.FUNCTION_LOAD(data)
     }
-
-    this.logger.warn(`Database functions loaded`)
   }
 
   async cleanup(): Promise<void> {

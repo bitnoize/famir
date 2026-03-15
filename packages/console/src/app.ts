@@ -1,7 +1,7 @@
 import { DIContainer, serializeError, SHUTDOWN_SIGNALS } from '@famir/common'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER, ReplServer } from '@famir/repl-server'
+import { REPL_SERVER, REPL_SERVER_ROUTER, ReplServer, ReplServerRouter } from '@famir/repl-server'
 import { ANALYZE_QUEUE, AnalyzeQueue, WORKFLOW_CONNECTOR, WorkflowConnector } from '@famir/workflow'
 
 export const APP = Symbol('App')
@@ -16,6 +16,7 @@ export class App {
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<WorkflowConnector>(WORKFLOW_CONNECTOR),
           c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<ReplServer>(REPL_SERVER)
         )
     )
@@ -30,6 +31,7 @@ export class App {
     protected readonly databaseConnector: DatabaseConnector,
     protected readonly workflowConnector: WorkflowConnector,
     protected readonly analyzeQueue: AnalyzeQueue,
+    protected readonly router: ReplServerRouter,
     protected readonly replServer: ReplServer
   ) {
     SHUTDOWN_SIGNALS.forEach((signal) => {
@@ -49,6 +51,8 @@ export class App {
 
   async start(): Promise<void> {
     try {
+      this.router.activate()
+
       await this.databaseConnector.connect()
 
       await this.replServer.start()

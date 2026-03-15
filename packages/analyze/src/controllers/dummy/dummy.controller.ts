@@ -44,15 +44,13 @@ export class DummyController extends BaseController {
     this.logger.debug(`DummyController initialized`)
   }
 
-  use(): this {
-    this.router.register(ANALYZE_QUEUE_NAME, 'dummy', async (data) => {
+  use() {
+    this.router.addProcessor(ANALYZE_QUEUE_NAME, 'dummy', async (data) => {
       this.validateAnalyzeJobData(data)
 
       const message = await this.readMessageUseCase.execute(data)
 
       await this.saveMessageUseCase.execute(message)
     })
-
-    return this
   }
 }

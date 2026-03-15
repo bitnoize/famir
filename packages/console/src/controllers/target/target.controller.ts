@@ -48,61 +48,59 @@ export class TargetController extends BaseController {
     this.logger.debug(`TargetController initialized`)
   }
 
-  use(): this {
-    this.router.register('createTarget', async (data) => {
+  use() {
+    this.router.addApiCall('createTarget', async (data) => {
       this.validateData<CreateTargetData>('console-create-target-data', data)
 
       return await this.targetService.create(data)
     })
 
-    this.router.register('readTarget', async (data) => {
+    this.router.addApiCall('readTarget', async (data) => {
       this.validateData<ReadTargetData>('console-read-target-data', data)
 
       return await this.targetService.read(data)
     })
 
-    this.router.register('updateTarget', async (data) => {
+    this.router.addApiCall('updateTarget', async (data) => {
       this.validateData<UpdateTargetData>('console-update-target-data', data)
 
       return await this.targetService.update(data)
     })
 
-    this.router.register('enableTarget', async (data) => {
+    this.router.addApiCall('enableTarget', async (data) => {
       this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
       return await this.targetService.enable(data)
     })
 
-    this.router.register('disableTarget', async (data) => {
+    this.router.addApiCall('disableTarget', async (data) => {
       this.validateData<UpdateTargetData>('console-switch-target-data', data)
 
       return await this.targetService.disable(data)
     })
 
-    this.router.register('appendTargetLabel', async (data) => {
+    this.router.addApiCall('appendTargetLabel', async (data) => {
       this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
       return await this.targetService.appendLabel(data)
     })
 
-    this.router.register('removeTargetLabel', async (data) => {
+    this.router.addApiCall('removeTargetLabel', async (data) => {
       this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
 
       return await this.targetService.removeLabel(data)
     })
 
-    this.router.register('deleteTarget', async (data) => {
+    this.router.addApiCall('deleteTarget', async (data) => {
       this.validateData<DeleteTargetData>('console-delete-target-data', data)
 
       return await this.targetService.delete(data)
     })
 
-    this.router.register('listTargets', async (data) => {
+    this.router.addApiCall('listTargets', async (data) => {
       this.validateData<ListTargetsData>('console-list-targets-data', data)
 
       return await this.targetService.list(data)
     })
-
-    return this
   }
 }

@@ -5,7 +5,6 @@ import { Validator } from '@famir/validator'
 import { Job, MetricsTime, Worker } from 'bullmq'
 import { RedisExecutorConnection } from '../../executor-connector.js'
 import { ExecutorRouter } from '../../executor-router.js'
-import { ExecutorError } from '../../executor.error.js'
 import {
   BullExecutorConfig,
   BullExecutorWorkerOptions,
@@ -34,13 +33,7 @@ export abstract class BullBaseWorker {
       this.queueName,
       async (job: Job<unknown, unknown>): Promise<unknown> => {
         try {
-          const processor = this.router.resolve(this.queueName, job.name)
-
-          if (!processor) {
-            throw new ExecutorError(`Processor not exists`, {
-              code: 'UNKNOWN_JOB'
-            })
-          }
+          const processor = this.router.getProcessor(this.queueName, job.name)
 
           return await processor(job.data)
         } catch (error) {
@@ -127,7 +120,7 @@ export abstract class BullBaseWorker {
     const spec = specs[queueName]
 
     if (!spec) {
-      throw new Error(`ExecutorWorkerSpec not exists: ${queueName}`)
+      throw new Error(`Worker spec not exists: ${queueName}`)
     }
 
     return spec

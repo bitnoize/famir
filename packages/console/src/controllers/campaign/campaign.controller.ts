@@ -48,47 +48,45 @@ export class CampaignController extends BaseController {
     this.logger.debug(`CampaignController initialized`)
   }
 
-  use(): this {
-    this.router.register('createCampaign', async (data) => {
+  use() {
+    this.router.addApiCall('createCampaign', async (data) => {
       this.validateData<CreateCampaignData>('console-create-campaign-data', data)
 
       return await this.campaignService.create(data)
     })
 
-    this.router.register('readCampaign', async (data) => {
+    this.router.addApiCall('readCampaign', async (data) => {
       this.validateData<ReadCampaignData>('console-read-campaign-data', data)
 
       return await this.campaignService.read(data)
     })
 
-    this.router.register('lockCampaign', async (data) => {
+    this.router.addApiCall('lockCampaign', async (data) => {
       this.validateData<LockCampaignData>('console-lock-campaign-data', data)
 
       return await this.campaignService.lock(data)
     })
 
-    this.router.register('unlockCampaign', async (data) => {
+    this.router.addApiCall('unlockCampaign', async (data) => {
       this.validateData<UnlockCampaignData>('console-unlock-campaign-data', data)
 
       return await this.campaignService.unlock(data)
     })
 
-    this.router.register('updateCampaign', async (data) => {
+    this.router.addApiCall('updateCampaign', async (data) => {
       this.validateData<UpdateCampaignData>('console-update-campaign-data', data)
 
       return await this.campaignService.update(data)
     })
 
-    this.router.register('deleteCampaign', async (data) => {
+    this.router.addApiCall('deleteCampaign', async (data) => {
       this.validateData<DeleteCampaignData>('console-delete-campaign-data', data)
 
       return await this.campaignService.delete(data)
     })
 
-    this.router.register('listCampaigns', async () => {
+    this.router.addApiCall('listCampaigns', async () => {
       return await this.campaignService.list()
     })
-
-    return this
   }
 }

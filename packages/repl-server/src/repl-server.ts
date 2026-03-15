@@ -36,7 +36,5 @@ export interface NetReplServerOptions {
   useColors: boolean
 }
 
-export const replServerDict = {
-  greet: `Welcome to Fake-Mirrors REPL!`,
-  leave: `So long!`
-} as const
+export const REPL_SERVER_BANNER_GREET = `Welcome to Fake-Mirrors REPL!`
+export const REPL_SERVER_BANNER_LEAVE = `So long!`

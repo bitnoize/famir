@@ -40,8 +40,8 @@ export class CompleteController extends BaseController {
     this.logger.debug(`CompleteController initialized`)
   }
 
-  use(): this {
-    this.router.register('complete', async (ctx, next) => {
+  use() {
+    this.router.addMiddleware('complete', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const proxy = this.getState(ctx, 'proxy')
       const target = this.getState(ctx, 'target')
@@ -84,8 +84,6 @@ export class CompleteController extends BaseController {
 
       await next()
     })
-
-    return this
   }
 
   protected renderMessageError(ctx: HttpServerContext, error: HttpClientError, isHtml: boolean) {

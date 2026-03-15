@@ -39,19 +39,17 @@ export class DatabaseController extends BaseController {
     this.logger.debug(`DatabaseController initialized`)
   }
 
-  use(): this {
-    this.router.register('loadDatabaseFunctions', async (data) => {
+  use() {
+    this.router.addApiCall('loadDatabaseFunctions', async (data) => {
       this.validateData<ActionDatabaseData>('console-action-database-data', data)
 
       return await this.databaseService.loadDatabaseFunctions(data)
     })
 
-    this.router.register('cleanupDatabase', async (data) => {
+    this.router.addApiCall('cleanupDatabase', async (data) => {
       this.validateData<ActionDatabaseData>('console-action-database-data', data)
 
       return await this.databaseService.cleanupDatabase(data)
     })
-
-    return this
   }
 }

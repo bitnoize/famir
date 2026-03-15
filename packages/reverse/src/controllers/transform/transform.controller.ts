@@ -29,8 +29,8 @@ export class TransformController extends BaseController {
     this.logger.debug(`TransformController initialized`)
   }
 
-  use(): this {
-    this.router.register('transform', async (ctx, next) => {
+  use() {
+    this.router.addMiddleware('transform', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const targets = this.getState(ctx, 'targets')
@@ -150,7 +150,5 @@ export class TransformController extends BaseController {
 
       await next()
     })
-
-    return this
   }
 }

@@ -79,14 +79,4 @@ export interface RestorePhishmapData {
 
 export interface PrunePhishmapData {
   campaignId: string
-  confirmSecret?: string
-}
-
-export interface LoadPhishmapData {
-  filename: string
-}
-
-export interface SavePhishmapData {
-  phishmap: Phishmap
-  filename: string
 }

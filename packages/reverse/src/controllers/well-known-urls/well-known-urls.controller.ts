@@ -30,8 +30,8 @@ export class WellKnownUrlsController extends BaseController {
     this.logger.debug(`WellKnownUrlsController initialized`)
   }
 
-  use(): this {
-    this.router.register('well-known-urls', async (ctx, next) => {
+  use() {
+    this.router.addMiddleware('well-known-urls', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
       if (ctx.method.is('OPTIONS')) {
@@ -46,8 +46,6 @@ export class WellKnownUrlsController extends BaseController {
         await next()
       }
     })
-
-    return this
   }
 
   protected async sendPreflightCors(ctx: HttpServerContext): Promise<void> {
