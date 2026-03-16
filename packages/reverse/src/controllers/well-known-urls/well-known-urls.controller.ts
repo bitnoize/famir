@@ -35,7 +35,7 @@ export class WellKnownUrlsController extends BaseController {
       const target = this.getState(ctx, 'target')
 
       if (ctx.method.is('OPTIONS')) {
-        await this.sendPreflightCors(ctx)
+        await this.sendPreflightCors(ctx, target)
       } else if (ctx.url.isPath('/favicon.ico')) {
         await this.sendFaviconIco(ctx, target)
       } else if (ctx.url.isPath('/robots.txt')) {
@@ -48,7 +48,10 @@ export class WellKnownUrlsController extends BaseController {
     })
   }
 
-  protected async sendPreflightCors(ctx: HttpServerContext): Promise<void> {
+  protected async sendPreflightCors(
+    ctx: HttpServerContext,
+    target: EnabledFullTargetModel
+  ): Promise<void> {
     ctx.status.set(204)
 
     ctx.responseHeaders.merge({

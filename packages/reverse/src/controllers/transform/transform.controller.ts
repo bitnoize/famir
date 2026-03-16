@@ -46,9 +46,11 @@ export class TransformController extends BaseController {
         message.requestHeaders.set('Host', target.donorHost)
 
         if (message.requestHeaders.has('Origin')) {
-          const donorOrigin = [target.donorProtocol, '//', target.donorHost].join('')
-
-          message.requestHeaders.set('Origin', donorOrigin)
+          const oldValue = message.requestHeaders.getString('Origin')
+          if (oldValue) {
+            const newValue = message.rewriteUrl(oldValue, true, targets)
+            message.requestHeaders.set('Origin', newValue)
+          }
         }
 
         if (message.requestHeaders.has('Referer')) {
@@ -79,20 +81,26 @@ export class TransformController extends BaseController {
 
       message.addRequestBodyInterceptor('transform', () => {
         const contentType = message.requestHeaders.getContentType()
-        if (contentType && message.isRewriteUrlContentType(contentType)) {
-          const charset = contentType.parameters['charset']
+        if (contentType) {
+          if (message.isRewriteUrlContentType(contentType)) {
+            const charset = contentType.parameters['charset']
 
-          const oldValue = message.requestBody.getText(charset)
-          if (oldValue) {
-            const newValue = message.rewriteUrl(oldValue, true, targets)
-            message.requestBody.setText(newValue)
+            const oldValue = message.requestBody.getText(charset)
+            if (oldValue) {
+              const newValue = message.rewriteUrl(oldValue, true, targets)
+              message.requestBody.setText(newValue)
+            }
           }
         }
       })
 
       message.addResponseHeadInterceptor('transform', () => {
         if (message.responseHeaders.has('Access-Control-Allow-Origin')) {
-          message.responseHeaders.set('Access-Control-Allow-Origin', '*')
+          const oldValue = message.responseHeaders.getString('Access-Control-Allow-Origin')
+          if (oldValue) {
+            const newValue = message.rewriteUrl(oldValue, false, targets)
+            message.responseHeaders.set('Access-Control-Allow-Origin', newValue)
+          }
         }
 
         if (message.responseHeaders.has('Location')) {
@@ -137,13 +145,15 @@ export class TransformController extends BaseController {
 
       message.addResponseBodyInterceptor('transform', () => {
         const contentType = message.responseHeaders.getContentType()
-        if (contentType && message.isRewriteUrlContentType(contentType)) {
-          const charset = contentType.parameters['charset']
+        if (contentType) {
+          if (message.isRewriteUrlContentType(contentType)) {
+            const charset = contentType.parameters['charset']
 
-          const oldValue = message.responseBody.getText(charset)
-          if (oldValue) {
-            const newValue = message.rewriteUrl(oldValue, false, targets)
-            message.responseBody.setText(newValue)
+            const oldValue = message.responseBody.getText(charset)
+            if (oldValue) {
+              const newValue = message.rewriteUrl(oldValue, false, targets)
+              message.responseBody.setText(newValue)
+            }
           }
         }
       })

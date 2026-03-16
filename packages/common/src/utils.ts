@@ -41,3 +41,17 @@ export const randomName = (): string => {
 
   return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
+
+export const safeBase64Encode = (base64: string): string => {
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+export const safeBase64Decode = (value: string): string => {
+  let base64 = value.replace(/-/g, '+').replace(/_/g, '/')
+
+  while (base64.length % 4) {
+    base64 += '='
+  }
+
+  return base64
+}
