@@ -18,6 +18,8 @@ process.on('uncaughtException', (error: unknown) => {
   process.exit(1)
 })
 
+export const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const
+
 export { serializeError } from 'serialize-error'
 
 // https://oida.dev/typescript-array-includes/
@@ -39,5 +41,3 @@ export const randomName = (): string => {
 
   return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
-
-export const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const

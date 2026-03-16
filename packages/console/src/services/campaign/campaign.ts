@@ -2,7 +2,7 @@ export interface CreateCampaignData {
   campaignId: string
   mirrorDomain: string
   description: string
-  lockTimeout: number
+  cryptSecret?: string | null | undefined
   landingUpgradePath: string
   sessionCookieName: string
   sessionExpire: number

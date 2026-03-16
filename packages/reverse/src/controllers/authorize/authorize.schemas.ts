@@ -26,6 +26,10 @@ const landingLureDataSchema: JSONSchemaType<LandingLureData> = {
   type: 'object',
   required: [],
   properties: {
+    back_url: {
+      type: 'string',
+      nullable: true
+    },
     og_title: {
       type: 'string',
       nullable: true
@@ -43,10 +47,6 @@ const landingLureDataSchema: JSONSchemaType<LandingLureData> = {
       nullable: true
     },
     upgrade_url: {
-      type: 'string',
-      nullable: true
-    },
-    back_url: {
       type: 'string',
       nullable: true
     }

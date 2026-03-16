@@ -20,7 +20,7 @@ local function create_campaign(keys, args)
     campaign_id = args[1],
     mirror_domain = args[2],
     description = args[3],
-    lock_timeout = tonumber(args[4]),
+    crypt_secret = args[4],
     landing_upgrade_path = args[5],
     session_cookie_name = args[6],
     session_expire = tonumber(args[7]),
@@ -37,17 +37,16 @@ local function create_campaign(keys, args)
       return redis.error_reply('ERR Wrong model.' .. field)
     end
 
-    if (field == 'campaign_id' or field == 'mirror_domain') and value == '' then
+    if
+      (field == 'campaign_id' or field == 'mirror_domain' or field == 'crypt_secret')
+      and value == ''
+    then
       return redis.error_reply('ERR Wrong model.' .. field)
     end
 
     if
-      (
-        field == 'lock_timeout'
-        or field == 'session_expire'
-        or field == 'new_session_expire'
-        or field == 'message_expire'
-      ) and value <= 0
+      (field == 'session_expire' or field == 'new_session_expire' or field == 'message_expire')
+      and value <= 0
     then
       return redis.error_reply('ERR Wrong model.' .. field)
     end
@@ -160,7 +159,7 @@ local function read_full_campaign(keys, args)
     'campaign_id',
     'mirror_domain',
     'description',
-    'lock_timeout',
+    'crypt_secret',
     'landing_upgrade_path',
     'session_cookie_name',
     'session_expire',
@@ -180,7 +179,7 @@ local function read_full_campaign(keys, args)
     campaign_id = values[1],
     mirror_domain = values[2],
     description = values[3],
-    lock_timeout = tonumber(values[4]),
+    crypt_secret = values[4],
     landing_upgrade_path = values[5],
     session_cookie_name = values[6],
     session_expire = tonumber(values[7]),
@@ -237,7 +236,7 @@ redis.register_function({
   Lock campaign
 --]]
 local function lock_campaign(keys, args)
-  if #keys ~= 2 or #args ~= 1 then
+  if #keys ~= 2 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -254,7 +253,7 @@ local function lock_campaign(keys, args)
 
   local stash = {
     lock_secret = args[1],
-    lock_timeout = tonumber(redis.call('HGET', campaign_key, 'lock_timeout')),
+    lock_timeout = tonumber(args[2]),
   }
 
   for field, value in pairs(stash) do

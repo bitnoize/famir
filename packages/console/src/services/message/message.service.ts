@@ -16,14 +16,14 @@ export class MessageService {
   constructor(protected readonly messageRepository: MessageRepository) {}
 
   async read(data: ReadMessageData): Promise<MessageModel> {
-    const model = await this.messageRepository.read(data.campaignId, data.messageId)
+    const message = await this.messageRepository.read(data.campaignId, data.messageId)
 
-    if (!model) {
+    if (!message) {
       throw new ReplServerError(`Message not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return model
+    return message
   }
 }

@@ -7,6 +7,7 @@ import {
   DeleteLureData,
   ListLuresData,
   LURE_SERVICE,
+  MakeLureUrlData,
   ReadLureData,
   SwitchLureData,
   type LureService
@@ -82,6 +83,12 @@ export class LureController extends BaseController {
       this.validateData<ListLuresData>('console-list-lures-data', data)
 
       return await this.lureService.list(data)
+    })
+
+    this.router.addApiCall('makeLureUrl', async (data) => {
+      this.validateData<MakeLureUrlData>('console-make-lure-url-data', data)
+
+      return await this.lureService.makeUrl(data)
     })
   }
 }

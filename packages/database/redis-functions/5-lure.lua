@@ -318,7 +318,7 @@ local function disable_lure(keys, args)
   local stash = {
     updated_at = tonumber(args[1]),
     lock_secret = args[2],
-    orig_lock_secret = redis.call('GET', campaign_key),
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
@@ -388,7 +388,7 @@ local function delete_lure(keys, args)
     lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     lure_id = redis.call('HGET', lure_key, 'lure_id'),
-    path = redis.call('GET', lure_key, 'path'),
+    path = redis.call('HGET', lure_key, 'path'),
     redirector_id = redis.call('HGET', lure_key, 'redirector_id'),
     orig_redirector_id = redis.call('HGET', redirector_key, 'redirector_id'),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),

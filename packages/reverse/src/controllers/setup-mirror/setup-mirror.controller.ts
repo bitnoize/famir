@@ -85,7 +85,7 @@ export class SetupMirrorController extends BaseController {
       const mirrorHost = ctx.requestHeaders.getString('Host')
 
       if (!(mirrorHost && /[^:]+:\d+$/.test(mirrorHost))) {
-        throw new Error(`MirrorHost header malform`)
+        throw new Error(`Host header malform`)
       }
 
       return mirrorHost

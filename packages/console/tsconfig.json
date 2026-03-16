@@ -11,7 +11,6 @@
     { "path": "../config" },
     { "path": "../logger" },
     { "path": "../database" },
-    { "path": "../storage" },
     { "path": "../workflow" },
     { "path": "../repl-server" }
   ]

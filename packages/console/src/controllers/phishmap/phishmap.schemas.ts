@@ -1,7 +1,6 @@
 import {
   campaignDescriptionSchema,
   campaignLandingUpgradePathSchema,
-  campaignLockTimeoutSchema,
   campaignMessageExpireSchema,
   campaignMirrorDomainSchema,
   campaignNewSessionExpireSchema,
@@ -46,7 +45,6 @@ const phishmapCampaignSchema: JSONSchemaType<PhishmapCampaign> = {
     'campaignId',
     'mirrorDomain',
     'description',
-    'lockTimeout',
     'landingUpgradePath',
     'sessionCookieName',
     'sessionExpire',
@@ -57,7 +55,6 @@ const phishmapCampaignSchema: JSONSchemaType<PhishmapCampaign> = {
     campaignId: customIdentSchema,
     mirrorDomain: campaignMirrorDomainSchema,
     description: campaignDescriptionSchema,
-    lockTimeout: campaignLockTimeoutSchema,
     landingUpgradePath: campaignLandingUpgradePathSchema,
     sessionCookieName: campaignSessionCookieNameSchema,
     sessionExpire: campaignSessionExpireSchema,
@@ -203,8 +200,8 @@ const restorePhishmapDataSchema: JSONSchemaType<RestorePhishmapData> = {
       ...campaignDescriptionSchema,
       nullable: true
     },
-    lockTimeout: {
-      ...campaignLockTimeoutSchema,
+    cryptSecret: {
+      ...randomIdentSchema,
       nullable: true
     },
     landingUpgradePath: {

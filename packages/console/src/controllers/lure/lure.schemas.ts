@@ -9,6 +9,8 @@ import {
   CreateLureData,
   DeleteLureData,
   ListLuresData,
+  LureUrlPayload,
+  MakeLureUrlData,
   ReadLureData,
   SwitchLureData
 } from '../../services/index.js'
@@ -68,10 +70,53 @@ const listLuresDataSchema: JSONSchemaType<ListLuresData> = {
   additionalProperties: false
 } as const
 
+const lureUrlPayloadSchema: JSONSchemaType<LureUrlPayload> = {
+  type: 'object',
+  required: [],
+  properties: {
+    back_url: {
+      type: 'string',
+      nullable: true
+    },
+    og_title: {
+      type: 'string',
+      nullable: true
+    },
+    og_description: {
+      type: 'string',
+      nullable: true
+    },
+    og_image: {
+      type: 'string',
+      nullable: true
+    },
+    og_url: {
+      type: 'string',
+      nullable: true
+    }
+  },
+  additionalProperties: {
+    type: 'string'
+  }
+} as const
+
+const makeLureUrlDataSchema: JSONSchemaType<MakeLureUrlData> = {
+  type: 'object',
+  required: ['campaignId', 'targetId', 'lureId', 'payload'],
+  properties: {
+    campaignId: customIdentSchema,
+    targetId: customIdentSchema,
+    lureId: customIdentSchema,
+    payload: lureUrlPayloadSchema
+  },
+  additionalProperties: false
+} as const
+
 export const lureSchemas: ValidatorSchemas = {
   'console-create-lure-data': createLureDataSchema,
   'console-read-lure-data': readLureDataSchema,
   'console-switch-lure-data': switchLureDataSchema,
   'console-delete-lure-data': deleteLureDataSchema,
-  'console-list-lures-data': listLuresDataSchema
+  'console-list-lures-data': listLuresDataSchema,
+  'console-make-lure-url-data': makeLureUrlDataSchema
 } as const

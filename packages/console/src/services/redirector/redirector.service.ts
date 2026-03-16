@@ -54,15 +54,15 @@ export class RedirectorService {
   }
 
   async read(data: ReadRedirectorData): Promise<FullRedirectorModel> {
-    const model = await this.redirectorRepository.readFull(data.campaignId, data.redirectorId)
+    const redirector = await this.redirectorRepository.readFull(data.campaignId, data.redirectorId)
 
-    if (!model) {
+    if (!redirector) {
       throw new ReplServerError(`Redirector not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return model
+    return redirector
   }
 
   async update(data: UpdateRedirectorData): Promise<true> {
@@ -111,14 +111,14 @@ export class RedirectorService {
   }
 
   async list(data: ListRedirectorsData): Promise<RedirectorModel[]> {
-    const collection = await this.redirectorRepository.list(data.campaignId)
+    const redirectors = await this.redirectorRepository.list(data.campaignId)
 
-    if (!collection) {
+    if (!redirectors) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return collection
+    return redirectors
   }
 }

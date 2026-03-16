@@ -7,7 +7,7 @@ export interface CampaignRepository {
     campaignId: string,
     mirrorDomain: string,
     description: string,
-    lockTimeout: number,
+    cryptSecret: string,
     landingUpgradePath: string,
     sessionCookieName: string,
     sessionExpire: number,

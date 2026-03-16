@@ -7,7 +7,7 @@ import {
   DatabaseConnector,
   RedisDatabaseConnection
 } from '../../database-connector.js'
-import { RedisDatabaseConfig } from '../../database.js'
+import { DATABASE_LOCK_TIMEOUT, RedisDatabaseConfig } from '../../database.js'
 import { CampaignModel, FullCampaignModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
@@ -45,7 +45,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     campaignId: string,
     mirrorDomain: string,
     description: string,
-    lockTimeout: number,
+    cryptSecret: string,
     landingUpgradePath: string,
     sessionCookieName: string,
     sessionExpire: number,
@@ -58,7 +58,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         campaignId,
         mirrorDomain,
         description,
-        lockTimeout,
+        cryptSecret,
         landingUpgradePath,
         sessionCookieName,
         sessionExpire,
@@ -104,7 +104,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       const statusReply = await this.connection.campaign.lock_campaign(
         this.options.prefix,
         campaignId,
-        lockSecret
+        lockSecret,
+        DATABASE_LOCK_TIMEOUT
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -241,7 +242,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       rawModel.campaign_id,
       rawModel.mirror_domain,
       rawModel.description,
-      rawModel.lock_timeout,
+      rawModel.crypt_secret,
       rawModel.landing_upgrade_path,
       rawModel.session_cookie_name,
       rawModel.session_expire,

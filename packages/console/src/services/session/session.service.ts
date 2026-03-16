@@ -16,14 +16,14 @@ export class SessionService {
   constructor(protected readonly sessionRepository: SessionRepository) {}
 
   async read(data: ReadSessionData): Promise<SessionModel> {
-    const model = await this.sessionRepository.read(data.campaignId, data.sessionId)
+    const session = await this.sessionRepository.read(data.campaignId, data.sessionId)
 
-    if (!model) {
+    if (!session) {
       throw new ReplServerError(`Session not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return model
+    return session
   }
 }

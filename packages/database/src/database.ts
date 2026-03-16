@@ -13,3 +13,5 @@ export interface RedisDatabaseConnectorOptions {
 export interface RedisDatabaseRepositoryOptions {
   prefix: string
 }
+
+export const DATABASE_LOCK_TIMEOUT = 5 * 60 * 1000

@@ -32,3 +32,19 @@ export interface DeleteLureData {
 export interface ListLuresData {
   campaignId: string
 }
+
+export interface LureUrlPayload {
+  [key: string]: string | null | undefined
+  back_url?: string | null | undefined
+  og_title?: string | null | undefined
+  og_description?: string | null | undefined
+  og_image?: string | null | undefined
+  og_url?: string | null | undefined
+}
+
+export interface MakeLureUrlData {
+  campaignId: string
+  targetId: string
+  lureId: string
+  payload: LureUrlPayload
+}

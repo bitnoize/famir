@@ -22,7 +22,7 @@ export interface RawCampaign {
 
 export interface RawFullCampaign extends RawCampaign {
   description: string
-  lock_timeout: number
+  crypt_secret: string
   landing_upgrade_path: string
   session_cookie_name: string
   session_expire: number
@@ -45,7 +45,7 @@ export const campaignFunctions = {
         campaignId: string,
         mirrorDomain: string,
         description: string,
-        lockTimeout: number,
+        cryptSecret: string,
         landingUpgradePath: string,
         sessionCookieName: string,
         sessionExpire: number,
@@ -59,7 +59,7 @@ export const campaignFunctions = {
         parser.push(campaignId)
         parser.push(mirrorDomain)
         parser.push(description)
-        parser.push(lockTimeout.toString())
+        parser.push(cryptSecret)
         parser.push(landingUpgradePath)
         parser.push(sessionCookieName)
         parser.push(sessionExpire.toString())
@@ -110,11 +110,18 @@ export const campaignFunctions = {
     lock_campaign: {
       NUMBER_OF_KEYS: 2,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockSecret: string) {
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        lockSecret: string,
+        lockTimeout: number
+      ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
 
         parser.push(lockSecret)
+        parser.push(lockTimeout.toString())
       },
 
       transformReply: undefined as unknown as () => unknown

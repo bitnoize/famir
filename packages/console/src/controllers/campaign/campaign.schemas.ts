@@ -1,7 +1,6 @@
 import {
   campaignDescriptionSchema,
   campaignLandingUpgradePathSchema,
-  campaignLockTimeoutSchema,
   campaignMessageExpireSchema,
   campaignMirrorDomainSchema,
   campaignNewSessionExpireSchema,
@@ -42,9 +41,9 @@ const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
       ...campaignDescriptionSchema,
       default: ''
     },
-    lockTimeout: {
-      ...campaignLockTimeoutSchema,
-      default: 300 * 1000
+    cryptSecret: {
+      ...randomIdentSchema,
+      nullable: true
     },
     landingUpgradePath: {
       ...campaignLandingUpgradePathSchema,

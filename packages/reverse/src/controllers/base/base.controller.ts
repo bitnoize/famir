@@ -54,7 +54,10 @@ export abstract class BaseController {
   protected async sendRedirectTo(ctx: HttpServerContext, url: string, status = 302): Promise<void> {
     ctx.status.set(status)
 
-    ctx.responseHeaders.set('Location', url)
+    ctx.responseHeaders.merge({
+      Location: url,
+      'Referrer-Policy': 'no-referrer'
+    })
 
     await ctx.sendResponse()
   }

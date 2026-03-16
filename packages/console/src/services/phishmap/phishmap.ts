@@ -2,7 +2,6 @@ export interface PhishmapCampaign {
   campaignId: string
   mirrorDomain: string
   description: string
-  lockTimeout: number
   landingUpgradePath: string
   sessionCookieName: string
   sessionExpire: number
@@ -66,17 +65,18 @@ export interface DumpPhishmapData {
 
 export interface RestorePhishmapData {
   phishmap: Phishmap
-  campaignId?: string
-  mirrorDomain?: string
-  description?: string
-  lockTimeout?: number
-  landingUpgradePath?: string
-  sessionCookieName?: string
-  sessionExpire?: number
-  newSessionExpire?: number
-  messageExpire?: number
+  campaignId?: string | null | undefined
+  mirrorDomain?: string | null | undefined
+  description?: string | null | undefined
+  cryptSecret?: string | null | undefined
+  landingUpgradePath?: string | null | undefined
+  sessionCookieName?: string | null | undefined
+  sessionExpire?: number | null | undefined
+  newSessionExpire?: number | null | undefined
+  messageExpire?: number | null | undefined
 }
 
 export interface PrunePhishmapData {
   campaignId: string
+  confirmSecret?: string
 }

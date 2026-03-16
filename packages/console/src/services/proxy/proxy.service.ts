@@ -48,15 +48,15 @@ export class ProxyService {
   }
 
   async read(data: ReadProxyData): Promise<ProxyModel> {
-    const model = await this.proxyRepository.read(data.campaignId, data.proxyId)
+    const proxy = await this.proxyRepository.read(data.campaignId, data.proxyId)
 
-    if (!model) {
+    if (!proxy) {
       throw new ReplServerError(`Proxy not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return model
+    return proxy
   }
 
   async enable(data: SwitchProxyData): Promise<true> {
@@ -120,14 +120,14 @@ export class ProxyService {
   }
 
   async list(data: ListProxiesData): Promise<ProxyModel[]> {
-    const collection = await this.proxyRepository.list(data.campaignId)
+    const proxies = await this.proxyRepository.list(data.campaignId)
 
-    if (!collection) {
+    if (!proxies) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return collection
+    return proxies
   }
 }

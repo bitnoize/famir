@@ -1,4 +1,4 @@
-import { DIContainer, arrayIncludes } from '@famir/common'
+import { DIContainer, arrayIncludes, randomIdent } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
@@ -35,7 +35,7 @@ export class CampaignService {
         data.campaignId,
         data.mirrorDomain,
         data.description,
-        data.lockTimeout,
+        data.cryptSecret ?? randomIdent(),
         data.landingUpgradePath,
         data.sessionCookieName,
         data.sessionExpire,
@@ -60,15 +60,15 @@ export class CampaignService {
   }
 
   async read(data: ReadCampaignData): Promise<FullCampaignModel> {
-    const model = await this.campaignRepository.readFull(data.campaignId)
+    const campaign = await this.campaignRepository.readFull(data.campaignId)
 
-    if (!model) {
+    if (!campaign) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return model
+    return campaign
   }
 
   async lock(data: LockCampaignData): Promise<string> {

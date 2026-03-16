@@ -17,7 +17,6 @@
     "@famir/config": "*",
     "@famir/logger": "*",
     "@famir/database": "*",
-    "@famir/storage": "*",
     "@famir/workflow": "*",
     "@famir/repl-server": "*"
   }

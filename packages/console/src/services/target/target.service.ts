@@ -73,15 +73,15 @@ export class TargetService {
   }
 
   async read(data: ReadTargetData): Promise<FullTargetModel> {
-    const model = await this.targetRepository.readFull(data.campaignId, data.targetId)
+    const target = await this.targetRepository.readFull(data.campaignId, data.targetId)
 
-    if (!model) {
+    if (!target) {
       throw new ReplServerError(`Target not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return model
+    return target
   }
 
   async update(data: UpdateTargetData): Promise<true> {
@@ -229,14 +229,14 @@ export class TargetService {
   }
 
   async list(data: ListTargetsData): Promise<TargetModel[]> {
-    const collection = await this.targetRepository.list(data.campaignId)
+    const targets = await this.targetRepository.list(data.campaignId)
 
-    if (!collection) {
+    if (!targets) {
       throw new ReplServerError(`Campaign not found`, {
         code: 'NOT_FOUND'
       })
     }
 
-    return collection
+    return targets
   }
 }

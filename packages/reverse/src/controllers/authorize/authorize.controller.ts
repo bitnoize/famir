@@ -1,4 +1,4 @@
-import { DIContainer, randomName } from '@famir/common'
+import { decrypt, DIContainer, encrypt, randomName } from '@famir/common'
 import {
   EnabledFullTargetModel,
   EnabledLureModel,
@@ -116,7 +116,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    const upgradeData = this.parseLandingUpgradeData(ctx)
+    const upgradeData = this.parseLandingUpgradeData(ctx, campaign)
     if (!upgradeData) {
       await this.sendNotFoundPage(ctx, target)
 
@@ -157,7 +157,7 @@ export class AuthorizeController extends BaseController {
       return
     }
 
-    const lureData = this.parseLandingLureData(ctx)
+    const lureData = this.parseLandingLureData(ctx, campaign)
     if (!lureData) {
       await this.sendNotFoundPage(ctx, target)
 
@@ -368,7 +368,10 @@ export class AuthorizeController extends BaseController {
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  private parseLandingUpgradeData(ctx: HttpServerContext): LandingUpgradeData | null {
+  private parseLandingUpgradeData(
+    ctx: HttpServerContext,
+    campaign: FullCampaignModel
+  ): LandingUpgradeData | null {
     try {
       const queryString = ctx.url.getQueryString()
       const value = Object.values(queryString)[0]
@@ -377,7 +380,7 @@ export class AuthorizeController extends BaseController {
         return null
       }
 
-      const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
+      const data: unknown = JSON.parse(decrypt(value, campaign.cryptSecret))
 
       this.validator.assertSchema<LandingUpgradeData>('reverse-landing-upgrade-data', data)
 
@@ -387,7 +390,10 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  private parseLandingLureData(ctx: HttpServerContext): LandingLureData | null {
+  private parseLandingLureData(
+    ctx: HttpServerContext,
+    campaign: FullCampaignModel
+  ): LandingLureData | null {
     try {
       const queryString = ctx.url.getQueryString()
       const value = Object.values(queryString)[0]
@@ -396,7 +402,7 @@ export class AuthorizeController extends BaseController {
         return null
       }
 
-      const data: unknown = JSON.parse(Buffer.from(value, 'base64').toString())
+      const data: unknown = JSON.parse(decrypt(value, campaign.cryptSecret))
 
       this.validator.assertSchema<LandingLureData>('reverse-landing-lure-data', data)
 
@@ -438,7 +444,7 @@ export class AuthorizeController extends BaseController {
           back_url: lureData['back_url'] ?? '/'
         }
 
-        const upgradeBlob = Buffer.from(JSON.stringify(upgradeData)).toString('base64')
+        const payload = encrypt(JSON.stringify(upgradeData), campaign.cryptSecret)
 
         const upgradeUrl = [
           //target.mirrorUrl,
@@ -446,7 +452,7 @@ export class AuthorizeController extends BaseController {
           '?',
           randomName(),
           '=',
-          upgradeBlob
+          encodeURIComponent(payload)
         ].join('')
 
         ctx.responseBody.setText(

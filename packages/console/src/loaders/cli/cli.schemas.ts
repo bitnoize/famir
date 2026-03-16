@@ -9,14 +9,6 @@ import {
   configPinoLoggerTransportTargetSchema
 } from '@famir/logger'
 import { configReplServerPromptSchema, configReplServerUseColorsSchema } from '@famir/repl-server'
-import {
-  configMinioStorageEndPointSchema,
-  configMinioStoragePortSchema,
-  configMinioStorageUseSSLSchema,
-  configStorageAccessKeySchema,
-  configStorageBucketNameSchema,
-  configStorageSecretKeySchema
-} from '@famir/storage'
 import { JSONSchemaType } from '@famir/validator'
 import {
   configRedisWorkflowConnectionUrlSchema,
@@ -33,12 +25,6 @@ export const configAppCliSchema: JSONSchemaType<AppCliConfig> = {
     'LOGGER_TRANSPORT_OPTIONS',
     'DATABASE_CONNECTION_URL',
     'DATABASE_PREFIX',
-    'STORAGE_END_POINT',
-    'STORAGE_PORT',
-    'STORAGE_USE_SSL',
-    'STORAGE_ACCESS_KEY',
-    'STORAGE_SECRET_KEY',
-    'STORAGE_BUCKET_NAME',
     'WORKFLOW_CONNECTION_URL',
     'WORKFLOW_PREFIX',
     'REPL_SERVER_PROMPT',
@@ -54,12 +40,6 @@ export const configAppCliSchema: JSONSchemaType<AppCliConfig> = {
     LOGGER_TRANSPORT_OPTIONS: configPinoLoggerTransportOptionsSchema,
     DATABASE_CONNECTION_URL: configRedisDatabaseConnectionUrlSchema,
     DATABASE_PREFIX: configRedisDatabasePrefixSchema,
-    STORAGE_END_POINT: configMinioStorageEndPointSchema,
-    STORAGE_PORT: configMinioStoragePortSchema,
-    STORAGE_USE_SSL: configMinioStorageUseSSLSchema,
-    STORAGE_ACCESS_KEY: configStorageAccessKeySchema,
-    STORAGE_SECRET_KEY: configStorageSecretKeySchema,
-    STORAGE_BUCKET_NAME: configStorageBucketNameSchema,
     WORKFLOW_CONNECTION_URL: configRedisWorkflowConnectionUrlSchema,
     WORKFLOW_PREFIX: configRedisWorkflowPrefixSchema,
     REPL_SERVER_PROMPT: configReplServerPromptSchema,

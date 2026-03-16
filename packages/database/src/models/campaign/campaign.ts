@@ -19,7 +19,7 @@ export class FullCampaignModel extends CampaignModel {
     campaignId: string,
     mirrorDomain: string,
     readonly description: string,
-    readonly lockTimeout: number,
+    readonly cryptSecret: string,
     readonly landingUpgradePath: string,
     readonly sessionCookieName: string,
     readonly sessionExpire: number,

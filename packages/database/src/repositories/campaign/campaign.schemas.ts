@@ -44,7 +44,7 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'campaign_id',
     'mirror_domain',
     'description',
-    'lock_timeout',
+    'crypt_secret',
     'landing_upgrade_path',
     'session_cookie_name',
     'session_expire',
@@ -70,8 +70,8 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     description: {
       type: 'string'
     },
-    lock_timeout: {
-      type: 'integer'
+    crypt_secret: {
+      type: 'string'
     },
     landing_upgrade_path: {
       type: 'string'
@@ -134,12 +134,6 @@ export const campaignDescriptionSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 0,
   maxLength: 1024
-} as const
-
-export const campaignLockTimeoutSchema: JSONSchemaType<number> = {
-  type: 'integer',
-  minimum: 60 * 1000,
-  maximum: 3600 * 1000
 } as const
 
 export const campaignLandingUpgradePathSchema: JSONSchemaType<string> = {

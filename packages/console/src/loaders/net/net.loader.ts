@@ -13,7 +13,6 @@ import {
 } from '@famir/database'
 import { PinoLogger } from '@famir/logger'
 import { NetReplServer, ReplServerRouter } from '@famir/repl-server'
-import { MinioStorage } from '@famir/storage'
 import { AjvValidator } from '@famir/validator'
 import { BullAnalyzeQueue, RedisWorkflowConnector } from '@famir/workflow'
 import { App } from '../../app.js'
@@ -40,8 +39,6 @@ export async function bootstrapNet(composer: DIComposer): Promise<void> {
   RedisLureRepository.inject(container)
   RedisSessionRepository.inject(container)
   RedisMessageRepository.inject(container)
-
-  MinioStorage.inject(container)
 
   RedisWorkflowConnector.inject(container)
 
