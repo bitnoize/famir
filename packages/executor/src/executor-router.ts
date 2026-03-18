@@ -56,7 +56,7 @@ export class ExecutorRouter {
 
     this.queues[queueName].set(jobName, processor)
 
-    this.logger.info(`ExecutorRouter add processor: ${queueName} => ${jobName}`)
+    this.logger.debug(`ExecutorRouter add processor: ${queueName} => ${jobName}`)
   }
 
   getProcessor(queueName: string, jobName: string): ExecutorProcessor {
@@ -95,7 +95,7 @@ export class ExecutorRouter {
 
       this.assets.set(name, data)
 
-      this.logger.info(`ExecutorRouter add asset: ${name}`)
+      this.logger.debug(`ExecutorRouter add asset: ${name}`)
     }
   }
 

@@ -45,20 +45,16 @@ export class TransformController extends BaseController {
 
         message.requestHeaders.set('Host', target.donorHost)
 
-        if (message.requestHeaders.has('Origin')) {
-          const oldValue = message.requestHeaders.getString('Origin')
-          if (oldValue) {
-            const newValue = message.rewriteUrl(oldValue, true, targets)
-            message.requestHeaders.set('Origin', newValue)
-          }
+        const oldOrigin = message.requestHeaders.getString('Origin')
+        if (oldOrigin) {
+          const newOrigin = message.rewriteUrl(oldOrigin, true, targets)
+          message.requestHeaders.set('Origin', newOrigin)
         }
 
-        if (message.requestHeaders.has('Referer')) {
-          const oldValue = message.requestHeaders.getString('Referer')
-          if (oldValue) {
-            const newValue = message.rewriteUrl(oldValue, true, targets)
-            message.requestHeaders.set('Referer', newValue)
-          }
+        const oldReferer = message.requestHeaders.getString('Referer')
+        if (oldReferer) {
+          const newReferer = message.rewriteUrl(oldReferer, true, targets)
+          message.requestHeaders.set('Referer', newReferer)
         }
 
         message.requestHeaders.delete([
@@ -85,31 +81,26 @@ export class TransformController extends BaseController {
           if (message.isRewriteUrlContentType(contentType)) {
             const charset = contentType.parameters['charset']
 
-            const oldValue = message.requestBody.getText(charset)
-            if (oldValue) {
-              const newValue = message.rewriteUrl(oldValue, true, targets)
-              message.requestBody.setText(newValue)
+            const oldText = message.requestBody.getText(charset)
+            if (oldText) {
+              const newText = message.rewriteUrl(oldText, true, targets)
+              message.requestBody.setText(newText)
             }
           }
         }
       })
 
       message.addResponseHeadInterceptor('transform', () => {
-        if (message.responseHeaders.has('Access-Control-Allow-Origin')) {
-          const oldValue = message.responseHeaders.getString('Access-Control-Allow-Origin')
-          if (oldValue) {
-            const newValue = message.rewriteUrl(oldValue, false, targets)
-            message.responseHeaders.set('Access-Control-Allow-Origin', newValue)
-          }
+        const oldLocation = message.responseHeaders.getString('Location')
+        if (oldLocation && message.isAbsoluteUrl(oldLocation)) {
+          const newLocation = message.rewriteUrl(oldLocation, false, targets)
+          message.responseHeaders.set('Location', newLocation)
         }
 
-        if (message.responseHeaders.has('Location')) {
-          const absoluteUrlRegExp = /^https?:\/\/|^\/\//i
-          const oldValue = message.responseHeaders.getString('Location')
-          if (oldValue && absoluteUrlRegExp.test(oldValue)) {
-            const newValue = message.rewriteUrl(oldValue, false, targets)
-            message.responseHeaders.set('Location', newValue)
-          }
+        const oldAcao = message.responseHeaders.getString('Access-Control-Allow-Origin')
+        if (oldAcao) {
+          const newAcao = message.rewriteUrl(oldAcao, false, targets)
+          message.responseHeaders.set('Access-Control-Allow-Origin', newAcao)
         }
 
         message.responseHeaders.delete([
@@ -149,10 +140,10 @@ export class TransformController extends BaseController {
           if (message.isRewriteUrlContentType(contentType)) {
             const charset = contentType.parameters['charset']
 
-            const oldValue = message.responseBody.getText(charset)
-            if (oldValue) {
-              const newValue = message.rewriteUrl(oldValue, false, targets)
-              message.responseBody.setText(newValue)
+            const oldText = message.responseBody.getText(charset)
+            if (oldText) {
+              const newText = message.rewriteUrl(oldText, false, targets)
+              message.responseBody.setText(newText)
             }
           }
         }

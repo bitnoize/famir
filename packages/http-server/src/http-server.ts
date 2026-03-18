@@ -114,16 +114,15 @@ export const HTTP_SERVER_ERROR_PAGE = `<!doctype html>
       font-weight: 350;
       color: #4f5f6f;
       margin-bottom: 2rem;
-      border-bottom: 1px solid #e0e6eb;
       padding-bottom: 1.5rem;
       word-break: break-word;
     }
 
     @media (max-width: 480px) {
-      .status {
+      .error-status {
           font-size: 4.5rem;
       }
-      .message {
+      .error-message {
           font-size: 1.5rem;
       }
       .error-card {

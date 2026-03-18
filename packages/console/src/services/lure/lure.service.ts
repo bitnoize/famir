@@ -182,13 +182,6 @@ export class LureService {
     }
 
     const payload = encrypt(JSON.stringify(data.payload), campaign.cryptSecret)
-    return [
-      target.mirrorUrl,
-      lure.path,
-      '?',
-      randomName(),
-      '=',
-      encodeURIComponent(payload),
-    ].join('')
+    return [target.mirrorUrl, lure.path, '?', randomName(), '=', payload].join('')
   }
 }

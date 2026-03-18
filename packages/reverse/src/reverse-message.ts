@@ -119,10 +119,15 @@ export class ReverseMessage {
     ['//', false]
   ]
 
-  addRewriteUrlSchemes(schemes: RewriteUrlScheme[]) {
-    this.sureNotReady('addRewriteUrlSchemes')
+  addRewriteUrlMoreSchemes() {
+    this.sureNotReady('addRewriteUrlMoreSchemes')
 
-    this.rewriteUrlSchemes.push(...schemes)
+    this.rewriteUrlSchemes.push(
+      ['%3A%2F%2F', true],
+      ['%2F%2F', false],
+      [':\\u002F\\u002F', true],
+      ['\\u002F\\u002F', false]
+    )
   }
 
   private requestHeadInterceptors: Array<[string, ReverseMessageInterceptor]> = []
@@ -157,13 +162,11 @@ export class ReverseMessage {
   runRequestBodyInterceptors() {
     this.sureIsReady('runRequestBodyInterceptors')
 
-    if (this.requestBody.length > 0) {
-      for (const [name, interceptor] of this.requestBodyInterceptors) {
-        try {
-          interceptor(this)
-        } catch (error) {
-          this.addError(error, 'request-body-interceptor', name)
-        }
+    for (const [name, interceptor] of this.requestBodyInterceptors) {
+      try {
+        interceptor(this)
+      } catch (error) {
+        this.addError(error, 'request-body-interceptor', name)
       }
     }
 
@@ -217,13 +220,11 @@ export class ReverseMessage {
   runResponseBodyInterceptors() {
     this.sureIsReady('runResponseBodyInterceptors')
 
-    if (this.responseBody.length > 0) {
-      for (const [name, interceptor] of this.responseBodyInterceptors) {
-        try {
-          interceptor(this)
-        } catch (error) {
-          this.addError(error, 'response-body-interceptor', name)
-        }
+    for (const [name, interceptor] of this.responseBodyInterceptors) {
+      try {
+        interceptor(this)
+      } catch (error) {
+        this.addError(error, 'response-body-interceptor', name)
       }
     }
 
@@ -243,6 +244,11 @@ export class ReverseMessage {
 
   getResponseTransforms(): Readonly<Transform[]> {
     return this.responseTransforms
+  }
+
+  isAbsoluteUrl(value: string): boolean {
+    const regExp = /^https?:\/\/|^\/\//i
+    return regExp.test(value)
   }
 
   rewriteUrl(text: string, rev: boolean, targets: RewriteUrlTarget[]): string {

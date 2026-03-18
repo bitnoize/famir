@@ -45,7 +45,13 @@ export abstract class BaseController {
 
     ctx.responseHeaders.merge({
       'Content-Type': 'text/plain',
-      'Content-Length': ctx.responseBody.length.toString()
+      'Content-Length': ctx.responseBody.length.toString(),
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': '*',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Expose-Headers': '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400'
     })
 
     await ctx.sendResponse()

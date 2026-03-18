@@ -373,8 +373,8 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel
   ): LandingUpgradeData | null {
     try {
-      const queryString = ctx.url.getQueryString()
-      const value = Object.values(queryString)[0]
+      const params = ctx.url.getQueryString()
+      const value = Object.values(params)[0]
 
       if (!(value && typeof value === 'string')) {
         return null
@@ -395,8 +395,8 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel
   ): LandingLureData | null {
     try {
-      const queryString = ctx.url.getQueryString()
-      const value = Object.values(queryString)[0]
+      const params = ctx.url.getQueryString()
+      const value = Object.values(params)[0]
 
       if (!(value && typeof value === 'string')) {
         return null
@@ -446,27 +446,20 @@ export class AuthorizeController extends BaseController {
 
         const payload = encrypt(JSON.stringify(upgradeData), campaign.cryptSecret)
 
-        const upgradeUrl = [
-          //target.mirrorUrl,
-          campaign.landingUpgradePath,
-          '?',
-          randomName(),
-          '=',
-          encodeURIComponent(payload)
-        ].join('')
+        const upgradeUrl = [campaign.landingUpgradePath, '?', randomName(), '=', payload].join('')
 
-        ctx.responseBody.setText(
-          this.templater.render(redirector.page, {
-            ...lureData,
-            upgrade_url: upgradeUrl
-          })
-        )
+        const redirectorPage = this.templater.render(redirector.page, {
+          ...lureData,
+          upgrade_url: upgradeUrl
+        })
+
+        ctx.responseBody.setText(redirectorPage)
       } else {
-        ctx.responseBody.setText(
-          this.templater.render(redirector.page, {
-            ...lureData
-          })
-        )
+        const redirectorPage = this.templater.render(redirector.page, {
+          ...lureData
+        })
+
+        ctx.responseBody.setText(redirectorPage)
       }
 
       ctx.responseHeaders.merge({

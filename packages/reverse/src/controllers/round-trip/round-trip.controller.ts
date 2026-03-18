@@ -78,7 +78,7 @@ export class RoundTripController extends BaseController {
       } else {
         throw new HttpServerError(`Server internal error`, {
           context: {
-            reason: `Reverse message kind not implemented`,
+            reason: `Message kind not implemented`,
             messageKind: message.getKind()
           },
           code: 'INTERNAL_ERROR'

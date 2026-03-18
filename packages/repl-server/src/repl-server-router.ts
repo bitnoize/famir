@@ -45,7 +45,7 @@ export class ReplServerRouter {
 
     this.apiCalls.set(name, apiCall)
 
-    this.logger.info(`ReplServerRouter add apiCall: ${name}`)
+    this.logger.debug(`ReplServerRouter add apiCall: ${name}`)
   }
 
   getApiCalls(): Readonly<ReplServerApiCalls> {
@@ -70,7 +70,7 @@ export class ReplServerRouter {
 
       this.assets.set(name, data)
 
-      this.logger.info(`ReplServerRouter add asset: ${name}`)
+      this.logger.debug(`ReplServerRouter add asset: ${name}`)
     }
   }
 

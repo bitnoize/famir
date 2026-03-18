@@ -45,7 +45,7 @@ export class HttpServerRouter {
 
     this.middlewares.set(name, middleware)
 
-    this.logger.info(`HttpServerRouter add middleware: ${name}`)
+    this.logger.debug(`HttpServerRouter add middleware: ${name}`)
   }
 
   getMiddlewares(): Readonly<HttpServerMiddlewares> {
@@ -70,7 +70,7 @@ export class HttpServerRouter {
 
       this.assets.set(name, data)
 
-      this.logger.info(`HttpServerRouter add asset: ${name}`)
+      this.logger.debug(`HttpServerRouter add asset: ${name}`)
     }
   }
 
