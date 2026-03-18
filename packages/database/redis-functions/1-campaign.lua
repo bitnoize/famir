@@ -29,7 +29,6 @@ local function create_campaign(keys, args)
     session_count = 0,
     message_count = 0,
     created_at = tonumber(args[10]),
-    updated_at = tonumber(args[10]),
   }
 
   for field, value in pairs(model) do
@@ -100,11 +99,10 @@ local function read_campaign(keys, args)
     'mirror_domain',
     'session_count',
     'message_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   )
 
-  if #values ~= 6 then
+  if #values ~= 5 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -115,7 +113,6 @@ local function read_campaign(keys, args)
     session_count = tonumber(values[3]),
     message_count = tonumber(values[4]),
     created_at = tonumber(values[5]),
-    updated_at = tonumber(values[6]),
   }
 
   for field, value in pairs(model) do
@@ -167,11 +164,10 @@ local function read_full_campaign(keys, args)
     'message_expire',
     'session_count',
     'message_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   )
 
-  if #values ~= 13 then
+  if #values ~= 12 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -193,7 +189,6 @@ local function read_full_campaign(keys, args)
     session_count = tonumber(values[10]),
     message_count = tonumber(values[11]),
     created_at = tonumber(values[12]),
-    updated_at = tonumber(values[13]),
   }
 
   for field, value in pairs(model) do
@@ -338,7 +333,7 @@ redis.register_function({
   Update campaign
 --]]
 local function update_campaign(keys, args)
-  if #keys ~= 2 or #args < 2 then
+  if #keys ~= 2 or #args < 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -355,7 +350,6 @@ local function update_campaign(keys, args)
 
   local stash = {
     lock_secret = table.remove(args),
-    updated_at = tonumber(table.remove(args)),
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -404,8 +398,6 @@ local function update_campaign(keys, args)
   if next(model) == nil then
     return redis.status_reply('OK Nothing to update')
   end
-
-  model.updated_at = stash.updated_at
 
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')

@@ -8,6 +8,8 @@ export interface ReplServer {
 export type ReplServerApiCall = (data: unknown) => Promise<unknown>
 export type ReplServerApiCalls = [string, ReplServerApiCall][]
 
+export type ReplServerAssets = [string, string][]
+
 export interface CliReplServerConfig {
   REPL_SERVER_PROMPT: string
   REPL_SERVER_USE_COLORS: boolean

@@ -1,11 +1,5 @@
 import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
-import {
-  LOGGER_LOG_LEVELS,
-  LoggerLogLevel,
-  PINO_LOGGER_TRANSPORT_TARGETS,
-  PinoLoggerTransportOptions,
-  PinoLoggerTransportTarget
-} from './logger.js'
+import { LOGGER_LOG_LEVELS, LoggerLogLevel, PinoLoggerTransportOptions } from './logger.js'
 
 const pinoLoggerTransportOptionsSchema: JSONSchemaType<PinoLoggerTransportOptions> = {
   type: 'object',
@@ -33,10 +27,9 @@ export const configLoggerLogLevelSchema: JSONSchemaType<LoggerLogLevel> = {
   default: LOGGER_LOG_LEVELS[1]
 } as const
 
-export const configPinoLoggerTransportTargetSchema: JSONSchemaType<PinoLoggerTransportTarget> = {
+export const configPinoLoggerTransportTargetSchema: JSONSchemaType<string> = {
   type: 'string',
-  enum: PINO_LOGGER_TRANSPORT_TARGETS,
-  default: PINO_LOGGER_TRANSPORT_TARGETS[0]
+  default: 'pino-pretty'
 } as const
 
 export const configPinoLoggerTransportOptionsSchema: JSONSchemaType<string> = {

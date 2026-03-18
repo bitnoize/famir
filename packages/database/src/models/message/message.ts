@@ -26,8 +26,7 @@ export class MessageModel {
     readonly method: string,
     readonly url: string,
     readonly status: number,
-    readonly score: number,
-    readonly ip: string,
+    readonly processor: string,
     readonly startTime: number,
     readonly finishTime: number,
     readonly createdAt: Date
@@ -56,8 +55,7 @@ export class FullMessageModel extends MessageModel {
     readonly connection: MessageConnection,
     readonly payload: MessagePayload,
     readonly errors: MessageError[],
-    score: number,
-    ip: string,
+    processor: string,
     startTime: number,
     finishTime: number,
     createdAt: Date
@@ -72,8 +70,7 @@ export class FullMessageModel extends MessageModel {
       method,
       url,
       status,
-      score,
-      ip,
+      processor,
       startTime,
       finishTime,
       createdAt

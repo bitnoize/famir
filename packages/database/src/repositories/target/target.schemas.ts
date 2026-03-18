@@ -18,8 +18,7 @@ const rawTargetSchema: JSONSchemaType<RawTarget> = {
     'labels',
     'is_enabled',
     'message_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   ],
   properties: {
     campaign_id: {
@@ -69,9 +68,6 @@ const rawTargetSchema: JSONSchemaType<RawTarget> = {
     },
     created_at: {
       type: 'integer'
-    },
-    updated_at: {
-      type: 'integer'
     }
   },
   additionalProperties: false
@@ -104,8 +100,7 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     'sitemap_xml',
     'is_enabled',
     'message_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   ],
   properties: {
     campaign_id: {
@@ -184,9 +179,6 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
       type: 'integer'
     },
     created_at: {
-      type: 'integer'
-    },
-    updated_at: {
       type: 'integer'
     }
   },

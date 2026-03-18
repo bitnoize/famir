@@ -465,7 +465,7 @@ export class AuthorizeController extends BaseController {
       ctx.responseHeaders.merge({
         'Content-Type': 'text/html',
         'Content-Length': ctx.responseBody.length.toString(),
-        'Last-Modified': redirector.updatedAt.toUTCString(),
+        'Last-Modified': redirector.createdAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 

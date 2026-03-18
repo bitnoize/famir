@@ -42,9 +42,7 @@ export class ExecutorRouter {
   }
 
   addProcessor(queueName: string, jobName: string, processor: ExecutorProcessor) {
-    if (this.isActive) {
-      throw new Error(`Router suddenly active`)
-    }
+    this.sureNotActive('addProcessor')
 
     if (!this.queues[queueName]) {
       throw new Error(`Queue not exists: ${queueName}`)
@@ -60,11 +58,7 @@ export class ExecutorRouter {
   }
 
   getProcessor(queueName: string, jobName: string): ExecutorProcessor {
-    if (!this.isActive) {
-      throw new ExecutorError(`Router suddenly not active`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
+    this.sureIsActive('getProcessor')
 
     if (!this.queues[queueName]) {
       throw new ExecutorError(`Queue not exists`, {
@@ -84,9 +78,7 @@ export class ExecutorRouter {
   }
 
   addAssets(entries: [string, string][]) {
-    if (this.isActive) {
-      throw new Error(`Router suddenly active`)
-    }
+    this.sureNotActive('addAssets')
 
     for (const [name, data] of entries) {
       if (this.assets.has(name)) {
@@ -100,12 +92,22 @@ export class ExecutorRouter {
   }
 
   getAsset(name: string): string | undefined {
+    this.sureIsActive('getAsset')
+
+    return this.assets.get(name)
+  }
+
+  protected sureNotActive(name: string) {
+    if (this.isActive) {
+      throw new Error(`Router is active on ${name}`)
+    }
+  }
+
+  protected sureIsActive(name: string) {
     if (!this.isActive) {
-      throw new ExecutorError(`Router suddenly not active`, {
+      throw new ExecutorError(`Router not active on ${name}`, {
         code: 'INTERNAL_ERROR'
       })
     }
-
-    return this.assets.get(name)
   }
 }

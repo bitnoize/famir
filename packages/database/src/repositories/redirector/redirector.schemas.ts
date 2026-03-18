@@ -3,7 +3,7 @@ import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 
 const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
   type: 'object',
-  required: ['campaign_id', 'redirector_id', 'lure_count', 'created_at', 'updated_at'],
+  required: ['campaign_id', 'redirector_id', 'lure_count', 'created_at'],
   properties: {
     campaign_id: {
       type: 'string'
@@ -16,9 +16,6 @@ const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
     },
     created_at: {
       type: 'integer'
-    },
-    updated_at: {
-      type: 'integer'
     }
   },
   additionalProperties: false
@@ -26,7 +23,7 @@ const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
 
 const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
   type: 'object',
-  required: ['campaign_id', 'redirector_id', 'page', 'lure_count', 'created_at', 'updated_at'],
+  required: ['campaign_id', 'redirector_id', 'page', 'lure_count', 'created_at'],
   properties: {
     campaign_id: {
       type: 'string'
@@ -41,9 +38,6 @@ const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
       type: 'integer'
     },
     created_at: {
-      type: 'integer'
-    },
-    updated_at: {
       type: 'integer'
     }
   },

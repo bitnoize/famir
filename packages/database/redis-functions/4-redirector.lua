@@ -46,7 +46,6 @@ local function create_redirector(keys, args)
     page = args[3],
     lure_count = 0,
     created_at = tonumber(args[4]),
-    updated_at = tonumber(args[4]),
   }
 
   for field, value in pairs(model) do
@@ -110,11 +109,10 @@ local function read_redirector(keys, args)
     'campaign_id',
     'redirector_id',
     'lure_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   )
 
-  if #values ~= 5 then
+  if #values ~= 4 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -123,7 +121,6 @@ local function read_redirector(keys, args)
     redirector_id = values[2],
     lure_count = tonumber(values[3]),
     created_at = tonumber(values[4]),
-    updated_at = tonumber(values[5]),
   }
 
   for field, value in pairs(model) do
@@ -168,11 +165,10 @@ local function read_full_redirector(keys, args)
     'redirector_id',
     'page',
     'lure_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   )
 
-  if #values ~= 6 then
+  if #values ~= 5 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -182,7 +178,6 @@ local function read_full_redirector(keys, args)
     page = values[3],
     lure_count = tonumber(values[4]),
     created_at = tonumber(values[5]),
-    updated_at = tonumber(values[6]),
   }
 
   for field, value in pairs(model) do
@@ -230,7 +225,7 @@ redis.register_function({
   Update redirector
 --]]
 local function update_redirector(keys, args)
-  if #keys ~= 3 or #args < 2 then
+  if #keys ~= 3 or #args < 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -252,7 +247,6 @@ local function update_redirector(keys, args)
 
   local stash = {
     lock_secret = table.remove(args),
-    updated_at = tonumber(table.remove(args)),
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -295,8 +289,6 @@ local function update_redirector(keys, args)
   if next(model) == nil then
     return redis.status_reply('OK Nothing to update')
   end
-
-  model.updated_at = stash.updated_at
 
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')

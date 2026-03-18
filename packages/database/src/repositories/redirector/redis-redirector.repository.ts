@@ -197,8 +197,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       rawModel.campaign_id,
       rawModel.redirector_id,
       rawModel.lure_count,
-      new Date(rawModel.created_at),
-      new Date(rawModel.updated_at)
+      new Date(rawModel.created_at)
     )
   }
 
@@ -214,8 +213,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       rawModel.redirector_id,
       rawModel.page,
       rawModel.lure_count,
-      new Date(rawModel.created_at),
-      new Date(rawModel.updated_at)
+      new Date(rawModel.created_at)
     )
   }
 

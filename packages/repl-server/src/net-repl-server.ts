@@ -139,44 +139,22 @@ export class NetReplServer implements ReplServer {
   }
 
   protected defineContext(context: object) {
-    const apiCalls: Record<string, unknown> = {}
-
-    this.router.getApiCalls().forEach(([name, apiCall]) => {
-      apiCalls[name] = async (data: unknown): Promise<unknown> => {
-        try {
-          return await apiCall(data)
-        } catch (error) {
-          if (error instanceof ReplServerError) {
-            error.context['apiCall'] = name
-            error.context['data'] = data
-
-            throw error
-          } else {
-            throw new ReplServerError(`Server internal error`, {
-              cause: error,
-              context: {
-                apiCall: name,
-                data
-              },
-              code: 'INTERNAL_ERROR'
-            })
-          }
-        }
-      }
+    Object.defineProperty(context, 'famir', {
+      value: this.buildApiCalls()
     })
 
-    apiCalls['getAsset'] = (name: string): string | undefined => {
-      return this.router.getAsset(name)
-    }
+    Object.defineProperty(context, 'phish', {
+      value: this.buildAssets()
+    })
 
-    apiCalls['listAssets'] = (): string[] => {
-      return this.router.listAssets()
-    }
+    Object.defineProperty(context, 'campaignId', {
+      writable: true,
+      value: null
+    })
 
-    Object.defineProperty(context, 'famir', {
-      configurable: false,
-      enumerable: true,
-      value: apiCalls
+    Object.defineProperty(context, 'lockSecret', {
+      writable: true,
+      value: null
     })
   }
 
@@ -252,6 +230,59 @@ export class NetReplServer implements ReplServer {
 
       this.clients.clear()
     })
+  }
+
+  private buildApiCalls(): Record<string, unknown> {
+    const apiCalls: Record<string, unknown> = {}
+
+    this.router.getApiCalls().forEach(([name, apiCall]) => {
+      apiCalls[name] = async (data: unknown): Promise<unknown> => {
+        try {
+          return await apiCall(data)
+        } catch (error) {
+          if (error instanceof ReplServerError) {
+            error.context['apiCall'] = name
+            error.context['data'] = data
+
+            throw error
+          } else {
+            throw new ReplServerError(`Server internal error`, {
+              cause: error,
+              context: {
+                apiCall: name,
+                data
+              },
+              code: 'INTERNAL_ERROR'
+            })
+          }
+        }
+      }
+    })
+
+    return apiCalls
+  }
+
+  private buildAssets(): Record<string, unknown> {
+    const assets: Record<string, unknown> = {}
+
+    const excludeNames = ['banner-greet.txt', 'banner-leave.txt']
+
+    this.router
+      .getAssets()
+      .filter(([name]) => !excludeNames.some((excludeName) => name === excludeName))
+      .forEach(([name, asset]) => {
+        if (name.match(/\.json$/)) {
+          try {
+            assets[name] = JSON.parse(asset)
+          } catch {
+            assets[name] = null
+          }
+        } else {
+          assets[name] = asset
+        }
+      })
+
+    return assets
   }
 
   private buildOptions(config: NetReplServerConfig): NetReplServerOptions {

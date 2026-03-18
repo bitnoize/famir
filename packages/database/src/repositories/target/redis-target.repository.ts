@@ -381,8 +381,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       rawModel.labels,
       !!rawModel.is_enabled,
       rawModel.message_count,
-      new Date(rawModel.created_at),
-      new Date(rawModel.updated_at)
+      new Date(rawModel.created_at)
     )
   }
 
@@ -418,8 +417,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       rawModel.sitemap_xml,
       !!rawModel.is_enabled,
       rawModel.message_count,
-      new Date(rawModel.created_at),
-      new Date(rawModel.updated_at)
+      new Date(rawModel.created_at)
     )
   }
 

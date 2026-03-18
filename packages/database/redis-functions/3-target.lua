@@ -71,7 +71,6 @@ local function create_target(keys, args)
     is_enabled = 0,
     message_count = 0,
     created_at = tonumber(args[21]),
-    updated_at = tonumber(args[21]),
   }
 
   for field, value in pairs(model) do
@@ -189,11 +188,10 @@ local function read_target(keys, args)
     'mirror_port',
     'is_enabled',
     'message_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   )
 
-  if #values ~= 14 then
+  if #values ~= 13 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -213,7 +211,6 @@ local function read_target(keys, args)
     is_enabled = tonumber(values[11]),
     message_count = tonumber(values[12]),
     created_at = tonumber(values[13]),
-    updated_at = tonumber(values[14]),
   }
 
   for field, value in pairs(model) do
@@ -277,11 +274,10 @@ local function read_full_target(keys, args)
     'sitemap_xml',
     'is_enabled',
     'message_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   )
 
-  if #values ~= 24 then
+  if #values ~= 23 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -311,7 +307,6 @@ local function read_full_target(keys, args)
     is_enabled = tonumber(values[21]),
     message_count = tonumber(values[22]),
     created_at = tonumber(values[23]),
-    updated_at = tonumber(values[24]),
   }
 
   for field, value in pairs(model) do
@@ -396,7 +391,7 @@ redis.register_function({
   Update target
 --]]
 local function update_target(keys, args)
-  if #keys ~= 3 or #args < 2 then
+  if #keys ~= 3 or #args < 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -418,7 +413,6 @@ local function update_target(keys, args)
 
   local stash = {
     lock_secret = table.remove(args),
-    updated_at = tonumber(table.remove(args)),
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -480,8 +474,6 @@ local function update_target(keys, args)
     return redis.status_reply('OK Nothing to update')
   end
 
-  model.updated_at = stash.updated_at
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
@@ -510,7 +502,7 @@ redis.register_function({
   Enable target
 --]]
 local function enable_target(keys, args)
-  if #keys ~= 3 or #args ~= 2 then
+  if #keys ~= 3 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -531,8 +523,7 @@ local function enable_target(keys, args)
   end
 
   local stash = {
-    updated_at = tonumber(args[1]),
-    lock_secret = args[2],
+    lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
@@ -557,7 +548,7 @@ local function enable_target(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', target_key, 'is_enabled', 1, 'updated_at', stash.updated_at)
+  redis.call('HSET', target_key, 'is_enabled', 1)
 
   return redis.status_reply('OK Target enabled')
 end
@@ -572,7 +563,7 @@ redis.register_function({
   Disable target
 --]]
 local function disable_target(keys, args)
-  if #keys ~= 3 or #args ~= 2 then
+  if #keys ~= 3 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -593,8 +584,7 @@ local function disable_target(keys, args)
   end
 
   local stash = {
-    updated_at = tonumber(args[1]),
-    lock_secret = args[2],
+    lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
@@ -619,7 +609,7 @@ local function disable_target(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', target_key, 'is_enabled', 0, 'updated_at', stash.updated_at)
+  redis.call('HSET', target_key, 'is_enabled', 0)
 
   return redis.status_reply('OK Target diabled')
 end
@@ -634,7 +624,7 @@ redis.register_function({
   Append target label
 --]]
 local function append_target_label(keys, args)
-  if #keys ~= 4 or #args ~= 3 then
+  if #keys ~= 4 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -657,8 +647,7 @@ local function append_target_label(keys, args)
 
   local stash = {
     label = args[1],
-    updated_at = tonumber(args[2]),
-    lock_secret = args[3],
+    lock_secret = args[2],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -684,8 +673,6 @@ local function append_target_label(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', target_key, 'updated_at', stash.updated_at)
-
   redis.call('SADD', target_labels_key, stash.label)
 
   return redis.status_reply('OK Target label appended')
@@ -701,7 +688,7 @@ redis.register_function({
   Remove target label
 --]]
 local function remove_target_label(keys, args)
-  if #keys ~= 4 or #args ~= 3 then
+  if #keys ~= 4 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -724,8 +711,7 @@ local function remove_target_label(keys, args)
 
   local stash = {
     label = args[1],
-    updated_at = tonumber(args[2]),
-    lock_secret = args[3],
+    lock_secret = args[2],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -750,8 +736,6 @@ local function remove_target_label(keys, args)
   end
 
   -- Point of no return
-
-  redis.call('HSET', target_key, 'updated_at', stash.updated_at)
 
   redis.call('SREM', target_labels_key, stash.label)
 

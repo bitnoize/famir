@@ -9,8 +9,7 @@ export class CampaignModel {
     readonly isLocked: boolean,
     readonly sessionCount: number,
     readonly messageCount: number,
-    readonly createdAt: Date,
-    readonly updatedAt: Date
+    readonly createdAt: Date
   ) {}
 }
 
@@ -32,9 +31,8 @@ export class FullCampaignModel extends CampaignModel {
     readonly lureCount: number,
     sessionCount: number,
     messageCount: number,
-    createdAt: Date,
-    updatedAt: Date
+    createdAt: Date
   ) {
-    super(campaignId, mirrorDomain, isLocked, sessionCount, messageCount, createdAt, updatedAt)
+    super(campaignId, mirrorDomain, isLocked, sessionCount, messageCount, createdAt)
   }
 }

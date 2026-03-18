@@ -54,7 +54,6 @@ local function create_lure(keys, args)
     is_enabled = 0,
     session_count = 0,
     created_at = tonumber(args[5]),
-    updated_at = tonumber(args[5]),
   }
 
   for field, value in pairs(model) do
@@ -128,11 +127,10 @@ local function read_lure(keys, args)
     'redirector_id',
     'is_enabled',
     'session_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   )
 
-  if #values ~= 8 then
+  if #values ~= 7 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -144,7 +142,6 @@ local function read_lure(keys, args)
     is_enabled = tonumber(values[5]),
     session_count = tonumber(values[6]),
     created_at = tonumber(values[7]),
-    updated_at = tonumber(values[8]),
   }
 
   for field, value in pairs(model) do
@@ -233,7 +230,7 @@ redis.register_function({
   Enable lure
 --]]
 local function enable_lure(keys, args)
-  if #keys ~= 3 or #args ~= 2 then
+  if #keys ~= 3 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -254,8 +251,7 @@ local function enable_lure(keys, args)
   end
 
   local stash = {
-    updated_at = tonumber(args[1]),
-    lock_secret = args[2],
+    lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
@@ -280,7 +276,7 @@ local function enable_lure(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', lure_key, 'is_enabled', 1, 'updated_at', stash.updated_at)
+  redis.call('HSET', lure_key, 'is_enabled', 1)
 
   return redis.status_reply('OK Lure enabled')
 end
@@ -295,7 +291,7 @@ redis.register_function({
   Disable lure
 --]]
 local function disable_lure(keys, args)
-  if #keys ~= 3 or #args ~= 2 then
+  if #keys ~= 3 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -316,8 +312,7 @@ local function disable_lure(keys, args)
   end
 
   local stash = {
-    updated_at = tonumber(args[1]),
-    lock_secret = args[2],
+    lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
@@ -342,7 +337,7 @@ local function disable_lure(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', lure_key, 'is_enabled', 0, 'updated_at', stash.updated_at)
+  redis.call('HSET', lure_key, 'is_enabled', 0)
 
   return redis.status_reply('OK Lure disabled')
 end

@@ -26,7 +26,6 @@ export interface RawTarget {
   is_enabled: number
   message_count: number
   created_at: number
-  updated_at: number
 }
 
 export interface RawFullTarget extends RawTarget {
@@ -228,7 +227,6 @@ export const targetFunctions = {
           parser.push(sitemapXml)
         }
 
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 
@@ -249,7 +247,6 @@ export const targetFunctions = {
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
 
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 
@@ -270,7 +267,6 @@ export const targetFunctions = {
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
 
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 
@@ -294,7 +290,6 @@ export const targetFunctions = {
         parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
 
         parser.push(label.toLowerCase())
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 
@@ -318,7 +313,6 @@ export const targetFunctions = {
         parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
 
         parser.push(label.toLowerCase())
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 

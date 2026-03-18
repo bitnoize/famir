@@ -3,15 +3,7 @@ import { RawProxy } from './proxy.functions.js'
 
 const rawProxySchema: JSONSchemaType<RawProxy> = {
   type: 'object',
-  required: [
-    'campaign_id',
-    'proxy_id',
-    'url',
-    'is_enabled',
-    'message_count',
-    'created_at',
-    'updated_at'
-  ],
+  required: ['campaign_id', 'proxy_id', 'url', 'is_enabled', 'message_count', 'created_at'],
   properties: {
     campaign_id: {
       type: 'string'
@@ -29,9 +21,6 @@ const rawProxySchema: JSONSchemaType<RawProxy> = {
       type: 'integer'
     },
     created_at: {
-      type: 'integer'
-    },
-    updated_at: {
       type: 'integer'
     }
   },

@@ -20,8 +20,7 @@ const rawMessageSchema: JSONSchemaType<RawMessage> = {
     'method',
     'url',
     'status',
-    'score',
-    'ip',
+    'processor',
     'start_time',
     'finish_time',
     'created_at'
@@ -54,10 +53,7 @@ const rawMessageSchema: JSONSchemaType<RawMessage> = {
     status: {
       type: 'integer'
     },
-    score: {
-      type: 'integer'
-    },
-    ip: {
+    processor: {
       type: 'string'
     },
     start_time: {
@@ -92,8 +88,7 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     'connection',
     'payload',
     'errors',
-    'score',
-    'ip',
+    'processor',
     'start_time',
     'finish_time',
     'created_at'
@@ -147,10 +142,7 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     errors: {
       type: 'string'
     },
-    score: {
-      type: 'integer'
-    },
-    ip: {
+    processor: {
       type: 'string'
     },
     start_time: {

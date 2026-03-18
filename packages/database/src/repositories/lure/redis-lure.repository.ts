@@ -187,8 +187,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       rawModel.redirector_id,
       !!rawModel.is_enabled,
       rawModel.session_count,
-      new Date(rawModel.created_at),
-      new Date(rawModel.updated_at)
+      new Date(rawModel.created_at)
     )
   }
 

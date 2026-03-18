@@ -9,8 +9,7 @@ const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
     'is_locked',
     'session_count',
     'message_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   ],
   properties: {
     campaign_id: {
@@ -29,9 +28,6 @@ const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
       type: 'integer'
     },
     created_at: {
-      type: 'integer'
-    },
-    updated_at: {
       type: 'integer'
     }
   },
@@ -57,8 +53,7 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'lure_count',
     'session_count',
     'message_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   ],
   properties: {
     campaign_id: {
@@ -110,9 +105,6 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
       type: 'integer'
     },
     created_at: {
-      type: 'integer'
-    },
-    updated_at: {
       type: 'integer'
     }
   },

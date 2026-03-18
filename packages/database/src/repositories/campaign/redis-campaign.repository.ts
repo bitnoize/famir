@@ -226,8 +226,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       !!rawModel.is_locked,
       rawModel.session_count,
       rawModel.message_count,
-      new Date(rawModel.created_at),
-      new Date(rawModel.updated_at)
+      new Date(rawModel.created_at)
     )
   }
 
@@ -255,8 +254,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       rawModel.lure_count,
       rawModel.session_count,
       rawModel.message_count,
-      new Date(rawModel.created_at),
-      new Date(rawModel.updated_at)
+      new Date(rawModel.created_at)
     )
   }
 

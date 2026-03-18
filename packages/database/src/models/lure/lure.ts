@@ -14,8 +14,7 @@ export class LureModel {
     readonly redirectorId: string,
     readonly isEnabled: boolean,
     readonly sessionCount: number,
-    readonly createdAt: Date,
-    readonly updatedAt: Date
+    readonly createdAt: Date
   ) {}
 }
 

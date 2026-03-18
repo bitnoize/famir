@@ -1,7 +1,7 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { ReplServerError } from './repl-server.error.js'
-import { ReplServerApiCall, ReplServerApiCalls } from './repl-server.js'
+import { ReplServerApiCall, ReplServerApiCalls, ReplServerAssets } from './repl-server.js'
 
 export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
 
@@ -35,9 +35,7 @@ export class ReplServerRouter {
   }
 
   addApiCall(name: string, apiCall: ReplServerApiCall) {
-    if (this.isActive) {
-      throw new Error(`Router suddenly active`)
-    }
+    this.sureNotActive('addApiCall')
 
     if (this.apiCalls.has(name)) {
       throw new Error(`ApiCall already exists: ${name}`)
@@ -49,19 +47,13 @@ export class ReplServerRouter {
   }
 
   getApiCalls(): Readonly<ReplServerApiCalls> {
-    if (!this.isActive) {
-      throw new ReplServerError(`Router suddenly not active`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
+    this.sureIsActive('getApiCalls')
 
     return Array.from(this.apiCalls.entries())
   }
 
   addAssets(entries: [string, string][]) {
-    if (this.isActive) {
-      throw new Error(`Router suddenly active`)
-    }
+    this.sureNotActive('addAssets')
 
     for (const [name, data] of entries) {
       if (this.assets.has(name)) {
@@ -75,22 +67,28 @@ export class ReplServerRouter {
   }
 
   getAsset(name: string): string | undefined {
-    if (!this.isActive) {
-      throw new ReplServerError(`Router suddenly not active`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
+    this.sureIsActive('getAsset')
 
     return this.assets.get(name)
   }
 
-  listAssets(): string[] {
+  getAssets(): Readonly<ReplServerAssets> {
+    this.sureIsActive('getAssets')
+
+    return Array.from(this.assets.entries())
+  }
+
+  protected sureNotActive(name: string) {
+    if (this.isActive) {
+      throw new Error(`Router is active on ${name}`)
+    }
+  }
+
+  protected sureIsActive(name: string) {
     if (!this.isActive) {
-      throw new ReplServerError(`Router suddenly not active`, {
+      throw new ReplServerError(`Router not active on ${name}`, {
         code: 'INTERNAL_ERROR'
       })
     }
-
-    return Array.from(this.assets.keys())
   }
 }

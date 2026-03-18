@@ -99,6 +99,28 @@ export class CliReplServer implements ReplServer {
   }
 
   protected defineContext(context: object) {
+    Object.defineProperty(context, 'famir', {
+      value: this.buildApiCalls()
+    })
+
+    Object.defineProperty(context, 'phish', {
+      value: this.buildAssets()
+    })
+
+    Object.defineProperty(context, 'campaignId', {
+      writable: true,
+      value: null
+    })
+
+    Object.defineProperty(context, 'lockSecret', {
+      writable: true,
+      value: null
+    })
+  }
+
+  //protected defineCommands(replServer: repl.REPLServer) {}
+
+  private buildApiCalls(): Record<string, unknown> {
     const apiCalls: Record<string, unknown> = {}
 
     this.router.getApiCalls().forEach(([name, apiCall]) => {
@@ -125,22 +147,31 @@ export class CliReplServer implements ReplServer {
       }
     })
 
-    apiCalls['getAsset'] = (name: string): string | undefined => {
-      return this.router.getAsset(name)
-    }
-
-    apiCalls['listAssets'] = (): string[] => {
-      return this.router.listAssets()
-    }
-
-    Object.defineProperty(context, 'famir', {
-      configurable: false,
-      enumerable: true,
-      value: apiCalls
-    })
+    return apiCalls
   }
 
-  //protected defineCommands(replServer: repl.REPLServer) {}
+  private buildAssets(): Record<string, unknown> {
+    const assets: Record<string, unknown> = {}
+
+    const excludeNames = ['banner-greet.txt', 'banner-leave.txt']
+
+    this.router
+      .getAssets()
+      .filter(([name]) => !excludeNames.some((excludeName) => name === excludeName))
+      .forEach(([name, asset]) => {
+        if (name.match(/\.json$/)) {
+          try {
+            assets[name] = JSON.parse(asset)
+          } catch {
+            assets[name] = null
+          }
+        } else {
+          assets[name] = asset
+        }
+      })
+
+    return assets
+  }
 
   private buildOptions(config: CliReplServerConfig): CliReplServerOptions {
     return {

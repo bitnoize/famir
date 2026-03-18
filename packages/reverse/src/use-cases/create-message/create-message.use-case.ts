@@ -42,13 +42,12 @@ export class CreateMessageUseCase {
         data.connection,
         data.payload,
         data.errors,
-        data.score,
-        data.ip,
+        data.processor,
         data.startTime,
         data.finishTime
       )
 
-      await this.analyzeQueue.addJob(data.analyze, {
+      await this.analyzeQueue.addJob(data.processor, {
         campaignId: data.campaignId,
         messageId: data.messageId
       })

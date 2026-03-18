@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-server",
   "type": "module",
-  "version": "0.3.3",
+  "version": "0.0.1",
   "description": "Http server module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

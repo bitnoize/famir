@@ -25,9 +25,7 @@ export interface CreateMessageData {
   connection: MessageConnection
   payload: MessagePayload
   errors: MessageError[]
-  score: number
-  analyze: string
-  ip: string
+  processor: string
   startTime: number
   finishTime: number
 }

@@ -1,7 +1,7 @@
 {
   "name": "@famir/executor",
   "type": "module",
-  "version": "0.3.3",
+  "version": "0.0.1",
   "description": "Executor module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,6 +18,6 @@
     "@famir/validator": "*",
     "@famir/workflow": "*",
     "bullmq": "^5.71.0",
-    "ioredis": "^5.9.2"
+    "ioredis": "^5.9.3"
   }
 }

@@ -13,8 +13,7 @@ export class ProxyModel {
     readonly url: string,
     readonly isEnabled: boolean,
     readonly messageCount: number,
-    readonly createdAt: Date,
-    readonly updatedAt: Date
+    readonly createdAt: Date
   ) {}
 }
 

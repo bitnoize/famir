@@ -18,7 +18,7 @@ generate() {
 
   local parts_path=$(mktemp)
 
-  if [ -n "$(ls -A "$source_dir")" ]; then
+  if [ -n "$(ls "$source_dir")" ]; then
     for file_path in "$source_dir"/*; do
       local file_name="$(basename "$file_path")"
       local file_body="$(base64 "$file_path")"

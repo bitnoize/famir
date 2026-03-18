@@ -48,7 +48,7 @@ export class CompleteController extends BaseController {
       const session = this.getState(ctx, 'session')
       const message = this.getState(ctx, 'message')
 
-      if (message.analyze) {
+      if (message.processor) {
         message.payload['user-agent'] = ctx.userAgent
 
         message.payload['request-content-type'] = message.requestHeaders.getContentType()
@@ -74,9 +74,7 @@ export class CompleteController extends BaseController {
           connection: message.connection,
           payload: message.payload,
           errors: message.errors,
-          score: message.score,
-          analyze: message.analyze,
-          ip: ctx.ip,
+          processor: message.processor,
           startTime: ctx.startTime,
           finishTime: ctx.finishTime
         })

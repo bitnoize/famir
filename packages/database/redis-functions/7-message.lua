@@ -4,7 +4,7 @@
   Create message
 --]]
 local function create_message(keys, args)
-  if #keys ~= 5 or #args ~= 21 then
+  if #keys ~= 5 or #args ~= 20 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -65,11 +65,10 @@ local function create_message(keys, args)
     connection = args[14],
     payload = args[15],
     errors = args[16],
-    score = tonumber(args[17]),
-    ip = args[18],
-    start_time = tonumber(args[19]),
-    finish_time = tonumber(args[20]),
-    created_at = tonumber(args[21]),
+    processor = args[17],
+    start_time = tonumber(args[18]),
+    finish_time = tonumber(args[19]),
+    created_at = tonumber(args[20]),
   }
 
   for field, value in pairs(model) do
@@ -148,14 +147,13 @@ local function read_message(keys, args)
     'method',
     'url',
     'status',
-    'score',
-    'ip',
+    'processor',
     'start_time',
     'finish_time',
     'created_at'
   )
 
-  if #values ~= 14 then
+  if #values ~= 13 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -169,11 +167,10 @@ local function read_message(keys, args)
     method = values[7],
     url = values[8],
     status = tonumber(values[9]),
-    score = tonumber(values[10]),
-    ip = values[11],
-    start_time = tonumber(values[12]),
-    finish_time = tonumber(values[13]),
-    created_at = tonumber(values[14]),
+    processor = values[10],
+    start_time = tonumber(values[11]),
+    finish_time = tonumber(values[12]),
+    created_at = tonumber(values[13]),
   }
 
   for field, value in pairs(model) do
@@ -230,14 +227,13 @@ local function read_full_message(keys, args)
     'connection',
     'payload',
     'errors',
-    'score',
-    'ip',
+    'processor',
     'start_time',
     'finish_time',
     'created_at'
   )
 
-  if #values ~= 21 then
+  if #values ~= 20 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -258,11 +254,10 @@ local function read_full_message(keys, args)
     connection = values[14],
     payload = values[15],
     errors = values[16],
-    score = tonumber(values[17]),
-    ip = values[18],
-    start_time = tonumber(values[19]),
-    finish_time = tonumber(values[20]),
-    created_at = tonumber(values[21]),
+    processor = values[17],
+    start_time = tonumber(values[18]),
+    finish_time = tonumber(values[19]),
+    created_at = tonumber(values[20]),
   }
 
   for field, value in pairs(model) do

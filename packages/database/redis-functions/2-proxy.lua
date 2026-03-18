@@ -48,7 +48,6 @@ local function create_proxy(keys, args)
     is_enabled = 0,
     message_count = 0,
     created_at = args[4],
-    updated_at = args[4],
   }
 
   for field, value in pairs(model) do
@@ -120,11 +119,10 @@ local function read_proxy(keys, args)
     'url',
     'is_enabled',
     'message_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   )
 
-  if #values ~= 7 then
+  if #values ~= 6 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -135,7 +133,6 @@ local function read_proxy(keys, args)
     is_enabled = tonumber(values[4]),
     message_count = tonumber(values[5]),
     created_at = tonumber(values[6]),
-    updated_at = tonumber(values[7]),
   }
 
   for field, value in pairs(model) do
@@ -183,7 +180,7 @@ redis.register_function({
   Enable proxy
 --]]
 local function enable_proxy(keys, args)
-  if #keys ~= 4 or #args ~= 2 then
+  if #keys ~= 4 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -205,8 +202,7 @@ local function enable_proxy(keys, args)
   end
 
   local stash = {
-    updated_at = tonumber(args[1]),
-    lock_secret = args[2],
+    lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
@@ -235,7 +231,7 @@ local function enable_proxy(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', proxy_key, 'is_enabled', 1, 'updated_at', stash.updated_at)
+  redis.call('HSET', proxy_key, 'is_enabled', 1)
 
   redis.call('SADD', enabled_proxy_index_key, stash.proxy_id)
 
@@ -252,7 +248,7 @@ redis.register_function({
   Disable proxy
 --]]
 local function disable_proxy(keys, args)
-  if #keys ~= 4 or #args ~= 2 then
+  if #keys ~= 4 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -274,8 +270,7 @@ local function disable_proxy(keys, args)
   end
 
   local stash = {
-    updated_at = tonumber(args[1]),
-    lock_secret = args[2],
+    lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
@@ -304,7 +299,7 @@ local function disable_proxy(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', proxy_key, 'is_enabled', 0, 'updated_at', stash.updated_at)
+  redis.call('HSET', proxy_key, 'is_enabled', 0)
 
   redis.call('SREM', enabled_proxy_index_key, stash.proxy_id)
 

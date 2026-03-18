@@ -29,8 +29,7 @@ export interface MessageRepository {
     connection: MessageConnection,
     payload: MessagePayload,
     errors: MessageError[],
-    score: number,
-    ip: string,
+    processor: string,
     startTime: number,
     finishTime: number
   ): Promise<void>

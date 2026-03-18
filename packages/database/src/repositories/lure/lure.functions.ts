@@ -16,7 +16,6 @@ export interface RawLure {
   is_enabled: number
   session_count: number
   created_at: number
-  updated_at: number
 }
 
 export const lureFunctions = {
@@ -100,7 +99,6 @@ export const lureFunctions = {
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
 
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 
@@ -121,7 +119,6 @@ export const lureFunctions = {
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(lureKey(prefix, campaignId, lureId))
 
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 

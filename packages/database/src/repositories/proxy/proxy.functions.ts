@@ -15,7 +15,6 @@ export interface RawProxy {
   is_enabled: number
   message_count: number
   created_at: number
-  updated_at: number
 }
 
 export const proxyFunctions = {
@@ -84,7 +83,6 @@ export const proxyFunctions = {
         parser.pushKey(proxyKey(prefix, campaignId, proxyId))
         parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 
@@ -106,7 +104,6 @@ export const proxyFunctions = {
         parser.pushKey(proxyKey(prefix, campaignId, proxyId))
         parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 

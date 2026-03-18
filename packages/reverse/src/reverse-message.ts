@@ -78,9 +78,7 @@ export class ReverseMessage {
     this.errors.push([serializeError(error), ...path])
   }
 
-  score: number = 0
-
-  analyze: string | null = null
+  processor: string | null = null
 
   protected readonly contentTypes: HttpContentTypes = {
     text: [],

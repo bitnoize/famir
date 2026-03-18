@@ -10,8 +10,7 @@ const rawLureSchema: JSONSchemaType<RawLure> = {
     'redirector_id',
     'is_enabled',
     'session_count',
-    'created_at',
-    'updated_at'
+    'created_at'
   ],
   properties: {
     campaign_id: {
@@ -33,9 +32,6 @@ const rawLureSchema: JSONSchemaType<RawLure> = {
       type: 'integer'
     },
     created_at: {
-      type: 'integer'
-    },
-    updated_at: {
       type: 'integer'
     }
   },

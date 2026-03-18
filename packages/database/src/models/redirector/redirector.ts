@@ -7,8 +7,7 @@ export class RedirectorModel {
     readonly campaignId: string,
     readonly redirectorId: string,
     readonly lureCount: number,
-    readonly createdAt: Date,
-    readonly updatedAt: Date
+    readonly createdAt: Date
   ) {}
 }
 
@@ -18,9 +17,8 @@ export class FullRedirectorModel extends RedirectorModel {
     redirectorId: string,
     readonly page: string,
     lureCount: number,
-    createdAt: Date,
-    updatedAt: Date
+    createdAt: Date
   ) {
-    super(campaignId, redirectorId, lureCount, createdAt, updatedAt)
+    super(campaignId, redirectorId, lureCount, createdAt)
   }
 }

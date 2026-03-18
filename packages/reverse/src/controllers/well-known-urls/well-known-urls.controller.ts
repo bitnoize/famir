@@ -76,7 +76,7 @@ export class WellKnownUrlsController extends BaseController {
       ctx.responseHeaders.merge({
         'Content-Type': 'image/x-icon',
         'Content-Length': ctx.responseBody.length.toString(),
-        'Last-Modified': target.updatedAt.toUTCString(),
+        'Last-Modified': target.createdAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 
@@ -102,7 +102,7 @@ export class WellKnownUrlsController extends BaseController {
       ctx.responseHeaders.merge({
         'Content-Type': 'text/plain',
         'Content-Length': ctx.responseBody.length.toString(),
-        'Last-Modified': target.updatedAt.toUTCString(),
+        'Last-Modified': target.createdAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 
@@ -128,7 +128,7 @@ export class WellKnownUrlsController extends BaseController {
       ctx.responseHeaders.merge({
         'Content-Type': 'application/xml',
         'Content-Length': ctx.responseBody.length.toString(),
-        'Last-Modified': target.updatedAt.toUTCString(),
+        'Last-Modified': target.createdAt.toUTCString(),
         'Cache-Control': 'public, max-age=86400'
       })
 

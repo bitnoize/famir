@@ -164,8 +164,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       rawModel.url,
       !!rawModel.is_enabled,
       rawModel.message_count,
-      new Date(rawModel.created_at),
-      new Date(rawModel.updated_at)
+      new Date(rawModel.created_at)
     )
   }
 

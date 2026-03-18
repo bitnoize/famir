@@ -15,7 +15,11 @@ export class SaveMessageUseCase {
   constructor(protected readonly storage: Storage) {}
 
   async execute(message: FullMessageModel): Promise<void> {
-    const basePath = `analyze/${message.campaignId}/${message.sessionId}/${message.messageId}`
+    const basePath = [
+      message.campaignId,
+      message.sessionId,
+      [message.createdAt.getTime(), message.messageId, message.processor].join('-')
+    ].join('/')
 
     const main = Buffer.from(
       JSON.stringify(
@@ -29,8 +33,7 @@ export class SaveMessageUseCase {
           method: message.method,
           url: message.url,
           status: message.status,
-          score: message.score,
-          ip: message.ip,
+          processor: message.processor,
           startTime: message.startTime,
           finishTime: message.finishTime,
           totalTime: message.totalTime

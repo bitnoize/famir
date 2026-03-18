@@ -24,8 +24,7 @@ export class TargetModel {
     readonly labels: string[],
     readonly isEnabled: boolean,
     readonly messageCount: number,
-    readonly createdAt: Date,
-    readonly updatedAt: Date
+    readonly createdAt: Date
   ) {}
 
   get donorProtocol(): string {
@@ -109,8 +108,7 @@ export class FullTargetModel extends TargetModel {
     readonly sitemapXml: string,
     isEnabled: boolean,
     messageCount: number,
-    createdAt: Date,
-    updatedAt: Date
+    createdAt: Date
   ) {
     super(
       campaignId,
@@ -127,8 +125,7 @@ export class FullTargetModel extends TargetModel {
       labels,
       isEnabled,
       messageCount,
-      createdAt,
-      updatedAt
+      createdAt
     )
   }
 }

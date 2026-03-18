@@ -11,7 +11,6 @@ export interface RawRedirector {
   redirector_id: string
   lure_count: number
   created_at: number
-  updated_at: number
 }
 
 export interface RawFullRedirector extends RawRedirector {
@@ -109,7 +108,6 @@ export const redirectorFunctions = {
           parser.push(page)
         }
 
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 

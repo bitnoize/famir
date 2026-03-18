@@ -14,10 +14,11 @@ import {
   MessageConnection,
   MessageError,
   MessageHeaders,
+  MessageModel,
   MessagePayload
 } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
-import { RawFullMessage } from './message.functions.js'
+import { RawFullMessage, RawMessage } from './message.functions.js'
 import { MESSAGE_REPOSITORY, MessageRepository } from './message.js'
 import { messageSchemas } from './message.schemas.js'
 
@@ -65,8 +66,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     connection: MessageConnection,
     payload: MessagePayload,
     errors: MessageError[],
-    score: number,
-    ip: string,
+    processor: string,
     startTime: number,
     finishTime: number
   ): Promise<void> {
@@ -89,8 +89,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         this.encodeJson(connection),
         this.encodeJson(payload),
         this.encodeJson(errors),
-        score,
-        ip,
+        processor,
         startTime,
         finishTime
       )
@@ -117,7 +116,6 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  /*
   protected buildModel(rawModel: unknown): MessageModel | null {
     if (rawModel === null) {
       return null
@@ -135,26 +133,12 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       rawModel.method,
       rawModel.url,
       rawModel.status,
-      rawModel.score,
-      rawModel.ip,
+      rawModel.processor,
       rawModel.start_time,
       rawModel.finish_time,
       new Date(rawModel.created_at)
     )
   }
-
-  protected buildModelStrict(rawModel: unknown): MessageModel {
-    const model = this.buildModel(rawModel)
-
-    if (!MessageModel.isNotNull(model)) {
-      throw new DatabaseError(`Message unexpected lost`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
-
-    return model
-  }
-  */
 
   protected buildFullModel(rawModel: unknown): FullMessageModel | null {
     if (rawModel === null) {
@@ -180,8 +164,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       this.parseConnection(rawModel.connection),
       this.parsePayload(rawModel.payload),
       this.parseErrors(rawModel.errors),
-      rawModel.score,
-      rawModel.ip,
+      rawModel.processor,
       rawModel.start_time,
       rawModel.finish_time,
       new Date(rawModel.created_at)

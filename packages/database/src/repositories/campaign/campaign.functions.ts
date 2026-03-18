@@ -17,7 +17,6 @@ export interface RawCampaign {
   session_count: number
   message_count: number
   created_at: number
-  updated_at: number
 }
 
 export interface RawFullCampaign extends RawCampaign {
@@ -176,7 +175,6 @@ export const campaignFunctions = {
           parser.push(messageExpire.toString())
         }
 
-        parser.push(Date.now().toString())
         parser.push(lockSecret)
       },
 

@@ -35,9 +35,7 @@ export class HttpServerRouter {
   }
 
   addMiddleware(name: string, middleware: HttpServerMiddleware) {
-    if (this.isActive) {
-      throw new Error(`Router suddenly active`)
-    }
+    this.sureNotActive('addMiddleware')
 
     if (this.middlewares.has(name)) {
       throw new Error(`Middleware already exists: ${name}`)
@@ -49,19 +47,13 @@ export class HttpServerRouter {
   }
 
   getMiddlewares(): Readonly<HttpServerMiddlewares> {
-    if (!this.isActive) {
-      throw new HttpServerError(`Router suddenly not active`, {
-        code: 'INTERNAL_ERROR'
-      })
-    }
+    this.sureIsActive('getMiddlewares')
 
     return Array.from(this.middlewares)
   }
 
   addAssets(entries: [string, string][]) {
-    if (this.isActive) {
-      throw new Error(`Router suddenly active`)
-    }
+    this.sureNotActive('addAssets')
 
     for (const [name, data] of entries) {
       if (this.assets.has(name)) {
@@ -75,12 +67,22 @@ export class HttpServerRouter {
   }
 
   getAsset(name: string): string | undefined {
+    this.sureIsActive('getAsset')
+
+    return this.assets.get(name)
+  }
+
+  protected sureNotActive(name: string) {
+    if (this.isActive) {
+      throw new Error(`Router is active on ${name}`)
+    }
+  }
+
+  protected sureIsActive(name: string) {
     if (!this.isActive) {
-      throw new HttpServerError(`Router suddenly not active`, {
+      throw new HttpServerError(`Router not active on ${name}`, {
         code: 'INTERNAL_ERROR'
       })
     }
-
-    return this.assets.get(name)
   }
 }
