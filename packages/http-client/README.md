@@ -1,2 +1,5 @@
 HttpClient
 ----------
+
+Strict HTTP client.
+

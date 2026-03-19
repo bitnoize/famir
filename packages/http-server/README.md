@@ -1,2 +1,5 @@
 HttpServer
 ----------
+
+Strict HTTP server.
+

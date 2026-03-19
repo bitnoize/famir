@@ -1,2 +1,5 @@
 Config
 ------
+
+Configuration service.
+

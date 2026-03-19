@@ -1,2 +1,5 @@
 Logger
 ------
+
+Logging service.
+
