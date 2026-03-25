@@ -1,0 +1,50 @@
+{
+  "name": "@famir/http-tools",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Famir HTTP tools module",
+  "keywords": [
+    "famir",
+    "fake-mirrors",
+    "man-in-the-middle",
+    "phishing",
+    "reverse-proxy"
+  ],
+  "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
+	"license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "node --test dist/**/*.test.js",
+    "build": "tsc -b"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitnoize/famir.git",
+    "directory": "packages/http-tools"
+  },
+  "bugs": {
+    "url": "https://github.com/bitnoize/famir/issues"
+  },
+  "homepage": "https://github.com/bitnoize/famir",
+  "dependencies": {
+    "@famir/common": "*",
+    "cheerio": "^1.2.0",
+    "content-type": "^1.0.5",
+    "iconv-lite": "^0.7.2",
+    "isbot": "^5.1.36",
+    "qs": "^6.15.0",
+    "tough-cookie": "^6.0.1",
+    "ua-parser-js": "^2.0.9"
+  },
+  "devDependencies": {
+    "@types/content-type": "^1.1.9",
+    "@types/qs": "^6.15.0"
+  }
+}

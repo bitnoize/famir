@@ -1,0 +1,43 @@
+{
+  "name": "@famir/storage",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Famir storage module",
+  "keywords": [
+    "famir",
+    "fake-mirrors",
+    "man-in-the-middle",
+    "phishing",
+    "reverse-proxy"
+  ],
+  "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
+	"license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "node --test dist/**/*.test.js",
+    "build": "tsc -b"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitnoize/famir.git",
+    "directory": "packages/storage"
+  },
+  "bugs": {
+    "url": "https://github.com/bitnoize/famir/issues"
+  },
+  "homepage": "https://github.com/bitnoize/famir",
+  "dependencies": {
+    "@famir/common": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
+    "@famir/validator": "*",
+    "minio": "^8.0.7"
+  }
+}

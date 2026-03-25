@@ -1,0 +1,18 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/common" },
+    { "path": "packages/validator" },
+    { "path": "packages/config" },
+    { "path": "packages/logger" },
+    { "path": "packages/templater" },
+    { "path": "packages/database" },
+    { "path": "packages/storage" },
+    { "path": "packages/produce" },
+    { "path": "packages/consume" },
+    { "path": "packages/http-client" },
+    { "path": "packages/http-server" },
+    { "path": "packages/http-tools" },
+    { "path": "packages/repl-server" }
+  ]
+}

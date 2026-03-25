@@ -1,0 +1,1 @@
+export { isbot } from 'isbot'

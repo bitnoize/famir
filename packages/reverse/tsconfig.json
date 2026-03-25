@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "references": [
+    { "path": "../common" },
+    { "path": "../validator" },
+    { "path": "../config" },
+    { "path": "../logger" },
+    { "path": "../templater" },
+    { "path": "../database" },
+    { "path": "../produce" },
+    { "path": "../http-client" },
+    { "path": "../http-server" },
+    { "path": "../http-tools" }
+  ]
+}

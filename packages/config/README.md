@@ -1,0 +1,4 @@
+# @famir/config
+
+Config service.
+

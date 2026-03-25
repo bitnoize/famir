@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "references": [
+    { "path": "../common" },
+    { "path": "../validator" },
+    { "path": "../config" },
+    { "path": "../logger" }
+  ]
+}

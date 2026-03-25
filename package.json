@@ -1,0 +1,40 @@
+{
+  "name": "famir",
+  "type": "module",
+  "private": true,
+  "description": "Fake mirrors entire the Web!",
+  "scripts": {
+    "format": "npm --ws run format",
+    "lint": "npm --ws run lint",
+    "build": "npm --ws run build",
+    "test": "npm --ws run test"
+  },
+  "workspaces": [
+    "packages/common",
+    "packages/validator",
+    "packages/config",
+    "packages/logger",
+    "packages/templater",
+    "packages/database",
+    "packages/storage",
+    "packages/produce",
+    "packages/consume",
+    "packages/http-client",
+    "packages/http-server",
+    "packages/http-tools",
+    "packages/repl-server",
+    "packages/reverse",
+    "packages/console",
+    "packages/analyze"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.0.0",
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1",
+    "prettier-plugin-organize-imports": "^4.3.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.2"
+  }
+}

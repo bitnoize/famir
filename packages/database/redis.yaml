@@ -1,0 +1,7 @@
+---
+base: lua51
+name: redis
+globals:
+  redis:
+    any: true
+

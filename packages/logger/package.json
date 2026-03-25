@@ -1,0 +1,43 @@
+{
+  "name": "@famir/logger",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Famir logger module",
+  "keywords": [
+    "famir",
+    "fake-mirrors",
+    "man-in-the-middle",
+    "phishing",
+    "reverse-proxy"
+  ],
+  "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
+	"license": "Apache-2.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "node --test dist/**/*.test.js",
+    "build": "tsc -b"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitnoize/famir.git",
+    "directory": "packages/logger"
+  },
+  "bugs": {
+    "url": "https://github.com/bitnoize/famir/issues"
+  },
+  "homepage": "https://github.com/bitnoize/famir",
+  "dependencies": {
+    "@famir/common": "*",
+    "@famir/config": "*",
+    "@famir/validator": "*",
+    "pino": "^10.3.1",
+    "pino-pretty": "^13.1.3"
+  }
+}

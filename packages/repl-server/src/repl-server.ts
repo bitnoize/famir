@@ -1,0 +1,44 @@
+export const REPL_SERVER = Symbol('ReplServer')
+export const REPL_SERVER_ASSETS = Symbol('ReplServerAssets')
+export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
+
+export interface ReplServer {
+  start(): Promise<void>
+  stop(): Promise<void>
+}
+
+export type ReplServerApiCall = (data: unknown) => Promise<unknown>
+export type ReplServerApiCalls = [string, ReplServerApiCall][]
+
+export type ReplServerAssets = [string, string][]
+
+export interface CliReplServerConfig {
+  REPL_SERVER_PROMPT: string
+  REPL_SERVER_USE_COLORS: boolean
+}
+
+export interface CliReplServerOptions {
+  prompt: string
+  useColors: boolean
+}
+
+export interface NetReplServerConfig {
+  REPL_SERVER_ADDRESS: string
+  REPL_SERVER_PORT: number
+  REPL_SERVER_MAX_CLIENTS: number
+  REPL_SERVER_SOCKET_TIMEOUT: number
+  REPL_SERVER_PROMPT: string
+  REPL_SERVER_USE_COLORS: boolean
+}
+
+export interface NetReplServerOptions {
+  address: string
+  port: number
+  maxClients: number
+  socketTimeout: number
+  prompt: string
+  useColors: boolean
+}
+
+export const REPL_SERVER_BANNER_GREET = `Welcome to Famir!`
+export const REPL_SERVER_BANNER_LEAVE = `So long!`
