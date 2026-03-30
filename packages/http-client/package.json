@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-client",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Famir HTTP client module",
   "keywords": [
     "famir",

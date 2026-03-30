@@ -650,6 +650,24 @@ export class CurlHttpClient implements HttpClient {
   }
 
   protected formatRawHeaders(headers: HttpHeaders): string[] {
+    if (process.env['CURL_IMPERSONATE']) {
+      const obsolete: RegExp[] = [
+        /^User-Agent$/i,
+        /^Upgrade-Insecure-Requests$/i,
+        /^Sec-CH-/i,
+        /^Sec-Fetch-/i,
+        /^Priority$/i,
+        /^DNT$/i,
+        /^TE$/i
+      ]
+
+      Object.keys(headers).forEach((name) => {
+        if (obsolete.some((re) => re.test(name))) {
+          headers[name] = undefined
+        }
+      })
+    }
+
     const curlHeaders: string[] = []
 
     Object.entries(headers).forEach(([name, value]) => {
