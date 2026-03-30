@@ -2,7 +2,7 @@ import { DIContainer } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
-import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
+import { Curl, CurlCode, CurlFeature, CurlHttpVersion } from 'node-libcurl'
 import { PassThrough, pipeline, Readable } from 'node:stream'
 import { HttpClientError, HttpClientErrorCode } from './http-client.error.js'
 import {
@@ -175,6 +175,16 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  protected browserHeaders: RegExp[] = [
+    /^User-Agent$/i,
+    /^Upgrade-Insecure-Requests$/i,
+    /^Sec-CH-/i,
+    /^Sec-Fetch-/i,
+    /^Priority$/i,
+    /^DNT$/i,
+    /^TE$/i
+  ]
+
   protected setupCurlOptions(
     curl: Curl,
     state: {
@@ -186,6 +196,16 @@ export class CurlHttpClient implements HttpClient {
       timeout: number
     }
   ) {
+    if (process.env['CURL_IMPERSONATE']) {
+      curl.setOpt('HTTP_VERSION', CurlHttpVersion.V2_0)
+
+      Object.keys(state.requestHeaders).forEach((name) => {
+        if (this.browserHeaders.some((re) => re.test(name))) {
+          state.requestHeaders[name] = undefined
+        }
+      })
+    }
+
     if (this.options.verbose) {
       curl.setOpt(Curl.option.VERBOSE, true)
     }
@@ -650,24 +670,6 @@ export class CurlHttpClient implements HttpClient {
   }
 
   protected formatRawHeaders(headers: HttpHeaders): string[] {
-    if (process.env['CURL_IMPERSONATE']) {
-      const obsolete: RegExp[] = [
-        /^User-Agent$/i,
-        /^Upgrade-Insecure-Requests$/i,
-        /^Sec-CH-/i,
-        /^Sec-Fetch-/i,
-        /^Priority$/i,
-        /^DNT$/i,
-        /^TE$/i
-      ]
-
-      Object.keys(headers).forEach((name) => {
-        if (obsolete.some((re) => re.test(name))) {
-          headers[name] = undefined
-        }
-      })
-    }
-
     const curlHeaders: string[] = []
 
     Object.entries(headers).forEach(([name, value]) => {
