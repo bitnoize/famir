@@ -1,4 +1,4 @@
 # @famir/validator
 
-Validate data service.
+Famir validator infrastructure service.
 

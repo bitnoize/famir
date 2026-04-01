@@ -6,6 +6,9 @@ export type ProduceErrorOptions = CommonErrorOptions & {
   code: ProduceErrorCode
 }
 
+/*
+ * Produce error object
+ */
 export class ProduceError extends CommonError {
   code: ProduceErrorCode
 

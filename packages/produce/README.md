@@ -1,4 +1,4 @@
 # @famir/produce
 
-Produce background jobs.
+Famir produce infrastructure service.
 

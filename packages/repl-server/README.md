@@ -1,4 +1,4 @@
 # @famir/repl-server
 
-REPL interactive environment.
+Famir repl-server infrastructure service.
 

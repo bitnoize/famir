@@ -1,3 +1,4 @@
+import { HttpUrl } from '@famir/common'
 import {
   formatQueryString,
   HttpFormatQueryStringOptions,
@@ -6,16 +7,20 @@ import {
   parseQueryString
 } from './query-string.js'
 
-export interface HttpUrl {
-  protocol: string
-  hostname: string
-  port: string
-  pathname: string
-  search: string
-  hash: string
-}
-
+/*
+ * HTTP URL wrapper
+ */
 export class HttpUrlWrap {
+  /*
+   * Create wrapper from scratch
+   */
+  static fromScratch(): HttpUrlWrap {
+    return HttpUrlWrap.fromRelative('/')
+  }
+
+  /*
+   * Create wrapper from req object
+   */
   static fromReq(req: { url?: string | undefined }): HttpUrlWrap {
     if (req.url == null) {
       throw new Error(`Url not defined`)
@@ -24,6 +29,9 @@ export class HttpUrlWrap {
     return HttpUrlWrap.fromRelative(req.url)
   }
 
+  /*
+   * Create wrapper from relative url
+   */
   static fromRelative(value: string): HttpUrlWrap {
     const parsedUrl = URL.parse(value, 'http://localhost')
 
@@ -41,6 +49,9 @@ export class HttpUrlWrap {
     })
   }
 
+  /*
+   * Create wrapper from absolute url
+   */
   static fromAbsolute(value: string): HttpUrlWrap {
     const parsedUrl = URL.parse(value)
 
@@ -64,26 +75,41 @@ export class HttpUrlWrap {
     this.#url = url
   }
 
+  /*
+   * Clone wrapper
+   */
   clone(): HttpUrlWrap {
     return new HttpUrlWrap({ ...this.#url })
   }
 
   #isFrozen: boolean = false
 
+  /*
+   * Wrapper frozen state
+   */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
+  /*
+   * Freeze wrapper
+   */
   freeze(): this {
     this.#isFrozen = true
 
     return this
   }
 
+  /*
+   * Get url part
+   */
   get<K extends keyof HttpUrl>(name: K): HttpUrl[K] {
     return this.#url[name]
   }
 
+  /*
+   * Set url part
+   */
   set<K extends keyof HttpUrl>(name: K, value: HttpUrl[K]): this {
     this.sureNotFrozen('set')
 
@@ -94,6 +120,9 @@ export class HttpUrlWrap {
     return this
   }
 
+  /*
+   * Merge partial url
+   */
   merge(url: Partial<HttpUrl>): this {
     this.sureNotFrozen('merge')
 
@@ -104,6 +133,9 @@ export class HttpUrlWrap {
     return this
   }
 
+  /*
+   * Get url host part
+   */
   getHost(): string {
     const { protocol, hostname, port } = this.#url
 
@@ -118,11 +150,21 @@ export class HttpUrlWrap {
     }
   }
 
+  /*
+   * Custom parse query-string options
+   */
   readonly parseQueryStringOptions: HttpParseQueryStringOptions = {}
+
+  /*
+   * Custom format query-string options
+   */
   readonly formatQueryStringOptions: HttpFormatQueryStringOptions = {}
 
   #cacheQueryString: HttpQueryString | null = null
 
+  /*
+   * Get url query-string part
+   */
   getQueryString(): HttpQueryString {
     if (this.#cacheQueryString != null) {
       return this.#cacheQueryString
@@ -140,6 +182,9 @@ export class HttpUrlWrap {
     return queryString
   }
 
+  /*
+   * Set url query-string part
+   */
   setQueryString(queryString: HttpQueryString): this {
     this.sureNotFrozen('setQueryString')
 
@@ -155,6 +200,9 @@ export class HttpUrlWrap {
     return this
   }
 
+  /*
+   * Match url pathname
+   */
   isPath(value: string | RegExp): boolean {
     if (typeof value === 'string') {
       return value === this.#url.pathname
@@ -165,14 +213,23 @@ export class HttpUrlWrap {
     }
   }
 
+  /*
+   * Get url object
+   */
   toObject(): HttpUrl {
     return { ...this.#url }
   }
 
+  /*
+   * Get relative url
+   */
   toRelative(): string {
     return [this.#url.pathname, this.#url.search, this.#url.hash].join('')
   }
 
+  /*
+   * Get absolute url
+   */
   toAbsolute(): string {
     return [
       this.#url.protocol,
@@ -184,6 +241,9 @@ export class HttpUrlWrap {
     ].join('')
   }
 
+  /*
+   * Cleanup wrapper
+   */
   reset(): this {
     this.sureNotFrozen('reset')
 

@@ -2,13 +2,18 @@ import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { ActionDatabaseData, DATABASE_SERVICE, type DatabaseService } from '../../services/index.js'
+import { DATABASE_SERVICE, type DatabaseService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { DATABASE_CONTROLLER } from './database.js'
-import { databaseSchemas } from './database.schemas.js'
 
+/*
+ * Database controller
+ */
 export class DatabaseController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       DATABASE_CONTROLLER,
       (c) =>
@@ -21,6 +26,9 @@ export class DatabaseController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): DatabaseController {
     return container.resolve(DATABASE_CONTROLLER)
   }
@@ -33,22 +41,19 @@ export class DatabaseController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas(databaseSchemas)
-
     this.logger.debug(`DatabaseController initialized`)
   }
 
+  /*
+   * Use api-calls
+   */
   use() {
-    this.router.addApiCall('loadDatabaseFunctions', async (data) => {
-      this.validateData<ActionDatabaseData>('console-action-database-data', data)
-
-      return await this.databaseService.loadDatabaseFunctions(data)
+    this.router.addApiCall('loadDatabaseFunctions', async () => {
+      return await this.databaseService.loadDatabaseFunctions()
     })
 
-    this.router.addApiCall('cleanupDatabase', async (data) => {
-      this.validateData<ActionDatabaseData>('console-action-database-data', data)
-
-      return await this.databaseService.cleanupDatabase(data)
+    this.router.addApiCall('cleanupDatabase', async () => {
+      return await this.databaseService.cleanupDatabase()
     })
   }
 }

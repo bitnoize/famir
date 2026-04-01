@@ -3,6 +3,7 @@ import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
+  CampaignShare,
   DatabaseError,
   DatabaseErrorCode,
   FullCampaignModel
@@ -18,8 +19,14 @@ import {
   UpdateCampaignData
 } from './campaign.js'
 
+/*
+ * Campaign service
+ */
 export class CampaignService {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<CampaignService>(
       CAMPAIGN_SERVICE,
       (c) => new CampaignService(c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY))
@@ -28,6 +35,9 @@ export class CampaignService {
 
   constructor(protected readonly campaignRepository: CampaignRepository) {}
 
+  /*
+   * Create campaign
+   */
   async create(data: CreateCampaignData): Promise<true> {
     try {
       await this.campaignRepository.create(
@@ -58,6 +68,9 @@ export class CampaignService {
     }
   }
 
+  /*
+   * Read campaign
+   */
   async read(data: ReadCampaignData): Promise<FullCampaignModel> {
     const campaign = await this.campaignRepository.readFull(data.campaignId)
 
@@ -70,6 +83,16 @@ export class CampaignService {
     return campaign
   }
 
+  /*
+   * Read campaign share
+   */
+  async readShare(): Promise<CampaignShare> {
+    return await this.campaignRepository.readShare()
+  }
+
+  /*
+   * Lock campaign
+   */
   async lock(data: LockCampaignData): Promise<string> {
     try {
       return await this.campaignRepository.lock(data.campaignId)
@@ -88,6 +111,9 @@ export class CampaignService {
     }
   }
 
+  /*
+   * Unlock campaign
+   */
   async unlock(data: UnlockCampaignData): Promise<true> {
     try {
       await this.campaignRepository.unlock(data.campaignId, data.lockSecret)
@@ -108,6 +134,9 @@ export class CampaignService {
     }
   }
 
+  /*
+   * Update campaign
+   */
   async update(data: UpdateCampaignData): Promise<true> {
     try {
       await this.campaignRepository.update(
@@ -135,6 +164,9 @@ export class CampaignService {
     }
   }
 
+  /*
+   * Delete campaign
+   */
   async delete(data: DeleteCampaignData): Promise<true> {
     try {
       await this.campaignRepository.delete(data.campaignId, data.lockSecret)
@@ -155,6 +187,9 @@ export class CampaignService {
     }
   }
 
+  /*
+   * List campaigns
+   */
   async list(): Promise<CampaignModel[]> {
     return await this.campaignRepository.list()
   }

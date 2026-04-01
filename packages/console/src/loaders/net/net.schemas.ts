@@ -2,12 +2,7 @@ import {
   configRedisDatabaseConnectionUrlSchema,
   configRedisDatabasePrefixSchema
 } from '@famir/database'
-import {
-  configLoggerAppNameSchema,
-  configLoggerLogLevelSchema,
-  configPinoLoggerTransportOptionsSchema,
-  configPinoLoggerTransportTargetSchema
-} from '@famir/logger'
+import { configLoggerAppNameSchema, configLoggerLogLevelSchema } from '@famir/logger'
 import {
   configRedisProduceConnectionUrlSchema,
   configRedisProducePrefixSchema
@@ -28,8 +23,6 @@ export const configNetConsoleSchema: JSONSchemaType<NetConsoleConfig> = {
   required: [
     'LOGGER_APP_NAME',
     'LOGGER_LOG_LEVEL',
-    'LOGGER_TRANSPORT_TARGET',
-    'LOGGER_TRANSPORT_OPTIONS',
     'DATABASE_CONNECTION_URL',
     'DATABASE_PREFIX',
     'PRODUCE_CONNECTION_URL',
@@ -47,8 +40,6 @@ export const configNetConsoleSchema: JSONSchemaType<NetConsoleConfig> = {
       default: 'console'
     },
     LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
-    LOGGER_TRANSPORT_TARGET: configPinoLoggerTransportTargetSchema,
-    LOGGER_TRANSPORT_OPTIONS: configPinoLoggerTransportOptionsSchema,
     DATABASE_CONNECTION_URL: configRedisDatabaseConnectionUrlSchema,
     DATABASE_PREFIX: configRedisDatabasePrefixSchema,
     PRODUCE_CONNECTION_URL: configRedisProduceConnectionUrlSchema,

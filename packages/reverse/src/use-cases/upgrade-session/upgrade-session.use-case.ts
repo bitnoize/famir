@@ -3,8 +3,14 @@ import { DatabaseError, SESSION_REPOSITORY, SessionRepository } from '@famir/dat
 import { HttpServerError } from '@famir/http-server'
 import { UPGRADE_SESSION_USE_CASE, UpgradeSessionData } from './upgrade-session.js'
 
+/*
+ * Upgrade session use-case
+ */
 export class UpgradeSessionUseCase {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<UpgradeSessionUseCase>(
       UPGRADE_SESSION_USE_CASE,
       (c) => new UpgradeSessionUseCase(c.resolve<SessionRepository>(SESSION_REPOSITORY))
@@ -13,6 +19,9 @@ export class UpgradeSessionUseCase {
 
   constructor(protected readonly sessionRepository: SessionRepository) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(data: UpgradeSessionData): Promise<boolean> {
     try {
       await this.sessionRepository.upgrade(

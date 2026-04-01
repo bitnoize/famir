@@ -1,16 +1,16 @@
-export const MESSAGE_KINDS = ['simple', 'stream-request', 'stream-response'] as const
-export type MessageKind = (typeof MESSAGE_KINDS)[number]
+import {
+  HttpBody,
+  HttpConnection,
+  HttpError,
+  HttpHeaders,
+  HttpMethod,
+  HttpPayload,
+  HttpType
+} from '@famir/common'
 
-export const MESSAGE_METHODS = ['HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
-export type MessageMethod = (typeof MESSAGE_METHODS)[number]
-
-export type MessageHeader = string | string[]
-export type MessageHeaders = Record<string, MessageHeader | undefined>
-export type MessageBody = Buffer
-export type MessageConnection = Record<string, number | string | null | undefined>
-export type MessagePayload = Record<string, unknown>
-export type MessageError = readonly [object, ...string[]]
-
+/*
+ * Message is a captured request and response
+ */
 export class MessageModel {
   static isNotNull = <T extends MessageModel>(model: T | null): model is T => {
     return model != null
@@ -22,8 +22,8 @@ export class MessageModel {
     readonly proxyId: string,
     readonly targetId: string,
     readonly sessionId: string,
-    readonly kind: string,
-    readonly method: string,
+    readonly type: HttpType,
+    readonly method: HttpMethod,
     readonly url: string,
     readonly status: number,
     readonly processor: string,
@@ -37,6 +37,9 @@ export class MessageModel {
   }
 }
 
+/*
+ * Extended message
+ */
 export class FullMessageModel extends MessageModel {
   constructor(
     campaignId: string,
@@ -44,17 +47,17 @@ export class FullMessageModel extends MessageModel {
     proxyId: string,
     targetId: string,
     sessionId: string,
-    kind: string,
-    method: string,
+    type: HttpType,
+    method: HttpMethod,
     url: string,
-    readonly requestHeaders: MessageHeaders,
-    readonly requestBody: MessageBody,
+    readonly requestHeaders: HttpHeaders,
+    readonly requestBody: HttpBody,
     status: number,
-    readonly responseHeaders: MessageHeaders,
-    readonly responseBody: MessageBody,
-    readonly connection: MessageConnection,
-    readonly payload: MessagePayload,
-    readonly errors: MessageError[],
+    readonly responseHeaders: HttpHeaders,
+    readonly responseBody: HttpBody,
+    readonly connection: HttpConnection,
+    readonly payload: HttpPayload,
+    readonly errors: HttpError[],
     processor: string,
     startTime: number,
     finishTime: number,
@@ -66,7 +69,7 @@ export class FullMessageModel extends MessageModel {
       proxyId,
       targetId,
       sessionId,
-      kind,
+      type,
       method,
       url,
       status,

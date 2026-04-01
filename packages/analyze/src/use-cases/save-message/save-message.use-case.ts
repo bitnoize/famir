@@ -3,8 +3,14 @@ import { FullMessageModel } from '@famir/database'
 import { Storage, STORAGE } from '@famir/storage'
 import { SAVE_MESSAGE_USE_CASE } from './save-message.js'
 
+/*
+ * Save message use-case
+ */
 export class SaveMessageUseCase {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<SaveMessageUseCase>(
       SAVE_MESSAGE_USE_CASE,
       (c) => new SaveMessageUseCase(c.resolve<Storage>(STORAGE))
@@ -13,12 +19,11 @@ export class SaveMessageUseCase {
 
   constructor(protected readonly storage: Storage) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(message: FullMessageModel): Promise<void> {
-    const basePath = [
-      message.campaignId,
-      message.sessionId,
-      [message.createdAt.getTime(), message.messageId, message.processor].join('-')
-    ].join('/')
+    const basePath = [message.campaignId, message.sessionId, message.messageId].join('/')
 
     const main = Buffer.from(
       JSON.stringify(
@@ -28,7 +33,7 @@ export class SaveMessageUseCase {
           proxyId: message.proxyId,
           targetId: message.targetId,
           sessionId: message.sessionId,
-          kind: message.kind,
+          type: message.type,
           method: message.method,
           url: message.url,
           status: message.status,

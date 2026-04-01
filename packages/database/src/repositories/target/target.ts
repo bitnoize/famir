@@ -1,12 +1,15 @@
-import { FullTargetModel, TargetModel } from '../../models/index.js'
+import { FullTargetModel, TargetAccessLevel, TargetModel } from '../../models/index.js'
 
 export const TARGET_REPOSITORY = Symbol('TargetRepository')
 
+/**
+ * Target repository contract
+ */
 export interface TargetRepository {
   create(
     campaignId: string,
     targetId: string,
-    isLanding: boolean,
+    accessLevel: TargetAccessLevel,
     donorSecure: boolean,
     donorSub: string,
     donorDomain: string,
@@ -24,6 +27,7 @@ export interface TargetRepository {
     faviconIco: string,
     robotsTxt: string,
     sitemapXml: string,
+    allowWebSockets: boolean,
     lockSecret: string
   ): Promise<void>
   read(campaignId: string, targetId: string): Promise<TargetModel | null>
@@ -43,6 +47,7 @@ export interface TargetRepository {
     faviconIco: string | null | undefined,
     robotsTxt: string | null | undefined,
     sitemapXml: string | null | undefined,
+    allowWebSockets: boolean | null | undefined,
     lockSecret: string
   ): Promise<void>
   enable(campaignId: string, targetId: string, lockSecret: string): Promise<void>

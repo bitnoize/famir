@@ -3,8 +3,14 @@ import { SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/data
 import { ReplServerError } from '@famir/repl-server'
 import { ReadSessionData, SESSION_SERVICE } from './session.js'
 
+/*
+ * Session service
+ */
 export class SessionService {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<SessionService>(
       SESSION_SERVICE,
       (c) => new SessionService(c.resolve<SessionRepository>(SESSION_REPOSITORY))
@@ -13,6 +19,9 @@ export class SessionService {
 
   constructor(protected readonly sessionRepository: SessionRepository) {}
 
+  /*
+   * Read session
+   */
   async read(data: ReadSessionData): Promise<SessionModel> {
     const session = await this.sessionRepository.read(data.campaignId, data.sessionId)
 

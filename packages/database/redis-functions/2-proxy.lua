@@ -11,7 +11,7 @@ local function create_proxy(keys, args)
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local proxy_key = keys[3]
-  local proxy_unique_url_key = keys[4]
+  local proxy_urls_key = keys[4]
   local proxy_index_key = keys[5]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
@@ -60,7 +60,7 @@ local function create_proxy(keys, args)
     end
   end
 
-  if redis.call('SISMEMBER', proxy_unique_url_key, model.url) ~= 0 then
+  if redis.call('SISMEMBER', proxy_urls_key, model.url) ~= 0 then
     return redis.status_reply('CONFLICT Proxy url allready taken')
   end
 
@@ -79,7 +79,7 @@ local function create_proxy(keys, args)
 
   redis.call('HSET', proxy_key, unpack(store))
 
-  redis.call('SADD', proxy_unique_url_key, model.url)
+  redis.call('SADD', proxy_urls_key, model.url)
 
   redis.call('ZADD', proxy_index_key, model.created_at, model.proxy_id)
 
@@ -323,7 +323,7 @@ local function delete_proxy(keys, args)
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local proxy_key = keys[3]
-  local proxy_unique_url_key = keys[4]
+  local proxy_urls_key = keys[4]
   local proxy_index_key = keys[5]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
@@ -375,7 +375,7 @@ local function delete_proxy(keys, args)
 
   redis.call('DEL', proxy_key)
 
-  redis.call('SREM', proxy_unique_url_key, stash.url)
+  redis.call('SREM', proxy_urls_key, stash.url)
 
   redis.call('ZREM', proxy_index_key, stash.proxy_id)
 

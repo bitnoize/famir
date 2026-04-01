@@ -1,3 +1,6 @@
+/*
+ * Campaign is a set of related sites
+ */
 export class CampaignModel {
   static isNotNull = <T extends CampaignModel>(model: T | null): model is T => {
     return model != null
@@ -13,6 +16,9 @@ export class CampaignModel {
   ) {}
 }
 
+/*
+ * Extended campaign
+ */
 export class FullCampaignModel extends CampaignModel {
   constructor(
     campaignId: string,

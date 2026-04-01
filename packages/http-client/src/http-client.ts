@@ -1,9 +1,12 @@
-import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-tools'
+import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/common'
 import type { PassThrough, Readable } from 'node:stream'
 import { HttpClientError } from './http-client.error.js'
 
 export const HTTP_CLIENT = Symbol('HttpClient')
 
+/**
+ * HTTP client contract
+ */
 export interface HttpClient {
   simple(
     proxy: string,

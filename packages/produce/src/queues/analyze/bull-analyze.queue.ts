@@ -11,15 +11,21 @@ import {
 import { BullBaseQueue } from '../base/index.js'
 import { ANALYZE_QUEUE, ANALYZE_QUEUE_NAME, AnalyzeQueue } from './analyze.js'
 
+/*
+ * Bull analyze queue implementation
+ */
 export class BullAnalyzeQueue extends BullBaseQueue implements AnalyzeQueue {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<AnalyzeQueue>(
       ANALYZE_QUEUE,
       (c) =>
         new BullAnalyzeQueue(
           c.resolve<Config<BullProduceConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ProduceConnector>(PRODUCE_CONNECTOR).connection<RedisProduceConnection>()
+          c.resolve<ProduceConnector>(PRODUCE_CONNECTOR).getConnection<RedisProduceConnection>()
         )
     )
   }
@@ -34,6 +40,9 @@ export class BullAnalyzeQueue extends BullBaseQueue implements AnalyzeQueue {
     this.logger.debug(`AnalyzeQueue initialized`)
   }
 
+  /*
+   * Add job to queue
+   */
   async addJob(name: string, data: AnalyzeJobData): Promise<void> {
     try {
       const jobId = [data.campaignId, data.messageId].join('-')

@@ -17,8 +17,14 @@ import {
   UpdateRedirectorData
 } from './redirector.js'
 
+/*
+ * Redirector service
+ */
 export class RedirectorService {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<RedirectorService>(
       REDIRECTOR_SERVICE,
       (c) => new RedirectorService(c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY))
@@ -27,6 +33,9 @@ export class RedirectorService {
 
   constructor(protected readonly redirectorRepository: RedirectorRepository) {}
 
+  /*
+   * Create redirector
+   */
   async create(data: CreateRedirectorData): Promise<true> {
     try {
       await this.redirectorRepository.create(
@@ -52,6 +61,9 @@ export class RedirectorService {
     }
   }
 
+  /*
+   * Read redirector
+   */
   async read(data: ReadRedirectorData): Promise<FullRedirectorModel> {
     const redirector = await this.redirectorRepository.readFull(data.campaignId, data.redirectorId)
 
@@ -64,6 +76,9 @@ export class RedirectorService {
     return redirector
   }
 
+  /*
+   * Update redirector
+   */
   async update(data: UpdateRedirectorData): Promise<true> {
     try {
       await this.redirectorRepository.update(
@@ -89,6 +104,9 @@ export class RedirectorService {
     }
   }
 
+  /*
+   * Delete redirector
+   */
   async delete(data: DeleteRedirectorData): Promise<true> {
     try {
       await this.redirectorRepository.delete(data.campaignId, data.redirectorId, data.lockSecret)
@@ -109,6 +127,9 @@ export class RedirectorService {
     }
   }
 
+  /*
+   * List redirectors
+   */
   async list(data: ListRedirectorsData): Promise<RedirectorModel[]> {
     const redirectors = await this.redirectorRepository.list(data.campaignId)
 

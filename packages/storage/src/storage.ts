@@ -1,5 +1,8 @@
 export const STORAGE = Symbol('Storage')
 
+/**
+ * Storage contract
+ */
 export interface Storage {
   getObject(objectName: string): Promise<Buffer>
   putObject(objectName: string, data: Buffer, metaData: Record<string, string>): Promise<void>

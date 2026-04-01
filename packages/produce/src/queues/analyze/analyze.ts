@@ -4,6 +4,9 @@ export const ANALYZE_QUEUE_NAME = 'analyze'
 
 export const ANALYZE_QUEUE = Symbol('AnalyzeQueue')
 
+/*
+ * Analyze queue contract
+ */
 export interface AnalyzeQueue {
   close(): Promise<void>
   getJobCount(): Promise<number>

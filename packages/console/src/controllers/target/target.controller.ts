@@ -16,8 +16,14 @@ import { BaseController } from '../base/index.js'
 import { TARGET_CONTROLLER } from './target.js'
 import { targetSchemas } from './target.schemas.js'
 
+/*
+ * Target controller
+ */
 export class TargetController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       TARGET_CONTROLLER,
       (c) =>
@@ -30,6 +36,9 @@ export class TargetController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): TargetController {
     return container.resolve(TARGET_CONTROLLER)
   }
@@ -47,6 +56,9 @@ export class TargetController extends BaseController {
     this.logger.debug(`TargetController initialized`)
   }
 
+  /*
+   * Use api-calls
+   */
   use() {
     this.router.addApiCall('createTarget', async (data) => {
       this.validateData<CreateTargetData>('console-create-target-data', data)

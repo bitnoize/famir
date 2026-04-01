@@ -1,4 +1,5 @@
 import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
+import { TARGET_ACCESS_LEVELS, TargetAccessLevel } from '../../models/index.js'
 import { RawFullTarget, RawTarget } from './target.functions.js'
 
 const rawTargetSchema: JSONSchemaType<RawTarget> = {
@@ -6,7 +7,7 @@ const rawTargetSchema: JSONSchemaType<RawTarget> = {
   required: [
     'campaign_id',
     'target_id',
-    'is_landing',
+    'access_level',
     'donor_secure',
     'donor_sub',
     'donor_domain',
@@ -27,8 +28,8 @@ const rawTargetSchema: JSONSchemaType<RawTarget> = {
     target_id: {
       type: 'string'
     },
-    is_landing: {
-      type: 'integer'
+    access_level: {
+      type: 'string'
     },
     donor_secure: {
       type: 'integer'
@@ -78,7 +79,7 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
   required: [
     'campaign_id',
     'target_id',
-    'is_landing',
+    'access_level',
     'donor_secure',
     'donor_sub',
     'donor_domain',
@@ -98,6 +99,7 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     'favicon_ico',
     'robots_txt',
     'sitemap_xml',
+    'allow_websockets',
     'is_enabled',
     'message_count',
     'created_at'
@@ -109,8 +111,8 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     target_id: {
       type: 'string'
     },
-    is_landing: {
-      type: 'integer'
+    access_level: {
+      type: 'string'
     },
     donor_secure: {
       type: 'integer'
@@ -172,6 +174,9 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     sitemap_xml: {
       type: 'string'
     },
+    allow_websockets: {
+      type: 'number'
+    },
     is_enabled: {
       type: 'integer'
     },
@@ -185,9 +190,9 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
   additionalProperties: false
 } as const
 
-export const targetSchemas: ValidatorSchemas = {
-  'database-raw-target': rawTargetSchema,
-  'database-raw-full-target': rawFullTargetSchema
+export const targetAccessLevelSchema: JSONSchemaType<TargetAccessLevel> = {
+  type: 'string',
+  enum: [...TARGET_ACCESS_LEVELS]
 } as const
 
 export const targetSubSchema: JSONSchemaType<string> = {
@@ -253,4 +258,10 @@ export const targetContentSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 0,
   maxLength: 10 * 1024 * 1024
+} as const
+
+export const targetSchemas: ValidatorSchemas = {
+  'database-raw-target': rawTargetSchema,
+  'database-raw-full-target': rawFullTargetSchema,
+  'database-target-access-level': targetAccessLevelSchema
 } as const

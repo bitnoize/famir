@@ -1,5 +1,11 @@
+export const TARGET_ACCESS_LEVELS = ['transparent', 'landing'] as const
+export type TargetAccessLevel = (typeof TARGET_ACCESS_LEVELS)[number]
+
 export const TARGET_SUB_ROOT = '.'
 
+/*
+ * Target is the specific donor and mirror domains and associated data.
+ */
 export class TargetModel {
   static isNotNull = <T extends TargetModel>(model: T | null): model is T => {
     return model != null
@@ -12,7 +18,7 @@ export class TargetModel {
   constructor(
     readonly campaignId: string,
     readonly targetId: string,
-    readonly isLanding: boolean,
+    readonly accessLevel: TargetAccessLevel,
     readonly donorSecure: boolean,
     readonly donorSub: string,
     readonly donorDomain: string,
@@ -82,11 +88,14 @@ export class TargetModel {
   }
 }
 
+/*
+ * Extended target
+ */
 export class FullTargetModel extends TargetModel {
   constructor(
     campaignId: string,
     targetId: string,
-    isLanding: boolean,
+    accessLevel: TargetAccessLevel,
     donorSecure: boolean,
     donorSub: string,
     donorDomain: string,
@@ -106,6 +115,7 @@ export class FullTargetModel extends TargetModel {
     readonly faviconIco: string,
     readonly robotsTxt: string,
     readonly sitemapXml: string,
+    readonly allowWebSockets: boolean,
     isEnabled: boolean,
     messageCount: number,
     createdAt: Date
@@ -113,7 +123,7 @@ export class FullTargetModel extends TargetModel {
     super(
       campaignId,
       targetId,
-      isLanding,
+      accessLevel,
       donorSecure,
       donorSub,
       donorDomain,

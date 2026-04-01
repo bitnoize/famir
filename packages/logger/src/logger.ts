@@ -1,5 +1,9 @@
 export const LOGGER = Symbol('Logger')
+export const LOGGER_BACKEND = Symbol('LoggerBackend')
 
+/**
+ * Logger contract
+ */
 export interface Logger {
   debug(mesg: string, data?: LoggerData): void
   info(mesg: string, data?: LoggerData): void
@@ -8,23 +12,16 @@ export interface Logger {
   fatal(mesg: string, data?: LoggerData): void
 }
 
+export { Logger as PinoLoggerBackend } from 'pino'
+
 export type LoggerData = Record<string, unknown>
-
-export const LOGGER_LOG_LEVELS = ['debug', 'info', 'warn', 'error', 'fatal'] as const
-export type LoggerLogLevel = (typeof LOGGER_LOG_LEVELS)[number]
-
-export type PinoLoggerTransportOptions = Record<string, unknown>
 
 export type PinoLoggerConfig = {
   LOGGER_APP_NAME: string
-  LOGGER_LOG_LEVEL: LoggerLogLevel
-  LOGGER_TRANSPORT_TARGET: string
-  LOGGER_TRANSPORT_OPTIONS: string
+  LOGGER_LOG_LEVEL: string
 }
 
 export interface PinoLoggerOptions {
   appName: string
-  logLevel: LoggerLogLevel
-  transportTarget: string
-  transportOptions: PinoLoggerTransportOptions
+  logLevel: string
 }

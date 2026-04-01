@@ -1,7 +1,6 @@
+import { DIContainer, HttpBody, HttpConnection } from '@famir/common'
 import {
-  HttpBody,
   HttpBodyWrap,
-  HttpConnection,
   HttpHeadersWrap,
   HttpMethodWrap,
   HttpStatusWrap,
@@ -11,50 +10,53 @@ import {
   UAResult
 } from '@famir/http-tools'
 import http from 'node:http'
-import { Readable, Writable } from 'node:stream'
+import { Duplex, Readable, Writable } from 'node:stream'
+import WebSocket, { createWebSocketStream } from 'ws'
 import { HttpServerError } from './http-server.error.js'
-import { HttpServerContext, HttpServerContextState } from './http-server.js'
+import {
+  HTTP_SERVER_CONTEXT_FACTORY,
+  HttpServerContext,
+  HttpServerContextFactory,
+  HttpServerContextState,
+  HttpServerContextType
+} from './http-server.js'
 
-export class NativeHttpServerContext implements HttpServerContext {
-  readonly state: HttpServerContextState = {}
+/**
+ * Native HTTP server context factory
+ */
+export class NativeHttpServerContextFactory implements HttpServerContextFactory {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
+    container.registerSingleton<HttpServerContextFactory>(
+      HTTP_SERVER_CONTEXT_FACTORY,
+      () => new NativeHttpServerContextFactory()
+    )
+  }
+
+  createNormal(
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+    state: HttpServerContextState
+  ): HttpServerContext {
+    return new NativeHttpServerNormalContext(req, res, state)
+  }
+
+  createWebSocket(
+    ws: WebSocket,
+    req: http.IncomingMessage,
+    state: HttpServerContextState
+  ): HttpServerContext {
+    return new NativeHttpServerWebSocketContext(ws, req, state)
+  }
+}
+
+/*
+ * Native HTTP server base context
+ */
+export abstract class NativeHttpServerBaseContext {
   readonly middlewares: string[] = []
-
-  constructor(
-    protected readonly req: http.IncomingMessage,
-    protected readonly res: http.ServerResponse,
-    public readonly verbose: boolean,
-    public readonly errorPage: string
-  ) {
-    this.res.on('finish', () => {
-      this.#finishTime = Date.now()
-    })
-
-    try {
-      this.method = HttpMethodWrap.fromReq(req)
-      this.url = HttpUrlWrap.fromReq(req).freeze()
-      this.requestHeaders = HttpHeadersWrap.fromReq(req).freeze()
-      this.requestBody = HttpBodyWrap.fromScratch()
-      this.status = HttpStatusWrap.fromScratch()
-      this.responseHeaders = HttpHeadersWrap.fromScratch()
-      this.responseBody = HttpBodyWrap.fromScratch()
-    } catch (error) {
-      throw new HttpServerError(`Bad request`, {
-        cause: error,
-        context: {
-          reason: `Context constructor failed`
-        },
-        code: 'BAD_REQUEST'
-      })
-    }
-  }
-
-  get requestStream(): Readable {
-    return this.req
-  }
-
-  get responseStream(): Writable {
-    return this.res
-  }
 
   readonly method: HttpMethodWrap
   readonly url: HttpUrlWrap
@@ -64,44 +66,43 @@ export class NativeHttpServerContext implements HttpServerContext {
   readonly responseHeaders: HttpHeadersWrap
   readonly responseBody: HttpBodyWrap
 
-  async loadRequest(bodySizeLimit: number): Promise<void> {
-    if (!(bodySizeLimit > 0)) {
-      throw new TypeError(`Wrong loadRequest params`)
-    }
-
-    const requestBody = await this.loadRequestBody(bodySizeLimit)
-
-    this.requestBody.set(requestBody).freeze()
-  }
-
-  sendHead() {
-    if (this.status.isUnknown()) {
-      throw new HttpServerError(`Server internal error`, {
+  constructor(
+    readonly type: HttpServerContextType,
+    protected readonly req: http.IncomingMessage,
+    readonly state: HttpServerContextState
+  ) {
+    try {
+      this.method = HttpMethodWrap.fromReq(req)
+      this.url = HttpUrlWrap.fromReq(req)
+      this.requestHeaders = HttpHeadersWrap.fromReq(req)
+      this.requestBody = HttpBodyWrap.fromScratch()
+      this.status = HttpStatusWrap.fromScratch()
+      this.responseHeaders = HttpHeadersWrap.fromScratch()
+      this.responseBody = HttpBodyWrap.fromScratch()
+    } catch (error) {
+      throw new HttpServerError(`Bad request`, {
+        cause: error,
         context: {
-          reason: `Unknown response status`,
-          status: this.status.get()
+          reason: `Create context failed`
         },
-        code: 'INTERNAL_ERROR'
+        code: 'BAD_REQUEST'
       })
     }
-
-    this.responseHeaders.forEach((name, value) => {
-      this.res.setHeader(name, value)
-    })
-
-    this.res.writeHead(this.status.get())
-
-    this.status.freeze()
-    this.responseHeaders.freeze()
   }
 
-  async sendResponse(): Promise<void> {
-    this.sendHead()
+  abstract get requestStream(): Readable
 
-    await this.sendResponseBody(this.responseBody.get())
+  abstract get responseStream(): Writable
 
-    this.responseBody.freeze()
-  }
+  abstract loadRequest(bodySizeLimit: number): Promise<void>
+
+  abstract sendHead(): void
+
+  abstract sendResponse(): Promise<void>
+
+  abstract close(): void
+
+  abstract get isComplete(): boolean
 
   #isBot: boolean | null = null
 
@@ -146,24 +147,22 @@ export class NativeHttpServerContext implements HttpServerContext {
 
   readonly startTime: number = Date.now()
 
-  #finishTime: number = 0
+  finishTime: number = 0
 
-  get finishTime(): number {
-    return this.#finishTime
-  }
-
-  get isComplete(): boolean {
-    return this.res.writableEnded
-  }
-
-  private loadRequestBody(bodySizeLimit: number): Promise<HttpBody> {
+  protected loadRequestBody(requestStream: Readable, bodySizeLimit: number): Promise<HttpBody> {
     return new Promise<HttpBody>((resolve, reject) => {
+      if (!(bodySizeLimit > 0)) {
+        reject(new Error(`Wrong loadRequestBody params`))
+
+        return
+      }
+
       const chunks: Buffer[] = []
       let requestBodySize = 0
 
-      this.req.on('data', (chunk: Buffer) => {
+      requestStream.on('data', (chunk: Buffer) => {
         if (requestBodySize + chunk.length > bodySizeLimit) {
-          this.req.destroy()
+          requestStream.destroy()
 
           reject(
             new HttpServerError(`Content too large`, {
@@ -182,13 +181,13 @@ export class NativeHttpServerContext implements HttpServerContext {
         requestBodySize += chunk.length
       })
 
-      this.req.on('end', () => {
+      requestStream.on('end', () => {
         const requestBody = this.parseRawBody(chunks)
 
         resolve(requestBody)
       })
 
-      this.req.on('error', (error) => {
+      requestStream.on('error', (error) => {
         reject(
           new HttpServerError(`Bad request`, {
             cause: error,
@@ -199,27 +198,12 @@ export class NativeHttpServerContext implements HttpServerContext {
           })
         )
       })
-
-      this.req.on('close', () => {
-        if (!this.req.complete) {
-          reject(
-            new HttpServerError(`Bad request`, {
-              context: {
-                reason: `Request closed before complete`
-              },
-              code: 'BAD_REQUEST'
-            })
-          )
-
-          return
-        }
-      })
     })
   }
 
-  private sendResponseBody(responseBody: HttpBody): Promise<void> {
+  protected sendResponseBody(responseStream: Writable, responseBody: HttpBody): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.res.end(responseBody, (error?: Error) => {
+      responseStream.end(responseBody, (error?: Error) => {
         if (error) {
           reject(
             new HttpServerError(`Server internal error`, {
@@ -245,5 +229,145 @@ export class NativeHttpServerContext implements HttpServerContext {
     } catch {
       return Buffer.alloc(0)
     }
+  }
+}
+
+/*
+ * Native HTTP server normal context
+ */
+export class NativeHttpServerNormalContext
+  extends NativeHttpServerBaseContext
+  implements HttpServerContext
+{
+  constructor(
+    req: http.IncomingMessage,
+    protected readonly res: http.ServerResponse,
+    state: HttpServerContextState
+  ) {
+    super('normal', req, state)
+
+    this.method.freeze()
+    this.url.freeze()
+    this.requestHeaders.freeze()
+
+    this.res.on('finish', () => {
+      this.finishTime = Date.now()
+    })
+  }
+
+  override get requestStream(): Readable {
+    return this.req
+  }
+
+  override get responseStream(): Writable {
+    return this.res
+  }
+
+  override async loadRequest(bodySizeLimit: number): Promise<void> {
+    const requestBody = await this.loadRequestBody(this.req, bodySizeLimit)
+
+    this.requestBody.set(requestBody).freeze()
+  }
+
+  override sendHead() {
+    if (this.status.isUnknown()) {
+      throw new HttpServerError(`Server internal error`, {
+        context: {
+          reason: `Unknown response status`,
+          status: this.status.get()
+        },
+        code: 'INTERNAL_ERROR'
+      })
+    }
+
+    this.responseHeaders.forEach((name, value) => {
+      this.res.setHeader(name, value)
+    })
+
+    this.res.writeHead(this.status.get())
+
+    this.status.freeze()
+    this.responseHeaders.freeze()
+  }
+
+  override async sendResponse(): Promise<void> {
+    this.sendHead()
+
+    await this.sendResponseBody(this.res, this.responseBody.get())
+
+    this.responseBody.freeze()
+  }
+
+  override close() {
+    if (!this.isComplete) {
+      this.res.end()
+    }
+  }
+
+  override get isComplete(): boolean {
+    return this.res.writableEnded
+  }
+}
+
+/*
+ * Native HTTP server websocket context
+ */
+export class NativeHttpServerWebSocketContext
+  extends NativeHttpServerBaseContext
+  implements HttpServerContext
+{
+  protected readonly duplexStream: Duplex
+
+  constructor(
+    protected readonly ws: WebSocket,
+    req: http.IncomingMessage,
+    state: HttpServerContextState
+  ) {
+    super('websocket', req, state)
+
+    this.method.freeze()
+    this.url.freeze()
+    this.requestHeaders.freeze()
+    this.status.set(101).freeze()
+    this.responseHeaders.freeze()
+    this.responseBody.freeze()
+
+    this.duplexStream = createWebSocketStream(ws)
+
+    this.duplexStream.on('finish', () => {
+      this.finishTime = Date.now()
+    })
+  }
+
+  override get requestStream(): Readable {
+    return this.duplexStream
+  }
+
+  override get responseStream(): Writable {
+    return this.duplexStream
+  }
+
+  override async loadRequest(bodySizeLimit: number): Promise<void> {
+    const requestBody = await this.loadRequestBody(this.req, bodySizeLimit)
+
+    this.requestBody.set(requestBody).freeze()
+  }
+
+  override sendHead() {
+    throw new Error(`Not implemented for websocket context`)
+  }
+
+  override sendResponse(): Promise<void> {
+    throw new Error(`Not implemented for websocket context`)
+  }
+
+  override close() {
+    if (!this.isComplete) {
+      this.ws.close()
+    }
+  }
+
+  override get isComplete(): boolean {
+    return this.ws.readyState === WebSocket.CLOSING || this.ws.readyState === WebSocket.CLOSED
   }
 }

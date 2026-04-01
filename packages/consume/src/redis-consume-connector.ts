@@ -10,8 +10,14 @@ import {
   RedisConsumeConnectorOptions
 } from './consume.js'
 
+/*
+ * Redis consume connector implementation
+ */
 export class RedisConsumeConnector implements ConsumeConnector {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<ConsumeConnector>(
       CONSUME_CONNECTOR,
       (c) =>
@@ -46,17 +52,26 @@ export class RedisConsumeConnector implements ConsumeConnector {
     this.logger.debug(`ConsumeConnector initialized`)
   }
 
+  /*
+   * Get connection object
+   */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  connection<T>(): T {
+  getConnection<T>(): T {
     return this.redis as T
   }
 
+  /*
+   * Connect to Redis
+   */
   //async connect(): Promise<void> {
   //  await this.redis.connect()
   //
   //  this.logger.debug(`ConsumeConnector connected`)
   //}
 
+  /*
+   * Close connection
+   */
   async close(): Promise<void> {
     await this.redis.quit()
 

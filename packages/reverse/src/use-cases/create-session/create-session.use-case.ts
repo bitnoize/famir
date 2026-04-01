@@ -3,8 +3,14 @@ import { DatabaseError, SESSION_REPOSITORY, SessionModel, SessionRepository } fr
 import { HttpServerError } from '@famir/http-server'
 import { CREATE_SESSION_USE_CASE, CreateSessionData } from './create-session.js'
 
+/*
+ * Create session use-case
+ */
 export class CreateSessionUseCase {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<CreateSessionUseCase>(
       CREATE_SESSION_USE_CASE,
       (c) => new CreateSessionUseCase(c.resolve<SessionRepository>(SESSION_REPOSITORY))
@@ -13,6 +19,9 @@ export class CreateSessionUseCase {
 
   constructor(protected readonly sessionRepository: SessionRepository) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(data: CreateSessionData): Promise<SessionModel> {
     try {
       return await this.sessionRepository.create(data.campaignId)

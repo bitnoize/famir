@@ -4,8 +4,14 @@ import { HttpServerError } from '@famir/http-server'
 import { ANALYZE_QUEUE, AnalyzeQueue } from '@famir/produce'
 import { CREATE_MESSAGE_USE_CASE, CreateMessageData } from './create-message.js'
 
+/*
+ * Create message use-case
+ */
 export class CreateMessageUseCase {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<CreateMessageUseCase>(
       CREATE_MESSAGE_USE_CASE,
       (c) =>
@@ -21,34 +27,47 @@ export class CreateMessageUseCase {
     protected readonly analyzeQueue: AnalyzeQueue
   ) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(data: CreateMessageData): Promise<void> {
     try {
-      await this.messageRepository.create(
-        data.campaignId,
-        data.messageId,
-        data.proxyId,
-        data.targetId,
-        data.sessionId,
-        data.kind,
-        data.method,
-        data.url,
-        data.requestHeaders,
-        data.requestBody,
-        data.status,
-        data.responseHeaders,
-        data.responseBody,
-        data.connection,
-        data.payload,
-        data.errors,
-        data.processor,
-        data.startTime,
-        data.finishTime
-      )
+      if (data.processor) {
+        await this.messageRepository.create(
+          data.campaignId,
+          data.messageId,
+          data.proxyId,
+          data.targetId,
+          data.sessionId,
+          data.type,
+          data.method,
+          data.url,
+          data.requestHeaders,
+          data.requestBody,
+          data.status,
+          data.responseHeaders,
+          data.responseBody,
+          data.connection,
+          data.payload,
+          data.errors,
+          data.processor,
+          data.startTime,
+          data.finishTime
+        )
 
-      await this.analyzeQueue.addJob(data.processor, {
-        campaignId: data.campaignId,
-        messageId: data.messageId
-      })
+        await this.analyzeQueue.addJob(data.processor, {
+          campaignId: data.campaignId,
+          messageId: data.messageId
+        })
+      } else {
+        await this.messageRepository.createDummy(
+          data.campaignId,
+          data.messageId,
+          data.proxyId,
+          data.targetId,
+          data.sessionId
+        )
+      }
     } catch (error) {
       if (error instanceof DatabaseError) {
         if (error.code === 'NOT_FOUND') {

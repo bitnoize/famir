@@ -16,8 +16,14 @@ import { BaseController } from '../base/index.js'
 import { CAMPAIGN_CONTROLLER } from './campaign.js'
 import { campaignSchemas } from './campaign.schemas.js'
 
+/*
+ * Campaign controller
+ */
 export class CampaignController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       CAMPAIGN_CONTROLLER,
       (c) =>
@@ -30,6 +36,9 @@ export class CampaignController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): CampaignController {
     return container.resolve(CAMPAIGN_CONTROLLER)
   }
@@ -47,6 +56,9 @@ export class CampaignController extends BaseController {
     this.logger.debug(`CampaignController initialized`)
   }
 
+  /*
+   * Use api-calls
+   */
   use() {
     this.router.addApiCall('createCampaign', async (data) => {
       this.validateData<CreateCampaignData>('console-create-campaign-data', data)
@@ -58,6 +70,10 @@ export class CampaignController extends BaseController {
       this.validateData<ReadCampaignData>('console-read-campaign-data', data)
 
       return await this.campaignService.read(data)
+    })
+
+    this.router.addApiCall('readCampaignShare', async () => {
+      return await this.campaignService.readShare()
     })
 
     this.router.addApiCall('lockCampaign', async (data) => {

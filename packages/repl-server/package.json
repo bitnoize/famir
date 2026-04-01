@@ -1,7 +1,7 @@
 {
   "name": "@famir/repl-server",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Famir REPL server module",
   "keywords": [
     "famir",

@@ -11,6 +11,9 @@ import {
   RedisConsumeConnection
 } from '../../consume.js'
 
+/*
+ * Bull base worker
+ */
 export abstract class BullBaseWorker {
   protected readonly options: BullConsumeWorkerOptions
   protected readonly spec: ConsumeSpec
@@ -88,12 +91,18 @@ export abstract class BullBaseWorker {
     })
   }
 
+  /*
+   * Run worker
+   */
   async run(): Promise<void> {
     await this.worker.run()
 
     this.logger.debug(`Worker running: ${this.queueName}`)
   }
 
+  /*
+   * Close worker
+   */
   async close(): Promise<void> {
     await this.worker.close()
 

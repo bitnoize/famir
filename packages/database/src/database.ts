@@ -4,9 +4,12 @@ import { DatabaseFunctions } from './database.functions.js'
 export const DATABASE_CONNECTOR = Symbol('DatabaseConnector')
 export const DATABASE_MANAGER = Symbol('DatabaseManager')
 
+/**
+ * Database connector contract
+ */
 export interface DatabaseConnector {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  connection<T>(): T
+  getConnection<T>(): T
   connect(): Promise<void>
   close(): Promise<void>
 }
@@ -18,6 +21,9 @@ export type RedisDatabaseConnection = RedisClientType<
   3 // RESP version
 >
 
+/**
+ * Database manager contract
+ */
 export interface DatabaseManager {
   loadFunctions(): Promise<void>
   cleanup(): Promise<void>

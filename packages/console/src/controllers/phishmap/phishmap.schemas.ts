@@ -9,6 +9,7 @@ import {
   lurePathSchema,
   proxyUrlSchema,
   redirectorPageSchema,
+  targetAccessLevelSchema,
   targetBodySizeLimitSchema,
   targetConnectTimeoutSchema,
   targetContentSchema,
@@ -79,7 +80,7 @@ const phishmapTargetSchema: JSONSchemaType<PhishmapTarget> = {
   type: 'object',
   required: [
     'targetId',
-    'isLanding',
+    'accessLevel',
     'donorSecure',
     'donorSub',
     'donorDomain',
@@ -98,11 +99,12 @@ const phishmapTargetSchema: JSONSchemaType<PhishmapTarget> = {
     'faviconIco',
     'robotsTxt',
     'sitemapXml',
+    'allowWebSockets',
     'isEnabled'
   ],
   properties: {
     targetId: customIdentSchema,
-    isLanding: booleanSchema,
+    accessLevel: targetAccessLevelSchema,
     donorSecure: booleanSchema,
     donorSub: targetSubSchema,
     donorDomain: targetDomainSchema,
@@ -121,6 +123,7 @@ const phishmapTargetSchema: JSONSchemaType<PhishmapTarget> = {
     faviconIco: targetContentSchema,
     robotsTxt: targetContentSchema,
     sitemapXml: targetContentSchema,
+    allowWebSockets: booleanSchema,
     isEnabled: booleanSchema
   },
   additionalProperties: false
@@ -232,11 +235,7 @@ const purgePhishmapDataSchema: JSONSchemaType<PurgePhishmapData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema,
-    confirmSecret: {
-      ...randomIdentSchema,
-      nullable: true
-    }
+    campaignId: customIdentSchema
   },
   additionalProperties: false
 } as const

@@ -15,7 +15,8 @@ import {
   HTTP_SERVER_ASSETS,
   HttpServerAssets,
   HttpServerRouter,
-  NativeHttpServer
+  NativeHttpServer,
+  NativeHttpServerContextFactory
 } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
 import { BullAnalyzeQueue, RedisProduceConnector } from '@famir/produce'
@@ -27,40 +28,42 @@ import { StdReverseConfig } from './std.js'
 import { configStdReverseSchema } from './std.schemas.js'
 
 export async function bootstrapStd(composer: DIComposer, assets: HttpServerAssets): Promise<void> {
-  const container = new DIContainer()
+  const container = DIContainer.getInstance()
 
   container.registerSingleton(CONFIG_SCHEMA, () => configStdReverseSchema)
   container.registerSingleton(HTTP_SERVER_ASSETS, () => assets)
 
-  AjvValidator.inject(container)
+  AjvValidator.register(container)
 
-  EnvConfig.inject<StdReverseConfig>(container)
+  EnvConfig.register<StdReverseConfig>(container)
 
-  PinoLogger.inject(container)
+  PinoLogger.register(container)
 
-  EtaTemplater.inject(container)
+  EtaTemplater.register(container)
 
-  RedisDatabaseConnector.inject(container)
+  RedisDatabaseConnector.register(container)
 
-  RedisCampaignRepository.inject(container)
-  RedisProxyRepository.inject(container)
-  RedisTargetRepository.inject(container)
-  RedisRedirectorRepository.inject(container)
-  RedisLureRepository.inject(container)
-  RedisSessionRepository.inject(container)
-  RedisMessageRepository.inject(container)
+  RedisCampaignRepository.register(container)
+  RedisProxyRepository.register(container)
+  RedisTargetRepository.register(container)
+  RedisRedirectorRepository.register(container)
+  RedisLureRepository.register(container)
+  RedisSessionRepository.register(container)
+  RedisMessageRepository.register(container)
 
-  RedisProduceConnector.inject(container)
+  RedisProduceConnector.register(container)
 
-  BullAnalyzeQueue.inject(container)
+  BullAnalyzeQueue.register(container)
 
-  CurlHttpClient.inject(container)
+  CurlHttpClient.register(container)
 
-  HttpServerRouter.inject(container)
+  HttpServerRouter.register(container)
 
-  NativeHttpServer.inject(container)
+  NativeHttpServerContextFactory.register(container)
 
-  ReverseApp.inject(container)
+  NativeHttpServer.register(container)
+
+  ReverseApp.register(container)
 
   autoLoad(container)
 

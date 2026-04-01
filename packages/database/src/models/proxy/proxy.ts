@@ -1,3 +1,6 @@
+/*
+ * Proxy used to route traffic from the client to the donor site
+ */
 export class ProxyModel {
   static isNotNull = <T extends ProxyModel>(model: T | null): model is T => {
     return model != null

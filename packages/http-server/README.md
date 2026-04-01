@@ -1,4 +1,4 @@
 # @famir/http-server
 
-Strict HTTP server.
+Famir http-server infrastructure service.
 

@@ -7,8 +7,14 @@ import { BaseController } from '../base/index.js'
 import { MESSAGE_CONTROLLER } from './message.js'
 import { messageSchemas } from './message.schemas.js'
 
+/*
+ * Message controller
+ */
 export class MessageController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       MESSAGE_CONTROLLER,
       (c) =>
@@ -21,6 +27,9 @@ export class MessageController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): MessageController {
     return container.resolve(MESSAGE_CONTROLLER)
   }
@@ -38,6 +47,9 @@ export class MessageController extends BaseController {
     this.logger.debug(`MessageController initialized`)
   }
 
+  /*
+   * Use api-calls
+   */
   use() {
     this.router.addApiCall('readMessage', async (data) => {
       this.validateData<ReadMessageData>('console-read-message-data', data)

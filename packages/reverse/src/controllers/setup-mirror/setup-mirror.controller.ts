@@ -5,18 +5,21 @@ import {
   HttpServerError,
   HttpServerRouter
 } from '@famir/http-server'
+import { HttpMessage } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { ReverseMessage } from '../../reverse-message.js'
-import {
-  type FindCampaignTargetUseCase,
-  FIND_CAMPAIGN_TARGET_USE_CASE
-} from '../../use-cases/index.js'
+import { type FindTargetUseCase, FIND_TARGET_USE_CASE } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
-import { SETUP_MIRROR_CONTROLLER } from './setup-mirror.js'
+import { SETUP_MIRROR_CONTROLLER, SetupMirrorDispatchContextType } from './setup-mirror.js'
 
+/*
+ * Setup mirror controller
+ */
 export class SetupMirrorController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       SETUP_MIRROR_CONTROLLER,
       (c) =>
@@ -24,11 +27,14 @@ export class SetupMirrorController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<FindCampaignTargetUseCase>(FIND_CAMPAIGN_TARGET_USE_CASE)
+          c.resolve<FindTargetUseCase>(FIND_TARGET_USE_CASE)
         )
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): SetupMirrorController {
     return container.resolve(SETUP_MIRROR_CONTROLLER)
   }
@@ -37,37 +43,39 @@ export class SetupMirrorController extends BaseController {
     validator: Validator,
     logger: Logger,
     router: HttpServerRouter,
-    protected readonly findCampaignTargetUseCase: FindCampaignTargetUseCase
+    protected readonly findTargetUseCase: FindTargetUseCase
   ) {
     super(validator, logger, router)
 
     this.logger.debug(`SetupMirrorController initialized`)
   }
 
+  /*
+   * Use middleware
+   */
   use() {
     this.router.addMiddleware('setup-mirror', async (ctx, next) => {
       const mirrorHost = this.parseMirrorHost(ctx)
 
-      const [campaign, target, targets] = await this.findCampaignTargetUseCase.execute({
+      const [campaignShare, campaign, target, targets] = await this.findTargetUseCase.execute({
         mirrorHost
       })
 
-      const message = new ReverseMessage(
-        ctx.method,
-        ctx.url.clone(),
-        ctx.requestHeaders.clone().reset(),
-        ctx.requestBody.clone().reset(),
-        ctx.status.clone().reset(),
-        ctx.responseHeaders.clone().reset(),
-        ctx.responseBody.clone().reset()
-      )
+      const message = HttpMessage.create(ctx.type)
 
+      this.setState(ctx, 'campaignShare', campaignShare)
       this.setState(ctx, 'campaign', campaign)
       this.setState(ctx, 'target', target)
       this.setState(ctx, 'targets', targets)
       this.setState(ctx, 'message', message)
 
-      if (ctx.verbose) {
+      await this.dispatchRoot[ctx.type](ctx, campaign, target, message, next)
+    })
+  }
+
+  protected dispatchRoot: SetupMirrorDispatchContextType = {
+    normal: async (ctx, campaign, target, message, next) => {
+      if (ctx.state.verbose) {
         ctx.responseHeaders.merge({
           'X-Famir-Campaign-Id': target.campaignId,
           'X-Famir-Target-Id': target.targetId,
@@ -76,10 +84,20 @@ export class SetupMirrorController extends BaseController {
       }
 
       await next()
-    })
+    },
+
+    websocket: async (ctx, campaign, target, message, next) => {
+      if (!target.allowWebSockets) {
+        ctx.close()
+
+        return
+      }
+
+      await next()
+    }
   }
 
-  private parseMirrorHost(ctx: HttpServerContext): string {
+  protected parseMirrorHost(ctx: HttpServerContext): string {
     try {
       const mirrorHost = ctx.requestHeaders.getString('Host')
 

@@ -11,8 +11,14 @@ import {
   RedisDatabaseConnectorOptions
 } from './database.js'
 
+/*
+ * Redis database connector implementation
+ */
 export class RedisDatabaseConnector implements DatabaseConnector {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<DatabaseConnector>(
       DATABASE_CONNECTOR,
       (c) =>
@@ -48,21 +54,30 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     this.logger.debug(`DatabaseConnector initialized`)
   }
 
+  /*
+   * Get connection object
+   */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  connection<T>(): T {
+  getConnection<T>(): T {
     return this.redis as T
   }
 
+  /*
+   * Connect to Redis
+   */
   async connect(): Promise<void> {
     await this.redis.connect()
 
-    this.logger.debug(`Database connected`)
+    this.logger.debug(`DatabaseConnector connected`)
   }
 
+  /*
+   * Close connection
+   */
   async close(): Promise<void> {
     await this.redis.close()
 
-    this.logger.debug(`Database closed`)
+    this.logger.debug(`DatabaseConnector closed`)
   }
 
   private buildOptions(config: RedisDatabaseConfig): RedisDatabaseConnectorOptions {

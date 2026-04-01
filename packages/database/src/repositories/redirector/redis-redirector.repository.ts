@@ -14,8 +14,14 @@ import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 import { REDIRECTOR_REPOSITORY, RedirectorRepository } from './redirector.js'
 import { redirectorSchemas } from './redirector.schemas.js'
 
+/*
+ * Redis redirector repository
+ */
 export class RedisRedirectorRepository extends RedisBaseRepository implements RedirectorRepository {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<RedirectorRepository>(
       REDIRECTOR_REPOSITORY,
       (c) =>
@@ -23,7 +29,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
         )
     )
   }
@@ -41,6 +47,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     this.logger.debug(`RedirectorRepository initialized`)
   }
 
+  /*
+   * Create redirector
+   */
   async create(
     campaignId: string,
     redirectorId: string,
@@ -53,6 +62,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         campaignId,
         redirectorId,
         page,
+        Date.now().toString(),
         lockSecret
       )
 
@@ -64,6 +74,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
+  /*
+   * Read redirector by id
+   */
   async read(campaignId: string, redirectorId: string): Promise<RedirectorModel | null> {
     try {
       const rawModel = await this.connection.redirector.read_redirector(
@@ -78,6 +91,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
+  /*
+   * Read extended redirector by id
+   */
   async readFull(campaignId: string, redirectorId: string): Promise<FullRedirectorModel | null> {
     try {
       const rawModel = await this.connection.redirector.read_full_redirector(
@@ -92,6 +108,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
+  /*
+   * Update redirector
+   */
   async update(
     campaignId: string,
     redirectorId: string,
@@ -103,7 +122,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         this.options.prefix,
         campaignId,
         redirectorId,
-        page,
+        page ?? null,
         lockSecret
       )
 
@@ -115,6 +134,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
+  /*
+   * Delete redirector
+   */
   async delete(campaignId: string, redirectorId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.redirector.delete_redirector(
@@ -132,6 +154,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
+  /*
+   * List redirectors
+   */
   async list(campaignId: string): Promise<RedirectorModel[] | null> {
     try {
       const index = await this.connection.redirector.read_redirector_index(
@@ -157,6 +182,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
+  /*
+   * List extended redirectors
+   */
   async listFull(campaignId: string): Promise<FullRedirectorModel[] | null> {
     try {
       const index = await this.connection.redirector.read_redirector_index(

@@ -4,6 +4,9 @@ export type CommonErrorOptions = ErrorOptions & {
   context?: ErrorContext | undefined
 }
 
+/*
+ * Common error object
+ */
 export abstract class CommonError extends Error {
   context: ErrorContext = {}
 

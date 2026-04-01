@@ -1,7 +1,7 @@
 {
   "name": "@famir/consume",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Famir consume module",
   "keywords": [
     "famir",
@@ -11,7 +11,7 @@
     "reverse-proxy"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
-	"license": "Apache-2.0",
+  "license": "Apache-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -39,7 +39,9 @@
     "@famir/logger": "*",
     "@famir/produce": "*",
     "@famir/validator": "*",
-    "bullmq": "~5.71.1",
-    "ioredis": "~5.10.1"
+    "bullmq": "^5.73.5"
+  },
+  "peerDependencies": {
+    "ioredis": "^5.10.1"
   }
 }

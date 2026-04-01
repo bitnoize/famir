@@ -8,10 +8,10 @@ const rawSessionSchema: JSONSchemaType<RawSession> = {
     'session_id',
     'proxy_id',
     'secret',
-    'is_landing',
+    'is_upgraded',
     'message_count',
     'created_at',
-    'last_auth_at'
+    'authorized_at'
   ],
   properties: {
     campaign_id: {
@@ -26,7 +26,7 @@ const rawSessionSchema: JSONSchemaType<RawSession> = {
     secret: {
       type: 'string'
     },
-    is_landing: {
+    is_upgraded: {
       type: 'integer'
     },
     message_count: {
@@ -35,7 +35,7 @@ const rawSessionSchema: JSONSchemaType<RawSession> = {
     created_at: {
       type: 'integer'
     },
-    last_auth_at: {
+    authorized_at: {
       type: 'integer'
     }
   },

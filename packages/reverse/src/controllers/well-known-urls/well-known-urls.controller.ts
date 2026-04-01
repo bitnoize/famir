@@ -4,10 +4,16 @@ import { HTTP_SERVER_ROUTER, HttpServerContext, HttpServerRouter } from '@famir/
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import { WELL_KNOWN_URLS_CONTROLLER } from './well-known-urls.js'
+import { WELL_KNOWN_URLS_CONTROLLER, WellKnownUrlsDispatchContextType } from './well-known-urls.js'
 
+/*
+ * Well known urls controller
+ */
 export class WellKnownUrlsController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       WELL_KNOWN_URLS_CONTROLLER,
       (c) =>
@@ -19,6 +25,9 @@ export class WellKnownUrlsController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): WellKnownUrlsController {
     return container.resolve(WELL_KNOWN_URLS_CONTROLLER)
   }
@@ -29,10 +38,19 @@ export class WellKnownUrlsController extends BaseController {
     this.logger.debug(`WellKnownUrlsController initialized`)
   }
 
+  /*
+   * Use middleware
+   */
   use() {
     this.router.addMiddleware('well-known-urls', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
+      await this.dispatchRoot[ctx.type](ctx, target, next)
+    })
+  }
+
+  protected dispatchRoot: WellKnownUrlsDispatchContextType = {
+    normal: async (ctx, target, next) => {
       if (ctx.method.is('OPTIONS')) {
         await this.sendPreflightCors(ctx)
       } else if (ctx.url.isPath('/favicon.ico')) {
@@ -44,10 +62,18 @@ export class WellKnownUrlsController extends BaseController {
       } else {
         await next()
       }
-    })
+    },
+
+    websocket: async (ctx, target, next) => {
+      await next()
+    }
   }
 
   protected async sendPreflightCors(ctx: HttpServerContext): Promise<void> {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     ctx.status.set(204)
 
     ctx.responseHeaders.merge({
@@ -67,6 +93,10 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     if (ctx.method.is(['GET', 'HEAD']) && target.faviconIco) {
       ctx.status.set(200)
 
@@ -93,6 +123,10 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     if (ctx.method.is(['GET', 'HEAD']) && target.robotsTxt) {
       ctx.status.set(200)
 
@@ -119,6 +153,10 @@ export class WellKnownUrlsController extends BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     if (ctx.method.is(['GET', 'HEAD']) && target.sitemapXml) {
       ctx.status.set(200)
 

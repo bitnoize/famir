@@ -6,6 +6,9 @@ export type ConsumeErrorOptions = CommonErrorOptions & {
   code: ConsumeErrorCode
 }
 
+/*
+ * Consume error object
+ */
 export class ConsumeError extends CommonError {
   code: ConsumeErrorCode
 

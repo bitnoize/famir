@@ -13,8 +13,14 @@ import { BaseController } from '../base/index.js'
 import { PHISHMAP_CONTROLLER } from './phishmap.js'
 import { phishmapSchemas } from './phishmap.schemas.js'
 
+/*
+ * Phishmap controller
+ */
 export class PhishmapController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       PHISHMAP_CONTROLLER,
       (c) =>
@@ -27,6 +33,9 @@ export class PhishmapController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): PhishmapController {
     return container.resolve(PHISHMAP_CONTROLLER)
   }
@@ -44,6 +53,9 @@ export class PhishmapController extends BaseController {
     this.logger.debug(`PhishmapController initialized`)
   }
 
+  /*
+   * Use api-calls
+   */
   use() {
     this.router.addApiCall('dumpPhishmap', async (data) => {
       this.validateData<DumpPhishmapData>('console-dump-phishmap-data', data)

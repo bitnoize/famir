@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-client",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Famir HTTP client module",
   "keywords": [
     "famir",
@@ -11,7 +11,7 @@
     "reverse-proxy"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
-	"license": "Apache-2.0",
+  "license": "Apache-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -36,7 +36,6 @@
   "dependencies": {
     "@famir/common": "*",
     "@famir/config": "*",
-    "@famir/http-tools": "*",
     "@famir/logger": "*",
     "@famir/validator": "*",
     "node-libcurl": "~4.1.0"

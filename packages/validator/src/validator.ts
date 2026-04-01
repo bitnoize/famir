@@ -2,6 +2,9 @@ export { JSONSchemaType } from 'ajv'
 
 export const VALIDATOR = Symbol('Validator')
 
+/**
+ * Validator contract
+ */
 export interface Validator {
   getSchema(name: string): object | undefined
   addSchema(name: string, schema: object): void

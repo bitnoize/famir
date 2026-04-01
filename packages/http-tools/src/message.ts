@@ -1,37 +1,60 @@
-import { randomIdent, serializeError } from '@famir/common'
 import {
-  HttpBodyWrap,
   HttpConnection,
-  HttpContentType,
-  HttpContentTypeName,
-  HttpContentTypes,
   HttpError,
-  HttpHeadersWrap,
-  HttpKind,
-  HttpMethodWrap,
   HttpPayload,
-  HttpStatusWrap,
-  HttpUrlWrap,
-  RewriteUrlScheme,
-  RewriteUrlTarget,
-  rewriteUrl
-} from '@famir/http-tools'
+  HttpType,
+  arrayIncludes,
+  randomIdent,
+  serializeError
+} from '@famir/common'
 import { Transform } from 'node:stream'
+import { HttpBodyWrap } from './body.js'
+import { HttpContentType, HttpContentTypeName, HttpContentTypes } from './content-type.js'
+import { HttpHeadersWrap } from './headers.js'
+import { HttpMethodWrap } from './method.js'
+import { RewriteUrlScheme, RewriteUrlTarget, rewriteUrl } from './rewrite-url.js'
+import { HttpStatusWrap } from './status.js'
+import { HttpUrlWrap } from './url.js'
 
-export type ReverseMessageInterceptor = (message: ReverseMessage) => void
+export type HttpMessageInterceptor = (message: HttpMessage) => void
 
-export class ReverseMessage {
+export class HttpMessage {
+  /*
+   * Create message
+   */
+  static create(type: string): HttpMessage {
+    if (type === 'normal') {
+      return new HttpMessage('normal-simple')
+    } else if (type === 'websocket') {
+      return new HttpMessage('websocket')
+    } else {
+      throw new Error(`Message type not known: ${type}`)
+    }
+  }
+
   readonly id = randomIdent()
 
-  constructor(
-    readonly method: HttpMethodWrap,
-    readonly url: HttpUrlWrap,
-    readonly requestHeaders: HttpHeadersWrap,
-    readonly requestBody: HttpBodyWrap,
-    readonly status: HttpStatusWrap,
-    readonly responseHeaders: HttpHeadersWrap,
-    readonly responseBody: HttpBodyWrap
-  ) {}
+  #type: HttpType
+
+  readonly method: HttpMethodWrap
+  readonly url: HttpUrlWrap
+  readonly requestHeaders: HttpHeadersWrap
+  readonly requestBody: HttpBodyWrap
+  readonly status: HttpStatusWrap
+  readonly responseHeaders: HttpHeadersWrap
+  readonly responseBody: HttpBodyWrap
+
+  constructor(type: HttpType) {
+    this.#type = type
+
+    this.method = HttpMethodWrap.fromScratch()
+    this.url = HttpUrlWrap.fromScratch()
+    this.requestHeaders = HttpHeadersWrap.fromScratch()
+    this.requestBody = HttpBodyWrap.fromScratch()
+    this.status = HttpStatusWrap.fromScratch()
+    this.responseHeaders = HttpHeadersWrap.fromScratch()
+    this.responseBody = HttpBodyWrap.fromScratch()
+  }
 
   #isReady: boolean = false
 
@@ -43,21 +66,19 @@ export class ReverseMessage {
     this.#isReady = true
   }
 
-  #kind: HttpKind = 'simple'
-
-  getKind(): HttpKind {
-    return this.#kind
+  get type(): HttpType {
+    return this.#type
   }
 
-  setKind(kind: HttpKind) {
-    this.sureNotReady('setKind')
+  setType(type: HttpType) {
+    this.sureNotReady('setType')
 
-    this.#kind = kind
-  }
+    if (!arrayIncludes(this.typesSwitch[this.type], type)) {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      throw new Error(`Wrong type switch: ${this.type} => ${type}`)
+    }
 
-  isKind(kind: HttpKind | HttpKind[]): boolean {
-    const values = Array.isArray(kind) ? kind : [kind]
-    return values.includes(this.getKind())
+    this.#type = type
   }
 
   readonly connection: HttpConnection = {}
@@ -128,16 +149,16 @@ export class ReverseMessage {
     )
   }
 
-  private requestHeadInterceptors: Array<[string, ReverseMessageInterceptor]> = []
-  private requestBodyInterceptors: Array<[string, ReverseMessageInterceptor]> = []
+  private requestHeadInterceptors: Array<[string, HttpMessageInterceptor]> = []
+  private requestBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
 
-  addRequestHeadInterceptor(name: string, interceptor: ReverseMessageInterceptor) {
+  addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addRequestHeadInterceptor')
 
     this.requestHeadInterceptors.push([name, interceptor])
   }
 
-  addRequestBodyInterceptor(name: string, interceptor: ReverseMessageInterceptor) {
+  addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addRequestBodyInterceptor')
 
     this.requestBodyInterceptors.push([name, interceptor])
@@ -186,16 +207,16 @@ export class ReverseMessage {
     return this.requestTransforms
   }
 
-  private responseHeadInterceptors: Array<[string, ReverseMessageInterceptor]> = []
-  private responseBodyInterceptors: Array<[string, ReverseMessageInterceptor]> = []
+  private responseHeadInterceptors: Array<[string, HttpMessageInterceptor]> = []
+  private responseBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
 
-  addResponseHeadInterceptor(name: string, interceptor: ReverseMessageInterceptor) {
+  addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addResponseHeadInterceptor')
 
     this.responseHeadInterceptors.push([name, interceptor])
   }
 
-  addResponseBodyInterceptor(name: string, interceptor: ReverseMessageInterceptor) {
+  addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addResponseBodyInterceptor')
 
     this.responseBodyInterceptors.push([name, interceptor])
@@ -255,13 +276,20 @@ export class ReverseMessage {
 
   protected sureNotReady(name: string) {
     if (this.isReady) {
-      throw new Error(`ReverseMessage is ready on: ${name}`)
+      throw new Error(`HttpMessage is ready on: ${name}`)
     }
   }
 
   protected sureIsReady(name: string) {
     if (!this.isReady) {
-      throw new Error(`ReverseMessage not ready on: ${name}`)
+      throw new Error(`HttpMessage not ready on: ${name}`)
     }
   }
+
+  private typesSwitch: Record<HttpType, HttpType[]> = {
+    'normal-simple': ['normal-simple', 'normal-stream-request', 'normal-stream-response'],
+    'normal-stream-request': ['normal-simple', 'normal-stream-request', 'normal-stream-response'],
+    'normal-stream-response': ['normal-simple', 'normal-stream-request', 'normal-stream-response'],
+    websocket: ['websocket']
+  } as const
 }

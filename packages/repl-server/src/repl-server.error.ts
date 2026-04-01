@@ -12,6 +12,9 @@ export type ReplServerErrorOptions = CommonErrorOptions & {
   code: ReplServerErrorCode
 }
 
+/*
+ * REPL server error object
+ */
 export class ReplServerError extends CommonError {
   code: ReplServerErrorCode
 

@@ -15,8 +15,14 @@ import { BullBaseWorker } from '../base/index.js'
 import { ANALYZE_WORKER, AnalyzeWorker } from './analyze.js'
 import { analyzeSchemas } from './analyze.schemas.js'
 
+/*
+ * Bull analyze worker implementation
+ */
 export class BullAnalyzeWorker extends BullBaseWorker implements AnalyzeWorker {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<AnalyzeWorker>(
       ANALYZE_WORKER,
       (c) =>
@@ -24,7 +30,7 @@ export class BullAnalyzeWorker extends BullBaseWorker implements AnalyzeWorker {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<BullConsumeConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ConsumeConnector>(CONSUME_CONNECTOR).connection<RedisConsumeConnection>(),
+          c.resolve<ConsumeConnector>(CONSUME_CONNECTOR).getConnection<RedisConsumeConnection>(),
           c.resolve<ConsumeRouter>(CONSUME_ROUTER)
         )
     )

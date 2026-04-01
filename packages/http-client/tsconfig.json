@@ -9,7 +9,6 @@
     { "path": "../common" },
     { "path": "../validator" },
     { "path": "../config" },
-    { "path": "../logger" },
-    { "path": "../http-tools" }
+    { "path": "../logger" }
   ]
 }

@@ -15,6 +15,9 @@ export interface HttpSetCookie {
 }
 export type HttpSetCookies = Record<string, HttpSetCookie | undefined>
 
+/*
+ * Parse cookies
+ */
 export function parseCookies(values: string[]): HttpCookies {
   const cookies: HttpCookies = {}
 
@@ -32,6 +35,9 @@ export function parseCookies(values: string[]): HttpCookies {
   return cookies
 }
 
+/*
+ * Format cookies
+ */
 export function formatCookies(cookies: HttpCookies): string {
   const toughCookies: ToughCookie[] = []
 
@@ -49,6 +55,9 @@ export function formatCookies(cookies: HttpCookies): string {
   return toughCookies.map((toughCookie) => toughCookie.cookieString()).join(';')
 }
 
+/*
+ * Parse set-cookies
+ */
 export function parseSetCookies(values: string[]): HttpSetCookies {
   const cookies: HttpSetCookies = {}
 
@@ -101,6 +110,9 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
   return cookies
 }
 
+/*
+ * Format set-cookies
+ */
 export function formatSetCookies(cookies: HttpSetCookies): string[] {
   const toughCookies: ToughCookie[] = []
 

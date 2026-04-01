@@ -1,4 +1,4 @@
 # @famir/consume
 
-Consume background jobs.
+Famir consume infrastructure service.
 

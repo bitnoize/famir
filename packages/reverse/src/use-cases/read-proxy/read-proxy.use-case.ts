@@ -3,8 +3,14 @@ import { EnabledProxyModel, PROXY_REPOSITORY, ProxyModel, ProxyRepository } from
 import { HttpServerError } from '@famir/http-server'
 import { READ_PROXY_USE_CASE, ReadProxyData } from './read-proxy.js'
 
+/*
+ * Read proxy use-case
+ */
 export class ReadProxyUseCase {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<ReadProxyUseCase>(
       READ_PROXY_USE_CASE,
       (c) => new ReadProxyUseCase(c.resolve<ProxyRepository>(PROXY_REPOSITORY))
@@ -13,6 +19,9 @@ export class ReadProxyUseCase {
 
   constructor(protected readonly proxyRepository: ProxyRepository) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(data: ReadProxyData): Promise<EnabledProxyModel> {
     const proxy = await this.proxyRepository.read(data.campaignId, data.proxyId)
 

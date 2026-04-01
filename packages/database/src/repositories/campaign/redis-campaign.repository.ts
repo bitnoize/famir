@@ -12,11 +12,17 @@ import {
 import { CampaignModel, FullCampaignModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
-import { CAMPAIGN_REPOSITORY, CampaignRepository } from './campaign.js'
+import { CAMPAIGN_REPOSITORY, CampaignRepository, CampaignShare } from './campaign.js'
 import { campaignSchemas } from './campaign.schemas.js'
 
+/*
+ * Redis campaign repository
+ */
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<CampaignRepository>(
       CAMPAIGN_REPOSITORY,
       (c) =>
@@ -24,7 +30,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
         )
     )
   }
@@ -42,6 +48,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     this.logger.debug(`CampaignRepository initialized`)
   }
 
+  /*
+   * Create campaign
+   */
   async create(
     campaignId: string,
     mirrorDomain: string,
@@ -62,9 +71,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         cryptSecret,
         landingUpgradePath,
         sessionCookieName,
-        sessionExpire,
-        newSessionExpire,
-        messageExpire
+        sessionExpire.toString(),
+        newSessionExpire.toString(),
+        messageExpire.toString(),
+        Date.now().toString()
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -75,6 +85,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  /*
+   * Read campaign by id
+   */
   async read(campaignId: string): Promise<CampaignModel | null> {
     try {
       const rawModel = await this.connection.campaign.read_campaign(this.options.prefix, campaignId)
@@ -85,6 +98,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  /*
+   * Read extended campaign by id
+   */
   async readFull(campaignId: string): Promise<FullCampaignModel | null> {
     try {
       const rawModel = await this.connection.campaign.read_full_campaign(
@@ -98,6 +114,31 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  /*
+   * Read campaign share
+   */
+  async readShare(): Promise<CampaignShare> {
+    try {
+      const [mirrorDomains, sessionCookieNames] = await Promise.all([
+        this.connection.campaign.read_campaign_mirror_domains(this.options.prefix),
+        this.connection.campaign.read_campaign_session_cookie_names(this.options.prefix)
+      ])
+
+      this.validateArrayStringsReply(mirrorDomains)
+      this.validateArrayStringsReply(sessionCookieNames)
+
+      return {
+        mirrorDomains: mirrorDomains.sort(),
+        sessionCookieNames: sessionCookieNames.sort()
+      }
+    } catch (error) {
+      this.raiseError(error, 'readShare', null)
+    }
+  }
+
+  /*
+   * Lock campaign
+   */
   async lock(campaignId: string): Promise<string> {
     const lockSecret = randomIdent()
 
@@ -106,7 +147,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         this.options.prefix,
         campaignId,
         lockSecret,
-        DATABASE_LOCK_TIMEOUT
+        DATABASE_LOCK_TIMEOUT.toString()
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -119,6 +160,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  /*
+   * Unlock campaign
+   */
   async unlock(campaignId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.campaign.unlock_campaign(
@@ -135,6 +179,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  /*
+   * Update campaign
+   */
   async update(
     campaignId: string,
     description: string | null | undefined,
@@ -147,10 +194,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       const statusReply = await this.connection.campaign.update_campaign(
         this.options.prefix,
         campaignId,
-        description,
-        sessionExpire,
-        newSessionExpire,
-        messageExpire,
+        description ?? null,
+        sessionExpire != null ? sessionExpire.toString() : null,
+        newSessionExpire != null ? newSessionExpire.toString() : null,
+        messageExpire != null ? messageExpire.toString() : null,
         lockSecret
       )
 
@@ -162,6 +209,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  /*
+   * Delete campaign
+   */
   async delete(campaignId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.campaign.delete_campaign(
@@ -178,6 +228,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  /*
+   * List campaigns
+   */
   async list(): Promise<CampaignModel[]> {
     try {
       const index = await this.connection.campaign.read_campaign_index(this.options.prefix)
@@ -196,6 +249,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  /*
+   * List extended campaigns
+   */
   async listFull(): Promise<FullCampaignModel[]> {
     try {
       const index = await this.connection.campaign.read_campaign_index(this.options.prefix)

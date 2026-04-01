@@ -1,7 +1,7 @@
 {
   "name": "@famir/console",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Famir console app",
   "keywords": [
     "famir",

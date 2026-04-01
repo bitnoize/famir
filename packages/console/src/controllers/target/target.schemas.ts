@@ -1,4 +1,5 @@
 import {
+  targetAccessLevelSchema,
   targetBodySizeLimitSchema,
   targetConnectTimeoutSchema,
   targetContentSchema,
@@ -32,7 +33,7 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
   required: [
     'campaignId',
     'targetId',
-    'isLanding',
+    'accessLevel',
     'donorSecure',
     'donorSub',
     'donorDomain',
@@ -50,12 +51,13 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     'faviconIco',
     'robotsTxt',
     'sitemapXml',
+    'allowWebSockets',
     'lockSecret'
   ],
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
-    isLanding: booleanSchema,
+    accessLevel: targetAccessLevelSchema,
     donorSecure: booleanSchema,
     donorSub: targetSubSchema,
     donorDomain: targetDomainSchema,
@@ -102,6 +104,10 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     sitemapXml: {
       ...targetContentSchema,
       default: ''
+    },
+    allowWebSockets: {
+      ...booleanSchema,
+      default: false
     },
     lockSecret: randomIdentSchema
   },
@@ -162,6 +168,10 @@ const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
     },
     sitemapXml: {
       ...targetContentSchema,
+      nullable: true
+    },
+    allowWebSockets: {
+      ...booleanSchema,
       nullable: true
     },
     lockSecret: randomIdentSchema

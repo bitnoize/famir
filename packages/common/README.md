@@ -1,4 +1,4 @@
 # @famir/common
 
-Project-wide utilities.
+Famir common utilities.
 

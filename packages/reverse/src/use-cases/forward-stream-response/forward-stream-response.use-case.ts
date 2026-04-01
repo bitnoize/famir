@@ -10,8 +10,14 @@ import {
   ForwardStreamResponseData
 } from './forward-stream-response.js'
 
+/*
+ * Forward stream response use-case
+ */
 export class ForwardStreamResponseUseCase {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<ForwardStreamResponseUseCase>(
       FORWARD_STREAM_RESPONSE_USE_CASE,
       (c) => new ForwardStreamResponseUseCase(c.resolve<HttpClient>(HTTP_CLIENT))
@@ -20,6 +26,9 @@ export class ForwardStreamResponseUseCase {
 
   constructor(protected readonly httpClient: HttpClient) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(
     data: ForwardStreamResponseData
   ): Promise<HttpClientStreamResult | HttpClientErrorResult> {

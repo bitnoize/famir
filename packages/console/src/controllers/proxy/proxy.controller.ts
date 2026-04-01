@@ -15,8 +15,14 @@ import { BaseController } from '../base/index.js'
 import { PROXY_CONTROLLER } from './proxy.js'
 import { proxySchemas } from './proxy.schemas.js'
 
+/*
+ * Proxy controller
+ */
 export class ProxyController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       PROXY_CONTROLLER,
       (c) =>
@@ -29,6 +35,9 @@ export class ProxyController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): ProxyController {
     return container.resolve(PROXY_CONTROLLER)
   }
@@ -46,6 +55,9 @@ export class ProxyController extends BaseController {
     this.logger.debug(`MessageController initialized`)
   }
 
+  /*
+   * Use api-calls
+   */
   use() {
     this.router.addApiCall('createProxy', async (data) => {
       this.validateData<CreateProxyData>('console-create-proxy-data', data)

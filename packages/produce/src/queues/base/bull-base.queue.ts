@@ -9,6 +9,9 @@ import {
   RedisProduceConnection
 } from '../../produce.js'
 
+/*
+ * Bull base queue
+ */
 export abstract class BullBaseQueue {
   protected readonly options: BullProduceQueueOptions
   protected readonly queue: Queue<unknown, unknown>
@@ -34,12 +37,18 @@ export abstract class BullBaseQueue {
     })
   }
 
+  /*
+   * Close queue
+   */
   async close(): Promise<void> {
     await this.queue.close()
 
     this.logger.debug(`Queue closed: ${this.queueName}`)
   }
 
+  /*
+   * Get job cound
+   */
   async getJobCount(): Promise<number> {
     try {
       return await this.queue.count()
@@ -48,6 +57,9 @@ export abstract class BullBaseQueue {
     }
   }
 
+  /*
+   * Get job counts
+   */
   async getJobCounts(): Promise<Record<string, number>> {
     try {
       return await this.queue.getJobCounts()

@@ -15,8 +15,14 @@ import { RawSession } from './session.functions.js'
 import { SESSION_REPOSITORY, SessionRepository } from './session.js'
 import { sessionSchemas } from './session.schemas.js'
 
+/*
+ * Redis session repository
+ */
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<SessionRepository>(
       SESSION_REPOSITORY,
       (c) =>
@@ -24,7 +30,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
         )
     )
   }
@@ -42,12 +48,21 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     this.logger.debug(`SessionRepository initialized`)
   }
 
+  /*
+   * Create session
+   */
   async create(campaignId: string): Promise<SessionModel> {
     const [sessionId, secret] = [randomIdent(), randomIdent()]
 
     try {
       const [statusReply, rawModel] = await Promise.all([
-        this.connection.session.create_session(this.options.prefix, campaignId, sessionId, secret),
+        this.connection.session.create_session(
+          this.options.prefix,
+          campaignId,
+          sessionId,
+          secret,
+          Date.now().toString()
+        ),
 
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
       ])
@@ -62,6 +77,9 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
+  /*
+   * Read session by id
+   */
   async read(campaignId: string, sessionId: string): Promise<SessionModel | null> {
     try {
       const rawModel = await this.connection.session.read_session(
@@ -76,10 +94,18 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
+  /*
+   * Auth session
+   */
   async auth(campaignId: string, sessionId: string): Promise<SessionModel> {
     try {
       const [statusReply, rawModel] = await Promise.all([
-        this.connection.session.auth_session(this.options.prefix, campaignId, sessionId),
+        this.connection.session.auth_session(
+          this.options.prefix,
+          campaignId,
+          sessionId,
+          Date.now().toString()
+        ),
 
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
       ])
@@ -94,6 +120,9 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
+  /*
+   * Upgrade session
+   */
   async upgrade(
     campaignId: string,
     lureId: string,
@@ -129,10 +158,10 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       rawModel.session_id,
       rawModel.proxy_id,
       rawModel.secret,
-      !!rawModel.is_landing,
+      !!rawModel.is_upgraded,
       rawModel.message_count,
       new Date(rawModel.created_at),
-      new Date(rawModel.last_auth_at)
+      new Date(rawModel.authorized_at)
     )
   }
 

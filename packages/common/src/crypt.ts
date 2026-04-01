@@ -8,6 +8,9 @@ const AUTH_TAG_LENGTH = 16
 const SALT_LENGTH = 16
 const KEY_LENGTH = 32 // 256 bytes
 
+/**
+ * Encrypt string with secret
+ */
 export function encrypt(text: string, secret: string): string {
   const compressed = deflateSync(text, {
     level: zlibConst.Z_BEST_COMPRESSION
@@ -29,6 +32,9 @@ export function encrypt(text: string, secret: string): string {
   return safeBase64Encode(data.toString('base64'))
 }
 
+/**
+ * Decrypt string with secret
+ */
 export function decrypt(value: string, secret: string): string {
   const data = Buffer.from(safeBase64Decode(value), 'base64')
 

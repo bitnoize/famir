@@ -11,8 +11,8 @@ import {
   AuthSessionUseCase,
   CreateMessageUseCase,
   CreateSessionUseCase,
-  FindCampaignTargetUseCase,
   FindLureRedirectorUseCase,
+  FindTargetUseCase,
   ForwardSimpleUseCase,
   ForwardStreamRequestUseCase,
   ForwardStreamResponseUseCase,
@@ -21,21 +21,21 @@ import {
 } from './use-cases/index.js'
 
 export const autoLoad: DIComposer = (container) => {
-  FindCampaignTargetUseCase.inject(container)
-  ReadProxyUseCase.inject(container)
-  FindLureRedirectorUseCase.inject(container)
-  CreateSessionUseCase.inject(container)
-  AuthSessionUseCase.inject(container)
-  UpgradeSessionUseCase.inject(container)
-  CreateMessageUseCase.inject(container)
-  ForwardSimpleUseCase.inject(container)
-  ForwardStreamRequestUseCase.inject(container)
-  ForwardStreamResponseUseCase.inject(container)
+  FindTargetUseCase.register(container)
+  ReadProxyUseCase.register(container)
+  FindLureRedirectorUseCase.register(container)
+  CreateSessionUseCase.register(container)
+  AuthSessionUseCase.register(container)
+  UpgradeSessionUseCase.register(container)
+  CreateMessageUseCase.register(container)
+  ForwardSimpleUseCase.register(container)
+  ForwardStreamRequestUseCase.register(container)
+  ForwardStreamResponseUseCase.register(container)
 
-  SetupMirrorController.inject(container)
-  WellKnownUrlsController.inject(container)
-  AuthorizeController.inject(container)
-  TransformController.inject(container)
-  RoundTripController.inject(container)
-  CompleteController.inject(container)
+  SetupMirrorController.register(container)
+  WellKnownUrlsController.register(container)
+  AuthorizeController.register(container)
+  TransformController.register(container)
+  RoundTripController.register(container)
+  CompleteController.register(container)
 }

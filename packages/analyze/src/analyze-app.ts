@@ -12,8 +12,14 @@ import { Logger, LOGGER } from '@famir/logger'
 import { PRODUCE_CONNECTOR, ProduceConnector } from '@famir/produce'
 import { ANALYZE_APP } from './analyze.js'
 
+/*
+ * Analyze app
+ */
 export class AnalyzeApp {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       ANALYZE_APP,
       (c) =>
@@ -28,6 +34,9 @@ export class AnalyzeApp {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): AnalyzeApp {
     return container.resolve(ANALYZE_APP)
   }
@@ -55,6 +64,9 @@ export class AnalyzeApp {
     this.logger.debug(`App initialized`)
   }
 
+  /*
+   * Start app
+   */
   async start(): Promise<void> {
     try {
       this.router.activate()
@@ -73,7 +85,10 @@ export class AnalyzeApp {
     }
   }
 
-  protected async stop(): Promise<void> {
+  /*
+   * Stop app
+   */
+  async stop(): Promise<void> {
     try {
       await this.analyzeWorker.close()
 

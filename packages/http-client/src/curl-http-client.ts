@@ -1,8 +1,7 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
-import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
-import { Curl, CurlCode, CurlFeature, CurlHttpVersion } from 'node-libcurl'
+import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
 import { PassThrough, pipeline, Readable } from 'node:stream'
 import { HttpClientError, HttpClientErrorCode } from './http-client.error.js'
 import {
@@ -18,8 +17,14 @@ import {
   HttpClientStreamResult
 } from './http-client.js'
 
+/*
+ * Curl HTTP client implementation
+ */
 export class CurlHttpClient implements HttpClient {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<HttpClient>(
       HTTP_CLIENT,
       (c) =>
@@ -41,6 +46,9 @@ export class CurlHttpClient implements HttpClient {
     this.logger.debug(`HttpClient initialized`)
   }
 
+  /*
+   * Simple HTTP request and response
+   */
   simple(
     proxy: string,
     method: HttpMethod,
@@ -52,7 +60,7 @@ export class CurlHttpClient implements HttpClient {
     headersSizeLimit: number,
     bodySizeLimit: number
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
-    return new Promise<HttpClientSimpleResult | HttpClientErrorResult>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const state: HttpClientSimpleState = {
         error: null,
         isResolved: false,
@@ -86,6 +94,9 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /*
+   * Streaming HTTP request and simple response
+   */
   streamRequest(
     proxy: string,
     method: HttpMethod,
@@ -97,7 +108,7 @@ export class CurlHttpClient implements HttpClient {
     headersSizeLimit: number,
     bodySizeLimit: number
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
-    return new Promise<HttpClientSimpleResult | HttpClientErrorResult>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const state: HttpClientStreamRequestState = {
         error: null,
         isResolved: false,
@@ -131,6 +142,9 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /*
+   * Simple HTTP request and streaming response
+   */
   streamResponse(
     proxy: string,
     method: HttpMethod,
@@ -141,7 +155,7 @@ export class CurlHttpClient implements HttpClient {
     timeout: number,
     headersSizeLimit: number
   ): Promise<HttpClientStreamResult | HttpClientErrorResult> {
-    return new Promise<HttpClientStreamResult | HttpClientErrorResult>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const state: HttpClientStreamResponseState = {
         error: null,
         isResolved: false,
@@ -175,15 +189,18 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /*
   protected browserHeaders: RegExp[] = [
+    /^Accept-Encoding$/i,
     /^User-Agent$/i,
     /^Upgrade-Insecure-Requests$/i,
     /^Sec-CH-/i,
     /^Sec-Fetch-/i,
     /^Priority$/i,
     /^DNT$/i,
-    /^TE$/i
+    /^TE$/i,
   ]
+  */
 
   protected setupCurlOptions(
     curl: Curl,
@@ -196,15 +213,15 @@ export class CurlHttpClient implements HttpClient {
       timeout: number
     }
   ) {
+    /*
     if (process.env['CURL_IMPERSONATE']) {
-      curl.setOpt('HTTP_VERSION', CurlHttpVersion.V2_0)
-
       Object.keys(state.requestHeaders).forEach((name) => {
         if (this.browserHeaders.some((re) => re.test(name))) {
           state.requestHeaders[name] = undefined
         }
       })
     }
+    */
 
     if (this.options.verbose) {
       curl.setOpt(Curl.option.VERBOSE, true)
@@ -622,17 +639,20 @@ export class CurlHttpClient implements HttpClient {
       const totalTime = curl.getInfo('TOTAL_TIME_T')
       const connectTime = curl.getInfo('CONNECT_TIME_T')
       const httpVersion = curl.getInfo('HTTP_VERSION')
+      const versionInfo = Curl.getVersionInfo()
 
       return {
         client_total_time: typeof totalTime === 'number' ? totalTime : null,
         client_connect_time: typeof connectTime === 'number' ? connectTime : null,
-        client_http_version: typeof httpVersion === 'number' ? httpVersion : null
+        client_http_version: typeof httpVersion === 'number' ? httpVersion : null,
+        client_version_info: versionInfo.version
       }
     } catch {
       return {
         client_total_time: null,
         client_connect_time: null,
-        client_http_version: null
+        client_http_version: null,
+        client_version_info: null
       }
     }
   }

@@ -2,6 +2,9 @@ export const REPL_SERVER = Symbol('ReplServer')
 export const REPL_SERVER_ASSETS = Symbol('ReplServerAssets')
 export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
 
+/**
+ * REPL server contract
+ */
 export interface ReplServer {
   start(): Promise<void>
   stop(): Promise<void>

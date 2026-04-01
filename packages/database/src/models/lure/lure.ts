@@ -1,3 +1,6 @@
+/*
+ * Lure is a secret link to enter mirror through landing page
+ */
 export class LureModel {
   static isNotNull = <T extends LureModel>(model: T | null): model is T => {
     return model != null

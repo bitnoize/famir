@@ -13,6 +13,9 @@ export type ValidatorErrorOptions = CommonErrorOptions & {
   validateErrors: ValidatorValidateError[]
 }
 
+/*
+ * Validator error object
+ */
 export class ValidatorError extends CommonError {
   validateErrors: ValidatorValidateError[]
 

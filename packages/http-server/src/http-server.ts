@@ -1,30 +1,60 @@
+import { HttpConnection } from '@famir/common'
 import {
   HttpBodyWrap,
-  HttpConnection,
   HttpHeadersWrap,
   HttpMethodWrap,
   HttpStatusWrap,
   HttpUrlWrap,
   UAResult
 } from '@famir/http-tools'
+import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Readable, Writable } from 'node:stream'
+import type WebSocket from 'ws'
 
 export const HTTP_SERVER = Symbol('HttpServer')
 export const HTTP_SERVER_ASSETS = Symbol('HttpServerAssets')
 export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
+export const HTTP_SERVER_CONTEXT_FACTORY = Symbol('HttpServerContextFactory')
 
+/**
+ * HTTP server contract
+ */
 export interface HttpServer {
   start(): Promise<void>
   stop(): Promise<void>
 }
 
-export type HttpServerContextState = Record<string, unknown>
+export interface HttpServerContextState {
+  [key: string]: unknown
+  verbose: boolean
+  errorPage: string
+}
 
+/**
+ * HTTP server context factory
+ */
+export interface HttpServerContextFactory {
+  createNormal(
+    req: IncomingMessage,
+    res: ServerResponse,
+    state: HttpServerContextState
+  ): HttpServerContext
+  createWebSocket(
+    ws: WebSocket,
+    req: IncomingMessage,
+    state: HttpServerContextState
+  ): HttpServerContext
+}
+
+export type HttpServerContextType = 'normal' | 'websocket'
+
+/**
+ * HTTP server context
+ */
 export interface HttpServerContext {
+  readonly type: HttpServerContextType
   readonly state: HttpServerContextState
   readonly middlewares: string[]
-  readonly verbose: boolean
-  readonly errorPage: string
   readonly method: HttpMethodWrap
   readonly url: HttpUrlWrap
   readonly requestHeaders: HttpHeadersWrap
@@ -37,6 +67,7 @@ export interface HttpServerContext {
   loadRequest(bodySizeLimit: number): Promise<void>
   sendHead(): void
   sendResponse(): Promise<void>
+  close(): void
   readonly isBot: boolean
   readonly userAgent: UAResult
   readonly clientIp: string | undefined
@@ -45,6 +76,7 @@ export interface HttpServerContext {
   readonly finishTime: number
   readonly isComplete: boolean
 }
+
 export type HttpServerNextFunction = () => Promise<void>
 
 export type HttpServerMiddleware = (

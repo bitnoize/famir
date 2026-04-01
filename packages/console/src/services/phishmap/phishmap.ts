@@ -1,3 +1,5 @@
+import { TargetAccessLevel } from '@famir/database'
+
 export const PHISHMAP_SERVICE = Symbol('PhishmapService')
 
 export interface PhishmapCampaign {
@@ -19,7 +21,7 @@ export interface PhishmapProxy {
 
 export interface PhishmapTarget {
   targetId: string
-  isLanding: boolean
+  accessLevel: TargetAccessLevel
   donorSecure: boolean
   donorSub: string
   donorDomain: string
@@ -38,6 +40,7 @@ export interface PhishmapTarget {
   faviconIco: string
   robotsTxt: string
   sitemapXml: string
+  allowWebSockets: boolean
   isEnabled: boolean
 }
 
@@ -80,5 +83,4 @@ export interface RestorePhishmapData {
 
 export interface PurgePhishmapData {
   campaignId: string
-  confirmSecret?: string
 }

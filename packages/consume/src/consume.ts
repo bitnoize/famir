@@ -5,9 +5,12 @@ export const CONSUME_SPECS = Symbol('ConsumeSpecs')
 export const CONSUME_ASSETS = Symbol('ConsumeAssets')
 export const CONSUME_ROUTER = Symbol('ConsumeRouter')
 
+/*
+ * Consume connector contract
+ */
 export interface ConsumeConnector {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  connection<T>(): T
+  getConnection<T>(): T
   //connect(): Promise<void>
   close(): Promise<void>
 }

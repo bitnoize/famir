@@ -16,8 +16,14 @@ import {
   SwitchProxyData
 } from './proxy.js'
 
+/*
+ * Proxy service
+ */
 export class ProxyService {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<ProxyService>(
       PROXY_SERVICE,
       (c) => new ProxyService(c.resolve<ProxyRepository>(PROXY_REPOSITORY))
@@ -26,6 +32,9 @@ export class ProxyService {
 
   constructor(protected readonly proxyRepository: ProxyRepository) {}
 
+  /*
+   * Create proxy
+   */
   async create(data: CreateProxyData): Promise<true> {
     try {
       await this.proxyRepository.create(data.campaignId, data.proxyId, data.url, data.lockSecret)
@@ -46,6 +55,9 @@ export class ProxyService {
     }
   }
 
+  /*
+   * Read proxy
+   */
   async read(data: ReadProxyData): Promise<ProxyModel> {
     const proxy = await this.proxyRepository.read(data.campaignId, data.proxyId)
 
@@ -58,6 +70,9 @@ export class ProxyService {
     return proxy
   }
 
+  /*
+   * Enable proxy
+   */
   async enable(data: SwitchProxyData): Promise<true> {
     try {
       await this.proxyRepository.enable(data.campaignId, data.proxyId, data.lockSecret)
@@ -78,6 +93,9 @@ export class ProxyService {
     }
   }
 
+  /*
+   * Disable proxy
+   */
   async disable(data: SwitchProxyData): Promise<true> {
     try {
       await this.proxyRepository.disable(data.campaignId, data.proxyId, data.lockSecret)
@@ -98,6 +116,9 @@ export class ProxyService {
     }
   }
 
+  /*
+   * Delete proxy
+   */
   async delete(data: DeleteProxyData): Promise<true> {
     try {
       await this.proxyRepository.delete(data.campaignId, data.proxyId, data.lockSecret)
@@ -118,6 +139,9 @@ export class ProxyService {
     }
   }
 
+  /*
+   * List proxies
+   */
   async list(data: ListProxiesData): Promise<ProxyModel[]> {
     const proxies = await this.proxyRepository.list(data.campaignId)
 

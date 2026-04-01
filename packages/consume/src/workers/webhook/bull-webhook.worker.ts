@@ -15,8 +15,14 @@ import { BullBaseWorker } from '../base/index.js'
 import { WEBHOOK_WORKER, WebhookWorker } from './webhook.js'
 import { webhookSchemas } from './webhook.schemas.js'
 
+/*
+ * Bull webhook worker implementation
+ */
 export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<WebhookWorker>(
       WEBHOOK_WORKER,
       (c) =>
@@ -24,7 +30,7 @@ export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<BullConsumeConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ConsumeConnector>(CONSUME_CONNECTOR).connection<RedisConsumeConnection>(),
+          c.resolve<ConsumeConnector>(CONSUME_CONNECTOR).getConnection<RedisConsumeConnection>(),
           c.resolve<ConsumeRouter>(CONSUME_ROUTER)
         )
     )

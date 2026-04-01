@@ -5,8 +5,14 @@ import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { TRANSFORM_CONTROLLER } from './transform.js'
 
+/*
+ * Transform controller
+ */
 export class TransformController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       TRANSFORM_CONTROLLER,
       (c) =>
@@ -18,6 +24,9 @@ export class TransformController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): TransformController {
     return container.resolve(TRANSFORM_CONTROLLER)
   }
@@ -28,8 +37,12 @@ export class TransformController extends BaseController {
     this.logger.debug(`TransformController initialized`)
   }
 
+  /*
+   * Use middleware
+   */
   use() {
     this.router.addMiddleware('transform', async (ctx, next) => {
+      const campaignShare = this.getState(ctx, 'campaignShare')
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const targets = this.getState(ctx, 'targets')
@@ -62,13 +75,16 @@ export class TransformController extends BaseController {
           'X-Client-Ip',
           'X-Forwarded-For',
           'X-Forwarded-Host',
-          'X-Forwarded-Proto',
-          'Upgrade-Insecure-Requests'
+          'X-Forwarded-Proto'
         ])
 
         const cookies = message.requestHeaders.getCookies()
         if (cookies) {
-          cookies[campaign.sessionCookieName] = undefined
+          campaignShare.sessionCookieNames.forEach((sessionCookieName) => {
+            if (cookies[sessionCookieName]) {
+              cookies[sessionCookieName] = undefined
+            }
+          })
 
           message.requestHeaders.setCookies(cookies)
         }

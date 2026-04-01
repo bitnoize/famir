@@ -5,7 +5,7 @@ import {
   enabledProxyIndexKey,
   proxyIndexKey,
   proxyKey,
-  proxyUniqueUrlKey
+  proxyUrlsKey
 } from '../../database.keys.js'
 
 export interface RawProxy {
@@ -28,18 +28,19 @@ export const proxyFunctions = {
         campaignId: string,
         proxyId: string,
         url: string,
+        createdAt: string,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(proxyKey(prefix, campaignId, proxyId))
-        parser.pushKey(proxyUniqueUrlKey(prefix, campaignId))
+        parser.pushKey(proxyUrlsKey(prefix, campaignId))
         parser.pushKey(proxyIndexKey(prefix, campaignId))
 
         parser.push(campaignId)
         parser.push(proxyId)
         parser.push(url)
-        parser.push(Date.now().toString())
+        parser.push(createdAt)
         parser.push(lockSecret)
       },
 
@@ -123,7 +124,7 @@ export const proxyFunctions = {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(proxyKey(prefix, campaignId, proxyId))
-        parser.pushKey(proxyUniqueUrlKey(prefix, campaignId))
+        parser.pushKey(proxyUrlsKey(prefix, campaignId))
         parser.pushKey(proxyIndexKey(prefix, campaignId))
 
         parser.push(lockSecret)

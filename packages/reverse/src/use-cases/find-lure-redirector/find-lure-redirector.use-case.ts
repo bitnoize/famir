@@ -11,8 +11,14 @@ import {
 import { HttpServerError } from '@famir/http-server'
 import { FIND_LURE_REDIRECTOR_USE_CASE, FindLureRedirectorData } from './find-lure-redirector.js'
 
+/*
+ * Find lure redirector use-case
+ */
 export class FindLureRedirectorUseCase {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<FindLureRedirectorUseCase>(
       FIND_LURE_REDIRECTOR_USE_CASE,
       (c) =>
@@ -28,6 +34,9 @@ export class FindLureRedirectorUseCase {
     protected readonly lureRepository: LureRepository
   ) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(
     data: FindLureRedirectorData
   ): Promise<[EnabledLureModel, FullRedirectorModel] | null> {

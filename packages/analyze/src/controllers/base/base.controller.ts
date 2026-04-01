@@ -3,6 +3,9 @@ import { Logger } from '@famir/logger'
 import { AnalyzeJobData } from '@famir/produce'
 import { Validator } from '@famir/validator'
 
+/*
+ * Base controller
+ */
 export abstract class BaseController {
   constructor(
     protected readonly validator: Validator,

@@ -19,8 +19,14 @@ import {
   UpdateTargetData
 } from './target.js'
 
+/*
+ * Target service
+ */
 export class TargetService {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<TargetService>(
       TARGET_SERVICE,
       (c) => new TargetService(c.resolve<TargetRepository>(TARGET_REPOSITORY))
@@ -29,12 +35,15 @@ export class TargetService {
 
   constructor(protected readonly targetRepository: TargetRepository) {}
 
+  /*
+   * Create target
+   */
   async create(data: CreateTargetData): Promise<true> {
     try {
       await this.targetRepository.create(
         data.campaignId,
         data.targetId,
-        data.isLanding,
+        data.accessLevel,
         data.donorSecure,
         data.donorSub,
         data.donorDomain,
@@ -52,6 +61,7 @@ export class TargetService {
         data.faviconIco,
         data.robotsTxt,
         data.sitemapXml,
+        data.allowWebSockets,
         data.lockSecret
       )
 
@@ -71,6 +81,9 @@ export class TargetService {
     }
   }
 
+  /*
+   * Read target
+   */
   async read(data: ReadTargetData): Promise<FullTargetModel> {
     const target = await this.targetRepository.readFull(data.campaignId, data.targetId)
 
@@ -83,6 +96,9 @@ export class TargetService {
     return target
   }
 
+  /*
+   * Update target
+   */
   async update(data: UpdateTargetData): Promise<true> {
     try {
       await this.targetRepository.update(
@@ -98,6 +114,7 @@ export class TargetService {
         data.faviconIco,
         data.robotsTxt,
         data.sitemapXml,
+        data.allowWebSockets,
         data.lockSecret
       )
 
@@ -117,6 +134,9 @@ export class TargetService {
     }
   }
 
+  /*
+   * Enable target
+   */
   async enable(data: SwitchTargetData): Promise<true> {
     try {
       await this.targetRepository.enable(data.campaignId, data.targetId, data.lockSecret)
@@ -137,6 +157,9 @@ export class TargetService {
     }
   }
 
+  /*
+   * Disable target
+   */
   async disable(data: SwitchTargetData): Promise<true> {
     try {
       await this.targetRepository.disable(data.campaignId, data.targetId, data.lockSecret)
@@ -157,6 +180,9 @@ export class TargetService {
     }
   }
 
+  /*
+   * Append target label
+   */
   async appendLabel(data: ActionTargetLabelData): Promise<true> {
     try {
       await this.targetRepository.appendLabel(
@@ -182,6 +208,9 @@ export class TargetService {
     }
   }
 
+  /*
+   * Remove target label
+   */
   async removeLabel(data: ActionTargetLabelData): Promise<true> {
     try {
       await this.targetRepository.removeLabel(
@@ -207,6 +236,9 @@ export class TargetService {
     }
   }
 
+  /*
+   * Delete target
+   */
   async delete(data: DeleteTargetData): Promise<true> {
     try {
       await this.targetRepository.delete(data.campaignId, data.targetId, data.lockSecret)
@@ -227,6 +259,9 @@ export class TargetService {
     }
   }
 
+  /*
+   * List targets
+   */
   async list(data: ListTargetsData): Promise<TargetModel[]> {
     const targets = await this.targetRepository.list(data.campaignId)
 

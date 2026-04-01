@@ -1,4 +1,4 @@
-import { HttpBody, HttpHeaders, HttpMethod } from '@famir/http-tools'
+import { HttpBody, HttpHeaders, HttpMethod } from '@famir/common'
 
 export const FORWARD_SIMPLE_USE_CASE = Symbol('ForwardSimpleUseCase')
 

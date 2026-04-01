@@ -6,10 +6,10 @@ export interface RawSession {
   session_id: string
   proxy_id: string
   secret: string
-  is_landing: number
+  is_upgraded: number
   message_count: number
   created_at: number
-  last_auth_at: number
+  authorized_at: number
 }
 
 export const sessionFunctions = {
@@ -22,7 +22,8 @@ export const sessionFunctions = {
         prefix: string,
         campaignId: string,
         sessionId: string,
-        secret: string
+        secret: string,
+        createdAt: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(sessionKey(prefix, campaignId, sessionId))
@@ -31,7 +32,7 @@ export const sessionFunctions = {
         parser.push(campaignId)
         parser.push(sessionId)
         parser.push(secret)
-        parser.push(Date.now().toString())
+        parser.push(createdAt)
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -51,12 +52,18 @@ export const sessionFunctions = {
     auth_session: {
       NUMBER_OF_KEYS: 3,
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, sessionId: string) {
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        sessionId: string,
+        authorizedAt: string
+      ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(sessionKey(prefix, campaignId, sessionId))
         parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
-        parser.push(Date.now().toString())
+        parser.push(authorizedAt)
       },
 
       transformReply: undefined as unknown as () => unknown

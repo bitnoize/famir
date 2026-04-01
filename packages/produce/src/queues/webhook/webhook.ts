@@ -4,6 +4,9 @@ export const WEBHOOK_QUEUE_NAME = 'webhook'
 
 export const WEBHOOK_QUEUE = Symbol('WebhookQueue')
 
+/*
+ * Webhook queue contract
+ */
 export interface WebhookQueue {
   close(): Promise<void>
   getJobCount(): Promise<number>

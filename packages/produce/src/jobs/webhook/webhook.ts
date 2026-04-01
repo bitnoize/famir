@@ -1,3 +1,6 @@
+/*
+ * Webhook job data
+ */
 export interface WebhookJobData {
   url: string
 }

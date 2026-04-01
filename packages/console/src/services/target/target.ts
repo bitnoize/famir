@@ -1,9 +1,11 @@
+import { TargetAccessLevel } from '@famir/database'
+
 export const TARGET_SERVICE = Symbol('TargetService')
 
 export interface CreateTargetData {
   campaignId: string
   targetId: string
-  isLanding: boolean
+  accessLevel: TargetAccessLevel
   donorSecure: boolean
   donorSub: string
   donorDomain: string
@@ -21,6 +23,7 @@ export interface CreateTargetData {
   faviconIco: string
   robotsTxt: string
   sitemapXml: string
+  allowWebSockets: boolean
   lockSecret: string
 }
 
@@ -42,6 +45,7 @@ export interface UpdateTargetData {
   faviconIco: string | null | undefined
   robotsTxt: string | null | undefined
   sitemapXml: string | null | undefined
+  allowWebSockets: boolean | null | undefined
   lockSecret: string
 }
 

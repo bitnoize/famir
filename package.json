@@ -7,7 +7,8 @@
     "format": "npm --ws run format",
     "lint": "npm --ws run lint",
     "build": "npm --ws run build",
-    "test": "npm --ws run test"
+    "test": "npm --ws run test",
+    "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo"
   },
   "workspaces": [
     "packages/common",
@@ -23,8 +24,8 @@
     "packages/http-server",
     "packages/http-tools",
     "packages/repl-server",
-    "packages/reverse",
     "packages/console",
+    "packages/reverse",
     "packages/analyze"
   ],
   "devDependencies": {

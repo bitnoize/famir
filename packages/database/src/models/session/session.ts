@@ -1,3 +1,6 @@
+/*
+ * Client session
+ */
 export class SessionModel {
   static isNotNull = <T extends SessionModel>(model: T | null): model is T => {
     return model != null
@@ -8,10 +11,10 @@ export class SessionModel {
     readonly sessionId: string,
     readonly proxyId: string,
     readonly secret: string,
-    readonly isLanding: boolean,
+    readonly isUpgraded: boolean,
     readonly messageCount: number,
     readonly createdAt: Date,
-    readonly lastAuthAt: Date
+    readonly authorizedAt: Date
   ) {}
 
   get isNew(): boolean {

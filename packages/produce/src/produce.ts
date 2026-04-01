@@ -2,9 +2,12 @@ import { type Redis } from 'ioredis'
 
 export const PRODUCE_CONNECTOR = Symbol('ProduceConnector')
 
+/*
+ * Produce connector contract
+ */
 export interface ProduceConnector {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  connection<T>(): T
+  getConnection<T>(): T
   //connect(): Promise<void>
   close(): Promise<void>
 }

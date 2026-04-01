@@ -7,7 +7,7 @@ export interface RawMessage {
   proxy_id: string
   target_id: string
   session_id: string
-  kind: string
+  type: string
   method: string
   url: string
   status: number
@@ -40,20 +40,21 @@ export const messageFunctions = {
         proxyId: string,
         targetId: string,
         sessionId: string,
-        kind: string,
+        type: string,
         method: string,
         url: string,
         requestHeaders: string,
         requestBody: string,
-        status: number,
+        status: string,
         responseHeaders: string,
         responseBody: string,
         connection: string,
         payload: string,
         errors: string,
         processor: string,
-        startTime: number,
-        finishTime: number
+        startTime: string,
+        finishTime: string,
+        createdAt: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))
@@ -66,21 +67,43 @@ export const messageFunctions = {
         parser.push(proxyId)
         parser.push(targetId)
         parser.push(sessionId)
-        parser.push(kind)
+        parser.push(type)
         parser.push(method)
         parser.push(url)
         parser.push(requestHeaders)
         parser.push(requestBody)
-        parser.push(status.toString())
+        parser.push(status)
         parser.push(responseHeaders)
         parser.push(responseBody)
         parser.push(connection)
         parser.push(payload)
         parser.push(errors)
         parser.push(processor)
-        parser.push(startTime.toString())
-        parser.push(finishTime.toString())
-        parser.push(Date.now().toString())
+        parser.push(startTime)
+        parser.push(finishTime)
+        parser.push(createdAt)
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    create_dummy_message: {
+      NUMBER_OF_KEYS: 5,
+
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        messageId: string,
+        proxyId: string,
+        targetId: string,
+        sessionId: string
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(messageKey(prefix, campaignId, messageId))
+        parser.pushKey(proxyKey(prefix, campaignId, proxyId))
+        parser.pushKey(targetKey(prefix, campaignId, targetId))
+        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
       },
 
       transformReply: undefined as unknown as () => unknown

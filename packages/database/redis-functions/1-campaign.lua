@@ -4,13 +4,14 @@
   Create campaign
 --]]
 local function create_campaign(keys, args)
-  if #keys ~= 3 or #args ~= 10 then
+  if #keys ~= 4 or #args ~= 10 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local campaign_unique_mirror_domain_key = keys[2]
-  local campaign_index_key = keys[3]
+  local campaign_mirror_domains_key = keys[2]
+  local campaign_session_cookie_names_key = keys[3]
+  local campaign_index_key = keys[4]
 
   if redis.call('EXISTS', campaign_key) ~= 0 then
     return redis.status_reply('CONFLICT Campaign allready exists')
@@ -37,8 +38,13 @@ local function create_campaign(keys, args)
     end
 
     if
-      (field == 'campaign_id' or field == 'mirror_domain' or field == 'crypt_secret')
-      and value == ''
+      (
+        field == 'campaign_id'
+        or field == 'mirror_domain'
+        or field == 'crypt_secret'
+        or field == 'landing_upgrade_path'
+        or field == 'session_cookie_name'
+      ) and value == ''
     then
       return redis.error_reply('ERR Wrong model.' .. field)
     end
@@ -51,8 +57,12 @@ local function create_campaign(keys, args)
     end
   end
 
-  if redis.call('SISMEMBER', campaign_unique_mirror_domain_key, model.mirror_domain) ~= 0 then
+  if redis.call('SISMEMBER', campaign_mirror_domains_key, model.mirror_domain) ~= 0 then
     return redis.status_reply('CONFLICT Campaign mirror_domain allready taken')
+  end
+
+  if redis.call('SISMEMBER', campaign_session_cookie_names_key, model.session_cookie_name) ~= 0 then
+    return redis.status_reply('CONFLICT Campaign session_cookie_name allready taken')
   end
 
   -- Point of no return
@@ -65,6 +75,10 @@ local function create_campaign(keys, args)
   end
 
   redis.call('HSET', campaign_key, unpack(store))
+
+  redis.call('SADD', campaign_mirror_domains_key, model.mirror_domain)
+
+  redis.call('SADD', campaign_session_cookie_names_key, model.session_cookie_name)
 
   redis.call('ZADD', campaign_index_key, model.created_at, model.campaign_id)
 
@@ -205,6 +219,46 @@ redis.register_function({
   callback = read_full_campaign,
   flags = { 'no-writes' },
   description = 'Read full campaign',
+})
+
+--[[
+  Read campaign mirror domains
+--]]
+local function read_campaign_mirror_domains(keys, args)
+  if #keys ~= 1 or #args ~= 0 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_mirror_domains_key = keys[1]
+
+  return redis.call('SMEMBERS', campaign_mirror_domains_key)
+end
+
+redis.register_function({
+  function_name = 'read_campaign_mirror_domains',
+  callback = read_campaign_mirror_domains,
+  flags = { 'no-writes' },
+  description = 'Read campaign mirror domains',
+})
+
+--[[
+  Read campaign session cookie names
+--]]
+local function read_campaign_session_cookie_names(keys, args)
+  if #keys ~= 1 or #args ~= 0 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_session_cookie_names_key = keys[1]
+
+  return redis.call('SMEMBERS', campaign_session_cookie_names_key)
+end
+
+redis.register_function({
+  function_name = 'read_campaign_session_cookie_names',
+  callback = read_campaign_session_cookie_names,
+  flags = { 'no-writes' },
+  description = 'Read campaign session cookie names',
 })
 
 --[[
@@ -427,18 +481,19 @@ redis.register_function({
   Delete campaign
 --]]
 local function delete_campaign(keys, args)
-  if #keys ~= 8 or #args ~= 1 then
+  if #keys ~= 9 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
-  local campaign_unique_mirror_domain_key = keys[3]
-  local campaign_index_key = keys[4]
-  local proxy_index_key = keys[5]
-  local target_index_key = keys[6]
-  local redirector_index_key = keys[7]
-  local lure_index_key = keys[8]
+  local campaign_mirror_domains_key = keys[3]
+  local campaign_session_cookie_names_key = keys[4]
+  local campaign_index_key = keys[5]
+  local proxy_index_key = keys[6]
+  local target_index_key = keys[7]
+  local redirector_index_key = keys[8]
+  local lure_index_key = keys[9]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
@@ -453,6 +508,7 @@ local function delete_campaign(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     campaign_id = redis.call('HGET', campaign_key, 'campaign_id'),
     mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
+    session_cookie_name = redis.call('HGET', campaign_key, 'session_cookie_name'),
   }
 
   for field, value in pairs(stash) do
@@ -466,6 +522,7 @@ local function delete_campaign(keys, args)
         or field == 'orig_lock_secret'
         or field == 'campaign_id'
         or field == 'mirror_domain'
+        or field == 'session_cookie_name'
       ) and value == ''
     then
       return redis.error_reply('ERR Wrong stash.' .. field)
@@ -496,7 +553,9 @@ local function delete_campaign(keys, args)
 
   redis.call('DEL', campaign_key, campaign_lock_key)
 
-  redis.call('SREM', campaign_unique_mirror_domain_key, stash.mirror_domain)
+  redis.call('SREM', campaign_mirror_domains_key, stash.mirror_domain)
+
+  redis.call('SREM', campaign_session_cookie_names_key, stash.session_cookie_name)
 
   redis.call('ZREM', campaign_index_key, stash.campaign_id)
 

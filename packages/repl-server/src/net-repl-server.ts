@@ -16,8 +16,14 @@ import {
   ReplServer
 } from './repl-server.js'
 
+/*
+ * Net REPL server implementation
+ */
 export class NetReplServer implements ReplServer {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
       (c) =>
@@ -40,7 +46,9 @@ export class NetReplServer implements ReplServer {
   ) {
     this.options = this.buildOptions(config.data)
 
-    this.server = net.createServer((socket) => {
+    this.server = net.createServer()
+
+    this.server.on('connection', (socket) => {
       this.clients.add(socket)
 
       socket.on('close', () => {
@@ -62,7 +70,7 @@ export class NetReplServer implements ReplServer {
       socket.setTimeout(this.options.socketTimeout)
 
       this.handleConnection(socket).catch((error: unknown) => {
-        this.logger.error(`ReplServer critical error`, {
+        this.logger.error(`ReplServer unexpected connection error`, {
           error: serializeError(error)
         })
 
@@ -77,12 +85,18 @@ export class NetReplServer implements ReplServer {
     this.logger.debug(`ReplServer initialized`)
   }
 
+  /*
+   * Start server
+   */
   async start(): Promise<void> {
     await this.listen()
 
     this.logger.debug(`ReplServer started`)
   }
 
+  /*
+   * Stop server
+   */
   async stop(): Promise<void> {
     await this.close()
 
@@ -94,7 +108,7 @@ export class NetReplServer implements ReplServer {
     try {
       this.replServerStart(socket)
     } catch (error) {
-      this.logger.error(`ReplServer connection failed`, {
+      this.logger.error(`ReplServer handle connection error`, {
         error: serializeError(error)
       })
 

@@ -30,36 +30,36 @@ export async function bootstrapStd(
   specs: ConsumeSpecs,
   assets: ConsumeAssets
 ): Promise<void> {
-  const container = new DIContainer()
+  const container = DIContainer.getInstance()
 
   container.registerSingleton(CONFIG_SCHEMA, () => configStdAnalyzeSchema)
   container.registerSingleton(CONSUME_SPECS, () => specs)
   container.registerSingleton(CONSUME_ASSETS, () => assets)
 
-  AjvValidator.inject(container)
+  AjvValidator.register(container)
 
-  EnvConfig.inject<StdAnalyzeConfig>(container)
+  EnvConfig.register<StdAnalyzeConfig>(container)
 
-  PinoLogger.inject(container)
+  PinoLogger.register(container)
 
-  RedisDatabaseConnector.inject(container)
+  RedisDatabaseConnector.register(container)
 
-  RedisCampaignRepository.inject(container)
-  RedisTargetRepository.inject(container)
-  RedisSessionRepository.inject(container)
-  RedisMessageRepository.inject(container)
+  RedisCampaignRepository.register(container)
+  RedisTargetRepository.register(container)
+  RedisSessionRepository.register(container)
+  RedisMessageRepository.register(container)
 
-  MinioStorage.inject(container)
+  MinioStorage.register(container)
 
-  RedisProduceConnector.inject(container)
+  RedisProduceConnector.register(container)
 
-  RedisConsumeConnector.inject(container)
+  RedisConsumeConnector.register(container)
 
-  ConsumeRouter.inject(container)
+  ConsumeRouter.register(container)
 
-  BullAnalyzeWorker.inject(container)
+  BullAnalyzeWorker.register(container)
 
-  AnalyzeApp.inject(container)
+  AnalyzeApp.register(container)
 
   autoLoad(container)
 

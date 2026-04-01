@@ -21,8 +21,14 @@ import {
   SwitchLureData
 } from './lure.js'
 
+/*
+ * Lure service
+ */
 export class LureService {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<LureService>(
       LURE_SERVICE,
       (c) =>
@@ -40,6 +46,9 @@ export class LureService {
     protected readonly lureRepository: LureRepository
   ) {}
 
+  /*
+   * Create lure
+   */
   async create(data: CreateLureData): Promise<true> {
     try {
       await this.lureRepository.create(
@@ -66,6 +75,9 @@ export class LureService {
     }
   }
 
+  /*
+   * Read lure
+   */
   async read(data: ReadLureData): Promise<LureModel> {
     const lure = await this.lureRepository.read(data.campaignId, data.lureId)
 
@@ -78,6 +90,9 @@ export class LureService {
     return lure
   }
 
+  /*
+   * Enable lure
+   */
   async enable(data: SwitchLureData): Promise<true> {
     try {
       await this.lureRepository.enable(data.campaignId, data.lureId, data.lockSecret)
@@ -98,6 +113,9 @@ export class LureService {
     }
   }
 
+  /*
+   * Disable lure
+   */
   async disable(data: SwitchLureData): Promise<true> {
     try {
       await this.lureRepository.disable(data.campaignId, data.lureId, data.lockSecret)
@@ -118,6 +136,9 @@ export class LureService {
     }
   }
 
+  /*
+   * Delete lure
+   */
   async delete(data: DeleteLureData): Promise<true> {
     try {
       await this.lureRepository.delete(
@@ -143,6 +164,9 @@ export class LureService {
     }
   }
 
+  /*
+   * List lures
+   */
   async list(data: ListLuresData): Promise<LureModel[]> {
     const lures = await this.lureRepository.list(data.campaignId)
 
@@ -155,6 +179,9 @@ export class LureService {
     return lures
   }
 
+  /*
+   * Make URL
+   */
   async makeUrl(data: MakeLureUrlData): Promise<string> {
     const lure = await this.lureRepository.read(data.campaignId, data.lureId)
 

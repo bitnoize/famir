@@ -16,8 +16,14 @@ import { BaseController } from '../base/index.js'
 import { LURE_CONTROLLER } from './lure.js'
 import { lureSchemas } from './lure.schemas.js'
 
+/*
+ * Lure controller
+ */
 export class LureController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       LURE_CONTROLLER,
       (c) =>
@@ -30,6 +36,9 @@ export class LureController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): LureController {
     return container.resolve(LURE_CONTROLLER)
   }
@@ -47,6 +56,9 @@ export class LureController extends BaseController {
     this.logger.debug(`LureController initialized`)
   }
 
+  /*
+   * Use api-calls
+   */
   use() {
     this.router.addApiCall('createLure', async (data) => {
       this.validateData<CreateLureData>('console-create-lure-data', data)

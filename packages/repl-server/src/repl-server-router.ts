@@ -8,8 +8,14 @@ import {
   ReplServerAssets
 } from './repl-server.js'
 
+/*
+ * REPL server router
+ */
 export class ReplServerRouter {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<ReplServerRouter>(
       REPL_SERVER_ROUTER,
       (c) =>
@@ -20,6 +26,9 @@ export class ReplServerRouter {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): ReplServerRouter {
     return container.resolve(REPL_SERVER_ROUTER)
   }
@@ -44,14 +53,23 @@ export class ReplServerRouter {
 
   #isActive: boolean = false
 
+  /*
+   * Check if router is active
+   */
   get isActive(): boolean {
     return this.#isActive
   }
 
+  /*
+   * Activate router
+   */
   activate() {
     this.#isActive = true
   }
 
+  /*
+   * Add api-call
+   */
   addApiCall(apiCallName: string, apiCall: ReplServerApiCall) {
     if (this.isActive) {
       throw new Error(`Router is active`)
@@ -66,6 +84,9 @@ export class ReplServerRouter {
     this.logger.debug(`ReplServerRouter add apiCall: ${apiCallName}`)
   }
 
+  /*
+   * Get api-calls array
+   */
   getApiCalls(): ReplServerApiCalls {
     if (!this.isActive) {
       throw new Error(`Router not active`)
@@ -74,10 +95,16 @@ export class ReplServerRouter {
     return Array.from(this.apiCalls.entries())
   }
 
+  /*
+   * Get asset by name
+   */
   getAsset(assetName: string): string | undefined {
     return this.assets.get(assetName)
   }
 
+  /*
+   * Get asset names
+   */
   getAssetNames(): string[] {
     return Array.from(this.assets.keys())
   }

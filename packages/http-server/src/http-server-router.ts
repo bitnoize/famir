@@ -8,8 +8,14 @@ import {
   HttpServerMiddlewares
 } from './http-server.js'
 
+/*
+ * HTTP server router
+ */
 export class HttpServerRouter {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<HttpServerRouter>(
       HTTP_SERVER_ROUTER,
       (c) =>
@@ -20,6 +26,9 @@ export class HttpServerRouter {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): HttpServerRouter {
     return container.resolve(HTTP_SERVER_ROUTER)
   }
@@ -44,14 +53,23 @@ export class HttpServerRouter {
 
   #isActive: boolean = false
 
+  /*
+   * Check if router is active
+   */
   get isActive(): boolean {
     return this.#isActive
   }
 
+  /*
+   * Activate router
+   */
   activate() {
     this.#isActive = true
   }
 
+  /*
+   * Add middleware
+   */
   addMiddleware(middlewareName: string, middleware: HttpServerMiddleware) {
     if (this.isActive) {
       throw new Error(`Router is active`)
@@ -66,6 +84,9 @@ export class HttpServerRouter {
     this.logger.debug(`HttpServerRouter add middleware: ${middlewareName}`)
   }
 
+  /*
+   * Get middlewares array
+   */
   getMiddlewares(): HttpServerMiddlewares {
     if (!this.isActive) {
       throw new Error(`Router not active`)
@@ -74,6 +95,9 @@ export class HttpServerRouter {
     return Array.from(this.middlewares)
   }
 
+  /*
+   * Get asset by name
+   */
   getAsset(name: string): string | undefined {
     return this.assets.get(name)
   }

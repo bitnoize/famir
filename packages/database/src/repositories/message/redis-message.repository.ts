@@ -1,4 +1,13 @@
-import { DIContainer } from '@famir/common'
+import {
+  DIContainer,
+  HttpBody,
+  HttpConnection,
+  HttpError,
+  HttpHeaders,
+  HttpMethod,
+  HttpPayload,
+  HttpType
+} from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -8,22 +17,20 @@ import {
   RedisDatabaseConfig,
   RedisDatabaseConnection
 } from '../../database.js'
-import {
-  FullMessageModel,
-  MessageBody,
-  MessageConnection,
-  MessageError,
-  MessageHeaders,
-  MessageModel,
-  MessagePayload
-} from '../../models/index.js'
+import { FullMessageModel, MessageModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 import { MESSAGE_REPOSITORY, MessageRepository } from './message.js'
 import { messageSchemas } from './message.schemas.js'
 
+/*
+ * Redis message repository
+ */
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<MessageRepository>(
       MESSAGE_REPOSITORY,
       (c) =>
@@ -31,7 +38,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).connection<RedisDatabaseConnection>()
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
         )
     )
   }
@@ -49,23 +56,26 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     this.logger.debug(`MessageRepository initialized`)
   }
 
+  /*
+   * Create message
+   */
   async create(
     campaignId: string,
     messageId: string,
     proxyId: string,
     targetId: string,
     sessionId: string,
-    kind: string,
-    method: string,
+    type: HttpType,
+    method: HttpMethod,
     url: string,
-    requestHeaders: MessageHeaders,
-    requestBody: MessageBody,
+    requestHeaders: HttpHeaders,
+    requestBody: HttpBody,
     status: number,
-    responseHeaders: MessageHeaders,
-    responseBody: MessageBody,
-    connection: MessageConnection,
-    payload: MessagePayload,
-    errors: MessageError[],
+    responseHeaders: HttpHeaders,
+    responseBody: HttpBody,
+    connection: HttpConnection,
+    payload: HttpPayload,
+    errors: HttpError[],
     processor: string,
     startTime: number,
     finishTime: number
@@ -78,20 +88,21 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         proxyId,
         targetId,
         sessionId,
-        kind,
+        type,
         method,
         url,
         this.encodeJson(requestHeaders),
         this.encodeBase64(requestBody),
-        status,
+        status.toString(),
         this.encodeJson(responseHeaders),
         this.encodeBase64(responseBody),
         this.encodeJson(connection),
         this.encodeJson(payload),
         this.encodeJson(errors),
         processor,
-        startTime,
-        finishTime
+        startTime.toString(),
+        finishTime.toString(),
+        Date.now().toString()
       )
 
       const mesg = this.handleStatusReply(statusReply)
@@ -102,7 +113,55 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  async read(campaignId: string, messageId: string): Promise<FullMessageModel | null> {
+  /*
+   * Create dummy message
+   */
+  async createDummy(
+    campaignId: string,
+    messageId: string,
+    proxyId: string,
+    targetId: string,
+    sessionId: string
+  ): Promise<void> {
+    try {
+      const statusReply = await this.connection.message.create_dummy_message(
+        this.options.prefix,
+        campaignId,
+        messageId,
+        proxyId,
+        targetId,
+        sessionId
+      )
+
+      const mesg = this.handleStatusReply(statusReply)
+
+      this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
+    } catch (error) {
+      this.raiseError(error, 'createDummy', { campaignId, messageId, proxyId, targetId, sessionId })
+    }
+  }
+
+  /*
+   * Read message by id
+   */
+  async read(campaignId: string, messageId: string): Promise<MessageModel | null> {
+    try {
+      const rawModel = await this.connection.message.read_message(
+        this.options.prefix,
+        campaignId,
+        messageId
+      )
+
+      return this.buildModel(rawModel)
+    } catch (error) {
+      this.raiseError(error, 'read', { campaignId, messageId })
+    }
+  }
+
+  /*
+   * Read extended message by id
+   */
+  async readFull(campaignId: string, messageId: string): Promise<FullMessageModel | null> {
     try {
       const rawModel = await this.connection.message.read_full_message(
         this.options.prefix,
@@ -112,7 +171,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'read', { campaignId, messageId })
+      this.raiseError(error, 'readFull', { campaignId, messageId })
     }
   }
 
@@ -122,6 +181,8 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
 
     this.validateRawData<RawMessage>('database-raw-message', rawModel)
+    this.validateRawData<HttpType>('database-message-type', rawModel.type)
+    this.validateRawData<HttpMethod>('database-message-method', rawModel.method)
 
     return new MessageModel(
       rawModel.campaign_id,
@@ -129,7 +190,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       rawModel.proxy_id,
       rawModel.target_id,
       rawModel.session_id,
-      rawModel.kind,
+      rawModel.type,
       rawModel.method,
       rawModel.url,
       rawModel.status,
@@ -146,6 +207,8 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
 
     this.validateRawData<RawFullMessage>('database-raw-full-message', rawModel)
+    this.validateRawData<HttpType>('database-message-type', rawModel.type)
+    this.validateRawData<HttpMethod>('database-message-method', rawModel.method)
 
     return new FullMessageModel(
       rawModel.campaign_id,
@@ -153,7 +216,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       rawModel.proxy_id,
       rawModel.target_id,
       rawModel.session_id,
-      rawModel.kind,
+      rawModel.type,
       rawModel.method,
       rawModel.url,
       this.parseHeaders(rawModel.request_headers),
@@ -171,34 +234,34 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     )
   }
 
-  protected parseHeaders(value: string): MessageHeaders {
+  protected parseHeaders(value: string): HttpHeaders {
     const data = this.decodeJson(value)
 
-    this.validateRawData<MessageHeaders>('database-message-headers', data)
+    this.validateRawData<HttpHeaders>('database-message-headers', data)
 
     return data
   }
 
-  protected parseConnection(value: string): MessageConnection {
+  protected parseConnection(value: string): HttpConnection {
     const data = this.decodeJson(value)
 
-    this.validateRawData<MessageConnection>('database-message-connection', data)
+    this.validateRawData<HttpConnection>('database-message-connection', data)
 
     return data
   }
 
-  protected parsePayload(value: string): MessagePayload {
+  protected parsePayload(value: string): HttpPayload {
     const data = this.decodeJson(value)
 
-    this.validateRawData<MessagePayload>('database-message-payload', data)
+    this.validateRawData<HttpPayload>('database-message-payload', data)
 
     return data
   }
 
-  protected parseErrors(value: string): MessageError[] {
+  protected parseErrors(value: string): HttpError[] {
     const data = this.decodeJson(value)
 
-    this.validateRawData<MessageError[]>('database-message-errors', data)
+    this.validateRawData<HttpError[]>('database-message-errors', data)
 
     return data
   }

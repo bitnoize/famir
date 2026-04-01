@@ -3,8 +3,14 @@ import { DatabaseError, SESSION_REPOSITORY, SessionModel, SessionRepository } fr
 import { HttpServerError } from '@famir/http-server'
 import { AUTH_SESSION_USE_CASE, AuthSessionData } from './auth-session.js'
 
+/*
+ * Auth session use-case
+ */
 export class AuthSessionUseCase {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<AuthSessionUseCase>(
       AUTH_SESSION_USE_CASE,
       (c) => new AuthSessionUseCase(c.resolve<SessionRepository>(SESSION_REPOSITORY))
@@ -13,6 +19,9 @@ export class AuthSessionUseCase {
 
   constructor(protected readonly sessionRepository: SessionRepository) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(data: AuthSessionData): Promise<SessionModel | null> {
     try {
       return await this.sessionRepository.auth(data.campaignId, data.sessionId)

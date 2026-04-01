@@ -1,3 +1,6 @@
+/*
+ * Redirector is a simple page shows to client when using landing targets
+ */
 export class RedirectorModel {
   static isNotNull = <T extends RedirectorModel>(model: T | null): model is T => {
     return model != null
@@ -11,6 +14,9 @@ export class RedirectorModel {
   ) {}
 }
 
+/*
+ * Extended redirector
+ */
 export class FullRedirectorModel extends RedirectorModel {
   constructor(
     campaignId: string,

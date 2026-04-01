@@ -6,8 +6,14 @@ import consumers from 'node:stream/consumers'
 import { StorageError } from './storage.error.js'
 import { MinioStorageConfig, MinioStorageOptions, Storage, STORAGE } from './storage.js'
 
+/*
+ * Minio storage implementation
+ */
 export class MinioStorage implements Storage {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<Storage>(
       STORAGE,
       (c) =>
@@ -35,6 +41,9 @@ export class MinioStorage implements Storage {
     this.logger.debug(`Storage initialized`)
   }
 
+  /*
+   * Get object from storage
+   */
   async getObject(objectName: string): Promise<Buffer> {
     try {
       await this.minio.statObject(this.options.bucketName, objectName)
@@ -47,6 +56,9 @@ export class MinioStorage implements Storage {
     }
   }
 
+  /*
+   * Put object to storage
+   */
   async putObject(
     objectName: string,
     data: Buffer,

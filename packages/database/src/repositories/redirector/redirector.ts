@@ -2,6 +2,9 @@ import { FullRedirectorModel, RedirectorModel } from '../../models/index.js'
 
 export const REDIRECTOR_REPOSITORY = Symbol('RedirectorRepository')
 
+/**
+ * Redirector repository contract
+ */
 export interface RedirectorRepository {
   create(campaignId: string, redirectorId: string, page: string, lockSecret: string): Promise<void>
   read(campaignId: string, redirectorId: string): Promise<RedirectorModel | null>

@@ -2,6 +2,9 @@ import { LureModel } from '../../models/index.js'
 
 export const LURE_REPOSITORY = Symbol('LureRepository')
 
+/**
+ * Lure repository contract
+ */
 export interface LureRepository {
   create(
     campaignId: string,

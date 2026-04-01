@@ -2,6 +2,9 @@ import { ProxyModel } from '../../models/index.js'
 
 export const PROXY_REPOSITORY = Symbol('ProxyRepository')
 
+/**
+ * Proxy repository contract
+ */
 export interface ProxyRepository {
   create(campaignId: string, proxyId: string, url: string, lockSecret: string): Promise<void>
   read(campaignId: string, proxyId: string): Promise<ProxyModel | null>

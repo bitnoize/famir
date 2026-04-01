@@ -6,6 +6,7 @@ Object.assign(util.inspect.defaultOptions, {
   showHidden: false
 })
 
+/*
 process.on('unhandledRejection', (reason: string, p: Promise<unknown>) => {
   console.error(`Unhandled rejection`, { reason, p })
 
@@ -17,20 +18,36 @@ process.on('uncaughtException', (error: unknown) => {
 
   process.exit(1)
 })
+*/
 
-export const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const
-
+/*
+ * Serialize error object helper
+ */
 export { serializeError } from 'serialize-error'
 
-// https://oida.dev/typescript-array-includes/
+/*
+ * List of shutdown signals to listen
+ */
+export const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const
+
+/*
+ * Check array includes a value, type-safe version
+ * https://oida.dev/typescript-array-includes/
+ */
 export const arrayIncludes = <T extends U, U>(coll: ReadonlyArray<T>, el: U): el is T => {
   return coll.includes(el as T)
 }
 
+/*
+ * Generate random identifier
+ */
 export const randomIdent = (): string => {
   return randomBytes(16).toString('hex')
 }
 
+/*
+ * Generate random name
+ */
 export const randomName = (): string => {
   const chars = 'abcdefghijklmnopqrstuvwxyz'
 
@@ -42,10 +59,16 @@ export const randomName = (): string => {
   return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
 
+/*
+ * Safe Base64 encode
+ */
 export const safeBase64Encode = (base64: string): string => {
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
+/*
+ * Safe Base64 decode
+ */
 export const safeBase64Decode = (value: string): string => {
   let base64 = value.replace(/-/g, '+').replace(/_/g, '/')
 

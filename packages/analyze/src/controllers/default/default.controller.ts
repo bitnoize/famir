@@ -10,14 +10,20 @@ import {
   type SaveMessageUseCase
 } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
-import { DUMMY_CONTROLLER } from './dummy.js'
+import { DEFAULT_CONTROLLER } from './default.js'
 
-export class DummyController extends BaseController {
-  static inject(container: DIContainer) {
+/*
+ * Default controller
+ */
+export class DefaultController extends BaseController {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
-      DUMMY_CONTROLLER,
+      DEFAULT_CONTROLLER,
       (c) =>
-        new DummyController(
+        new DefaultController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<ConsumeRouter>(CONSUME_ROUTER),
@@ -27,8 +33,11 @@ export class DummyController extends BaseController {
     )
   }
 
-  static resolve(container: DIContainer): DummyController {
-    return container.resolve(DUMMY_CONTROLLER)
+  /*
+   * Resolve dependency
+   */
+  static resolve(container: DIContainer): DefaultController {
+    return container.resolve(DEFAULT_CONTROLLER)
   }
 
   constructor(
@@ -40,11 +49,14 @@ export class DummyController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.logger.debug(`DummyController initialized`)
+    this.logger.debug(`DefaultController initialized`)
   }
 
+  /*
+   * Use processor
+   */
   use() {
-    this.router.addProcessor(ANALYZE_QUEUE_NAME, 'dummy', async (data) => {
+    this.router.addProcessor(ANALYZE_QUEUE_NAME, 'default', async (data) => {
       this.validateAnalyzeJobData(data)
 
       const message = await this.readMessageUseCase.execute(data)

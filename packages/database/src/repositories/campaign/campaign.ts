@@ -2,6 +2,9 @@ import { CampaignModel, FullCampaignModel } from '../../models/index.js'
 
 export const CAMPAIGN_REPOSITORY = Symbol('CampaignRepository')
 
+/**
+ * Campaign repository contract
+ */
 export interface CampaignRepository {
   create(
     campaignId: string,
@@ -16,6 +19,7 @@ export interface CampaignRepository {
   ): Promise<void>
   read(campaignId: string): Promise<CampaignModel | null>
   readFull(campaignId: string): Promise<FullCampaignModel | null>
+  readShare(): Promise<CampaignShare>
   lock(campaignId: string): Promise<string>
   unlock(campaignId: string, lockSecret: string): Promise<void>
   update(
@@ -29,4 +33,9 @@ export interface CampaignRepository {
   delete(campaignId: string, lockSecret: string): Promise<void>
   list(): Promise<CampaignModel[]>
   listFull(): Promise<CampaignModel[]>
+}
+
+export interface CampaignShare {
+  mirrorDomains: string[]
+  sessionCookieNames: string[]
 }

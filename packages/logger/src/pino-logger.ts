@@ -5,85 +5,92 @@ import pino from 'pino'
 import {
   Logger,
   LOGGER,
+  LOGGER_BACKEND,
   LoggerData,
+  PinoLoggerBackend,
   PinoLoggerConfig,
-  PinoLoggerOptions,
-  PinoLoggerTransportOptions
+  PinoLoggerOptions
 } from './logger.js'
-import { pinoLoggerSchemas } from './logger.schemas.js'
 
+/*
+ * Pino logger implementation
+ */
 export class PinoLogger implements Logger {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<Logger>(
       LOGGER,
       (c) =>
-        new PinoLogger(c.resolve<Validator>(VALIDATOR), c.resolve<Config<PinoLoggerConfig>>(CONFIG))
+        new PinoLogger(
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config<PinoLoggerConfig>>(CONFIG),
+          c.resolveOptional<PinoLoggerBackend>(LOGGER_BACKEND)
+        )
     )
   }
 
   protected readonly options: PinoLoggerOptions
-  protected readonly pino: pino.Logger
+  protected readonly pino: PinoLoggerBackend
 
   constructor(
     protected readonly validator: Validator,
-    config: Config<PinoLoggerConfig>
+    config: Config<PinoLoggerConfig>,
+    loggerBackend: PinoLoggerBackend | null
   ) {
-    this.validator.addSchemas(pinoLoggerSchemas)
-
     this.options = this.buildOptions(config.data)
 
-    this.pino = pino({
-      name: this.options.appName,
-      level: this.options.logLevel,
-      base: {},
-      transport: {
-        target: this.options.transportTarget,
-        options: this.options.transportOptions
-      }
-    })
+    this.pino =
+      loggerBackend ??
+      pino({
+        name: this.options.appName,
+        level: this.options.logLevel
+        //base: {},
+      })
 
     this.debug(`Logger initialized`)
   }
 
+  /*
+   * Log debug message
+   */
   debug(mesg: string, data: LoggerData = {}) {
     this.pino.debug(data, mesg)
   }
 
+  /*
+   * Log info message
+   */
   info(mesg: string, data: LoggerData = {}) {
     this.pino.info(data, mesg)
   }
 
+  /*
+   * Log warn message
+   */
   warn(mesg: string, data: LoggerData = {}) {
     this.pino.warn(data, mesg)
   }
 
+  /*
+   * Log error message
+   */
   error(mesg: string, data: LoggerData = {}) {
     this.pino.error(data, mesg)
   }
 
+  /*
+   * Log fatal message
+   */
   fatal(mesg: string, data: LoggerData = {}) {
     this.pino.fatal(data, mesg)
   }
 
   private buildOptions(config: PinoLoggerConfig): PinoLoggerOptions {
-    try {
-      const transportOptions: unknown = JSON.parse(config.LOGGER_TRANSPORT_OPTIONS)
-
-      this.validator.assertSchema<PinoLoggerTransportOptions>(
-        'logger-transport-options',
-        transportOptions
-      )
-
-      return {
-        logLevel: config.LOGGER_LOG_LEVEL,
-        appName: config.LOGGER_APP_NAME,
-        transportTarget: config.LOGGER_TRANSPORT_TARGET,
-        transportOptions
-      }
-    } catch (error) {
-      console.error(`Build logger options failed`, { error })
-
-      process.exit(1)
+    return {
+      logLevel: config.LOGGER_LOG_LEVEL,
+      appName: config.LOGGER_APP_NAME
     }
   }
 }

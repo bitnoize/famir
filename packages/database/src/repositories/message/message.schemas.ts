@@ -1,11 +1,13 @@
-import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import {
-  MessageConnection,
-  MessageError,
-  MessageHeader,
-  MessageHeaders,
-  MessagePayload
-} from '../../models/index.js'
+  JSONSchemaType,
+  ValidatorSchemas,
+  httpConnectionSchema,
+  httpErrorsSchema,
+  httpHeadersSchema,
+  httpMethodSchema,
+  httpPayloadSchema,
+  httpTypeSchema
+} from '@famir/validator'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
 const rawMessageSchema: JSONSchemaType<RawMessage> = {
@@ -16,7 +18,7 @@ const rawMessageSchema: JSONSchemaType<RawMessage> = {
     'proxy_id',
     'target_id',
     'session_id',
-    'kind',
+    'type',
     'method',
     'url',
     'status',
@@ -41,7 +43,7 @@ const rawMessageSchema: JSONSchemaType<RawMessage> = {
     session_id: {
       type: 'string'
     },
-    kind: {
+    type: {
       type: 'string'
     },
     method: {
@@ -77,7 +79,7 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     'proxy_id',
     'target_id',
     'session_id',
-    'kind',
+    'type',
     'method',
     'url',
     'request_headers',
@@ -109,7 +111,7 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     session_id: {
       type: 'string'
     },
-    kind: {
+    type: {
       type: 'string'
     },
     method: {
@@ -158,67 +160,13 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
   additionalProperties: false
 } as const
 
-const messageHeaderSchema: JSONSchemaType<MessageHeader> = {
-  type: ['string', 'array'],
-  oneOf: [
-    {
-      type: 'string'
-    },
-    {
-      type: 'array',
-      items: {
-        type: 'string'
-      }
-    }
-  ]
-} as const
-
-const messageHeadersSchema: JSONSchemaType<MessageHeaders> = {
-  type: 'object',
-  required: [],
-  additionalProperties: {
-    ...messageHeaderSchema,
-    nullable: true
-  }
-} as const
-
-const messageConnectionSchema: JSONSchemaType<MessageConnection> = {
-  type: 'object',
-  additionalProperties: {
-    anyOf: [{ type: 'number' }, { type: 'string' }]
-  }
-} as const
-
-const messagePayloadSchema: JSONSchemaType<MessagePayload> = {
-  type: 'object',
-  additionalProperties: true
-} as const
-
-// FIXME
-const messageErrorSchema: JSONSchemaType<MessageError> = {
-  type: 'array',
-  minItems: 1,
-  maxItems: 10,
-  items: [
-    {
-      type: 'object'
-    }
-  ],
-  additionalItems: {
-    type: 'string'
-  }
-} as const
-
-const messageErrorsSchema: JSONSchemaType<MessageError[]> = {
-  type: 'array',
-  items: messageErrorSchema
-} as const
-
 export const messageSchemas: ValidatorSchemas = {
   'database-raw-message': rawMessageSchema,
   'database-raw-full-message': rawFullMessageSchema,
-  'database-message-headers': messageHeadersSchema,
-  'database-message-connection': messageConnectionSchema,
-  'database-message-payload': messagePayloadSchema,
-  'database-message-errors': messageErrorsSchema
+  'database-message-type': httpTypeSchema,
+  'database-message-method': httpMethodSchema,
+  'database-message-headers': httpHeadersSchema,
+  'database-message-connection': httpConnectionSchema,
+  'database-message-payload': httpPayloadSchema,
+  'database-message-errors': httpErrorsSchema
 } as const

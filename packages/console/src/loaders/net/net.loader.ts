@@ -26,37 +26,37 @@ import { NetConsoleConfig } from './net.js'
 import { configNetConsoleSchema } from './net.schemas.js'
 
 export async function bootstrapNet(composer: DIComposer, assets: ReplServerAssets): Promise<void> {
-  const container = new DIContainer()
+  const container = DIContainer.getInstance()
 
   container.registerSingleton(CONFIG_SCHEMA, () => configNetConsoleSchema)
   container.registerSingleton(REPL_SERVER_ASSETS, () => assets)
 
-  AjvValidator.inject(container)
+  AjvValidator.register(container)
 
-  EnvConfig.inject<NetConsoleConfig>(container)
+  EnvConfig.register<NetConsoleConfig>(container)
 
-  PinoLogger.inject(container)
+  PinoLogger.register(container)
 
-  RedisDatabaseConnector.inject(container)
-  RedisDatabaseManager.inject(container)
+  RedisDatabaseConnector.register(container)
+  RedisDatabaseManager.register(container)
 
-  RedisCampaignRepository.inject(container)
-  RedisProxyRepository.inject(container)
-  RedisTargetRepository.inject(container)
-  RedisRedirectorRepository.inject(container)
-  RedisLureRepository.inject(container)
-  RedisSessionRepository.inject(container)
-  RedisMessageRepository.inject(container)
+  RedisCampaignRepository.register(container)
+  RedisProxyRepository.register(container)
+  RedisTargetRepository.register(container)
+  RedisRedirectorRepository.register(container)
+  RedisLureRepository.register(container)
+  RedisSessionRepository.register(container)
+  RedisMessageRepository.register(container)
 
-  RedisProduceConnector.inject(container)
+  RedisProduceConnector.register(container)
 
-  BullAnalyzeQueue.inject(container)
+  BullAnalyzeQueue.register(container)
 
-  ReplServerRouter.inject(container)
+  ReplServerRouter.register(container)
 
-  NetReplServer.inject(container)
+  NetReplServer.register(container)
 
-  ConsoleApp.inject(container)
+  ConsoleApp.register(container)
 
   autoLoad(container)
 

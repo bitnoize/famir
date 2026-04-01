@@ -11,15 +11,21 @@ import {
 import { BullBaseQueue } from '../base/index.js'
 import { WEBHOOK_QUEUE, WEBHOOK_QUEUE_NAME, WebhookQueue } from './webhook.js'
 
+/*
+ * Bull webhook queue implementation
+ */
 export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<WebhookQueue>(
       WEBHOOK_QUEUE,
       (c) =>
         new BullWebhookQueue(
           c.resolve<Config<BullProduceConfig>>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ProduceConnector>(PRODUCE_CONNECTOR).connection<RedisProduceConnection>()
+          c.resolve<ProduceConnector>(PRODUCE_CONNECTOR).getConnection<RedisProduceConnection>()
         )
     )
   }
@@ -34,6 +40,9 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
     this.logger.debug(`WebhookQueue initialized`)
   }
 
+  /*
+   * Add job to queue
+   */
   async addJob(name: string, data: WebhookJobData): Promise<void> {
     try {
       await this.queue.add(name, data)

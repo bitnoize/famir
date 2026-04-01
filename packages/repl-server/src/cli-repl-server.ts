@@ -15,8 +15,14 @@ import {
   ReplServer
 } from './repl-server.js'
 
+/*
+ * Cli REPL server implementation
+ */
 export class CliReplServer implements ReplServer {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
       (c) =>
@@ -42,6 +48,9 @@ export class CliReplServer implements ReplServer {
 
   protected replServer: repl.REPLServer | null = null
 
+  /*
+   * Start server
+   */
   // eslint-disable-next-line @typescript-eslint/require-await
   async start(): Promise<void> {
     if (!this.replServer) {
@@ -51,6 +60,9 @@ export class CliReplServer implements ReplServer {
     }
   }
 
+  /*
+   * Stop server
+   */
   // eslint-disable-next-line @typescript-eslint/require-await
   async stop(): Promise<void> {
     if (this.replServer) {

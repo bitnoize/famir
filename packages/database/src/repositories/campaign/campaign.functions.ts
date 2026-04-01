@@ -3,7 +3,8 @@ import {
   campaignIndexKey,
   campaignKey,
   campaignLockKey,
-  campaignUniqueMirrorDomainKey,
+  campaignMirrorDomainsKey,
+  campaignSessionCookieNamesKey,
   lureIndexKey,
   proxyIndexKey,
   redirectorIndexKey,
@@ -36,7 +37,7 @@ export interface RawFullCampaign extends RawCampaign {
 export const campaignFunctions = {
   campaign: {
     create_campaign: {
-      NUMBER_OF_KEYS: 3,
+      NUMBER_OF_KEYS: 4,
 
       parseCommand(
         parser: CommandParser,
@@ -47,12 +48,14 @@ export const campaignFunctions = {
         cryptSecret: string,
         landingUpgradePath: string,
         sessionCookieName: string,
-        sessionExpire: number,
-        newSessionExpire: number,
-        messageExpire: number
+        sessionExpire: string,
+        newSessionExpire: string,
+        messageExpire: string,
+        createdAt: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignUniqueMirrorDomainKey(prefix))
+        parser.pushKey(campaignMirrorDomainsKey(prefix))
+        parser.pushKey(campaignSessionCookieNamesKey(prefix))
         parser.pushKey(campaignIndexKey(prefix))
 
         parser.push(campaignId)
@@ -61,10 +64,10 @@ export const campaignFunctions = {
         parser.push(cryptSecret)
         parser.push(landingUpgradePath)
         parser.push(sessionCookieName)
-        parser.push(sessionExpire.toString())
-        parser.push(newSessionExpire.toString())
-        parser.push(messageExpire.toString())
-        parser.push(Date.now().toString())
+        parser.push(sessionExpire)
+        parser.push(newSessionExpire)
+        parser.push(messageExpire)
+        parser.push(createdAt)
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -96,6 +99,26 @@ export const campaignFunctions = {
       transformReply: undefined as unknown as () => unknown
     },
 
+    read_campaign_mirror_domains: {
+      NUMBER_OF_KEYS: 1,
+
+      parseCommand(parser: CommandParser, prefix: string) {
+        parser.pushKey(campaignMirrorDomainsKey(prefix))
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
+    read_campaign_session_cookie_names: {
+      NUMBER_OF_KEYS: 1,
+
+      parseCommand(parser: CommandParser, prefix: string) {
+        parser.pushKey(campaignSessionCookieNamesKey(prefix))
+      },
+
+      transformReply: undefined as unknown as () => unknown
+    },
+
     read_campaign_index: {
       NUMBER_OF_KEYS: 1,
 
@@ -114,13 +137,13 @@ export const campaignFunctions = {
         prefix: string,
         campaignId: string,
         lockSecret: string,
-        lockTimeout: number
+        lockTimeout: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
 
         parser.push(lockSecret)
-        parser.push(lockTimeout.toString())
+        parser.push(lockTimeout)
       },
 
       transformReply: undefined as unknown as () => unknown
@@ -146,10 +169,10 @@ export const campaignFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        description: string | null | undefined,
-        sessionExpire: number | null | undefined,
-        newSessionExpire: number | null | undefined,
-        messageExpire: number | null | undefined,
+        description: string | null,
+        sessionExpire: string | null,
+        newSessionExpire: string | null,
+        messageExpire: string | null,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -162,17 +185,17 @@ export const campaignFunctions = {
 
         if (sessionExpire != null) {
           parser.push('session_expire')
-          parser.push(sessionExpire.toString())
+          parser.push(sessionExpire)
         }
 
         if (newSessionExpire != null) {
           parser.push('new_session_expire')
-          parser.push(newSessionExpire.toString())
+          parser.push(newSessionExpire)
         }
 
         if (messageExpire != null) {
           parser.push('message_expire')
-          parser.push(messageExpire.toString())
+          parser.push(messageExpire)
         }
 
         parser.push(lockSecret)
@@ -182,12 +205,13 @@ export const campaignFunctions = {
     },
 
     delete_campaign: {
-      NUMBER_OF_KEYS: 8,
+      NUMBER_OF_KEYS: 9,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockSecret: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(campaignUniqueMirrorDomainKey(prefix))
+        parser.pushKey(campaignMirrorDomainsKey(prefix))
+        parser.pushKey(campaignSessionCookieNamesKey(prefix))
         parser.pushKey(campaignIndexKey(prefix))
         parser.pushKey(proxyIndexKey(prefix, campaignId))
         parser.pushKey(targetIndexKey(prefix, campaignId))

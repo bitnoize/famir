@@ -1,3 +1,4 @@
+import { HttpBody, HttpJson, HttpText } from '@famir/common'
 import * as iconv from 'iconv-lite'
 import {
   formatQueryString,
@@ -7,11 +8,13 @@ import {
   parseQueryString
 } from './query-string.js'
 
-export type HttpBody = Buffer
-export type HttpText = string
-export type HttpJson = NonNullable<unknown>
-
+/*
+ * HTTP body wrapper
+ */
 export class HttpBodyWrap {
+  /*
+   * Create wrapper from scratch
+   */
   static fromScratch(): HttpBodyWrap {
     return new HttpBodyWrap(Buffer.alloc(0))
   }
@@ -22,30 +25,48 @@ export class HttpBodyWrap {
     this.#body = body
   }
 
+  /*
+   * Clone wrapper
+   */
   clone(): HttpBodyWrap {
     return new HttpBodyWrap(Buffer.from(this.#body))
   }
 
   #isFrozen: boolean = false
 
+  /*
+   * Wrapper frozen state
+   */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
+  /*
+   * Freeze wrapper
+   */
   freeze(): this {
     this.#isFrozen = true
 
     return this
   }
 
+  /*
+   * Body size
+   */
   get length(): number {
     return this.#body.length
   }
 
+  /*
+   * Get body
+   */
   get(): HttpBody {
     return this.#body
   }
 
+  /*
+   * Set body
+   */
   set(body: HttpBody): this {
     this.sureNotFrozen('set')
 
@@ -58,6 +79,9 @@ export class HttpBodyWrap {
 
   #cacheBase64: string | null = null
 
+  /*
+   * Get base64 body
+   */
   getBase64(): string {
     if (this.#cacheBase64 != null) {
       return this.#cacheBase64
@@ -70,6 +94,9 @@ export class HttpBodyWrap {
     return base64
   }
 
+  /*
+   * Set base64 body
+   */
   setBase64(base64: string): this {
     this.sureNotFrozen('setBase64')
 
@@ -82,6 +109,9 @@ export class HttpBodyWrap {
 
   #cacheText: string | null = null
 
+  /*
+   * Get text body
+   */
   getText(charset: string = 'utf8'): HttpText {
     if (this.#cacheText != null) {
       return this.#cacheText
@@ -94,6 +124,9 @@ export class HttpBodyWrap {
     return text
   }
 
+  /*
+   * Set text body
+   */
   setText(text: HttpText, charset: string = 'utf8'): this {
     this.sureNotFrozen('setText')
 
@@ -106,6 +139,9 @@ export class HttpBodyWrap {
 
   #cacheJson: HttpJson | null = null
 
+  /*
+   * Get json body
+   */
   getJson(charset?: string): HttpJson {
     if (this.#cacheJson != null) {
       return this.#cacheJson
@@ -123,6 +159,9 @@ export class HttpBodyWrap {
     return json
   }
 
+  /*
+   * Set json body
+   */
   setJson(json: HttpJson, charset?: string): this {
     this.sureNotFrozen('setJson')
 
@@ -134,11 +173,21 @@ export class HttpBodyWrap {
     return this
   }
 
+  /*
+   * Custom parse query-string options
+   */
   readonly parseQueryStringOptions: HttpParseQueryStringOptions = {}
+
+  /*
+   * Custom format query-string options
+   */
   readonly formatQueryStringOptions: HttpFormatQueryStringOptions = {}
 
   #cacheQueryString: HttpQueryString | null = null
 
+  /*
+   * Get query-string body
+   */
   getQueryString(charset?: string): HttpQueryString {
     if (this.#cacheQueryString != null) {
       return this.#cacheQueryString
@@ -155,6 +204,9 @@ export class HttpBodyWrap {
     return queryString
   }
 
+  /*
+   * Set query-string body
+   */
   setQueryString(queryString: HttpQueryString, charset?: string): this {
     this.sureNotFrozen('setQueryString')
 
@@ -169,6 +221,9 @@ export class HttpBodyWrap {
     return this
   }
 
+  /*
+   * Cleanup wrapper
+   */
   reset(): this {
     this.sureNotFrozen('reset')
 

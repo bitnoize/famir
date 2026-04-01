@@ -1,16 +1,19 @@
 import {
-  FullMessageModel,
-  MessageBody,
-  MessageConnection,
-  MessageError,
-  MessageHeaders,
-  MessageKind,
-  MessageMethod,
-  MessagePayload
-} from '../../models/index.js'
+  HttpBody,
+  HttpConnection,
+  HttpError,
+  HttpHeaders,
+  HttpMethod,
+  HttpPayload,
+  HttpType
+} from '@famir/common'
+import { FullMessageModel, MessageModel } from '../../models/index.js'
 
 export const MESSAGE_REPOSITORY = Symbol('MessageRepository')
 
+/**
+ * Message repository contract
+ */
 export interface MessageRepository {
   create(
     campaignId: string,
@@ -18,20 +21,28 @@ export interface MessageRepository {
     proxyId: string,
     targetId: string,
     sessionId: string,
-    kind: MessageKind,
-    method: MessageMethod,
+    type: HttpType,
+    method: HttpMethod,
     url: string,
-    requestHeaders: MessageHeaders,
-    requestBody: MessageBody,
+    requestHeaders: HttpHeaders,
+    requestBody: HttpBody,
     status: number,
-    responseHeaders: MessageHeaders,
-    responseBody: MessageBody,
-    connection: MessageConnection,
-    payload: MessagePayload,
-    errors: MessageError[],
+    responseHeaders: HttpHeaders,
+    responseBody: HttpBody,
+    connection: HttpConnection,
+    payload: HttpPayload,
+    errors: HttpError[],
     processor: string,
     startTime: number,
     finishTime: number
   ): Promise<void>
-  read(campaignId: string, messageId: string): Promise<FullMessageModel | null>
+  createDummy(
+    campaignId: string,
+    messageId: string,
+    proxyId: string,
+    targetId: string,
+    sessionId: string
+  ): Promise<void>
+  read(campaignId: string, messageId: string): Promise<MessageModel | null>
+  readFull(campaignId: string, messageId: string): Promise<FullMessageModel | null>
 }

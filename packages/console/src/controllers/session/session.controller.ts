@@ -7,8 +7,14 @@ import { BaseController } from '../base/index.js'
 import { SESSION_CONTROLLER } from './session.js'
 import { sessionSchemas } from './session.schemas.js'
 
+/*
+ * Session controller
+ */
 export class SessionController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       SESSION_CONTROLLER,
       (c) =>
@@ -21,6 +27,9 @@ export class SessionController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): SessionController {
     return container.resolve(SESSION_CONTROLLER)
   }
@@ -38,6 +47,9 @@ export class SessionController extends BaseController {
     this.logger.debug(`SessionController initialized`)
   }
 
+  /*
+   * Use api-calls
+   */
   use() {
     this.router.addApiCall('readSession', async (data) => {
       this.validateData<ReadSessionData>('console-read-session-data', data)

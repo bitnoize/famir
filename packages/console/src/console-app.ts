@@ -5,8 +5,14 @@ import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCE_CONNECTOR, ProduceConnector } from
 import { REPL_SERVER, REPL_SERVER_ROUTER, ReplServer, ReplServerRouter } from '@famir/repl-server'
 import { CONSOLE_APP } from './console.js'
 
+/*
+ * Console app
+ */
 export class ConsoleApp {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       CONSOLE_APP,
       (c) =>
@@ -21,6 +27,9 @@ export class ConsoleApp {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): ConsoleApp {
     return container.resolve(CONSOLE_APP)
   }
@@ -48,6 +57,9 @@ export class ConsoleApp {
     this.logger.debug(`App initialized`)
   }
 
+  /*
+   * Start app
+   */
   async start(): Promise<void> {
     try {
       this.router.activate()
@@ -66,7 +78,10 @@ export class ConsoleApp {
     }
   }
 
-  protected async stop(): Promise<void> {
+  /*
+   * Stop app
+   */
+  async stop(): Promise<void> {
     try {
       await this.replServer.stop()
 

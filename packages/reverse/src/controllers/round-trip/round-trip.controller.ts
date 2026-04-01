@@ -1,19 +1,12 @@
 import { DIContainer } from '@famir/common'
-import { EnabledFullTargetModel, EnabledProxyModel } from '@famir/database'
 import { HttpClientError } from '@famir/http-client'
-import {
-  HTTP_SERVER_ROUTER,
-  HttpServerContext,
-  HttpServerError,
-  HttpServerRouter
-} from '@famir/http-server'
+import { HTTP_SERVER_ROUTER, HttpServerContext, HttpServerRouter } from '@famir/http-server'
 import { LimiterTransform } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { PassThrough, pipeline as pipelineSync } from 'node:stream'
 import { pipeline as pipelineAsync } from 'node:stream/promises'
-import { type ReverseMessage } from '../../reverse-message.js'
 import {
   FORWARD_SIMPLE_USE_CASE,
   FORWARD_STREAM_REQUEST_USE_CASE,
@@ -23,10 +16,16 @@ import {
   type ForwardStreamResponseUseCase
 } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
-import { ROUND_TRIP_CONTROLLER } from './round-trip.js'
+import { ROUND_TRIP_CONTROLLER, RoundTripDispatchHttpType } from './round-trip.js'
 
+/*
+ * Round-trip controller
+ */
 export class RoundTripController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       ROUND_TRIP_CONTROLLER,
       (c) =>
@@ -42,6 +41,9 @@ export class RoundTripController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): RoundTripController {
     return container.resolve(ROUND_TRIP_CONTROLLER)
   }
@@ -60,6 +62,9 @@ export class RoundTripController extends BaseController {
     this.logger.debug(`RoundTripController initialized`)
   }
 
+  /*
+   * Use middleware
+   */
   use() {
     this.router.addMiddleware('round-trip', async (ctx, next) => {
       const proxy = this.getState(ctx, 'proxy')
@@ -68,216 +73,199 @@ export class RoundTripController extends BaseController {
 
       message.ready()
 
-      if (message.isKind('simple')) {
-        await this.forwardSimple(ctx, proxy, target, message)
-      } else if (message.isKind('stream-request')) {
-        await this.forwardStreamRequest(ctx, proxy, target, message)
-      } else if (message.isKind('stream-response')) {
-        await this.forwardStreamResponse(ctx, proxy, target, message)
+      await this.dispatchRoot[message.type](ctx, proxy, target, message, next)
+    })
+  }
+
+  protected dispatchRoot: RoundTripDispatchHttpType = {
+    'normal-simple': async (ctx, proxy, target, message, next) => {
+      await ctx.loadRequest(target.bodySizeLimit)
+
+      message.url.merge(ctx.url.toObject())
+      message.requestHeaders.merge(ctx.requestHeaders.toObject())
+      message.mergeConnection(ctx.connection)
+
+      message.runRequestHeadInterceptors()
+
+      message.requestBody.set(ctx.requestBody.get())
+
+      message.runRequestBodyInterceptors()
+
+      const result = await this.forwardSimpleUseCase.execute({
+        proxy: proxy.url,
+        method: message.method.get(),
+        url: message.url.toAbsolute(),
+        requestHeaders: message.requestHeaders.toObject(),
+        requestBody: message.requestBody.get(),
+        connectTimeout: target.connectTimeout,
+        timeout: target.simpleTimeout,
+        headersSizeLimit: target.headersSizeLimit,
+        bodySizeLimit: target.bodySizeLimit
+      })
+
+      if (result.error) {
+        message.addError(result.error, 'forward', 'simple')
+        message.mergeConnection(result.connection)
+
+        this.renderMessageError(ctx, result.error, true)
+
+        await ctx.sendResponse()
       } else {
-        throw new HttpServerError(`Server internal error`, {
-          context: {
-            reason: `Message kind not implemented`,
-            messageKind: message.getKind()
-          },
-          code: 'INTERNAL_ERROR'
-        })
+        message.status.set(result.status)
+        message.responseHeaders.merge(result.responseHeaders)
+        message.mergeConnection(result.connection)
+
+        message.runResponseHeadInterceptors()
+
+        message.responseBody.set(result.responseBody)
+
+        message.runResponseBodyInterceptors()
+
+        ctx.status.set(message.status.get())
+        ctx.responseHeaders.merge(message.responseHeaders.toObject())
+        ctx.responseBody.set(message.responseBody.get())
+
+        await ctx.sendResponse()
       }
 
       await next()
-    })
-  }
+    },
 
-  protected async forwardSimple(
-    ctx: HttpServerContext,
-    proxy: EnabledProxyModel,
-    target: EnabledFullTargetModel,
-    message: ReverseMessage
-  ): Promise<void> {
-    await ctx.loadRequest(target.bodySizeLimit)
+    'normal-stream-request': async (ctx, proxy, target, message, next) => {
+      message.url.merge(ctx.url.toObject())
+      message.requestHeaders.merge(ctx.requestHeaders.toObject())
+      message.mergeConnection(ctx.connection)
 
-    message.url.merge(ctx.url.toObject())
-    message.requestHeaders.merge(ctx.requestHeaders.toObject())
-    message.mergeConnection(ctx.connection)
+      message.runRequestHeadInterceptors()
 
-    message.runRequestHeadInterceptors()
+      const requestStream = new PassThrough()
 
-    message.requestBody.set(ctx.requestBody.get())
+      const limiterTransform = new LimiterTransform(target.bodySizeLimit)
 
-    message.runRequestBodyInterceptors()
+      pipelineSync(
+        ctx.requestStream,
+        limiterTransform,
+        ...message.getRequestTransforms(),
+        requestStream,
+        (error) => {
+          if (error) {
+            message.addError(error, 'forward', 'stream-request', 'pipeline')
 
-    const result = await this.forwardSimpleUseCase.execute({
-      proxy: proxy.url,
-      method: message.method.get(),
-      url: message.url.toAbsolute(),
-      requestHeaders: message.requestHeaders.toObject(),
-      requestBody: message.requestBody.get(),
-      connectTimeout: target.connectTimeout,
-      timeout: target.simpleTimeout,
-      headersSizeLimit: target.headersSizeLimit,
-      bodySizeLimit: target.bodySizeLimit
-    })
+            this.logger.warn(`HttpServer request stream pipeline error`, { error })
+          }
+        }
+      )
 
-    if (result.error) {
-      message.addError(result.error, 'forward', 'simple')
-      message.mergeConnection(result.connection)
+      const result = await this.forwardStreamRequestUseCase.execute({
+        proxy: proxy.url,
+        method: message.method.get(),
+        url: message.url.toAbsolute(),
+        requestHeaders: message.requestHeaders.toObject(),
+        requestStream,
+        connectTimeout: target.connectTimeout,
+        timeout: target.streamTimeout,
+        headersSizeLimit: target.headersSizeLimit,
+        bodySizeLimit: target.bodySizeLimit
+      })
 
-      this.renderMessageError(ctx, result.error, true)
+      if (result.error) {
+        message.addError(result.error, 'forward', 'stream-request')
+        message.mergeConnection(result.connection)
 
-      await ctx.sendResponse()
-    } else {
-      message.status.set(result.status)
-      message.responseHeaders.merge(result.responseHeaders)
-      message.mergeConnection(result.connection)
+        this.renderMessageError(ctx, result.error, false)
 
-      message.runResponseHeadInterceptors()
+        await ctx.sendResponse()
+      } else {
+        message.status.set(result.status)
+        message.responseHeaders.merge(result.responseHeaders)
+        message.mergeConnection(result.connection)
 
-      message.responseBody.set(result.responseBody)
+        message.runResponseHeadInterceptors()
 
-      message.runResponseBodyInterceptors()
+        message.responseBody.set(result.responseBody)
 
-      ctx.status.set(message.status.get())
-      ctx.responseHeaders.merge(message.responseHeaders.toObject())
-      ctx.responseBody.set(message.responseBody.get())
+        message.runResponseBodyInterceptors()
 
-      await ctx.sendResponse()
-    }
-  }
+        ctx.status.set(message.status.get())
+        ctx.responseHeaders.merge(message.responseHeaders.toObject())
+        ctx.responseBody.set(message.responseBody.get())
 
-  protected async forwardStreamRequest(
-    ctx: HttpServerContext,
-    proxy: EnabledProxyModel,
-    target: EnabledFullTargetModel,
-    message: ReverseMessage
-  ): Promise<void> {
-    message.url.merge(ctx.url.toObject())
-    message.requestHeaders.merge(ctx.requestHeaders.toObject())
-    message.mergeConnection(ctx.connection)
+        await ctx.sendResponse()
+      }
 
-    message.runRequestHeadInterceptors()
+      await next()
+    },
 
-    const requestStream = new PassThrough()
+    'normal-stream-response': async (ctx, proxy, target, message, next) => {
+      await ctx.loadRequest(target.bodySizeLimit)
 
-    const limiterTransform = new LimiterTransform(target.bodySizeLimit)
+      message.url.merge(ctx.url.toObject())
+      message.requestHeaders.merge(ctx.requestHeaders.toObject())
+      message.mergeConnection(ctx.connection)
 
-    pipelineSync(
-      ctx.requestStream,
-      limiterTransform,
-      ...message.getRequestTransforms(),
-      requestStream,
-      (error) => {
-        if (error) {
-          message.addError(error, 'forward', 'stream-request', 'pipeline')
+      message.runRequestHeadInterceptors()
 
-          this.logger.warn(`HttpServer request stream pipeline error`, { error })
+      message.requestBody.set(ctx.requestBody.get())
+
+      message.runRequestBodyInterceptors()
+
+      const result = await this.forwardStreamResponseUseCase.execute({
+        proxy: proxy.url,
+        method: message.method.get(),
+        url: message.url.toAbsolute(),
+        requestHeaders: message.requestHeaders.toObject(),
+        requestBody: message.requestBody.get(),
+        connectTimeout: target.connectTimeout,
+        timeout: target.streamTimeout,
+        headersSizeLimit: target.headersSizeLimit
+      })
+
+      if (result.error) {
+        message.addError(result.error, 'forward', 'stream-response')
+        message.mergeConnection(result.connection)
+
+        this.renderMessageError(ctx, result.error, false)
+
+        await ctx.sendResponse()
+      } else {
+        message.status.set(result.status)
+        message.responseHeaders.merge(result.responseHeaders)
+        message.mergeConnection(result.connection)
+
+        message.runResponseHeadInterceptors()
+
+        ctx.status.set(message.status.get())
+        ctx.responseHeaders.merge(message.responseHeaders.toObject())
+
+        ctx.sendHead()
+
+        try {
+          const limiterTransform = new LimiterTransform(target.bodySizeLimit)
+
+          await pipelineAsync(
+            result.responseStream,
+            limiterTransform,
+            ...message.getResponseTransforms(),
+            ctx.responseStream
+          )
+        } catch (error) {
+          message.addError(error, 'forward', 'stream-response', 'pipeline')
+
+          this.logger.warn(`HttpServer response stream pipeline error`, { error })
+
+          if (!ctx.responseStream.writableEnded) {
+            ctx.responseStream.end()
+          }
         }
       }
-    )
 
-    const result = await this.forwardStreamRequestUseCase.execute({
-      proxy: proxy.url,
-      method: message.method.get(),
-      url: message.url.toAbsolute(),
-      requestHeaders: message.requestHeaders.toObject(),
-      requestStream,
-      connectTimeout: target.connectTimeout,
-      timeout: target.streamTimeout,
-      headersSizeLimit: target.headersSizeLimit,
-      bodySizeLimit: target.bodySizeLimit
-    })
+      await next()
+    },
 
-    if (result.error) {
-      message.addError(result.error, 'forward', 'stream-request')
-      message.mergeConnection(result.connection)
+    websocket: async (ctx, proxy, target, message, next) => {
+      ctx.close()
 
-      this.renderMessageError(ctx, result.error, false)
-
-      await ctx.sendResponse()
-    } else {
-      message.status.set(result.status)
-      message.responseHeaders.merge(result.responseHeaders)
-      message.mergeConnection(result.connection)
-
-      message.runResponseHeadInterceptors()
-
-      message.responseBody.set(result.responseBody)
-
-      message.runResponseBodyInterceptors()
-
-      ctx.status.set(message.status.get())
-      ctx.responseHeaders.merge(message.responseHeaders.toObject())
-      ctx.responseBody.set(message.responseBody.get())
-
-      await ctx.sendResponse()
-    }
-  }
-
-  protected async forwardStreamResponse(
-    ctx: HttpServerContext,
-    proxy: EnabledProxyModel,
-    target: EnabledFullTargetModel,
-    message: ReverseMessage
-  ): Promise<void> {
-    await ctx.loadRequest(target.bodySizeLimit)
-
-    message.url.merge(ctx.url.toObject())
-    message.requestHeaders.merge(ctx.requestHeaders.toObject())
-    message.mergeConnection(ctx.connection)
-
-    message.runRequestHeadInterceptors()
-
-    message.requestBody.set(ctx.requestBody.get())
-
-    message.runRequestBodyInterceptors()
-
-    const result = await this.forwardStreamResponseUseCase.execute({
-      proxy: proxy.url,
-      method: message.method.get(),
-      url: message.url.toAbsolute(),
-      requestHeaders: message.requestHeaders.toObject(),
-      requestBody: message.requestBody.get(),
-      connectTimeout: target.connectTimeout,
-      timeout: target.streamTimeout,
-      headersSizeLimit: target.headersSizeLimit
-    })
-
-    if (result.error) {
-      message.addError(result.error, 'forward', 'stream-response')
-      message.mergeConnection(result.connection)
-
-      this.renderMessageError(ctx, result.error, false)
-
-      await ctx.sendResponse()
-    } else {
-      message.status.set(result.status)
-      message.responseHeaders.merge(result.responseHeaders)
-      message.mergeConnection(result.connection)
-
-      message.runResponseHeadInterceptors()
-
-      ctx.status.set(message.status.get())
-      ctx.responseHeaders.merge(message.responseHeaders.toObject())
-
-      ctx.sendHead()
-
-      try {
-        const limiterTransform = new LimiterTransform(target.bodySizeLimit)
-
-        await pipelineAsync(
-          result.responseStream,
-          limiterTransform,
-          ...message.getResponseTransforms(),
-          ctx.responseStream
-        )
-      } catch (error) {
-        message.addError(error, 'forward', 'stream-response', 'pipeline')
-
-        this.logger.warn(`HttpServer response stream pipeline error`, { error })
-
-        if (!ctx.responseStream.writableEnded) {
-          ctx.responseStream.end()
-        }
-      }
+      await next()
     }
   }
 
@@ -285,7 +273,7 @@ export class RoundTripController extends BaseController {
     ctx.status.set(error.status)
 
     if (isHtml) {
-      const errorPage = this.templater.render(ctx.errorPage, {
+      const errorPage = this.templater.render(ctx.state.errorPage, {
         status: error.status,
         message: error.message
       })

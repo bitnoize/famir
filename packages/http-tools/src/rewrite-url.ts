@@ -7,6 +7,9 @@ export interface RewriteUrlTarget {
 
 export type RewriteUrlScheme = [string, boolean] // separator, withProto
 
+/*
+ * Rewrite target urls in text
+ */
 export function rewriteUrl(
   text: string,
   rev: boolean,

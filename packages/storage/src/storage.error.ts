@@ -6,6 +6,9 @@ export type StorageErrorOptions = CommonErrorOptions & {
   code: StorageErrorCode
 }
 
+/*
+ * Storage error object
+ */
 export class StorageError extends CommonError {
   code: StorageErrorCode
 

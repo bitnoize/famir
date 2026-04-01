@@ -7,8 +7,14 @@ import {
 } from '@famir/http-client'
 import { FORWARD_SIMPLE_USE_CASE, ForwardSimpleData } from './forward-simple.js'
 
+/*
+ * Forward simple use-case
+ */
 export class ForwardSimpleUseCase {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<ForwardSimpleUseCase>(
       FORWARD_SIMPLE_USE_CASE,
       (c) => new ForwardSimpleUseCase(c.resolve<HttpClient>(HTTP_CLIENT))
@@ -17,6 +23,9 @@ export class ForwardSimpleUseCase {
 
   constructor(protected readonly httpClient: HttpClient) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(data: ForwardSimpleData): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
     return await this.httpClient.simple(
       data.proxy,

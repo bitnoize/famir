@@ -1,3 +1,6 @@
+/*
+ * Analyze job data
+ */
 export interface AnalyzeJobData {
   campaignId: string
   messageId: string

@@ -28,6 +28,7 @@ export const redirectorFunctions = {
         campaignId: string,
         redirectorId: string,
         page: string,
+        createdAt: string,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -38,7 +39,7 @@ export const redirectorFunctions = {
         parser.push(campaignId)
         parser.push(redirectorId)
         parser.push(page)
-        parser.push(Date.now().toString())
+        parser.push(createdAt)
         parser.push(lockSecret)
       },
 
@@ -96,7 +97,7 @@ export const redirectorFunctions = {
         prefix: string,
         campaignId: string,
         redirectorId: string,
-        page: string | null | undefined,
+        page: string | null,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))

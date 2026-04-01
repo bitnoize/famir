@@ -1,14 +1,14 @@
-export const CREATE_MESSAGE_USE_CASE = Symbol('CreateMessageUseCase')
-
 import {
-  MessageBody,
-  MessageConnection,
-  MessageError,
-  MessageHeaders,
-  MessageKind,
-  MessageMethod,
-  MessagePayload
-} from '@famir/database'
+  HttpBody,
+  HttpConnection,
+  HttpError,
+  HttpHeaders,
+  HttpMethod,
+  HttpPayload,
+  HttpType
+} from '@famir/common'
+
+export const CREATE_MESSAGE_USE_CASE = Symbol('CreateMessageUseCase')
 
 export interface CreateMessageData {
   campaignId: string
@@ -16,18 +16,18 @@ export interface CreateMessageData {
   proxyId: string
   targetId: string
   sessionId: string
-  kind: MessageKind
-  method: MessageMethod
+  type: HttpType
+  method: HttpMethod
   url: string
-  requestHeaders: MessageHeaders
-  requestBody: MessageBody
+  requestHeaders: HttpHeaders
+  requestBody: HttpBody
   status: number
-  responseHeaders: MessageHeaders
-  responseBody: MessageBody
-  connection: MessageConnection
-  payload: MessagePayload
-  errors: MessageError[]
-  processor: string
+  responseHeaders: HttpHeaders
+  responseBody: HttpBody
+  connection: HttpConnection
+  payload: HttpPayload
+  errors: HttpError[]
+  processor: string | null
   startTime: number
   finishTime: number
 }

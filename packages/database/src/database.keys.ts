@@ -10,8 +10,12 @@ export const campaignLockKey = (prefix: string, campaignId: string) => {
   return buildKey(prefix, 'campaign-lock', campaignId)
 }
 
-export const campaignUniqueMirrorDomainKey = (prefix: string) => {
-  return buildKey(prefix, 'campaign-unique-mirror-domain')
+export const campaignMirrorDomainsKey = (prefix: string) => {
+  return buildKey(prefix, 'campaign-mirror-domains')
+}
+
+export const campaignSessionCookieNamesKey = (prefix: string) => {
+  return buildKey(prefix, 'campaign-session-cookie-names')
 }
 
 export const campaignIndexKey = (prefix: string) => {
@@ -22,8 +26,8 @@ export const proxyKey = (prefix: string, campaignId: string, proxyId: string) =>
   return buildKey(prefix, 'proxy', campaignId, proxyId)
 }
 
-export const proxyUniqueUrlKey = (prefix: string, campaignId: string) => {
-  return buildKey(prefix, 'proxy-unique-url', campaignId)
+export const proxyUrlsKey = (prefix: string, campaignId: string) => {
+  return buildKey(prefix, 'proxy-urls', campaignId)
 }
 
 export const proxyIndexKey = (prefix: string, campaignId: string) => {
@@ -42,12 +46,12 @@ export const targetLabelsKey = (prefix: string, campaignId: string, targetId: st
   return buildKey(prefix, 'target-labels', campaignId, targetId)
 }
 
-export const targetUniqueDonorKey = (prefix: string, campaignId: string) => {
-  return buildKey(prefix, 'target-unique-donor', campaignId)
+export const targetDonorsKey = (prefix: string, campaignId: string) => {
+  return buildKey(prefix, 'target-donors', campaignId)
 }
 
-export const targetUniqueMirrorKey = (prefix: string, campaignId: string) => {
-  return buildKey(prefix, 'target-unique-mirror', campaignId)
+export const targetMirrorsKey = (prefix: string, campaignId: string) => {
+  return buildKey(prefix, 'target-mirrors', campaignId)
 }
 
 export const targetMirrorHostsKey = (prefix: string) => {

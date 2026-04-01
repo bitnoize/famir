@@ -15,8 +15,14 @@ import { BaseController } from '../base/index.js'
 import { REDIRECTOR_CONTROLLER } from './redirector.js'
 import { redirectorSchemas } from './redirector.schemas.js'
 
+/*
+ * Redirector controller
+ */
 export class RedirectorController extends BaseController {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       REDIRECTOR_CONTROLLER,
       (c) =>
@@ -29,6 +35,9 @@ export class RedirectorController extends BaseController {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): RedirectorController {
     return container.resolve(REDIRECTOR_CONTROLLER)
   }
@@ -46,6 +55,9 @@ export class RedirectorController extends BaseController {
     this.logger.debug(`RedirectorController initialized`)
   }
 
+  /*
+   * Use api-calls
+   */
   use() {
     this.router.addApiCall('createRedirector', async (data) => {
       this.validateData<CreateRedirectorData>('console-create-redirector-data', data)

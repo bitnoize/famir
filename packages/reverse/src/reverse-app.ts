@@ -5,8 +5,14 @@ import { Logger, LOGGER } from '@famir/logger'
 import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCE_CONNECTOR, ProduceConnector } from '@famir/produce'
 import { REVERSE_APP } from './reverse.js'
 
+/*
+ * Reverse app
+ */
 export class ReverseApp {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton(
       REVERSE_APP,
       (c) =>
@@ -21,6 +27,9 @@ export class ReverseApp {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): ReverseApp {
     return container.resolve(REVERSE_APP)
   }
@@ -48,6 +57,9 @@ export class ReverseApp {
     this.logger.debug(`App initialized`)
   }
 
+  /*
+   * Start app
+   */
   async start(): Promise<void> {
     try {
       this.router.activate()
@@ -66,7 +78,10 @@ export class ReverseApp {
     }
   }
 
-  protected async stop(): Promise<void> {
+  /*
+   * Stop app
+   */
+  async stop(): Promise<void> {
     try {
       await this.httpServer.stop()
 

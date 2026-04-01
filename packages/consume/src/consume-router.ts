@@ -10,8 +10,14 @@ import {
   ConsumeSpecs
 } from './consume.js'
 
+/*
+ * Consume router
+ */
 export class ConsumeRouter {
-  static inject(container: DIContainer) {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
     container.registerSingleton<ConsumeRouter>(
       CONSUME_ROUTER,
       (c) =>
@@ -23,6 +29,9 @@ export class ConsumeRouter {
     )
   }
 
+  /*
+   * Resolve dependency
+   */
   static resolve(container: DIContainer): ConsumeRouter {
     return container.resolve(CONSUME_ROUTER)
   }
@@ -59,14 +68,23 @@ export class ConsumeRouter {
 
   #isActive: boolean = false
 
+  /*
+   * Check if router is active
+   */
   get isActive(): boolean {
     return this.#isActive
   }
 
+  /*
+   * Activate router
+   */
   activate() {
     this.#isActive = true
   }
 
+  /*
+   * Add processor
+   */
   addProcessor(queueName: string, jobName: string, processor: ConsumeProcessor) {
     if (this.isActive) {
       throw new Error(`Router is active`)
@@ -85,6 +103,9 @@ export class ConsumeRouter {
     this.logger.debug(`ConsumeRouter add processor: ${queueName} => ${jobName}`)
   }
 
+  /*
+   * Get processor by name
+   */
   getProcessor(queueName: string, jobName: string): ConsumeProcessor {
     if (!this.isActive) {
       throw new Error(`Router not active`)
@@ -103,6 +124,7 @@ export class ConsumeRouter {
     return processor
   }
 
+  // FIXME
   getSpec(queueName: string): ConsumeSpec {
     const spec = this.specs.get(queueName)
 
@@ -113,6 +135,9 @@ export class ConsumeRouter {
     return spec
   }
 
+  /*
+   * Get asset by name
+   */
   getAsset(assetName: string): string | undefined {
     return this.assets.get(assetName)
   }

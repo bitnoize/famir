@@ -1,4 +1,4 @@
 # @famir/templater
 
-Template engine service.
+Famir templater infrastructure service.
 

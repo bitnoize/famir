@@ -43,10 +43,10 @@ local function create_session(keys, args)
     session_id = args[2],
     proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key),
     secret = args[3],
-    is_landing = 0,
+    is_upgraded = 0,
     message_count = 0,
     created_at = tonumber(args[4]),
-    last_auth_at = tonumber(args[4]),
+    authorized_at = tonumber(args[4]),
   }
 
   for field, value in pairs(model) do
@@ -112,10 +112,10 @@ local function read_session(keys, args)
     'session_id',
     'proxy_id',
     'secret',
-    'is_landing',
+    'is_upgraded',
     'message_count',
     'created_at',
-    'last_auth_at'
+    'authorized_at'
   )
 
   if #values ~= 8 then
@@ -127,10 +127,10 @@ local function read_session(keys, args)
     session_id = values[2],
     proxy_id = values[3],
     secret = values[4],
-    is_landing = tonumber(values[5]),
+    is_upgraded = tonumber(values[5]),
     message_count = tonumber(values[6]),
     created_at = tonumber(values[7]),
-    last_auth_at = tonumber(values[8]),
+    authorized_at = tonumber(values[8]),
   }
 
   for field, value in pairs(model) do
@@ -170,7 +170,7 @@ local function auth_session(keys, args)
   end
 
   local stash = {
-    last_auth_at = tonumber(args[1]),
+    authorized_at = tonumber(args[1]),
     proxy_id = redis.call('HGET', session_key, 'proxy_id'),
     session_expire = tonumber(redis.call('HGET', campaign_key, 'session_expire')),
   }
@@ -206,10 +206,10 @@ local function auth_session(keys, args)
     redis.call(
       'HSET', session_key,
       'proxy_id', enabled_proxy_id,
-      'last_auth_at', stash.last_auth_at
+      'authorized_at', stash.authorized_at
     )
   else
-    redis.call('HSET', session_key, 'last_auth_at', stash.last_auth_at)
+    redis.call('HSET', session_key, 'authorized_at', stash.authorized_at)
   end
 
   redis.call('PEXPIRE', session_key, stash.session_expire)
@@ -250,7 +250,7 @@ local function upgrade_session(keys, args)
   local stash = {
     secret = args[1],
     orig_secret = redis.call('HGET', session_key, 'secret'),
-    is_landing = tonumber(redis.call('HGET', session_key, 'is_landing')),
+    is_upgraded = tonumber(redis.call('HGET', session_key, 'is_upgraded')),
   }
 
   for field, value in pairs(stash) do
@@ -267,13 +267,13 @@ local function upgrade_session(keys, args)
     return redis.status_reply('FORBIDDEN Session secret not match')
   end
 
-  if stash.is_landing ~= 0 then
+  if stash.is_upgraded ~= 0 then
     return redis.status_reply('OK Session allready upgraded')
   end
 
   -- Point of no return
 
-  redis.call('HSET', session_key, 'is_landing', 1)
+  redis.call('HSET', session_key, 'is_upgraded', 1)
 
   redis.call('HINCRBY', lure_key, 'session_count', 1)
 

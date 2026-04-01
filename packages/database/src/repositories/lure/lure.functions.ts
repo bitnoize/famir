@@ -30,6 +30,7 @@ export const lureFunctions = {
         lureId: string,
         path: string,
         redirectorId: string,
+        createdAt: string,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -43,7 +44,7 @@ export const lureFunctions = {
         parser.push(lureId)
         parser.push(path)
         parser.push(redirectorId)
-        parser.push(Date.now().toString())
+        parser.push(createdAt)
         parser.push(lockSecret)
       },
 

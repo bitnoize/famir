@@ -1,10 +1,10 @@
 import { DIComposer } from '@famir/common'
-import { DummyController } from './controllers/index.js'
+import { DefaultController } from './controllers/index.js'
 import { ReadMessageUseCase, SaveMessageUseCase } from './use-cases/index.js'
 
 export const autoLoad: DIComposer = (container) => {
-  ReadMessageUseCase.inject(container)
-  SaveMessageUseCase.inject(container)
+  ReadMessageUseCase.register(container)
+  SaveMessageUseCase.register(container)
 
-  DummyController.inject(container)
+  DefaultController.register(container)
 }

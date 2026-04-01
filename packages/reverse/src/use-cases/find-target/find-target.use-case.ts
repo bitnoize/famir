@@ -2,22 +2,28 @@ import { DIContainer } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignRepository,
+  CampaignShare,
   EnabledFullTargetModel,
-  EnabledTargetModel,
   FullCampaignModel,
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository
 } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
-import { FIND_CAMPAIGN_TARGET_USE_CASE, FindCampaignTargetData } from './find-campaign-target.js'
+import { FIND_TARGET_USE_CASE, FindTargetData } from './find-target.js'
 
-export class FindCampaignTargetUseCase {
-  static inject(container: DIContainer) {
-    container.registerSingleton<FindCampaignTargetUseCase>(
-      FIND_CAMPAIGN_TARGET_USE_CASE,
+/*
+ * Find target use-case
+ */
+export class FindTargetUseCase {
+  /*
+   * Register dependency
+   */
+  static register(container: DIContainer) {
+    container.registerSingleton<FindTargetUseCase>(
+      FIND_TARGET_USE_CASE,
       (c) =>
-        new FindCampaignTargetUseCase(
+        new FindTargetUseCase(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY)
         )
@@ -29,9 +35,12 @@ export class FindCampaignTargetUseCase {
     protected readonly targetRepository: TargetRepository
   ) {}
 
+  /*
+   * Execute use-case
+   */
   async execute(
-    data: FindCampaignTargetData
-  ): Promise<[FullCampaignModel, EnabledFullTargetModel, EnabledTargetModel[]]> {
+    data: FindTargetData
+  ): Promise<[CampaignShare, FullCampaignModel, EnabledFullTargetModel, TargetModel[]]> {
     const target = await this.targetRepository.findFull(data.mirrorHost)
 
     if (!(target && TargetModel.isEnabled(target))) {
@@ -56,6 +65,8 @@ export class FindCampaignTargetUseCase {
       })
     }
 
+    const campaignShare = await this.campaignRepository.readShare()
+
     const targets = await this.targetRepository.list(target.campaignId)
 
     if (!targets) {
@@ -68,6 +79,6 @@ export class FindCampaignTargetUseCase {
       })
     }
 
-    return [campaign, target, targets.filter(TargetModel.isEnabled)]
+    return [campaignShare, campaign, target, targets]
   }
 }

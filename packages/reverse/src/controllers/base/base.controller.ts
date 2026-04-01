@@ -1,9 +1,29 @@
-import { EnabledFullTargetModel } from '@famir/database'
-import { HttpServerContext, HttpServerRouter } from '@famir/http-server'
+import {
+  CampaignShare,
+  EnabledFullTargetModel,
+  EnabledProxyModel,
+  FullCampaignModel,
+  SessionModel,
+  TargetModel
+} from '@famir/database'
+import { HttpServerContext, HttpServerContextState, HttpServerRouter } from '@famir/http-server'
+import { type HttpMessage } from '@famir/http-tools'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
-import { ReverseState } from '../../reverse.js'
 
+export interface ReverseState extends HttpServerContextState {
+  campaignShare?: CampaignShare
+  campaign?: FullCampaignModel
+  proxy?: EnabledProxyModel
+  target?: EnabledFullTargetModel
+  targets?: TargetModel[]
+  session?: SessionModel
+  message?: HttpMessage
+}
+
+/*
+ * Base controller
+ */
 export abstract class BaseController {
   constructor(
     protected readonly validator: Validator,
@@ -39,6 +59,10 @@ export abstract class BaseController {
   }
 
   protected async sendNoContent(ctx: HttpServerContext, status = 200): Promise<void> {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     ctx.status.set(status)
 
     ctx.responseBody.reset()
@@ -58,6 +82,10 @@ export abstract class BaseController {
   }
 
   protected async sendRedirectTo(ctx: HttpServerContext, url: string, status = 302): Promise<void> {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     ctx.status.set(status)
 
     ctx.responseHeaders.merge({
@@ -80,6 +108,10 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     if (ctx.method.is(['GET', 'HEAD']) && target.mainPage) {
       ctx.status.set(200)
 
@@ -106,6 +138,10 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
+    if (ctx.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+
     ctx.status.set(404)
 
     if (target.notFoundPage) {

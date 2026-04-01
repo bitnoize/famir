@@ -31,6 +31,9 @@ const codeToStatusMap: Record<HttpServerErrorCode, number> = {
   GATEWAY_TIMEOUT: 504
 } as const
 
+/*
+ * HTTP server error object
+ */
 export class HttpServerError extends CommonError {
   code: HttpServerErrorCode
   status: number

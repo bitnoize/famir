@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-tools",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Famir HTTP tools module",
   "keywords": [
     "famir",
@@ -11,7 +11,7 @@
     "reverse-proxy"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
-	"license": "Apache-2.0",
+  "license": "Apache-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -38,8 +38,8 @@
     "cheerio": "^1.2.0",
     "content-type": "^1.0.5",
     "iconv-lite": "^0.7.2",
-    "isbot": "^5.1.36",
-    "qs": "^6.15.0",
+    "isbot": "^5.1.37",
+    "qs": "^6.15.1",
     "tough-cookie": "^6.0.1",
     "ua-parser-js": "^2.0.9"
   },

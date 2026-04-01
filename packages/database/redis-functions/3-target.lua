@@ -4,15 +4,15 @@
   Create target
 --]]
 local function create_target(keys, args)
-  if #keys ~= 7 or #args ~= 22 then
+  if #keys ~= 7 or #args ~= 23 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local target_key = keys[3]
-  local target_unique_donor_key = keys[4]
-  local target_unique_mirror_key = keys[5]
+  local target_donors_key = keys[4]
+  local target_mirrors_key = keys[5]
   local target_mirror_hosts_key = keys[6]
   local target_index_key = keys[7]
 
@@ -29,7 +29,7 @@ local function create_target(keys, args)
   end
 
   local stash = {
-    lock_secret = args[22],
+    lock_secret = args[23],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
   }
@@ -50,7 +50,7 @@ local function create_target(keys, args)
   local model = {
     campaign_id = args[1],
     target_id = args[2],
-    is_landing = tonumber(args[3]),
+    access_level = args[3],
     donor_secure = tonumber(args[4]),
     donor_sub = args[5],
     donor_domain = args[6],
@@ -68,9 +68,10 @@ local function create_target(keys, args)
     favicon_ico = args[18],
     robots_txt = args[19],
     sitemap_xml = args[20],
+    allow_websockets = tonumber(args[21]),
     is_enabled = 0,
     message_count = 0,
-    created_at = tonumber(args[21]),
+    created_at = tonumber(args[22]),
   }
 
   for field, value in pairs(model) do
@@ -82,6 +83,7 @@ local function create_target(keys, args)
       (
         field == 'campaign_id'
         or field == 'target_id'
+        or field == 'access_level'
         or field == 'donor_sub'
         or field == 'donor_domain'
         or field == 'donor_port'
@@ -99,7 +101,7 @@ local function create_target(keys, args)
     .. '\t' .. model.donor_domain
     .. '\t' .. model.donor_port
 
-  if redis.call('SISMEMBER', target_unique_donor_key, donor_str) ~= 0 then
+  if redis.call('SISMEMBER', target_donors_key, donor_str) ~= 0 then
     return redis.status_reply('CONFLICT Target donor allready taken')
   end
 
@@ -108,7 +110,7 @@ local function create_target(keys, args)
     .. '\t' .. model.mirror_sub
     .. '\t' .. model.mirror_port
 
-  if redis.call('SISMEMBER', target_unique_mirror_key, mirror_str) ~= 0 then
+  if redis.call('SISMEMBER', target_mirrors_key, mirror_str) ~= 0 then
     return redis.status_reply('CONFLICT Target mirror allready taken')
   end
 
@@ -136,8 +138,8 @@ local function create_target(keys, args)
 
   redis.call('HSET', target_key, unpack(store))
 
-  redis.call('SADD', target_unique_donor_key, donor_str)
-  redis.call('SADD', target_unique_mirror_key, mirror_str)
+  redis.call('SADD', target_donors_key, donor_str)
+  redis.call('SADD', target_mirrors_key, mirror_str)
 
   local target_link = model.campaign_id .. '\t' .. model.target_id
   redis.call('HSET', target_mirror_hosts_key, mirror_host, target_link)
@@ -178,7 +180,7 @@ local function read_target(keys, args)
     'HMGET', target_key,
     'campaign_id',
     'target_id',
-    'is_landing',
+    'access_level',
     'donor_secure',
     'donor_sub',
     'donor_domain',
@@ -198,7 +200,7 @@ local function read_target(keys, args)
   local model = {
     campaign_id = values[1],
     target_id = values[2],
-    is_landing = tonumber(values[3]),
+    access_level = values[3],
     donor_secure = tonumber(values[4]),
     donor_sub = values[5],
     donor_domain = values[6],
@@ -254,7 +256,7 @@ local function read_full_target(keys, args)
     'HMGET', target_key,
     'campaign_id',
     'target_id',
-    'is_landing',
+    'access_level',
     'donor_secure',
     'donor_sub',
     'donor_domain',
@@ -272,19 +274,20 @@ local function read_full_target(keys, args)
     'favicon_ico',
     'robots_txt',
     'sitemap_xml',
+    'allow_websockets',
     'is_enabled',
     'message_count',
     'created_at'
   )
 
-  if #values ~= 23 then
+  if #values ~= 24 then
     return redis.error_reply('ERR Malform values')
   end
 
   local model = {
     campaign_id = values[1],
     target_id = values[2],
-    is_landing = tonumber(values[3]),
+    access_level = values[3],
     donor_secure = tonumber(values[4]),
     donor_sub = values[5],
     donor_domain = values[6],
@@ -304,9 +307,10 @@ local function read_full_target(keys, args)
     favicon_ico = values[18],
     robots_txt = values[19],
     sitemap_xml = values[20],
-    is_enabled = tonumber(values[21]),
-    message_count = tonumber(values[22]),
-    created_at = tonumber(values[23]),
+    allow_websockets = tonumber(values[21]),
+    is_enabled = tonumber(values[22]),
+    message_count = tonumber(values[23]),
+    created_at = tonumber(values[24]),
   }
 
   for field, value in pairs(model) do
@@ -459,6 +463,8 @@ local function update_target(keys, args)
       model.robots_txt = value
     elseif field == 'sitemap_xml' then
       model.sitemap_xml = value
+    elseif field == 'allow_websockets' then
+      model.allow_websockets = tonumber(value)
     else
       return redis.error_reply('ERR Unknown model.' .. field)
     end
@@ -760,8 +766,8 @@ local function delete_target(keys, args)
   local campaign_lock_key = keys[2]
   local target_key = keys[3]
   local target_labels_key = keys[4]
-  local target_unique_donor_key = keys[5]
-  local target_unique_mirror_key = keys[6]
+  local target_donors_key = keys[5]
+  local target_mirrors_key = keys[6]
   local target_mirror_hosts_key = keys[7]
   local target_index_key = keys[8]
 
@@ -843,8 +849,8 @@ local function delete_target(keys, args)
   redis.call('DEL', target_key)
   redis.call('DEL', target_labels_key)
 
-  redis.call('SREM', target_unique_donor_key, donor_str)
-  redis.call('SREM', target_unique_mirror_key, mirror_str)
+  redis.call('SREM', target_donors_key, donor_str)
+  redis.call('SREM', target_mirrors_key, mirror_str)
 
   redis.call('HDEL', target_mirror_hosts_key, mirror_host)
 

@@ -6,6 +6,9 @@ export type DatabaseErrorOptions = CommonErrorOptions & {
   code: DatabaseErrorCode
 }
 
+/*
+ * Database error object
+ */
 export class DatabaseError extends CommonError {
   code: DatabaseErrorCode
 
