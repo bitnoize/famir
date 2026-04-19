@@ -10,10 +10,11 @@ const KEY_LENGTH = 32 // 256 bytes
 
 /**
  * Encrypt string with secret
+ * @category Utils
  */
 export function encrypt(text: string, secret: string): string {
   const compressed = deflateSync(text, {
-    level: zlibConst.Z_BEST_COMPRESSION
+    level: zlibConst.Z_BEST_COMPRESSION,
   })
 
   const salt = randomBytes(SALT_LENGTH)
@@ -34,6 +35,7 @@ export function encrypt(text: string, secret: string): string {
 
 /**
  * Decrypt string with secret
+ * @category Utils
  */
 export function decrypt(value: string, secret: string): string {
   const data = Buffer.from(safeBase64Decode(value), 'base64')

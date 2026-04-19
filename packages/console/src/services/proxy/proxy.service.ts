@@ -4,7 +4,7 @@ import {
   DatabaseErrorCode,
   PROXY_REPOSITORY,
   ProxyModel,
-  ProxyRepository
+  ProxyRepository,
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
@@ -13,14 +13,15 @@ import {
   ListProxiesData,
   PROXY_SERVICE,
   ReadProxyData,
-  SwitchProxyData
+  SwitchProxyData,
 } from './proxy.js'
 
-/*
+/**
  * Proxy service
+ * @category Services
  */
 export class ProxyService {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -32,7 +33,7 @@ export class ProxyService {
 
   constructor(protected readonly proxyRepository: ProxyRepository) {}
 
-  /*
+  /**
    * Create proxy
    */
   async create(data: CreateProxyData): Promise<true> {
@@ -46,7 +47,7 @@ export class ProxyService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -55,7 +56,7 @@ export class ProxyService {
     }
   }
 
-  /*
+  /**
    * Read proxy
    */
   async read(data: ReadProxyData): Promise<ProxyModel> {
@@ -63,14 +64,14 @@ export class ProxyService {
 
     if (!proxy) {
       throw new ReplServerError(`Proxy not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 
     return proxy
   }
 
-  /*
+  /**
    * Enable proxy
    */
   async enable(data: SwitchProxyData): Promise<true> {
@@ -84,7 +85,7 @@ export class ProxyService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -93,7 +94,7 @@ export class ProxyService {
     }
   }
 
-  /*
+  /**
    * Disable proxy
    */
   async disable(data: SwitchProxyData): Promise<true> {
@@ -107,7 +108,7 @@ export class ProxyService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -116,7 +117,7 @@ export class ProxyService {
     }
   }
 
-  /*
+  /**
    * Delete proxy
    */
   async delete(data: DeleteProxyData): Promise<true> {
@@ -130,7 +131,7 @@ export class ProxyService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -139,7 +140,7 @@ export class ProxyService {
     }
   }
 
-  /*
+  /**
    * List proxies
    */
   async list(data: ListProxiesData): Promise<ProxyModel[]> {
@@ -147,7 +148,7 @@ export class ProxyService {
 
     if (!proxies) {
       throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 

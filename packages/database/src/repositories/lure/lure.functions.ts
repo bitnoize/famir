@@ -5,9 +5,13 @@ import {
   lureIndexKey,
   lureKey,
   lurePathsKey,
-  redirectorKey
+  redirectorKey,
 } from '../../database.keys.js'
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export interface RawLure {
   campaign_id: string
   lure_id: string
@@ -18,6 +22,10 @@ export interface RawLure {
   created_at: number
 }
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export const lureFunctions = {
   lure: {
     create_lure: {
@@ -48,7 +56,7 @@ export const lureFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_lure: {
@@ -59,7 +67,7 @@ export const lureFunctions = {
         parser.pushKey(lureKey(prefix, campaignId, lureId))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     find_lure_id: {
@@ -72,7 +80,7 @@ export const lureFunctions = {
         parser.push(path)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_lure_index: {
@@ -83,7 +91,7 @@ export const lureFunctions = {
         parser.pushKey(lureIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     enable_lure: {
@@ -103,7 +111,7 @@ export const lureFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     disable_lure: {
@@ -123,7 +131,7 @@ export const lureFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     delete_lure: {
@@ -147,7 +155,7 @@ export const lureFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
-    }
-  }
+      transformReply: undefined as unknown as () => unknown,
+    },
+  },
 } as const

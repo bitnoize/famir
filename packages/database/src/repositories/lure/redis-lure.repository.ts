@@ -6,7 +6,7 @@ import {
   DATABASE_CONNECTOR,
   DatabaseConnector,
   RedisDatabaseConfig,
-  RedisDatabaseConnection
+  RedisDatabaseConnection,
 } from '../../database.js'
 import { LureModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
@@ -14,11 +14,12 @@ import { RawLure } from './lure.functions.js'
 import { LURE_REPOSITORY, LureRepository } from './lure.js'
 import { lureSchemas } from './lure.schemas.js'
 
-/*
- * Redis lure repository
+/**
+ * Redis lure repository implementation
+ * @category Repositories
  */
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -47,9 +48,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     this.logger.debug(`LureRepository initialized`)
   }
 
-  /*
-   * Create lure
-   */
   async create(
     campaignId: string,
     lureId: string,
@@ -76,9 +74,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  /*
-   * Read lure by id
-   */
   async read(campaignId: string, lureId: string): Promise<LureModel | null> {
     try {
       const rawModel = await this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
@@ -89,9 +84,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  /*
-   * Find lure by path
-   */
   async find(campaignId: string, path: string): Promise<LureModel | null> {
     try {
       const lureId = await this.connection.lure.find_lure_id(this.options.prefix, campaignId, path)
@@ -110,9 +102,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  /*
-   * Enable lure
-   */
   async enable(campaignId: string, lureId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.lure.enable_lure(
@@ -130,9 +119,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  /*
-   * Disable lure
-   */
   async disable(campaignId: string, lureId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.lure.disable_lure(
@@ -150,9 +136,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  /*
-   * Delete lure
-   */
   async delete(
     campaignId: string,
     lureId: string,
@@ -176,9 +159,6 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
-  /*
-   * List lures
-   */
   async list(campaignId: string): Promise<LureModel[] | null> {
     try {
       const index = await this.connection.lure.read_lure_index(this.options.prefix, campaignId)

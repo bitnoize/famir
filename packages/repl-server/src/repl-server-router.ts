@@ -5,14 +5,15 @@ import {
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
   ReplServerApiCalls,
-  ReplServerAssets
+  ReplServerAssets,
 } from './repl-server.js'
 
-/*
- * REPL server router
+/**
+ * Represents a REPL server router
+ * @category none
  */
 export class ReplServerRouter {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -26,15 +27,15 @@ export class ReplServerRouter {
     )
   }
 
-  /*
+  /**
    * Resolve dependency
    */
   static resolve(container: DIContainer): ReplServerRouter {
     return container.resolve(REPL_SERVER_ROUTER)
   }
 
-  protected readonly assets = new Map<string, string>()
-  protected readonly apiCalls = new Map<string, ReplServerApiCall>()
+  protected readonly assets: Map<string, string> = new Map()
+  protected readonly apiCalls: Map<string, ReplServerApiCall> = new Map()
 
   constructor(
     protected readonly logger: Logger,
@@ -53,21 +54,21 @@ export class ReplServerRouter {
 
   #isActive: boolean = false
 
-  /*
+  /**
    * Check if router is active
    */
   get isActive(): boolean {
     return this.#isActive
   }
 
-  /*
+  /**
    * Activate router
    */
   activate() {
     this.#isActive = true
   }
 
-  /*
+  /**
    * Add api-call
    */
   addApiCall(apiCallName: string, apiCall: ReplServerApiCall) {
@@ -84,8 +85,8 @@ export class ReplServerRouter {
     this.logger.debug(`ReplServerRouter add apiCall: ${apiCallName}`)
   }
 
-  /*
-   * Get api-calls array
+  /**
+   * Get api-calls
    */
   getApiCalls(): ReplServerApiCalls {
     if (!this.isActive) {
@@ -95,14 +96,14 @@ export class ReplServerRouter {
     return Array.from(this.apiCalls.entries())
   }
 
-  /*
+  /**
    * Get asset by name
    */
   getAsset(assetName: string): string | undefined {
     return this.assets.get(assetName)
   }
 
-  /*
+  /**
    * Get asset names
    */
   getAssetNames(): string[] {

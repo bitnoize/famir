@@ -1,18 +1,17 @@
-import { lurePathSchema } from '@famir/database'
+import { lurePathSchema, redirectorParamsSchema } from '@famir/database'
 import {
   JSONSchemaType,
   ValidatorSchemas,
   customIdentSchema,
-  randomIdentSchema
+  randomIdentSchema,
 } from '@famir/validator'
 import {
   CreateLureData,
   DeleteLureData,
   ListLuresData,
-  LurePayload,
   MakeLureUrlData,
   ReadLureData,
-  SwitchLureData
+  SwitchLureData,
 } from '../../services/index.js'
 
 const createLureDataSchema: JSONSchemaType<CreateLureData> = {
@@ -23,9 +22,9 @@ const createLureDataSchema: JSONSchemaType<CreateLureData> = {
     lureId: customIdentSchema,
     path: lurePathSchema,
     redirectorId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const readLureDataSchema: JSONSchemaType<ReadLureData> = {
@@ -33,9 +32,9 @@ const readLureDataSchema: JSONSchemaType<ReadLureData> = {
   required: ['campaignId', 'lureId'],
   properties: {
     campaignId: customIdentSchema,
-    lureId: customIdentSchema
+    lureId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
@@ -44,9 +43,9 @@ const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
   properties: {
     campaignId: customIdentSchema,
     lureId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
@@ -56,47 +55,30 @@ const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
     campaignId: customIdentSchema,
     lureId: customIdentSchema,
     redirectorId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const listLuresDataSchema: JSONSchemaType<ListLuresData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema
+    campaignId: customIdentSchema,
   },
-  additionalProperties: false
-} as const
-
-const lureUrlPayloadSchema: JSONSchemaType<LurePayload> = {
-  type: 'object',
-  required: [],
-  additionalProperties: {
-    type: 'string',
-    minLength: 1,
-    maxLength: 100
-  }
+  additionalProperties: false,
 } as const
 
 const makeLureUrlDataSchema: JSONSchemaType<MakeLureUrlData> = {
   type: 'object',
-  required: ['campaignId', 'targetId', 'lureId'],
+  required: ['campaignId', 'targetId', 'lureId', 'params'],
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
     lureId: customIdentSchema,
-    paramName: {
-      type: 'string',
-      nullable: true
-    },
-    payload: {
-      ...lureUrlPayloadSchema,
-      nullable: true
-    }
+    params: redirectorParamsSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 export const lureSchemas: ValidatorSchemas = {
@@ -105,5 +87,5 @@ export const lureSchemas: ValidatorSchemas = {
   'console-switch-lure-data': switchLureDataSchema,
   'console-delete-lure-data': deleteLureDataSchema,
   'console-list-lures-data': listLuresDataSchema,
-  'console-make-lure-url-data': makeLureUrlDataSchema
+  'console-make-lure-url-data': makeLureUrlDataSchema,
 } as const

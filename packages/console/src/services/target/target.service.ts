@@ -5,7 +5,7 @@ import {
   FullTargetModel,
   TARGET_REPOSITORY,
   TargetModel,
-  TargetRepository
+  TargetRepository,
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
@@ -16,14 +16,15 @@ import {
   ReadTargetData,
   SwitchTargetData,
   TARGET_SERVICE,
-  UpdateTargetData
+  UpdateTargetData,
 } from './target.js'
 
-/*
+/**
  * Target service
+ * @category Services
  */
 export class TargetService {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -35,7 +36,7 @@ export class TargetService {
 
   constructor(protected readonly targetRepository: TargetRepository) {}
 
-  /*
+  /**
    * Create target
    */
   async create(data: CreateTargetData): Promise<true> {
@@ -72,7 +73,7 @@ export class TargetService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -81,7 +82,7 @@ export class TargetService {
     }
   }
 
-  /*
+  /**
    * Read target
    */
   async read(data: ReadTargetData): Promise<FullTargetModel> {
@@ -89,14 +90,14 @@ export class TargetService {
 
     if (!target) {
       throw new ReplServerError(`Target not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 
     return target
   }
 
-  /*
+  /**
    * Update target
    */
   async update(data: UpdateTargetData): Promise<true> {
@@ -125,7 +126,7 @@ export class TargetService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -134,7 +135,7 @@ export class TargetService {
     }
   }
 
-  /*
+  /**
    * Enable target
    */
   async enable(data: SwitchTargetData): Promise<true> {
@@ -148,7 +149,7 @@ export class TargetService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -157,7 +158,7 @@ export class TargetService {
     }
   }
 
-  /*
+  /**
    * Disable target
    */
   async disable(data: SwitchTargetData): Promise<true> {
@@ -171,7 +172,7 @@ export class TargetService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -180,7 +181,7 @@ export class TargetService {
     }
   }
 
-  /*
+  /**
    * Append target label
    */
   async appendLabel(data: ActionTargetLabelData): Promise<true> {
@@ -199,7 +200,7 @@ export class TargetService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -208,7 +209,7 @@ export class TargetService {
     }
   }
 
-  /*
+  /**
    * Remove target label
    */
   async removeLabel(data: ActionTargetLabelData): Promise<true> {
@@ -227,7 +228,7 @@ export class TargetService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -236,7 +237,7 @@ export class TargetService {
     }
   }
 
-  /*
+  /**
    * Delete target
    */
   async delete(data: DeleteTargetData): Promise<true> {
@@ -250,7 +251,7 @@ export class TargetService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -259,7 +260,7 @@ export class TargetService {
     }
   }
 
-  /*
+  /**
    * List targets
    */
   async list(data: ListTargetsData): Promise<TargetModel[]> {
@@ -267,7 +268,7 @@ export class TargetService {
 
     if (!targets) {
       throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 

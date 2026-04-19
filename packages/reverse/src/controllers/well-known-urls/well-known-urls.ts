@@ -2,7 +2,7 @@ import { type EnabledFullTargetModel } from '@famir/database'
 import {
   HttpServerContext,
   HttpServerContextType,
-  HttpServerNextFunction
+  HttpServerNextFunction,
 } from '@famir/http-server'
 
 export const WELL_KNOWN_URLS_CONTROLLER = Symbol('WellKnownUrlsController')

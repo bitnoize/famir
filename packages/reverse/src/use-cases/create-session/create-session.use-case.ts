@@ -31,9 +31,9 @@ export class CreateSessionUseCase {
           throw new HttpServerError(`Service unavailable`, {
             cause: error,
             context: {
-              reason: `Create session failed`
+              reason: `Create session failed`,
             },
-            code: 'SERVICE_UNAVAILABLE'
+            code: 'SERVICE_UNAVAILABLE',
           })
         }
       }

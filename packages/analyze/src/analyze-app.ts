@@ -5,18 +5,19 @@ import {
   CONSUME_CONNECTOR,
   CONSUME_ROUTER,
   ConsumeConnector,
-  ConsumeRouter
+  ConsumeRouter,
 } from '@famir/consume'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
 import { PRODUCE_CONNECTOR, ProduceConnector } from '@famir/produce'
 import { ANALYZE_APP } from './analyze.js'
 
-/*
- * Analyze app
+/**
+ * Represents an analyze app
+ * @category none
  */
 export class AnalyzeApp {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -34,7 +35,7 @@ export class AnalyzeApp {
     )
   }
 
-  /*
+  /**
    * Resolve dependency
    */
   static resolve(container: DIContainer): AnalyzeApp {
@@ -53,7 +54,7 @@ export class AnalyzeApp {
       process.once(signal, () => {
         this.stop().catch((error: unknown) => {
           this.logger.error(`App critical error`, {
-            error: serializeError(error)
+            error: serializeError(error),
           })
 
           process.exit(2)
@@ -64,7 +65,7 @@ export class AnalyzeApp {
     this.logger.debug(`App initialized`)
   }
 
-  /*
+  /**
    * Start app
    */
   async start(): Promise<void> {
@@ -78,14 +79,14 @@ export class AnalyzeApp {
       this.logger.debug(`App started`)
     } catch (error) {
       this.logger.error(`App start failed`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
 
       process.exit(1)
     }
   }
 
-  /*
+  /**
    * Stop app
    */
   async stop(): Promise<void> {
@@ -101,7 +102,7 @@ export class AnalyzeApp {
       this.logger.debug(`App stopped`)
     } catch (error) {
       this.logger.error(`App stop failed`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
 
       process.exit(1)

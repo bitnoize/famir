@@ -36,13 +36,13 @@ local function create_lure(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -56,16 +56,16 @@ local function create_lure(keys, args)
     created_at = tonumber(args[5]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
 
     if
-      (field == 'campaign_id' or field == 'lure_id' or field == 'path' or field == 'redirector_id')
-      and value == ''
+      (k == 'campaign_id' or k == 'lure_id' or k == 'path' or k == 'redirector_id')
+      and v == ''
     then
-      return redis.error_reply('ERR Wrong model.' .. field)
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -77,9 +77,9 @@ local function create_lure(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', lure_key, unpack(store))
@@ -144,9 +144,9 @@ local function read_lure(keys, args)
     created_at = tonumber(values[7]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -256,13 +256,13 @@ local function enable_lure(keys, args)
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -317,13 +317,13 @@ local function disable_lure(keys, args)
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -389,22 +389,22 @@ local function delete_lure(keys, args)
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
     if
       (
-        field == 'lock_secret'
-        or field == 'orig_lock_secret'
-        or field == 'lure_id'
-        or field == 'path'
-        or field == 'redirector_id'
-        or field == 'orig_redirector_id'
-      ) and value == ''
+        k == 'lock_secret'
+        or k == 'orig_lock_secret'
+        or k == 'lure_id'
+        or k == 'path'
+        or k == 'redirector_id'
+        or k == 'orig_redirector_id'
+      ) and v == ''
     then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 

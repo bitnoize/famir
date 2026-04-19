@@ -3,8 +3,9 @@ import { Logger } from '@famir/logger'
 import { AnalyzeJobData } from '@famir/produce'
 import { Validator } from '@famir/validator'
 
-/*
+/**
  * Base controller
+ * @category Controllers
  */
 export abstract class BaseController {
   constructor(
@@ -19,7 +20,7 @@ export abstract class BaseController {
     } catch (error) {
       throw new ConsumeError(`AnalyzeJobData validate failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }

@@ -1,8 +1,8 @@
-// @ts-check
-
 import eslint from '@eslint/js'
-import { defineConfig } from 'eslint/config'
 import prettierConfig from 'eslint-config-prettier'
+import tsdoc from 'eslint-plugin-tsdoc'
+import tsdocRequire from 'eslint-plugin-tsdoc-require-2'
+import { defineConfig } from 'eslint/config'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig(
@@ -11,13 +11,20 @@ export default defineConfig(
   {
     languageOptions: {
       parserOptions: {
-        project: [
-          './packages/*/tsconfig.json'
-        ],
+        project: ['./packages/*/tsconfig.json'],
         tsconfigRootDir: import.meta.dirname,
-        warnOnUnsupportedTypeScriptVersion: false
-      }
-    }
+        warnOnUnsupportedTypeScriptVersion: false,
+      },
+    },
   },
+  {
+    plugins: {
+      tsdoc,
+    },
+    rules: {
+      'tsdoc/syntax': 'error',
+    },
+  },
+  tsdocRequire.configs.recommended,
   prettierConfig
 )

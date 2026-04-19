@@ -3,10 +3,11 @@ import {
   HTTP_SERVER_ROUTER,
   HttpServerContext,
   HttpServerError,
-  HttpServerRouter
+  HttpServerRouter,
 } from '@famir/http-server'
 import { HttpMessage } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
+import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { type FindTargetUseCase, FIND_TARGET_USE_CASE } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
@@ -26,6 +27,7 @@ export class SetupMirrorController extends BaseController {
         new SetupMirrorController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<FindTargetUseCase>(FIND_TARGET_USE_CASE)
         )
@@ -42,10 +44,11 @@ export class SetupMirrorController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
     router: HttpServerRouter,
     protected readonly findTargetUseCase: FindTargetUseCase
   ) {
-    super(validator, logger, router)
+    super(validator, logger, templater, router)
 
     this.logger.debug(`SetupMirrorController initialized`)
   }
@@ -58,7 +61,7 @@ export class SetupMirrorController extends BaseController {
       const mirrorHost = this.parseMirrorHost(ctx)
 
       const [campaignShare, campaign, target, targets] = await this.findTargetUseCase.execute({
-        mirrorHost
+        mirrorHost,
       })
 
       const message = HttpMessage.create(ctx.type)
@@ -73,13 +76,13 @@ export class SetupMirrorController extends BaseController {
     })
   }
 
-  protected dispatchRoot: SetupMirrorDispatchContextType = {
+  private dispatchRoot: SetupMirrorDispatchContextType = {
     normal: async (ctx, campaign, target, message, next) => {
       if (ctx.state.verbose) {
         ctx.responseHeaders.merge({
           'X-Famir-Campaign-Id': target.campaignId,
           'X-Famir-Target-Id': target.targetId,
-          'X-Famir-Message-Id': message.id
+          'X-Famir-Message-Id': message.id,
         })
       }
 
@@ -94,10 +97,10 @@ export class SetupMirrorController extends BaseController {
       }
 
       await next()
-    }
+    },
   }
 
-  protected parseMirrorHost(ctx: HttpServerContext): string {
+  private parseMirrorHost(ctx: HttpServerContext): string {
     try {
       const mirrorHost = ctx.requestHeaders.getString('Host')
 
@@ -109,7 +112,7 @@ export class SetupMirrorController extends BaseController {
     } catch (error) {
       throw new HttpServerError(`Bad request`, {
         cause: error,
-        code: 'BAD_REQUEST'
+        code: 'BAD_REQUEST',
       })
     }
   }

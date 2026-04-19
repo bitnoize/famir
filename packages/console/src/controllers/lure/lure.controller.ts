@@ -10,7 +10,7 @@ import {
   MakeLureUrlData,
   ReadLureData,
   SwitchLureData,
-  type LureService
+  type LureService,
 } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { LURE_CONTROLLER } from './lure.js'

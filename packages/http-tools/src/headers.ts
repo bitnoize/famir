@@ -6,21 +6,22 @@ import {
   formatCookies,
   formatSetCookies,
   parseCookies,
-  parseSetCookies
+  parseSetCookies,
 } from './cookies.js'
 
-/*
- * HTTP headers wrapper
+/**
+ * Represents a HTTP headers wrapper
+ * @category none
  */
 export class HttpHeadersWrap {
-  /*
+  /**
    * Create wrapper from scratch
    */
   static fromScratch(): HttpHeadersWrap {
     return new HttpHeadersWrap({})
   }
 
-  /*
+  /**
    * Create wrapper from req object
    */
   static fromReq(req: { headers: HttpHeaders }): HttpHeadersWrap {
@@ -33,7 +34,7 @@ export class HttpHeadersWrap {
     this.#headers = headers
   }
 
-  /*
+  /**
    * Clone wrapper
    */
   clone(): HttpHeadersWrap {
@@ -42,14 +43,14 @@ export class HttpHeadersWrap {
 
   #isFrozen: boolean = false
 
-  /*
+  /**
    * Wrapper frozen state
    */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
-  /*
+  /**
    * Freeze wrapper
    */
   freeze(): this {
@@ -58,7 +59,7 @@ export class HttpHeadersWrap {
     return this
   }
 
-  /*
+  /**
    * Get header value
    */
   get(name: string): HttpHeader | undefined {
@@ -67,7 +68,7 @@ export class HttpHeadersWrap {
     return this.#headers[normName]
   }
 
-  /*
+  /**
    * Get header string
    */
   getString(name: string): string | undefined {
@@ -84,7 +85,7 @@ export class HttpHeadersWrap {
     return value
   }
 
-  /*
+  /**
    * Get header array
    */
   getArray(name: string): string[] | undefined {
@@ -101,7 +102,7 @@ export class HttpHeadersWrap {
     return [value]
   }
 
-  /*
+  /**
    * Set header value
    */
   set(name: string, value: HttpHeader): this {
@@ -116,7 +117,7 @@ export class HttpHeadersWrap {
     return this
   }
 
-  /*
+  /**
    * Add header value
    */
   add(name: string, value: string): this {
@@ -135,7 +136,7 @@ export class HttpHeadersWrap {
     return this
   }
 
-  /*
+  /**
    * Check header exists
    */
   has(name: string): boolean {
@@ -144,7 +145,7 @@ export class HttpHeadersWrap {
     return normName in this.#headers
   }
 
-  /*
+  /**
    * Delete headers
    */
   delete(arg: string | string[]): this {
@@ -163,7 +164,7 @@ export class HttpHeadersWrap {
     return this
   }
 
-  /*
+  /**
    * Merge headers
    */
   merge(headers: HttpHeaders): this {
@@ -180,7 +181,7 @@ export class HttpHeadersWrap {
 
   #cacheContentType: HttpContentType | null = null
 
-  /*
+  /**
    * Get content-type header
    */
   getContentType(): HttpContentType | null {
@@ -198,7 +199,7 @@ export class HttpHeadersWrap {
     return this.#cacheContentType
   }
 
-  /*
+  /**
    * Set content-type header
    */
   setContentType(contentType: HttpContentType): this {
@@ -214,7 +215,7 @@ export class HttpHeadersWrap {
 
   #cacheCookies: HttpCookies | null = null
 
-  /*
+  /**
    * Get cookie header
    */
   getCookies(): HttpCookies | null {
@@ -232,7 +233,7 @@ export class HttpHeadersWrap {
     return this.#cacheCookies
   }
 
-  /*
+  /**
    * Set cookie header
    */
   setCookies(cookies: HttpCookies): this {
@@ -248,7 +249,7 @@ export class HttpHeadersWrap {
 
   #cacheSetCookies: HttpSetCookies | null = null
 
-  /*
+  /**
    * Get set-cookie header
    */
   getSetCookies(): HttpSetCookies | null {
@@ -266,7 +267,7 @@ export class HttpHeadersWrap {
     return this.#cacheSetCookies
   }
 
-  /*
+  /**
    * Set set-cookie header
    */
   setSetCookies(setCookies: HttpSetCookies): this {
@@ -280,7 +281,7 @@ export class HttpHeadersWrap {
     return this
   }
 
-  /*
+  /**
    * Get headers object
    */
   toObject(): HttpStrictHeaders {
@@ -295,14 +296,14 @@ export class HttpHeadersWrap {
     return strictHeaders
   }
 
-  /*
+  /**
    * Get headers entries
    */
   entries(): [string, HttpHeader][] {
     return Object.entries(this.toObject())
   }
 
-  /*
+  /**
    * Loop over headers
    */
   forEach(cb: (name: string, value: HttpHeader) => void): this {
@@ -313,7 +314,7 @@ export class HttpHeadersWrap {
     return this
   }
 
-  /*
+  /**
    * Cleanup wrapper
    */
   reset(): this {
@@ -326,13 +327,13 @@ export class HttpHeadersWrap {
     return this
   }
 
-  protected sureNotFrozen(name: string) {
+  private sureNotFrozen(name: string) {
     if (this.isFrozen) {
       throw new Error(`Headers frozen on ${name}`)
     }
   }
 
-  protected invalidateCacheFor(name: string) {
+  private invalidateCacheFor(name: string) {
     if (name === 'content-type') {
       this.#cacheContentType = null
     } else if (name === 'cookie') {
@@ -342,7 +343,7 @@ export class HttpHeadersWrap {
     }
   }
 
-  protected invalidateCacheAll() {
+  private invalidateCacheAll() {
     this.#cacheContentType = null
     this.#cacheCookies = null
     this.#cacheSetCookies = null

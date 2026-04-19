@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { HttpClientError } from '@famir/http-client'
-import { HTTP_SERVER_ROUTER, HttpServerContext, HttpServerRouter } from '@famir/http-server'
+import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
 import { LimiterTransform } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
@@ -13,7 +12,7 @@ import {
   FORWARD_STREAM_RESPONSE_USE_CASE,
   type ForwardSimpleUseCase,
   type ForwardStreamRequestUseCase,
-  type ForwardStreamResponseUseCase
+  type ForwardStreamResponseUseCase,
 } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
 import { ROUND_TRIP_CONTROLLER, RoundTripDispatchHttpType } from './round-trip.js'
@@ -51,13 +50,13 @@ export class RoundTripController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    protected templater: Templater,
+    templater: Templater,
     router: HttpServerRouter,
     protected readonly forwardSimpleUseCase: ForwardSimpleUseCase,
     protected readonly forwardStreamRequestUseCase: ForwardStreamRequestUseCase,
     protected readonly forwardStreamResponseUseCase: ForwardStreamResponseUseCase
   ) {
-    super(validator, logger, router)
+    super(validator, logger, templater, router)
 
     this.logger.debug(`RoundTripController initialized`)
   }
@@ -77,18 +76,17 @@ export class RoundTripController extends BaseController {
     })
   }
 
-  protected dispatchRoot: RoundTripDispatchHttpType = {
+  private dispatchRoot: RoundTripDispatchHttpType = {
     'normal-simple': async (ctx, proxy, target, message, next) => {
       await ctx.loadRequest(target.bodySizeLimit)
 
+      message.method.set(ctx.method.get())
       message.url.merge(ctx.url.toObject())
       message.requestHeaders.merge(ctx.requestHeaders.toObject())
+      message.requestBody.set(ctx.requestBody.get())
       message.mergeConnection(ctx.connection)
 
       message.runRequestHeadInterceptors()
-
-      message.requestBody.set(ctx.requestBody.get())
-
       message.runRequestBodyInterceptors()
 
       const result = await this.forwardSimpleUseCase.execute({
@@ -100,25 +98,21 @@ export class RoundTripController extends BaseController {
         connectTimeout: target.connectTimeout,
         timeout: target.simpleTimeout,
         headersSizeLimit: target.headersSizeLimit,
-        bodySizeLimit: target.bodySizeLimit
+        bodySizeLimit: target.bodySizeLimit,
       })
 
       if (result.error) {
-        message.addError(result.error, 'forward', 'simple')
+        message.addError(result.error, 'forward', 'normal-simple')
         message.mergeConnection(result.connection)
 
-        this.renderMessageError(ctx, result.error, true)
-
-        await ctx.sendResponse()
+        await this.sendErrorPage(ctx, result.error, true)
       } else {
         message.status.set(result.status)
         message.responseHeaders.merge(result.responseHeaders)
+        message.responseBody.set(result.responseBody)
         message.mergeConnection(result.connection)
 
         message.runResponseHeadInterceptors()
-
-        message.responseBody.set(result.responseBody)
-
         message.runResponseBodyInterceptors()
 
         ctx.status.set(message.status.get())
@@ -132,6 +126,7 @@ export class RoundTripController extends BaseController {
     },
 
     'normal-stream-request': async (ctx, proxy, target, message, next) => {
+      message.method.set(ctx.method.get())
       message.url.merge(ctx.url.toObject())
       message.requestHeaders.merge(ctx.requestHeaders.toObject())
       message.mergeConnection(ctx.connection)
@@ -139,7 +134,6 @@ export class RoundTripController extends BaseController {
       message.runRequestHeadInterceptors()
 
       const requestStream = new PassThrough()
-
       const limiterTransform = new LimiterTransform(target.bodySizeLimit)
 
       pipelineSync(
@@ -149,9 +143,11 @@ export class RoundTripController extends BaseController {
         requestStream,
         (error) => {
           if (error) {
-            message.addError(error, 'forward', 'stream-request', 'pipeline')
+            message.addError(error, 'forward', 'normal-stream-request', 'pipeline')
 
             this.logger.warn(`HttpServer request stream pipeline error`, { error })
+
+            ctx.close()
           }
         }
       )
@@ -165,25 +161,21 @@ export class RoundTripController extends BaseController {
         connectTimeout: target.connectTimeout,
         timeout: target.streamTimeout,
         headersSizeLimit: target.headersSizeLimit,
-        bodySizeLimit: target.bodySizeLimit
+        bodySizeLimit: target.bodySizeLimit,
       })
 
       if (result.error) {
-        message.addError(result.error, 'forward', 'stream-request')
+        message.addError(result.error, 'forward', 'normal-stream-request')
         message.mergeConnection(result.connection)
 
-        this.renderMessageError(ctx, result.error, false)
-
-        await ctx.sendResponse()
+        await this.sendErrorPage(ctx, result.error, false)
       } else {
         message.status.set(result.status)
         message.responseHeaders.merge(result.responseHeaders)
+        message.responseBody.set(result.responseBody)
         message.mergeConnection(result.connection)
 
         message.runResponseHeadInterceptors()
-
-        message.responseBody.set(result.responseBody)
-
         message.runResponseBodyInterceptors()
 
         ctx.status.set(message.status.get())
@@ -199,14 +191,13 @@ export class RoundTripController extends BaseController {
     'normal-stream-response': async (ctx, proxy, target, message, next) => {
       await ctx.loadRequest(target.bodySizeLimit)
 
+      message.method.set(ctx.method.get())
       message.url.merge(ctx.url.toObject())
       message.requestHeaders.merge(ctx.requestHeaders.toObject())
+      message.requestBody.set(ctx.requestBody.get())
       message.mergeConnection(ctx.connection)
 
       message.runRequestHeadInterceptors()
-
-      message.requestBody.set(ctx.requestBody.get())
-
       message.runRequestBodyInterceptors()
 
       const result = await this.forwardStreamResponseUseCase.execute({
@@ -217,16 +208,14 @@ export class RoundTripController extends BaseController {
         requestBody: message.requestBody.get(),
         connectTimeout: target.connectTimeout,
         timeout: target.streamTimeout,
-        headersSizeLimit: target.headersSizeLimit
+        headersSizeLimit: target.headersSizeLimit,
       })
 
       if (result.error) {
-        message.addError(result.error, 'forward', 'stream-response')
+        message.addError(result.error, 'forward', 'normal-stream-response')
         message.mergeConnection(result.connection)
 
-        this.renderMessageError(ctx, result.error, false)
-
-        await ctx.sendResponse()
+        await this.sendErrorPage(ctx, result.error, false)
       } else {
         message.status.set(result.status)
         message.responseHeaders.merge(result.responseHeaders)
@@ -249,42 +238,32 @@ export class RoundTripController extends BaseController {
             ctx.responseStream
           )
         } catch (error) {
-          message.addError(error, 'forward', 'stream-response', 'pipeline')
+          message.addError(error, 'forward', 'normal-stream-response', 'pipeline')
 
           this.logger.warn(`HttpServer response stream pipeline error`, { error })
 
-          if (!ctx.responseStream.writableEnded) {
-            ctx.responseStream.end()
-          }
+          ctx.close()
         }
       }
 
       await next()
     },
 
-    websocket: async (ctx, proxy, target, message, next) => {
+    'websocket': async (ctx, proxy, target, message, next) => {
+      await ctx.loadRequest(target.bodySizeLimit)
+
+      message.method.set(ctx.method.get())
+      message.url.merge(ctx.url.toObject())
+      message.requestHeaders.merge(ctx.requestHeaders.toObject())
+      message.requestBody.set(ctx.requestBody.get())
+      message.mergeConnection(ctx.connection)
+
+      message.runRequestHeadInterceptors()
+      message.runRequestBodyInterceptors()
+
       ctx.close()
 
       await next()
-    }
-  }
-
-  protected renderMessageError(ctx: HttpServerContext, error: HttpClientError, isHtml: boolean) {
-    ctx.status.set(error.status)
-
-    if (isHtml) {
-      const errorPage = this.templater.render(ctx.state.errorPage, {
-        status: error.status,
-        message: error.message
-      })
-
-      ctx.responseHeaders.set('Content-Type', 'text/html')
-      ctx.responseBody.setText(errorPage)
-    } else {
-      ctx.responseHeaders.set('Content-Type', 'text/plain')
-      ctx.responseBody.setText(error.message)
-    }
-
-    ctx.responseHeaders.set('Content-Length', ctx.responseBody.length.toString())
+    },
   }
 }

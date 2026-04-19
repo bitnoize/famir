@@ -3,19 +3,27 @@ import {
   JSONSchemaType,
   ValidatorSchemas,
   customIdentSchema,
-  randomIdentSchema
+  randomIdentSchema,
 } from '@famir/validator'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const analyzeJobDataSchema: JSONSchemaType<AnalyzeJobData> = {
   type: 'object',
   required: ['campaignId', 'messageId'],
   properties: {
     campaignId: customIdentSchema,
-    messageId: randomIdentSchema
+    messageId: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Workers
+ * @internal
+ */
 export const analyzeSchemas: ValidatorSchemas = {
-  'consume-analyze-job-data': analyzeJobDataSchema
+  'consume-analyze-job-data': analyzeJobDataSchema,
 } as const

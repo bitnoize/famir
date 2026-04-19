@@ -3,11 +3,11 @@ import {
   HTTP_CLIENT,
   HttpClient,
   HttpClientErrorResult,
-  HttpClientSimpleResult
+  HttpClientSimpleResult,
 } from '@famir/http-client'
 import {
   FORWARD_STREAM_REQUEST_USE_CASE,
-  ForwardStreamRequestData
+  ForwardStreamRequestData,
 } from './forward-stream-request.js'
 
 /*

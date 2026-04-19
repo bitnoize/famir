@@ -2,6 +2,10 @@ import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import { TARGET_ACCESS_LEVELS, TargetAccessLevel } from '../../models/index.js'
 import { RawFullTarget, RawTarget } from './target.functions.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const rawTargetSchema: JSONSchemaType<RawTarget> = {
   type: 'object',
   required: [
@@ -16,64 +20,61 @@ const rawTargetSchema: JSONSchemaType<RawTarget> = {
     'mirror_sub',
     'mirror_domain',
     'mirror_port',
-    'labels',
     'is_enabled',
     'message_count',
-    'created_at'
+    'created_at',
   ],
   properties: {
     campaign_id: {
-      type: 'string'
+      type: 'string',
     },
     target_id: {
-      type: 'string'
+      type: 'string',
     },
     access_level: {
-      type: 'string'
+      type: 'string',
     },
     donor_secure: {
-      type: 'integer'
+      type: 'integer',
     },
     donor_sub: {
-      type: 'string'
+      type: 'string',
     },
     donor_domain: {
-      type: 'string'
+      type: 'string',
     },
     donor_port: {
-      type: 'integer'
+      type: 'integer',
     },
     mirror_secure: {
-      type: 'integer'
+      type: 'integer',
     },
     mirror_sub: {
-      type: 'string'
+      type: 'string',
     },
     mirror_domain: {
-      type: 'string'
+      type: 'string',
     },
     mirror_port: {
-      type: 'integer'
-    },
-    labels: {
-      type: 'array',
-      items: {
-        type: 'string'
-      }
+      type: 'integer',
     },
     is_enabled: {
-      type: 'integer'
+      type: 'integer',
     },
     message_count: {
-      type: 'integer'
+      type: 'integer',
     },
     created_at: {
-      type: 'integer'
-    }
+      type: 'integer',
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
   type: 'object',
   required: [
@@ -102,166 +103,218 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     'allow_websockets',
     'is_enabled',
     'message_count',
-    'created_at'
+    'created_at',
   ],
   properties: {
     campaign_id: {
-      type: 'string'
+      type: 'string',
     },
     target_id: {
-      type: 'string'
+      type: 'string',
     },
     access_level: {
-      type: 'string'
+      type: 'string',
     },
     donor_secure: {
-      type: 'integer'
+      type: 'integer',
     },
     donor_sub: {
-      type: 'string'
+      type: 'string',
     },
     donor_domain: {
-      type: 'string'
+      type: 'string',
     },
     donor_port: {
-      type: 'integer'
+      type: 'integer',
     },
     mirror_secure: {
-      type: 'integer'
+      type: 'integer',
     },
     mirror_sub: {
-      type: 'string'
+      type: 'string',
     },
     mirror_domain: {
-      type: 'string'
+      type: 'string',
     },
     mirror_port: {
-      type: 'integer'
+      type: 'integer',
     },
     labels: {
       type: 'array',
       items: {
-        type: 'string'
-      }
+        type: 'string',
+      },
     },
     connect_timeout: {
-      type: 'integer'
+      type: 'integer',
     },
     simple_timeout: {
-      type: 'integer'
+      type: 'integer',
     },
     stream_timeout: {
-      type: 'integer'
+      type: 'integer',
     },
     headers_size_limit: {
-      type: 'integer'
+      type: 'integer',
     },
     body_size_limit: {
-      type: 'integer'
+      type: 'integer',
     },
     main_page: {
-      type: 'string'
+      type: 'string',
     },
     not_found_page: {
-      type: 'string'
+      type: 'string',
     },
     favicon_ico: {
-      type: 'string'
+      type: 'string',
     },
     robots_txt: {
-      type: 'string'
+      type: 'string',
     },
     sitemap_xml: {
-      type: 'string'
+      type: 'string',
     },
     allow_websockets: {
-      type: 'number'
+      type: 'number',
     },
     is_enabled: {
-      type: 'integer'
+      type: 'integer',
     },
     message_count: {
-      type: 'integer'
+      type: 'integer',
     },
     created_at: {
-      type: 'integer'
-    }
+      type: 'integer',
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetAccessLevelSchema: JSONSchemaType<TargetAccessLevel> = {
   type: 'string',
-  enum: [...TARGET_ACCESS_LEVELS]
+  enum: [...TARGET_ACCESS_LEVELS],
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetSubSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
-  maxLength: 128
+  maxLength: 128,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetDomainSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
-  maxLength: 128
+  maxLength: 128,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetPortSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 0,
-  maximum: 65535
+  maximum: 65535,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetLabelSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 3,
-  maxLength: 64
+  maxLength: 64,
 }
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetLabelsSchema: JSONSchemaType<string[]> = {
   type: 'array',
-  items: targetLabelSchema
+  items: targetLabelSchema,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,
-  maximum: 60 * 1000
+  maximum: 60 * 1000,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetSimpleTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,
-  maximum: 5 * 60 * 1000
+  maximum: 5 * 60 * 1000,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetStreamTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,
-  maximum: 3600 * 1000
+  maximum: 3600 * 1000,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetHeadersSizeLimitSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,
-  maximum: 1024 * 1024
+  maximum: 1024 * 1024,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetBodySizeLimitSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 1,
-  maximum: 1024 * 1024 * 1024
+  maximum: 1024 * 1024 * 1024,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const targetContentSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 0,
-  maxLength: 10 * 1024 * 1024
+  maxLength: 10 * 1024 * 1024,
 } as const
 
+/**
+ * @category Utils
+ * @internal
+ */
 export const targetSchemas: ValidatorSchemas = {
   'database-raw-target': rawTargetSchema,
   'database-raw-full-target': rawFullTargetSchema,
-  'database-target-access-level': targetAccessLevelSchema
+  'database-target-access-level': targetAccessLevelSchema,
 } as const

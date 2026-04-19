@@ -2,8 +2,9 @@ import { Logger } from '@famir/logger'
 import { ReplServerError, ReplServerRouter } from '@famir/repl-server'
 import { Validator } from '@famir/validator'
 
-/*
+/**
  * Base controller
+ * @category Controllers
  */
 export abstract class BaseController {
   constructor(
@@ -19,7 +20,7 @@ export abstract class BaseController {
     } catch (error) {
       throw new ReplServerError(`Data validate failed`, {
         cause: error,
-        code: 'BAD_REQUEST'
+        code: 'BAD_REQUEST',
       })
     }
   }

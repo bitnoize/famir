@@ -6,16 +6,17 @@ import {
   BullProduceConfig,
   PRODUCE_CONNECTOR,
   ProduceConnector,
-  RedisProduceConnection
+  RedisProduceConnection,
 } from '../../produce.js'
 import { BullBaseQueue } from '../base/index.js'
 import { WEBHOOK_QUEUE, WEBHOOK_QUEUE_NAME, WebhookQueue } from './webhook.js'
 
-/*
+/**
  * Bull webhook queue implementation
+ * @category Queues
  */
 export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -40,9 +41,6 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
     this.logger.debug(`WebhookQueue initialized`)
   }
 
-  /*
-   * Add job to queue
-   */
   async addJob(name: string, data: WebhookJobData): Promise<void> {
     try {
       await this.queue.add(name, data)

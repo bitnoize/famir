@@ -2,7 +2,7 @@ import { EnabledFullTargetModel, FullCampaignModel, TargetAccessLevel } from '@f
 import {
   HttpServerContext,
   HttpServerContextType,
-  HttpServerNextFunction
+  HttpServerNextFunction,
 } from '@famir/http-server'
 
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
@@ -16,12 +16,3 @@ export type AuthorizeHandler = (
 
 export type AuthorizeDispatchContextType = Record<HttpServerContextType, AuthorizeHandler>
 export type AuthorizeDispatchAccessLevel = Record<TargetAccessLevel, AuthorizeHandler>
-
-export interface LandingUpgradePayload {
-  lure_id: string
-  session_id: string
-  secret: string
-  back_url: string
-}
-
-export type LandingLurePayload = Record<string, string>

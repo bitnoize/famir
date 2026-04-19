@@ -1,6 +1,7 @@
 import { DIContainer } from '@famir/common'
 import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
+import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { TRANSFORM_CONTROLLER } from './transform.js'
@@ -19,6 +20,7 @@ export class TransformController extends BaseController {
         new TransformController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )
@@ -31,8 +33,13 @@ export class TransformController extends BaseController {
     return container.resolve(TRANSFORM_CONTROLLER)
   }
 
-  constructor(validator: Validator, logger: Logger, router: HttpServerRouter) {
-    super(validator, logger, router)
+  constructor(
+    validator: Validator,
+    logger: Logger,
+    templater: Templater,
+    router: HttpServerRouter
+  ) {
+    super(validator, logger, templater, router)
 
     this.logger.debug(`TransformController initialized`)
   }
@@ -52,7 +59,7 @@ export class TransformController extends BaseController {
         message.url.merge({
           protocol: target.donorProtocol,
           hostname: target.donorHostname,
-          port: target.donorPort.toString()
+          port: target.donorPort.toString(),
         })
 
         message.requestHeaders.set('Host', target.donorHost)
@@ -75,7 +82,7 @@ export class TransformController extends BaseController {
           'X-Client-Ip',
           'X-Forwarded-For',
           'X-Forwarded-Host',
-          'X-Forwarded-Proto'
+          'X-Forwarded-Proto',
         ])
 
         const cookies = message.requestHeaders.getCookies()
@@ -126,7 +133,7 @@ export class TransformController extends BaseController {
           'Strict-Transport-Security',
           'X-XSS-Protection',
           'X-Content-Type-Options',
-          'X-Frame-Options'
+          'X-Frame-Options',
         ])
 
         const setCookies = message.responseHeaders.getSetCookies()

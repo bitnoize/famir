@@ -1,8 +1,9 @@
-/*
- * HTTP status wrapper
+/**
+ * Represents a HTTP status wrapper
+ * @category none
  */
 export class HttpStatusWrap {
-  /*
+  /**
    * Create wrapper from scratch
    */
   static fromScratch(): HttpStatusWrap {
@@ -15,7 +16,7 @@ export class HttpStatusWrap {
     this.#status = status
   }
 
-  /*
+  /**
    * Clone wrapper
    */
   clone(): HttpStatusWrap {
@@ -24,14 +25,14 @@ export class HttpStatusWrap {
 
   #isFrozen: boolean = false
 
-  /*
+  /**
    * Wrapper frozen state
    */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
-  /*
+  /**
    * Freeze wrapper
    */
   freeze(): this {
@@ -40,14 +41,14 @@ export class HttpStatusWrap {
     return this
   }
 
-  /*
+  /**
    * Get status value
    */
   get(): number {
     return this.#status
   }
 
-  /*
+  /**
    * Set status value
    */
   set(status: number): this {
@@ -58,49 +59,49 @@ export class HttpStatusWrap {
     return this
   }
 
-  /*
+  /**
    * Check status in range 100-199
    */
   isInformation(): boolean {
     return this.between(100, 200)
   }
 
-  /*
+  /**
    * Check status in range 200-299
    */
   isSuccess(): boolean {
     return this.between(200, 300)
   }
 
-  /*
+  /**
    * Check status in range 300-399
    */
   isRedirect(): boolean {
     return this.between(300, 400)
   }
 
-  /*
+  /**
    * Check status in range 400-499
    */
   isClientError(): boolean {
     return this.between(400, 500)
   }
 
-  /*
+  /**
    * Check status in range 500-599
    */
   isServerError(): boolean {
     return this.between(500, 600)
   }
 
-  /*
+  /**
    * Check status is not in valid range
    */
   isUnknown(): boolean {
     return !this.between(100, 600)
   }
 
-  /*
+  /**
    * Cleanup wrapper
    */
   reset(): this {
@@ -111,13 +112,13 @@ export class HttpStatusWrap {
     return this
   }
 
-  protected sureNotFrozen(name: string) {
+  private sureNotFrozen(name: string) {
     if (this.isFrozen) {
       throw new Error(`Status frozen on ${name}`)
     }
   }
 
-  protected between(min: number, max: number): boolean {
+  private between(min: number, max: number): boolean {
     return this.#status >= min && this.#status < max
   }
 }

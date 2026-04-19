@@ -9,7 +9,7 @@ import {
   RedisProxyRepository,
   RedisRedirectorRepository,
   RedisSessionRepository,
-  RedisTargetRepository
+  RedisTargetRepository,
 } from '@famir/database'
 import { PinoLogger } from '@famir/logger'
 import { BullAnalyzeQueue, RedisProduceConnector } from '@famir/produce'
@@ -17,7 +17,7 @@ import {
   NetReplServer,
   REPL_SERVER_ASSETS,
   ReplServerAssets,
-  ReplServerRouter
+  ReplServerRouter,
 } from '@famir/repl-server'
 import { AjvValidator } from '@famir/validator'
 import { ConsoleApp } from '../../console-app.js'
@@ -25,6 +25,10 @@ import { autoLoad } from '../../main.js'
 import { NetConsoleConfig } from './net.js'
 import { configNetConsoleSchema } from './net.schemas.js'
 
+/**
+ * Composition root
+ * @category Loaders
+ */
 export async function bootstrapNet(composer: DIComposer, assets: ReplServerAssets): Promise<void> {
   const container = DIContainer.getInstance()
 

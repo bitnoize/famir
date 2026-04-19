@@ -8,7 +8,8 @@
     "lint": "npm --ws run lint",
     "build": "npm --ws run build",
     "test": "npm --ws run test",
-    "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo"
+    "clean": "npm --ws run clean",
+    "docs": "typedoc --cleanOutputDir"
   },
   "workspaces": [
     "packages/common",
@@ -33,8 +34,13 @@
     "@types/node": "^25.0.0",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-tsdoc": "^0.5.2",
+    "eslint-plugin-tsdoc-require-2": "^1.0.9",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
+    "rimraf": "^6.1.3",
+    "typedoc": "^0.28.19",
+    "typedoc-theme-fresh": "^0.2.3",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2"
   }

@@ -5,9 +5,13 @@ import {
   enabledProxyIndexKey,
   proxyIndexKey,
   proxyKey,
-  proxyUrlsKey
+  proxyUrlsKey,
 } from '../../database.keys.js'
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export interface RawProxy {
   campaign_id: string
   proxy_id: string
@@ -17,6 +21,10 @@ export interface RawProxy {
   created_at: number
 }
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export const proxyFunctions = {
   proxy: {
     create_proxy: {
@@ -44,7 +52,7 @@ export const proxyFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_proxy: {
@@ -55,7 +63,7 @@ export const proxyFunctions = {
         parser.pushKey(proxyKey(prefix, campaignId, proxyId))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_proxy_index: {
@@ -66,7 +74,7 @@ export const proxyFunctions = {
         parser.pushKey(proxyIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     enable_proxy: {
@@ -87,7 +95,7 @@ export const proxyFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     disable_proxy: {
@@ -108,7 +116,7 @@ export const proxyFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     delete_proxy: {
@@ -130,7 +138,7 @@ export const proxyFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
-    }
-  }
+      transformReply: undefined as unknown as () => unknown,
+    },
+  },
 } as const

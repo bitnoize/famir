@@ -46,7 +46,7 @@ export class ReverseApp {
       process.once(signal, () => {
         this.stop().catch((error: unknown) => {
           this.logger.error(`App critical error`, {
-            error: serializeError(error)
+            error: serializeError(error),
           })
 
           process.exit(2)
@@ -71,7 +71,7 @@ export class ReverseApp {
       this.logger.debug(`App started`)
     } catch (error) {
       this.logger.error(`App start failed`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
 
       process.exit(1)
@@ -94,7 +94,7 @@ export class ReverseApp {
       this.logger.debug(`App stopped`)
     } catch (error) {
       this.logger.error(`App stop failed`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
 
       process.exit(1)

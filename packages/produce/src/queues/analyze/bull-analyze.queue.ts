@@ -6,16 +6,17 @@ import {
   BullProduceConfig,
   PRODUCE_CONNECTOR,
   ProduceConnector,
-  RedisProduceConnection
+  RedisProduceConnection,
 } from '../../produce.js'
 import { BullBaseQueue } from '../base/index.js'
 import { ANALYZE_QUEUE, ANALYZE_QUEUE_NAME, AnalyzeQueue } from './analyze.js'
 
-/*
+/**
  * Bull analyze queue implementation
+ * @category Queues
  */
 export class BullAnalyzeQueue extends BullBaseQueue implements AnalyzeQueue {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -40,15 +41,12 @@ export class BullAnalyzeQueue extends BullBaseQueue implements AnalyzeQueue {
     this.logger.debug(`AnalyzeQueue initialized`)
   }
 
-  /*
-   * Add job to queue
-   */
   async addJob(name: string, data: AnalyzeJobData): Promise<void> {
     try {
       const jobId = [data.campaignId, data.messageId].join('-')
 
       await this.queue.add(name, data, {
-        jobId
+        jobId,
       })
     } catch (error) {
       this.raiseError(error, 'addJob', data)

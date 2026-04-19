@@ -1,4 +1,3 @@
 # @famir/common
 
-Famir common utilities.
-
+Common utilities for the entire ecosystem.

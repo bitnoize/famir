@@ -3,11 +3,12 @@ import { FullMessageModel, MESSAGE_REPOSITORY, MessageRepository } from '@famir/
 import { ReplServerError } from '@famir/repl-server'
 import { MESSAGE_SERVICE, ReadMessageData } from './message.js'
 
-/*
+/**
  * Message service
+ * @category Services
  */
 export class MessageService {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -19,7 +20,7 @@ export class MessageService {
 
   constructor(protected readonly messageRepository: MessageRepository) {}
 
-  /*
+  /**
    * Read message
    */
   async read(data: ReadMessageData): Promise<FullMessageModel> {
@@ -27,7 +28,7 @@ export class MessageService {
 
     if (!message) {
       throw new ReplServerError(`Message not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 

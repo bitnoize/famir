@@ -6,10 +6,14 @@ import {
   httpHeadersSchema,
   httpMethodSchema,
   httpPayloadSchema,
-  httpTypeSchema
+  httpTypeSchema,
 } from '@famir/validator'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const rawMessageSchema: JSONSchemaType<RawMessage> = {
   type: 'object',
   required: [
@@ -25,52 +29,56 @@ const rawMessageSchema: JSONSchemaType<RawMessage> = {
     'processor',
     'start_time',
     'finish_time',
-    'created_at'
+    'created_at',
   ],
   properties: {
     campaign_id: {
-      type: 'string'
+      type: 'string',
     },
     message_id: {
-      type: 'string'
+      type: 'string',
     },
     proxy_id: {
-      type: 'string'
+      type: 'string',
     },
     target_id: {
-      type: 'string'
+      type: 'string',
     },
     session_id: {
-      type: 'string'
+      type: 'string',
     },
     type: {
-      type: 'string'
+      type: 'string',
     },
     method: {
-      type: 'string'
+      type: 'string',
     },
     url: {
-      type: 'string'
+      type: 'string',
     },
     status: {
-      type: 'integer'
+      type: 'integer',
     },
     processor: {
-      type: 'string'
+      type: 'string',
     },
     start_time: {
-      type: 'integer'
+      type: 'integer',
     },
     finish_time: {
-      type: 'integer'
+      type: 'integer',
     },
     created_at: {
-      type: 'integer'
-    }
+      type: 'integer',
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
   type: 'object',
   required: [
@@ -93,73 +101,77 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     'processor',
     'start_time',
     'finish_time',
-    'created_at'
+    'created_at',
   ],
   properties: {
     campaign_id: {
-      type: 'string'
+      type: 'string',
     },
     message_id: {
-      type: 'string'
+      type: 'string',
     },
     proxy_id: {
-      type: 'string'
+      type: 'string',
     },
     target_id: {
-      type: 'string'
+      type: 'string',
     },
     session_id: {
-      type: 'string'
+      type: 'string',
     },
     type: {
-      type: 'string'
+      type: 'string',
     },
     method: {
-      type: 'string'
+      type: 'string',
     },
     url: {
-      type: 'string'
+      type: 'string',
     },
     request_headers: {
-      type: 'string'
+      type: 'string',
     },
     request_body: {
-      type: 'string'
+      type: 'string',
     },
     status: {
-      type: 'integer'
+      type: 'integer',
     },
     response_headers: {
-      type: 'string'
+      type: 'string',
     },
     response_body: {
-      type: 'string'
+      type: 'string',
     },
     connection: {
-      type: 'string'
+      type: 'string',
     },
     payload: {
-      type: 'string'
+      type: 'string',
     },
     errors: {
-      type: 'string'
+      type: 'string',
     },
     processor: {
-      type: 'string'
+      type: 'string',
     },
     start_time: {
-      type: 'integer'
+      type: 'integer',
     },
     finish_time: {
-      type: 'integer'
+      type: 'integer',
     },
     created_at: {
-      type: 'integer'
-    }
+      type: 'integer',
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Utils
+ * @internal
+ */
 export const messageSchemas: ValidatorSchemas = {
   'database-raw-message': rawMessageSchema,
   'database-raw-full-message': rawFullMessageSchema,
@@ -168,5 +180,5 @@ export const messageSchemas: ValidatorSchemas = {
   'database-message-headers': httpHeadersSchema,
   'database-message-connection': httpConnectionSchema,
   'database-message-payload': httpPayloadSchema,
-  'database-message-errors': httpErrorsSchema
+  'database-message-errors': httpErrorsSchema,
 } as const

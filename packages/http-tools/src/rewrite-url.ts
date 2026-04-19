@@ -1,3 +1,8 @@
+
+/**
+ * Represents rewrite url target
+ * @category Utils
+ */
 export interface RewriteUrlTarget {
   donorSecure: boolean
   donorHost: string
@@ -5,10 +10,15 @@ export interface RewriteUrlTarget {
   mirrorHost: string
 }
 
+/**
+ * Represents rewrite-url scheme
+ * @category Utils
+ */
 export type RewriteUrlScheme = [string, boolean] // separator, withProto
 
-/*
+/**
  * Rewrite target urls in text
+ * @category Utils
  */
 export function rewriteUrl(
   text: string,

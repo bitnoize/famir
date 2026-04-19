@@ -1,7 +1,13 @@
 import { TargetAccessLevel } from '@famir/database'
 
+/**
+ * @category DI
+ */
 export const TARGET_SERVICE = Symbol('TargetService')
 
+/**
+ * @category Data
+ */
 export interface CreateTargetData {
   campaignId: string
   targetId: string
@@ -27,11 +33,17 @@ export interface CreateTargetData {
   lockSecret: string
 }
 
+/**
+ * @category Data
+ */
 export interface ReadTargetData {
   campaignId: string
   targetId: string
 }
 
+/**
+ * @category Data
+ */
 export interface UpdateTargetData {
   campaignId: string
   targetId: string
@@ -49,12 +61,18 @@ export interface UpdateTargetData {
   lockSecret: string
 }
 
+/**
+ * @category Data
+ */
 export interface SwitchTargetData {
   campaignId: string
   targetId: string
   lockSecret: string
 }
 
+/**
+ * @category Data
+ */
 export interface ActionTargetLabelData {
   campaignId: string
   targetId: string
@@ -62,12 +80,18 @@ export interface ActionTargetLabelData {
   lockSecret: string
 }
 
+/**
+ * @category Data
+ */
 export interface DeleteTargetData {
   campaignId: string
   targetId: string
   lockSecret: string
 }
 
+/**
+ * @category Data
+ */
 export interface ListTargetsData {
   campaignId: string
 }

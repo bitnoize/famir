@@ -10,7 +10,7 @@ import {
   ReadTargetData,
   TARGET_SERVICE,
   UpdateTargetData,
-  type TargetService
+  type TargetService,
 } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { TARGET_CONTROLLER } from './target.js'

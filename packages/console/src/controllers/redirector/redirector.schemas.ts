@@ -1,16 +1,17 @@
-import { redirectorPageSchema } from '@famir/database'
+import { redirectorFieldSchema, redirectorPageSchema } from '@famir/database'
 import {
   JSONSchemaType,
   ValidatorSchemas,
   customIdentSchema,
-  randomIdentSchema
+  randomIdentSchema,
 } from '@famir/validator'
 import {
+  ActionRedirectorFieldData,
   CreateRedirectorData,
   DeleteRedirectorData,
   ListRedirectorsData,
   ReadRedirectorData,
-  UpdateRedirectorData
+  UpdateRedirectorData,
 } from '../../services/index.js'
 
 const DEFAULT_PAGE = ``
@@ -23,11 +24,11 @@ const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = {
     redirectorId: customIdentSchema,
     page: {
       ...redirectorPageSchema,
-      default: DEFAULT_PAGE
+      default: DEFAULT_PAGE,
     },
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const readRedirectorDataSchema: JSONSchemaType<ReadRedirectorData> = {
@@ -35,9 +36,9 @@ const readRedirectorDataSchema: JSONSchemaType<ReadRedirectorData> = {
   required: ['campaignId', 'redirectorId'],
   properties: {
     campaignId: customIdentSchema,
-    redirectorId: customIdentSchema
+    redirectorId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
@@ -48,11 +49,23 @@ const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
     redirectorId: customIdentSchema,
     page: {
       ...redirectorPageSchema,
-      nullable: true
+      nullable: true,
     },
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
+} as const
+
+const actionRedirectorFieldDataSchema: JSONSchemaType<ActionRedirectorFieldData> = {
+  type: 'object',
+  required: ['campaignId', 'redirectorId', 'field', 'lockSecret'],
+  properties: {
+    campaignId: customIdentSchema,
+    redirectorId: customIdentSchema,
+    field: redirectorFieldSchema,
+    lockSecret: randomIdentSchema,
+  },
+  additionalProperties: false,
 } as const
 
 const deleteRedirectorDataSchema: JSONSchemaType<DeleteRedirectorData> = {
@@ -61,24 +74,25 @@ const deleteRedirectorDataSchema: JSONSchemaType<DeleteRedirectorData> = {
   properties: {
     campaignId: customIdentSchema,
     redirectorId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const listRedirectorsDataSchema: JSONSchemaType<ListRedirectorsData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema
+    campaignId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 export const redirectorSchemas: ValidatorSchemas = {
   'console-create-redirector-data': createRedirectorDataSchema,
   'console-read-redirector-data': readRedirectorDataSchema,
   'console-update-redirector-data': updateRedirectorDataSchema,
+  'console-action-redirector-field-data': actionRedirectorFieldDataSchema,
   'console-delete-redirector-data': deleteRedirectorDataSchema,
-  'console-list-redirectors-data': listRedirectorsDataSchema
+  'console-list-redirectors-data': listRedirectorsDataSchema,
 } as const

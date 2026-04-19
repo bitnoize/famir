@@ -1,5 +1,6 @@
-/*
- * Proxy used to route traffic from the client to the donor site
+/**
+ * Proxy model
+ * @category Models
  */
 export class ProxyModel {
   static isNotNull = <T extends ProxyModel>(model: T | null): model is T => {
@@ -20,6 +21,10 @@ export class ProxyModel {
   ) {}
 }
 
+/**
+ * Enabled proxy model
+ * @category Models
+ */
 export interface EnabledProxyModel extends ProxyModel {
   isEnabled: true
 }

@@ -14,14 +14,15 @@ import {
   HttpClientSimpleState,
   HttpClientStreamRequestState,
   HttpClientStreamResponseState,
-  HttpClientStreamResult
+  HttpClientStreamResult,
 } from './http-client.js'
 
-/*
+/**
  * Curl HTTP client implementation
+ * @category none
  */
 export class CurlHttpClient implements HttpClient {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -46,9 +47,6 @@ export class CurlHttpClient implements HttpClient {
     this.logger.debug(`HttpClient initialized`)
   }
 
-  /*
-   * Simple HTTP request and response
-   */
   simple(
     proxy: string,
     method: HttpMethod,
@@ -74,7 +72,7 @@ export class CurlHttpClient implements HttpClient {
         connectTimeout,
         timeout,
         headersSizeLimit,
-        bodySizeLimit
+        bodySizeLimit,
       }
 
       const curl = new Curl()
@@ -94,9 +92,6 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  /*
-   * Streaming HTTP request and simple response
-   */
   streamRequest(
     proxy: string,
     method: HttpMethod,
@@ -122,7 +117,7 @@ export class CurlHttpClient implements HttpClient {
         connectTimeout,
         timeout,
         headersSizeLimit,
-        bodySizeLimit
+        bodySizeLimit,
       }
 
       const curl = new Curl()
@@ -142,9 +137,6 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  /*
-   * Simple HTTP request and streaming response
-   */
   streamResponse(
     proxy: string,
     method: HttpMethod,
@@ -168,7 +160,7 @@ export class CurlHttpClient implements HttpClient {
         responseStream: new PassThrough(),
         connectTimeout,
         timeout,
-        headersSizeLimit
+        headersSizeLimit,
       }
 
       const curl = new Curl()
@@ -190,7 +182,7 @@ export class CurlHttpClient implements HttpClient {
   }
 
   /*
-  protected browserHeaders: RegExp[] = [
+  private browserHeaders: RegExp[] = [
     /^Accept-Encoding$/i,
     /^User-Agent$/i,
     /^Upgrade-Insecure-Requests$/i,
@@ -202,7 +194,7 @@ export class CurlHttpClient implements HttpClient {
   ]
   */
 
-  protected setupCurlOptions(
+  private setupCurlOptions(
     curl: Curl,
     state: {
       proxy: string
@@ -241,7 +233,7 @@ export class CurlHttpClient implements HttpClient {
     curl.setOpt(Curl.option.ACCEPT_ENCODING, '') // Means all encodings!
   }
 
-  protected setupCurlReadfunction(
+  private setupCurlReadfunction(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -273,9 +265,9 @@ export class CurlHttpClient implements HttpClient {
         state.error = new HttpClientError(`Bad gateway`, {
           cause: error,
           context: {
-            reason: `Curl READFUNCTION callback failed`
+            reason: `Curl READFUNCTION callback failed`,
           },
-          code: 'BAD_GATEWAY'
+          code: 'BAD_GATEWAY',
         })
 
         return 0
@@ -283,7 +275,7 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  protected setupCurlUploadStream(
+  private setupCurlUploadStream(
     curl: Curl,
     state: {
       requestStream: Readable
@@ -294,7 +286,7 @@ export class CurlHttpClient implements HttpClient {
     curl.setUploadStream(state.requestStream)
   }
 
-  protected setupCurlHeaderfunction(
+  private setupCurlHeaderfunction(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -316,9 +308,9 @@ export class CurlHttpClient implements HttpClient {
         if (responseHeadersSize + chunkSize > state.headersSizeLimit) {
           state.error = new HttpClientError('Bad gateway', {
             context: {
-              reason: 'Response headers size limit exceeded'
+              reason: 'Response headers size limit exceeded',
             },
-            code: 'BAD_GATEWAY'
+            code: 'BAD_GATEWAY',
           })
 
           return 0
@@ -334,9 +326,9 @@ export class CurlHttpClient implements HttpClient {
         state.error = new HttpClientError(`Bad gateway`, {
           cause: error,
           context: {
-            reason: `Curl HEADERFUNCTION callback failed`
+            reason: `Curl HEADERFUNCTION callback failed`,
           },
-          code: 'BAD_GATEWAY'
+          code: 'BAD_GATEWAY',
         })
 
         return 0
@@ -344,7 +336,7 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  protected setupCurlWritefunction(
+  private setupCurlWritefunction(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -365,9 +357,9 @@ export class CurlHttpClient implements HttpClient {
         if (responseBodySize + chunkSize > state.bodySizeLimit) {
           state.error = new HttpClientError(`Bad gateway`, {
             context: {
-              reason: `Response body size limit exceeded`
+              reason: `Response body size limit exceeded`,
             },
-            code: 'BAD_GATEWAY'
+            code: 'BAD_GATEWAY',
           })
 
           return 0
@@ -383,9 +375,9 @@ export class CurlHttpClient implements HttpClient {
         state.error = new HttpClientError(`Bad gateway`, {
           cause: error,
           context: {
-            reason: `Curl WRITEFUNCTION callback failed`
+            reason: `Curl WRITEFUNCTION callback failed`,
           },
-          code: 'BAD_GATEWAY'
+          code: 'BAD_GATEWAY',
         })
 
         return 0
@@ -393,7 +385,7 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  protected setupCurlSimpleEndEvent(
+  private setupCurlSimpleEndEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -418,7 +410,7 @@ export class CurlHttpClient implements HttpClient {
         if (state.error) {
           resolve({
             error: state.error,
-            connection
+            connection,
           })
 
           return
@@ -435,7 +427,7 @@ export class CurlHttpClient implements HttpClient {
           status,
           responseHeaders,
           responseBody,
-          connection
+          connection,
         })
 
         return
@@ -443,7 +435,7 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  protected setupCurlSimpleErrorEvent(
+  private setupCurlSimpleErrorEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -469,14 +461,14 @@ export class CurlHttpClient implements HttpClient {
           cause: error,
           context: {
             reason: `Curl perform failed`,
-            curlCode
+            curlCode,
           },
-          code
+          code,
         })
 
         resolve({
           error: clientError,
-          connection
+          connection,
         })
 
         return
@@ -484,7 +476,7 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  protected setupCurlStreamEvent(
+  private setupCurlStreamEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -521,12 +513,12 @@ export class CurlHttpClient implements HttpClient {
         status,
         responseHeaders,
         responseStream: state.responseStream,
-        connection
+        connection,
       })
     })
   }
 
-  protected setupCurlStreamEndEvent(
+  private setupCurlStreamEndEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -555,7 +547,7 @@ export class CurlHttpClient implements HttpClient {
 
           resolve({
             error: state.error,
-            connection
+            connection,
           })
 
           return
@@ -563,9 +555,9 @@ export class CurlHttpClient implements HttpClient {
 
         const clientError = new HttpClientError(`Bad gateway`, {
           context: {
-            reason: `Curl stream event not triggered`
+            reason: `Curl stream event not triggered`,
           },
-          code: 'BAD_GATEWAY'
+          code: 'BAD_GATEWAY',
         })
 
         if (!state.responseStream.destroyed) {
@@ -574,7 +566,7 @@ export class CurlHttpClient implements HttpClient {
 
         resolve({
           error: clientError,
-          connection
+          connection,
         })
 
         return
@@ -582,7 +574,7 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  protected setupCurlStreamErrorEvent(
+  private setupCurlStreamErrorEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -619,14 +611,14 @@ export class CurlHttpClient implements HttpClient {
           cause: error,
           context: {
             reason: `Curl perform failed`,
-            curlCode
+            curlCode,
           },
-          code
+          code,
         })
 
         resolve({
           error: clientError,
-          connection
+          connection,
         })
 
         return
@@ -634,7 +626,7 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  protected parseConnection(curl: Curl): HttpConnection {
+  private parseConnection(curl: Curl): HttpConnection {
     try {
       const totalTime = curl.getInfo('TOTAL_TIME_T')
       const connectTime = curl.getInfo('CONNECT_TIME_T')
@@ -645,19 +637,19 @@ export class CurlHttpClient implements HttpClient {
         client_total_time: typeof totalTime === 'number' ? totalTime : null,
         client_connect_time: typeof connectTime === 'number' ? connectTime : null,
         client_http_version: typeof httpVersion === 'number' ? httpVersion : null,
-        client_version_info: versionInfo.version
+        client_version_info: versionInfo.version,
       }
     } catch {
       return {
         client_total_time: null,
         client_connect_time: null,
         client_http_version: null,
-        client_version_info: null
+        client_version_info: null,
       }
     }
   }
 
-  protected parseRawHeaders(curlHeaders: Buffer[]): HttpHeaders {
+  private parseRawHeaders(curlHeaders: Buffer[]): HttpHeaders {
     const headers: HttpHeaders = {}
 
     curlHeaders.forEach((curlHeader) => {
@@ -689,7 +681,7 @@ export class CurlHttpClient implements HttpClient {
     return headers
   }
 
-  protected formatRawHeaders(headers: HttpHeaders): string[] {
+  private formatRawHeaders(headers: HttpHeaders): string[] {
     const curlHeaders: string[] = []
 
     Object.entries(headers).forEach(([name, value]) => {
@@ -709,7 +701,7 @@ export class CurlHttpClient implements HttpClient {
     return curlHeaders
   }
 
-  protected parseRawBody(chunks: Buffer[]): HttpBody {
+  private parseRawBody(chunks: Buffer[]): HttpBody {
     try {
       return Buffer.concat(chunks)
     } catch {
@@ -717,7 +709,7 @@ export class CurlHttpClient implements HttpClient {
     }
   }
 
-  protected parseCurlCode(curlCode: CurlCode): [HttpClientErrorCode, string] {
+  private parseCurlCode(curlCode: CurlCode): [HttpClientErrorCode, string] {
     return curlCode === CurlCode.CURLE_OPERATION_TIMEOUTED
       ? ['GATEWAY_TIMEOUT', 'Gateway timeout']
       : ['BAD_GATEWAY', 'Bad gateway']
@@ -725,7 +717,7 @@ export class CurlHttpClient implements HttpClient {
 
   private buildOptions(config: CurlHttpClientConfig): CurlHttpClientOptions {
     return {
-      verbose: config.HTTP_CLIENT_VERBOSE
+      verbose: config.HTTP_CLIENT_VERBOSE,
     }
   }
 }

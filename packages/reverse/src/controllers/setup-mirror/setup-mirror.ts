@@ -2,7 +2,7 @@ import { type EnabledFullTargetModel, type FullCampaignModel } from '@famir/data
 import {
   HttpServerContext,
   HttpServerContextType,
-  HttpServerNextFunction
+  HttpServerNextFunction,
 } from '@famir/http-server'
 import { type HttpMessage } from '@famir/http-tools'
 

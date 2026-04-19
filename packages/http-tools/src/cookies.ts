@@ -1,8 +1,21 @@
 import { Cookie as ToughCookie } from 'tough-cookie'
 
+/**
+ * Represents a cookie
+ * @category Utils
+ */
 export type HttpCookie = string
+
+/**
+ * Represents a cookies
+ * @category Utils
+ */
 export type HttpCookies = Record<string, HttpCookie | undefined>
 
+/**
+ * Represents a set-cookie
+ * @category Utils
+ */
 export interface HttpSetCookie {
   value: string
   expires?: number
@@ -13,10 +26,16 @@ export interface HttpSetCookie {
   httpOnly?: boolean
   sameSite?: string
 }
+
+/**
+ * Represents a set-cookies
+ * @category Utils
+ */
 export type HttpSetCookies = Record<string, HttpSetCookie | undefined>
 
-/*
+/**
  * Parse cookies
+ * @category Utils
  */
 export function parseCookies(values: string[]): HttpCookies {
   const cookies: HttpCookies = {}
@@ -35,8 +54,9 @@ export function parseCookies(values: string[]): HttpCookies {
   return cookies
 }
 
-/*
+/**
  * Format cookies
+ * @category Utils
  */
 export function formatCookies(cookies: HttpCookies): string {
   const toughCookies: ToughCookie[] = []
@@ -45,7 +65,7 @@ export function formatCookies(cookies: HttpCookies): string {
     if (value != null) {
       const toughCookie = new ToughCookie({
         key: name,
-        value: value
+        value: value,
       })
 
       toughCookies.push(toughCookie)
@@ -55,8 +75,9 @@ export function formatCookies(cookies: HttpCookies): string {
   return toughCookies.map((toughCookie) => toughCookie.cookieString()).join(';')
 }
 
-/*
+/**
  * Parse set-cookies
+ * @category Utils
  */
 export function parseSetCookies(values: string[]): HttpSetCookies {
   const cookies: HttpSetCookies = {}
@@ -71,7 +92,7 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
     const name = toughCookie.key
 
     cookies[name] = {
-      value: toughCookie.value
+      value: toughCookie.value,
     }
 
     // tough-cookie expires: Date | 'Infinity' | null
@@ -110,8 +131,9 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
   return cookies
 }
 
-/*
+/**
  * Format set-cookies
+ * @category Utils
  */
 export function formatSetCookies(cookies: HttpSetCookies): string[] {
   const toughCookies: ToughCookie[] = []
@@ -120,7 +142,7 @@ export function formatSetCookies(cookies: HttpSetCookies): string[] {
     if (cookie != null) {
       const toughCookie = new ToughCookie({
         key: name,
-        value: cookie.value
+        value: cookie.value,
       })
 
       if (cookie.expires != null) {

@@ -1,17 +1,18 @@
 import { arrayIncludes, HTTP_METHODS, HttpMethod } from '@famir/common'
 
-/*
- * HTTP method wrapper
+/**
+ * Represents a HTTP method wrapper
+ * @category none
  */
 export class HttpMethodWrap {
-  /*
+  /**
    * Create wrapper from scratch
    */
   static fromScratch(): HttpMethodWrap {
     return new HttpMethodWrap('GET')
   }
 
-  /*
+  /**
    * Create wrapper from req object
    */
   static fromReq(req: { method?: string | undefined }): HttpMethodWrap {
@@ -22,7 +23,7 @@ export class HttpMethodWrap {
     return HttpMethodWrap.fromString(req.method)
   }
 
-  /*
+  /**
    * Create wrapper from string
    */
   static fromString(value: string): HttpMethodWrap {
@@ -41,7 +42,7 @@ export class HttpMethodWrap {
     this.#method = method
   }
 
-  /*
+  /**
    * Clone wrapper
    */
   clone(): HttpMethodWrap {
@@ -50,14 +51,14 @@ export class HttpMethodWrap {
 
   #isFrozen: boolean = false
 
-  /*
+  /**
    * Wrapper frozen state
    */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
-  /*
+  /**
    * Freeze wrapper
    */
   freeze(): this {
@@ -66,14 +67,14 @@ export class HttpMethodWrap {
     return this
   }
 
-  /*
+  /**
    * Get method
    */
   get(): HttpMethod {
     return this.#method
   }
 
-  /*
+  /**
    * Set method value
    */
   set(method: HttpMethod) {
@@ -84,7 +85,7 @@ export class HttpMethodWrap {
     return this
   }
 
-  /*
+  /**
    * Check method
    */
   is(arg: HttpMethod | HttpMethod[]): boolean {
@@ -92,7 +93,7 @@ export class HttpMethodWrap {
     return methods.includes(this.#method)
   }
 
-  protected sureNotFrozen(name: string) {
+  private sureNotFrozen(name: string) {
     if (this.isFrozen) {
       throw new Error(`Method frozen on ${name}`)
     }

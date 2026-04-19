@@ -9,14 +9,15 @@ import {
   LoggerData,
   PinoLoggerBackend,
   PinoLoggerConfig,
-  PinoLoggerOptions
+  PinoLoggerOptions,
 } from './logger.js'
 
-/*
+/**
  * Pino logger implementation
+ * @category none
  */
 export class PinoLogger implements Logger {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -45,52 +46,37 @@ export class PinoLogger implements Logger {
       loggerBackend ??
       pino({
         name: this.options.appName,
-        level: this.options.logLevel
-        //base: {},
+        level: this.options.logLevel,
+        base: {},
       })
 
     this.debug(`Logger initialized`)
   }
 
-  /*
-   * Log debug message
-   */
-  debug(mesg: string, data: LoggerData = {}) {
-    this.pino.debug(data, mesg)
+  debug(msg: string, data: LoggerData | null = null) {
+    this.pino.debug({ data }, msg)
   }
 
-  /*
-   * Log info message
-   */
-  info(mesg: string, data: LoggerData = {}) {
-    this.pino.info(data, mesg)
+  info(msg: string, data: LoggerData | null = null) {
+    this.pino.info({ data }, msg)
   }
 
-  /*
-   * Log warn message
-   */
-  warn(mesg: string, data: LoggerData = {}) {
-    this.pino.warn(data, mesg)
+  warn(msg: string, data: LoggerData | null = null) {
+    this.pino.warn({ data }, msg)
   }
 
-  /*
-   * Log error message
-   */
-  error(mesg: string, data: LoggerData = {}) {
-    this.pino.error(data, mesg)
+  error(msg: string, data: LoggerData | null = null) {
+    this.pino.error({ data }, msg)
   }
 
-  /*
-   * Log fatal message
-   */
-  fatal(mesg: string, data: LoggerData = {}) {
-    this.pino.fatal(data, mesg)
+  fatal(msg: string, data: LoggerData | null = null) {
+    this.pino.fatal({ data }, msg)
   }
 
   private buildOptions(config: PinoLoggerConfig): PinoLoggerOptions {
     return {
       logLevel: config.LOGGER_LOG_LEVEL,
-      appName: config.LOGGER_APP_NAME
+      appName: config.LOGGER_APP_NAME,
     }
   }
 }

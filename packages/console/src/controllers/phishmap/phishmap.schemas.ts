@@ -1,13 +1,14 @@
 import {
   campaignDescriptionSchema,
-  campaignLandingUpgradePathSchema,
   campaignMessageExpireSchema,
   campaignMirrorDomainSchema,
   campaignNewSessionExpireSchema,
   campaignSessionCookieNameSchema,
   campaignSessionExpireSchema,
+  campaignUpgradeSessionPathSchema,
   lurePathSchema,
   proxyUrlSchema,
+  redirectorFieldsSchema,
   redirectorPageSchema,
   targetAccessLevelSchema,
   targetBodySizeLimitSchema,
@@ -19,14 +20,14 @@ import {
   targetPortSchema,
   targetSimpleTimeoutSchema,
   targetStreamTimeoutSchema,
-  targetSubSchema
+  targetSubSchema,
 } from '@famir/database'
 import {
   JSONSchemaType,
   ValidatorSchemas,
   booleanSchema,
   customIdentSchema,
-  randomIdentSchema
+  randomIdentSchema,
 } from '@famir/validator'
 import {
   DumpPhishmapData,
@@ -37,7 +38,7 @@ import {
   PhishmapRedirector,
   PhishmapTarget,
   PurgePhishmapData,
-  RestorePhishmapData
+  RestorePhishmapData,
 } from '../../services/index.js'
 
 const phishmapCampaignSchema: JSONSchemaType<PhishmapCampaign> = {
@@ -46,23 +47,23 @@ const phishmapCampaignSchema: JSONSchemaType<PhishmapCampaign> = {
     'campaignId',
     'mirrorDomain',
     'description',
-    'landingUpgradePath',
+    'upgradeSessionPath',
     'sessionCookieName',
     'sessionExpire',
     'newSessionExpire',
-    'messageExpire'
+    'messageExpire',
   ],
   properties: {
     campaignId: customIdentSchema,
     mirrorDomain: campaignMirrorDomainSchema,
     description: campaignDescriptionSchema,
-    landingUpgradePath: campaignLandingUpgradePathSchema,
+    upgradeSessionPath: campaignUpgradeSessionPathSchema,
     sessionCookieName: campaignSessionCookieNameSchema,
     sessionExpire: campaignSessionExpireSchema,
     newSessionExpire: campaignNewSessionExpireSchema,
-    messageExpire: campaignMessageExpireSchema
+    messageExpire: campaignMessageExpireSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const phishmapProxySchema: JSONSchemaType<PhishmapProxy> = {
@@ -71,9 +72,9 @@ const phishmapProxySchema: JSONSchemaType<PhishmapProxy> = {
   properties: {
     proxyId: customIdentSchema,
     url: proxyUrlSchema,
-    isEnabled: booleanSchema
+    isEnabled: booleanSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const phishmapTargetSchema: JSONSchemaType<PhishmapTarget> = {
@@ -100,7 +101,7 @@ const phishmapTargetSchema: JSONSchemaType<PhishmapTarget> = {
     'robotsTxt',
     'sitemapXml',
     'allowWebSockets',
-    'isEnabled'
+    'isEnabled',
   ],
   properties: {
     targetId: customIdentSchema,
@@ -124,20 +125,21 @@ const phishmapTargetSchema: JSONSchemaType<PhishmapTarget> = {
     robotsTxt: targetContentSchema,
     sitemapXml: targetContentSchema,
     allowWebSockets: booleanSchema,
-    isEnabled: booleanSchema
+    isEnabled: booleanSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const phishmapRedirectorSchema: JSONSchemaType<PhishmapRedirector> = {
   type: 'object',
-  required: ['redirectorId', 'page'],
+  required: ['redirectorId', 'page', 'fields'],
   properties: {
     redirectorId: customIdentSchema,
     page: redirectorPageSchema,
-    isEnabled: booleanSchema
+    fields: redirectorFieldsSchema,
+    isEnabled: booleanSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const phishmapLureSchema: JSONSchemaType<PhishmapLure> = {
@@ -147,9 +149,9 @@ const phishmapLureSchema: JSONSchemaType<PhishmapLure> = {
     lureId: customIdentSchema,
     path: lurePathSchema,
     redirectorId: customIdentSchema,
-    isEnabled: booleanSchema
+    isEnabled: booleanSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const phishmapSchema: JSONSchemaType<Phishmap> = {
@@ -159,31 +161,31 @@ const phishmapSchema: JSONSchemaType<Phishmap> = {
     campaign: phishmapCampaignSchema,
     proxies: {
       type: 'array',
-      items: phishmapProxySchema
+      items: phishmapProxySchema,
     },
     targets: {
       type: 'array',
-      items: phishmapTargetSchema
+      items: phishmapTargetSchema,
     },
     redirectors: {
       type: 'array',
-      items: phishmapRedirectorSchema
+      items: phishmapRedirectorSchema,
     },
     lures: {
       type: 'array',
-      items: phishmapLureSchema
-    }
+      items: phishmapLureSchema,
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const dumpPhishmapDataSchema: JSONSchemaType<DumpPhishmapData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema
+    campaignId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const restorePhishmapDataSchema: JSONSchemaType<RestorePhishmapData> = {
@@ -193,55 +195,55 @@ const restorePhishmapDataSchema: JSONSchemaType<RestorePhishmapData> = {
     phishmap: phishmapSchema,
     campaignId: {
       ...customIdentSchema,
-      nullable: true
+      nullable: true,
     },
     mirrorDomain: {
       ...campaignMirrorDomainSchema,
-      nullable: true
+      nullable: true,
     },
     description: {
       ...campaignDescriptionSchema,
-      nullable: true
+      nullable: true,
     },
     cryptSecret: {
       ...randomIdentSchema,
-      nullable: true
+      nullable: true,
     },
-    landingUpgradePath: {
-      ...campaignLandingUpgradePathSchema,
-      nullable: true
+    upgradeSessionPath: {
+      ...campaignUpgradeSessionPathSchema,
+      nullable: true,
     },
     sessionCookieName: {
       ...campaignSessionCookieNameSchema,
-      nullable: true
+      nullable: true,
     },
     sessionExpire: {
       ...campaignSessionExpireSchema,
-      nullable: true
+      nullable: true,
     },
     newSessionExpire: {
       ...campaignNewSessionExpireSchema,
-      nullable: true
+      nullable: true,
     },
     messageExpire: {
       ...campaignMessageExpireSchema,
-      nullable: true
-    }
+      nullable: true,
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const purgePhishmapDataSchema: JSONSchemaType<PurgePhishmapData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema
+    campaignId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 export const phishmapSchemas: ValidatorSchemas = {
   'console-dump-phishmap-data': dumpPhishmapDataSchema,
   'console-restore-phishmap-data': restorePhishmapDataSchema,
-  'console-purge-phishmap-data': purgePhishmapDataSchema
+  'console-purge-phishmap-data': purgePhishmapDataSchema,
 } as const

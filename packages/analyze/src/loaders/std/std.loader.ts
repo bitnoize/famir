@@ -7,14 +7,14 @@ import {
   ConsumeAssets,
   ConsumeRouter,
   ConsumeSpecs,
-  RedisConsumeConnector
+  RedisConsumeConnector,
 } from '@famir/consume'
 import {
   RedisCampaignRepository,
   RedisDatabaseConnector,
   RedisMessageRepository,
   RedisSessionRepository,
-  RedisTargetRepository
+  RedisTargetRepository,
 } from '@famir/database'
 import { PinoLogger } from '@famir/logger'
 import { RedisProduceConnector } from '@famir/produce'
@@ -25,6 +25,10 @@ import { autoLoad } from '../../main.js'
 import { StdAnalyzeConfig } from './std.js'
 import { configStdAnalyzeSchema } from './std.schemas.js'
 
+/**
+ * Composition root
+ * @category Loaders
+ */
 export async function bootstrapStd(
   composer: DIComposer,
   specs: ConsumeSpecs,

@@ -9,7 +9,7 @@ import {
   PROXY_SERVICE,
   ReadProxyData,
   SwitchProxyData,
-  type ProxyService
+  type ProxyService,
 } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { PROXY_CONTROLLER } from './proxy.js'

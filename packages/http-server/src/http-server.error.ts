@@ -1,5 +1,9 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
+/**
+ * HTTP server error code
+ * @category none
+ */
 export type HttpServerErrorCode =
   | 'BAD_REQUEST'
   | 'UNAUTHORIZED'
@@ -13,6 +17,10 @@ export type HttpServerErrorCode =
   | 'SERVICE_UNAVAILABLE'
   | 'GATEWAY_TIMEOUT'
 
+/**
+ * HTTP server error options
+ * @category none
+ */
 export type HttpServerErrorOptions = CommonErrorOptions & {
   code: HttpServerErrorCode
 }
@@ -28,11 +36,12 @@ const codeToStatusMap: Record<HttpServerErrorCode, number> = {
   INTERNAL_ERROR: 500,
   BAD_GATEWAY: 502,
   SERVICE_UNAVAILABLE: 503,
-  GATEWAY_TIMEOUT: 504
+  GATEWAY_TIMEOUT: 504,
 } as const
 
-/*
- * HTTP server error object
+/**
+ * Represents HTTP server error
+ * @category none
  */
 export class HttpServerError extends CommonError {
   code: HttpServerErrorCode
@@ -41,7 +50,7 @@ export class HttpServerError extends CommonError {
   constructor(message: string, options: HttpServerErrorOptions) {
     super(message, {
       cause: options.cause,
-      context: options.context
+      context: options.context,
     })
 
     this.name = 'HttpServerError'

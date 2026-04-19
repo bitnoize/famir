@@ -1,11 +1,11 @@
 import {
   configRedisDatabaseConnectionUrlSchema,
-  configRedisDatabasePrefixSchema
+  configRedisDatabasePrefixSchema,
 } from '@famir/database'
 import { configLoggerAppNameSchema, configLoggerLogLevelSchema } from '@famir/logger'
 import {
   configRedisProduceConnectionUrlSchema,
-  configRedisProducePrefixSchema
+  configRedisProducePrefixSchema,
 } from '@famir/produce'
 import {
   configNetReplServerAddressSchema,
@@ -13,11 +13,15 @@ import {
   configNetReplServerPortSchema,
   configNetReplServerSocketTimeoutSchema,
   configReplServerPromptSchema,
-  configReplServerUseColorsSchema
+  configReplServerUseColorsSchema,
 } from '@famir/repl-server'
 import { JSONSchemaType } from '@famir/validator'
 import { NetConsoleConfig } from './net.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const configNetConsoleSchema: JSONSchemaType<NetConsoleConfig> = {
   type: 'object',
   required: [
@@ -32,12 +36,12 @@ export const configNetConsoleSchema: JSONSchemaType<NetConsoleConfig> = {
     'REPL_SERVER_MAX_CLIENTS',
     'REPL_SERVER_SOCKET_TIMEOUT',
     'REPL_SERVER_PROMPT',
-    'REPL_SERVER_USE_COLORS'
+    'REPL_SERVER_USE_COLORS',
   ],
   properties: {
     LOGGER_APP_NAME: {
       ...configLoggerAppNameSchema,
-      default: 'console'
+      default: 'console',
     },
     LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
     DATABASE_CONNECTION_URL: configRedisDatabaseConnectionUrlSchema,
@@ -46,16 +50,16 @@ export const configNetConsoleSchema: JSONSchemaType<NetConsoleConfig> = {
     PRODUCE_PREFIX: configRedisProducePrefixSchema,
     REPL_SERVER_ADDRESS: {
       ...configNetReplServerAddressSchema,
-      default: '127.0.0.1'
+      default: '127.0.0.1',
     },
     REPL_SERVER_PORT: {
       ...configNetReplServerPortSchema,
-      default: 5000
+      default: 5000,
     },
     REPL_SERVER_MAX_CLIENTS: configNetReplServerMaxClientsSchema,
     REPL_SERVER_SOCKET_TIMEOUT: configNetReplServerSocketTimeoutSchema,
     REPL_SERVER_PROMPT: configReplServerPromptSchema,
-    REPL_SERVER_USE_COLORS: configReplServerUseColorsSchema
+    REPL_SERVER_USE_COLORS: configReplServerUseColorsSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const

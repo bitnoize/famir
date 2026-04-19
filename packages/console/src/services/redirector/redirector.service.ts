@@ -5,23 +5,25 @@ import {
   FullRedirectorModel,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
-  RedirectorRepository
+  RedirectorRepository,
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
+  ActionRedirectorFieldData,
   CreateRedirectorData,
   DeleteRedirectorData,
   ListRedirectorsData,
   REDIRECTOR_SERVICE,
   ReadRedirectorData,
-  UpdateRedirectorData
+  UpdateRedirectorData,
 } from './redirector.js'
 
-/*
+/**
  * Redirector service
+ * @category Services
  */
 export class RedirectorService {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -33,7 +35,7 @@ export class RedirectorService {
 
   constructor(protected readonly redirectorRepository: RedirectorRepository) {}
 
-  /*
+  /**
    * Create redirector
    */
   async create(data: CreateRedirectorData): Promise<true> {
@@ -52,7 +54,7 @@ export class RedirectorService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -61,7 +63,7 @@ export class RedirectorService {
     }
   }
 
-  /*
+  /**
    * Read redirector
    */
   async read(data: ReadRedirectorData): Promise<FullRedirectorModel> {
@@ -69,14 +71,14 @@ export class RedirectorService {
 
     if (!redirector) {
       throw new ReplServerError(`Redirector not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 
     return redirector
   }
 
-  /*
+  /**
    * Update redirector
    */
   async update(data: UpdateRedirectorData): Promise<true> {
@@ -95,7 +97,7 @@ export class RedirectorService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -104,7 +106,63 @@ export class RedirectorService {
     }
   }
 
-  /*
+  /**
+   * Append redirector field
+   */
+  async appendField(data: ActionRedirectorFieldData): Promise<true> {
+    try {
+      await this.redirectorRepository.appendField(
+        data.campaignId,
+        data.redirectorId,
+        data.field,
+        data.lockSecret
+      )
+
+      return true
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code,
+          })
+        }
+      }
+
+      throw error
+    }
+  }
+
+  /**
+   * Remove redirector field
+   */
+  async removeField(data: ActionRedirectorFieldData): Promise<true> {
+    try {
+      await this.redirectorRepository.removeField(
+        data.campaignId,
+        data.redirectorId,
+        data.field,
+        data.lockSecret
+      )
+
+      return true
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code,
+          })
+        }
+      }
+
+      throw error
+    }
+  }
+
+  /**
    * Delete redirector
    */
   async delete(data: DeleteRedirectorData): Promise<true> {
@@ -118,7 +176,7 @@ export class RedirectorService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -127,7 +185,7 @@ export class RedirectorService {
     }
   }
 
-  /*
+  /**
    * List redirectors
    */
   async list(data: ListRedirectorsData): Promise<RedirectorModel[]> {
@@ -135,7 +193,7 @@ export class RedirectorService {
 
     if (!redirectors) {
       throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 

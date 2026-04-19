@@ -2,7 +2,7 @@ import {
   JSONSchemaType,
   ValidatorSchemas,
   customIdentSchema,
-  randomIdentSchema
+  randomIdentSchema,
 } from '@famir/validator'
 import { ReadMessageData } from '../../services/index.js'
 
@@ -11,11 +11,11 @@ const readMessageDataSchema: JSONSchemaType<ReadMessageData> = {
   required: ['campaignId', 'messageId'],
   properties: {
     campaignId: customIdentSchema,
-    messageId: randomIdentSchema
+    messageId: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 export const messageSchemas: ValidatorSchemas = {
-  'console-read-message-data': readMessageDataSchema
+  'console-read-message-data': readMessageDataSchema,
 } as const

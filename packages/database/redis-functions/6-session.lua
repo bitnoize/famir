@@ -24,13 +24,13 @@ local function create_session(keys, args)
     new_session_expire = tonumber(redis.call('HGET', campaign_key, 'new_session_expire')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if field == 'new_session_expire' and value <= 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if k == 'new_session_expire' and v <= 0 then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -49,16 +49,16 @@ local function create_session(keys, args)
     authorized_at = tonumber(args[4]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
 
     if
-      (field == 'campaign_id' or field == 'session_id' or field == 'proxy_id' or field == 'secret')
-      and value == ''
+      (k == 'campaign_id' or k == 'session_id' or k == 'proxy_id' or k == 'secret')
+      and v == ''
     then
-      return redis.error_reply('ERR Wrong model.' .. field)
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -66,9 +66,9 @@ local function create_session(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', session_key, unpack(store))
@@ -133,9 +133,9 @@ local function read_session(keys, args)
     authorized_at = tonumber(values[8]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -175,17 +175,17 @@ local function auth_session(keys, args)
     session_expire = tonumber(redis.call('HGET', campaign_key, 'session_expire')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if field == 'proxy_id' and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if k == 'proxy_id' and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if field == 'session_expire' and value <= 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if k == 'session_expire' and v <= 0 then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -253,13 +253,13 @@ local function upgrade_session(keys, args)
     is_upgraded = tonumber(redis.call('HGET', session_key, 'is_upgraded')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'secret' or field == 'orig_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'secret' or k == 'orig_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 

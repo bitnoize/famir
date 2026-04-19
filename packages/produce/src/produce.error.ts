@@ -1,13 +1,22 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
+/**
+ * Produce error code
+ * @category none
+ */
 export type ProduceErrorCode = 'INTERNAL_ERROR'
 
+/**
+ * Produce error options
+ * @category none
+ */
 export type ProduceErrorOptions = CommonErrorOptions & {
   code: ProduceErrorCode
 }
 
-/*
- * Produce error object
+/**
+ * Represents a produce error
+ * @category none
  */
 export class ProduceError extends CommonError {
   code: ProduceErrorCode
@@ -15,7 +24,7 @@ export class ProduceError extends CommonError {
   constructor(message: string, options: ProduceErrorOptions) {
     super(message, {
       cause: options.cause,
-      context: options.context
+      context: options.context,
     })
 
     this.name = 'ProduceError'

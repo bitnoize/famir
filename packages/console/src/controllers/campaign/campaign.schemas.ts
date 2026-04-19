@@ -1,17 +1,17 @@
 import {
   campaignDescriptionSchema,
-  campaignLandingUpgradePathSchema,
   campaignMessageExpireSchema,
   campaignMirrorDomainSchema,
   campaignNewSessionExpireSchema,
   campaignSessionCookieNameSchema,
-  campaignSessionExpireSchema
+  campaignSessionExpireSchema,
+  campaignUpgradeSessionPathSchema,
 } from '@famir/database'
 import {
   JSONSchemaType,
   ValidatorSchemas,
   customIdentSchema,
-  randomIdentSchema
+  randomIdentSchema,
 } from '@famir/validator'
 import {
   CreateCampaignData,
@@ -19,84 +19,104 @@ import {
   LockCampaignData,
   ReadCampaignData,
   UnlockCampaignData,
-  UpdateCampaignData
+  UpdateCampaignData,
 } from '../../services/index.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
   type: 'object',
   required: [
     'campaignId',
     'mirrorDomain',
     'description',
-    'landingUpgradePath',
+    'upgradeSessionPath',
     'sessionCookieName',
     'sessionExpire',
     'newSessionExpire',
-    'messageExpire'
+    'messageExpire',
   ],
   properties: {
     campaignId: customIdentSchema,
     mirrorDomain: campaignMirrorDomainSchema,
     description: {
       ...campaignDescriptionSchema,
-      default: ''
+      default: '',
     },
     cryptSecret: {
       ...randomIdentSchema,
-      nullable: true
+      nullable: true,
     },
-    landingUpgradePath: {
-      ...campaignLandingUpgradePathSchema,
-      default: '/fake-auth'
+    upgradeSessionPath: {
+      ...campaignUpgradeSessionPathSchema,
+      default: '/fake-upgrade-session',
     },
     sessionCookieName: {
       ...campaignSessionCookieNameSchema,
-      default: 'fake-sess'
+      default: 'fake-sess', // FIXME
     },
     sessionExpire: {
       ...campaignSessionExpireSchema,
-      default: 24 * 3600 * 1000
+      default: 24 * 3600 * 1000,
     },
     newSessionExpire: {
       ...campaignNewSessionExpireSchema,
-      default: 300 * 1000
+      default: 300 * 1000,
     },
     messageExpire: {
       ...campaignMessageExpireSchema,
-      default: 3600 * 1000
-    }
+      default: 3600 * 1000,
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema
+    campaignId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 }
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const lockCampaignDataSchema: JSONSchemaType<LockCampaignData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema
+    campaignId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const unlockCampaignDataSchema: JSONSchemaType<UnlockCampaignData> = {
   type: 'object',
   required: ['campaignId', 'lockSecret'],
   properties: {
     campaignId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
   type: 'object',
   required: ['campaignId', 'lockSecret'],
@@ -104,40 +124,48 @@ const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
     campaignId: customIdentSchema,
     description: {
       ...campaignDescriptionSchema,
-      nullable: true
+      nullable: true,
     },
     sessionExpire: {
       ...campaignSessionExpireSchema,
-      nullable: true
+      nullable: true,
     },
     newSessionExpire: {
       ...campaignNewSessionExpireSchema,
-      nullable: true
+      nullable: true,
     },
     messageExpire: {
       ...campaignMessageExpireSchema,
-      nullable: true
+      nullable: true,
     },
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
   type: 'object',
   required: ['campaignId', 'lockSecret'],
   properties: {
     campaignId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const campaignSchemas: ValidatorSchemas = {
   'console-create-campaign-data': createCampaignDataSchema,
   'console-read-campaign-data': readCampaignDataSchema,
   'console-lock-campaign-data': lockCampaignDataSchema,
   'console-unlock-campaign-data': unlockCampaignDataSchema,
   'console-update-campaign-data': updateCampaignDataSchema,
-  'console-delete-campaign-data': deleteCampaignDataSchema
+  'console-delete-campaign-data': deleteCampaignDataSchema,
 } as const

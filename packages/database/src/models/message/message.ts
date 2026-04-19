@@ -5,11 +5,12 @@ import {
   HttpHeaders,
   HttpMethod,
   HttpPayload,
-  HttpType
+  HttpType,
 } from '@famir/common'
 
-/*
- * Message is a captured request and response
+/**
+ * Message model
+ * @category Models
  */
 export class MessageModel {
   static isNotNull = <T extends MessageModel>(model: T | null): model is T => {
@@ -37,8 +38,9 @@ export class MessageModel {
   }
 }
 
-/*
- * Extended message
+/**
+ * Extended message model
+ * @category Models
  */
 export class FullMessageModel extends MessageModel {
   constructor(

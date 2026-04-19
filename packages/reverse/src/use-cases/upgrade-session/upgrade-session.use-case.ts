@@ -38,9 +38,9 @@ export class UpgradeSessionUseCase {
           throw new HttpServerError(`Not found`, {
             cause: error,
             context: {
-              reason: `Upgrade session failed`
+              reason: `Upgrade session failed`,
             },
-            code: `NOT_FOUND`
+            code: `NOT_FOUND`,
           })
         } else if (error.code === 'FORBIDDEN') {
           return false

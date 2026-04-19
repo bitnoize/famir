@@ -3,14 +3,14 @@ import {
   JSONSchemaType,
   ValidatorSchemas,
   customIdentSchema,
-  randomIdentSchema
+  randomIdentSchema,
 } from '@famir/validator'
 import {
   CreateProxyData,
   DeleteProxyData,
   ListProxiesData,
   ReadProxyData,
-  SwitchProxyData
+  SwitchProxyData,
 } from '../../services/index.js'
 
 const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
@@ -20,9 +20,9 @@ const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
     campaignId: customIdentSchema,
     proxyId: customIdentSchema,
     url: proxyUrlSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
@@ -30,9 +30,9 @@ const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
   required: ['campaignId', 'proxyId'],
   properties: {
     campaignId: customIdentSchema,
-    proxyId: customIdentSchema
+    proxyId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const switchProxyDataSchema: JSONSchemaType<SwitchProxyData> = {
@@ -41,9 +41,9 @@ const switchProxyDataSchema: JSONSchemaType<SwitchProxyData> = {
   properties: {
     campaignId: customIdentSchema,
     proxyId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const deleteProxyDataSchema: JSONSchemaType<DeleteProxyData> = {
@@ -52,18 +52,18 @@ const deleteProxyDataSchema: JSONSchemaType<DeleteProxyData> = {
   properties: {
     campaignId: customIdentSchema,
     proxyId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const listProxiesDataSchema: JSONSchemaType<ListProxiesData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema
+    campaignId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 export const proxySchemas: ValidatorSchemas = {
@@ -71,5 +71,5 @@ export const proxySchemas: ValidatorSchemas = {
   'console-read-proxy-data': readProxyDataSchema,
   'console-switch-proxy-data': switchProxyDataSchema,
   'console-delete-proxy-data': deleteProxyDataSchema,
-  'console-list-proxies-data': listProxiesDataSchema
+  'console-list-proxies-data': listProxiesDataSchema,
 } as const

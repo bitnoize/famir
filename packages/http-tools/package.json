@@ -1,24 +1,30 @@
 {
   "name": "@famir/http-tools",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Famir HTTP tools module",
   "keywords": [
     "famir",
     "fake-mirrors",
     "man-in-the-middle",
     "phishing",
-    "reverse-proxy"
+    "reverse-proxy",
+    "red-teaming"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
   "license": "Apache-2.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "format": "prettier -w \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "node --test dist/**/*.test.js",
-    "build": "tsc -b"
+    "build": "tsc -b",
+    "clean": "rimraf dist *.tsbuildinfo"
   },
   "files": [
     "dist",
@@ -32,13 +38,13 @@
   "bugs": {
     "url": "https://github.com/bitnoize/famir/issues"
   },
-  "homepage": "https://github.com/bitnoize/famir",
+  "homepage": "https://fake-mirrors.net",
   "dependencies": {
     "@famir/common": "*",
     "cheerio": "^1.2.0",
     "content-type": "^1.0.5",
     "iconv-lite": "^0.7.2",
-    "isbot": "^5.1.37",
+    "isbot": "^5.1.39",
     "qs": "^6.15.1",
     "tough-cookie": "^6.0.1",
     "ua-parser-js": "^2.0.9"

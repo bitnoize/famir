@@ -10,7 +10,7 @@ import {
   ReadCampaignData,
   UnlockCampaignData,
   UpdateCampaignData,
-  type CampaignService
+  type CampaignService,
 } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { CAMPAIGN_CONTROLLER } from './campaign.js'

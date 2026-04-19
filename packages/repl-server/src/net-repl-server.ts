@@ -13,14 +13,15 @@ import {
   REPL_SERVER_BANNER_GREET,
   REPL_SERVER_BANNER_LEAVE,
   REPL_SERVER_ROUTER,
-  ReplServer
+  ReplServer,
 } from './repl-server.js'
 
-/*
+/**
  * Net REPL server implementation
+ * @category none
  */
 export class NetReplServer implements ReplServer {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -37,7 +38,8 @@ export class NetReplServer implements ReplServer {
 
   protected readonly options: NetReplServerOptions
   protected readonly server: net.Server
-  protected readonly clients = new Set<net.Socket>()
+
+  protected readonly clients: Set<net.Socket> = new Set()
 
   constructor(
     config: Config<NetReplServerConfig>,
@@ -63,7 +65,7 @@ export class NetReplServer implements ReplServer {
         socket.destroy()
 
         this.logger.error(`ReplServer socket error`, {
-          error: serializeError(error)
+          error: serializeError(error),
         })
       })
 
@@ -71,7 +73,7 @@ export class NetReplServer implements ReplServer {
 
       this.handleConnection(socket).catch((error: unknown) => {
         this.logger.error(`ReplServer unexpected connection error`, {
-          error: serializeError(error)
+          error: serializeError(error),
         })
 
         if (!socket.destroyed) {
@@ -85,18 +87,12 @@ export class NetReplServer implements ReplServer {
     this.logger.debug(`ReplServer initialized`)
   }
 
-  /*
-   * Start server
-   */
   async start(): Promise<void> {
     await this.listen()
 
     this.logger.debug(`ReplServer started`)
   }
 
-  /*
-   * Stop server
-   */
   async stop(): Promise<void> {
     await this.close()
 
@@ -104,19 +100,19 @@ export class NetReplServer implements ReplServer {
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  protected async handleConnection(socket: net.Socket): Promise<void> {
+  private async handleConnection(socket: net.Socket): Promise<void> {
     try {
       this.replServerStart(socket)
     } catch (error) {
       this.logger.error(`ReplServer handle connection error`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
 
       socket.end()
     }
   }
 
-  protected replServerStart(socket: net.Socket): repl.REPLServer {
+  private replServerStart(socket: net.Socket): repl.REPLServer {
     const bannerGreet = this.router.getAsset('banner-greet.txt') ?? REPL_SERVER_BANNER_GREET
     const bannerLeave = this.router.getAsset('banner-leave.txt') ?? REPL_SERVER_BANNER_LEAVE
 
@@ -131,8 +127,8 @@ export class NetReplServer implements ReplServer {
       writer: (output) =>
         util.inspect(output, {
           depth: 4,
-          colors: this.options.useColors
-        })
+          colors: this.options.useColors,
+        }),
     })
 
     replServer.on('reset', (context) => {
@@ -153,7 +149,7 @@ export class NetReplServer implements ReplServer {
     return replServer
   }
 
-  protected defineContext(context: object) {
+  private defineContext(context: object) {
     const apiCalls: Record<string, unknown> = {}
 
     this.router.getApiCalls().forEach(([apiCallName, apiCall]) => {
@@ -171,9 +167,9 @@ export class NetReplServer implements ReplServer {
               cause: error,
               context: {
                 apiCall: apiCallName,
-                data
+                data,
               },
-              code: 'INTERNAL_ERROR'
+              code: 'INTERNAL_ERROR',
             })
           }
         }
@@ -181,13 +177,13 @@ export class NetReplServer implements ReplServer {
     })
 
     Object.defineProperty(context, 'famir', {
-      value: apiCalls
+      value: apiCalls,
     })
 
     Object.defineProperty(context, 'getAssetNames', {
       value: (): string[] => {
         return this.router.getAssetNames()
-      }
+      },
     })
 
     Object.defineProperty(context, 'getAsset', {
@@ -197,11 +193,11 @@ export class NetReplServer implements ReplServer {
         }
 
         return this.router.getAsset(assetName)
-      }
+      },
     })
   }
 
-  protected defineCommands(replServer: repl.REPLServer, socket: net.Socket) {
+  private defineCommands(replServer: repl.REPLServer, socket: net.Socket) {
     replServer.defineCommand('conns', {
       help: `Show connections`,
       action: () => {
@@ -219,11 +215,11 @@ export class NetReplServer implements ReplServer {
         socket.write(`\n`)
 
         replServer.displayPrompt()
-      }
+      },
     })
   }
 
-  protected listen(): Promise<void> {
+  private listen(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this.server.off('listening', listeningHandler)
@@ -244,7 +240,7 @@ export class NetReplServer implements ReplServer {
     })
   }
 
-  protected close(): Promise<void> {
+  private close(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this.server.off('close', closeHandler)
@@ -282,7 +278,7 @@ export class NetReplServer implements ReplServer {
       maxClients: config.REPL_SERVER_MAX_CLIENTS,
       socketTimeout: config.REPL_SERVER_SOCKET_TIMEOUT,
       prompt: config.REPL_SERVER_PROMPT,
-      useColors: config.REPL_SERVER_USE_COLORS
+      useColors: config.REPL_SERVER_USE_COLORS,
     }
   }
 }

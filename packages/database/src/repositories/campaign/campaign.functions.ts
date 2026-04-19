@@ -8,9 +8,13 @@ import {
   lureIndexKey,
   proxyIndexKey,
   redirectorIndexKey,
-  targetIndexKey
+  targetIndexKey,
 } from '../../database.keys.js'
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export interface RawCampaign {
   campaign_id: string
   mirror_domain: string
@@ -20,10 +24,14 @@ export interface RawCampaign {
   created_at: number
 }
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export interface RawFullCampaign extends RawCampaign {
   description: string
   crypt_secret: string
-  landing_upgrade_path: string
+  upgrade_session_path: string
   session_cookie_name: string
   session_expire: number
   new_session_expire: number
@@ -34,6 +42,10 @@ export interface RawFullCampaign extends RawCampaign {
   lure_count: number
 }
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export const campaignFunctions = {
   campaign: {
     create_campaign: {
@@ -46,7 +58,7 @@ export const campaignFunctions = {
         mirrorDomain: string,
         description: string,
         cryptSecret: string,
-        landingUpgradePath: string,
+        upgradeSessionPath: string,
         sessionCookieName: string,
         sessionExpire: string,
         newSessionExpire: string,
@@ -62,7 +74,7 @@ export const campaignFunctions = {
         parser.push(mirrorDomain)
         parser.push(description)
         parser.push(cryptSecret)
-        parser.push(landingUpgradePath)
+        parser.push(upgradeSessionPath)
         parser.push(sessionCookieName)
         parser.push(sessionExpire)
         parser.push(newSessionExpire)
@@ -70,7 +82,7 @@ export const campaignFunctions = {
         parser.push(createdAt)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_campaign: {
@@ -81,7 +93,7 @@ export const campaignFunctions = {
         parser.pushKey(campaignLockKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_full_campaign: {
@@ -96,7 +108,7 @@ export const campaignFunctions = {
         parser.pushKey(lureIndexKey(prefix, campaignId))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_campaign_mirror_domains: {
@@ -106,7 +118,7 @@ export const campaignFunctions = {
         parser.pushKey(campaignMirrorDomainsKey(prefix))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_campaign_session_cookie_names: {
@@ -116,7 +128,7 @@ export const campaignFunctions = {
         parser.pushKey(campaignSessionCookieNamesKey(prefix))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_campaign_index: {
@@ -126,7 +138,7 @@ export const campaignFunctions = {
         parser.pushKey(campaignIndexKey(prefix))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     lock_campaign: {
@@ -146,7 +158,7 @@ export const campaignFunctions = {
         parser.push(lockTimeout)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     unlock_campaign: {
@@ -159,7 +171,7 @@ export const campaignFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     update_campaign: {
@@ -201,7 +213,7 @@ export const campaignFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     delete_campaign: {
@@ -221,7 +233,7 @@ export const campaignFunctions = {
         parser.push(lockSecret)
       },
 
-      transformReply: undefined as unknown as () => unknown
-    }
-  }
+      transformReply: undefined as unknown as () => unknown,
+    },
+  },
 } as const

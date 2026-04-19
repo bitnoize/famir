@@ -1,15 +1,15 @@
 import {
   configRedisConsumeConnectionUrlSchema,
-  configRedisConsumePrefixSchema
+  configRedisConsumePrefixSchema,
 } from '@famir/consume'
 import {
   configRedisDatabaseConnectionUrlSchema,
-  configRedisDatabasePrefixSchema
+  configRedisDatabasePrefixSchema,
 } from '@famir/database'
 import { configLoggerAppNameSchema, configLoggerLogLevelSchema } from '@famir/logger'
 import {
   configRedisProduceConnectionUrlSchema,
-  configRedisProducePrefixSchema
+  configRedisProducePrefixSchema,
 } from '@famir/produce'
 import {
   configMinioStorageEndPointSchema,
@@ -17,11 +17,15 @@ import {
   configMinioStorageUseSSLSchema,
   configStorageAccessKeySchema,
   configStorageBucketNameSchema,
-  configStorageSecretKeySchema
+  configStorageSecretKeySchema,
 } from '@famir/storage'
 import { JSONSchemaType } from '@famir/validator'
 import { StdAnalyzeConfig } from './std.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const configStdAnalyzeSchema: JSONSchemaType<StdAnalyzeConfig> = {
   type: 'object',
   required: [
@@ -38,12 +42,12 @@ export const configStdAnalyzeSchema: JSONSchemaType<StdAnalyzeConfig> = {
     'PRODUCE_CONNECTION_URL',
     'PRODUCE_PREFIX',
     'CONSUME_CONNECTION_URL',
-    'CONSUME_PREFIX'
+    'CONSUME_PREFIX',
   ],
   properties: {
     LOGGER_APP_NAME: {
       ...configLoggerAppNameSchema,
-      default: 'analyze'
+      default: 'analyze',
     },
     LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
     DATABASE_CONNECTION_URL: configRedisDatabaseConnectionUrlSchema,
@@ -57,7 +61,7 @@ export const configStdAnalyzeSchema: JSONSchemaType<StdAnalyzeConfig> = {
     PRODUCE_CONNECTION_URL: configRedisProduceConnectionUrlSchema,
     PRODUCE_PREFIX: configRedisProducePrefixSchema,
     CONSUME_CONNECTION_URL: configRedisConsumeConnectionUrlSchema,
-    CONSUME_PREFIX: configRedisConsumePrefixSchema
+    CONSUME_PREFIX: configRedisConsumePrefixSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const

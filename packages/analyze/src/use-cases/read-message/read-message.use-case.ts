@@ -4,11 +4,12 @@ import { FullMessageModel, MESSAGE_REPOSITORY, MessageRepository } from '@famir/
 import { AnalyzeJobData } from '@famir/produce'
 import { READ_MESSAGE_USE_CASE } from './read-message.js'
 
-/*
+/**
  * Read message use-case
+ * @category Use-cases
  */
 export class ReadMessageUseCase {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -20,7 +21,7 @@ export class ReadMessageUseCase {
 
   constructor(protected readonly messageRepository: MessageRepository) {}
 
-  /*
+  /**
    * Execute use-case
    */
   async execute(data: AnalyzeJobData): Promise<FullMessageModel> {
@@ -28,7 +29,7 @@ export class ReadMessageUseCase {
 
     if (!message) {
       throw new ConsumeError(`Message not found`, {
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
 

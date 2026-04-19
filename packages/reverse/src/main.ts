@@ -5,25 +5,39 @@ import {
   RoundTripController,
   SetupMirrorController,
   TransformController,
-  WellKnownUrlsController
+  WellKnownUrlsController,
 } from './controllers/index.js'
 import {
   AuthSessionUseCase,
   CreateMessageUseCase,
   CreateSessionUseCase,
-  FindLureRedirectorUseCase,
+  FindLureUseCase,
   FindTargetUseCase,
   ForwardSimpleUseCase,
   ForwardStreamRequestUseCase,
   ForwardStreamResponseUseCase,
   ReadProxyUseCase,
-  UpgradeSessionUseCase
+  ReadRedirectorUseCase,
+  UpgradeSessionUseCase,
 } from './use-cases/index.js'
+
+process.on('unhandledRejection', (reason: string, p: Promise<unknown>) => {
+  console.error(`Unhandled rejection`, { reason, p })
+
+  process.exit(1)
+})
+
+process.on('uncaughtException', (error: unknown) => {
+  console.error(`Uncaught exception`, { error })
+
+  process.exit(1)
+})
 
 export const autoLoad: DIComposer = (container) => {
   FindTargetUseCase.register(container)
   ReadProxyUseCase.register(container)
-  FindLureRedirectorUseCase.register(container)
+  ReadRedirectorUseCase.register(container)
+  FindLureUseCase.register(container)
   CreateSessionUseCase.register(container)
   AuthSessionUseCase.register(container)
   UpgradeSessionUseCase.register(container)

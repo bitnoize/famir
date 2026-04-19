@@ -2,11 +2,12 @@ import { DIContainer } from '@famir/common'
 import { DATABASE_MANAGER, DatabaseManager } from '@famir/database'
 import { DATABASE_SERVICE } from './database.js'
 
-/*
+/**
  * Database service
+ * @category Services
  */
 export class DatabaseService {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -18,7 +19,7 @@ export class DatabaseService {
 
   constructor(protected readonly databaseManager: DatabaseManager) {}
 
-  /*
+  /**
    * Load database functions
    */
   async loadDatabaseFunctions(): Promise<true> {
@@ -27,7 +28,7 @@ export class DatabaseService {
     return true
   }
 
-  /*
+  /**
    * Cleanup database
    */
   async cleanupDatabase(): Promise<true> {

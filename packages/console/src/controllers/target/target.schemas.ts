@@ -9,14 +9,14 @@ import {
   targetPortSchema,
   targetSimpleTimeoutSchema,
   targetStreamTimeoutSchema,
-  targetSubSchema
+  targetSubSchema,
 } from '@famir/database'
 import {
   JSONSchemaType,
   ValidatorSchemas,
   booleanSchema,
   customIdentSchema,
-  randomIdentSchema
+  randomIdentSchema,
 } from '@famir/validator'
 import {
   ActionTargetLabelData,
@@ -25,7 +25,7 @@ import {
   ListTargetsData,
   ReadTargetData,
   SwitchTargetData,
-  UpdateTargetData
+  UpdateTargetData,
 } from '../../services/index.js'
 
 const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
@@ -52,7 +52,7 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     'robotsTxt',
     'sitemapXml',
     'allowWebSockets',
-    'lockSecret'
+    'lockSecret',
   ],
   properties: {
     campaignId: customIdentSchema,
@@ -67,51 +67,51 @@ const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
     mirrorPort: targetPortSchema,
     connectTimeout: {
       ...targetConnectTimeoutSchema,
-      default: 10 * 1000 // 10 sec
+      default: 10 * 1000, // 10 sec
     },
     simpleTimeout: {
       ...targetSimpleTimeoutSchema,
-      default: 60 * 1000 // 1 min
+      default: 60 * 1000, // 1 min
     },
     streamTimeout: {
       ...targetStreamTimeoutSchema,
-      default: 300 * 1000 // 5 min
+      default: 300 * 1000, // 5 min
     },
     headersSizeLimit: {
       ...targetHeadersSizeLimitSchema,
-      default: 10 * 1024 // 10 kb
+      default: 10 * 1024, // 10 kb
     },
     bodySizeLimit: {
       ...targetBodySizeLimitSchema,
-      default: 10 * 1024 * 1024 // 10 mb
+      default: 10 * 1024 * 1024, // 10 mb
     },
     mainPage: {
       ...targetContentSchema,
-      default: ''
+      default: '',
     },
     notFoundPage: {
       ...targetContentSchema,
-      default: ''
+      default: '',
     },
     faviconIco: {
       ...targetContentSchema,
-      default: ''
+      default: '',
     },
     robotsTxt: {
       ...targetContentSchema,
-      default: ''
+      default: '',
     },
     sitemapXml: {
       ...targetContentSchema,
-      default: ''
+      default: '',
     },
     allowWebSockets: {
       ...booleanSchema,
-      default: false
+      default: false,
     },
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const readTargetDataSchema: JSONSchemaType<ReadTargetData> = {
@@ -119,9 +119,9 @@ const readTargetDataSchema: JSONSchemaType<ReadTargetData> = {
   required: ['campaignId', 'targetId'],
   properties: {
     campaignId: customIdentSchema,
-    targetId: customIdentSchema
+    targetId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
@@ -132,51 +132,51 @@ const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
     targetId: customIdentSchema,
     connectTimeout: {
       ...targetConnectTimeoutSchema,
-      nullable: true
+      nullable: true,
     },
     simpleTimeout: {
       ...targetSimpleTimeoutSchema,
-      nullable: true
+      nullable: true,
     },
     streamTimeout: {
       ...targetStreamTimeoutSchema,
-      nullable: true
+      nullable: true,
     },
     headersSizeLimit: {
       ...targetHeadersSizeLimitSchema,
-      nullable: true
+      nullable: true,
     },
     bodySizeLimit: {
       ...targetBodySizeLimitSchema,
-      nullable: true
+      nullable: true,
     },
     mainPage: {
       ...targetContentSchema,
-      nullable: true
+      nullable: true,
     },
     notFoundPage: {
       ...targetContentSchema,
-      nullable: true
+      nullable: true,
     },
     faviconIco: {
       ...targetContentSchema,
-      nullable: true
+      nullable: true,
     },
     robotsTxt: {
       ...targetContentSchema,
-      nullable: true
+      nullable: true,
     },
     sitemapXml: {
       ...targetContentSchema,
-      nullable: true
+      nullable: true,
     },
     allowWebSockets: {
       ...booleanSchema,
-      nullable: true
+      nullable: true,
     },
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
@@ -185,9 +185,9 @@ const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const actionTargetLabelDataSchema: JSONSchemaType<ActionTargetLabelData> = {
@@ -197,9 +197,9 @@ const actionTargetLabelDataSchema: JSONSchemaType<ActionTargetLabelData> = {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
     label: targetLabelSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const deleteTargetDataSchema: JSONSchemaType<DeleteTargetData> = {
@@ -208,18 +208,18 @@ const deleteTargetDataSchema: JSONSchemaType<DeleteTargetData> = {
   properties: {
     campaignId: customIdentSchema,
     targetId: customIdentSchema,
-    lockSecret: randomIdentSchema
+    lockSecret: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 const listTargetsDataSchema: JSONSchemaType<ListTargetsData> = {
   type: 'object',
   required: ['campaignId'],
   properties: {
-    campaignId: customIdentSchema
+    campaignId: customIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 export const targetSchemas: ValidatorSchemas = {
@@ -229,5 +229,5 @@ export const targetSchemas: ValidatorSchemas = {
   'console-switch-target-data': switchTargetDataSchema,
   'console-action-target-label-data': actionTargetLabelDataSchema,
   'console-delete-target-data': deleteTargetDataSchema,
-  'console-list-targets-data': listTargetsDataSchema
+  'console-list-targets-data': listTargetsDataSchema,
 } as const

@@ -3,13 +3,14 @@ import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import {
+  ActionRedirectorFieldData,
   CreateRedirectorData,
   DeleteRedirectorData,
   ListRedirectorsData,
   ReadRedirectorData,
   REDIRECTOR_SERVICE,
   UpdateRedirectorData,
-  type RedirectorService
+  type RedirectorService,
 } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { REDIRECTOR_CONTROLLER } from './redirector.js'
@@ -75,6 +76,18 @@ export class RedirectorController extends BaseController {
       this.validateData<UpdateRedirectorData>('console-update-redirector-data', data)
 
       return await this.redirectorService.update(data)
+    })
+
+    this.router.addApiCall('appendRedirectorField', async (data) => {
+      this.validateData<ActionRedirectorFieldData>('console-action-redirector-field-data', data)
+
+      return await this.redirectorService.appendField(data)
+    })
+
+    this.router.addApiCall('removeRedirectorField', async (data) => {
+      this.validateData<ActionRedirectorFieldData>('console-action-redirector-field-data', data)
+
+      return await this.redirectorService.removeField(data)
     })
 
     this.router.addApiCall('deleteRedirector', async (data) => {

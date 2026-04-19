@@ -1,13 +1,14 @@
 import { Transform, TransformCallback } from 'node:stream'
 
-/*
+/**
  * Stream transform limiter
+ * @category Utils
  */
 export class LimiterTransform extends Transform {
-  protected totalSize: number = 0
-  protected limitExceeded: boolean = false
+  private totalSize: number = 0
+  private limitExceeded: boolean = false
 
-  constructor(protected readonly sizeLimit: number) {
+  constructor(private readonly sizeLimit: number) {
     super()
   }
 

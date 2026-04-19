@@ -1,11 +1,19 @@
 import { FullTargetModel, TargetAccessLevel, TargetModel } from '../../models/index.js'
 
+/**
+ * DI token
+ * @category DI
+ */
 export const TARGET_REPOSITORY = Symbol('TargetRepository')
 
 /**
- * Target repository contract
+ * Represents target repository
+ * @category Repositories
  */
 export interface TargetRepository {
+  /**
+   * Create target
+   */
   create(
     campaignId: string,
     targetId: string,
@@ -30,10 +38,30 @@ export interface TargetRepository {
     allowWebSockets: boolean,
     lockSecret: string
   ): Promise<void>
+
+  /**
+   * Read target by id
+   */
   read(campaignId: string, targetId: string): Promise<TargetModel | null>
+
+  /**
+   * Read extended target by id
+   */
   readFull(campaignId: string, targetId: string): Promise<FullTargetModel | null>
+
+  /**
+   * Find target by mirrorHost
+   */
   find(mirrorHost: string): Promise<TargetModel | null>
+
+  /**
+   * Find extended target by mirrorHost
+   */
   findFull(mirrorHost: string): Promise<FullTargetModel | null>
+
+  /**
+   * Update target
+   */
   update(
     campaignId: string,
     targetId: string,
@@ -50,21 +78,49 @@ export interface TargetRepository {
     allowWebSockets: boolean | null | undefined,
     lockSecret: string
   ): Promise<void>
+
+  /**
+   * Enable target
+   */
   enable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
+
+  /**
+   * Disable target
+   */
   disable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
+
+  /**
+   * Append label to target
+   */
   appendLabel(
     campaignId: string,
     targetId: string,
     label: string,
     lockSecret: string
   ): Promise<void>
+
+  /**
+   * Remove label from target
+   */
   removeLabel(
     campaignId: string,
     targetId: string,
     label: string,
     lockSecret: string
   ): Promise<void>
+
+  /**
+   * Delete target
+   */
   delete(campaignId: string, targetId: string, lockSecret: string): Promise<void>
+
+  /**
+   * List targets
+   */
   list(campaignId: string): Promise<TargetModel[] | null>
+
+  /**
+   * List extended targets
+   */
   listFull(campaignId: string): Promise<FullTargetModel[] | null>
 }

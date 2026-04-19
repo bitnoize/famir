@@ -11,7 +11,7 @@ import {
   REDIRECTOR_REPOSITORY,
   RedirectorRepository,
   TARGET_REPOSITORY,
-  TargetRepository
+  TargetRepository,
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
@@ -19,14 +19,15 @@ import {
   Phishmap,
   PHISHMAP_SERVICE,
   PurgePhishmapData,
-  RestorePhishmapData
+  RestorePhishmapData,
 } from './phishmap.js'
 
-/*
+/**
  * Phishmap service
+ * @category Services
  */
 export class PhishmapService {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -51,7 +52,7 @@ export class PhishmapService {
     protected readonly lureRepository: LureRepository
   ) {}
 
-  /*
+  /**
    * Dump phishmap
    */
   async dump(data: DumpPhishmapData): Promise<Phishmap> {
@@ -64,7 +65,7 @@ export class PhishmapService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -81,7 +82,7 @@ export class PhishmapService {
 
       if (!(campaign && proxies && targets && redirectors && lures)) {
         throw new ReplServerError(`Dump phishmap failed`, {
-          code: 'INTERNAL_ERROR'
+          code: 'INTERNAL_ERROR',
         })
       }
 
@@ -90,17 +91,17 @@ export class PhishmapService {
           campaignId: campaign.campaignId,
           mirrorDomain: campaign.mirrorDomain,
           description: campaign.description,
-          landingUpgradePath: campaign.landingUpgradePath,
+          upgradeSessionPath: campaign.upgradeSessionPath,
           sessionCookieName: campaign.sessionCookieName,
           sessionExpire: campaign.sessionExpire,
           newSessionExpire: campaign.newSessionExpire,
-          messageExpire: campaign.messageExpire
+          messageExpire: campaign.messageExpire,
         },
         proxies: proxies.map((proxy) => {
           return {
             proxyId: proxy.proxyId,
             url: proxy.url,
-            isEnabled: proxy.isEnabled
+            isEnabled: proxy.isEnabled,
           }
         }),
         targets: targets.map((target) => {
@@ -126,13 +127,14 @@ export class PhishmapService {
             robotsTxt: target.robotsTxt,
             sitemapXml: target.sitemapXml,
             allowWebSockets: target.allowWebSockets,
-            isEnabled: target.isEnabled
+            isEnabled: target.isEnabled,
           }
         }),
         redirectors: redirectors.map((redirector) => {
           return {
             redirectorId: redirector.redirectorId,
-            page: redirector.page
+            page: redirector.page,
+            fields: redirector.fields,
           }
         }),
         lures: lures.map((lure) => {
@@ -140,16 +142,16 @@ export class PhishmapService {
             lureId: lure.lureId,
             path: lure.path,
             redirectorId: lure.redirectorId,
-            isEnabled: lure.isEnabled
+            isEnabled: lure.isEnabled,
           }
-        })
+        }),
       }
     } finally {
       await this.campaignRepository.unlock(data.campaignId, lockSecret)
     }
   }
 
-  /*
+  /**
    * Restore phishmap
    */
   async restore(data: RestorePhishmapData): Promise<true> {
@@ -163,7 +165,7 @@ export class PhishmapService {
         data.mirrorDomain ?? campaign.mirrorDomain,
         data.description ?? campaign.description,
         data.cryptSecret ?? randomIdent(),
-        data.landingUpgradePath ?? campaign.landingUpgradePath,
+        data.upgradeSessionPath ?? campaign.upgradeSessionPath,
         data.sessionCookieName ?? campaign.sessionCookieName,
         data.sessionExpire ?? campaign.sessionExpire,
         data.newSessionExpire ?? campaign.newSessionExpire,
@@ -175,7 +177,7 @@ export class PhishmapService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -192,7 +194,7 @@ export class PhishmapService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -251,6 +253,15 @@ export class PhishmapService {
           redirector.page,
           lockSecret
         )
+
+        for (const field of redirector.fields) {
+          await this.redirectorRepository.appendField(
+            campaignId,
+            redirector.redirectorId,
+            field,
+            lockSecret
+          )
+        }
       }
 
       for (const lure of lures) {
@@ -273,7 +284,7 @@ export class PhishmapService {
     }
   }
 
-  /*
+  /**
    * Purge phishmap
    */
   async purge(data: PurgePhishmapData): Promise<true> {
@@ -286,7 +297,7 @@ export class PhishmapService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -303,7 +314,7 @@ export class PhishmapService {
 
       if (!(campaign && proxies && targets && redirectors && lures)) {
         throw new ReplServerError(`Build phishmap failed`, {
-          code: 'INTERNAL_ERROR'
+          code: 'INTERNAL_ERROR',
         })
       }
 
@@ -350,7 +361,7 @@ export class PhishmapService {
 
       throw new ReplServerError(`Purge phishmap failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
 

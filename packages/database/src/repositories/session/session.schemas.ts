@@ -1,6 +1,16 @@
-import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
+import {
+  JSONSchemaType,
+  ValidatorSchemas,
+  customIdentSchema,
+  randomIdentSchema,
+} from '@famir/validator'
+import { UpgradeSessionParams } from '../../models/index.js'
 import { RawSession } from './session.functions.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const rawSessionSchema: JSONSchemaType<RawSession> = {
   type: 'object',
   required: [
@@ -11,37 +21,60 @@ const rawSessionSchema: JSONSchemaType<RawSession> = {
     'is_upgraded',
     'message_count',
     'created_at',
-    'authorized_at'
+    'authorized_at',
   ],
   properties: {
     campaign_id: {
-      type: 'string'
+      type: 'string',
     },
     session_id: {
-      type: 'string'
+      type: 'string',
     },
     proxy_id: {
-      type: 'string'
+      type: 'string',
     },
     secret: {
-      type: 'string'
+      type: 'string',
     },
     is_upgraded: {
-      type: 'integer'
+      type: 'integer',
     },
     message_count: {
-      type: 'integer'
+      type: 'integer',
     },
     created_at: {
-      type: 'integer'
+      type: 'integer',
     },
     authorized_at: {
-      type: 'integer'
-    }
+      type: 'integer',
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
+export const upgradeSessionParamsSchema: JSONSchemaType<UpgradeSessionParams> = {
+  type: 'object',
+  required: ['lure_id', 'session_id', 'secret', 'back_url'],
+  properties: {
+    lure_id: customIdentSchema,
+    session_id: randomIdentSchema,
+    secret: randomIdentSchema,
+    back_url: {
+      type: 'string',
+      minLength: 1,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Utils
+ * @internal
+ */
 export const sessionSchemas: ValidatorSchemas = {
-  'database-raw-session': rawSessionSchema
+  'database-raw-session': rawSessionSchema,
 } as const

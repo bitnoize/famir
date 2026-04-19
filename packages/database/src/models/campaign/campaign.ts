@@ -1,5 +1,6 @@
-/*
- * Campaign is a set of related sites
+/**
+ * Campaign model
+ * @category Models
  */
 export class CampaignModel {
   static isNotNull = <T extends CampaignModel>(model: T | null): model is T => {
@@ -16,8 +17,9 @@ export class CampaignModel {
   ) {}
 }
 
-/*
- * Extended campaign
+/**
+ * Extended campaign model
+ * @category Models
  */
 export class FullCampaignModel extends CampaignModel {
   constructor(
@@ -25,7 +27,7 @@ export class FullCampaignModel extends CampaignModel {
     mirrorDomain: string,
     readonly description: string,
     readonly cryptSecret: string,
-    readonly landingUpgradePath: string,
+    readonly upgradeSessionPath: string,
     readonly sessionCookieName: string,
     readonly sessionExpire: number,
     readonly newSessionExpire: number,

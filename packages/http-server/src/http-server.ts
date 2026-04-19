@@ -5,25 +5,56 @@ import {
   HttpMethodWrap,
   HttpStatusWrap,
   HttpUrlWrap,
-  UAResult
+  UAResult,
 } from '@famir/http-tools'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Readable, Writable } from 'node:stream'
 import type WebSocket from 'ws'
 
+/**
+ * DI token
+ * @category DI
+ */
 export const HTTP_SERVER = Symbol('HttpServer')
+
+/**
+ * DI token
+ * @category DI
+ */
 export const HTTP_SERVER_ASSETS = Symbol('HttpServerAssets')
+
+/**
+ * DI token
+ * @category DI
+ */
 export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
+
+/**
+ * DI token
+ * @category DI
+ */
 export const HTTP_SERVER_CONTEXT_FACTORY = Symbol('HttpServerContextFactory')
 
 /**
- * HTTP server contract
+ * Represents a HTTP server
+ * @category none
  */
 export interface HttpServer {
+  /**
+   * Start server
+   */
   start(): Promise<void>
+
+  /**
+   * Stop server
+   */
   stop(): Promise<void>
 }
 
+/**
+ * HTTP server context state
+ * @category none
+ */
 export interface HttpServerContextState {
   [key: string]: unknown
   verbose: boolean
@@ -31,14 +62,22 @@ export interface HttpServerContextState {
 }
 
 /**
- * HTTP server context factory
+ * Represents a HTTP server context factory
+ * @category none
  */
 export interface HttpServerContextFactory {
+  /**
+   * Create normal context
+   */
   createNormal(
     req: IncomingMessage,
     res: ServerResponse,
     state: HttpServerContextState
   ): HttpServerContext
+
+  /**
+   * Create websocket context
+   */
   createWebSocket(
     ws: WebSocket,
     req: IncomingMessage,
@@ -46,10 +85,15 @@ export interface HttpServerContextFactory {
   ): HttpServerContext
 }
 
+/**
+ * HTTP server context type
+ * @category none
+ */
 export type HttpServerContextType = 'normal' | 'websocket'
 
 /**
- * HTTP server context
+ * Represents a HTTP server context
+ * @category none
  */
 export interface HttpServerContext {
   readonly type: HttpServerContextType
@@ -77,29 +121,57 @@ export interface HttpServerContext {
   readonly isComplete: boolean
 }
 
+/**
+ * HTTP server next function
+ * @category none
+ */
 export type HttpServerNextFunction = () => Promise<void>
 
+/**
+ * HTTP server middleware
+ * @category none
+ */
 export type HttpServerMiddleware = (
   ctx: HttpServerContext,
   next: HttpServerNextFunction
 ) => Promise<void>
 
+/**
+ * @category none
+ * @internal
+ */
 export type HttpServerMiddlewares = [string, HttpServerMiddleware][]
 
+/**
+ * @category none
+ * @internal
+ */
 export type HttpServerAssets = [string, string][]
 
+/**
+ * Native HTTP server config
+ * @category none
+ */
 export interface NativeHttpServerConfig {
   HTTP_SERVER_ADDRESS: string
   HTTP_SERVER_PORT: number
   HTTP_SERVER_VERBOSE: boolean
 }
 
+/**
+ * @category none
+ * @internal
+ */
 export interface NativeHttpServerOptions {
   address: string
   port: number
   verbose: boolean
 }
 
+/**
+ * @category none
+ * @internal
+ */
 export const HTTP_SERVER_ERROR_PAGE = `<!doctype html>
 <html lang="en">
 <head>

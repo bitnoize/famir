@@ -7,16 +7,17 @@ import {
   READ_MESSAGE_USE_CASE,
   SAVE_MESSAGE_USE_CASE,
   type ReadMessageUseCase,
-  type SaveMessageUseCase
+  type SaveMessageUseCase,
 } from '../../use-cases/index.js'
 import { BaseController } from '../base/index.js'
 import { DEFAULT_CONTROLLER } from './default.js'
 
-/*
+/**
  * Default controller
+ * @category Controllers
  */
 export class DefaultController extends BaseController {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -33,7 +34,7 @@ export class DefaultController extends BaseController {
     )
   }
 
-  /*
+  /**
    * Resolve dependency
    */
   static resolve(container: DIContainer): DefaultController {
@@ -52,7 +53,7 @@ export class DefaultController extends BaseController {
     this.logger.debug(`DefaultController initialized`)
   }
 
-  /*
+  /**
    * Use processor
    */
   use() {

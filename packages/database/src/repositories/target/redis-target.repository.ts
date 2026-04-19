@@ -7,7 +7,7 @@ import {
   DATABASE_CONNECTOR,
   DatabaseConnector,
   RedisDatabaseConfig,
-  RedisDatabaseConnection
+  RedisDatabaseConnection,
 } from '../../database.js'
 import { FullTargetModel, TargetAccessLevel, TargetModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
@@ -15,11 +15,12 @@ import { RawFullTarget, RawTarget } from './target.functions.js'
 import { TARGET_REPOSITORY, TargetRepository } from './target.js'
 import { targetSchemas } from './target.schemas.js'
 
-/*
- * Redis target repository
+/**
+ * Redis target repository implementation
+ * @category Repositories
  */
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -48,9 +49,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     this.logger.debug(`TargetRepository initialized`)
   }
 
-  /*
-   * Create target
-   */
   async create(
     campaignId: string,
     targetId: string,
@@ -111,9 +109,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Read target by id
-   */
   async read(campaignId: string, targetId: string): Promise<TargetModel | null> {
     try {
       const rawModel = await this.connection.target.read_target(
@@ -128,9 +123,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Read extended target by id
-   */
   async readFull(campaignId: string, targetId: string): Promise<FullTargetModel | null> {
     try {
       const rawModel = await this.connection.target.read_full_target(
@@ -145,9 +137,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Find target by mirrorHost
-   */
   async find(mirrorHost: string): Promise<TargetModel | null> {
     try {
       const targetLink = await this.connection.target.find_target_link(
@@ -173,9 +162,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Find extended target by mirrorHost
-   */
   async findFull(mirrorHost: string): Promise<FullTargetModel | null> {
     try {
       const targetLink = await this.connection.target.find_target_link(
@@ -201,9 +187,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Update target
-   */
   async update(
     campaignId: string,
     targetId: string,
@@ -247,9 +230,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Enable target
-   */
   async enable(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.target.enable_target(
@@ -267,9 +247,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Disable target
-   */
   async disable(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.target.disable_target(
@@ -287,9 +264,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Append label to target
-   */
   async appendLabel(
     campaignId: string,
     targetId: string,
@@ -301,7 +275,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.options.prefix,
         campaignId,
         targetId,
-        label,
+        label.toLowerCase(),
         lockSecret
       )
 
@@ -313,9 +287,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Remove label from target
-   */
   async removeLabel(
     campaignId: string,
     targetId: string,
@@ -327,7 +298,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.options.prefix,
         campaignId,
         targetId,
-        label,
+        label.toLowerCase(),
         lockSecret
       )
 
@@ -339,9 +310,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * Delete target
-   */
   async delete(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.target.delete_target(
@@ -359,9 +327,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * List targets
-   */
   async list(campaignId: string): Promise<TargetModel[] | null> {
     try {
       const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
@@ -384,9 +349,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  /*
-   * List extended targets
-   */
   async listFull(campaignId: string): Promise<FullTargetModel[] | null> {
     try {
       const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
@@ -429,7 +391,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       rawModel.mirror_sub,
       rawModel.mirror_domain,
       rawModel.mirror_port,
-      rawModel.labels,
       !!rawModel.is_enabled,
       rawModel.message_count,
       new Date(rawModel.created_at)
@@ -495,7 +456,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
     if (!(campaignId && targetId)) {
       throw new DatabaseError(`TargetLink validate failed`, {
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
 

@@ -29,9 +29,9 @@ export class ReadProxyUseCase {
       throw new HttpServerError(`Service unavailable`, {
         context: {
           reason: `Read proxy failed`,
-          data
+          data,
         },
-        code: 'SERVICE_UNAVAILABLE'
+        code: 'SERVICE_UNAVAILABLE',
       })
     }
 

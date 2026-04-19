@@ -6,11 +6,12 @@ import { ProduceError } from '../../produce.error.js'
 import {
   BullProduceConfig,
   BullProduceQueueOptions,
-  RedisProduceConnection
+  RedisProduceConnection,
 } from '../../produce.js'
 
-/*
+/**
  * Bull base queue
+ * @category Queues
  */
 export abstract class BullBaseQueue {
   protected readonly options: BullProduceQueueOptions
@@ -26,29 +27,23 @@ export abstract class BullBaseQueue {
 
     this.queue = new Queue<unknown, unknown>(this.queueName, {
       connection: this.connection,
-      prefix: this.options.prefix
+      prefix: this.options.prefix,
     })
 
     this.queue.on('error', (error: unknown) => {
       this.logger.error(`Queue error event`, {
         error: serializeError(error),
-        queue: this.queueName
+        queue: this.queueName,
       })
     })
   }
 
-  /*
-   * Close queue
-   */
   async close(): Promise<void> {
     await this.queue.close()
 
     this.logger.debug(`Queue closed: ${this.queueName}`)
   }
 
-  /*
-   * Get job cound
-   */
   async getJobCount(): Promise<number> {
     try {
       return await this.queue.count()
@@ -57,9 +52,6 @@ export abstract class BullBaseQueue {
     }
   }
 
-  /*
-   * Get job counts
-   */
   async getJobCounts(): Promise<Record<string, number>> {
     try {
       return await this.queue.getJobCounts()
@@ -81,16 +73,16 @@ export abstract class BullBaseQueue {
         context: {
           queue: this.queueName,
           method,
-          data
+          data,
         },
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
 
   private buildOptions(config: BullProduceConfig): BullProduceQueueOptions {
     return {
-      prefix: config.PRODUCE_PREFIX
+      prefix: config.PRODUCE_PREFIX,
     }
   }
 }

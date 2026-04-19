@@ -7,14 +7,15 @@ import {
   ConsumeAssets,
   ConsumeProcessor,
   ConsumeSpec,
-  ConsumeSpecs
+  ConsumeSpecs,
 } from './consume.js'
 
-/*
- * Consume router
+/**
+ * Represents a consume router
+ * @category none
  */
 export class ConsumeRouter {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -29,15 +30,15 @@ export class ConsumeRouter {
     )
   }
 
-  /*
+  /**
    * Resolve dependency
    */
   static resolve(container: DIContainer): ConsumeRouter {
     return container.resolve(CONSUME_ROUTER)
   }
 
-  protected readonly specs = new Map<string, ConsumeSpec>()
-  protected readonly assets = new Map<string, string>()
+  protected readonly specs: Map<string, ConsumeSpec> = new Map()
+  protected readonly assets: Map<string, string> = new Map()
   protected readonly queues: Record<string, Map<string, ConsumeProcessor>> = {}
 
   constructor(
@@ -68,21 +69,21 @@ export class ConsumeRouter {
 
   #isActive: boolean = false
 
-  /*
+  /**
    * Check if router is active
    */
   get isActive(): boolean {
     return this.#isActive
   }
 
-  /*
+  /**
    * Activate router
    */
   activate() {
     this.#isActive = true
   }
 
-  /*
+  /**
    * Add processor
    */
   addProcessor(queueName: string, jobName: string, processor: ConsumeProcessor) {
@@ -103,7 +104,7 @@ export class ConsumeRouter {
     this.logger.debug(`ConsumeRouter add processor: ${queueName} => ${jobName}`)
   }
 
-  /*
+  /**
    * Get processor by name
    */
   getProcessor(queueName: string, jobName: string): ConsumeProcessor {
@@ -124,7 +125,9 @@ export class ConsumeRouter {
     return processor
   }
 
-  // FIXME
+  /**
+   * Get spec by name
+   */
   getSpec(queueName: string): ConsumeSpec {
     const spec = this.specs.get(queueName)
 
@@ -135,7 +138,7 @@ export class ConsumeRouter {
     return spec
   }
 
-  /*
+  /**
    * Get asset by name
    */
   getAsset(assetName: string): string | undefined {

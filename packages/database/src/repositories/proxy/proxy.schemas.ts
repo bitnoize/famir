@@ -1,38 +1,50 @@
 import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import { RawProxy } from './proxy.functions.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const rawProxySchema: JSONSchemaType<RawProxy> = {
   type: 'object',
   required: ['campaign_id', 'proxy_id', 'url', 'is_enabled', 'message_count', 'created_at'],
   properties: {
     campaign_id: {
-      type: 'string'
+      type: 'string',
     },
     proxy_id: {
-      type: 'string'
+      type: 'string',
     },
     url: {
-      type: 'string'
+      type: 'string',
     },
     is_enabled: {
-      type: 'integer'
+      type: 'integer',
     },
     message_count: {
-      type: 'integer'
+      type: 'integer',
     },
     created_at: {
-      type: 'integer'
-    }
+      type: 'integer',
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
-export const proxySchemas: ValidatorSchemas = {
-  'database-raw-proxy': rawProxySchema
-} as const
-
+/**
+ * @category Schemas
+ * @internal
+ */
 export const proxyUrlSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
-  maxLength: 128
+  maxLength: 128,
+} as const
+
+/**
+ * @category Utils
+ * @internal
+ */
+export const proxySchemas: ValidatorSchemas = {
+  'database-raw-proxy': rawProxySchema,
 } as const

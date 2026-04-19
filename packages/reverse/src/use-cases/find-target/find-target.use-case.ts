@@ -7,7 +7,7 @@ import {
   FullCampaignModel,
   TARGET_REPOSITORY,
   TargetModel,
-  TargetRepository
+  TargetRepository,
 } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
 import { FIND_TARGET_USE_CASE, FindTargetData } from './find-target.js'
@@ -47,9 +47,9 @@ export class FindTargetUseCase {
       throw new HttpServerError(`Service unavailable`, {
         context: {
           reason: `Read target failed`,
-          data
+          data,
         },
-        code: 'SERVICE_UNAVAILABLE'
+        code: 'SERVICE_UNAVAILABLE',
       })
     }
 
@@ -59,9 +59,9 @@ export class FindTargetUseCase {
       throw new HttpServerError(`Service unavailable`, {
         context: {
           reason: `Read campaign failed`,
-          data
+          data,
         },
-        code: 'SERVICE_UNAVAILABLE'
+        code: 'SERVICE_UNAVAILABLE',
       })
     }
 
@@ -73,9 +73,9 @@ export class FindTargetUseCase {
       throw new HttpServerError(`Service unavailable`, {
         context: {
           reason: `List targets failed`,
-          data
+          data,
         },
-        code: 'SERVICE_UNAVAILABLE'
+        code: 'SERVICE_UNAVAILABLE',
       })
     }
 

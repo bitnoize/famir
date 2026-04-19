@@ -57,7 +57,7 @@ export class CreateMessageUseCase {
 
         await this.analyzeQueue.addJob(data.processor, {
           campaignId: data.campaignId,
-          messageId: data.messageId
+          messageId: data.messageId,
         })
       } else {
         await this.messageRepository.createDummy(
@@ -74,9 +74,9 @@ export class CreateMessageUseCase {
           throw new HttpServerError(`Service unavailable`, {
             cause: error,
             context: {
-              reason: `Create message failed`
+              reason: `Create message failed`,
             },
-            code: 'SERVICE_UNAVAILABLE'
+            code: 'SERVICE_UNAVAILABLE',
           })
         }
       }

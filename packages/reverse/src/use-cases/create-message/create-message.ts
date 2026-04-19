@@ -5,7 +5,7 @@ import {
   HttpHeaders,
   HttpMethod,
   HttpPayload,
-  HttpType
+  HttpType,
 } from '@famir/common'
 
 export const CREATE_MESSAGE_USE_CASE = Symbol('CreateMessageUseCase')

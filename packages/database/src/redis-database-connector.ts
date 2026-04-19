@@ -8,14 +8,15 @@ import {
   DatabaseConnector,
   RedisDatabaseConfig,
   RedisDatabaseConnection,
-  RedisDatabaseConnectorOptions
+  RedisDatabaseConnectorOptions,
 } from './database.js'
 
-/*
+/**
  * Redis database connector implementation
+ * @category none
  */
 export class RedisDatabaseConnector implements DatabaseConnector {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -42,38 +43,29 @@ export class RedisDatabaseConnector implements DatabaseConnector {
       url: this.options.connectionUrl,
       functions: databaseFunctions,
       name: 'database',
-      RESP: 3
+      RESP: 3,
     })
 
     this.redis.on('error', (error) => {
       this.logger.error(`Redis error event`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
     })
 
     this.logger.debug(`DatabaseConnector initialized`)
   }
 
-  /*
-   * Get connection object
-   */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   getConnection<T>(): T {
     return this.redis as T
   }
 
-  /*
-   * Connect to Redis
-   */
   async connect(): Promise<void> {
     await this.redis.connect()
 
     this.logger.debug(`DatabaseConnector connected`)
   }
 
-  /*
-   * Close connection
-   */
   async close(): Promise<void> {
     await this.redis.close()
 
@@ -82,7 +74,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
 
   private buildOptions(config: RedisDatabaseConfig): RedisDatabaseConnectorOptions {
     return {
-      connectionUrl: config.DATABASE_CONNECTION_URL
+      connectionUrl: config.DATABASE_CONNECTION_URL,
     }
   }
 }

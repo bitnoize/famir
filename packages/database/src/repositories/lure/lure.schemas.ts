@@ -1,6 +1,10 @@
 import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import { RawLure } from './lure.functions.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 const rawLureSchema: JSONSchemaType<RawLure> = {
   type: 'object',
   required: [
@@ -10,40 +14,48 @@ const rawLureSchema: JSONSchemaType<RawLure> = {
     'redirector_id',
     'is_enabled',
     'session_count',
-    'created_at'
+    'created_at',
   ],
   properties: {
     campaign_id: {
-      type: 'string'
+      type: 'string',
     },
     lure_id: {
-      type: 'string'
+      type: 'string',
     },
     path: {
-      type: 'string'
+      type: 'string',
     },
     redirector_id: {
-      type: 'string'
+      type: 'string',
     },
     is_enabled: {
-      type: 'integer'
+      type: 'integer',
     },
     session_count: {
-      type: 'integer'
+      type: 'integer',
     },
     created_at: {
-      type: 'integer'
-    }
+      type: 'integer',
+    },
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
-export const lureSchemas: ValidatorSchemas = {
-  'database-raw-lure': rawLureSchema
-} as const
-
+/**
+ * @category Schemas
+ * @internal
+ */
 export const lurePathSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
-  maxLength: 128
+  maxLength: 128,
+} as const
+
+/**
+ * @category Utils
+ * @internal
+ */
+export const lureSchemas: ValidatorSchemas = {
+  'database-raw-lure': rawLureSchema,
 } as const

@@ -4,6 +4,10 @@ import { PinoLoggerConfig } from '@famir/logger'
 import { BullProduceConfig } from '@famir/produce'
 import { MinioStorageConfig } from '@famir/storage'
 
+/**
+ * Config
+ * @category Loaders
+ */
 export type StdAnalyzeConfig = PinoLoggerConfig &
   RedisDatabaseConfig &
   MinioStorageConfig &

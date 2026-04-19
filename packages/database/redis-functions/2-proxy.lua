@@ -31,13 +31,13 @@ local function create_proxy(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -50,13 +50,13 @@ local function create_proxy(keys, args)
     created_at = args[4],
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
 
-    if (field == 'campaign_id' or field == 'proxy_id' or field == 'url') and value == '' then
-      return redis.error_reply('ERR Wrong model.' .. field)
+    if (k == 'campaign_id' or k == 'proxy_id' or k == 'url') and v == '' then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -72,9 +72,9 @@ local function create_proxy(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', proxy_key, unpack(store))
@@ -135,9 +135,9 @@ local function read_proxy(keys, args)
     created_at = tonumber(values[6]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -208,16 +208,13 @@ local function enable_proxy(keys, args)
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if
-      (field == 'lock_secret' or field == 'orig_lock_secret' or field == 'proxy_id')
-      and value == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'proxy_id') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -276,16 +273,13 @@ local function disable_proxy(keys, args)
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if
-      (field == 'lock_secret' or field == 'orig_lock_secret' or field == 'proxy_id')
-      and value == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'proxy_id') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -346,20 +340,15 @@ local function delete_proxy(keys, args)
     is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
     if
-      (
-        field == 'lock_secret'
-        or field == 'orig_lock_secret'
-        or field == 'proxy_id'
-        or field == 'url'
-      ) and value == ''
+      (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'proxy_id' or k == 'url') and v == ''
     then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 

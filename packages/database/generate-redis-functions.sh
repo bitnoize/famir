@@ -41,6 +41,10 @@ const REDIS_FUNCTIONS: string[] = [
 ${parts_body}
 ]
 
+/**
+ * @category Utils
+ * @internal
+ */
 export function makeRedisFunctions(): [string, string][] {
   const entries: [string, string][] = []
 

@@ -1,5 +1,6 @@
-/*
- * Lure is a secret link to enter mirror through landing page
+/**
+ * Lure model
+ * @category Models
  */
 export class LureModel {
   static isNotNull = <T extends LureModel>(model: T | null): model is T => {
@@ -21,6 +22,10 @@ export class LureModel {
   ) {}
 }
 
+/**
+ * Enabled lure model
+ * @category Models
+ */
 export interface EnabledLureModel extends LureModel {
   isEnabled: true
 }

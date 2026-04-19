@@ -1,4 +1,13 @@
+/**
+ * DI token
+ * @category DI
+ */
 export type DIToken = string | symbol
+
+/**
+ * DI factory
+ * @category DI
+ */
 export type DIFactory<T = unknown> = (container: DIContainer) => T
 
 interface DIRegistration<T = unknown> {
@@ -7,18 +16,20 @@ interface DIRegistration<T = unknown> {
   instance: T | null
 }
 
-/*
- * Dependency injection container
+/**
+ * Represents a DI container
+ * @category DI
  */
 export class DIContainer {
   private static instance: DIContainer | null = null
-  protected readonly registry = new Map<DIToken, DIRegistration>()
-  protected readonly resolutionStack = new Set<DIToken>()
+
+  private readonly registry: Map<DIToken, DIRegistration> = new Map()
+  private readonly resolutionStack: Set<DIToken> = new Set()
 
   private constructor() {}
 
   /**
-   * Get or create singleton instance
+   * Get or create container instance
    */
   static getInstance(): DIContainer {
     DIContainer.instance ??= new DIContainer()
@@ -27,13 +38,13 @@ export class DIContainer {
   }
 
   /**
-   * Reset instance
+   * Reset singleton instance
    */
   static resetInstance() {
     DIContainer.instance = null
   }
 
-  protected register<T>(token: DIToken, factory: DIFactory<T>, isSingleton: boolean) {
+  private register<T>(token: DIToken, factory: DIFactory<T>, isSingleton: boolean) {
     if (this.exists(token)) {
       throw new Error(`Dependency already registered: ${token.toString()}`)
     }
@@ -120,4 +131,8 @@ export class DIContainer {
   }
 }
 
+/**
+ * DI composer
+ * @category DI
+ */
 export type DIComposer = (container: DIContainer) => void

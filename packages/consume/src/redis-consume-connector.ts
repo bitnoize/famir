@@ -7,14 +7,15 @@ import {
   CONSUME_CONNECTOR,
   ConsumeConnector,
   RedisConsumeConnection,
-  RedisConsumeConnectorOptions
+  RedisConsumeConnectorOptions,
 } from './consume.js'
 
-/*
+/**
  * Redis consume connector implementation
+ * @category none
  */
 export class RedisConsumeConnector implements ConsumeConnector {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -40,38 +41,29 @@ export class RedisConsumeConnector implements ConsumeConnector {
     this.redis = new Redis(this.options.connectionUrl, {
       //lazyConnect: true,
       connectionName: 'consume',
-      maxRetriesPerRequest: null
+      maxRetriesPerRequest: null,
     })
 
     this.redis.on('error', (error) => {
       this.logger.error(`Redis error event`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
     })
 
     this.logger.debug(`ConsumeConnector initialized`)
   }
 
-  /*
-   * Get connection object
-   */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   getConnection<T>(): T {
     return this.redis as T
   }
 
-  /*
-   * Connect to Redis
-   */
   //async connect(): Promise<void> {
   //  await this.redis.connect()
   //
   //  this.logger.debug(`ConsumeConnector connected`)
   //}
 
-  /*
-   * Close connection
-   */
   async close(): Promise<void> {
     await this.redis.quit()
 
@@ -80,7 +72,7 @@ export class RedisConsumeConnector implements ConsumeConnector {
 
   private buildOptions(config: BullConsumeConfig): RedisConsumeConnectorOptions {
     return {
-      connectionUrl: config.CONSUME_CONNECTION_URL
+      connectionUrl: config.CONSUME_CONNECTION_URL,
     }
   }
 }

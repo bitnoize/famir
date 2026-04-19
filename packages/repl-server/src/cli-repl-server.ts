@@ -12,14 +12,15 @@ import {
   REPL_SERVER_BANNER_GREET,
   REPL_SERVER_BANNER_LEAVE,
   REPL_SERVER_ROUTER,
-  ReplServer
+  ReplServer,
 } from './repl-server.js'
 
-/*
+/**
  * Cli REPL server implementation
+ * @category none
  */
 export class CliReplServer implements ReplServer {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -48,9 +49,6 @@ export class CliReplServer implements ReplServer {
 
   protected replServer: repl.REPLServer | null = null
 
-  /*
-   * Start server
-   */
   // eslint-disable-next-line @typescript-eslint/require-await
   async start(): Promise<void> {
     if (!this.replServer) {
@@ -60,9 +58,6 @@ export class CliReplServer implements ReplServer {
     }
   }
 
-  /*
-   * Stop server
-   */
   // eslint-disable-next-line @typescript-eslint/require-await
   async stop(): Promise<void> {
     if (this.replServer) {
@@ -74,7 +69,7 @@ export class CliReplServer implements ReplServer {
     }
   }
 
-  protected replServerStart(): repl.REPLServer {
+  private replServerStart(): repl.REPLServer {
     const bannerGreet = this.router.getAsset('banner-greet.txt') ?? REPL_SERVER_BANNER_GREET
     const bannerLeave = this.router.getAsset('banner-leave.txt') ?? REPL_SERVER_BANNER_LEAVE
 
@@ -87,8 +82,8 @@ export class CliReplServer implements ReplServer {
       writer: (output) =>
         util.inspect(output, {
           depth: 4,
-          colors: this.options.useColors
-        })
+          colors: this.options.useColors,
+        }),
     })
 
     replServer.on('reset', (context) => {
@@ -111,7 +106,7 @@ export class CliReplServer implements ReplServer {
     return replServer
   }
 
-  protected defineContext(context: object) {
+  private defineContext(context: object) {
     const apiCalls: Record<string, unknown> = {}
 
     this.router.getApiCalls().forEach(([apiCallName, apiCall]) => {
@@ -129,9 +124,9 @@ export class CliReplServer implements ReplServer {
               cause: error,
               context: {
                 apiCall: apiCallName,
-                data
+                data,
               },
-              code: 'INTERNAL_ERROR'
+              code: 'INTERNAL_ERROR',
             })
           }
         }
@@ -139,13 +134,13 @@ export class CliReplServer implements ReplServer {
     })
 
     Object.defineProperty(context, 'famir', {
-      value: apiCalls
+      value: apiCalls,
     })
 
     Object.defineProperty(context, 'getAssetNames', {
       value: (): string[] => {
         return this.router.getAssetNames()
-      }
+      },
     })
 
     Object.defineProperty(context, 'getAsset', {
@@ -155,16 +150,16 @@ export class CliReplServer implements ReplServer {
         }
 
         return this.router.getAsset(assetName)
-      }
+      },
     })
   }
 
-  //protected defineCommands(replServer: repl.REPLServer) {}
+  //private defineCommands(replServer: repl.REPLServer) {}
 
   private buildOptions(config: CliReplServerConfig): CliReplServerOptions {
     return {
       prompt: config.REPL_SERVER_PROMPT,
-      useColors: config.REPL_SERVER_USE_COLORS
+      useColors: config.REPL_SERVER_USE_COLORS,
     }
   }
 }

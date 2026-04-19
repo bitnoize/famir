@@ -5,15 +5,16 @@ import {
   DATABASE_MANAGER,
   DatabaseConnector,
   DatabaseManager,
-  RedisDatabaseConnection
+  RedisDatabaseConnection,
 } from './database.js'
 import { makeRedisFunctions } from './redis-functions.js'
 
-/*
+/**
  * Redis database manager implementation
+ * @category none
  */
 export class RedisDatabaseManager implements DatabaseManager {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -34,9 +35,6 @@ export class RedisDatabaseManager implements DatabaseManager {
     this.logger.debug(`DatabaseManager initialized`)
   }
 
-  /*
-   * Load database functions
-   */
   async loadFunctions(): Promise<void> {
     await this.connection.FUNCTION_FLUSH()
 
@@ -47,9 +45,6 @@ export class RedisDatabaseManager implements DatabaseManager {
     }
   }
 
-  /*
-   * Cleanup database
-   */
   async cleanup(): Promise<void> {
     await this.connection.FLUSHDB()
 

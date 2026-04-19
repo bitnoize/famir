@@ -5,11 +5,12 @@ import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCE_CONNECTOR, ProduceConnector } from
 import { REPL_SERVER, REPL_SERVER_ROUTER, ReplServer, ReplServerRouter } from '@famir/repl-server'
 import { CONSOLE_APP } from './console.js'
 
-/*
- * Console app
+/**
+ * Represents a console app
+ * @category none
  */
 export class ConsoleApp {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -27,7 +28,7 @@ export class ConsoleApp {
     )
   }
 
-  /*
+  /**
    * Resolve dependency
    */
   static resolve(container: DIContainer): ConsoleApp {
@@ -46,7 +47,7 @@ export class ConsoleApp {
       process.once(signal, () => {
         this.stop().catch((error: unknown) => {
           this.logger.error(`App critical error`, {
-            error: serializeError(error)
+            error: serializeError(error),
           })
 
           process.exit(2)
@@ -57,7 +58,7 @@ export class ConsoleApp {
     this.logger.debug(`App initialized`)
   }
 
-  /*
+  /**
    * Start app
    */
   async start(): Promise<void> {
@@ -71,14 +72,14 @@ export class ConsoleApp {
       this.logger.debug(`App started`)
     } catch (error) {
       this.logger.error(`App start failed`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
 
       process.exit(1)
     }
   }
 
-  /*
+  /**
    * Stop app
    */
   async stop(): Promise<void> {
@@ -94,7 +95,7 @@ export class ConsoleApp {
       this.logger.debug(`App stopped`)
     } catch (error) {
       this.logger.error(`App stop failed`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
 
       process.exit(1)

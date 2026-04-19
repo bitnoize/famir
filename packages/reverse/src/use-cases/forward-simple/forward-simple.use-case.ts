@@ -3,7 +3,7 @@ import {
   HTTP_CLIENT,
   HttpClient,
   HttpClientErrorResult,
-  HttpClientSimpleResult
+  HttpClientSimpleResult,
 } from '@famir/http-client'
 import { FORWARD_SIMPLE_USE_CASE, ForwardSimpleData } from './forward-simple.js'
 

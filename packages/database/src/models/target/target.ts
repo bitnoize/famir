@@ -1,10 +1,23 @@
+/**
+ * @category Models
+ * @internal
+ */
 export const TARGET_ACCESS_LEVELS = ['transparent', 'landing'] as const
+
+/**
+ * @category Models
+ */
 export type TargetAccessLevel = (typeof TARGET_ACCESS_LEVELS)[number]
 
+/**
+ * @category Models
+ * @internal
+ */
 export const TARGET_SUB_ROOT = '.'
 
-/*
- * Target is the specific donor and mirror domains and associated data.
+/**
+ * Target model
+ * @category Models
  */
 export class TargetModel {
   static isNotNull = <T extends TargetModel>(model: T | null): model is T => {
@@ -27,7 +40,6 @@ export class TargetModel {
     readonly mirrorSub: string,
     readonly mirrorDomain: string,
     readonly mirrorPort: number,
-    readonly labels: string[],
     readonly isEnabled: boolean,
     readonly messageCount: number,
     readonly createdAt: Date
@@ -82,14 +94,11 @@ export class TargetModel {
   get mirrorUrl(): string {
     return [this.mirrorProtocol, '//', this.mirrorHost].join('')
   }
-
-  hasLabel(value: string): boolean {
-    return this.labels.includes(value)
-  }
 }
 
-/*
- * Extended target
+/**
+ * Extended target model
+ * @category Models
  */
 export class FullTargetModel extends TargetModel {
   constructor(
@@ -104,7 +113,7 @@ export class FullTargetModel extends TargetModel {
     mirrorSub: string,
     mirrorDomain: string,
     mirrorPort: number,
-    labels: string[],
+    readonly labels: string[],
     readonly connectTimeout: number,
     readonly simpleTimeout: number,
     readonly streamTimeout: number,
@@ -132,18 +141,29 @@ export class FullTargetModel extends TargetModel {
       mirrorSub,
       mirrorDomain,
       mirrorPort,
-      labels,
       isEnabled,
       messageCount,
       createdAt
     )
   }
+
+  hasLabel(value: string): boolean {
+    return this.labels.includes(value)
+  }
 }
 
+/**
+ * Enabled target model
+ * @category Models
+ */
 export interface EnabledTargetModel extends TargetModel {
   isEnabled: true
 }
 
+/**
+ * Enabled extended target model
+ * @category Models
+ */
 export interface EnabledFullTargetModel extends FullTargetModel {
   isEnabled: true
 }

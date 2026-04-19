@@ -2,11 +2,12 @@ import { DIContainer } from '@famir/common'
 import { Eta } from 'eta'
 import { TEMPLATER, Templater } from './templater.js'
 
-/*
+/**
  * Eta templater implementation
+ * @category none
  */
 export class EtaTemplater implements Templater {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -17,13 +18,10 @@ export class EtaTemplater implements Templater {
 
   constructor() {
     this.eta = new Eta({
-      varName: 'data'
+      varName: 'data',
     })
   }
 
-  /*
-   * Render template
-   */
   render(template: string, data: object): string {
     return this.eta.renderString(template, data)
   }

@@ -8,7 +8,7 @@ import {
   ProxyController,
   RedirectorController,
   SessionController,
-  TargetController
+  TargetController,
 } from './controllers/index.js'
 import {
   CampaignService,
@@ -19,9 +19,25 @@ import {
   ProxyService,
   RedirectorService,
   SessionService,
-  TargetService
+  TargetService,
 } from './services/index.js'
 
+process.on('unhandledRejection', (reason: string, p: Promise<unknown>) => {
+  console.error(`Unhandled rejection`, { reason, p })
+
+  process.exit(1)
+})
+
+process.on('uncaughtException', (error: unknown) => {
+  console.error(`Uncaught exception`, { error })
+
+  process.exit(1)
+})
+
+/**
+ * DI composer
+ * @category Loaders
+ */
 export const autoLoad: DIComposer = (container) => {
   DatabaseService.register(container)
   CampaignService.register(container)

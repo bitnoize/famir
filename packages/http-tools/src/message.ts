@@ -1,11 +1,13 @@
 import {
+  HTTP_TYPES_NORMAL,
+  HTTP_TYPES_WEBSOCKET,
   HttpConnection,
   HttpError,
   HttpPayload,
   HttpType,
   arrayIncludes,
   randomIdent,
-  serializeError
+  serializeError,
 } from '@famir/common'
 import { Transform } from 'node:stream'
 import { HttpBodyWrap } from './body.js'
@@ -16,10 +18,25 @@ import { RewriteUrlScheme, RewriteUrlTarget, rewriteUrl } from './rewrite-url.js
 import { HttpStatusWrap } from './status.js'
 import { HttpUrlWrap } from './url.js'
 
+/**
+ * Http message interceptor
+ * @category none
+ */
 export type HttpMessageInterceptor = (message: HttpMessage) => void
 
+/**
+ * Http message interceptors
+ * @category none
+ * @internal
+ */
+export type HttpMessageInterceptors = Array<[string, HttpMessageInterceptor]>
+
+/**
+ * Represents a HTTP message
+ * @category none
+ */
 export class HttpMessage {
-  /*
+  /**
    * Create message
    */
   static create(type: string): HttpMessage {
@@ -101,47 +118,47 @@ export class HttpMessage {
 
   processor: string | null = null
 
-  protected readonly contentTypes: HttpContentTypes = {
+  #contentTypes: HttpContentTypes = {
     text: [],
     html: [],
     css: [],
     javascript: [],
     json: [],
     xml: [],
-    urlEncoded: []
+    urlEncoded: [],
   }
 
   addContentTypes(name: HttpContentTypeName, types: string[]) {
     this.sureNotReady('addContentTypes')
 
-    this.contentTypes[name].push(...types)
+    this.#contentTypes[name].push(...types)
   }
 
   isContentType(name: HttpContentTypeName, contentType: HttpContentType): boolean {
-    return this.contentTypes[name].includes(contentType.type)
+    return this.#contentTypes[name].includes(contentType.type)
   }
 
-  protected readonly rewriteUrlContentTypes: string[] = []
+  #rewriteUrlContentTypes: string[] = []
 
   addRewriteUrlContentTypes(types: string[]) {
     this.sureNotReady('addRewriteUrlContentTypes')
 
-    this.rewriteUrlContentTypes.push(...types)
+    this.#rewriteUrlContentTypes.push(...types)
   }
 
   isRewriteUrlContentType(contentType: HttpContentType): boolean {
-    return this.rewriteUrlContentTypes.includes(contentType.type)
+    return this.#rewriteUrlContentTypes.includes(contentType.type)
   }
 
-  protected readonly rewriteUrlSchemes: RewriteUrlScheme[] = [
+  #rewriteUrlSchemes: RewriteUrlScheme[] = [
     ['://', true],
-    ['//', false]
+    ['//', false],
   ]
 
-  addRewriteUrlMoreSchemes() {
-    this.sureNotReady('addRewriteUrlMoreSchemes')
+  addRewriteUrlExtraSchemes() {
+    this.sureNotReady('addRewriteUrlExtraSchemes')
 
-    this.rewriteUrlSchemes.push(
+    this.#rewriteUrlSchemes.push(
       ['%3A%2F%2F', true],
       ['%2F%2F', false],
       [':\\u002F\\u002F', true],
@@ -149,25 +166,25 @@ export class HttpMessage {
     )
   }
 
-  private requestHeadInterceptors: Array<[string, HttpMessageInterceptor]> = []
-  private requestBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
+  #requestHeadInterceptors: HttpMessageInterceptors = []
+  #requestBodyInterceptors: HttpMessageInterceptors = []
 
   addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addRequestHeadInterceptor')
 
-    this.requestHeadInterceptors.push([name, interceptor])
+    this.#requestHeadInterceptors.push([name, interceptor])
   }
 
   addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addRequestBodyInterceptor')
 
-    this.requestBodyInterceptors.push([name, interceptor])
+    this.#requestBodyInterceptors.push([name, interceptor])
   }
 
   runRequestHeadInterceptors() {
     this.sureIsReady('runRequestHeadInterceptors')
 
-    for (const [name, interceptor] of this.requestHeadInterceptors) {
+    for (const [name, interceptor] of this.#requestHeadInterceptors) {
       try {
         interceptor(this)
       } catch (error) {
@@ -175,13 +192,14 @@ export class HttpMessage {
       }
     }
 
+    this.method.freeze()
     this.url.freeze()
   }
 
   runRequestBodyInterceptors() {
     this.sureIsReady('runRequestBodyInterceptors')
 
-    for (const [name, interceptor] of this.requestBodyInterceptors) {
+    for (const [name, interceptor] of this.#requestBodyInterceptors) {
       try {
         interceptor(this)
       } catch (error) {
@@ -195,37 +213,37 @@ export class HttpMessage {
     this.requestBody.freeze()
   }
 
-  private requestTransforms: Transform[] = []
+  #requestTransforms: Transform[] = []
 
   addRequestTransform(transform: Transform) {
     this.sureNotReady('addRequestTransform')
 
-    this.requestTransforms.push(transform)
+    this.#requestTransforms.push(transform)
   }
 
   getRequestTransforms(): Readonly<Transform[]> {
-    return this.requestTransforms
+    return this.#requestTransforms
   }
 
-  private responseHeadInterceptors: Array<[string, HttpMessageInterceptor]> = []
-  private responseBodyInterceptors: Array<[string, HttpMessageInterceptor]> = []
+  #responseHeadInterceptors: HttpMessageInterceptors = []
+  #responseBodyInterceptors: HttpMessageInterceptors = []
 
   addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addResponseHeadInterceptor')
 
-    this.responseHeadInterceptors.push([name, interceptor])
+    this.#responseHeadInterceptors.push([name, interceptor])
   }
 
   addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addResponseBodyInterceptor')
 
-    this.responseBodyInterceptors.push([name, interceptor])
+    this.#responseBodyInterceptors.push([name, interceptor])
   }
 
   runResponseHeadInterceptors() {
     this.sureIsReady('runResponseHeadInterceptors')
 
-    for (const [name, interceptor] of this.responseHeadInterceptors) {
+    for (const [name, interceptor] of this.#responseHeadInterceptors) {
       try {
         interceptor(this)
       } catch (error) {
@@ -239,7 +257,7 @@ export class HttpMessage {
   runResponseBodyInterceptors() {
     this.sureIsReady('runResponseBodyInterceptors')
 
-    for (const [name, interceptor] of this.responseBodyInterceptors) {
+    for (const [name, interceptor] of this.#responseBodyInterceptors) {
       try {
         interceptor(this)
       } catch (error) {
@@ -253,16 +271,16 @@ export class HttpMessage {
     this.responseBody.freeze()
   }
 
-  private responseTransforms: Transform[] = []
+  #responseTransforms: Transform[] = []
 
   addResponseTransform(transform: Transform) {
     this.sureNotReady('addResponseTransform')
 
-    this.responseTransforms.push(transform)
+    this.#responseTransforms.push(transform)
   }
 
   getResponseTransforms(): Readonly<Transform[]> {
-    return this.responseTransforms
+    return this.#responseTransforms
   }
 
   isAbsoluteUrl(value: string): boolean {
@@ -271,25 +289,25 @@ export class HttpMessage {
   }
 
   rewriteUrl(text: string, rev: boolean, targets: RewriteUrlTarget[]): string {
-    return rewriteUrl(text, rev, targets, this.rewriteUrlSchemes)
+    return rewriteUrl(text, rev, targets, this.#rewriteUrlSchemes)
   }
 
-  protected sureNotReady(name: string) {
+  private sureNotReady(name: string) {
     if (this.isReady) {
       throw new Error(`HttpMessage is ready on: ${name}`)
     }
   }
 
-  protected sureIsReady(name: string) {
+  private sureIsReady(name: string) {
     if (!this.isReady) {
       throw new Error(`HttpMessage not ready on: ${name}`)
     }
   }
 
   private typesSwitch: Record<HttpType, HttpType[]> = {
-    'normal-simple': ['normal-simple', 'normal-stream-request', 'normal-stream-response'],
-    'normal-stream-request': ['normal-simple', 'normal-stream-request', 'normal-stream-response'],
-    'normal-stream-response': ['normal-simple', 'normal-stream-request', 'normal-stream-response'],
-    websocket: ['websocket']
+    'normal-simple': [...HTTP_TYPES_NORMAL],
+    'normal-stream-request': [...HTTP_TYPES_NORMAL],
+    'normal-stream-response': [...HTTP_TYPES_NORMAL],
+    'websocket': [...HTTP_TYPES_WEBSOCKET],
   } as const
 }

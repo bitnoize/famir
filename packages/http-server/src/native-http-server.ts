@@ -15,14 +15,15 @@ import {
   HttpServerContext,
   HttpServerContextFactory,
   NativeHttpServerConfig,
-  NativeHttpServerOptions
+  NativeHttpServerOptions,
 } from './http-server.js'
 
-/*
+/**
  * Native HTTP server implementation
+ * @category none
  */
 export class NativeHttpServer implements HttpServer {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -57,20 +58,20 @@ export class NativeHttpServer implements HttpServer {
     this.wsServer = new WebSocketServer({
       server: this.server,
       clientTracking: true,
-      autoPong: true
+      autoPong: true,
     })
 
     this.server.on('request', (req, res) => {
       this.handleNormalRequest(req, res).catch((error: unknown) => {
         this.logger.error(`HttpServer unexpected normal request error`, {
           error: serializeError(error),
-          request: this.dumpRequest(req)
+          request: this.dumpRequest(req),
         })
 
         if (!res.writableEnded) {
           if (!res.headersSent) {
             res.writeHead(500, {
-              'content-type': 'text/plain'
+              'content-type': 'text/plain',
             })
 
             res.end(`Server internal error`)
@@ -86,7 +87,7 @@ export class NativeHttpServer implements HttpServer {
 
       ws.on('error', (error) => {
         this.logger.error(`HttpServer websocket error`, {
-          error: serializeError(error)
+          error: serializeError(error),
         })
 
         ws.close()
@@ -95,7 +96,7 @@ export class NativeHttpServer implements HttpServer {
       this.handleWebSocketConnection(ws, req).catch((error: unknown) => {
         this.logger.error(`HttpServer unexpected websocket connection error`, {
           error: serializeError(error),
-          request: this.dumpRequest(req)
+          request: this.dumpRequest(req),
         })
 
         ws.close()
@@ -105,18 +106,12 @@ export class NativeHttpServer implements HttpServer {
     this.logger.debug(`HttpServer initialized`)
   }
 
-  /*
-   * Start server
-   */
   async start(): Promise<void> {
     await this.listen()
 
     this.logger.debug(`HttpServer started`)
   }
 
-  /*
-   * Stop server
-   */
   async stop(): Promise<void> {
     await this.closeWs()
     await this.close()
@@ -124,14 +119,14 @@ export class NativeHttpServer implements HttpServer {
     this.logger.debug(`HttpServer stopped`)
   }
 
-  protected async handleNormalRequest(
+  private async handleNormalRequest(
     req: http.IncomingMessage,
     res: http.ServerResponse
   ): Promise<void> {
     try {
       const ctx = this.contextFactory.createNormal(req, res, {
         verbose: this.options.verbose,
-        errorPage: this.getErrorPage()
+        errorPage: this.getErrorPage(),
       })
 
       await this.chainMiddlewares(ctx)
@@ -139,15 +134,15 @@ export class NativeHttpServer implements HttpServer {
       if (!ctx.isComplete) {
         throw new HttpServerError(`Server internal error`, {
           context: {
-            reason: `No response after processing all middlewares`
+            reason: `No response after processing all middlewares`,
           },
-          code: 'INTERNAL_ERROR'
+          code: 'INTERNAL_ERROR',
         })
       }
     } catch (error) {
       this.logger.error(`HttpServer handle normal request error`, {
         error: serializeError(error),
-        request: this.dumpRequest(req)
+        request: this.dumpRequest(req),
       })
 
       const [status, message] =
@@ -157,13 +152,13 @@ export class NativeHttpServer implements HttpServer {
 
       const body = this.templater.render(this.getErrorPage(), {
         status,
-        message
+        message,
       })
 
       if (!res.writableEnded) {
         if (!res.headersSent) {
           res.writeHead(status, {
-            'content-type': 'text/html'
+            'content-type': 'text/html',
           })
 
           res.end(body)
@@ -174,14 +169,11 @@ export class NativeHttpServer implements HttpServer {
     }
   }
 
-  protected async handleWebSocketConnection(
-    ws: WebSocket,
-    req: http.IncomingMessage
-  ): Promise<void> {
+  private async handleWebSocketConnection(ws: WebSocket, req: http.IncomingMessage): Promise<void> {
     try {
       const ctx = this.contextFactory.createWebSocket(ws, req, {
         verbose: this.options.verbose,
-        errorPage: this.getErrorPage()
+        errorPage: this.getErrorPage(),
       })
 
       await this.chainMiddlewares(ctx)
@@ -189,22 +181,22 @@ export class NativeHttpServer implements HttpServer {
       if (!ctx.isComplete) {
         throw new HttpServerError(`Server internal error`, {
           context: {
-            reason: `No response after processing all middlewares`
+            reason: `No response after processing all middlewares`,
           },
-          code: 'INTERNAL_ERROR'
+          code: 'INTERNAL_ERROR',
         })
       }
     } catch (error) {
       this.logger.error(`HttpServer handle websocket connection error`, {
         error: serializeError(error),
-        request: this.dumpRequest(req)
+        request: this.dumpRequest(req),
       })
 
       ws.close()
     }
   }
 
-  protected async chainMiddlewares(ctx: HttpServerContext): Promise<void> {
+  private async chainMiddlewares(ctx: HttpServerContext): Promise<void> {
     try {
       const middlewares = this.router.getMiddlewares()
 
@@ -239,15 +231,15 @@ export class NativeHttpServer implements HttpServer {
           cause: error,
           context: {
             middlewares: ctx.middlewares,
-            reason: `Unknown middleware error`
+            reason: `Unknown middleware error`,
           },
-          code: 'INTERNAL_ERROR'
+          code: 'INTERNAL_ERROR',
         })
       }
     }
   }
 
-  protected listen(): Promise<void> {
+  private listen(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this.server.off('listening', listeningHandler)
@@ -268,7 +260,7 @@ export class NativeHttpServer implements HttpServer {
     })
   }
 
-  protected close(): Promise<void> {
+  private close(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this.server.off('close', closeHandler)
@@ -291,7 +283,7 @@ export class NativeHttpServer implements HttpServer {
     })
   }
 
-  protected closeWs(): Promise<void> {
+  private closeWs(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this.wsServer.off('close', closeHandler)
@@ -312,15 +304,15 @@ export class NativeHttpServer implements HttpServer {
     })
   }
 
-  protected getErrorPage(): string {
+  private getErrorPage(): string {
     return this.router.getAsset('error-page.html') ?? HTTP_SERVER_ERROR_PAGE
   }
 
-  protected dumpRequest(req: http.IncomingMessage): object {
+  private dumpRequest(req: http.IncomingMessage): object {
     return {
       method: req.method,
       url: req.url,
-      headers: req.headers
+      headers: req.headers,
     }
   }
 
@@ -328,7 +320,7 @@ export class NativeHttpServer implements HttpServer {
     return {
       address: config.HTTP_SERVER_ADDRESS,
       port: config.HTTP_SERVER_PORT,
-      verbose: config.HTTP_SERVER_VERBOSE
+      verbose: config.HTTP_SERVER_VERBOSE,
     }
   }
 }

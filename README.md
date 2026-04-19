@@ -1,11 +1,10 @@
 # Famir
 
-A framework for building complex infrastructure for HTTP traffic security research through a man-in-the-middle attack.
-It helps organize a network of mirrors for sites and process/modify intercepted data.
-See [demo-project](https://github.com/bitnoize/famir-demo) for example usage.
+A framework for building complex infrastructure for HTTP traffic security research through a
+man-in-the-middle attack. It helps organize a network of mirrors for sites and process/modify
+intercepted data. See [demo-project](https://github.com/bitnoize/famir-demo) for example usage.
 
-Features
---------
+## Features
 
 - Clean architecture, modular design.
 - Multiple phishing campaigns in one project.
@@ -16,17 +15,14 @@ Features
 - Minimum third-party dependencies.
 - Resistant to errors, follows standards.
 
-Stack
------
+## Stack
 
 - Node.js, Typescript.
 - Any of fast web-server like Nginx or Caddy.
 - Redis as main database.
 - S3-like storage.
 
-Disclaimer
-----------
+## Disclaimer
 
-This tool is made only for educational purposes and can be used in legitimate penetration tests or research only.
-Author does not take any responsibility for any actions taken by its users.
-
+This tool is made only for educational purposes and can be used in legitimate penetration tests or
+research only. Author does not take any responsibility for any actions taken by its users.

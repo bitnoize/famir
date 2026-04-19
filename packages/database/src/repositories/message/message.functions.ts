@@ -1,6 +1,10 @@
 import { CommandParser } from '@redis/client'
 import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../database.keys.js'
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export interface RawMessage {
   campaign_id: string
   message_id: string
@@ -17,6 +21,10 @@ export interface RawMessage {
   created_at: number
 }
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export interface RawFullMessage extends RawMessage {
   request_headers: string
   request_body: string
@@ -27,6 +35,10 @@ export interface RawFullMessage extends RawMessage {
   errors: string
 }
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export const messageFunctions = {
   message: {
     create_message: {
@@ -84,7 +96,7 @@ export const messageFunctions = {
         parser.push(createdAt)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     create_dummy_message: {
@@ -106,7 +118,7 @@ export const messageFunctions = {
         parser.pushKey(sessionKey(prefix, campaignId, sessionId))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_message: {
@@ -117,7 +129,7 @@ export const messageFunctions = {
         parser.pushKey(messageKey(prefix, campaignId, messageId))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_full_message: {
@@ -128,7 +140,7 @@ export const messageFunctions = {
         parser.pushKey(messageKey(prefix, campaignId, messageId))
       },
 
-      transformReply: undefined as unknown as () => unknown
-    }
-  }
+      transformReply: undefined as unknown as () => unknown,
+    },
+  },
 } as const

@@ -1,16 +1,20 @@
 import {
   configRedisDatabaseConnectionUrlSchema,
-  configRedisDatabasePrefixSchema
+  configRedisDatabasePrefixSchema,
 } from '@famir/database'
 import { configLoggerAppNameSchema, configLoggerLogLevelSchema } from '@famir/logger'
 import {
   configRedisProduceConnectionUrlSchema,
-  configRedisProducePrefixSchema
+  configRedisProducePrefixSchema,
 } from '@famir/produce'
 import { configReplServerPromptSchema, configReplServerUseColorsSchema } from '@famir/repl-server'
 import { JSONSchemaType } from '@famir/validator'
 import { CliConsoleConfig } from './cli.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const configCliConsoleSchema: JSONSchemaType<CliConsoleConfig> = {
   type: 'object',
   required: [
@@ -21,12 +25,12 @@ export const configCliConsoleSchema: JSONSchemaType<CliConsoleConfig> = {
     'PRODUCE_CONNECTION_URL',
     'PRODUCE_PREFIX',
     'REPL_SERVER_PROMPT',
-    'REPL_SERVER_USE_COLORS'
+    'REPL_SERVER_USE_COLORS',
   ],
   properties: {
     LOGGER_APP_NAME: {
       ...configLoggerAppNameSchema,
-      default: 'console'
+      default: 'console',
     },
     LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
     DATABASE_CONNECTION_URL: configRedisDatabaseConnectionUrlSchema,
@@ -34,7 +38,7 @@ export const configCliConsoleSchema: JSONSchemaType<CliConsoleConfig> = {
     PRODUCE_CONNECTION_URL: configRedisProduceConnectionUrlSchema,
     PRODUCE_PREFIX: configRedisProducePrefixSchema,
     REPL_SERVER_PROMPT: configReplServerPromptSchema,
-    REPL_SERVER_USE_COLORS: configReplServerUseColorsSchema
+    REPL_SERVER_USE_COLORS: configReplServerUseColorsSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const

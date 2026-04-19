@@ -1,17 +1,17 @@
 import {
   configRedisDatabaseConnectionUrlSchema,
-  configRedisDatabasePrefixSchema
+  configRedisDatabasePrefixSchema,
 } from '@famir/database'
 import { configHttpClientVerboseSchema } from '@famir/http-client'
 import {
   configHttpServerAddressSchema,
   configHttpServerPortSchema,
-  configHttpServerVerboseSchema
+  configHttpServerVerboseSchema,
 } from '@famir/http-server'
 import { configLoggerAppNameSchema, configLoggerLogLevelSchema } from '@famir/logger'
 import {
   configRedisProduceConnectionUrlSchema,
-  configRedisProducePrefixSchema
+  configRedisProducePrefixSchema,
 } from '@famir/produce'
 import { JSONSchemaType } from '@famir/validator'
 import { StdReverseConfig } from './std.js'
@@ -28,12 +28,12 @@ export const configStdReverseSchema: JSONSchemaType<StdReverseConfig> = {
     'HTTP_CLIENT_VERBOSE',
     'HTTP_SERVER_ADDRESS',
     'HTTP_SERVER_PORT',
-    'HTTP_SERVER_VERBOSE'
+    'HTTP_SERVER_VERBOSE',
   ],
   properties: {
     LOGGER_APP_NAME: {
       ...configLoggerAppNameSchema,
-      default: 'reverse'
+      default: 'reverse',
     },
     LOGGER_LOG_LEVEL: configLoggerLogLevelSchema,
     DATABASE_CONNECTION_URL: configRedisDatabaseConnectionUrlSchema,
@@ -43,13 +43,13 @@ export const configStdReverseSchema: JSONSchemaType<StdReverseConfig> = {
     HTTP_CLIENT_VERBOSE: configHttpClientVerboseSchema,
     HTTP_SERVER_ADDRESS: {
       ...configHttpServerAddressSchema,
-      default: '127.0.0.1'
+      default: '127.0.0.1',
     },
     HTTP_SERVER_PORT: {
       ...configHttpServerPortSchema,
-      default: 3000
+      default: 3000,
     },
-    HTTP_SERVER_VERBOSE: configHttpServerVerboseSchema
+    HTTP_SERVER_VERBOSE: configHttpServerVerboseSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const

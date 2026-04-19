@@ -6,7 +6,7 @@ import {
   HttpHeaders,
   HttpMethod,
   HttpPayload,
-  HttpType
+  HttpType,
 } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
@@ -15,7 +15,7 @@ import {
   DATABASE_CONNECTOR,
   DatabaseConnector,
   RedisDatabaseConfig,
-  RedisDatabaseConnection
+  RedisDatabaseConnection,
 } from '../../database.js'
 import { FullMessageModel, MessageModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
@@ -23,11 +23,12 @@ import { RawFullMessage, RawMessage } from './message.functions.js'
 import { MESSAGE_REPOSITORY, MessageRepository } from './message.js'
 import { messageSchemas } from './message.schemas.js'
 
-/*
- * Redis message repository
+/**
+ * Redis message repository implementation
+ * @category Repositories
  */
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -56,9 +57,6 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     this.logger.debug(`MessageRepository initialized`)
   }
 
-  /*
-   * Create message
-   */
   async create(
     campaignId: string,
     messageId: string,
@@ -113,9 +111,6 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  /*
-   * Create dummy message
-   */
   async createDummy(
     campaignId: string,
     messageId: string,
@@ -141,9 +136,6 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  /*
-   * Read message by id
-   */
   async read(campaignId: string, messageId: string): Promise<MessageModel | null> {
     try {
       const rawModel = await this.connection.message.read_message(
@@ -158,9 +150,6 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
-  /*
-   * Read extended message by id
-   */
   async readFull(campaignId: string, messageId: string): Promise<FullMessageModel | null> {
     try {
       const rawModel = await this.connection.message.read_full_message(

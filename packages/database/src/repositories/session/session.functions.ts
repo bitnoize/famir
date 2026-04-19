@@ -1,6 +1,10 @@
 import { CommandParser } from '@redis/client'
 import { campaignKey, enabledProxyIndexKey, lureKey, sessionKey } from '../../database.keys.js'
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export interface RawSession {
   campaign_id: string
   session_id: string
@@ -12,6 +16,10 @@ export interface RawSession {
   authorized_at: number
 }
 
+/**
+ * @category Repositories
+ * @internal
+ */
 export const sessionFunctions = {
   session: {
     create_session: {
@@ -35,7 +43,7 @@ export const sessionFunctions = {
         parser.push(createdAt)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     read_session: {
@@ -46,7 +54,7 @@ export const sessionFunctions = {
         parser.pushKey(sessionKey(prefix, campaignId, sessionId))
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     auth_session: {
@@ -66,7 +74,7 @@ export const sessionFunctions = {
         parser.push(authorizedAt)
       },
 
-      transformReply: undefined as unknown as () => unknown
+      transformReply: undefined as unknown as () => unknown,
     },
 
     upgrade_session: {
@@ -87,7 +95,7 @@ export const sessionFunctions = {
         parser.push(secret)
       },
 
-      transformReply: undefined as unknown as () => unknown
-    }
-  }
+      transformReply: undefined as unknown as () => unknown,
+    },
+  },
 } as const

@@ -9,17 +9,18 @@ import {
   CONSUME_CONNECTOR,
   CONSUME_ROUTER,
   ConsumeConnector,
-  RedisConsumeConnection
+  RedisConsumeConnection,
 } from '../../consume.js'
 import { BullBaseWorker } from '../base/index.js'
 import { ANALYZE_WORKER, AnalyzeWorker } from './analyze.js'
 import { analyzeSchemas } from './analyze.schemas.js'
 
-/*
+/**
  * Bull analyze worker implementation
+ * @category Workers
  */
 export class BullAnalyzeWorker extends BullBaseWorker implements AnalyzeWorker {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {

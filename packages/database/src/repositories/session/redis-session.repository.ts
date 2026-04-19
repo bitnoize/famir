@@ -7,7 +7,7 @@ import {
   DATABASE_CONNECTOR,
   DatabaseConnector,
   RedisDatabaseConfig,
-  RedisDatabaseConnection
+  RedisDatabaseConnection,
 } from '../../database.js'
 import { SessionModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
@@ -15,11 +15,12 @@ import { RawSession } from './session.functions.js'
 import { SESSION_REPOSITORY, SessionRepository } from './session.js'
 import { sessionSchemas } from './session.schemas.js'
 
-/*
- * Redis session repository
+/**
+ * Redis session repository implementation
+ * @category Repositories
  */
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -48,9 +49,6 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     this.logger.debug(`SessionRepository initialized`)
   }
 
-  /*
-   * Create session
-   */
   async create(campaignId: string): Promise<SessionModel> {
     const [sessionId, secret] = [randomIdent(), randomIdent()]
 
@@ -64,7 +62,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
           Date.now().toString()
         ),
 
-        this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
+        this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
       const mesg = this.handleStatusReply(statusReply)
@@ -77,9 +75,6 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  /*
-   * Read session by id
-   */
   async read(campaignId: string, sessionId: string): Promise<SessionModel | null> {
     try {
       const rawModel = await this.connection.session.read_session(
@@ -94,9 +89,6 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  /*
-   * Auth session
-   */
   async auth(campaignId: string, sessionId: string): Promise<SessionModel> {
     try {
       const [statusReply, rawModel] = await Promise.all([
@@ -107,7 +99,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
           Date.now().toString()
         ),
 
-        this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
+        this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
       const mesg = this.handleStatusReply(statusReply)
@@ -120,9 +112,6 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
-  /*
-   * Upgrade session
-   */
   async upgrade(
     campaignId: string,
     lureId: string,
@@ -170,7 +159,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
     if (!SessionModel.isNotNull(model)) {
       throw new DatabaseError(`Session unexpected lost`, {
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
 

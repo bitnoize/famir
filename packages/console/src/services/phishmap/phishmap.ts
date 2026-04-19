@@ -1,24 +1,39 @@
 import { TargetAccessLevel } from '@famir/database'
 
+/**
+ * @category DI
+ */
 export const PHISHMAP_SERVICE = Symbol('PhishmapService')
 
+/**
+ * @category Services
+ * @internal
+ */
 export interface PhishmapCampaign {
   campaignId: string
   mirrorDomain: string
   description: string
-  landingUpgradePath: string
+  upgradeSessionPath: string
   sessionCookieName: string
   sessionExpire: number
   newSessionExpire: number
   messageExpire: number
 }
 
+/**
+ * @category Services
+ * @internal
+ */
 export interface PhishmapProxy {
   proxyId: string
   url: string
   isEnabled: boolean
 }
 
+/**
+ * @category Services
+ * @internal
+ */
 export interface PhishmapTarget {
   targetId: string
   accessLevel: TargetAccessLevel
@@ -44,11 +59,20 @@ export interface PhishmapTarget {
   isEnabled: boolean
 }
 
+/**
+ * @category Services
+ * @internal
+ */
 export interface PhishmapRedirector {
   redirectorId: string
   page: string
+  fields: string[]
 }
 
+/**
+ * @category Services
+ * @internal
+ */
 export interface PhishmapLure {
   lureId: string
   path: string
@@ -56,6 +80,9 @@ export interface PhishmapLure {
   isEnabled: boolean
 }
 
+/**
+ * @category Services
+ */
 export interface Phishmap {
   campaign: PhishmapCampaign
   proxies: PhishmapProxy[]
@@ -64,23 +91,32 @@ export interface Phishmap {
   lures: PhishmapLure[]
 }
 
+/**
+ * @category Data
+ */
 export interface DumpPhishmapData {
   campaignId: string
 }
 
+/**
+ * @category Data
+ */
 export interface RestorePhishmapData {
   phishmap: Phishmap
   campaignId?: string | null | undefined
   mirrorDomain?: string | null | undefined
   description?: string | null | undefined
   cryptSecret?: string | null | undefined
-  landingUpgradePath?: string | null | undefined
+  upgradeSessionPath?: string | null | undefined
   sessionCookieName?: string | null | undefined
   sessionExpire?: number | null | undefined
   newSessionExpire?: number | null | undefined
   messageExpire?: number | null | undefined
 }
 
+/**
+ * @category Data
+ */
 export interface PurgePhishmapData {
   campaignId: string
 }

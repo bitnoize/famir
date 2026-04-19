@@ -3,11 +3,12 @@ import { SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/data
 import { ReplServerError } from '@famir/repl-server'
 import { ReadSessionData, SESSION_SERVICE } from './session.js'
 
-/*
+/**
  * Session service
+ * @category Services
  */
 export class SessionService {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -19,7 +20,7 @@ export class SessionService {
 
   constructor(protected readonly sessionRepository: SessionRepository) {}
 
-  /*
+  /**
    * Read session
    */
   async read(data: ReadSessionData): Promise<SessionModel> {
@@ -27,7 +28,7 @@ export class SessionService {
 
     if (!session) {
       throw new ReplServerError(`Session not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 

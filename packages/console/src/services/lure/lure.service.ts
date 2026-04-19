@@ -7,8 +7,10 @@ import {
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
+  REDIRECTOR_REPOSITORY,
+  RedirectorRepository,
   TARGET_REPOSITORY,
-  TargetRepository
+  TargetRepository,
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
@@ -18,14 +20,15 @@ import {
   ListLuresData,
   MakeLureUrlData,
   ReadLureData,
-  SwitchLureData
+  SwitchLureData,
 } from './lure.js'
 
-/*
+/**
  * Lure service
+ * @category Services
  */
 export class LureService {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -35,6 +38,7 @@ export class LureService {
         new LureService(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY),
+          c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
           c.resolve<LureRepository>(LURE_REPOSITORY)
         )
     )
@@ -43,10 +47,11 @@ export class LureService {
   constructor(
     protected readonly campaignRepository: CampaignRepository,
     protected readonly targetRepository: TargetRepository,
+    protected readonly redirectorRepository: RedirectorRepository,
     protected readonly lureRepository: LureRepository
   ) {}
 
-  /*
+  /**
    * Create lure
    */
   async create(data: CreateLureData): Promise<true> {
@@ -66,7 +71,7 @@ export class LureService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -75,7 +80,7 @@ export class LureService {
     }
   }
 
-  /*
+  /**
    * Read lure
    */
   async read(data: ReadLureData): Promise<LureModel> {
@@ -83,14 +88,14 @@ export class LureService {
 
     if (!lure) {
       throw new ReplServerError(`Lure not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 
     return lure
   }
 
-  /*
+  /**
    * Enable lure
    */
   async enable(data: SwitchLureData): Promise<true> {
@@ -104,7 +109,7 @@ export class LureService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -113,7 +118,7 @@ export class LureService {
     }
   }
 
-  /*
+  /**
    * Disable lure
    */
   async disable(data: SwitchLureData): Promise<true> {
@@ -127,7 +132,7 @@ export class LureService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -136,7 +141,7 @@ export class LureService {
     }
   }
 
-  /*
+  /**
    * Delete lure
    */
   async delete(data: DeleteLureData): Promise<true> {
@@ -155,7 +160,7 @@ export class LureService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -164,7 +169,7 @@ export class LureService {
     }
   }
 
-  /*
+  /**
    * List lures
    */
   async list(data: ListLuresData): Promise<LureModel[]> {
@@ -172,14 +177,14 @@ export class LureService {
 
     if (!lures) {
       throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 
     return lures
   }
 
-  /*
+  /**
    * Make URL
    */
   async makeUrl(data: MakeLureUrlData): Promise<string> {
@@ -187,7 +192,7 @@ export class LureService {
 
     if (!lure) {
       throw new ReplServerError(`Lure not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 
@@ -195,7 +200,7 @@ export class LureService {
 
     if (!campaign) {
       throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 
@@ -203,19 +208,35 @@ export class LureService {
 
     if (!target) {
       throw new ReplServerError(`Target not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 
-    return data.payload
-      ? [
-          target.mirrorUrl,
-          lure.path,
-          '?',
-          data.paramName ?? randomName(),
-          '=',
-          encrypt(JSON.stringify(data.payload), campaign.cryptSecret)
-        ].join('')
-      : [target.mirrorUrl, lure.path].join('')
+    const redirector = await this.redirectorRepository.readFull(data.campaignId, lure.redirectorId)
+
+    if (!redirector) {
+      throw new ReplServerError(`Redirector not found`, {
+        code: 'NOT_FOUND',
+      })
+    }
+
+    if (!redirector.checkParams(data.params)) {
+      throw new ReplServerError(`Redirector wrong params`, {
+        code: 'BAD_REQUEST',
+      })
+    }
+
+    if (redirector.isLoose) {
+      return [target.mirrorUrl, lure.path].join('')
+    } else {
+      return [
+        target.mirrorUrl,
+        lure.path,
+        '?',
+        randomName(),
+        '=',
+        encrypt(JSON.stringify(data.params), campaign.cryptSecret),
+      ].join('')
+    }
   }
 }

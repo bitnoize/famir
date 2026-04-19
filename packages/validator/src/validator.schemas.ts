@@ -7,86 +7,129 @@ import {
   HttpHeaders,
   HttpMethod,
   HttpPayload,
-  HttpType
+  HttpType,
 } from '@famir/common'
 import { JSONSchemaType } from './validator.js'
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const booleanSchema: JSONSchemaType<boolean> = {
-  type: 'boolean'
+  type: 'boolean',
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const customIdentSchema: JSONSchemaType<string> = {
   type: 'string',
-  pattern: '^[0-9a-zA-Z-_]{1,64}$'
+  pattern: '^[0-9a-zA-Z-_]{1,64}$',
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const randomIdentSchema: JSONSchemaType<string> = {
   type: 'string',
-  pattern: '^[0-9a-f]{32}$'
+  pattern: '^[0-9a-f]{32}$',
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const httpTypeSchema: JSONSchemaType<HttpType> = {
   type: 'string',
-  enum: [...HTTP_TYPES]
+  enum: [...HTTP_TYPES],
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const httpMethodSchema: JSONSchemaType<HttpMethod> = {
   type: 'string',
-  enum: [...HTTP_METHODS]
+  enum: [...HTTP_METHODS],
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const httpHeaderSchema: JSONSchemaType<HttpHeader> = {
   type: ['string', 'array'],
   oneOf: [
     {
-      type: 'string'
+      type: 'string',
     },
     {
       type: 'array',
       items: {
-        type: 'string'
-      }
-    }
-  ]
+        type: 'string',
+      },
+    },
+  ],
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const httpHeadersSchema: JSONSchemaType<HttpHeaders> = {
   type: 'object',
   required: [],
   additionalProperties: {
     ...httpHeaderSchema,
-    nullable: true
-  }
+    nullable: true,
+  },
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const httpConnectionSchema: JSONSchemaType<HttpConnection> = {
   type: 'object',
   additionalProperties: {
-    anyOf: [{ type: 'number' }, { type: 'string' }]
-  }
+    anyOf: [{ type: 'number' }, { type: 'string' }],
+  },
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const httpPayloadSchema: JSONSchemaType<HttpPayload> = {
   type: 'object',
-  additionalProperties: true
+  additionalProperties: true,
 } as const
 
-// FIXME!!!
+/**
+ * @category Schemas
+ * @internal
+ */
 export const httpErrorSchema: JSONSchemaType<HttpError> = {
   type: 'array',
   minItems: 1,
   maxItems: 10,
   items: [
     {
-      type: 'object'
-    }
+      type: 'object',
+    },
   ],
   additionalItems: {
-    type: 'string'
-  }
+    type: 'string',
+  },
 } as const
 
+/**
+ * @category Schemas
+ * @internal
+ */
 export const httpErrorsSchema: JSONSchemaType<HttpError[]> = {
   type: 'array',
-  items: httpErrorSchema
+  items: httpErrorSchema,
 } as const

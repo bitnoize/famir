@@ -31,9 +31,9 @@ export class AuthSessionUseCase {
           throw new HttpServerError(`Service unavailable`, {
             cause: error,
             context: {
-              reason: `Auth session failed`
+              reason: `Auth session failed`,
             },
-            code: `SERVICE_UNAVAILABLE`
+            code: `SERVICE_UNAVAILABLE`,
           })
         } else if (error.code === 'FORBIDDEN') {
           return null

@@ -38,11 +38,11 @@ export class CompleteController extends BaseController {
   constructor(
     validator: Validator,
     logger: Logger,
-    protected templater: Templater,
+    templater: Templater,
     router: HttpServerRouter,
     protected readonly createMessageUseCase: CreateMessageUseCase
   ) {
-    super(validator, logger, router)
+    super(validator, logger, templater, router)
 
     this.logger.debug(`CompleteController initialized`)
   }
@@ -85,7 +85,7 @@ export class CompleteController extends BaseController {
         errors: message.errors,
         processor: message.processor,
         startTime: ctx.startTime,
-        finishTime: ctx.finishTime
+        finishTime: ctx.finishTime,
       })
 
       await next()

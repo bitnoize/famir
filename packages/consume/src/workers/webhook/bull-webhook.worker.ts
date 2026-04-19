@@ -9,17 +9,18 @@ import {
   CONSUME_CONNECTOR,
   CONSUME_ROUTER,
   ConsumeConnector,
-  RedisConsumeConnection
+  RedisConsumeConnection,
 } from '../../consume.js'
 import { BullBaseWorker } from '../base/index.js'
 import { WEBHOOK_WORKER, WebhookWorker } from './webhook.js'
 import { webhookSchemas } from './webhook.schemas.js'
 
-/*
+/**
  * Bull webhook worker implementation
+ * @category Workers
  */
 export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {

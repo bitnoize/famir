@@ -1,5 +1,13 @@
+import { RedirectorParams } from '@famir/database'
+
+/**
+ * @category DI
+ */
 export const LURE_SERVICE = Symbol('LureService')
 
+/**
+ * @category Data
+ */
 export interface CreateLureData {
   campaignId: string
   lureId: string
@@ -8,22 +16,34 @@ export interface CreateLureData {
   lockSecret: string
 }
 
+/**
+ * @category Data
+ */
 export interface ReadLureData {
   campaignId: string
   lureId: string
 }
 
+/**
+ * @category Data
+ */
 export interface ReadLurePathData {
   campaignId: string
   path: string
 }
 
+/**
+ * @category Data
+ */
 export interface SwitchLureData {
   campaignId: string
   lureId: string
   lockSecret: string
 }
 
+/**
+ * @category Data
+ */
 export interface DeleteLureData {
   campaignId: string
   lureId: string
@@ -31,16 +51,19 @@ export interface DeleteLureData {
   lockSecret: string
 }
 
+/**
+ * @category Data
+ */
 export interface ListLuresData {
   campaignId: string
 }
 
-export type LurePayload = Record<string, string>
-
+/**
+ * @category Data
+ */
 export interface MakeLureUrlData {
   campaignId: string
   targetId: string
   lureId: string
-  paramName?: string | null | undefined
-  payload?: LurePayload | null | undefined
+  params: RedirectorParams
 }

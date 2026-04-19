@@ -1,8 +1,16 @@
+/**
+ * DI token
+ * @category DI
+ */
 export const TEMPLATER = Symbol('Templater')
 
 /**
- * Templater contract
+ * Represents a templater
+ * @category none
  */
 export interface Templater {
+  /**
+   * Render template
+   */
   render(template: string, data: object): string
 }

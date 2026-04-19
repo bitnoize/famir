@@ -7,7 +7,7 @@ import {
   PHISHMAP_SERVICE,
   PurgePhishmapData,
   RestorePhishmapData,
-  type PhishmapService
+  type PhishmapService,
 } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { PHISHMAP_CONTROLLER } from './phishmap.js'

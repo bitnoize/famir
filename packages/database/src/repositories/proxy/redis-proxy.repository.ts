@@ -6,7 +6,7 @@ import {
   DATABASE_CONNECTOR,
   DatabaseConnector,
   RedisDatabaseConfig,
-  RedisDatabaseConnection
+  RedisDatabaseConnection,
 } from '../../database.js'
 import { ProxyModel } from '../../models/index.js'
 import { RedisBaseRepository } from '../base/index.js'
@@ -14,11 +14,12 @@ import { RawProxy } from './proxy.functions.js'
 import { PROXY_REPOSITORY, ProxyRepository } from './proxy.js'
 import { proxySchemas } from './proxy.schemas.js'
 
-/*
- * Redis proxy repository
+/**
+ * Redis proxy repository implementation
+ * @category Repositories
  */
 export class RedisProxyRepository extends RedisBaseRepository implements ProxyRepository {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -47,9 +48,6 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     this.logger.debug(`ProxyRepository initialized`)
   }
 
-  /*
-   * Create proxy
-   */
   async create(
     campaignId: string,
     proxyId: string,
@@ -74,9 +72,6 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  /*
-   * Read proxy by id
-   */
   async read(campaignId: string, proxyId: string): Promise<ProxyModel | null> {
     try {
       const rawModel = await this.connection.proxy.read_proxy(
@@ -91,9 +86,6 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  /*
-   * Enable proxy
-   */
   async enable(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.proxy.enable_proxy(
@@ -111,9 +103,6 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  /*
-   * Disable proxy
-   */
   async disable(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.proxy.disable_proxy(
@@ -131,9 +120,6 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  /*
-   * Delete proxy
-   */
   async delete(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.proxy.delete_proxy(
@@ -151,9 +137,6 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
-  /*
-   * List proxies
-   */
   async list(campaignId: string): Promise<ProxyModel[] | null> {
     try {
       const index = await this.connection.proxy.read_proxy_index(this.options.prefix, campaignId)

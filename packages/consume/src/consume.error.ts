@@ -1,13 +1,22 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
+/**
+ * Consume error code
+ * @category none
+ */
 export type ConsumeErrorCode = 'BAD_REQUEST' | 'UNKNOWN_JOB' | 'INTERNAL_ERROR'
 
+/**
+ * Consume error options
+ * @category none
+ */
 export type ConsumeErrorOptions = CommonErrorOptions & {
   code: ConsumeErrorCode
 }
 
-/*
- * Consume error object
+/**
+ * Represents a consume error
+ * @category none
  */
 export class ConsumeError extends CommonError {
   code: ConsumeErrorCode
@@ -15,7 +24,7 @@ export class ConsumeError extends CommonError {
   constructor(message: string, options: ConsumeErrorOptions) {
     super(message, {
       cause: options.cause,
-      context: options.context
+      context: options.context,
     })
 
     this.name = 'ConsumeError'

@@ -8,7 +8,7 @@ import {
   RedisProxyRepository,
   RedisRedirectorRepository,
   RedisSessionRepository,
-  RedisTargetRepository
+  RedisTargetRepository,
 } from '@famir/database'
 import { CurlHttpClient } from '@famir/http-client'
 import {
@@ -16,7 +16,7 @@ import {
   HttpServerAssets,
   HttpServerRouter,
   NativeHttpServer,
-  NativeHttpServerContextFactory
+  NativeHttpServerContextFactory,
 } from '@famir/http-server'
 import { PinoLogger } from '@famir/logger'
 import { BullAnalyzeQueue, RedisProduceConnector } from '@famir/produce'

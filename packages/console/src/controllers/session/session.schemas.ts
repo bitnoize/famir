@@ -2,7 +2,7 @@ import {
   JSONSchemaType,
   ValidatorSchemas,
   customIdentSchema,
-  randomIdentSchema
+  randomIdentSchema,
 } from '@famir/validator'
 import { ReadSessionData } from '../../services/index.js'
 
@@ -11,11 +11,11 @@ const readSessionDataSchema: JSONSchemaType<ReadSessionData> = {
   required: ['campaignId', 'sessionId'],
   properties: {
     campaignId: customIdentSchema,
-    sessionId: randomIdentSchema
+    sessionId: randomIdentSchema,
   },
-  additionalProperties: false
+  additionalProperties: false,
 } as const
 
 export const sessionSchemas: ValidatorSchemas = {
-  'console-read-session-data': readSessionDataSchema
+  'console-read-session-data': readSessionDataSchema,
 } as const

@@ -7,11 +7,12 @@ import {
   DATABASE_STATUS_CODES,
   RedisDatabaseConfig,
   RedisDatabaseConnection,
-  RedisDatabaseRepositoryOptions
+  RedisDatabaseRepositoryOptions,
 } from '../../database.js'
 
-/*
+/**
  * Redis base repository
+ * @category Repositories
  */
 export abstract class RedisBaseRepository {
   protected readonly options: RedisDatabaseRepositoryOptions
@@ -29,7 +30,7 @@ export abstract class RedisBaseRepository {
   protected validateStringReply(value: unknown): asserts value is string {
     if (!(value != null && typeof value === 'string' && value)) {
       throw new DatabaseError(`StringReply validate failed`, {
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
@@ -37,7 +38,7 @@ export abstract class RedisBaseRepository {
   protected validateArrayReply(value: unknown): asserts value is unknown[] {
     if (!(value != null && Array.isArray(value))) {
       throw new DatabaseError(`ArrayReply validate failed`, {
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
@@ -50,7 +51,7 @@ export abstract class RedisBaseRepository {
 
     if (!isValid) {
       throw new DatabaseError(`ArrayStringsReply validate failed`, {
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
@@ -58,7 +59,7 @@ export abstract class RedisBaseRepository {
   protected handleStatusReply(value: unknown): string {
     if (!(value != null && typeof value === 'string' && value)) {
       throw new DatabaseError(`StatusReply validate failed`, {
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
 
@@ -66,13 +67,13 @@ export abstract class RedisBaseRepository {
 
     if (!(code && message && arrayIncludes(DATABASE_STATUS_CODES, code))) {
       throw new DatabaseError(`StatusReply parse failed`, {
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
 
     if (code !== 'OK') {
       throw new DatabaseError(message, {
-        code
+        code,
       })
     }
 
@@ -86,7 +87,7 @@ export abstract class RedisBaseRepository {
     } catch (error) {
       throw new DatabaseError(`RawData validate failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
@@ -97,7 +98,7 @@ export abstract class RedisBaseRepository {
     } catch (error) {
       throw new DatabaseError(`JSON decode failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
@@ -108,7 +109,7 @@ export abstract class RedisBaseRepository {
     } catch (error) {
       throw new DatabaseError(`JSON encode failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
@@ -119,7 +120,7 @@ export abstract class RedisBaseRepository {
     } catch (error) {
       throw new DatabaseError(`Base64 decode failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
@@ -130,7 +131,7 @@ export abstract class RedisBaseRepository {
     } catch (error) {
       throw new DatabaseError(`Base64 encode failed`, {
         cause: error,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
@@ -148,16 +149,16 @@ export abstract class RedisBaseRepository {
         context: {
           repository: this.repositoryName,
           method,
-          data
+          data,
         },
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
 
   private buildOptions(config: RedisDatabaseConfig): RedisDatabaseRepositoryOptions {
     return {
-      prefix: config.DATABASE_PREFIX
+      prefix: config.DATABASE_PREFIX,
     }
   }
 }

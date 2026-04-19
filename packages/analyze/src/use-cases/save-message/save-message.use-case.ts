@@ -3,11 +3,12 @@ import { FullMessageModel } from '@famir/database'
 import { Storage, STORAGE } from '@famir/storage'
 import { SAVE_MESSAGE_USE_CASE } from './save-message.js'
 
-/*
+/**
  * Save message use-case
+ * @category Use-cases
  */
 export class SaveMessageUseCase {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -19,7 +20,7 @@ export class SaveMessageUseCase {
 
   constructor(protected readonly storage: Storage) {}
 
-  /*
+  /**
    * Execute use-case
    */
   async execute(message: FullMessageModel): Promise<void> {
@@ -40,52 +41,52 @@ export class SaveMessageUseCase {
           processor: message.processor,
           startTime: message.startTime,
           finishTime: message.finishTime,
-          totalTime: message.totalTime
+          totalTime: message.totalTime,
         },
         null,
         2
       )
     )
     await this.storage.putObject(`${basePath}/main.json`, main, {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     })
 
     const requestHeaders = Buffer.from(JSON.stringify(message.requestHeaders, null, 2))
     await this.storage.putObject(`${basePath}/request-headers.json`, requestHeaders, {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     })
 
     if (message.requestBody.length > 0) {
       await this.storage.putObject(`${basePath}/request-body.bin`, message.requestBody, {
-        'Content-Type': 'application/octet-stream'
+        'Content-Type': 'application/octet-stream',
       })
     }
 
     const responseHeaders = Buffer.from(JSON.stringify(message.responseHeaders, null, 2))
     await this.storage.putObject(`${basePath}/response-headers.json`, responseHeaders, {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     })
 
     if (message.responseBody.length > 0) {
       await this.storage.putObject(`${basePath}/response-body.bin`, message.responseBody, {
-        'Content-Type': 'application/octet-stream'
+        'Content-Type': 'application/octet-stream',
       })
     }
 
     const connection = Buffer.from(JSON.stringify(message.connection, null, 2))
     await this.storage.putObject(`${basePath}/connection.json`, connection, {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     })
 
     const payload = Buffer.from(JSON.stringify(message.payload, null, 2))
     await this.storage.putObject(`${basePath}/payload.json`, payload, {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     })
 
     if (message.errors.length > 0) {
       const errors = Buffer.from(JSON.stringify(message.errors, null, 2))
       await this.storage.putObject(`${basePath}/errors.json`, errors, {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       })
     }
   }

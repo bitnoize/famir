@@ -6,7 +6,7 @@ import {
   CampaignShare,
   DatabaseError,
   DatabaseErrorCode,
-  FullCampaignModel
+  FullCampaignModel,
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
@@ -16,14 +16,15 @@ import {
   LockCampaignData,
   ReadCampaignData,
   UnlockCampaignData,
-  UpdateCampaignData
+  UpdateCampaignData,
 } from './campaign.js'
 
-/*
+/**
  * Campaign service
+ * @category Services
  */
 export class CampaignService {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -35,7 +36,7 @@ export class CampaignService {
 
   constructor(protected readonly campaignRepository: CampaignRepository) {}
 
-  /*
+  /**
    * Create campaign
    */
   async create(data: CreateCampaignData): Promise<true> {
@@ -45,7 +46,7 @@ export class CampaignService {
         data.mirrorDomain,
         data.description,
         data.cryptSecret ?? randomIdent(),
-        data.landingUpgradePath,
+        data.upgradeSessionPath,
         data.sessionCookieName,
         data.sessionExpire,
         data.newSessionExpire,
@@ -59,7 +60,7 @@ export class CampaignService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -68,7 +69,7 @@ export class CampaignService {
     }
   }
 
-  /*
+  /**
    * Read campaign
    */
   async read(data: ReadCampaignData): Promise<FullCampaignModel> {
@@ -76,21 +77,21 @@ export class CampaignService {
 
     if (!campaign) {
       throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND'
+        code: 'NOT_FOUND',
       })
     }
 
     return campaign
   }
 
-  /*
+  /**
    * Read campaign share
    */
   async readShare(): Promise<CampaignShare> {
     return await this.campaignRepository.readShare()
   }
 
-  /*
+  /**
    * Lock campaign
    */
   async lock(data: LockCampaignData): Promise<string> {
@@ -102,7 +103,7 @@ export class CampaignService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -111,7 +112,7 @@ export class CampaignService {
     }
   }
 
-  /*
+  /**
    * Unlock campaign
    */
   async unlock(data: UnlockCampaignData): Promise<true> {
@@ -125,7 +126,7 @@ export class CampaignService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -134,7 +135,7 @@ export class CampaignService {
     }
   }
 
-  /*
+  /**
    * Update campaign
    */
   async update(data: UpdateCampaignData): Promise<true> {
@@ -155,7 +156,7 @@ export class CampaignService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -164,7 +165,7 @@ export class CampaignService {
     }
   }
 
-  /*
+  /**
    * Delete campaign
    */
   async delete(data: DeleteCampaignData): Promise<true> {
@@ -178,7 +179,7 @@ export class CampaignService {
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
           throw new ReplServerError(error.message, {
-            code: error.code
+            code: error.code,
           })
         }
       }
@@ -187,7 +188,7 @@ export class CampaignService {
     }
   }
 
-  /*
+  /**
    * List campaigns
    */
   async list(): Promise<CampaignModel[]> {

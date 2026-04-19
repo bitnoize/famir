@@ -8,11 +8,12 @@ import {
   BullConsumeConfig,
   BullConsumeWorkerOptions,
   ConsumeSpec,
-  RedisConsumeConnection
+  RedisConsumeConnection,
 } from '../../consume.js'
 
-/*
+/**
  * Bull base worker
+ * @category Workers
  */
 export abstract class BullBaseWorker {
   protected readonly options: BullConsumeWorkerOptions
@@ -42,7 +43,7 @@ export abstract class BullBaseWorker {
           this.logger.error(`Worker processor error`, {
             error: serializeError(error),
             queue: this.queueName,
-            job: this.dumpJob(job)
+            job: this.dumpJob(job),
           })
 
           throw error
@@ -54,73 +55,67 @@ export abstract class BullBaseWorker {
         concurrency: this.spec.concurrency,
         limiter: {
           max: this.spec.limiterMax,
-          duration: this.spec.limiterDuration
+          duration: this.spec.limiterDuration,
         },
         autorun: false,
         removeOnComplete: {
-          count: 0
+          count: 0,
         },
         removeOnFail: {
-          count: 0
+          count: 0,
         },
         metrics: {
-          maxDataPoints: MetricsTime.ONE_WEEK
-        }
+          maxDataPoints: MetricsTime.ONE_WEEK,
+        },
       }
     )
 
     this.worker.on('completed', (job: Job<unknown, unknown>) => {
       this.logger.info(`Worker completed event`, {
         queue: this.queueName,
-        job: this.dumpJob(job)
+        job: this.dumpJob(job),
       })
     })
 
     this.worker.on('failed', (job: Job<unknown, unknown> | undefined) => {
       this.logger.error(`Worker failed event`, {
         queue: this.queueName,
-        job: job !== undefined ? this.dumpJob(job) : null
+        job: job !== undefined ? this.dumpJob(job) : null,
       })
     })
 
     this.worker.on('error', (error: unknown) => {
       this.logger.error(`Worker error event`, {
         error: serializeError(error),
-        queue: this.queueName
+        queue: this.queueName,
       })
     })
   }
 
-  /*
-   * Run worker
-   */
   async run(): Promise<void> {
     await this.worker.run()
 
     this.logger.debug(`Worker running: ${this.queueName}`)
   }
 
-  /*
-   * Close worker
-   */
   async close(): Promise<void> {
     await this.worker.close()
 
     this.logger.debug(`Worker closed: ${this.queueName}`)
   }
 
-  protected dumpJob(job: Job<unknown, unknown>): object {
+  private dumpJob(job: Job<unknown, unknown>): object {
     return {
       id: job.id,
       name: job.name,
       data: job.data,
-      result: job.returnvalue
+      result: job.returnvalue,
     }
   }
 
   private buildOptions(config: BullConsumeConfig): BullConsumeWorkerOptions {
     return {
-      prefix: config.CONSUME_PREFIX
+      prefix: config.CONSUME_PREFIX,
     }
   }
 }

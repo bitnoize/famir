@@ -1,5 +1,17 @@
-/*
- * Client session
+/**
+ * Upgrade session params
+ * @category Models
+ */
+export interface UpgradeSessionParams {
+  lure_id: string
+  session_id: string
+  secret: string
+  back_url: string
+}
+
+/**
+ * Session model
+ * @category Models
  */
 export class SessionModel {
   static isNotNull = <T extends SessionModel>(model: T | null): model is T => {
