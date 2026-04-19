@@ -1,0 +1,16 @@
+{
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.ts"],
+  "categoryOrder": [
+    "Database",
+    "Campaign",
+    "Proxy",
+    "Target",
+    "Redirector",
+    "Lure",
+    "Session",
+    "Message",
+    "Phishmap",
+    "*"
+  ]
+}

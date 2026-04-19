@@ -6,18 +6,20 @@ import consumers from 'node:stream/consumers'
 import { StorageError } from './storage.error.js'
 import { MinioStorageConfig, MinioStorageOptions, Storage, STORAGE } from './storage.js'
 
-/*
+/**
  * Minio storage implementation
+ *
+ * @category none
+ * @see [MinIO Client SDK](https://github.com/minio/minio-js)
  */
 export class MinioStorage implements Storage {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
     container.registerSingleton<Storage>(
       STORAGE,
-      (c) =>
-        new MinioStorage(c.resolve<Config<MinioStorageConfig>>(CONFIG), c.resolve<Logger>(LOGGER))
+      (c) => new MinioStorage(c.resolve(CONFIG), c.resolve(LOGGER))
     )
   }
 
@@ -25,7 +27,7 @@ export class MinioStorage implements Storage {
   protected readonly minio: MinioClient
 
   constructor(
-    config: Config<MinioStorageConfig>,
+    protected readonly config: Config<MinioStorageConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)
@@ -35,15 +37,12 @@ export class MinioStorage implements Storage {
       port: this.options.port,
       useSSL: this.options.useSSL,
       accessKey: this.options.accessKey,
-      secretKey: this.options.secretKey
+      secretKey: this.options.secretKey,
     })
 
     this.logger.debug(`Storage initialized`)
   }
 
-  /*
-   * Get object from storage
-   */
   async getObject(objectName: string): Promise<Buffer> {
     try {
       await this.minio.statObject(this.options.bucketName, objectName)
@@ -56,9 +55,6 @@ export class MinioStorage implements Storage {
     }
   }
 
-  /*
-   * Put object to storage
-   */
   async putObject(
     objectName: string,
     data: Buffer,
@@ -84,9 +80,9 @@ export class MinioStorage implements Storage {
         cause: error,
         context: {
           method,
-          data
+          data,
         },
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
   }
@@ -98,7 +94,7 @@ export class MinioStorage implements Storage {
       useSSL: config.STORAGE_USE_SSL,
       accessKey: config.STORAGE_ACCESS_KEY,
       secretKey: config.STORAGE_SECRET_KEY,
-      bucketName: config.STORAGE_BUCKET_NAME
+      bucketName: config.STORAGE_BUCKET_NAME,
     }
   }
 }

@@ -22,7 +22,7 @@ local function create_campaign(keys, args)
     mirror_domain = args[2],
     description = args[3],
     crypt_secret = args[4],
-    landing_upgrade_path = args[5],
+    upgrade_session_path = args[5],
     session_cookie_name = args[6],
     session_expire = tonumber(args[7]),
     new_session_expire = tonumber(args[8]),
@@ -32,28 +32,25 @@ local function create_campaign(keys, args)
     created_at = tonumber(args[10]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
 
     if
       (
-        field == 'campaign_id'
-        or field == 'mirror_domain'
-        or field == 'crypt_secret'
-        or field == 'landing_upgrade_path'
-        or field == 'session_cookie_name'
-      ) and value == ''
+        k == 'campaign_id'
+        or k == 'mirror_domain'
+        or k == 'crypt_secret'
+        or k == 'upgrade_session_path'
+        or k == 'session_cookie_name'
+      ) and v == ''
     then
-      return redis.error_reply('ERR Wrong model.' .. field)
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
 
-    if
-      (field == 'session_expire' or field == 'new_session_expire' or field == 'message_expire')
-      and value <= 0
-    then
-      return redis.error_reply('ERR Wrong model.' .. field)
+    if (k == 'session_expire' or k == 'new_session_expire' or k == 'message_expire') and v <= 0 then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -69,9 +66,9 @@ local function create_campaign(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', campaign_key, unpack(store))
@@ -129,9 +126,9 @@ local function read_campaign(keys, args)
     created_at = tonumber(values[5]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -149,16 +146,17 @@ redis.register_function({
   Read full campaign
 --]]
 local function read_full_campaign(keys, args)
-  if #keys ~= 6 or #args ~= 0 then
+  if #keys ~= 7 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local campaign_lock_key = keys[2]
-  local proxy_index_key = keys[3]
-  local target_index_key = keys[4]
-  local redirector_index_key = keys[5]
-  local lure_index_key = keys[6]
+  local campaign_session_cookie_names_key = keys[2]
+  local campaign_lock_key = keys[3]
+  local proxy_index_key = keys[4]
+  local target_index_key = keys[5]
+  local redirector_index_key = keys[6]
+  local lure_index_key = keys[7]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
@@ -171,7 +169,7 @@ local function read_full_campaign(keys, args)
     'mirror_domain',
     'description',
     'crypt_secret',
-    'landing_upgrade_path',
+    'upgrade_session_path',
     'session_cookie_name',
     'session_expire',
     'new_session_expire',
@@ -190,8 +188,9 @@ local function read_full_campaign(keys, args)
     mirror_domain = values[2],
     description = values[3],
     crypt_secret = values[4],
-    landing_upgrade_path = values[5],
+    upgrade_session_path = values[5],
     session_cookie_name = values[6],
+    session_cookie_names = redis.call('SMEMBERS', campaign_session_cookie_names_key),
     session_expire = tonumber(values[7]),
     new_session_expire = tonumber(values[8]),
     message_expire = tonumber(values[9]),
@@ -205,9 +204,9 @@ local function read_full_campaign(keys, args)
     created_at = tonumber(values[12]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -219,46 +218,6 @@ redis.register_function({
   callback = read_full_campaign,
   flags = { 'no-writes' },
   description = 'Read full campaign',
-})
-
---[[
-  Read campaign mirror domains
---]]
-local function read_campaign_mirror_domains(keys, args)
-  if #keys ~= 1 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
-  end
-
-  local campaign_mirror_domains_key = keys[1]
-
-  return redis.call('SMEMBERS', campaign_mirror_domains_key)
-end
-
-redis.register_function({
-  function_name = 'read_campaign_mirror_domains',
-  callback = read_campaign_mirror_domains,
-  flags = { 'no-writes' },
-  description = 'Read campaign mirror domains',
-})
-
---[[
-  Read campaign session cookie names
---]]
-local function read_campaign_session_cookie_names(keys, args)
-  if #keys ~= 1 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
-  end
-
-  local campaign_session_cookie_names_key = keys[1]
-
-  return redis.call('SMEMBERS', campaign_session_cookie_names_key)
-end
-
-redis.register_function({
-  function_name = 'read_campaign_session_cookie_names',
-  callback = read_campaign_session_cookie_names,
-  flags = { 'no-writes' },
-  description = 'Read campaign session cookie names',
 })
 
 --[[
@@ -305,17 +264,17 @@ local function lock_campaign(keys, args)
     lock_timeout = tonumber(args[2]),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if field == 'lock_secret' and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if k == 'lock_secret' and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if field == 'lock_timeout' and value <= 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if k == 'lock_timeout' and v <= 0 then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -356,13 +315,13 @@ local function unlock_campaign(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -407,13 +366,13 @@ local function update_campaign(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -424,28 +383,28 @@ local function update_campaign(keys, args)
   local model = {}
 
   for i = 1, #args, 2 do
-    local field, value = args[i], args[i + 1]
+    local k, v = args[i], args[i + 1]
 
-    if model[field] then
-      return redis.error_reply('ERR Duplicate model.' .. field)
+    if model[k] then
+      return redis.error_reply('ERR Duplicate model.' .. k)
     end
 
-    if field == 'description' then
-      model.description = value
-    elseif field == 'session_expire' then
-      model.session_expire = tonumber(value)
-    elseif field == 'new_session_expire' then
-      model.new_session_expire = tonumber(value)
-    elseif field == 'message_expire' then
-      model.message_expire = tonumber(value)
+    if k == 'description' then
+      model.description = v
+    elseif k == 'session_expire' then
+      model.session_expire = tonumber(v)
+    elseif k == 'new_session_expire' then
+      model.new_session_expire = tonumber(v)
+    elseif k == 'message_expire' then
+      model.message_expire = tonumber(v)
     else
-      return redis.error_reply('ERR Unknown model.' .. field)
+      return redis.error_reply('ERR Unknown model.' .. k)
     end
   end
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -461,9 +420,9 @@ local function update_campaign(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', campaign_key, unpack(store))
@@ -511,21 +470,21 @@ local function delete_campaign(keys, args)
     session_cookie_name = redis.call('HGET', campaign_key, 'session_cookie_name'),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
     if
       (
-        field == 'lock_secret'
-        or field == 'orig_lock_secret'
-        or field == 'campaign_id'
-        or field == 'mirror_domain'
-        or field == 'session_cookie_name'
-      ) and value == ''
+        k == 'lock_secret'
+        or k == 'orig_lock_secret'
+        or k == 'campaign_id'
+        or k == 'mirror_domain'
+        or k == 'session_cookie_name'
+      ) and v == ''
     then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 

@@ -1,4 +1,3 @@
 # @famir/http-tools
 
-Famir HTTP-specific tools.
-
+HTTP-specific wrappers and tools.

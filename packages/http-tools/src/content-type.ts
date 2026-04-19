@@ -1,10 +1,10 @@
+import { HttpContentType } from '@famir/http-proto'
 import contenttype from 'content-type'
 
-export interface HttpContentType {
-  type: string
-  parameters: Record<string, string>
-}
-
+/**
+ * @category none
+ * @internal
+ */
 export const HTTP_CONTENT_TYPE_NAMES = [
   'text',
   'html',
@@ -12,20 +12,32 @@ export const HTTP_CONTENT_TYPE_NAMES = [
   'javascript',
   'json',
   'xml',
-  'urlEncoded'
+  'urlEncoded',
 ] as const
+
+/**
+ * @category none
+ * @internal
+ */
 export type HttpContentTypeName = (typeof HTTP_CONTENT_TYPE_NAMES)[number]
+
+/**
+ * @category none
+ * @internal
+ */
 export type HttpContentTypes = Record<HttpContentTypeName, string[]>
 
-/*
- * Parse content-type
+/**
+ * @category none
+ * @internal
  */
 export function parseContentType(value: string): HttpContentType {
   return contenttype.parse(value.trim())
 }
 
-/*
- * Format content-type
+/**
+ * @category none
+ * @internal
  */
 export function formatContentType(contentType: HttpContentType) {
   return contenttype.format(contentType)

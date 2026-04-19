@@ -1,5 +1,8 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
+/**
+ * @category none
+ */
 export type ReplServerErrorCode =
   | 'BAD_REQUEST'
   | 'FORBIDDEN'
@@ -8,12 +11,17 @@ export type ReplServerErrorCode =
   | 'INTERNAL_ERROR'
   | 'SERVICE_UNAVAILABLE'
 
+/**
+ * @category none
+ */
 export type ReplServerErrorOptions = CommonErrorOptions & {
   code: ReplServerErrorCode
 }
 
-/*
- * REPL server error object
+/**
+ * Represents REPL server error
+ *
+ * @category none
  */
 export class ReplServerError extends CommonError {
   code: ReplServerErrorCode
@@ -21,7 +29,7 @@ export class ReplServerError extends CommonError {
   constructor(message: string, options: ReplServerErrorOptions) {
     super(message, {
       cause: options.cause,
-      context: options.context
+      context: options.context,
     })
 
     this.name = 'ReplServerError'

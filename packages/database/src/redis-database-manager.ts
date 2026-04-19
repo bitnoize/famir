@@ -5,51 +5,47 @@ import {
   DATABASE_MANAGER,
   DatabaseConnector,
   DatabaseManager,
-  RedisDatabaseConnection
+  RedisDatabaseConnection,
 } from './database.js'
-import { makeRedisFunctions } from './redis-functions.js'
+import { redisFunctions } from './redis-functions.js'
 
-/*
+/**
  * Redis database manager implementation
+ *
+ * @category none
  */
 export class RedisDatabaseManager implements DatabaseManager {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
     container.registerSingleton<DatabaseManager>(
       DATABASE_MANAGER,
-      (c) =>
-        new RedisDatabaseManager(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
-        )
+      (c) => new RedisDatabaseManager(c.resolve(LOGGER), c.resolve(DATABASE_CONNECTOR))
     )
   }
 
+  protected readonly connection: RedisDatabaseConnection
+
   constructor(
     protected readonly logger: Logger,
-    protected readonly connection: RedisDatabaseConnection
+    protected readonly connector: DatabaseConnector
   ) {
+    this.connection = connector.getConnection<RedisDatabaseConnection>()
+
     this.logger.debug(`DatabaseManager initialized`)
   }
 
-  /*
-   * Load database functions
-   */
   async loadFunctions(): Promise<void> {
     await this.connection.FUNCTION_FLUSH()
 
-    for (const [name, data] of makeRedisFunctions()) {
+    for (const [name, data] of redisFunctions) {
       this.logger.info(`Load redis functions: ${name}`)
 
       await this.connection.FUNCTION_LOAD(data)
     }
   }
 
-  /*
-   * Cleanup database
-   */
   async cleanup(): Promise<void> {
     await this.connection.FLUSHDB()
 

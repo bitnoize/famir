@@ -1,0 +1,52 @@
+{
+  "name": "@famir/reverse-app",
+  "type": "module",
+  "version": "0.0.3",
+  "description": "Famir reverse app",
+  "keywords": [
+    "famir",
+    "fake-mirrors",
+    "man-in-the-middle",
+    "phishing",
+    "reverse-proxy",
+    "red-teaming"
+  ],
+  "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "node --test dist/**/*.test.js",
+    "build": "tsc -b",
+    "clean": "rimraf dist *.tsbuildinfo"
+  },
+  "files": ["dist", "README.md"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitnoize/famir.git",
+    "directory": "packages/reverse-app"
+  },
+  "bugs": {
+    "url": "https://github.com/bitnoize/famir/issues"
+  },
+  "homepage": "https://fake-mirrors.net",
+  "dependencies": {
+    "@famir/common": "*",
+    "@famir/config": "*",
+    "@famir/database": "*",
+    "@famir/http-client": "*",
+    "@famir/http-server": "*",
+    "@famir/http-proto": "*",
+    "@famir/http-tools": "*",
+    "@famir/logger": "*",
+    "@famir/validator": "*",
+    "@famir/templater": "*",
+    "@famir/produce": "*"
+  }
+}

@@ -1,4 +1,3 @@
 # @famir/database
 
-Famir database infrastructure service.
-
+Database infrastructure service.

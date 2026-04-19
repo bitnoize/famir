@@ -1,0 +1,15 @@
+{
+  "entryPointStrategy": "packages",
+  "entryPoints": ["packages/*"],
+  "out": "docs",
+  "name": "Fake Mirrors",
+  "plugin": ["typedoc-theme-fresh"],
+  "theme": "fresh",
+  "titleLink": "https://fake-mirrors.net",
+  "navigation": {
+    "includeFolders": false,
+    "includeCategories": true,
+    "includeGroups": false
+  },
+  "githubPages": true
+}

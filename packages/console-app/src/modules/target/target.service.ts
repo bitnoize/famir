@@ -1,0 +1,251 @@
+import { DIContainer, arrayIncludes } from '@famir/common'
+import {
+  DatabaseError,
+  DatabaseErrorCode,
+  FullTargetModel,
+  TARGET_REPOSITORY,
+  TargetModel,
+  TargetRepository,
+} from '@famir/database'
+import { ReplServerError } from '@famir/repl-server'
+import {
+  AlterTargetLabelData,
+  CreateTargetData,
+  DeleteTargetData,
+  ListTargetsData,
+  ReadTargetData,
+  TARGET_SERVICE,
+  ToggleTargetData,
+  UpdateTargetData,
+} from './target.js'
+
+/**
+ * Represents a target service
+ *
+ * @category Target
+ */
+export class TargetService {
+  /**
+   * Register dependency
+   */
+  static register(container: DIContainer) {
+    container.registerSingleton<TargetService>(
+      TARGET_SERVICE,
+      (c) => new TargetService(c.resolve(TARGET_REPOSITORY))
+    )
+  }
+
+  constructor(protected readonly targetRepository: TargetRepository) {}
+
+  async create(data: CreateTargetData): Promise<true> {
+    try {
+      await this.targetRepository.create(
+        data.campaignId,
+        data.targetId,
+        data.accessLevel,
+        data.donorSecure,
+        data.donorSub,
+        data.donorDomain,
+        data.donorPort,
+        data.mirrorSecure,
+        data.mirrorSub,
+        data.mirrorPort,
+        data.connectTimeout,
+        data.simpleTimeout,
+        data.streamTimeout,
+        data.headersSizeLimit,
+        data.bodySizeLimit,
+        data.mainPage,
+        data.notFoundPage,
+        data.faviconIco,
+        data.robotsTxt,
+        data.sitemapXml,
+        data.allowWebSockets,
+        data.lockSecret
+      )
+
+      return true
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code,
+          })
+        }
+      }
+
+      throw error
+    }
+  }
+
+  async read(data: ReadTargetData): Promise<FullTargetModel> {
+    const target = await this.targetRepository.readFull(data.campaignId, data.targetId)
+
+    if (!target) {
+      throw new ReplServerError(`Target not found`, {
+        code: 'NOT_FOUND',
+      })
+    }
+
+    return target
+  }
+
+  async update(data: UpdateTargetData): Promise<true> {
+    try {
+      await this.targetRepository.update(
+        data.campaignId,
+        data.targetId,
+        data.connectTimeout,
+        data.simpleTimeout,
+        data.streamTimeout,
+        data.headersSizeLimit,
+        data.bodySizeLimit,
+        data.mainPage,
+        data.notFoundPage,
+        data.faviconIco,
+        data.robotsTxt,
+        data.sitemapXml,
+        data.allowWebSockets,
+        data.lockSecret
+      )
+
+      return true
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code,
+          })
+        }
+      }
+
+      throw error
+    }
+  }
+
+  async enable(data: ToggleTargetData): Promise<true> {
+    try {
+      await this.targetRepository.enable(data.campaignId, data.targetId, data.lockSecret)
+
+      return true
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code,
+          })
+        }
+      }
+
+      throw error
+    }
+  }
+
+  async disable(data: ToggleTargetData): Promise<true> {
+    try {
+      await this.targetRepository.disable(data.campaignId, data.targetId, data.lockSecret)
+
+      return true
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code,
+          })
+        }
+      }
+
+      throw error
+    }
+  }
+
+  async appendLabel(data: AlterTargetLabelData): Promise<true> {
+    try {
+      await this.targetRepository.appendLabel(
+        data.campaignId,
+        data.targetId,
+        data.label,
+        data.lockSecret
+      )
+
+      return true
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code,
+          })
+        }
+      }
+
+      throw error
+    }
+  }
+
+  async removeLabel(data: AlterTargetLabelData): Promise<true> {
+    try {
+      await this.targetRepository.removeLabel(
+        data.campaignId,
+        data.targetId,
+        data.label,
+        data.lockSecret
+      )
+
+      return true
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code,
+          })
+        }
+      }
+
+      throw error
+    }
+  }
+
+  async delete(data: DeleteTargetData): Promise<true> {
+    try {
+      await this.targetRepository.delete(data.campaignId, data.targetId, data.lockSecret)
+
+      return true
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
+
+        if (arrayIncludes(knownErrorCodes, error.code)) {
+          throw new ReplServerError(error.message, {
+            code: error.code,
+          })
+        }
+      }
+
+      throw error
+    }
+  }
+
+  async list(data: ListTargetsData): Promise<TargetModel[]> {
+    const targets = await this.targetRepository.list(data.campaignId)
+
+    if (!targets) {
+      throw new ReplServerError(`Campaign not found`, {
+        code: 'NOT_FOUND',
+      })
+    }
+
+    return targets
+  }
+}

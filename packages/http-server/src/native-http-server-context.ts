@@ -1,4 +1,5 @@
-import { DIContainer, HttpBody, HttpConnection } from '@famir/common'
+import { DIContainer } from '@famir/common'
+import { HttpBody, HttpConnection } from '@famir/http-proto'
 import {
   HttpBodyWrap,
   HttpHeadersWrap,
@@ -7,7 +8,7 @@ import {
   HttpUrlWrap,
   isbot,
   UAParser,
-  UAResult
+  UAResult,
 } from '@famir/http-tools'
 import http from 'node:http'
 import { Duplex, Readable, Writable } from 'node:stream'
@@ -18,14 +19,16 @@ import {
   HttpServerContext,
   HttpServerContextFactory,
   HttpServerContextState,
-  HttpServerContextType
+  HttpServerContextType,
 } from './http-server.js'
 
 /**
- * Native HTTP server context factory
+ * Native HTTP server context factory implementation
+ *
+ * @category none
  */
 export class NativeHttpServerContextFactory implements HttpServerContextFactory {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -52,8 +55,10 @@ export class NativeHttpServerContextFactory implements HttpServerContextFactory 
   }
 }
 
-/*
+/**
  * Native HTTP server base context
+ *
+ * @category none
  */
 export abstract class NativeHttpServerBaseContext {
   readonly middlewares: string[] = []
@@ -83,9 +88,9 @@ export abstract class NativeHttpServerBaseContext {
       throw new HttpServerError(`Bad request`, {
         cause: error,
         context: {
-          reason: `Create context failed`
+          reason: `Create context failed`,
         },
-        code: 'BAD_REQUEST'
+        code: 'BAD_REQUEST',
       })
     }
   }
@@ -141,7 +146,7 @@ export abstract class NativeHttpServerBaseContext {
       server_client_ip: this.clientIp ?? null,
       server_forwarded_for: this.requestHeaders.getString('X-Forwarded-For') ?? null,
       server_forwarded_host: this.requestHeaders.getString('X-Forwarded-Host') ?? null,
-      server_forwarded_proto: this.requestHeaders.getString('X-Forwarded-Proto') ?? null
+      server_forwarded_proto: this.requestHeaders.getString('X-Forwarded-Proto') ?? null,
     }
   }
 
@@ -167,9 +172,9 @@ export abstract class NativeHttpServerBaseContext {
           reject(
             new HttpServerError(`Content too large`, {
               context: {
-                reason: `Request body size limit exceeded`
+                reason: `Request body size limit exceeded`,
               },
-              code: 'CONTENT_TOO_LARGE'
+              code: 'CONTENT_TOO_LARGE',
             })
           )
 
@@ -192,9 +197,9 @@ export abstract class NativeHttpServerBaseContext {
           new HttpServerError(`Bad request`, {
             cause: error,
             context: {
-              reason: `Load request body failed`
+              reason: `Load request body failed`,
             },
-            code: 'BAD_REQUEST'
+            code: 'BAD_REQUEST',
           })
         )
       })
@@ -209,9 +214,9 @@ export abstract class NativeHttpServerBaseContext {
             new HttpServerError(`Server internal error`, {
               cause: error,
               context: {
-                reason: `Send response body failed`
+                reason: `Send response body failed`,
               },
-              code: 'INTERNAL_ERROR'
+              code: 'INTERNAL_ERROR',
             })
           )
 
@@ -223,7 +228,7 @@ export abstract class NativeHttpServerBaseContext {
     })
   }
 
-  protected parseRawBody(chunks: Buffer[]): HttpBody {
+  private parseRawBody(chunks: Buffer[]): HttpBody {
     try {
       return Buffer.concat(chunks)
     } catch {
@@ -232,8 +237,10 @@ export abstract class NativeHttpServerBaseContext {
   }
 }
 
-/*
+/**
  * Native HTTP server normal context
+ *
+ * @category none
  */
 export class NativeHttpServerNormalContext
   extends NativeHttpServerBaseContext
@@ -274,9 +281,9 @@ export class NativeHttpServerNormalContext
       throw new HttpServerError(`Server internal error`, {
         context: {
           reason: `Unknown response status`,
-          status: this.status.get()
+          status: this.status.get(),
         },
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
       })
     }
 
@@ -309,8 +316,10 @@ export class NativeHttpServerNormalContext
   }
 }
 
-/*
+/**
  * Native HTTP server websocket context
+ *
+ * @category none
  */
 export class NativeHttpServerWebSocketContext
   extends NativeHttpServerBaseContext

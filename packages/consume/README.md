@@ -1,4 +1,3 @@
 # @famir/consume
 
-Famir consume infrastructure service.
-
+Consume infrastructure service.

@@ -1,18 +1,19 @@
-import { HttpBody, HttpJson, HttpText } from '@famir/common'
+import { HttpBody, HttpJson, HttpQueryString, HttpText } from '@famir/http-proto'
 import * as iconv from 'iconv-lite'
 import {
   formatQueryString,
   HttpFormatQueryStringOptions,
   HttpParseQueryStringOptions,
-  HttpQueryString,
-  parseQueryString
+  parseQueryString,
 } from './query-string.js'
 
-/*
- * HTTP body wrapper
+/**
+ * Represents a HTTP body wrapper
+ *
+ * @category none
  */
 export class HttpBodyWrap {
-  /*
+  /**
    * Create wrapper from scratch
    */
   static fromScratch(): HttpBodyWrap {
@@ -25,7 +26,7 @@ export class HttpBodyWrap {
     this.#body = body
   }
 
-  /*
+  /**
    * Clone wrapper
    */
   clone(): HttpBodyWrap {
@@ -34,14 +35,14 @@ export class HttpBodyWrap {
 
   #isFrozen: boolean = false
 
-  /*
+  /**
    * Wrapper frozen state
    */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
-  /*
+  /**
    * Freeze wrapper
    */
   freeze(): this {
@@ -50,21 +51,21 @@ export class HttpBodyWrap {
     return this
   }
 
-  /*
+  /**
    * Body size
    */
   get length(): number {
     return this.#body.length
   }
 
-  /*
+  /**
    * Get body
    */
   get(): HttpBody {
     return this.#body
   }
 
-  /*
+  /**
    * Set body
    */
   set(body: HttpBody): this {
@@ -79,7 +80,7 @@ export class HttpBodyWrap {
 
   #cacheBase64: string | null = null
 
-  /*
+  /**
    * Get base64 body
    */
   getBase64(): string {
@@ -94,7 +95,7 @@ export class HttpBodyWrap {
     return base64
   }
 
-  /*
+  /**
    * Set base64 body
    */
   setBase64(base64: string): this {
@@ -109,7 +110,7 @@ export class HttpBodyWrap {
 
   #cacheText: string | null = null
 
-  /*
+  /**
    * Get text body
    */
   getText(charset: string = 'utf8'): HttpText {
@@ -124,7 +125,7 @@ export class HttpBodyWrap {
     return text
   }
 
-  /*
+  /**
    * Set text body
    */
   setText(text: HttpText, charset: string = 'utf8'): this {
@@ -139,7 +140,7 @@ export class HttpBodyWrap {
 
   #cacheJson: HttpJson | null = null
 
-  /*
+  /**
    * Get json body
    */
   getJson(charset?: string): HttpJson {
@@ -159,7 +160,7 @@ export class HttpBodyWrap {
     return json
   }
 
-  /*
+  /**
    * Set json body
    */
   setJson(json: HttpJson, charset?: string): this {
@@ -173,19 +174,19 @@ export class HttpBodyWrap {
     return this
   }
 
-  /*
+  /**
    * Custom parse query-string options
    */
   readonly parseQueryStringOptions: HttpParseQueryStringOptions = {}
 
-  /*
+  /**
    * Custom format query-string options
    */
   readonly formatQueryStringOptions: HttpFormatQueryStringOptions = {}
 
   #cacheQueryString: HttpQueryString | null = null
 
-  /*
+  /**
    * Get query-string body
    */
   getQueryString(charset?: string): HttpQueryString {
@@ -196,7 +197,7 @@ export class HttpBodyWrap {
     const text = this.getText(charset)
     const queryString = parseQueryString(text, {
       ...this.parseQueryStringOptions,
-      ignoreQueryPrefix: true
+      ignoreQueryPrefix: true,
     })
 
     this.#cacheQueryString = queryString
@@ -204,7 +205,7 @@ export class HttpBodyWrap {
     return queryString
   }
 
-  /*
+  /**
    * Set query-string body
    */
   setQueryString(queryString: HttpQueryString, charset?: string): this {
@@ -212,7 +213,7 @@ export class HttpBodyWrap {
 
     const text = formatQueryString(queryString, {
       ...this.formatQueryStringOptions,
-      addQueryPrefix: true
+      addQueryPrefix: true,
     })
     this.setText(text, charset)
 
@@ -221,7 +222,7 @@ export class HttpBodyWrap {
     return this
   }
 
-  /*
+  /**
    * Cleanup wrapper
    */
   reset(): this {
@@ -234,13 +235,13 @@ export class HttpBodyWrap {
     return this
   }
 
-  protected sureNotFrozen(name: string) {
+  private sureNotFrozen(name: string) {
     if (this.isFrozen) {
       throw new Error(`Body frozen on ${name}`)
     }
   }
 
-  protected invalidateCacheAll() {
+  private invalidateCacheAll() {
     this.#cacheBase64 = null
     this.#cacheText = null
     this.#cacheJson = null

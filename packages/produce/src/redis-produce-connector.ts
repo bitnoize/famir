@@ -7,24 +7,23 @@ import {
   PRODUCE_CONNECTOR,
   ProduceConnector,
   RedisProduceConnection,
-  RedisProduceConnectorOptions
+  RedisProduceConnectorOptions,
 } from './produce.js'
 
-/*
+/**
  * Redis produce connector implementation
+ *
+ * @category none
+ * @see [ioredis home](https://ioredis.com)
  */
 export class RedisProduceConnector implements ProduceConnector {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
     container.registerSingleton<ProduceConnector>(
       PRODUCE_CONNECTOR,
-      (c) =>
-        new RedisProduceConnector(
-          c.resolve<Config<BullProduceConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER)
-        )
+      (c) => new RedisProduceConnector(c.resolve(CONFIG), c.resolve(LOGGER))
     )
   }
 
@@ -32,45 +31,36 @@ export class RedisProduceConnector implements ProduceConnector {
   protected readonly redis: RedisProduceConnection
 
   constructor(
-    config: Config<BullProduceConfig>,
+    protected readonly config: Config<BullProduceConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)
 
     this.redis = new Redis(this.options.connectionUrl, {
       //lazyConnect: true,
-      connectionName: 'produce'
+      connectionName: 'produce',
     })
 
     this.redis.on('error', (error) => {
       this.logger.error(`Redis error event`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
     })
 
     this.logger.debug(`ProduceConnector initialized`)
   }
 
-  /*
-   * Get connection object
-   */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   getConnection<T>(): T {
     return this.redis as T
   }
 
-  /*
-   * Connect to Redis
-   */
   //async connect(): Promise<void> {
   //  await this.redis.connect()
   //
   //  this.logger.debug(`ProduceConnector connected`)
   //}
 
-  /*
-   * Close connection
-   */
   async close(): Promise<void> {
     await this.redis.quit()
 
@@ -79,7 +69,7 @@ export class RedisProduceConnector implements ProduceConnector {
 
   private buildOptions(config: BullProduceConfig): RedisProduceConnectorOptions {
     return {
-      connectionUrl: config.PRODUCE_CONNECTION_URL
+      connectionUrl: config.PRODUCE_CONNECTION_URL,
     }
   }
 }

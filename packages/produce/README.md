@@ -1,4 +1,3 @@
 # @famir/produce
 
-Famir produce infrastructure service.
-
+Produce infrastructure service.

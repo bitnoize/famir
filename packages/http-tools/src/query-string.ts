@@ -1,11 +1,21 @@
+import { HttpQueryString } from '@famir/http-proto'
 import qs from 'qs'
 
-export type HttpQueryString = Record<string, unknown>
+/**
+ * @category none
+ * @internal
+ */
 export type HttpParseQueryStringOptions = qs.IParseBaseOptions
+
+/**
+ * @category none
+ * @internal
+ */
 export type HttpFormatQueryStringOptions = qs.IStringifyBaseOptions
 
-/*
- * Parse query-string
+/**
+ * @category none
+ * @internal
  */
 export function parseQueryString(
   value: string,
@@ -14,8 +24,9 @@ export function parseQueryString(
   return qs.parse(value.trim(), options)
 }
 
-/*
- * Format query-string
+/**
+ * @category none
+ * @internal
  */
 export function formatQueryString(
   queryString: HttpQueryString,

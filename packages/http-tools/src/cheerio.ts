@@ -1,15 +1,14 @@
-import * as cheerio from 'cheerio'
-
-export type CheerioAPI = cheerio.CheerioAPI
-export type CheerioOptions = cheerio.CheerioOptions
-
-/*
- * Load and parse HTML
+/**
+ * @category none
  */
-export function cheerioLoad(
-  value: string,
-  options?: CheerioOptions,
-  isDocument?: boolean
-): CheerioAPI {
-  return cheerio.load(value, options, isDocument)
-}
+export { CheerioAPI } from 'cheerio'
+
+/**
+ * @category none
+ */
+export { CheerioOptions } from 'cheerio'
+
+/**
+ * @category none
+ */
+export { load as cheerioLoad } from 'cheerio'

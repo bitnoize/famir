@@ -1,11 +1,19 @@
+/**
+ * @category none
+ */
 export type ErrorContext = Record<string, unknown>
 
+/**
+ * @category none
+ */
 export type CommonErrorOptions = ErrorOptions & {
   context?: ErrorContext | undefined
 }
 
-/*
- * Common error object
+/**
+ * Represents a common error
+ *
+ * @category none
  */
 export abstract class CommonError extends Error {
   context: ErrorContext = {}
@@ -26,7 +34,7 @@ export abstract class CommonError extends Error {
     Object.defineProperty(this, 'stack', {
       value: undefined,
       writable: true,
-      configurable: true
+      configurable: true,
     })
   }
 }

@@ -30,13 +30,13 @@ local function create_redirector(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -48,13 +48,13 @@ local function create_redirector(keys, args)
     created_at = tonumber(args[4]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
 
-    if (field == 'campaign_id' or field == 'redirector_id') and value == '' then
-      return redis.error_reply('ERR Wrong model.' .. field)
+    if (k == 'campaign_id' or k == 'redirector_id') and v == '' then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -66,9 +66,9 @@ local function create_redirector(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', redirector_key, unpack(store))
@@ -123,9 +123,9 @@ local function read_redirector(keys, args)
     created_at = tonumber(values[4]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -143,12 +143,13 @@ redis.register_function({
   Read full redirector
 --]]
 local function read_full_redirector(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
+  if #keys ~= 3 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local redirector_key = keys[2]
+  local redirector_fields_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
@@ -176,13 +177,14 @@ local function read_full_redirector(keys, args)
     campaign_id = values[1],
     redirector_id = values[2],
     page = values[3],
+    fields = redis.call('SMEMBERS', redirector_fields_key),
     lure_count = tonumber(values[4]),
     created_at = tonumber(values[5]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -250,13 +252,13 @@ local function update_redirector(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -267,22 +269,22 @@ local function update_redirector(keys, args)
   local model = {}
 
   for i = 1, #args, 2 do
-    local field, value = args[i], args[i + 1]
+    local k, v = args[i], args[i + 1]
 
-    if model[field] then
-      return redis.error_reply('ERR Duplicate model.' .. field)
+    if model[k] then
+      return redis.error_reply('ERR Duplicate model.' .. k)
     end
 
-    if field == 'page' then
-      model.page = value
+    if k == 'page' then
+      model.page = v
     else
-      return redis.error_reply('ERR Unknown model.' .. field)
+      return redis.error_reply('ERR Unknown model.' .. k)
     end
   end
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -298,9 +300,9 @@ local function update_redirector(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', redirector_key, unpack(store))
@@ -315,17 +317,142 @@ redis.register_function({
 })
 
 --[[
-  Delete redirector
+  Append redirector field
 --]]
-local function delete_redirector(keys, args)
-  if #keys ~= 4 or #args ~= 1 then
+local function append_redirector_field(keys, args)
+  if #keys ~= 4 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local redirector_key = keys[3]
-  local redirector_index_key = keys[4]
+  local redirector_fields_key = keys[4]
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if redis.call('EXISTS', redirector_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Redirector not exists')
+  end
+
+  local stash = {
+    field = args[1],
+    lock_secret = args[2],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
+  }
+
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+
+    if (k == 'field' or k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+  end
+
+  if redis.call('SISMEMBER', redirector_fields_key, stash.field) ~= 0 then
+    return redis.status_reply('OK Redirector field allready exists')
+  end
+
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  -- Point of no return
+
+  redis.call('SADD', redirector_fields_key, stash.field)
+
+  return redis.status_reply('OK Redirector field appended')
+end
+
+redis.register_function({
+  function_name = 'append_redirector_field',
+  callback = append_redirector_field,
+  description = 'Append redirector field',
+})
+
+--[[
+  Remove redirector field
+--]]
+local function remove_redirector_field(keys, args)
+  if #keys ~= 4 or #args ~= 2 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local campaign_lock_key = keys[2]
+  local redirector_key = keys[3]
+  local redirector_fields_key = keys[4]
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+    return redis.status_reply('FORBIDDEN Campaign not locked')
+  end
+
+  if redis.call('EXISTS', redirector_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Redirector not exists')
+  end
+
+  local stash = {
+    field = args[1],
+    lock_secret = args[2],
+    orig_lock_secret = redis.call('GET', campaign_lock_key),
+  }
+
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+
+    if (k == 'field' or k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+  end
+
+  if redis.call('SISMEMBER', redirector_fields_key, stash.field) ~= 1 then
+    return redis.status_reply('OK Redirector field not exists')
+  end
+
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  -- Point of no return
+
+  redis.call('SREM', redirector_fields_key, stash.field)
+
+  return redis.status_reply('OK Redirector field removed')
+end
+
+redis.register_function({
+  function_name = 'remove_redirector_field',
+  callback = remove_redirector_field,
+  description = 'Remove redirector field',
+})
+
+--[[
+  Delete redirector
+--]]
+local function delete_redirector(keys, args)
+  if #keys ~= 5 or #args ~= 1 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local campaign_lock_key = keys[2]
+  local redirector_key = keys[3]
+  local redirector_fields_key = keys[4]
+  local redirector_index_key = keys[5]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND campaign not exists')
@@ -346,20 +473,17 @@ local function delete_redirector(keys, args)
     lure_count = tonumber(redis.call('HGET', redirector_key, 'lure_count')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if
-      (field == 'lock_secret' or field == 'orig_lock_secret' or field == 'redirector_id')
-      and value == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'redirector_id') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if field == 'lure_count' and value < 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if k == 'lure_count' and v < 0 then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -374,6 +498,7 @@ local function delete_redirector(keys, args)
   -- Point of no return
 
   redis.call('DEL', redirector_key)
+  redis.call('DEL', redirector_fields_key)
 
   redis.call('ZREM', redirector_index_key, stash.redirector_id)
 
@@ -383,5 +508,5 @@ end
 redis.register_function({
   function_name = 'delete_redirector',
   callback = delete_redirector,
-  description = 'Delete target',
+  description = 'Delete redirector',
 })

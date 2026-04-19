@@ -34,16 +34,13 @@ local function create_target(keys, args)
     mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if
-      (field == 'lock_secret' or field == 'orig_lock_secret' or field == 'mirror_domain')
-      and value == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'mirror_domain') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -74,24 +71,24 @@ local function create_target(keys, args)
     created_at = tonumber(args[22]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
 
     if
       (
-        field == 'campaign_id'
-        or field == 'target_id'
-        or field == 'access_level'
-        or field == 'donor_sub'
-        or field == 'donor_domain'
-        or field == 'donor_port'
-        or field == 'mirror_sub'
-        or field == 'mirror_port'
-      ) and value == ''
+        k == 'campaign_id'
+        or k == 'target_id'
+        or k == 'access_level'
+        or k == 'donor_sub'
+        or k == 'donor_domain'
+        or k == 'donor_port'
+        or k == 'mirror_sub'
+        or k == 'mirror_port'
+      ) and v == ''
     then
-      return redis.error_reply('ERR Wrong model.' .. field)
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -131,9 +128,9 @@ local function create_target(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', target_key, unpack(store))
@@ -159,13 +156,12 @@ redis.register_function({
   Read target
 --]]
 local function read_target(keys, args)
-  if #keys ~= 3 or #args ~= 0 then
+  if #keys ~= 2 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local target_key = keys[2]
-  local target_labels_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
@@ -209,15 +205,14 @@ local function read_target(keys, args)
     mirror_sub = values[9],
     mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
     mirror_port = values[10],
-    labels = redis.call('SMEMBERS', target_labels_key),
     is_enabled = tonumber(values[11]),
     message_count = tonumber(values[12]),
     created_at = tonumber(values[13]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -313,9 +308,9 @@ local function read_full_target(keys, args)
     created_at = tonumber(values[24]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -420,13 +415,13 @@ local function update_target(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -437,42 +432,42 @@ local function update_target(keys, args)
   local model = {}
 
   for i = 1, #args, 2 do
-    local field, value = args[i], args[i + 1]
+    local k, v = args[i], args[i + 1]
 
-    if model[field] then
-      return redis.error_reply('ERR Duplicate model.' .. field)
+    if model[k] then
+      return redis.error_reply('ERR Duplicate model.' .. k)
     end
 
-    if field == 'connect_timeout' then
-      model.connect_timeout = tonumber(value)
-    elseif field == 'simple_timeout' then
-      model.simple_timeout = tonumber(value)
-    elseif field == 'stream_timeout' then
-      model.stream_timeout = tonumber(value)
-    elseif field == 'headers_size_limit' then
-      model.headers_size_limit = tonumber(value)
-    elseif field == 'body_size_limit' then
-      model.body_size_limit = tonumber(value)
-    elseif field == 'main_page' then
-      model.main_page = value
-    elseif field == 'not_found_page' then
-      model.not_found_page = value
-    elseif field == 'favicon_ico' then
-      model.favicon_ico = value
-    elseif field == 'robots_txt' then
-      model.robots_txt = value
-    elseif field == 'sitemap_xml' then
-      model.sitemap_xml = value
-    elseif field == 'allow_websockets' then
-      model.allow_websockets = tonumber(value)
+    if k == 'connect_timeout' then
+      model.connect_timeout = tonumber(v)
+    elseif k == 'simple_timeout' then
+      model.simple_timeout = tonumber(v)
+    elseif k == 'stream_timeout' then
+      model.stream_timeout = tonumber(v)
+    elseif k == 'headers_size_limit' then
+      model.headers_size_limit = tonumber(v)
+    elseif k == 'body_size_limit' then
+      model.body_size_limit = tonumber(v)
+    elseif k == 'main_page' then
+      model.main_page = v
+    elseif k == 'not_found_page' then
+      model.not_found_page = v
+    elseif k == 'favicon_ico' then
+      model.favicon_ico = v
+    elseif k == 'robots_txt' then
+      model.robots_txt = v
+    elseif k == 'sitemap_xml' then
+      model.sitemap_xml = v
+    elseif k == 'allow_websockets' then
+      model.allow_websockets = tonumber(v)
     else
-      return redis.error_reply('ERR Unknown model.' .. field)
+      return redis.error_reply('ERR Unknown model.' .. k)
     end
   end
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -488,9 +483,9 @@ local function update_target(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', target_key, unpack(store))
@@ -534,13 +529,13 @@ local function enable_target(keys, args)
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -595,13 +590,13 @@ local function disable_target(keys, args)
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (field == 'lock_secret' or field == 'orig_lock_secret') and value == '' then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -657,15 +652,13 @@ local function append_target_label(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if
-      (field == 'label' or field == 'lock_secret' or field == 'orig_lock_secret') and value == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'label' or k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -721,15 +714,13 @@ local function remove_target_label(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if
-      (field == 'label' or field == 'lock_secret' or field == 'orig_lock_secret') and value == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if (k == 'label' or k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -797,26 +788,26 @@ local function delete_target(keys, args)
     is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
     if
       (
-        field == 'lock_secret'
-        or field == 'orig_lock_secret'
-        or field == 'campaign_id'
-        or field == 'target_id'
-        or field == 'donor_sub'
-        or field == 'donor_domain'
-        or field == 'donor_port'
-        or field == 'mirror_sub'
-        or field == 'mirror_domain'
-        or field == 'mirror_port'
-      ) and value == ''
+        k == 'lock_secret'
+        or k == 'orig_lock_secret'
+        or k == 'campaign_id'
+        or k == 'target_id'
+        or k == 'donor_sub'
+        or k == 'donor_domain'
+        or k == 'donor_port'
+        or k == 'mirror_sub'
+        or k == 'mirror_domain'
+        or k == 'mirror_port'
+      ) and v == ''
     then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 

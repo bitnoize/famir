@@ -13,34 +13,32 @@ import {
   REPL_SERVER_BANNER_GREET,
   REPL_SERVER_BANNER_LEAVE,
   REPL_SERVER_ROUTER,
-  ReplServer
+  ReplServer,
 } from './repl-server.js'
 
-/*
+/**
  * Net REPL server implementation
+ *
+ * @category none
  */
 export class NetReplServer implements ReplServer {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
-      (c) =>
-        new NetReplServer(
-          c.resolve<Config<NetReplServerConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
-        )
+      (c) => new NetReplServer(c.resolve(CONFIG), c.resolve(LOGGER), c.resolve(REPL_SERVER_ROUTER))
     )
   }
 
   protected readonly options: NetReplServerOptions
   protected readonly server: net.Server
-  protected readonly clients = new Set<net.Socket>()
+
+  protected readonly clients: Set<net.Socket> = new Set()
 
   constructor(
-    config: Config<NetReplServerConfig>,
+    protected readonly config: Config<NetReplServerConfig>,
     protected readonly logger: Logger,
     protected readonly router: ReplServerRouter
   ) {
@@ -60,18 +58,18 @@ export class NetReplServer implements ReplServer {
       })
 
       socket.on('error', (error) => {
-        socket.destroy()
-
         this.logger.error(`ReplServer socket error`, {
-          error: serializeError(error)
+          error: serializeError(error),
         })
+
+        socket.destroy()
       })
 
       socket.setTimeout(this.options.socketTimeout)
 
       this.handleConnection(socket).catch((error: unknown) => {
         this.logger.error(`ReplServer unexpected connection error`, {
-          error: serializeError(error)
+          error: serializeError(error),
         })
 
         if (!socket.destroyed) {
@@ -85,18 +83,12 @@ export class NetReplServer implements ReplServer {
     this.logger.debug(`ReplServer initialized`)
   }
 
-  /*
-   * Start server
-   */
   async start(): Promise<void> {
     await this.listen()
 
     this.logger.debug(`ReplServer started`)
   }
 
-  /*
-   * Stop server
-   */
   async stop(): Promise<void> {
     await this.close()
 
@@ -104,26 +96,25 @@ export class NetReplServer implements ReplServer {
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
-  protected async handleConnection(socket: net.Socket): Promise<void> {
+  private async handleConnection(socket: net.Socket): Promise<void> {
     try {
       this.replServerStart(socket)
     } catch (error) {
       this.logger.error(`ReplServer handle connection error`, {
-        error: serializeError(error)
+        error: serializeError(error),
       })
 
-      socket.end()
+      if (!socket.writableEnded) {
+        socket.end()
+      }
     }
   }
 
-  protected replServerStart(socket: net.Socket): repl.REPLServer {
-    const bannerGreet = this.router.getAsset('banner-greet.txt') ?? REPL_SERVER_BANNER_GREET
-    const bannerLeave = this.router.getAsset('banner-leave.txt') ?? REPL_SERVER_BANNER_LEAVE
-
+  private replServerStart(socket: net.Socket): repl.REPLServer {
     const replServer = repl.start({
       input: socket,
       output: socket,
-      terminal: true,
+      terminal: false,
       useGlobal: false,
       prompt: this.options.prompt,
       ignoreUndefined: true,
@@ -131,8 +122,8 @@ export class NetReplServer implements ReplServer {
       writer: (output) =>
         util.inspect(output, {
           depth: 4,
-          colors: this.options.useColors
-        })
+          colors: this.options.useColors,
+        }),
     })
 
     replServer.on('reset', (context) => {
@@ -140,68 +131,30 @@ export class NetReplServer implements ReplServer {
     })
 
     replServer.on('exit', () => {
-      socket.end(bannerLeave + '\n')
+      socket.end(this.getBannerLeave() + '\n')
     })
 
     this.defineContext(replServer.context)
     this.defineCommands(replServer, socket)
 
-    socket.write(bannerGreet + '\n')
+    socket.write(this.getBannerGreet() + '\n')
 
     replServer.displayPrompt()
 
     return replServer
   }
 
-  protected defineContext(context: object) {
-    const apiCalls: Record<string, unknown> = {}
-
-    this.router.getApiCalls().forEach(([apiCallName, apiCall]) => {
-      apiCalls[apiCallName] = async (data: unknown): Promise<unknown> => {
-        try {
-          return await apiCall(data)
-        } catch (error) {
-          if (error instanceof ReplServerError) {
-            error.context['apiCall'] = apiCallName
-            error.context['data'] = data
-
-            throw error
-          } else {
-            throw new ReplServerError(`Server internal error`, {
-              cause: error,
-              context: {
-                apiCall: apiCallName,
-                data
-              },
-              code: 'INTERNAL_ERROR'
-            })
-          }
-        }
-      }
-    })
-
+  private defineContext(context: object) {
     Object.defineProperty(context, 'famir', {
-      value: apiCalls
+      value: this.wrapApiCalls(),
     })
 
-    Object.defineProperty(context, 'getAssetNames', {
-      value: (): string[] => {
-        return this.router.getAssetNames()
-      }
-    })
-
-    Object.defineProperty(context, 'getAsset', {
-      value: (assetName: unknown): string | undefined => {
-        if (!(assetName && typeof assetName === 'string')) {
-          throw new TypeError(`Asset name not a string`)
-        }
-
-        return this.router.getAsset(assetName)
-      }
+    Object.defineProperty(context, 'assets', {
+      value: this.router.buildAssets(),
     })
   }
 
-  protected defineCommands(replServer: repl.REPLServer, socket: net.Socket) {
+  private defineCommands(replServer: repl.REPLServer, socket: net.Socket) {
     replServer.defineCommand('conns', {
       help: `Show connections`,
       action: () => {
@@ -219,11 +172,11 @@ export class NetReplServer implements ReplServer {
         socket.write(`\n`)
 
         replServer.displayPrompt()
-      }
+      },
     })
   }
 
-  protected listen(): Promise<void> {
+  private listen(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this.server.off('listening', listeningHandler)
@@ -244,7 +197,7 @@ export class NetReplServer implements ReplServer {
     })
   }
 
-  protected close(): Promise<void> {
+  private close(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const errorHandler = (error: Error) => {
         this.server.off('close', closeHandler)
@@ -275,6 +228,44 @@ export class NetReplServer implements ReplServer {
     })
   }
 
+  private wrapApiCalls(): Record<string, unknown> {
+    const apiCalls: Record<string, unknown> = {}
+
+    this.router.getApiCalls().forEach(([apiCallName, apiCall]) => {
+      apiCalls[apiCallName] = async (data: unknown): Promise<unknown> => {
+        try {
+          return await apiCall(data)
+        } catch (error) {
+          if (error instanceof ReplServerError) {
+            error.context['apiCall'] = apiCallName
+            error.context['data'] = data
+
+            throw error
+          } else {
+            throw new ReplServerError(`Server internal error`, {
+              cause: error,
+              context: {
+                apiCall: apiCallName,
+                data,
+              },
+              code: 'INTERNAL_ERROR',
+            })
+          }
+        }
+      }
+    })
+
+    return apiCalls
+  }
+
+  private getBannerGreet(): string {
+    return this.router.getAsset('banner-greet.txt') ?? REPL_SERVER_BANNER_GREET
+  }
+
+  private getBannerLeave(): string {
+    return this.router.getAsset('banner-leave.txt') ?? REPL_SERVER_BANNER_LEAVE
+  }
+
   private buildOptions(config: NetReplServerConfig): NetReplServerOptions {
     return {
       address: config.REPL_SERVER_ADDRESS,
@@ -282,7 +273,7 @@ export class NetReplServer implements ReplServer {
       maxClients: config.REPL_SERVER_MAX_CLIENTS,
       socketTimeout: config.REPL_SERVER_SOCKET_TIMEOUT,
       prompt: config.REPL_SERVER_PROMPT,
-      useColors: config.REPL_SERVER_USE_COLORS
+      useColors: config.REPL_SERVER_USE_COLORS,
     }
   }
 }

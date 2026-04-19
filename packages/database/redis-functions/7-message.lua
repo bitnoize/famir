@@ -38,13 +38,13 @@ local function create_message(keys, args)
     message_expire = tonumber(redis.call('HGET', campaign_key, 'message_expire')),
   }
 
-  for field, value in pairs(stash) do
-    if not value then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if field == 'message_expire' and value <= 0 then
-      return redis.error_reply('ERR Wrong stash.' .. field)
+    if k == 'message_expire' and v <= 0 then
+      return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
@@ -65,30 +65,30 @@ local function create_message(keys, args)
     connection = args[14],
     payload = args[15],
     errors = args[16],
-    processor = args[17],
+    analyze = args[17],
     start_time = tonumber(args[18]),
     finish_time = tonumber(args[19]),
     created_at = tonumber(args[20]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Wrong model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
 
     if
       (
-        field == 'campaign_id'
-        or field == 'message_id'
-        or field == 'proxy_id'
-        or field == 'target_id'
-        or field == 'session_id'
-        or field == 'type'
-        or field == 'method'
-        or field == 'url'
-      ) and value == ''
+        k == 'campaign_id'
+        or k == 'message_id'
+        or k == 'proxy_id'
+        or k == 'target_id'
+        or k == 'session_id'
+        or k == 'type'
+        or k == 'method'
+        or k == 'url'
+      ) and v == ''
     then
-      return redis.error_reply('ERR Wrong model.' .. field)
+      return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
 
@@ -96,9 +96,9 @@ local function create_message(keys, args)
 
   local store = {}
 
-  for field, value in pairs(model) do
-    table.insert(store, field)
-    table.insert(store, value)
+  for k, v in pairs(model) do
+    table.insert(store, k)
+    table.insert(store, v)
   end
 
   redis.call('HSET', message_key, unpack(store))
@@ -200,7 +200,7 @@ local function read_message(keys, args)
     'method',
     'url',
     'status',
-    'processor',
+    'analyze',
     'start_time',
     'finish_time',
     'created_at'
@@ -220,15 +220,15 @@ local function read_message(keys, args)
     method = values[7],
     url = values[8],
     status = tonumber(values[9]),
-    processor = values[10],
+    analyze = values[10],
     start_time = tonumber(values[11]),
     finish_time = tonumber(values[12]),
     created_at = tonumber(values[13]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 
@@ -280,7 +280,7 @@ local function read_full_message(keys, args)
     'connection',
     'payload',
     'errors',
-    'processor',
+    'analyze',
     'start_time',
     'finish_time',
     'created_at'
@@ -307,15 +307,15 @@ local function read_full_message(keys, args)
     connection = values[14],
     payload = values[15],
     errors = values[16],
-    processor = values[17],
+    analyze = values[17],
     start_time = tonumber(values[18]),
     finish_time = tonumber(values[19]),
     created_at = tonumber(values[20]),
   }
 
-  for field, value in pairs(model) do
-    if not value then
-      return redis.error_reply('ERR Malform model.' .. field)
+  for k, v in pairs(model) do
+    if not v then
+      return redis.error_reply('ERR Malform model.' .. k)
     end
   end
 

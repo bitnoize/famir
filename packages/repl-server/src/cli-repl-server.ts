@@ -12,32 +12,29 @@ import {
   REPL_SERVER_BANNER_GREET,
   REPL_SERVER_BANNER_LEAVE,
   REPL_SERVER_ROUTER,
-  ReplServer
+  ReplServer,
 } from './repl-server.js'
 
-/*
+/**
  * Cli REPL server implementation
+ *
+ * @category none
  */
 export class CliReplServer implements ReplServer {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
-      (c) =>
-        new CliReplServer(
-          c.resolve<Config<CliReplServerConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
-        )
+      (c) => new CliReplServer(c.resolve(CONFIG), c.resolve(LOGGER), c.resolve(REPL_SERVER_ROUTER))
     )
   }
 
   protected readonly options: CliReplServerOptions
 
   constructor(
-    config: Config<CliReplServerConfig>,
+    protected readonly config: Config<CliReplServerConfig>,
     protected readonly logger: Logger,
     protected readonly router: ReplServerRouter
   ) {
@@ -48,9 +45,6 @@ export class CliReplServer implements ReplServer {
 
   protected replServer: repl.REPLServer | null = null
 
-  /*
-   * Start server
-   */
   // eslint-disable-next-line @typescript-eslint/require-await
   async start(): Promise<void> {
     if (!this.replServer) {
@@ -60,9 +54,6 @@ export class CliReplServer implements ReplServer {
     }
   }
 
-  /*
-   * Stop server
-   */
   // eslint-disable-next-line @typescript-eslint/require-await
   async stop(): Promise<void> {
     if (this.replServer) {
@@ -74,10 +65,7 @@ export class CliReplServer implements ReplServer {
     }
   }
 
-  protected replServerStart(): repl.REPLServer {
-    const bannerGreet = this.router.getAsset('banner-greet.txt') ?? REPL_SERVER_BANNER_GREET
-    const bannerLeave = this.router.getAsset('banner-leave.txt') ?? REPL_SERVER_BANNER_LEAVE
-
+  private replServerStart(): repl.REPLServer {
     const replServer = repl.start({
       terminal: true,
       useGlobal: false,
@@ -87,8 +75,8 @@ export class CliReplServer implements ReplServer {
       writer: (output) =>
         util.inspect(output, {
           depth: 4,
-          colors: this.options.useColors
-        })
+          colors: this.options.useColors,
+        }),
     })
 
     replServer.on('reset', (context) => {
@@ -96,7 +84,7 @@ export class CliReplServer implements ReplServer {
     })
 
     replServer.on('exit', () => {
-      console.log(bannerLeave)
+      console.log(this.getBannerLeave())
 
       process.kill(process.pid, 'SIGINT')
     })
@@ -104,14 +92,26 @@ export class CliReplServer implements ReplServer {
     this.defineContext(replServer.context)
     //this.defineCommands(replServer)
 
-    console.log(bannerGreet)
+    console.log(this.getBannerGreet())
 
     replServer.displayPrompt()
 
     return replServer
   }
 
-  protected defineContext(context: object) {
+  private defineContext(context: object) {
+    Object.defineProperty(context, 'famir', {
+      value: this.wrapApiCalls(),
+    })
+
+    Object.defineProperty(context, 'assets', {
+      value: this.router.buildAssets(),
+    })
+  }
+
+  //private defineCommands(replServer: repl.REPLServer) {}
+
+  private wrapApiCalls(): Record<string, unknown> {
     const apiCalls: Record<string, unknown> = {}
 
     this.router.getApiCalls().forEach(([apiCallName, apiCall]) => {
@@ -129,42 +129,30 @@ export class CliReplServer implements ReplServer {
               cause: error,
               context: {
                 apiCall: apiCallName,
-                data
+                data,
               },
-              code: 'INTERNAL_ERROR'
+              code: 'INTERNAL_ERROR',
             })
           }
         }
       }
     })
 
-    Object.defineProperty(context, 'famir', {
-      value: apiCalls
-    })
-
-    Object.defineProperty(context, 'getAssetNames', {
-      value: (): string[] => {
-        return this.router.getAssetNames()
-      }
-    })
-
-    Object.defineProperty(context, 'getAsset', {
-      value: (assetName: unknown): string | undefined => {
-        if (!(assetName && typeof assetName === 'string')) {
-          throw new TypeError(`Asset name not a string`)
-        }
-
-        return this.router.getAsset(assetName)
-      }
-    })
+    return apiCalls
   }
 
-  //protected defineCommands(replServer: repl.REPLServer) {}
+  private getBannerGreet(): string {
+    return this.router.getAsset('banner-greet.txt') ?? REPL_SERVER_BANNER_GREET
+  }
+
+  private getBannerLeave(): string {
+    return this.router.getAsset('banner-leave.txt') ?? REPL_SERVER_BANNER_LEAVE
+  }
 
   private buildOptions(config: CliReplServerConfig): CliReplServerOptions {
     return {
       prompt: config.REPL_SERVER_PROMPT,
-      useColors: config.REPL_SERVER_USE_COLORS
+      useColors: config.REPL_SERVER_USE_COLORS,
     }
   }
 }

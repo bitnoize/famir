@@ -6,6 +6,7 @@
     { "path": "packages/config" },
     { "path": "packages/logger" },
     { "path": "packages/templater" },
+    { "path": "packages/http-proto" },
     { "path": "packages/database" },
     { "path": "packages/storage" },
     { "path": "packages/produce" },

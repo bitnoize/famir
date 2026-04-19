@@ -1,10 +1,18 @@
 import { JSONSchemaType } from '@famir/validator'
 
+/**
+ * @category none
+ * @internal
+ */
 export const configRedisDatabaseConnectionUrlSchema: JSONSchemaType<string> = {
-  type: 'string'
+  type: 'string',
 } as const
 
+/**
+ * @category none
+ * @internal
+ */
 export const configRedisDatabasePrefixSchema: JSONSchemaType<string> = {
   type: 'string',
-  default: 'famir'
+  default: 'famir',
 } as const

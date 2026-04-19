@@ -3,11 +3,14 @@ import { Ajv, ValidateFunction } from 'ajv'
 import { ValidatorError } from './validator.error.js'
 import { VALIDATOR, Validator, ValidatorSchemas } from './validator.js'
 
-/*
+/**
  * Ajv validator implementation
+ *
+ * @category none
+ * @see [Ajv home](https://ajv.js.org/)
  */
 export class AjvValidator implements Validator {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -23,21 +26,15 @@ export class AjvValidator implements Validator {
       coerceTypes: true,
       removeAdditional: true,
       allowUnionTypes: true,
-      strictTypes: true
+      strictTypes: true,
       //strictTuples: true // FIXME
     })
   }
 
-  /*
-   * Get schema by name
-   */
   getSchema(name: string): object | undefined {
     return this.ajv.getSchema(name)
   }
 
-  /*
-   * Add schema object
-   */
   addSchema(name: string, schema: object) {
     const existsSchema = this.getSchema(name)
     if (existsSchema) {
@@ -47,9 +44,6 @@ export class AjvValidator implements Validator {
     this.ajv.addSchema(schema, name)
   }
 
-  /*
-   * Bulk adding schemas
-   */
   addSchemas(schemas: ValidatorSchemas) {
     Object.entries(schemas).forEach(([name, schema]) => {
       this.addSchema(name, schema)
@@ -66,9 +60,6 @@ export class AjvValidator implements Validator {
     return validate
   }
 
-  /*
-   * Safe validate data
-   */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   guardSchema<T>(name: string, data: unknown): data is T {
     const validate = this.getValidate<T>(name)
@@ -76,9 +67,6 @@ export class AjvValidator implements Validator {
     return validate(data) ? true : false
   }
 
-  /*
-   * Validate data with exception on fail
-   */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   assertSchema<T>(name: string, data: unknown): asserts data is T {
     const validate = this.getValidate<T>(name)
@@ -91,16 +79,16 @@ export class AjvValidator implements Validator {
           schemaPath: error.schemaPath,
           params: error.params,
           propertyName: error.propertyName,
-          message: error.message
+          message: error.message,
         }
       })
 
       throw new ValidatorError(`JSON-Schema assertion failed`, {
         context: {
-          schemaName: name
+          schemaName: name,
           //data
         },
-        validateErrors
+        validateErrors,
       })
     }
   }

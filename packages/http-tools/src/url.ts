@@ -1,24 +1,25 @@
-import { HttpUrl } from '@famir/common'
+import { HttpQueryString, HttpUrl } from '@famir/http-proto'
 import {
   formatQueryString,
   HttpFormatQueryStringOptions,
   HttpParseQueryStringOptions,
-  HttpQueryString,
-  parseQueryString
+  parseQueryString,
 } from './query-string.js'
 
-/*
- * HTTP URL wrapper
+/**
+ * Represents a HTTP URL wrapper
+ *
+ * @category none
  */
 export class HttpUrlWrap {
-  /*
+  /**
    * Create wrapper from scratch
    */
   static fromScratch(): HttpUrlWrap {
     return HttpUrlWrap.fromRelative('/')
   }
 
-  /*
+  /**
    * Create wrapper from req object
    */
   static fromReq(req: { url?: string | undefined }): HttpUrlWrap {
@@ -29,7 +30,7 @@ export class HttpUrlWrap {
     return HttpUrlWrap.fromRelative(req.url)
   }
 
-  /*
+  /**
    * Create wrapper from relative url
    */
   static fromRelative(value: string): HttpUrlWrap {
@@ -45,11 +46,11 @@ export class HttpUrlWrap {
       port: '',
       pathname: parsedUrl.pathname,
       search: parsedUrl.search,
-      hash: parsedUrl.hash
+      hash: parsedUrl.hash,
     })
   }
 
-  /*
+  /**
    * Create wrapper from absolute url
    */
   static fromAbsolute(value: string): HttpUrlWrap {
@@ -65,7 +66,7 @@ export class HttpUrlWrap {
       port: parsedUrl.port,
       pathname: parsedUrl.pathname,
       search: parsedUrl.search,
-      hash: parsedUrl.hash
+      hash: parsedUrl.hash,
     })
   }
 
@@ -75,7 +76,7 @@ export class HttpUrlWrap {
     this.#url = url
   }
 
-  /*
+  /**
    * Clone wrapper
    */
   clone(): HttpUrlWrap {
@@ -84,14 +85,14 @@ export class HttpUrlWrap {
 
   #isFrozen: boolean = false
 
-  /*
+  /**
    * Wrapper frozen state
    */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
-  /*
+  /**
    * Freeze wrapper
    */
   freeze(): this {
@@ -100,14 +101,14 @@ export class HttpUrlWrap {
     return this
   }
 
-  /*
+  /**
    * Get url part
    */
   get<K extends keyof HttpUrl>(name: K): HttpUrl[K] {
     return this.#url[name]
   }
 
-  /*
+  /**
    * Set url part
    */
   set<K extends keyof HttpUrl>(name: K, value: HttpUrl[K]): this {
@@ -120,7 +121,7 @@ export class HttpUrlWrap {
     return this
   }
 
-  /*
+  /**
    * Merge partial url
    */
   merge(url: Partial<HttpUrl>): this {
@@ -133,7 +134,7 @@ export class HttpUrlWrap {
     return this
   }
 
-  /*
+  /**
    * Get url host part
    */
   getHost(): string {
@@ -150,19 +151,19 @@ export class HttpUrlWrap {
     }
   }
 
-  /*
+  /**
    * Custom parse query-string options
    */
   readonly parseQueryStringOptions: HttpParseQueryStringOptions = {}
 
-  /*
+  /**
    * Custom format query-string options
    */
   readonly formatQueryStringOptions: HttpFormatQueryStringOptions = {}
 
   #cacheQueryString: HttpQueryString | null = null
 
-  /*
+  /**
    * Get url query-string part
    */
   getQueryString(): HttpQueryString {
@@ -173,7 +174,7 @@ export class HttpUrlWrap {
     const value = this.get('search')
     const queryString = parseQueryString(value, {
       ...this.parseQueryStringOptions,
-      ignoreQueryPrefix: true
+      ignoreQueryPrefix: true,
       // ...
     })
 
@@ -182,7 +183,7 @@ export class HttpUrlWrap {
     return queryString
   }
 
-  /*
+  /**
    * Set url query-string part
    */
   setQueryString(queryString: HttpQueryString): this {
@@ -190,7 +191,7 @@ export class HttpUrlWrap {
 
     const value = formatQueryString(queryString, {
       ...this.formatQueryStringOptions,
-      addQueryPrefix: true
+      addQueryPrefix: true,
       // ...
     })
     this.set('search', value)
@@ -200,7 +201,7 @@ export class HttpUrlWrap {
     return this
   }
 
-  /*
+  /**
    * Match url pathname
    */
   isPath(value: string | RegExp): boolean {
@@ -213,21 +214,21 @@ export class HttpUrlWrap {
     }
   }
 
-  /*
+  /**
    * Get url object
    */
   toObject(): HttpUrl {
     return { ...this.#url }
   }
 
-  /*
+  /**
    * Get relative url
    */
   toRelative(): string {
     return [this.#url.pathname, this.#url.search, this.#url.hash].join('')
   }
 
-  /*
+  /**
    * Get absolute url
    */
   toAbsolute(): string {
@@ -237,11 +238,11 @@ export class HttpUrlWrap {
       this.getHost(),
       this.#url.pathname,
       this.#url.search,
-      this.#url.hash
+      this.#url.hash,
     ].join('')
   }
 
-  /*
+  /**
    * Cleanup wrapper
    */
   reset(): this {
@@ -255,25 +256,25 @@ export class HttpUrlWrap {
       port: '',
       pathname: '/',
       search: '',
-      hash: ''
+      hash: '',
     }
 
     return this
   }
 
-  protected sureNotFrozen(name: string) {
+  private sureNotFrozen(name: string) {
     if (this.isFrozen) {
       throw new Error(`Url frozen on ${name}`)
     }
   }
 
-  protected invalidateCacheFor(name: keyof HttpUrl) {
+  private invalidateCacheFor(name: keyof HttpUrl) {
     if (name === 'search') {
       this.#cacheQueryString = null
     }
   }
 
-  protected invalidateCacheAll() {
+  private invalidateCacheAll() {
     this.#cacheQueryString = null
   }
 }

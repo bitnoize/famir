@@ -1,5 +1,8 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
+/**
+ * @category none
+ */
 export interface ValidatorValidateError {
   keyword: string
   instancePath: string
@@ -9,12 +12,17 @@ export interface ValidatorValidateError {
   message: string | undefined
 }
 
+/**
+ * @category none
+ */
 export type ValidatorErrorOptions = CommonErrorOptions & {
   validateErrors: ValidatorValidateError[]
 }
 
-/*
- * Validator error object
+/**
+ * Represents validator error
+ *
+ * @category none
  */
 export class ValidatorError extends CommonError {
   validateErrors: ValidatorValidateError[]
@@ -22,7 +30,7 @@ export class ValidatorError extends CommonError {
   constructor(message: string, options: ValidatorErrorOptions) {
     super(message, {
       cause: options.cause,
-      context: options.context
+      context: options.context,
     })
 
     this.name = 'ValidatorError'

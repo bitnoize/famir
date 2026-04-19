@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto'
 import { deflateSync, inflateSync, constants as zlibConst } from 'zlib'
-import { safeBase64Decode, safeBase64Encode } from './utils.js'
+import { safeBase64Decode, safeBase64Encode } from './base64.js'
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12 // recommended for GCM
@@ -10,10 +10,11 @@ const KEY_LENGTH = 32 // 256 bytes
 
 /**
  * Encrypt string with secret
+ * @category none
  */
 export function encrypt(text: string, secret: string): string {
   const compressed = deflateSync(text, {
-    level: zlibConst.Z_BEST_COMPRESSION
+    level: zlibConst.Z_BEST_COMPRESSION,
   })
 
   const salt = randomBytes(SALT_LENGTH)
@@ -29,14 +30,15 @@ export function encrypt(text: string, secret: string): string {
 
   const data = Buffer.concat([salt, iv, authTag, encrypted])
 
-  return safeBase64Encode(data.toString('base64'))
+  return safeBase64Encode(data)
 }
 
 /**
  * Decrypt string with secret
+ * @category none
  */
 export function decrypt(value: string, secret: string): string {
-  const data = Buffer.from(safeBase64Decode(value), 'base64')
+  const data = safeBase64Decode(value)
 
   const salt = data.subarray(0, SALT_LENGTH)
   const iv = data.subarray(SALT_LENGTH, SALT_LENGTH + IV_LENGTH)

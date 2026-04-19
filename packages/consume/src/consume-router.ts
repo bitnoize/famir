@@ -7,82 +7,90 @@ import {
   ConsumeAssets,
   ConsumeProcessor,
   ConsumeSpec,
-  ConsumeSpecs
+  ConsumeSpecs,
 } from './consume.js'
 
-/*
- * Consume router
+type ConsumeQueuesMap = Map<string, Map<string, ConsumeProcessor>>
+
+/**
+ * Represents a consume router
+ *
+ * @category none
  */
 export class ConsumeRouter {
-  /*
+  /**
    * Register dependency
    */
-  static register(container: DIContainer) {
+  static register(container: DIContainer, specs: ConsumeSpecs, assets: ConsumeAssets) {
+    container.registerSingleton<ConsumeSpecs>(CONSUME_SPECS, () => specs)
+
+    container.registerSingleton<ConsumeAssets>(CONSUME_ASSETS, () => assets)
+
     container.registerSingleton<ConsumeRouter>(
       CONSUME_ROUTER,
       (c) =>
-        new ConsumeRouter(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ConsumeSpecs>(CONSUME_SPECS),
-          c.resolve<ConsumeAssets>(CONSUME_ASSETS)
-        )
+        new ConsumeRouter(c.resolve(LOGGER), c.resolve(CONSUME_SPECS), c.resolve(CONSUME_ASSETS))
     )
   }
 
-  /*
+  /**
    * Resolve dependency
    */
   static resolve(container: DIContainer): ConsumeRouter {
     return container.resolve(CONSUME_ROUTER)
   }
 
-  protected readonly specs = new Map<string, ConsumeSpec>()
-  protected readonly assets = new Map<string, string>()
-  protected readonly queues: Record<string, Map<string, ConsumeProcessor>> = {}
+  protected readonly queues: ConsumeQueuesMap = new Map()
 
   constructor(
     protected readonly logger: Logger,
-    specs: ConsumeSpecs,
-    assets: ConsumeAssets
+    protected readonly specs: ConsumeSpecs,
+    protected readonly assets: ConsumeAssets
   ) {
-    specs.forEach(([queueName, spec]) => {
-      if (this.specs.has(queueName)) {
-        throw new Error(`Duplicate spec: ${queueName}`)
-      }
-
-      this.specs.set(queueName, spec)
-
-      this.queues[queueName] = new Map<string, ConsumeProcessor>()
-    })
-
-    assets.forEach(([assetName, asset]) => {
-      if (this.assets.has(assetName)) {
-        throw new Error(`Duplicate asset: ${assetName}`)
-      }
-
-      this.assets.set(assetName, asset)
-    })
+    for (const queueName of specs.keys()) {
+      this.queues.set(queueName, new Map())
+    }
 
     this.logger.debug(`ConsumeRouter initialized`)
   }
 
   #isActive: boolean = false
 
-  /*
+  /**
    * Check if router is active
    */
   get isActive(): boolean {
     return this.#isActive
   }
 
-  /*
+  /**
    * Activate router
    */
   activate() {
     this.#isActive = true
   }
 
-  /*
+  /**
+   * Get spec by queueName
+   */
+  getSpec(queueName: string): ConsumeSpec {
+    const spec = this.specs.get(queueName)
+
+    if (!spec) {
+      throw new Error(`Consume spec not known: ${queueName}`)
+    }
+
+    return spec
+  }
+
+  /**
+   * Get asset by name
+   */
+  getAsset(assetName: string): string | undefined {
+    return this.assets.get(assetName)
+  }
+
+  /**
    * Add processor
    */
   addProcessor(queueName: string, jobName: string, processor: ConsumeProcessor) {
@@ -90,20 +98,21 @@ export class ConsumeRouter {
       throw new Error(`Router is active`)
     }
 
-    if (!this.queues[queueName]) {
+    const queue = this.queues.get(queueName)
+    if (!queue) {
       throw new Error(`Queue not exists: ${queueName}`)
     }
 
-    if (this.queues[queueName].has(jobName)) {
+    if (queue.has(jobName)) {
       throw new Error(`Processor already exists: ${queueName} => ${jobName}`)
     }
 
-    this.queues[queueName].set(jobName, processor)
+    queue.set(jobName, processor)
 
     this.logger.debug(`ConsumeRouter add processor: ${queueName} => ${jobName}`)
   }
 
-  /*
+  /**
    * Get processor by name
    */
   getProcessor(queueName: string, jobName: string): ConsumeProcessor {
@@ -111,34 +120,16 @@ export class ConsumeRouter {
       throw new Error(`Router not active`)
     }
 
-    if (!this.queues[queueName]) {
+    const queue = this.queues.get(queueName)
+    if (!queue) {
       throw new Error(`Queue not exists: ${queueName}`)
     }
 
-    const processor = this.queues[queueName].get(jobName)
-
+    const processor = queue.get(jobName)
     if (!processor) {
       throw new Error(`Processor not exists: ${queueName} => ${jobName}`)
     }
 
     return processor
-  }
-
-  // FIXME
-  getSpec(queueName: string): ConsumeSpec {
-    const spec = this.specs.get(queueName)
-
-    if (!spec) {
-      throw new Error(`Spec not exists: ${queueName}`)
-    }
-
-    return spec
-  }
-
-  /*
-   * Get asset by name
-   */
-  getAsset(assetName: string): string | undefined {
-    return this.assets.get(assetName)
   }
 }
