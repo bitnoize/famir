@@ -1,5 +1,5 @@
 {
   "extends": ["../../typedoc.base.json"],
   "entryPoints": ["src/index.ts"],
-  "categoryOrder": ["DI", "Controllers", "Use-cases", "Loaders", "Data", "Schemas", "Utils", "*"]
+  "categoryOrder": ["SetupMirror", "WellKnownUrls", "Authorize", "Transform", "Forward", "Complete", "*"]
 }

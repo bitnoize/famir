@@ -14,6 +14,7 @@ import {
  * Redis consume connector implementation
  *
  * @category none
+ * @see [ioredis home](https://ioredis.com)
  */
 export class RedisConsumeConnector implements ConsumeConnector {
   /**

@@ -15,6 +15,8 @@ import {
  * Redis database connector implementation
  *
  * @category none
+ * @see [Redis home](https://redis.io)
+ * @see [Node Redis client](https://github.com/redis/node-redis)
  */
 export class RedisDatabaseConnector implements DatabaseConnector {
   /**

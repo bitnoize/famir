@@ -14,6 +14,7 @@ import {
  * Redis produce connector implementation
  *
  * @category none
+ * @see [ioredis home](https://ioredis.com)
  */
 export class RedisProduceConnector implements ProduceConnector {
   /**

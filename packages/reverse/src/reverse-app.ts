@@ -3,13 +3,14 @@ import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
 import { HTTP_SERVER, HTTP_SERVER_ROUTER, HttpServer, HttpServerRouter } from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
 import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCE_CONNECTOR, ProduceConnector } from '@famir/produce'
-import { REVERSE_APP } from './reverse.js'
 
-/*
+export const REVERSE_APP = Symbol('ReverseApp')
+
+/**
  * Reverse app
  */
 export class ReverseApp {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -27,7 +28,7 @@ export class ReverseApp {
     )
   }
 
-  /*
+  /**
    * Resolve dependency
    */
   static resolve(container: DIContainer): ReverseApp {

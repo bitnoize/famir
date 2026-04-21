@@ -3,10 +3,16 @@ import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
 import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCE_CONNECTOR, ProduceConnector } from '@famir/produce'
 import { REPL_SERVER, REPL_SERVER_ROUTER, ReplServer, ReplServerRouter } from '@famir/repl-server'
-import { CONSOLE_APP } from './console.js'
 
 /**
- * Represents a console app
+ * @category none
+ * @internal
+ */
+export const CONSOLE_APP = Symbol('ConsoleApp')
+
+/**
+ * Represents a console
+ *
  * @category none
  */
 export class ConsoleApp {
