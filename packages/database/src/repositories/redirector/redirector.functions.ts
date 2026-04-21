@@ -8,7 +8,7 @@ import {
 } from '../../database.keys.js'
 
 /**
- * @category Repositories
+ * @category Redirector
  * @internal
  */
 export interface RawRedirector {
@@ -19,7 +19,7 @@ export interface RawRedirector {
 }
 
 /**
- * @category Repositories
+ * @category Redirector
  * @internal
  */
 export interface RawFullRedirector extends RawRedirector {
@@ -28,7 +28,7 @@ export interface RawFullRedirector extends RawRedirector {
 }
 
 /**
- * @category Repositories
+ * @category Redirector
  * @internal
  */
 export const redirectorFunctions = {

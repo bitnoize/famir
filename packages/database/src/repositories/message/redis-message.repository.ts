@@ -1,5 +1,7 @@
 import {
   DIContainer,
+} from '@famir/common'
+import {
   HttpBody,
   HttpConnection,
   HttpError,
@@ -7,7 +9,7 @@ import {
   HttpMethod,
   HttpPayload,
   HttpType,
-} from '@famir/common'
+} from '@famir/http-proto'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -25,7 +27,8 @@ import { messageSchemas } from './message.schemas.js'
 
 /**
  * Redis message repository implementation
- * @category Repositories
+ *
+ * @category Message
  */
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
   /**

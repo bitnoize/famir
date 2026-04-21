@@ -1,6 +1,7 @@
 /**
- * Campaign model
- * @category Models
+ * Represents campaign model
+ *
+ * @category Campaign
  */
 export class CampaignModel {
   static isNotNull = <T extends CampaignModel>(model: T | null): model is T => {
@@ -18,8 +19,9 @@ export class CampaignModel {
 }
 
 /**
- * Extended campaign model
- * @category Models
+ * Represents full campaign model
+ *
+ * @category Campaign
  */
 export class FullCampaignModel extends CampaignModel {
   constructor(

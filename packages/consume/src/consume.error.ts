@@ -1,13 +1,11 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * Consume error code
  * @category none
  */
 export type ConsumeErrorCode = 'BAD_REQUEST' | 'UNKNOWN_JOB' | 'INTERNAL_ERROR'
 
 /**
- * Consume error options
  * @category none
  */
 export type ConsumeErrorOptions = CommonErrorOptions & {
@@ -16,6 +14,7 @@ export type ConsumeErrorOptions = CommonErrorOptions & {
 
 /**
  * Represents a consume error
+ *
  * @category none
  */
 export class ConsumeError extends CommonError {

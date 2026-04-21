@@ -41,6 +41,7 @@
     "@famir/config": "*",
     "@famir/http-tools": "*",
     "@famir/logger": "*",
+    "@famir/http-proto": "*",
     "@famir/templater": "*",
     "@famir/validator": "*",
     "ws": "^8.20.0"

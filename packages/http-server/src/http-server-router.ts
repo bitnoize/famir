@@ -10,6 +10,7 @@ import {
 
 /**
  * Represents a HTTP server router
+ *
  * @category none
  */
 export class HttpServerRouter {

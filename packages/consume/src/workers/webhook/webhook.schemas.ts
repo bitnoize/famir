@@ -2,7 +2,7 @@ import { WebhookJobData } from '@famir/produce'
 import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 
 /**
- * @category Schemas
+ * @category Webhook
  * @internal
  */
 export const webhookJobDataSchema: JSONSchemaType<WebhookJobData> = {
@@ -17,7 +17,7 @@ export const webhookJobDataSchema: JSONSchemaType<WebhookJobData> = {
 } as const
 
 /**
- * @category Workers
+ * @category Webhook
  * @internal
  */
 export const webhookSchemas: ValidatorSchemas = {

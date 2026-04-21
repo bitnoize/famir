@@ -1,13 +1,14 @@
 import { type Redis } from 'ioredis'
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const PRODUCE_CONNECTOR = Symbol('ProduceConnector')
 
 /**
  * Represents a produce connector
+ *
  * @category none
  */
 export interface ProduceConnector {
@@ -29,13 +30,11 @@ export interface ProduceConnector {
 }
 
 /**
- * Redis produce connection
  * @category none
  */
 export type RedisProduceConnection = Redis
 
 /**
- * Bull produce config
  * @category none
  */
 export interface BullProduceConfig {

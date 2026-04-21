@@ -1,3 +1,3 @@
 # @famir/storage
 
-Famir storage infrastructure service.
+Storage infrastructure service.

@@ -1,12 +1,13 @@
 /**
- * DI token
- * @category DI
+ * @category Webhook
+ * @internal
  */
 export const WEBHOOK_WORKER = Symbol('WebhookWorker')
 
 /**
- * Represents an webhook worker
- * @category Workers
+ * Represents a webhook worker
+ *
+ * @category Webhook
  */
 export interface WebhookWorker {
   /**

@@ -1,14 +1,15 @@
 import { CampaignModel, FullCampaignModel } from '../../models/index.js'
 
 /**
- * DI token
- * @category DI
+ * @category Campaign
+ * @internal
  */
 export const CAMPAIGN_REPOSITORY = Symbol('CampaignRepository')
 
 /**
  * Represents a campaign repository
- * @category Repositories
+ *
+ * @category Campaign
  */
 export interface CampaignRepository {
   /**
@@ -80,8 +81,9 @@ export interface CampaignRepository {
 }
 
 /**
- * Campaign share
- * @category Repositories
+ * Represents a campaign share
+ *
+ * @category Campaign
  */
 export interface CampaignShare {
   mirrorDomains: string[]

@@ -1,11 +1,9 @@
 /**
- * User-Agent parser
- * @category Utils
+ * @category none
  */
 export { UAParser } from 'ua-parser-js'
 
 /**
- * User-Agent result
- * @category Utils
+ * @category none
  */
 export { IResult as UAResult } from 'ua-parser-js'

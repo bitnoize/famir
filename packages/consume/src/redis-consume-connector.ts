@@ -12,6 +12,7 @@ import {
 
 /**
  * Redis consume connector implementation
+ *
  * @category none
  */
 export class RedisConsumeConnector implements ConsumeConnector {

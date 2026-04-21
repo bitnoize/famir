@@ -1,6 +1,5 @@
 /**
- * Analyze job data
- * @category Jobs
+ * @category Analyze
  */
 export interface AnalyzeJobData {
   campaignId: string
@@ -8,7 +7,6 @@ export interface AnalyzeJobData {
 }
 
 /**
- * Analyze job result
- * @category Jobs
+ * @category Analyze
  */
 export type AnalyzeJobResult = boolean

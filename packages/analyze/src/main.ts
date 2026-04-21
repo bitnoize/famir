@@ -15,8 +15,8 @@ process.on('uncaughtException', (error: unknown) => {
 })
 
 /**
- * DI composer
- * @category Loaders
+ * @category none
+ * @internal
  */
 export const autoLoad: DIComposer = (container) => {
   ReadMessageUseCase.register(container)

@@ -2,20 +2,20 @@ import { WebhookJobData } from '../../jobs/index.js'
 
 /**
  * DI token
- * @category DI
+ * @category Webhook
  */
 export const WEBHOOK_QUEUE = Symbol('WebhookQueue')
 
 /**
- * Queue name
- * @category Queues
+ * @category Webhook
  * @internal
  */
 export const WEBHOOK_QUEUE_NAME = 'webhook'
 
 /**
  * Represents a webhook queue
- * @category Queues
+ *
+ * @category Webhook
  */
 export interface WebhookQueue {
   /**

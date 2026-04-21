@@ -2,7 +2,7 @@ import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import { RawProxy } from './proxy.functions.js'
 
 /**
- * @category Schemas
+ * @category Proxy
  * @internal
  */
 const rawProxySchema: JSONSchemaType<RawProxy> = {
@@ -32,7 +32,7 @@ const rawProxySchema: JSONSchemaType<RawProxy> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Proxy
  * @internal
  */
 export const proxyUrlSchema: JSONSchemaType<string> = {
@@ -42,7 +42,7 @@ export const proxyUrlSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Utils
+ * @category Proxy
  * @internal
  */
 export const proxySchemas: ValidatorSchemas = {

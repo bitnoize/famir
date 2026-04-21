@@ -1,17 +1,19 @@
 import {
   JSONSchemaType,
   ValidatorSchemas,
+} from '@famir/validator'
+import {
   httpConnectionSchema,
   httpErrorsSchema,
   httpHeadersSchema,
   httpMethodSchema,
   httpPayloadSchema,
   httpTypeSchema,
-} from '@famir/validator'
+} from '@famir/http-proto'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
 /**
- * @category Schemas
+ * @category Message
  * @internal
  */
 const rawMessageSchema: JSONSchemaType<RawMessage> = {
@@ -76,7 +78,7 @@ const rawMessageSchema: JSONSchemaType<RawMessage> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Message
  * @internal
  */
 const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
@@ -169,7 +171,7 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
 } as const
 
 /**
- * @category Utils
+ * @category Message
  * @internal
  */
 export const messageSchemas: ValidatorSchemas = {

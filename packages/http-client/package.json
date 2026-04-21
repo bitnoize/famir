@@ -41,6 +41,7 @@
     "@famir/config": "*",
     "@famir/logger": "*",
     "@famir/validator": "*",
+    "@famir/http-proto": "*",
     "node-libcurl": "~4.1.0"
   }
 }

@@ -16,11 +16,12 @@ import { BaseController } from '../base/index.js'
 import { CAMPAIGN_CONTROLLER } from './campaign.js'
 import { campaignSchemas } from './campaign.schemas.js'
 
-/*
+/**
  * Campaign controller
+ * @category Controllers
  */
 export class CampaignController extends BaseController {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -36,7 +37,7 @@ export class CampaignController extends BaseController {
     )
   }
 
-  /*
+  /**
    * Resolve dependency
    */
   static resolve(container: DIContainer): CampaignController {
@@ -56,9 +57,6 @@ export class CampaignController extends BaseController {
     this.logger.debug(`CampaignController initialized`)
   }
 
-  /*
-   * Use api-calls
-   */
   use() {
     this.router.addApiCall('createCampaign', async (data) => {
       this.validateData<CreateCampaignData>('console-create-campaign-data', data)

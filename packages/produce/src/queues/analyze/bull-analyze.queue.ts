@@ -13,7 +13,8 @@ import { ANALYZE_QUEUE, ANALYZE_QUEUE_NAME, AnalyzeQueue } from './analyze.js'
 
 /**
  * Bull analyze queue implementation
- * @category Queues
+ *
+ * @category Analyze
  */
 export class BullAnalyzeQueue extends BullBaseQueue implements AnalyzeQueue {
   /**

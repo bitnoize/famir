@@ -12,6 +12,7 @@ import {
 
 /**
  * Redis produce connector implementation
+ *
  * @category none
  */
 export class RedisProduceConnector implements ProduceConnector {

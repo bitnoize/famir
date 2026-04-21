@@ -1,8 +1,8 @@
 import { Transform, TransformCallback } from 'node:stream'
 
 /**
- * Stream transform limiter
- * @category Utils
+ * @category none
+ * @internal
  */
 export class LimiterTransform extends Transform {
   private totalSize: number = 0

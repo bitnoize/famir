@@ -7,7 +7,7 @@ import { sessionFunctions } from './repositories/session/session.functions.js'
 import { targetFunctions } from './repositories/target/target.functions.js'
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const databaseFunctions = {
@@ -21,7 +21,7 @@ export const databaseFunctions = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export type DatabaseFunctions = typeof databaseFunctions

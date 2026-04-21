@@ -44,6 +44,7 @@
   "homepage": "https://fake-mirrors.net",
   "dependencies": {
     "@famir/common": "*",
+    "@famir/http-proto": "*",
     "@famir/config": "*",
     "@famir/logger": "*",
     "@famir/validator": "*",

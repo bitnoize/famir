@@ -6,8 +6,8 @@ import {
   SessionModel,
   UpgradeSessionParams,
 } from '@famir/database'
+import { HttpCookie } from '@famir/http-proto'
 import { HTTP_SERVER_ROUTER, HttpServerContext, HttpServerRouter } from '@famir/http-server'
-import { HttpCookie } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'

@@ -1,7 +1,7 @@
 import { JSONSchemaType } from '@famir/validator'
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configLoggerAppNameSchema: JSONSchemaType<string> = {
@@ -9,7 +9,7 @@ export const configLoggerAppNameSchema: JSONSchemaType<string> = {
 }
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configLoggerLogLevelSchema: JSONSchemaType<string> = {

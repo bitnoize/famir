@@ -1,13 +1,11 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * HTTP client error code
  * @category none
  */
 export type HttpClientErrorCode = 'BAD_GATEWAY' | 'GATEWAY_TIMEOUT'
 
 /**
- * HTTP client error options
  * @category none
  */
 export type HttpClientErrorOptions = CommonErrorOptions & {
@@ -21,6 +19,7 @@ const codeToStatusMap: Record<HttpClientErrorCode, number> = {
 
 /**
  * Represents HTTP client error
+ *
  * @category none
  */
 export class HttpClientError extends CommonError {

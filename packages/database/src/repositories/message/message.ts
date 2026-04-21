@@ -6,18 +6,19 @@ import {
   HttpMethod,
   HttpPayload,
   HttpType,
-} from '@famir/common'
+} from '@famir/http-proto'
 import { FullMessageModel, MessageModel } from '../../models/index.js'
 
 /**
- * DI token
- * @category DI
+ * @category Message
+ * @internal
  */
 export const MESSAGE_REPOSITORY = Symbol('MessageRepository')
 
 /**
  * Represents a message repository
- * @category Repositories
+ *
+ * @category Message
  */
 export interface MessageRepository {
   /**

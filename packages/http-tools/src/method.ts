@@ -1,7 +1,9 @@
-import { arrayIncludes, HTTP_METHODS, HttpMethod } from '@famir/common'
+import { arrayIncludes } from '@famir/common'
+import { HTTP_METHODS, HttpMethod } from '@famir/http-proto'
 
 /**
  * Represents a HTTP method wrapper
+ *
  * @category none
  */
 export class HttpMethodWrap {

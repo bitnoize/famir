@@ -14,7 +14,9 @@ import {
 
 /**
  * Pino logger implementation
+ *
  * @category none
+ * @see [Pino home](https://getpino.io)
  */
 export class PinoLogger implements Logger {
   /**

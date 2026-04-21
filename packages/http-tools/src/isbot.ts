@@ -1,5 +1,4 @@
 /**
- * Check bots by user-agent
- * @category Utils
+ * @category none
  */
 export { isbot } from 'isbot'

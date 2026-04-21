@@ -1,7 +1,6 @@
-
 /**
- * Represents rewrite url target
- * @category Utils
+ * @category none
+ * @internal
  */
 export interface RewriteUrlTarget {
   donorSecure: boolean
@@ -11,14 +10,14 @@ export interface RewriteUrlTarget {
 }
 
 /**
- * Represents rewrite-url scheme
- * @category Utils
+ * @category none
+ * @internal
  */
 export type RewriteUrlScheme = [string, boolean] // separator, withProto
 
 /**
- * Rewrite target urls in text
- * @category Utils
+ * @category none
+ * @internal
  */
 export function rewriteUrl(
   text: string,

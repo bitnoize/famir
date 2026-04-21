@@ -7,7 +7,7 @@ import {
 } from '@famir/validator'
 
 /**
- * @category Schemas
+ * @category Analyze
  * @internal
  */
 export const analyzeJobDataSchema: JSONSchemaType<AnalyzeJobData> = {
@@ -21,7 +21,7 @@ export const analyzeJobDataSchema: JSONSchemaType<AnalyzeJobData> = {
 } as const
 
 /**
- * @category Workers
+ * @category Analyze
  * @internal
  */
 export const analyzeSchemas: ValidatorSchemas = {

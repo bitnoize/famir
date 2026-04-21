@@ -1,12 +1,12 @@
 /**
- * Redirector params
- * @category Models
+ * @category Redirector
  */
 export type RedirectorParams = Record<string, string>
 
 /**
- * Redirector model
- * @category Models
+ * Represents redirector model
+ *
+ * @category Redirector
  */
 export class RedirectorModel {
   static isNotNull = <T extends RedirectorModel>(model: T | null): model is T => {
@@ -22,8 +22,9 @@ export class RedirectorModel {
 }
 
 /**
- * Extended redirector model
- * @category Models
+ * Represents full redirector model
+ *
+ * @category Redirector
  */
 export class FullRedirectorModel extends RedirectorModel {
   constructor(

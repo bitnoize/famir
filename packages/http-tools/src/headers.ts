@@ -1,16 +1,17 @@
-import { HttpHeader, HttpHeaders, HttpStrictHeaders } from '@famir/common'
-import { HttpContentType, formatContentType, parseContentType } from './content-type.js'
 import {
+  HttpContentType,
   HttpCookies,
+  HttpHeader,
+  HttpHeaders,
   HttpSetCookies,
-  formatCookies,
-  formatSetCookies,
-  parseCookies,
-  parseSetCookies,
-} from './cookies.js'
+  HttpStrictHeaders,
+} from '@famir/http-proto'
+import { formatContentType, parseContentType } from './content-type.js'
+import { formatCookies, formatSetCookies, parseCookies, parseSetCookies } from './cookies.js'
 
 /**
  * Represents a HTTP headers wrapper
+ *
  * @category none
  */
 export class HttpHeadersWrap {

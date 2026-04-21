@@ -18,6 +18,7 @@ import {
 
 /**
  * Net REPL server implementation
+ *
  * @category none
  */
 export class NetReplServer implements ReplServer {

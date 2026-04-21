@@ -13,7 +13,8 @@ import {
 
 /**
  * Bull base worker
- * @category Workers
+ *
+ * @category none
  */
 export abstract class BullBaseWorker {
   protected readonly options: BullConsumeWorkerOptions

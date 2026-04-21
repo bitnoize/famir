@@ -17,6 +17,7 @@
     "packages/config",
     "packages/logger",
     "packages/templater",
+    "packages/http-proto",
     "packages/database",
     "packages/storage",
     "packages/produce",

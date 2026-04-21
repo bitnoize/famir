@@ -20,6 +20,7 @@ import {
 
 /**
  * Native HTTP server implementation
+ *
  * @category none
  */
 export class NativeHttpServer implements HttpServer {

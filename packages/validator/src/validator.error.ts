@@ -1,7 +1,6 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * Validator validate error
  * @category none
  */
 export interface ValidatorValidateError {
@@ -14,7 +13,6 @@ export interface ValidatorValidateError {
 }
 
 /**
- * Validator error options
  * @category none
  */
 export type ValidatorErrorOptions = CommonErrorOptions & {
@@ -23,6 +21,7 @@ export type ValidatorErrorOptions = CommonErrorOptions & {
 
 /**
  * Represents validator error
+ *
  * @category none
  */
 export class ValidatorError extends CommonError {

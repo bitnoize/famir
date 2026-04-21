@@ -16,7 +16,8 @@ import { proxySchemas } from './proxy.schemas.js'
 
 /**
  * Redis proxy repository implementation
- * @category Repositories
+ *
+ * @category Proxy
  */
 export class RedisProxyRepository extends RedisBaseRepository implements ProxyRepository {
   /**

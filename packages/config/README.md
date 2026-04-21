@@ -1,3 +1,3 @@
 # @famir/config
 
-Famir config infrastructure service.
+Config infrastructure service.

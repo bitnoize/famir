@@ -1,7 +1,6 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * REPL server error code
  * @category none
  */
 export type ReplServerErrorCode =
@@ -13,7 +12,6 @@ export type ReplServerErrorCode =
   | 'SERVICE_UNAVAILABLE'
 
 /**
- * REPL server error options
  * @category none
  */
 export type ReplServerErrorOptions = CommonErrorOptions & {
@@ -22,6 +20,7 @@ export type ReplServerErrorOptions = CommonErrorOptions & {
 
 /**
  * Represents REPL server error
+ *
  * @category none
  */
 export class ReplServerError extends CommonError {

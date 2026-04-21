@@ -1,17 +1,18 @@
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const LOGGER = Symbol('Logger')
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const LOGGER_BACKEND = Symbol('LoggerBackend')
 
 /**
  * Represents a logger
+ *
  * @category none
  */
 export interface Logger {
@@ -42,19 +43,16 @@ export interface Logger {
 }
 
 /**
- * Pino logger backend
  * @category none
  */
 export { Logger as PinoLoggerBackend } from 'pino'
 
 /**
- * Logger data
  * @category none
  */
 export type LoggerData = Record<string, unknown>
 
 /**
- * Pino logger config
  * @category none
  */
 export type PinoLoggerConfig = {

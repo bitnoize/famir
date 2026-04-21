@@ -1,4 +1,5 @@
-import { DIContainer, HttpBody, HttpConnection } from '@famir/common'
+import { DIContainer } from '@famir/common'
+import { HttpBody, HttpConnection } from '@famir/http-proto'
 import {
   HttpBodyWrap,
   HttpHeadersWrap,
@@ -23,6 +24,7 @@ import {
 
 /**
  * Native HTTP server context factory implementation
+ *
  * @category none
  */
 export class NativeHttpServerContextFactory implements HttpServerContextFactory {
@@ -55,6 +57,7 @@ export class NativeHttpServerContextFactory implements HttpServerContextFactory 
 
 /**
  * Native HTTP server base context
+ *
  * @category none
  */
 export abstract class NativeHttpServerBaseContext {
@@ -236,6 +239,7 @@ export abstract class NativeHttpServerBaseContext {
 
 /**
  * Native HTTP server normal context
+ *
  * @category none
  */
 export class NativeHttpServerNormalContext
@@ -314,6 +318,7 @@ export class NativeHttpServerNormalContext
 
 /**
  * Native HTTP server websocket context
+ *
  * @category none
  */
 export class NativeHttpServerWebSocketContext

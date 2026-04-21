@@ -1,17 +1,14 @@
 /**
- * Cheerio API
- * @category Utils
+ * @category none
  */
 export { CheerioAPI } from 'cheerio'
 
 /**
- * Cheerio options
- * @category Utils
+ * @category none
  */
 export { CheerioOptions } from 'cheerio'
 
 /**
- * Cheerio load and parse HTML
- * @category Utils
+ * @category none
  */
 export { load as cheerioLoad } from 'cheerio'

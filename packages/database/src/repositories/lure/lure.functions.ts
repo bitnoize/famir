@@ -9,7 +9,7 @@ import {
 } from '../../database.keys.js'
 
 /**
- * @category Repositories
+ * @category Lure
  * @internal
  */
 export interface RawLure {
@@ -23,7 +23,7 @@ export interface RawLure {
 }
 
 /**
- * @category Repositories
+ * @category Lure
  * @internal
  */
 export const lureFunctions = {

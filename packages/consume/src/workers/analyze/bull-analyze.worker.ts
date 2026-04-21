@@ -17,7 +17,8 @@ import { analyzeSchemas } from './analyze.schemas.js'
 
 /**
  * Bull analyze worker implementation
- * @category Workers
+ *
+ * @category Analyze
  */
 export class BullAnalyzeWorker extends BullBaseWorker implements AnalyzeWorker {
   /**

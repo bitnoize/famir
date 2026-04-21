@@ -1,14 +1,14 @@
-import { HttpUrl } from '@famir/common'
+import { HttpQueryString, HttpUrl } from '@famir/http-proto'
 import {
   formatQueryString,
   HttpFormatQueryStringOptions,
   HttpParseQueryStringOptions,
-  HttpQueryString,
   parseQueryString,
 } from './query-string.js'
 
 /**
  * Represents a HTTP URL wrapper
+ *
  * @category none
  */
 export class HttpUrlWrap {

@@ -1,4 +1,4 @@
-import { HttpBody, HttpHeaders, HttpMethod } from '@famir/common'
+import { HttpBody, HttpHeaders, HttpMethod } from '@famir/http-proto'
 
 export const FORWARD_STREAM_RESPONSE_USE_CASE = Symbol('ForwardStreamResponseUseCase')
 

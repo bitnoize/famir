@@ -1,14 +1,15 @@
 import { SessionModel } from '../../models/index.js'
 
 /**
- * DI token
- * @category DI
+ * @category Session
+ * @internal
  */
 export const SESSION_REPOSITORY = Symbol('SessionRepository')
 
 /**
  * Represents session repository
- * @category Repositories
+ *
+ * @category Session
  */
 export interface SessionRepository {
   /**

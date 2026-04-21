@@ -13,6 +13,7 @@ import {
 
 /**
  * Redis database connector implementation
+ *
  * @category none
  */
 export class RedisDatabaseConnector implements DatabaseConnector {

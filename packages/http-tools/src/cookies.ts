@@ -1,41 +1,9 @@
+import { HttpCookies, HttpSetCookies } from '@famir/http-proto'
 import { Cookie as ToughCookie } from 'tough-cookie'
 
 /**
- * Represents a cookie
- * @category Utils
- */
-export type HttpCookie = string
-
-/**
- * Represents a cookies
- * @category Utils
- */
-export type HttpCookies = Record<string, HttpCookie | undefined>
-
-/**
- * Represents a set-cookie
- * @category Utils
- */
-export interface HttpSetCookie {
-  value: string
-  expires?: number
-  maxAge?: number
-  path?: string
-  domain?: string
-  secure?: boolean
-  httpOnly?: boolean
-  sameSite?: string
-}
-
-/**
- * Represents a set-cookies
- * @category Utils
- */
-export type HttpSetCookies = Record<string, HttpSetCookie | undefined>
-
-/**
- * Parse cookies
- * @category Utils
+ * @category none
+ * @internal
  */
 export function parseCookies(values: string[]): HttpCookies {
   const cookies: HttpCookies = {}
@@ -55,8 +23,8 @@ export function parseCookies(values: string[]): HttpCookies {
 }
 
 /**
- * Format cookies
- * @category Utils
+ * @category none
+ * @internal
  */
 export function formatCookies(cookies: HttpCookies): string {
   const toughCookies: ToughCookie[] = []
@@ -76,8 +44,8 @@ export function formatCookies(cookies: HttpCookies): string {
 }
 
 /**
- * Parse set-cookies
- * @category Utils
+ * @category none
+ * @internal
  */
 export function parseSetCookies(values: string[]): HttpSetCookies {
   const cookies: HttpSetCookies = {}
@@ -132,8 +100,8 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
 }
 
 /**
- * Format set-cookies
- * @category Utils
+ * @category none
+ * @internal
  */
 export function formatSetCookies(cookies: HttpSetCookies): string[] {
   const toughCookies: ToughCookie[] = []

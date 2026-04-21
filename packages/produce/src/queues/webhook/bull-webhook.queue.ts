@@ -13,7 +13,8 @@ import { WEBHOOK_QUEUE, WEBHOOK_QUEUE_NAME, WebhookQueue } from './webhook.js'
 
 /**
  * Bull webhook queue implementation
- * @category Queues
+ *
+ * @category Webhook
  */
 export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
   /**

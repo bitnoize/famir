@@ -1,7 +1,7 @@
 import { JSONSchemaType } from '@famir/validator'
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configNetReplServerAddressSchema: JSONSchemaType<string> = {
@@ -11,7 +11,7 @@ export const configNetReplServerAddressSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configNetReplServerPortSchema: JSONSchemaType<number> = {
@@ -21,7 +21,7 @@ export const configNetReplServerPortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configNetReplServerMaxClientsSchema: JSONSchemaType<number> = {
@@ -32,7 +32,7 @@ export const configNetReplServerMaxClientsSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configNetReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
@@ -43,7 +43,7 @@ export const configNetReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configReplServerPromptSchema: JSONSchemaType<string> = {
@@ -54,7 +54,7 @@ export const configReplServerPromptSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configReplServerUseColorsSchema: JSONSchemaType<boolean> = {

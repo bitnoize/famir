@@ -1,13 +1,11 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * Produce error code
  * @category none
  */
 export type ProduceErrorCode = 'INTERNAL_ERROR'
 
 /**
- * Produce error options
  * @category none
  */
 export type ProduceErrorOptions = CommonErrorOptions & {
@@ -16,6 +14,7 @@ export type ProduceErrorOptions = CommonErrorOptions & {
 
 /**
  * Represents a produce error
+ *
  * @category none
  */
 export class ProduceError extends CommonError {

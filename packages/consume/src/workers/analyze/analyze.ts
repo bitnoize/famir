@@ -1,12 +1,13 @@
 /**
- * DI token
- * @category DI
+ * @category Analyze
+ * @internal
  */
 export const ANALYZE_WORKER = Symbol('AnalyzeWorker')
 
 /**
  * Represents an analyze worker
- * @category Workers
+ *
+ * @category Analyze
  */
 export interface AnalyzeWorker {
   /**

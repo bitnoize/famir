@@ -12,7 +12,7 @@ import {
 } from '../../database.keys.js'
 
 /**
- * @category Repositories
+ * @category Campaign
  * @internal
  */
 export interface RawCampaign {
@@ -25,7 +25,7 @@ export interface RawCampaign {
 }
 
 /**
- * @category Repositories
+ * @category Campaign
  * @internal
  */
 export interface RawFullCampaign extends RawCampaign {
@@ -43,7 +43,7 @@ export interface RawFullCampaign extends RawCampaign {
 }
 
 /**
- * @category Repositories
+ * @category Campaign
  * @internal
  */
 export const campaignFunctions = {

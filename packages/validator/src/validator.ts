@@ -1,11 +1,12 @@
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const VALIDATOR = Symbol('Validator')
 
 /**
  * Represents a validator
+ *
  * @category none
  */
 export interface Validator {
@@ -44,7 +45,7 @@ export interface Validator {
 export type ValidatorSchemas = Record<string, object>
 
 /**
- * Ajv JSON-Schema Type
+ * Original Ajv schema type
  * @category none
  */
 export { JSONSchemaType } from 'ajv'

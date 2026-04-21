@@ -1,13 +1,11 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * Database error code
  * @category none
  */
 export type DatabaseErrorCode = 'NOT_FOUND' | 'CONFLICT' | 'FORBIDDEN' | 'INTERNAL_ERROR'
 
 /**
- * Database error options
  * @category none
  */
 export type DatabaseErrorOptions = CommonErrorOptions & {
@@ -16,6 +14,7 @@ export type DatabaseErrorOptions = CommonErrorOptions & {
 
 /**
  * Represents a database error
+ *
  * @category none
  */
 export class DatabaseError extends CommonError {

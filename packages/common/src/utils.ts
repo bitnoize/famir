@@ -7,13 +7,14 @@ Object.assign(util.inspect.defaultOptions, {
 })
 
 /**
+ * @category none
  * @internal
  */
 export const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const
 
 /**
  * Check array includes a value, type-safe version
- * @category Utils
+ * @category none
  * @see https://oida.dev/typescript-array-includes/
  */
 export const arrayIncludes = <T extends U, U>(coll: ReadonlyArray<T>, el: U): el is T => {
@@ -22,7 +23,7 @@ export const arrayIncludes = <T extends U, U>(coll: ReadonlyArray<T>, el: U): el
 
 /**
  * Generate random identifier
- * @category Utils
+ * @category none
  */
 export const randomIdent = (): string => {
   return randomBytes(16).toString('hex')
@@ -30,7 +31,7 @@ export const randomIdent = (): string => {
 
 /**
  * Generate random name
- * @category Utils
+ * @category none
  */
 export const randomName = (): string => {
   const chars = 'abcdefghijklmnopqrstuvwxyz'
@@ -45,7 +46,7 @@ export const randomName = (): string => {
 
 /**
  * Safe Base64 encode
- * @category Utils
+ * @category none
  */
 export const safeBase64Encode = (base64: string): string => {
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
@@ -53,7 +54,7 @@ export const safeBase64Encode = (base64: string): string => {
 
 /**
  * Safe Base64 decode
- * @category Utils
+ * @category none
  */
 export const safeBase64Decode = (value: string): string => {
   let base64 = value.replace(/-/g, '+').replace(/_/g, '/')
@@ -66,6 +67,6 @@ export const safeBase64Decode = (value: string): string => {
 }
 
 /**
- * @category Utils
+ * @category none
  */
 export { serializeError } from 'serialize-error'

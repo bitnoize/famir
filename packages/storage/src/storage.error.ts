@@ -1,13 +1,11 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * Storage error code
  * @category none
  */
 export type StorageErrorCode = 'INTERNAL_ERROR'
 
 /**
- * Storage error options
  * @category none
  */
 export type StorageErrorOptions = CommonErrorOptions & {
@@ -16,6 +14,7 @@ export type StorageErrorOptions = CommonErrorOptions & {
 
 /**
  * Represents storage error
+ *
  * @category none
  */
 export class StorageError extends CommonError {

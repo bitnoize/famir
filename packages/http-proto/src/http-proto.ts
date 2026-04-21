@@ -1,5 +1,5 @@
 /**
- * @category HTTP
+ * @category none
  * @internal
  */
 export const HTTP_TYPES_NORMAL = [
@@ -9,35 +9,35 @@ export const HTTP_TYPES_NORMAL = [
 ] as const
 
 /**
- * @category HTTP
+ * @category none
  * @internal
  */
 export const HTTP_TYPES_WEBSOCKET = ['websocket'] as const
 
 /**
- * @category HTTP
+ * @category none
  * @internal
  */
 export const HTTP_TYPES = [...HTTP_TYPES_NORMAL, ...HTTP_TYPES_WEBSOCKET] as const
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpType = (typeof HTTP_TYPES)[number]
 
 /**
- * @category HTTP
+ * @category none
  * @internal
  */
 export const HTTP_METHODS = ['HEAD', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'] as const
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpMethod = (typeof HTTP_METHODS)[number]
 
 /**
- * @category HTTP
+ * @category none
  */
 export interface HttpUrl {
   protocol: string
@@ -49,46 +49,90 @@ export interface HttpUrl {
 }
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpHeader = string | string[]
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpHeaders = Record<string, HttpHeader | undefined>
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpStrictHeaders = Record<string, HttpHeader>
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpBody = Buffer
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpText = string
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpJson = NonNullable<unknown>
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpConnection = Record<string, number | string | null | undefined>
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpPayload = Record<string, unknown>
 
 /**
- * @category HTTP
+ * @category none
  */
 export type HttpError = readonly [object, ...string[]]
+
+/**
+ * @category none
+ */
+export type HttpQueryString = Record<string, unknown>
+
+/**
+ * @category none
+ */
+export interface HttpContentType {
+  type: string
+  parameters: Record<string, string>
+}
+
+/**
+ * @category none
+ */
+export type HttpCookie = string
+
+/**
+ * @category none
+ */
+export type HttpCookies = Record<string, HttpCookie | undefined>
+
+/**
+ * @category none
+ */
+export interface HttpSetCookie {
+  value: string
+  expires?: number
+  maxAge?: number
+  path?: string
+  domain?: string
+  secure?: boolean
+  httpOnly?: boolean
+  sameSite?: string
+}
+
+/**
+ * @category none
+ */
+export type HttpSetCookies = Record<string, HttpSetCookie | undefined>
+
+

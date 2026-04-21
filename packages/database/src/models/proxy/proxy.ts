@@ -1,6 +1,7 @@
 /**
- * Proxy model
- * @category Models
+ * Represents proxy model
+ *
+ * @category Proxy
  */
 export class ProxyModel {
   static isNotNull = <T extends ProxyModel>(model: T | null): model is T => {
@@ -22,8 +23,9 @@ export class ProxyModel {
 }
 
 /**
- * Enabled proxy model
- * @category Models
+ * Represents enabled proxy model
+ *
+ * @category Proxy
  */
 export interface EnabledProxyModel extends ProxyModel {
   isEnabled: true

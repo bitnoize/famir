@@ -2,7 +2,7 @@ import { CommandParser } from '@redis/client'
 import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../database.keys.js'
 
 /**
- * @category Repositories
+ * @category Message
  * @internal
  */
 export interface RawMessage {
@@ -22,7 +22,7 @@ export interface RawMessage {
 }
 
 /**
- * @category Repositories
+ * @category Message
  * @internal
  */
 export interface RawFullMessage extends RawMessage {
@@ -36,7 +36,7 @@ export interface RawFullMessage extends RawMessage {
 }
 
 /**
- * @category Repositories
+ * @category Message
  * @internal
  */
 export const messageFunctions = {

@@ -1,15 +1,15 @@
-import { HttpBody, HttpJson, HttpText } from '@famir/common'
+import { HttpBody, HttpJson, HttpQueryString, HttpText } from '@famir/http-proto'
 import * as iconv from 'iconv-lite'
 import {
   formatQueryString,
   HttpFormatQueryStringOptions,
   HttpParseQueryStringOptions,
-  HttpQueryString,
   parseQueryString,
 } from './query-string.js'
 
 /**
  * Represents a HTTP body wrapper
+ *
  * @category none
  */
 export class HttpBodyWrap {

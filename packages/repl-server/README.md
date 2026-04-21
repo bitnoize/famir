@@ -1,3 +1,3 @@
 # @famir/repl-server
 
-Famir repl-server infrastructure service.
+REPL server infrastructure service.

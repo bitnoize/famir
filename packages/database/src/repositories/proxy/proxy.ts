@@ -1,14 +1,15 @@
 import { ProxyModel } from '../../models/index.js'
 
 /**
- * DI token
- * @category DI
+ * @category Proxy
+ * @internal
  */
 export const PROXY_REPOSITORY = Symbol('ProxyRepository')
 
 /**
  * Represents a proxy repository
- * @category Repositories
+ *
+ * @category Proxy
  */
 export interface ProxyRepository {
   /**

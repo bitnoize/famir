@@ -1,5 +1,5 @@
-import { HttpType } from '@famir/common'
 import { EnabledFullTargetModel, EnabledProxyModel } from '@famir/database'
+import { HttpType } from '@famir/http-proto'
 import { HttpServerContext, HttpServerNextFunction } from '@famir/http-server'
 import { type HttpMessage } from '@famir/http-tools'
 

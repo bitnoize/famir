@@ -4,19 +4,12 @@ import { Config, CONFIG, CONFIG_SCHEMA } from './config.js'
 
 /**
  * Env config implementation
+ *
  * @category none
  */
 export class EnvConfig<T> implements Config<T> {
   /**
    * Register dependency
-   *
-   * @example
-   * ```ts
-   * const container = DIContainer.getInstance()
-   *
-   * container.registerSingleton(CONFIG_SCHEMA, () => configConcreteSchema)
-   * EnvConfig.register<ConcreteConfig>(container)
-   *```
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   static register<C>(container: DIContainer) {

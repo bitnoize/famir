@@ -17,7 +17,8 @@ import { sessionSchemas } from './session.schemas.js'
 
 /**
  * Redis session repository implementation
- * @category Repositories
+ *
+ * @category Session
  */
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {
   /**

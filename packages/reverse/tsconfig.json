@@ -11,6 +11,7 @@
     { "path": "../config" },
     { "path": "../logger" },
     { "path": "../templater" },
+    { "path": "../http-proto" },
     { "path": "../database" },
     { "path": "../produce" },
     { "path": "../http-client" },

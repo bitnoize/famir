@@ -27,7 +27,7 @@ import { configStdAnalyzeSchema } from './std.schemas.js'
 
 /**
  * Composition root
- * @category Loaders
+ * @category none
  */
 export async function bootstrapStd(
   composer: DIComposer,

@@ -11,7 +11,7 @@ import {
 } from '../../database.keys.js'
 
 /**
- * @category Repositories
+ * @category Target
  * @internal
  */
 export interface RawTarget {
@@ -32,7 +32,7 @@ export interface RawTarget {
 }
 
 /**
- * @category Repositories
+ * @category Target
  * @internal
  */
 export interface RawFullTarget extends RawTarget {
@@ -51,7 +51,7 @@ export interface RawFullTarget extends RawTarget {
 }
 
 /**
- * @category Repositories
+ * @category Target
  * @internal
  */
 export const targetFunctions = {

@@ -1,7 +1,7 @@
 import { JSONSchemaType } from '@famir/validator'
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configMinioStorageEndPointSchema: JSONSchemaType<string> = {
@@ -12,7 +12,7 @@ export const configMinioStorageEndPointSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configMinioStoragePortSchema: JSONSchemaType<number> = {
@@ -23,7 +23,7 @@ export const configMinioStoragePortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configMinioStorageUseSSLSchema: JSONSchemaType<boolean> = {
@@ -32,7 +32,7 @@ export const configMinioStorageUseSSLSchema: JSONSchemaType<boolean> = {
 }
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configStorageAccessKeySchema: JSONSchemaType<string> = {
@@ -43,7 +43,7 @@ export const configStorageAccessKeySchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configStorageSecretKeySchema: JSONSchemaType<string> = {
@@ -54,7 +54,7 @@ export const configStorageSecretKeySchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configStorageBucketNameSchema: JSONSchemaType<string> = {

@@ -17,7 +17,8 @@ import { targetSchemas } from './target.schemas.js'
 
 /**
  * Redis target repository implementation
- * @category Repositories
+ *
+ * @category Target
  */
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
   /**

@@ -3,7 +3,7 @@ const buildKey = (...args: string[]): string => {
 }
 
 /**
- * @category Keys
+ * @category Campaign
  * @internal
  */
 export const campaignKey = (prefix: string, campaignId: string) => {
@@ -11,7 +11,7 @@ export const campaignKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Campaign
  * @internal
  */
 export const campaignLockKey = (prefix: string, campaignId: string) => {
@@ -19,7 +19,7 @@ export const campaignLockKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Campaign
  * @internal
  */
 export const campaignMirrorDomainsKey = (prefix: string) => {
@@ -27,7 +27,7 @@ export const campaignMirrorDomainsKey = (prefix: string) => {
 }
 
 /**
- * @category Keys
+ * @category Campaign
  * @internal
  */
 export const campaignSessionCookieNamesKey = (prefix: string) => {
@@ -35,7 +35,7 @@ export const campaignSessionCookieNamesKey = (prefix: string) => {
 }
 
 /**
- * @category Keys
+ * @category Campaign
  * @internal
  */
 export const campaignIndexKey = (prefix: string) => {
@@ -43,7 +43,7 @@ export const campaignIndexKey = (prefix: string) => {
 }
 
 /**
- * @category Keys
+ * @category Proxy
  * @internal
  */
 export const proxyKey = (prefix: string, campaignId: string, proxyId: string) => {
@@ -51,7 +51,7 @@ export const proxyKey = (prefix: string, campaignId: string, proxyId: string) =>
 }
 
 /**
- * @category Keys
+ * @category Proxy
  * @internal
  */
 export const proxyUrlsKey = (prefix: string, campaignId: string) => {
@@ -59,7 +59,7 @@ export const proxyUrlsKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Proxy
  * @internal
  */
 export const proxyIndexKey = (prefix: string, campaignId: string) => {
@@ -67,7 +67,7 @@ export const proxyIndexKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Proxy
  * @internal
  */
 export const enabledProxyIndexKey = (prefix: string, campaignId: string) => {
@@ -75,7 +75,7 @@ export const enabledProxyIndexKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Target
  * @internal
  */
 export const targetKey = (prefix: string, campaignId: string, targetId: string) => {
@@ -83,7 +83,7 @@ export const targetKey = (prefix: string, campaignId: string, targetId: string) 
 }
 
 /**
- * @category Keys
+ * @category Target
  * @internal
  */
 export const targetLabelsKey = (prefix: string, campaignId: string, targetId: string) => {
@@ -91,7 +91,7 @@ export const targetLabelsKey = (prefix: string, campaignId: string, targetId: st
 }
 
 /**
- * @category Keys
+ * @category Target
  * @internal
  */
 export const targetDonorsKey = (prefix: string, campaignId: string) => {
@@ -99,7 +99,7 @@ export const targetDonorsKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Target
  * @internal
  */
 export const targetMirrorsKey = (prefix: string, campaignId: string) => {
@@ -107,7 +107,7 @@ export const targetMirrorsKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Target
  * @internal
  */
 export const targetMirrorHostsKey = (prefix: string) => {
@@ -115,7 +115,7 @@ export const targetMirrorHostsKey = (prefix: string) => {
 }
 
 /**
- * @category Keys
+ * @category Target
  * @internal
  */
 export const targetIndexKey = (prefix: string, campaignId: string) => {
@@ -123,7 +123,7 @@ export const targetIndexKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Redirector
  * @internal
  */
 export const redirectorKey = (prefix: string, campaignId: string, redirectorId: string) => {
@@ -131,7 +131,7 @@ export const redirectorKey = (prefix: string, campaignId: string, redirectorId: 
 }
 
 /**
- * @category Keys
+ * @category Redirector
  * @internal
  */
 export const redirectorFieldsKey = (prefix: string, campaignId: string, redirectorId: string) => {
@@ -139,7 +139,7 @@ export const redirectorFieldsKey = (prefix: string, campaignId: string, redirect
 }
 
 /**
- * @category Keys
+ * @category Redirector
  * @internal
  */
 export const redirectorIndexKey = (prefix: string, campaignId: string) => {
@@ -147,7 +147,7 @@ export const redirectorIndexKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Lure
  * @internal
  */
 export const lureKey = (prefix: string, campaignId: string, lureId: string) => {
@@ -155,7 +155,7 @@ export const lureKey = (prefix: string, campaignId: string, lureId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Lure
  * @internal
  */
 export const lurePathsKey = (prefix: string, campaignId: string) => {
@@ -163,7 +163,7 @@ export const lurePathsKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Lure
  * @internal
  */
 export const lureIndexKey = (prefix: string, campaignId: string) => {
@@ -171,7 +171,7 @@ export const lureIndexKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * @category Keys
+ * @category Session
  * @internal
  */
 export const sessionKey = (prefix: string, campaignId: string, sessionId: string) => {
@@ -179,7 +179,7 @@ export const sessionKey = (prefix: string, campaignId: string, sessionId: string
 }
 
 /**
- * @category Keys
+ * @category Message
  * @internal
  */
 export const messageKey = (prefix: string, campaignId: string, messageId: string) => {

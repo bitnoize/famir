@@ -6,11 +6,12 @@ import { DATABASE_SERVICE, type DatabaseService } from '../../services/index.js'
 import { BaseController } from '../base/index.js'
 import { DATABASE_CONTROLLER } from './database.js'
 
-/*
+/**
  * Database controller
+ * @category Controllers
  */
 export class DatabaseController extends BaseController {
-  /*
+  /**
    * Register dependency
    */
   static register(container: DIContainer) {
@@ -26,7 +27,7 @@ export class DatabaseController extends BaseController {
     )
   }
 
-  /*
+  /**
    * Resolve dependency
    */
   static resolve(container: DIContainer): DatabaseController {
@@ -44,9 +45,6 @@ export class DatabaseController extends BaseController {
     this.logger.debug(`DatabaseController initialized`)
   }
 
-  /*
-   * Use api-calls
-   */
   use() {
     this.router.addApiCall('loadDatabaseFunctions', async () => {
       return await this.databaseService.loadDatabaseFunctions()

@@ -12,7 +12,8 @@ import {
 
 /**
  * Redis base repository
- * @category Repositories
+ *
+ * @category none
  */
 export abstract class RedisBaseRepository {
   protected readonly options: RedisDatabaseRepositoryOptions

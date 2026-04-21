@@ -10,6 +10,7 @@ import {
 
 /**
  * Represents a REPL server router
+ *
  * @category none
  */
 export class ReplServerRouter {

@@ -10,7 +10,7 @@ const KEY_LENGTH = 32 // 256 bytes
 
 /**
  * Encrypt string with secret
- * @category Utils
+ * @category none
  */
 export function encrypt(text: string, secret: string): string {
   const compressed = deflateSync(text, {
@@ -35,7 +35,7 @@ export function encrypt(text: string, secret: string): string {
 
 /**
  * Decrypt string with secret
- * @category Utils
+ * @category none
  */
 export function decrypt(value: string, secret: string): string {
   const data = Buffer.from(safeBase64Decode(value), 'base64')

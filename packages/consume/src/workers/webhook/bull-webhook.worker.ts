@@ -17,7 +17,8 @@ import { webhookSchemas } from './webhook.schemas.js'
 
 /**
  * Bull webhook worker implementation
- * @category Workers
+ *
+ * @category Webhook
  */
 export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
   /**

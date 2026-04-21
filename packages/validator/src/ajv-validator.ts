@@ -5,18 +5,13 @@ import { VALIDATOR, Validator, ValidatorSchemas } from './validator.js'
 
 /**
  * Ajv validator implementation
+ *
  * @category none
+ * @see [Ajv home](https://ajv.js.org/)
  */
 export class AjvValidator implements Validator {
   /**
    * Register dependency
-   *
-   * @example
-   * ```ts
-   * const container = DIContainer.getInstance()
-   *
-   * AjvValidator.register(container)
-   *```
    */
   static register(container: DIContainer) {
     container.registerSingleton<Validator>(VALIDATOR, () => new AjvValidator())

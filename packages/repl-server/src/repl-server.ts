@@ -1,23 +1,24 @@
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const REPL_SERVER = Symbol('ReplServer')
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const REPL_SERVER_ASSETS = Symbol('ReplServerAssets')
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
 
 /**
  * Represents a REPL server
+ *
  * @category none
  */
 export interface ReplServer {
@@ -33,7 +34,6 @@ export interface ReplServer {
 }
 
 /**
- * REPL server api-call
  * @category none
  */
 export type ReplServerApiCall = (data: unknown) => Promise<unknown>
@@ -51,7 +51,6 @@ export type ReplServerApiCalls = [string, ReplServerApiCall][]
 export type ReplServerAssets = [string, string][]
 
 /**
- * Cli REPL server config
  * @category none
  */
 export interface CliReplServerConfig {
@@ -69,7 +68,6 @@ export interface CliReplServerOptions {
 }
 
 /**
- * Net REPL server config
  * @category none
  */
 export interface NetReplServerConfig {

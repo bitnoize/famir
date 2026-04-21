@@ -8,7 +8,9 @@ import { MinioStorageConfig, MinioStorageOptions, Storage, STORAGE } from './sto
 
 /**
  * Minio storage implementation
+ *
  * @category none
+ * @see [MinIO Client SDK](https://github.com/minio/minio-js)
  */
 export class MinioStorage implements Storage {
   /**

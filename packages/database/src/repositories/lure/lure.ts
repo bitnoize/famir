@@ -1,14 +1,15 @@
 import { LureModel } from '../../models/index.js'
 
 /**
- * DI token
- * @category DI
+ * @category Lure
+ * @internal
  */
 export const LURE_REPOSITORY = Symbol('LureRepository')
 
 /**
  * Represents a lure repository
- * @category Repositories
+ *
+ * @category Lure
  */
 export interface LureRepository {
   /**

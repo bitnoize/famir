@@ -1,3 +1,3 @@
 # @famir/templater
 
-Famir templater infrastructure service.
+Templater infrastructure service.

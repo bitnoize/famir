@@ -14,7 +14,7 @@ import { DEFAULT_CONTROLLER } from './default.js'
 
 /**
  * Default controller
- * @category Controllers
+ * @category Default
  */
 export class DefaultController extends BaseController {
   /**
@@ -53,9 +53,6 @@ export class DefaultController extends BaseController {
     this.logger.debug(`DefaultController initialized`)
   }
 
-  /**
-   * Use processor
-   */
   use() {
     this.router.addProcessor(ANALYZE_QUEUE_NAME, 'default', async (data) => {
       this.validateAnalyzeJobData(data)

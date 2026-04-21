@@ -1,11 +1,9 @@
 /**
- * Error context
  * @category none
  */
 export type ErrorContext = Record<string, unknown>
 
 /**
- * Common error options
  * @category none
  */
 export type CommonErrorOptions = ErrorOptions & {
@@ -14,6 +12,7 @@ export type CommonErrorOptions = ErrorOptions & {
 
 /**
  * Represents a common error
+ *
  * @category none
  */
 export abstract class CommonError extends Error {

@@ -1,3 +1,3 @@
 # @famir/logger
 
-Famir logger infrastructure service.
+Logger infrastructure service.

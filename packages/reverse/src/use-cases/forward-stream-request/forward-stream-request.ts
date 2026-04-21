@@ -1,4 +1,4 @@
-import { HttpHeaders, HttpMethod } from '@famir/common'
+import { HttpHeaders, HttpMethod } from '@famir/http-proto'
 import type { Readable } from 'node:stream'
 
 export const FORWARD_STREAM_REQUEST_USE_CASE = Symbol('ForwardStreamRequestUseCase')

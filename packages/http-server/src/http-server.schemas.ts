@@ -1,7 +1,7 @@
 import { JSONSchemaType } from '@famir/validator'
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configHttpServerAddressSchema: JSONSchemaType<string> = {
@@ -11,7 +11,7 @@ export const configHttpServerAddressSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configHttpServerPortSchema: JSONSchemaType<number> = {
@@ -21,7 +21,7 @@ export const configHttpServerPortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configHttpServerVerboseSchema: JSONSchemaType<boolean> = {

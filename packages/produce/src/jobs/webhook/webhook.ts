@@ -1,13 +1,11 @@
 /**
- * Webhook job data
- * @category Jobs
+ * @category Webhook
  */
 export interface WebhookJobData {
   url: string
 }
 
 /**
- * Webhook job result
- * @category Jobs
+ * @category Webhook
  */
 export type WebhookJobResult = boolean

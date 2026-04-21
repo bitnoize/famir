@@ -1,3 +1,3 @@
 # @famir/http-server
 
-Famir http-server infrastructure service.
+HTTP server infrastructure service.

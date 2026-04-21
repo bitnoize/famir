@@ -1,7 +1,6 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * HTTP server error code
  * @category none
  */
 export type HttpServerErrorCode =
@@ -18,7 +17,6 @@ export type HttpServerErrorCode =
   | 'GATEWAY_TIMEOUT'
 
 /**
- * HTTP server error options
  * @category none
  */
 export type HttpServerErrorOptions = CommonErrorOptions & {
@@ -41,6 +39,7 @@ const codeToStatusMap: Record<HttpServerErrorCode, number> = {
 
 /**
  * Represents HTTP server error
+ *
  * @category none
  */
 export class HttpServerError extends CommonError {

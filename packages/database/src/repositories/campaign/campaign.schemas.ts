@@ -2,7 +2,7 @@ import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 
 /**
- * @category Schemas
+ * @category Campaign
  * @internal
  */
 const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
@@ -39,7 +39,7 @@ const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Campaign
  * @internal
  */
 const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
@@ -120,7 +120,7 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Campaign
  * @internal
  */
 export const campaignMirrorDomainSchema: JSONSchemaType<string> = {
@@ -130,7 +130,7 @@ export const campaignMirrorDomainSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Campaign
  * @internal
  */
 export const campaignDescriptionSchema: JSONSchemaType<string> = {
@@ -140,7 +140,7 @@ export const campaignDescriptionSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Campaign
  * @internal
  */
 export const campaignUpgradeSessionPathSchema: JSONSchemaType<string> = {
@@ -150,7 +150,7 @@ export const campaignUpgradeSessionPathSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Campaign
  * @internal
  */
 export const campaignSessionCookieNameSchema: JSONSchemaType<string> = {
@@ -160,7 +160,7 @@ export const campaignSessionCookieNameSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Campaign
  * @internal
  */
 export const campaignSessionExpireSchema: JSONSchemaType<number> = {
@@ -170,7 +170,7 @@ export const campaignSessionExpireSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Campaign
  * @internal
  */
 export const campaignNewSessionExpireSchema: JSONSchemaType<number> = {
@@ -180,7 +180,7 @@ export const campaignNewSessionExpireSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Campaign
  * @internal
  */
 export const campaignMessageExpireSchema: JSONSchemaType<number> = {
@@ -190,7 +190,7 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Utils
+ * @category Campaign
  * @internal
  */
 export const campaignSchemas: ValidatorSchemas = {

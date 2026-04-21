@@ -3,7 +3,7 @@ import { RedirectorParams } from '../../models/index.js'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 
 /**
- * @category Schemas
+ * @category Redirector
  * @internal
  */
 const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
@@ -27,7 +27,7 @@ const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Redirector
  * @internal
  */
 const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
@@ -60,7 +60,7 @@ const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Redirector
  * @internal
  */
 export const redirectorPageSchema: JSONSchemaType<string> = {
@@ -70,7 +70,7 @@ export const redirectorPageSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Redirector
  * @internal
  */
 export const redirectorFieldSchema: JSONSchemaType<string> = {
@@ -79,7 +79,7 @@ export const redirectorFieldSchema: JSONSchemaType<string> = {
 }
 
 /**
- * @category Schemas
+ * @category Redirector
  * @internal
  */
 export const redirectorFieldsSchema: JSONSchemaType<string[]> = {
@@ -88,7 +88,7 @@ export const redirectorFieldsSchema: JSONSchemaType<string[]> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Redirector
  * @internal
  */
 export const redirectorParamsSchema: JSONSchemaType<RedirectorParams> = {
@@ -101,7 +101,7 @@ export const redirectorParamsSchema: JSONSchemaType<RedirectorParams> = {
 } as const
 
 /**
- * @category Utils
+ * @category Redirector
  * @internal
  */
 export const redirectorSchemas: ValidatorSchemas = {

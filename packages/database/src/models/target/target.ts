@@ -1,23 +1,24 @@
 /**
- * @category Models
+ * @category Target
  * @internal
  */
 export const TARGET_ACCESS_LEVELS = ['transparent', 'landing'] as const
 
 /**
- * @category Models
+ * @category Target
  */
 export type TargetAccessLevel = (typeof TARGET_ACCESS_LEVELS)[number]
 
 /**
- * @category Models
+ * @category Target
  * @internal
  */
 export const TARGET_SUB_ROOT = '.'
 
 /**
- * Target model
- * @category Models
+ * Represents target model
+ *
+ * @category Target
  */
 export class TargetModel {
   static isNotNull = <T extends TargetModel>(model: T | null): model is T => {
@@ -97,8 +98,9 @@ export class TargetModel {
 }
 
 /**
- * Extended target model
- * @category Models
+ * Represents full target model
+ *
+ * @category Target
  */
 export class FullTargetModel extends TargetModel {
   constructor(
@@ -153,16 +155,18 @@ export class FullTargetModel extends TargetModel {
 }
 
 /**
- * Enabled target model
- * @category Models
+ * Represents enabled target model
+ *
+ * @category Target
  */
 export interface EnabledTargetModel extends TargetModel {
   isEnabled: true
 }
 
 /**
- * Enabled extended target model
- * @category Models
+ * Represents enabled full target model
+ *
+ * @category Target
  */
 export interface EnabledFullTargetModel extends FullTargetModel {
   isEnabled: true

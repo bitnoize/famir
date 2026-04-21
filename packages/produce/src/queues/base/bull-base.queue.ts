@@ -11,7 +11,8 @@ import {
 
 /**
  * Bull base queue
- * @category Queues
+ *
+ * @category none
  */
 export abstract class BullBaseQueue {
   protected readonly options: BullProduceQueueOptions

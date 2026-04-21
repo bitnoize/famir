@@ -1,3 +1,3 @@
 # @famir/http-client
 
-Famir http-client infrastructure service.
+HTTP client infrastructure service.

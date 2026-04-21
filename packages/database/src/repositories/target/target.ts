@@ -1,14 +1,15 @@
 import { FullTargetModel, TargetAccessLevel, TargetModel } from '../../models/index.js'
 
 /**
- * DI token
- * @category DI
+ * @category Target
+ * @internal
  */
 export const TARGET_REPOSITORY = Symbol('TargetRepository')
 
 /**
  * Represents target repository
- * @category Repositories
+ *
+ * @category Target
  */
 export interface TargetRepository {
   /**

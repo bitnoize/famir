@@ -17,7 +17,8 @@ import { campaignSchemas } from './campaign.schemas.js'
 
 /**
  * Redis campaign repository implementation
- * @category Repositories
+ *
+ * @category Campaign
  */
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {
   /**

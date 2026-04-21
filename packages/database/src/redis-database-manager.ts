@@ -11,6 +11,7 @@ import { makeRedisFunctions } from './redis-functions.js'
 
 /**
  * Redis database manager implementation
+ *
  * @category none
  */
 export class RedisDatabaseManager implements DatabaseManager {

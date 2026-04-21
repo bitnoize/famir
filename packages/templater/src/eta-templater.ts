@@ -4,7 +4,9 @@ import { TEMPLATER, Templater } from './templater.js'
 
 /**
  * Eta templater implementation
+ *
  * @category none
+ * @see [Eta home](https://eta.js.org)
  */
 export class EtaTemplater implements Templater {
   /**

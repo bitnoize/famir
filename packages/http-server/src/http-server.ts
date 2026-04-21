@@ -1,4 +1,4 @@
-import { HttpConnection } from '@famir/common'
+import { HttpConnection } from '@famir/http-proto'
 import {
   HttpBodyWrap,
   HttpHeadersWrap,
@@ -12,31 +12,32 @@ import type { Readable, Writable } from 'node:stream'
 import type WebSocket from 'ws'
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const HTTP_SERVER = Symbol('HttpServer')
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const HTTP_SERVER_ASSETS = Symbol('HttpServerAssets')
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const HTTP_SERVER_CONTEXT_FACTORY = Symbol('HttpServerContextFactory')
 
 /**
  * Represents a HTTP server
+ *
  * @category none
  */
 export interface HttpServer {
@@ -52,7 +53,6 @@ export interface HttpServer {
 }
 
 /**
- * HTTP server context state
  * @category none
  */
 export interface HttpServerContextState {
@@ -63,6 +63,7 @@ export interface HttpServerContextState {
 
 /**
  * Represents a HTTP server context factory
+ *
  * @category none
  */
 export interface HttpServerContextFactory {
@@ -86,13 +87,13 @@ export interface HttpServerContextFactory {
 }
 
 /**
- * HTTP server context type
  * @category none
  */
 export type HttpServerContextType = 'normal' | 'websocket'
 
 /**
  * Represents a HTTP server context
+ *
  * @category none
  */
 export interface HttpServerContext {
@@ -122,13 +123,11 @@ export interface HttpServerContext {
 }
 
 /**
- * HTTP server next function
  * @category none
  */
 export type HttpServerNextFunction = () => Promise<void>
 
 /**
- * HTTP server middleware
  * @category none
  */
 export type HttpServerMiddleware = (
@@ -149,7 +148,6 @@ export type HttpServerMiddlewares = [string, HttpServerMiddleware][]
 export type HttpServerAssets = [string, string][]
 
 /**
- * Native HTTP server config
  * @category none
  */
 export interface NativeHttpServerConfig {

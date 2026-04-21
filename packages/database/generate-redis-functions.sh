@@ -42,7 +42,7 @@ ${parts_body}
 ]
 
 /**
- * @category Utils
+ * @category none
  * @internal
  */
 export function makeRedisFunctions(): [string, string][] {

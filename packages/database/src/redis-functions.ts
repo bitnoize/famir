@@ -1478,7 +1478,7 @@ ICduby13cml0ZXMnIH0sCiAgZGVzY3JpcHRpb24gPSAnUmVhZCBmdWxsIG1lc3NhZ2UnLAp9KQo=`,
 ]
 
 /**
- * @category Utils
+ * @category none
  * @internal
  */
 export function makeRedisFunctions(): [string, string][] {

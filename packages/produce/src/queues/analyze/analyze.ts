@@ -2,20 +2,20 @@ import { AnalyzeJobData } from '../../jobs/index.js'
 
 /**
  * DI token
- * @category DI
+ * @category Analyze
  */
 export const ANALYZE_QUEUE = Symbol('AnalyzeQueue')
 
 /**
- * Queue name
- * @category Queues
+ * @category Analyze
  * @internal
  */
 export const ANALYZE_QUEUE_NAME = 'analyze'
 
 /**
  * Represents an analyze queue
- * @category Queues
+ *
+ * @category Analyze
  */
 export interface AnalyzeQueue {
   /**

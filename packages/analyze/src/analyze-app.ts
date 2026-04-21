@@ -14,6 +14,7 @@ import { ANALYZE_APP } from './analyze.js'
 
 /**
  * Represents an analyze app
+ *
  * @category none
  */
 export class AnalyzeApp {

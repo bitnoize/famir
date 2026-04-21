@@ -2,7 +2,7 @@ import { CommandParser } from '@redis/client'
 import { campaignKey, enabledProxyIndexKey, lureKey, sessionKey } from '../../database.keys.js'
 
 /**
- * @category Repositories
+ * @category Session
  * @internal
  */
 export interface RawSession {
@@ -17,7 +17,7 @@ export interface RawSession {
 }
 
 /**
- * @category Repositories
+ * @category Session
  * @internal
  */
 export const sessionFunctions = {

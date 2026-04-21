@@ -1,4 +1,5 @@
-import { DIContainer, HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/common'
+import { DIContainer } from '@famir/common'
+import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-proto'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
@@ -19,6 +20,7 @@ import {
 
 /**
  * Curl HTTP client implementation
+ *
  * @category none
  */
 export class CurlHttpClient implements HttpClient {

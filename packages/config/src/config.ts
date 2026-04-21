@@ -1,17 +1,18 @@
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const CONFIG = Symbol('Config')
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const CONFIG_SCHEMA = Symbol('ConfigSchema')
 
 /**
  * Represents a config
+ *
  * @category none
  */
 export interface Config<T> {

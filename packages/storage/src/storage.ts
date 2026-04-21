@@ -1,11 +1,12 @@
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const STORAGE = Symbol('Storage')
 
 /**
  * Represents a storage
+ *
  * @category none
  */
 export interface Storage {
@@ -21,7 +22,6 @@ export interface Storage {
 }
 
 /**
- * Minio storage config
  * @category none
  */
 export interface MinioStorageConfig {

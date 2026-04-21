@@ -1,6 +1,5 @@
 /**
- * Upgrade session params
- * @category Models
+ * @category Session
  */
 export interface UpgradeSessionParams {
   lure_id: string
@@ -10,8 +9,9 @@ export interface UpgradeSessionParams {
 }
 
 /**
- * Session model
- * @category Models
+ * Represents session model
+ *
+ * @category Session
  */
 export class SessionModel {
   static isNotNull = <T extends SessionModel>(model: T | null): model is T => {

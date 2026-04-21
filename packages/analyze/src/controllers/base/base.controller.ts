@@ -5,7 +5,7 @@ import { Validator } from '@famir/validator'
 
 /**
  * Base controller
- * @category Controllers
+ * @category none
  */
 export abstract class BaseController {
   constructor(

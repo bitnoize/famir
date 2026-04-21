@@ -23,7 +23,7 @@ import { JSONSchemaType } from '@famir/validator'
 import { StdAnalyzeConfig } from './std.js'
 
 /**
- * @category Schemas
+ * @category none
  * @internal
  */
 export const configStdAnalyzeSchema: JSONSchemaType<StdAnalyzeConfig> = {

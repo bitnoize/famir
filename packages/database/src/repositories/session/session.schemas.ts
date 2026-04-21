@@ -8,7 +8,7 @@ import { UpgradeSessionParams } from '../../models/index.js'
 import { RawSession } from './session.functions.js'
 
 /**
- * @category Schemas
+ * @category Session
  * @internal
  */
 const rawSessionSchema: JSONSchemaType<RawSession> = {
@@ -53,7 +53,7 @@ const rawSessionSchema: JSONSchemaType<RawSession> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Session
  * @internal
  */
 export const upgradeSessionParamsSchema: JSONSchemaType<UpgradeSessionParams> = {
@@ -72,7 +72,7 @@ export const upgradeSessionParamsSchema: JSONSchemaType<UpgradeSessionParams> = 
 } as const
 
 /**
- * @category Utils
+ * @category Session
  * @internal
  */
 export const sessionSchemas: ValidatorSchemas = {

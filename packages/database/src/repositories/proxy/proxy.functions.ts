@@ -9,7 +9,7 @@ import {
 } from '../../database.keys.js'
 
 /**
- * @category Repositories
+ * @category Proxy
  * @internal
  */
 export interface RawProxy {
@@ -22,7 +22,7 @@ export interface RawProxy {
 }
 
 /**
- * @category Repositories
+ * @category Proxy
  * @internal
  */
 export const proxyFunctions = {

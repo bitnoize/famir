@@ -3,7 +3,7 @@ import { TARGET_ACCESS_LEVELS, TargetAccessLevel } from '../../models/index.js'
 import { RawFullTarget, RawTarget } from './target.functions.js'
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 const rawTargetSchema: JSONSchemaType<RawTarget> = {
@@ -72,7 +72,7 @@ const rawTargetSchema: JSONSchemaType<RawTarget> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
@@ -192,7 +192,7 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetAccessLevelSchema: JSONSchemaType<TargetAccessLevel> = {
@@ -201,7 +201,7 @@ export const targetAccessLevelSchema: JSONSchemaType<TargetAccessLevel> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetSubSchema: JSONSchemaType<string> = {
@@ -211,7 +211,7 @@ export const targetSubSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetDomainSchema: JSONSchemaType<string> = {
@@ -221,7 +221,7 @@ export const targetDomainSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetPortSchema: JSONSchemaType<number> = {
@@ -231,7 +231,7 @@ export const targetPortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetLabelSchema: JSONSchemaType<string> = {
@@ -241,7 +241,7 @@ export const targetLabelSchema: JSONSchemaType<string> = {
 }
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetLabelsSchema: JSONSchemaType<string[]> = {
@@ -250,7 +250,7 @@ export const targetLabelsSchema: JSONSchemaType<string[]> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
@@ -260,7 +260,7 @@ export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetSimpleTimeoutSchema: JSONSchemaType<number> = {
@@ -270,7 +270,7 @@ export const targetSimpleTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetStreamTimeoutSchema: JSONSchemaType<number> = {
@@ -280,7 +280,7 @@ export const targetStreamTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetHeadersSizeLimitSchema: JSONSchemaType<number> = {
@@ -290,7 +290,7 @@ export const targetHeadersSizeLimitSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetBodySizeLimitSchema: JSONSchemaType<number> = {
@@ -300,7 +300,7 @@ export const targetBodySizeLimitSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Target
  * @internal
  */
 export const targetContentSchema: JSONSchemaType<string> = {
@@ -310,7 +310,7 @@ export const targetContentSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Utils
+ * @category Target
  * @internal
  */
 export const targetSchemas: ValidatorSchemas = {

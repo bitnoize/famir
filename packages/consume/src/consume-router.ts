@@ -12,6 +12,7 @@ import {
 
 /**
  * Represents a consume router
+ *
  * @category none
  */
 export class ConsumeRouter {

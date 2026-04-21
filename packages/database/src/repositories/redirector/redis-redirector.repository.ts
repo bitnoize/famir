@@ -16,7 +16,8 @@ import { redirectorSchemas } from './redirector.schemas.js'
 
 /**
  * Redis redirector repository implementation
- * @category Repositories
+ *
+ * @category Redirector
  */
 export class RedisRedirectorRepository extends RedisBaseRepository implements RedirectorRepository {
   /**

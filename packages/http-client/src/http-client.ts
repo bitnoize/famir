@@ -1,15 +1,16 @@
-import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/common'
+import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-proto'
 import type { PassThrough, Readable } from 'node:stream'
 import { HttpClientError } from './http-client.error.js'
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const HTTP_CLIENT = Symbol('HttpClient')
 
 /**
  * Represents a HTTP client
+ *
  * @category none
  */
 export interface HttpClient {
@@ -105,7 +106,6 @@ export interface HttpClientStreamResponseState extends HttpClientBaseState {
 }
 
 /**
- * HTTP client error result
  * @category none
  */
 export interface HttpClientErrorResult {
@@ -125,7 +125,6 @@ export interface HttpClientBaseResult {
 }
 
 /**
- * HTTP client simple result
  * @category none
  */
 export interface HttpClientSimpleResult extends HttpClientBaseResult {
@@ -133,7 +132,6 @@ export interface HttpClientSimpleResult extends HttpClientBaseResult {
 }
 
 /**
- * HTTP client stream result
  * @category none
  */
 export interface HttpClientStreamResult extends HttpClientBaseResult {
@@ -141,7 +139,6 @@ export interface HttpClientStreamResult extends HttpClientBaseResult {
 }
 
 /**
- * Curl HTTP client config
  * @category none
  */
 export interface CurlHttpClientConfig {

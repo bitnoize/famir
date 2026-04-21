@@ -1,5 +1,6 @@
 /**
  * Represents a HTTP status wrapper
+ *
  * @category none
  */
 export class HttpStatusWrap {

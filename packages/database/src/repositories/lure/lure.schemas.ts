@@ -2,7 +2,7 @@ import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
 import { RawLure } from './lure.functions.js'
 
 /**
- * @category Schemas
+ * @category Lure
  * @internal
  */
 const rawLureSchema: JSONSchemaType<RawLure> = {
@@ -43,7 +43,7 @@ const rawLureSchema: JSONSchemaType<RawLure> = {
 } as const
 
 /**
- * @category Schemas
+ * @category Lure
  * @internal
  */
 export const lurePathSchema: JSONSchemaType<string> = {
@@ -53,7 +53,7 @@ export const lurePathSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * @category Utils
+ * @category Lure
  * @internal
  */
 export const lureSchemas: ValidatorSchemas = {

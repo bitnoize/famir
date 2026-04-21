@@ -16,7 +16,8 @@ import { lureSchemas } from './lure.schemas.js'
 
 /**
  * Redis lure repository implementation
- * @category Repositories
+ *
+ * @category Lure
  */
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {
   /**

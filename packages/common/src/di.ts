@@ -1,12 +1,12 @@
 /**
  * DI token
- * @category DI
+ * @category none
  */
 export type DIToken = string | symbol
 
 /**
  * DI factory
- * @category DI
+ * @category none
  */
 export type DIFactory<T = unknown> = (container: DIContainer) => T
 
@@ -18,7 +18,8 @@ interface DIRegistration<T = unknown> {
 
 /**
  * Represents a DI container
- * @category DI
+ *
+ * @category none
  */
 export class DIContainer {
   private static instance: DIContainer | null = null
@@ -133,6 +134,6 @@ export class DIContainer {
 
 /**
  * DI composer
- * @category DI
+ * @category none
  */
 export type DIComposer = (container: DIContainer) => void

@@ -42,6 +42,7 @@
     "@famir/database": "*",
     "@famir/http-client": "*",
     "@famir/http-server": "*",
+    "@famir/http-proto": "*",
     "@famir/http-tools": "*",
     "@famir/logger": "*",
     "@famir/validator": "*",

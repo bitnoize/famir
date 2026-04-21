@@ -1,6 +1,7 @@
 /**
- * Lure model
- * @category Models
+ * Represents lure model
+ *
+ * @category Lure
  */
 export class LureModel {
   static isNotNull = <T extends LureModel>(model: T | null): model is T => {
@@ -23,8 +24,9 @@ export class LureModel {
 }
 
 /**
- * Enabled lure model
- * @category Models
+ * Represents enabled lure model
+ *
+ * @category Lure
  */
 export interface EnabledLureModel extends LureModel {
   isEnabled: true

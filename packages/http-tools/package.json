@@ -41,6 +41,7 @@
   "homepage": "https://fake-mirrors.net",
   "dependencies": {
     "@famir/common": "*",
+    "@famir/http-proto": "*",
     "cheerio": "^1.2.0",
     "content-type": "^1.0.5",
     "iconv-lite": "^0.7.2",

@@ -6,11 +6,12 @@ import {
   HttpMethod,
   HttpPayload,
   HttpType,
-} from '@famir/common'
+} from '@famir/http-proto'
 
 /**
- * Message model
- * @category Models
+ * Represents message model
+ *
+ * @category Message
  */
 export class MessageModel {
   static isNotNull = <T extends MessageModel>(model: T | null): model is T => {
@@ -39,8 +40,9 @@ export class MessageModel {
 }
 
 /**
- * Extended message model
- * @category Models
+ * Represents full message model
+ *
+ * @category Message
  */
 export class FullMessageModel extends MessageModel {
   constructor(

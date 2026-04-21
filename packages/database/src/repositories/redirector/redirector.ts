@@ -1,14 +1,15 @@
 import { FullRedirectorModel, RedirectorModel } from '../../models/index.js'
 
 /**
- * DI token
- * @category DI
+ * @category Redirector
+ * @internal
  */
 export const REDIRECTOR_REPOSITORY = Symbol('RedirectorRepository')
 
 /**
  * Represents redirector repository
- * @category Repositories
+ *
+ * @category Redirector
  */
 export interface RedirectorRepository {
   /**

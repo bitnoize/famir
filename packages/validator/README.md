@@ -1,3 +1,3 @@
 # @famir/validator
 
-Famir validator infrastructure service.
+Validator infrastructure service.

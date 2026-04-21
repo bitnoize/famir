@@ -1,17 +1,16 @@
+import { arrayIncludes, randomIdent, serializeError } from '@famir/common'
 import {
   HTTP_TYPES_NORMAL,
   HTTP_TYPES_WEBSOCKET,
   HttpConnection,
+  HttpContentType,
   HttpError,
   HttpPayload,
   HttpType,
-  arrayIncludes,
-  randomIdent,
-  serializeError,
-} from '@famir/common'
+} from '@famir/http-proto'
 import { Transform } from 'node:stream'
 import { HttpBodyWrap } from './body.js'
-import { HttpContentType, HttpContentTypeName, HttpContentTypes } from './content-type.js'
+import { HttpContentTypeName, HttpContentTypes } from './content-type.js'
 import { HttpHeadersWrap } from './headers.js'
 import { HttpMethodWrap } from './method.js'
 import { RewriteUrlScheme, RewriteUrlTarget, rewriteUrl } from './rewrite-url.js'
@@ -19,13 +18,11 @@ import { HttpStatusWrap } from './status.js'
 import { HttpUrlWrap } from './url.js'
 
 /**
- * Http message interceptor
  * @category none
  */
 export type HttpMessageInterceptor = (message: HttpMessage) => void
 
 /**
- * Http message interceptors
  * @category none
  * @internal
  */
@@ -33,6 +30,7 @@ export type HttpMessageInterceptors = Array<[string, HttpMessageInterceptor]>
 
 /**
  * Represents a HTTP message
+ *
  * @category none
  */
 export class HttpMessage {

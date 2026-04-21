@@ -2,19 +2,20 @@ import { RedisClientType } from 'redis'
 import { DatabaseFunctions } from './database.functions.js'
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const DATABASE_CONNECTOR = Symbol('DatabaseConnector')
 
 /**
- * DI token
- * @category DI
+ * @category none
+ * @internal
  */
 export const DATABASE_MANAGER = Symbol('DatabaseManager')
 
 /**
  * Represents a database connector
+ *
  * @category none
  */
 export interface DatabaseConnector {
@@ -36,7 +37,6 @@ export interface DatabaseConnector {
 }
 
 /**
- * Redis database connection
  * @category none
  */
 export type RedisDatabaseConnection = RedisClientType<
@@ -48,6 +48,7 @@ export type RedisDatabaseConnection = RedisClientType<
 
 /**
  * Represents a database manager
+ *
  * @category none
  */
 export interface DatabaseManager {
@@ -69,13 +70,11 @@ export interface DatabaseManager {
 export const DATABASE_STATUS_CODES = ['OK', 'NOT_FOUND', 'CONFLICT', 'FORBIDDEN'] as const
 
 /**
- * Database status code
  * @category none
  */
 export type DatabaseStatusCode = (typeof DATABASE_STATUS_CODES)[number]
 
 /**
- * Redis database config
  * @category none
  */
 export interface RedisDatabaseConfig {
@@ -100,7 +99,7 @@ export interface RedisDatabaseRepositoryOptions {
 }
 
 /**
- * @category Utils
+ * @category none
  * @internal
  */
 export const DATABASE_LOCK_TIMEOUT = 5 * 60 * 1000
