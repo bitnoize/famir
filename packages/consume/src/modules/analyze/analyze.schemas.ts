@@ -1,10 +1,5 @@
 import { AnalyzeJobData } from '@famir/produce'
-import {
-  JSONSchemaType,
-  ValidatorSchemas,
-  customIdentSchema,
-  randomIdentSchema,
-} from '@famir/validator'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
 
 /**
  * @category Analyze
@@ -18,12 +13,4 @@ export const analyzeJobDataSchema: JSONSchemaType<AnalyzeJobData> = {
     messageId: randomIdentSchema,
   },
   additionalProperties: false,
-} as const
-
-/**
- * @category Analyze
- * @internal
- */
-export const analyzeSchemas: ValidatorSchemas = {
-  'consume-analyze-job-data': analyzeJobDataSchema,
 } as const

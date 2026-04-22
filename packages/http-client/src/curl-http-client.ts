@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
-import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-proto'
 import { Config, CONFIG } from '@famir/config'
+import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-proto'
 import { Logger, LOGGER } from '@famir/logger'
 import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
 import { PassThrough, pipeline, Readable } from 'node:stream'

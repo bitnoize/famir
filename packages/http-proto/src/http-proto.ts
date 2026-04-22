@@ -134,5 +134,3 @@ export interface HttpSetCookie {
  * @category none
  */
 export type HttpSetCookies = Record<string, HttpSetCookie | undefined>
-
-

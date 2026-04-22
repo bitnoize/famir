@@ -13,7 +13,6 @@ import {
 } from '../../consume.js'
 import { BullBaseWorker } from '../base/index.js'
 import { WEBHOOK_WORKER, WebhookWorker } from './webhook.js'
-import { webhookSchemas } from './webhook.schemas.js'
 
 /**
  * Bull webhook worker implementation
@@ -46,8 +45,6 @@ export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
     router: ConsumeRouter
   ) {
     super(validator, config, logger, connection, router, WEBHOOK_QUEUE_NAME)
-
-    this.validator.addSchemas(webhookSchemas)
 
     this.logger.debug(`WebhookWorker initialized`)
   }

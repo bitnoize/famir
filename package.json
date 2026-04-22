@@ -26,9 +26,9 @@
     "packages/http-server",
     "packages/http-tools",
     "packages/repl-server",
-    "packages/console",
-    "packages/reverse",
-    "packages/analyze"
+    "packages/console-app",
+    "packages/reverse-app",
+    "packages/actions-app"
   ],
   "devDependencies": {
     "@eslint/js": "^10.0.1",
