@@ -2,12 +2,7 @@ import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import {
-  DATABASE_CONNECTOR,
-  DatabaseConnector,
-  RedisDatabaseConfig,
-  RedisDatabaseConnection,
-} from '../../database.js'
+import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawLure } from './lure.functions.js'
 import { LURE_REPOSITORY, LureRepository } from './lure.js'
@@ -28,10 +23,10 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       LURE_REPOSITORY,
       (c) =>
         new RedisLureRepository(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
+          c.resolve(VALIDATOR),
+          c.resolve(CONFIG),
+          c.resolve(LOGGER),
+          c.resolve(DATABASE_CONNECTOR)
         )
     )
   }
@@ -40,9 +35,9 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
     logger: Logger,
-    connection: RedisDatabaseConnection
+    connector: DatabaseConnector
   ) {
-    super(validator, config, logger, connection, 'lure')
+    super(validator, config, logger, connector, 'lure')
 
     this.validator.addSchemas(lureSchemas)
 

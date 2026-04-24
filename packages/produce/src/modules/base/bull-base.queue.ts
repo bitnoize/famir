@@ -6,6 +6,7 @@ import { ProduceError } from '../../produce.error.js'
 import {
   BullProduceConfig,
   BullProduceQueueOptions,
+  ProduceConnector,
   RedisProduceConnection,
 } from '../../produce.js'
 
@@ -17,15 +18,18 @@ import {
  */
 export abstract class BullBaseQueue {
   protected readonly options: BullProduceQueueOptions
+  protected readonly connection: RedisProduceConnection
   protected readonly queue: Queue<unknown, unknown>
 
   constructor(
-    config: Config<BullProduceConfig>,
+    protected readonly config: Config<BullProduceConfig>,
     protected readonly logger: Logger,
-    protected readonly connection: RedisProduceConnection,
+    protected readonly connector: ProduceConnector,
     protected readonly queueName: string
   ) {
     this.options = this.buildOptions(config.data)
+
+    this.connection = connector.getConnection<RedisProduceConnection>()
 
     this.queue = new Queue<unknown, unknown>(this.queueName, {
       connection: this.connection,

@@ -23,14 +23,14 @@ export class PhishmapController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<PhishmapController>(
       PHISHMAP_CONTROLLER,
       (c) =>
         new PhishmapController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<PhishmapService>(PHISHMAP_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(PHISHMAP_SERVICE)
         )
     )
   }
@@ -39,7 +39,7 @@ export class PhishmapController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): PhishmapController {
-    return container.resolve<PhishmapService>(PHISHMAP_CONTROLLER)
+    return container.resolve(PHISHMAP_CONTROLLER)
   }
 
   constructor(

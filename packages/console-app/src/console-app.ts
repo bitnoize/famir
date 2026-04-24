@@ -30,12 +30,12 @@ export class ConsoleApp {
       CONSOLE_APP,
       (c) =>
         new ConsoleApp(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
-          c.resolve<ProduceConnector>(PRODUCE_CONNECTOR),
-          c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<ReplServer>(REPL_SERVER)
+          c.resolve(LOGGER),
+          c.resolve(DATABASE_CONNECTOR),
+          c.resolve(PRODUCE_CONNECTOR),
+          c.resolve(ANALYZE_QUEUE),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(REPL_SERVER)
         )
     )
   }

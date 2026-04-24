@@ -20,11 +20,7 @@ export class ReplServerRouter {
   static register(container: DIContainer) {
     container.registerSingleton<ReplServerRouter>(
       REPL_SERVER_ROUTER,
-      (c) =>
-        new ReplServerRouter(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS)
-        )
+      (c) => new ReplServerRouter(c.resolve(LOGGER), c.resolve(REPL_SERVER_ASSETS))
     )
   }
 

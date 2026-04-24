@@ -15,17 +15,13 @@ export class EnvConfig<T> implements Config<T> {
   static register<C>(container: DIContainer) {
     container.registerSingleton<Config<C>>(
       CONFIG,
-      (c) =>
-        new EnvConfig<C>(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<JSONSchemaType<C>>(CONFIG_SCHEMA)
-        )
+      (c) => new EnvConfig<C>(c.resolve(VALIDATOR), c.resolve(CONFIG_SCHEMA))
     )
   }
 
   constructor(
     protected readonly validator: Validator,
-    configSchema: JSONSchemaType<T>
+    protected readonly configSchema: JSONSchemaType<T>
   ) {
     this.validator.addSchemas({
       config: configSchema,

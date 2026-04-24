@@ -4,7 +4,7 @@ import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
-  ActionRedirectorFieldData,
+  AlterRedirectorFieldData,
   CreateRedirectorData,
   DeleteRedirectorData,
   ListRedirectorsData,
@@ -26,14 +26,14 @@ export class RedirectorController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<RedirectorController>(
       REDIRECTOR_CONTROLLER,
       (c) =>
         new RedirectorController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<RedirectorService>(REDIRECTOR_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(REDIRECTOR_SERVICE)
         )
     )
   }
@@ -42,7 +42,7 @@ export class RedirectorController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): RedirectorController {
-    return container.resolve<RedirectorService>(REDIRECTOR_CONTROLLER)
+    return container.resolve(REDIRECTOR_CONTROLLER)
   }
 
   constructor(
@@ -78,13 +78,13 @@ export class RedirectorController extends BaseController {
     })
 
     this.router.addApiCall('appendRedirectorField', async (data) => {
-      this.validateData<ActionRedirectorFieldData>('console-action-redirector-field-data', data)
+      this.validateData<AlterRedirectorFieldData>('console-alter-redirector-field-data', data)
 
       return await this.redirectorService.appendField(data)
     })
 
     this.router.addApiCall('removeRedirectorField', async (data) => {
-      this.validateData<ActionRedirectorFieldData>('console-action-redirector-field-data', data)
+      this.validateData<AlterRedirectorFieldData>('console-alter-redirector-field-data', data)
 
       return await this.redirectorService.removeField(data)
     })

@@ -5,6 +5,7 @@ import { Validator } from '@famir/validator'
 import { DatabaseError } from '../../database.error.js'
 import {
   DATABASE_STATUS_CODES,
+  DatabaseConnector,
   RedisDatabaseConfig,
   RedisDatabaseConnection,
   RedisDatabaseRepositoryOptions,
@@ -17,15 +18,18 @@ import {
  */
 export abstract class RedisBaseRepository {
   protected readonly options: RedisDatabaseRepositoryOptions
+  protected readonly connection: RedisDatabaseConnection
 
   constructor(
     protected readonly validator: Validator,
-    config: Config<RedisDatabaseConfig>,
+    protected readonly config: Config<RedisDatabaseConfig>,
     protected readonly logger: Logger,
-    protected readonly connection: RedisDatabaseConnection,
+    protected readonly connector: DatabaseConnector,
     protected readonly repositoryName: string
   ) {
     this.options = this.buildOptions(config.data)
+
+    this.connection = connector.getConnection<RedisDatabaseConnection>()
   }
 
   protected validateStringReply(value: unknown): asserts value is string {

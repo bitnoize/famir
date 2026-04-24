@@ -23,7 +23,7 @@ export class RedisDatabaseManager implements DatabaseManager {
       DATABASE_MANAGER,
       (c) =>
         new RedisDatabaseManager(
-          c.resolve<Logger>(LOGGER),
+          c.resolve(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
         )
     )

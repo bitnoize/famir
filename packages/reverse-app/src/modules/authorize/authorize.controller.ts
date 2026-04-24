@@ -31,15 +31,15 @@ export class AuthorizeController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<AuthorizeController>(
       AUTHORIZE_CONTROLLER,
       (c) =>
         new AuthorizeController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<Templater>(TEMPLATER),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<AuthorizeService>(AUTHORIZE_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(TEMPLATER),
+          c.resolve(HTTP_SERVER_ROUTER),
+          c.resolve(AUTHORIZE_SERVICE)
         )
     )
   }
@@ -48,7 +48,7 @@ export class AuthorizeController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): AuthorizeController {
-    return container.resolve<AuthorizeService>(AUTHORIZE_CONTROLLER)
+    return container.resolve(AUTHORIZE_CONTROLLER)
   }
 
   constructor(

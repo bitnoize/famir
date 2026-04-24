@@ -16,11 +16,7 @@ export class CompleteService {
   static register(container: DIContainer) {
     container.registerSingleton<CompleteService>(
       COMPLETE_SERVICE,
-      (c) =>
-        new CompleteService(
-          c.resolve<MessageRepository>(MESSAGE_REPOSITORY),
-          c.resolve<AnalyzeQueue>(ANALYZE_QUEUE)
-        )
+      (c) => new CompleteService(c.resolve(MESSAGE_REPOSITORY), c.resolve(ANALYZE_QUEUE))
     )
   }
 

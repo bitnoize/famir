@@ -13,7 +13,7 @@ import {
   ListProxiesData,
   PROXY_SERVICE,
   ReadProxyData,
-  SwitchProxyData,
+  ToggleProxyData,
 } from './proxy.js'
 
 /**
@@ -28,7 +28,7 @@ export class ProxyService {
   static register(container: DIContainer) {
     container.registerSingleton<ProxyService>(
       PROXY_SERVICE,
-      (c) => new ProxyService(c.resolve<ProxyRepository>(PROXY_REPOSITORY))
+      (c) => new ProxyService(c.resolve(PROXY_REPOSITORY))
     )
   }
 
@@ -66,7 +66,7 @@ export class ProxyService {
     return proxy
   }
 
-  async enable(data: SwitchProxyData): Promise<true> {
+  async enable(data: ToggleProxyData): Promise<true> {
     try {
       await this.proxyRepository.enable(data.campaignId, data.proxyId, data.lockSecret)
 
@@ -86,7 +86,7 @@ export class ProxyService {
     }
   }
 
-  async disable(data: SwitchProxyData): Promise<true> {
+  async disable(data: ToggleProxyData): Promise<true> {
     try {
       await this.proxyRepository.disable(data.campaignId, data.proxyId, data.lockSecret)
 

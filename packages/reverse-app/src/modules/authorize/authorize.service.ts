@@ -41,10 +41,10 @@ export class AuthorizeService {
       AUTHORIZE_SERVICE,
       (c) =>
         new AuthorizeService(
-          c.resolve<ProxyRepository>(PROXY_REPOSITORY),
-          c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
-          c.resolve<LureRepository>(LURE_REPOSITORY),
-          c.resolve<SessionRepository>(SESSION_REPOSITORY)
+          c.resolve(PROXY_REPOSITORY),
+          c.resolve(REDIRECTOR_REPOSITORY),
+          c.resolve(LURE_REPOSITORY),
+          c.resolve(SESSION_REPOSITORY)
         )
     )
   }

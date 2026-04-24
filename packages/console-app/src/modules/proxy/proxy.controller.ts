@@ -10,7 +10,7 @@ import {
   PROXY_CONTROLLER,
   PROXY_SERVICE,
   ReadProxyData,
-  SwitchProxyData,
+  ToggleProxyData,
 } from './proxy.js'
 import { proxySchemas } from './proxy.schemas.js'
 import { type ProxyService } from './proxy.service.js'
@@ -25,14 +25,14 @@ export class ProxyController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<ProxyController>(
       PROXY_CONTROLLER,
       (c) =>
         new ProxyController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<ProxyService>(PROXY_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(PROXY_SERVICE)
         )
     )
   }
@@ -41,7 +41,7 @@ export class ProxyController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): ProxyController {
-    return container.resolve<ProxyService>(PROXY_CONTROLLER)
+    return container.resolve(PROXY_CONTROLLER)
   }
 
   constructor(
@@ -71,13 +71,13 @@ export class ProxyController extends BaseController {
     })
 
     this.router.addApiCall('enableProxy', async (data) => {
-      this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
+      this.validateData<ToggleProxyData>('console-toggle-proxy-data', data)
 
       return await this.proxyService.enable(data)
     })
 
     this.router.addApiCall('disableProxy', async (data) => {
-      this.validateData<SwitchProxyData>('console-switch-proxy-data', data)
+      this.validateData<ToggleProxyData>('console-toggle-proxy-data', data)
 
       return await this.proxyService.disable(data)
     })

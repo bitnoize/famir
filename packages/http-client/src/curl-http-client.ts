@@ -30,18 +30,14 @@ export class CurlHttpClient implements HttpClient {
   static register(container: DIContainer) {
     container.registerSingleton<HttpClient>(
       HTTP_CLIENT,
-      (c) =>
-        new CurlHttpClient(
-          c.resolve<Config<CurlHttpClientConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER)
-        )
+      (c) => new CurlHttpClient(c.resolve(CONFIG), c.resolve(LOGGER))
     )
   }
 
   protected readonly options: CurlHttpClientOptions
 
   constructor(
-    config: Config<CurlHttpClientConfig>,
+    protected readonly config: Config<CurlHttpClientConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)

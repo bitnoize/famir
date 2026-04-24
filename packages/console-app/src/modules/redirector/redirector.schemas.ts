@@ -6,7 +6,7 @@ import {
   randomIdentSchema,
 } from '@famir/validator'
 import {
-  ActionRedirectorFieldData,
+  AlterRedirectorFieldData,
   CreateRedirectorData,
   DeleteRedirectorData,
   ListRedirectorsData,
@@ -72,7 +72,7 @@ const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
  * @category Redirector
  * @internal
  */
-const actionRedirectorFieldDataSchema: JSONSchemaType<ActionRedirectorFieldData> = {
+const alterRedirectorFieldDataSchema: JSONSchemaType<AlterRedirectorFieldData> = {
   type: 'object',
   required: ['campaignId', 'redirectorId', 'field', 'lockSecret'],
   properties: {
@@ -120,7 +120,7 @@ export const redirectorSchemas: ValidatorSchemas = {
   'console-create-redirector-data': createRedirectorDataSchema,
   'console-read-redirector-data': readRedirectorDataSchema,
   'console-update-redirector-data': updateRedirectorDataSchema,
-  'console-action-redirector-field-data': actionRedirectorFieldDataSchema,
+  'console-alter-redirector-field-data': alterRedirectorFieldDataSchema,
   'console-delete-redirector-data': deleteRedirectorDataSchema,
   'console-list-redirectors-data': listRedirectorsDataSchema,
 } as const

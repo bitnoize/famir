@@ -28,12 +28,7 @@ export class NetReplServer implements ReplServer {
   static register(container: DIContainer) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
-      (c) =>
-        new NetReplServer(
-          c.resolve<Config<NetReplServerConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
-        )
+      (c) => new NetReplServer(c.resolve(CONFIG), c.resolve(LOGGER), c.resolve(REPL_SERVER_ROUTER))
     )
   }
 
@@ -43,7 +38,7 @@ export class NetReplServer implements ReplServer {
   protected readonly clients: Set<net.Socket> = new Set()
 
   constructor(
-    config: Config<NetReplServerConfig>,
+    protected readonly config: Config<NetReplServerConfig>,
     protected readonly logger: Logger,
     protected readonly router: ReplServerRouter
   ) {

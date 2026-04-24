@@ -32,11 +32,11 @@ export class NativeHttpServer implements HttpServer {
       HTTP_SERVER,
       (c) =>
         new NativeHttpServer(
-          c.resolve<Config<NativeHttpServerConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<Templater>(TEMPLATER),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<HttpServerContextFactory>(HTTP_SERVER_CONTEXT_FACTORY)
+          c.resolve(CONFIG),
+          c.resolve(LOGGER),
+          c.resolve(TEMPLATER),
+          c.resolve(HTTP_SERVER_ROUTER),
+          c.resolve(HTTP_SERVER_CONTEXT_FACTORY)
         )
     )
   }
@@ -46,7 +46,7 @@ export class NativeHttpServer implements HttpServer {
   protected readonly wsServer: WebSocketServer
 
   constructor(
-    config: Config<NativeHttpServerConfig>,
+    protected readonly config: Config<NativeHttpServerConfig>,
     protected readonly logger: Logger,
     protected readonly templater: Templater,
     protected readonly router: HttpServerRouter,

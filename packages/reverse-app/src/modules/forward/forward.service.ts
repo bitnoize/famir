@@ -25,7 +25,7 @@ export class ForwardService {
   static register(container: DIContainer) {
     container.registerSingleton<ForwardService>(
       FORWARD_SERVICE,
-      (c) => new ForwardService(c.resolve<HttpClient>(HTTP_CLIENT))
+      (c) => new ForwardService(c.resolve(HTTP_CLIENT))
     )
   }
 

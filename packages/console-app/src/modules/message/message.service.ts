@@ -15,7 +15,7 @@ export class MessageService {
   static register(container: DIContainer) {
     container.registerSingleton<MessageService>(
       MESSAGE_SERVICE,
-      (c) => new MessageService(c.resolve<MessageRepository>(MESSAGE_REPOSITORY))
+      (c) => new MessageService(c.resolve(MESSAGE_REPOSITORY))
     )
   }
 

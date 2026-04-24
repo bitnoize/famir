@@ -16,14 +16,14 @@ export class DatabaseController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<DatabaseController>(
       DATABASE_CONTROLLER,
       (c) =>
         new DatabaseController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<DatabaseService>(DATABASE_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(DATABASE_SERVICE)
         )
     )
   }
@@ -32,7 +32,7 @@ export class DatabaseController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): DatabaseController {
-    return container.resolve<DatabaseService>(DATABASE_CONTROLLER)
+    return container.resolve(DATABASE_CONTROLLER)
   }
 
   constructor(

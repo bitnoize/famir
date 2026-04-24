@@ -11,7 +11,7 @@ import {
   LURE_SERVICE,
   MakeLureUrlData,
   ReadLureData,
-  SwitchLureData,
+  ToggleLureData,
 } from './lure.js'
 import { lureSchemas } from './lure.schemas.js'
 import { type LureService } from './lure.service.js'
@@ -26,14 +26,14 @@ export class LureController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<LureController>(
       LURE_CONTROLLER,
       (c) =>
         new LureController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<LureService>(LURE_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(LURE_SERVICE)
         )
     )
   }
@@ -42,7 +42,7 @@ export class LureController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): LureController {
-    return container.resolve<LureService>(LURE_CONTROLLER)
+    return container.resolve(LURE_CONTROLLER)
   }
 
   constructor(
@@ -72,13 +72,13 @@ export class LureController extends BaseController {
     })
 
     this.router.addApiCall('enableLure', async (data) => {
-      this.validateData<SwitchLureData>('console-switch-lure-data', data)
+      this.validateData<ToggleLureData>('console-toggle-lure-data', data)
 
       return await this.lureService.enable(data)
     })
 
     this.router.addApiCall('disableLure', async (data) => {
-      this.validateData<SwitchLureData>('console-switch-lure-data', data)
+      this.validateData<ToggleLureData>('console-toggle-lure-data', data)
 
       return await this.lureService.disable(data)
     })

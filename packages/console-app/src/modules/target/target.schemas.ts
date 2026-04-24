@@ -19,12 +19,12 @@ import {
   randomIdentSchema,
 } from '@famir/validator'
 import {
-  ActionTargetLabelData,
+  AlterTargetLabelData,
   CreateTargetData,
   DeleteTargetData,
   ListTargetsData,
   ReadTargetData,
-  SwitchTargetData,
+  ToggleTargetData,
   UpdateTargetData,
 } from './target.js'
 
@@ -195,7 +195,7 @@ const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
  * @category Target
  * @internal
  */
-const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
+const toggleTargetDataSchema: JSONSchemaType<ToggleTargetData> = {
   type: 'object',
   required: ['campaignId', 'targetId', 'lockSecret'],
   properties: {
@@ -210,7 +210,7 @@ const switchTargetDataSchema: JSONSchemaType<SwitchTargetData> = {
  * @category Target
  * @internal
  */
-const actionTargetLabelDataSchema: JSONSchemaType<ActionTargetLabelData> = {
+const alterTargetLabelDataSchema: JSONSchemaType<AlterTargetLabelData> = {
   type: 'object',
   required: ['campaignId', 'targetId', 'label', 'lockSecret'],
   properties: {
@@ -258,8 +258,8 @@ export const targetSchemas: ValidatorSchemas = {
   'console-create-target-data': createTargetDataSchema,
   'console-read-target-data': readTargetDataSchema,
   'console-update-target-data': updateTargetDataSchema,
-  'console-switch-target-data': switchTargetDataSchema,
-  'console-action-target-label-data': actionTargetLabelDataSchema,
+  'console-toggle-target-data': toggleTargetDataSchema,
+  'console-alter-target-label-data': alterTargetLabelDataSchema,
   'console-delete-target-data': deleteTargetDataSchema,
   'console-list-targets-data': listTargetsDataSchema,
 } as const

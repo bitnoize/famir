@@ -20,11 +20,7 @@ export class HttpServerRouter {
   static register(container: DIContainer) {
     container.registerSingleton<HttpServerRouter>(
       HTTP_SERVER_ROUTER,
-      (c) =>
-        new HttpServerRouter(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS)
-        )
+      (c) => new HttpServerRouter(c.resolve(LOGGER), c.resolve(HTTP_SERVER_ASSETS))
     )
   }
 
@@ -42,6 +38,7 @@ export class HttpServerRouter {
     protected readonly logger: Logger,
     assets: HttpServerAssets
   ) {
+    // FIXME
     assets.forEach(([assetName, asset]) => {
       if (this.assets.has(assetName)) {
         throw new Error(`Duplicate asset: ${assetName}`)

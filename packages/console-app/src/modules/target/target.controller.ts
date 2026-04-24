@@ -4,13 +4,14 @@ import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
-  ActionTargetLabelData,
+  AlterTargetLabelData,
   CreateTargetData,
   DeleteTargetData,
   ListTargetsData,
   ReadTargetData,
   TARGET_CONTROLLER,
   TARGET_SERVICE,
+  ToggleTargetData,
   UpdateTargetData,
 } from './target.js'
 import { targetSchemas } from './target.schemas.js'
@@ -26,14 +27,14 @@ export class TargetController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<TargetController>(
       TARGET_CONTROLLER,
       (c) =>
         new TargetController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<TargetService>(TARGET_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(TARGET_SERVICE)
         )
     )
   }
@@ -42,7 +43,7 @@ export class TargetController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): TargetController {
-    return container.resolve<TargetService>(TARGET_CONTROLLER)
+    return container.resolve(TARGET_CONTROLLER)
   }
 
   constructor(
@@ -78,25 +79,25 @@ export class TargetController extends BaseController {
     })
 
     this.router.addApiCall('enableTarget', async (data) => {
-      this.validateData<UpdateTargetData>('console-switch-target-data', data)
+      this.validateData<ToggleTargetData>('console-toggle-target-data', data)
 
       return await this.targetService.enable(data)
     })
 
     this.router.addApiCall('disableTarget', async (data) => {
-      this.validateData<UpdateTargetData>('console-switch-target-data', data)
+      this.validateData<ToggleTargetData>('console-toggle-target-data', data)
 
       return await this.targetService.disable(data)
     })
 
     this.router.addApiCall('appendTargetLabel', async (data) => {
-      this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
+      this.validateData<AlterTargetLabelData>('console-alter-target-label-data', data)
 
       return await this.targetService.appendLabel(data)
     })
 
     this.router.addApiCall('removeTargetLabel', async (data) => {
-      this.validateData<ActionTargetLabelData>('console-action-target-label-data', data)
+      this.validateData<AlterTargetLabelData>('console-alter-target-label-data', data)
 
       return await this.targetService.removeLabel(data)
     })

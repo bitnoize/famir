@@ -17,14 +17,14 @@ export class MessageController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<MessageController>(
       MESSAGE_CONTROLLER,
       (c) =>
         new MessageController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<MessageService>(MESSAGE_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(MESSAGE_SERVICE)
         )
     )
   }
@@ -33,7 +33,7 @@ export class MessageController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): MessageController {
-    return container.resolve<MessageService>(MESSAGE_CONTROLLER)
+    return container.resolve(MESSAGE_CONTROLLER)
   }
 
   constructor(

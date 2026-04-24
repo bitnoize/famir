@@ -2,12 +2,7 @@ import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import {
-  DATABASE_CONNECTOR,
-  DatabaseConnector,
-  RedisDatabaseConfig,
-  RedisDatabaseConnection,
-} from '../../database.js'
+import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 import { REDIRECTOR_REPOSITORY, RedirectorRepository } from './redirector.js'
@@ -28,10 +23,10 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       REDIRECTOR_REPOSITORY,
       (c) =>
         new RedisRedirectorRepository(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
+          c.resolve(VALIDATOR),
+          c.resolve(CONFIG),
+          c.resolve(LOGGER),
+          c.resolve(DATABASE_CONNECTOR)
         )
     )
   }
@@ -40,9 +35,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
     logger: Logger,
-    connection: RedisDatabaseConnection
+    connector: DatabaseConnector
   ) {
-    super(validator, config, logger, connection, 'redirector')
+    super(validator, config, logger, connector, 'redirector')
 
     this.validator.addSchemas(redirectorSchemas)
 

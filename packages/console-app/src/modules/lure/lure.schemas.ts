@@ -11,7 +11,7 @@ import {
   ListLuresData,
   MakeLureUrlData,
   ReadLureData,
-  SwitchLureData,
+  ToggleLureData,
 } from './lure.js'
 
 /**
@@ -49,7 +49,7 @@ const readLureDataSchema: JSONSchemaType<ReadLureData> = {
  * @category Lure
  * @internal
  */
-const switchLureDataSchema: JSONSchemaType<SwitchLureData> = {
+const toggleLureDataSchema: JSONSchemaType<ToggleLureData> = {
   type: 'object',
   required: ['campaignId', 'lureId', 'lockSecret'],
   properties: {
@@ -112,7 +112,7 @@ const makeLureUrlDataSchema: JSONSchemaType<MakeLureUrlData> = {
 export const lureSchemas: ValidatorSchemas = {
   'console-create-lure-data': createLureDataSchema,
   'console-read-lure-data': readLureDataSchema,
-  'console-switch-lure-data': switchLureDataSchema,
+  'console-toggle-lure-data': toggleLureDataSchema,
   'console-delete-lure-data': deleteLureDataSchema,
   'console-list-lures-data': listLuresDataSchema,
   'console-make-lure-url-data': makeLureUrlDataSchema,

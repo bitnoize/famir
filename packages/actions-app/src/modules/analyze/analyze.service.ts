@@ -17,11 +17,7 @@ export class AnalyzeService {
   static register(container: DIContainer) {
     container.registerSingleton<AnalyzeService>(
       ANALYZE_SERVICE,
-      (c) =>
-        new AnalyzeService(
-          c.resolve<MessageRepository>(MESSAGE_REPOSITORY),
-          c.resolve<Storage>(STORAGE)
-        )
+      (c) => new AnalyzeService(c.resolve(MESSAGE_REPOSITORY), c.resolve(STORAGE))
     )
   }
 

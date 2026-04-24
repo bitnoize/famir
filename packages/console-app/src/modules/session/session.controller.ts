@@ -17,14 +17,14 @@ export class SessionController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<SessionController>(
       SESSION_CONTROLLER,
       (c) =>
         new SessionController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<SessionService>(SESSION_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(SESSION_SERVICE)
         )
     )
   }
@@ -33,7 +33,7 @@ export class SessionController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): SessionController {
-    return container.resolve<SessionService>(SESSION_CONTROLLER)
+    return container.resolve(SESSION_CONTROLLER)
   }
 
   constructor(

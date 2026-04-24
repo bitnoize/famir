@@ -9,13 +9,13 @@ import {
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
-  ActionTargetLabelData,
+  AlterTargetLabelData,
   CreateTargetData,
   DeleteTargetData,
   ListTargetsData,
   ReadTargetData,
-  SwitchTargetData,
   TARGET_SERVICE,
+  ToggleTargetData,
   UpdateTargetData,
 } from './target.js'
 
@@ -31,7 +31,7 @@ export class TargetService {
   static register(container: DIContainer) {
     container.registerSingleton<TargetService>(
       TARGET_SERVICE,
-      (c) => new TargetService(c.resolve<TargetRepository>(TARGET_REPOSITORY))
+      (c) => new TargetService(c.resolve(TARGET_REPOSITORY))
     )
   }
 
@@ -127,7 +127,7 @@ export class TargetService {
     }
   }
 
-  async enable(data: SwitchTargetData): Promise<true> {
+  async enable(data: ToggleTargetData): Promise<true> {
     try {
       await this.targetRepository.enable(data.campaignId, data.targetId, data.lockSecret)
 
@@ -147,7 +147,7 @@ export class TargetService {
     }
   }
 
-  async disable(data: SwitchTargetData): Promise<true> {
+  async disable(data: ToggleTargetData): Promise<true> {
     try {
       await this.targetRepository.disable(data.campaignId, data.targetId, data.lockSecret)
 
@@ -167,7 +167,7 @@ export class TargetService {
     }
   }
 
-  async appendLabel(data: ActionTargetLabelData): Promise<true> {
+  async appendLabel(data: AlterTargetLabelData): Promise<true> {
     try {
       await this.targetRepository.appendLabel(
         data.campaignId,
@@ -192,7 +192,7 @@ export class TargetService {
     }
   }
 
-  async removeLabel(data: ActionTargetLabelData): Promise<true> {
+  async removeLabel(data: AlterTargetLabelData): Promise<true> {
     try {
       await this.targetRepository.removeLabel(
         data.campaignId,

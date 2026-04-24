@@ -20,15 +20,15 @@ export class ForwardController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<ForwardController>(
       FORWARD_CONTROLLER,
       (c) =>
         new ForwardController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<Templater>(TEMPLATER),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<ForwardService>(FORWARD_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(TEMPLATER),
+          c.resolve(HTTP_SERVER_ROUTER),
+          c.resolve(FORWARD_SERVICE)
         )
     )
   }
@@ -37,7 +37,7 @@ export class ForwardController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): ForwardController {
-    return container.resolve<ForwardService>(FORWARD_CONTROLLER)
+    return container.resolve(FORWARD_CONTROLLER)
   }
 
   constructor(

@@ -71,7 +71,7 @@ export interface UpdateTargetData {
 /**
  * @category Target
  */
-export interface SwitchTargetData {
+export interface ToggleTargetData {
   campaignId: string
   targetId: string
   lockSecret: string
@@ -80,7 +80,7 @@ export interface SwitchTargetData {
 /**
  * @category Target
  */
-export interface ActionTargetLabelData {
+export interface AlterTargetLabelData {
   campaignId: string
   targetId: string
   label: string

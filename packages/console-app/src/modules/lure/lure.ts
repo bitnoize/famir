@@ -42,7 +42,7 @@ export interface ReadLurePathData {
 /**
  * @category Lure
  */
-export interface SwitchLureData {
+export interface ToggleLureData {
   campaignId: string
   lureId: string
   lockSecret: string

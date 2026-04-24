@@ -25,11 +25,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   static register(container: DIContainer) {
     container.registerSingleton<DatabaseConnector>(
       DATABASE_CONNECTOR,
-      (c) =>
-        new RedisDatabaseConnector(
-          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER)
-        )
+      (c) => new RedisDatabaseConnector(c.resolve(CONFIG), c.resolve(LOGGER))
     )
   }
 
@@ -37,7 +33,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   protected readonly redis: RedisDatabaseConnection
 
   constructor(
-    config: Config<RedisDatabaseConfig>,
+    protected readonly config: Config<RedisDatabaseConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)

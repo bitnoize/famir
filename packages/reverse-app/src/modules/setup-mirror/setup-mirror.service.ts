@@ -24,11 +24,7 @@ export class SetupMirrorService {
   static register(container: DIContainer) {
     container.registerSingleton<SetupMirrorService>(
       SETUP_MIRROR_SERVICE,
-      (c) =>
-        new SetupMirrorService(
-          c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
-          c.resolve<TargetRepository>(TARGET_REPOSITORY)
-        )
+      (c) => new SetupMirrorService(c.resolve(CAMPAIGN_REPOSITORY), c.resolve(TARGET_REPOSITORY))
     )
   }
 

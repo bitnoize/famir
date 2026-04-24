@@ -27,19 +27,14 @@ export class CliReplServer implements ReplServer {
   static register(container: DIContainer) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
-      (c) =>
-        new CliReplServer(
-          c.resolve<Config<CliReplServerConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
-        )
+      (c) => new CliReplServer(c.resolve(CONFIG), c.resolve(LOGGER), c.resolve(REPL_SERVER_ROUTER))
     )
   }
 
   protected readonly options: CliReplServerOptions
 
   constructor(
-    config: Config<CliReplServerConfig>,
+    protected readonly config: Config<CliReplServerConfig>,
     protected readonly logger: Logger,
     protected readonly router: ReplServerRouter
   ) {

@@ -27,15 +27,15 @@ export class SetupMirrorController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<SetupMirrorController>(
       SETUP_MIRROR_CONTROLLER,
       (c) =>
         new SetupMirrorController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<Templater>(TEMPLATER),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<SetupMirrorService>(SETUP_MIRROR_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(TEMPLATER),
+          c.resolve(HTTP_SERVER_ROUTER),
+          c.resolve(SETUP_MIRROR_SERVICE)
         )
     )
   }
@@ -43,7 +43,7 @@ export class SetupMirrorController extends BaseController {
   /**
    * Resolve dependency
    */
-  static resolve<SetupMirrorService>(container: DIContainer): SetupMirrorController {
+  static resolve(container: DIContainer): SetupMirrorController {
     return container.resolve(SETUP_MIRROR_CONTROLLER)
   }
 

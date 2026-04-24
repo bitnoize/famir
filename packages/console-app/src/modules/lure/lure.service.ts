@@ -20,7 +20,7 @@ import {
   ListLuresData,
   MakeLureUrlData,
   ReadLureData,
-  SwitchLureData,
+  ToggleLureData,
 } from './lure.js'
 
 /**
@@ -37,10 +37,10 @@ export class LureService {
       LURE_SERVICE,
       (c) =>
         new LureService(
-          c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
-          c.resolve<TargetRepository>(TARGET_REPOSITORY),
-          c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
-          c.resolve<LureRepository>(LURE_REPOSITORY)
+          c.resolve(CAMPAIGN_REPOSITORY),
+          c.resolve(TARGET_REPOSITORY),
+          c.resolve(REDIRECTOR_REPOSITORY),
+          c.resolve(LURE_REPOSITORY)
         )
     )
   }
@@ -90,7 +90,7 @@ export class LureService {
     return lure
   }
 
-  async enable(data: SwitchLureData): Promise<true> {
+  async enable(data: ToggleLureData): Promise<true> {
     try {
       await this.lureRepository.enable(data.campaignId, data.lureId, data.lockSecret)
 
@@ -110,7 +110,7 @@ export class LureService {
     }
   }
 
-  async disable(data: SwitchLureData): Promise<true> {
+  async disable(data: ToggleLureData): Promise<true> {
     try {
       await this.lureRepository.disable(data.campaignId, data.lureId, data.lockSecret)
 

@@ -31,7 +31,7 @@ export interface ReadProxyData {
 /**
  * @category Proxy
  */
-export interface SwitchProxyData {
+export interface ToggleProxyData {
   campaignId: string
   proxyId: string
   lockSecret: string

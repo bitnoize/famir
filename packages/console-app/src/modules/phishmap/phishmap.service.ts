@@ -36,11 +36,11 @@ export class PhishmapService {
       PHISHMAP_SERVICE,
       (c) =>
         new PhishmapService(
-          c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
-          c.resolve<ProxyRepository>(PROXY_REPOSITORY),
-          c.resolve<TargetRepository>(TARGET_REPOSITORY),
-          c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
-          c.resolve<LureRepository>(LURE_REPOSITORY)
+          c.resolve(CAMPAIGN_REPOSITORY),
+          c.resolve(PROXY_REPOSITORY),
+          c.resolve(TARGET_REPOSITORY),
+          c.resolve(REDIRECTOR_REPOSITORY),
+          c.resolve(LURE_REPOSITORY)
         )
     )
   }

@@ -17,15 +17,15 @@ export class CompleteController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<CompleteController>(
       COMPLETE_CONTROLLER,
       (c) =>
         new CompleteController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<Templater>(TEMPLATER),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<CompleteService>(COMPLETE_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(TEMPLATER),
+          c.resolve(HTTP_SERVER_ROUTER),
+          c.resolve(COMPLETE_SERVICE)
         )
     )
   }
@@ -34,7 +34,7 @@ export class CompleteController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): CompleteController {
-    return container.resolve<CompleteService>(COMPLETE_CONTROLLER)
+    return container.resolve(COMPLETE_CONTROLLER)
   }
 
   constructor(

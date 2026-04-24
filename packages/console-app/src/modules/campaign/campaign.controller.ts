@@ -26,14 +26,14 @@ export class CampaignController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<CampaignController>(
       CAMPAIGN_CONTROLLER,
       (c) =>
         new CampaignController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          c.resolve<CampaignService>(CAMPAIGN_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(REPL_SERVER_ROUTER),
+          c.resolve(CAMPAIGN_SERVICE)
         )
     )
   }
@@ -42,7 +42,7 @@ export class CampaignController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): CampaignController {
-    return container.resolve<CampaignService>(CAMPAIGN_CONTROLLER)
+    return container.resolve(CAMPAIGN_CONTROLLER)
   }
 
   constructor(

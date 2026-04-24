@@ -10,7 +10,7 @@ import {
   DeleteProxyData,
   ListProxiesData,
   ReadProxyData,
-  SwitchProxyData,
+  ToggleProxyData,
 } from './proxy.js'
 
 /**
@@ -47,7 +47,7 @@ const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
  * @category Proxy
  * @internal
  */
-const switchProxyDataSchema: JSONSchemaType<SwitchProxyData> = {
+const toggleProxyDataSchema: JSONSchemaType<ToggleProxyData> = {
   type: 'object',
   required: ['campaignId', 'proxyId', 'lockSecret'],
   properties: {
@@ -93,7 +93,7 @@ const listProxiesDataSchema: JSONSchemaType<ListProxiesData> = {
 export const proxySchemas: ValidatorSchemas = {
   'console-create-proxy-data': createProxyDataSchema,
   'console-read-proxy-data': readProxyDataSchema,
-  'console-switch-proxy-data': switchProxyDataSchema,
+  'console-toggle-proxy-data': toggleProxyDataSchema,
   'console-delete-proxy-data': deleteProxyDataSchema,
   'console-list-proxies-data': listProxiesDataSchema,
 } as const

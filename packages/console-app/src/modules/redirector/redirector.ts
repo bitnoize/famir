@@ -41,7 +41,7 @@ export interface UpdateRedirectorData {
 /**
  * @category Redirector
  */
-export interface ActionRedirectorFieldData {
+export interface AlterRedirectorFieldData {
   campaignId: string
   redirectorId: string
   field: string

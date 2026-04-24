@@ -2,12 +2,7 @@ import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import {
-  DATABASE_CONNECTOR,
-  DatabaseConnector,
-  RedisDatabaseConfig,
-  RedisDatabaseConnection,
-} from '../../database.js'
+import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawProxy } from './proxy.functions.js'
 import { PROXY_REPOSITORY, ProxyRepository } from './proxy.js'
@@ -28,10 +23,10 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       PROXY_REPOSITORY,
       (c) =>
         new RedisProxyRepository(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
+          c.resolve(VALIDATOR),
+          c.resolve(CONFIG),
+          c.resolve(LOGGER),
+          c.resolve(DATABASE_CONNECTOR)
         )
     )
   }
@@ -40,9 +35,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
     logger: Logger,
-    connection: RedisDatabaseConnection
+    connector: DatabaseConnector
   ) {
-    super(validator, config, logger, connection, 'proxy')
+    super(validator, config, logger, connector, 'proxy')
 
     this.validator.addSchemas(proxySchemas)
 

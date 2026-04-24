@@ -19,8 +19,7 @@ export class MinioStorage implements Storage {
   static register(container: DIContainer) {
     container.registerSingleton<Storage>(
       STORAGE,
-      (c) =>
-        new MinioStorage(c.resolve<Config<MinioStorageConfig>>(CONFIG), c.resolve<Logger>(LOGGER))
+      (c) => new MinioStorage(c.resolve(CONFIG), c.resolve(LOGGER))
     )
   }
 
@@ -28,7 +27,7 @@ export class MinioStorage implements Storage {
   protected readonly minio: MinioClient
 
   constructor(
-    config: Config<MinioStorageConfig>,
+    protected readonly config: Config<MinioStorageConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)

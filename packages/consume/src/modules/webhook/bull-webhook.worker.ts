@@ -9,7 +9,6 @@ import {
   CONSUME_CONNECTOR,
   CONSUME_ROUTER,
   ConsumeConnector,
-  RedisConsumeConnection,
 } from '../../consume.js'
 import { BullBaseWorker } from '../base/index.js'
 import { WEBHOOK_WORKER, WebhookWorker } from './webhook.js'
@@ -28,11 +27,11 @@ export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
       WEBHOOK_WORKER,
       (c) =>
         new BullWebhookWorker(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<BullConsumeConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ConsumeConnector>(CONSUME_CONNECTOR).getConnection<RedisConsumeConnection>(),
-          c.resolve<ConsumeRouter>(CONSUME_ROUTER)
+          c.resolve(VALIDATOR),
+          c.resolve(CONFIG),
+          c.resolve(LOGGER),
+          c.resolve(CONSUME_CONNECTOR),
+          c.resolve(CONSUME_ROUTER)
         )
     )
   }
@@ -41,10 +40,10 @@ export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
     validator: Validator,
     config: Config<BullConsumeConfig>,
     logger: Logger,
-    connection: RedisConsumeConnection,
+    connector: ConsumeConnector,
     router: ConsumeRouter
   ) {
-    super(validator, config, logger, connection, router, WEBHOOK_QUEUE_NAME)
+    super(validator, config, logger, connector, router, WEBHOOK_QUEUE_NAME)
 
     this.logger.debug(`WebhookWorker initialized`)
   }

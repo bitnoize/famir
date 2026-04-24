@@ -1,12 +1,7 @@
 import { DIContainer } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
-import {
-  BullProduceConfig,
-  PRODUCE_CONNECTOR,
-  ProduceConnector,
-  RedisProduceConnection,
-} from '../../produce.js'
+import { BullProduceConfig, PRODUCE_CONNECTOR, ProduceConnector } from '../../produce.js'
 import { BullBaseQueue } from '../base/index.js'
 import { WebhookJobData } from './webhook.job.js'
 import { WEBHOOK_QUEUE, WEBHOOK_QUEUE_NAME, WebhookQueue } from './webhook.js'
@@ -24,20 +19,12 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
     container.registerSingleton<WebhookQueue>(
       WEBHOOK_QUEUE,
       (c) =>
-        new BullWebhookQueue(
-          c.resolve<Config<BullProduceConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ProduceConnector>(PRODUCE_CONNECTOR).getConnection<RedisProduceConnection>()
-        )
+        new BullWebhookQueue(c.resolve(CONFIG), c.resolve(LOGGER), c.resolve(PRODUCE_CONNECTOR))
     )
   }
 
-  constructor(
-    config: Config<BullProduceConfig>,
-    logger: Logger,
-    connection: RedisProduceConnection
-  ) {
-    super(config, logger, connection, WEBHOOK_QUEUE_NAME)
+  constructor(config: Config<BullProduceConfig>, logger: Logger, connector: ProduceConnector) {
+    super(config, logger, connector, WEBHOOK_QUEUE_NAME)
 
     this.logger.debug(`WebhookQueue initialized`)
   }

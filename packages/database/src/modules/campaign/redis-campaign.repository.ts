@@ -7,7 +7,6 @@ import {
   DATABASE_LOCK_TIMEOUT,
   DatabaseConnector,
   RedisDatabaseConfig,
-  RedisDatabaseConnection,
 } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
@@ -29,10 +28,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       CAMPAIGN_REPOSITORY,
       (c) =>
         new RedisCampaignRepository(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
+          c.resolve(VALIDATOR),
+          c.resolve(CONFIG),
+          c.resolve(LOGGER),
+          c.resolve(DATABASE_CONNECTOR)
         )
     )
   }
@@ -41,9 +40,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
     logger: Logger,
-    connection: RedisDatabaseConnection
+    connector: DatabaseConnector
   ) {
-    super(validator, config, logger, connection, 'campaign')
+    super(validator, config, logger, connector, 'campaign')
 
     this.validator.addSchemas(campaignSchemas)
 

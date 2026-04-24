@@ -16,14 +16,14 @@ export class WellKnownUrlsController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<WellKnownUrlsController>(
       WELL_KNOWN_URLS_CONTROLLER,
       (c) =>
         new WellKnownUrlsController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<Templater>(TEMPLATER),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(TEMPLATER),
+          c.resolve(HTTP_SERVER_ROUTER)
         )
     )
   }

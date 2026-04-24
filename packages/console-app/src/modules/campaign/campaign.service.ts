@@ -31,7 +31,7 @@ export class CampaignService {
   static register(container: DIContainer) {
     container.registerSingleton<CampaignService>(
       CAMPAIGN_SERVICE,
-      (c) => new CampaignService(c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY))
+      (c) => new CampaignService(c.resolve(CAMPAIGN_REPOSITORY))
     )
   }
 

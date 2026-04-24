@@ -9,7 +9,7 @@ import {
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
-  ActionRedirectorFieldData,
+  AlterRedirectorFieldData,
   CreateRedirectorData,
   DeleteRedirectorData,
   ListRedirectorsData,
@@ -30,7 +30,7 @@ export class RedirectorService {
   static register(container: DIContainer) {
     container.registerSingleton<RedirectorService>(
       REDIRECTOR_SERVICE,
-      (c) => new RedirectorService(c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY))
+      (c) => new RedirectorService(c.resolve(REDIRECTOR_REPOSITORY))
     )
   }
 
@@ -98,7 +98,7 @@ export class RedirectorService {
     }
   }
 
-  async appendField(data: ActionRedirectorFieldData): Promise<true> {
+  async appendField(data: AlterRedirectorFieldData): Promise<true> {
     try {
       await this.redirectorRepository.appendField(
         data.campaignId,
@@ -123,7 +123,7 @@ export class RedirectorService {
     }
   }
 
-  async removeField(data: ActionRedirectorFieldData): Promise<true> {
+  async removeField(data: AlterRedirectorFieldData): Promise<true> {
     try {
       await this.redirectorRepository.removeField(
         data.campaignId,

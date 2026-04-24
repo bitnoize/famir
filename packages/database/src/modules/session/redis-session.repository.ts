@@ -3,12 +3,7 @@ import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DatabaseError } from '../../database.error.js'
-import {
-  DATABASE_CONNECTOR,
-  DatabaseConnector,
-  RedisDatabaseConfig,
-  RedisDatabaseConnection,
-} from '../../database.js'
+import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawSession } from './session.functions.js'
 import { SESSION_REPOSITORY, SessionRepository } from './session.js'
@@ -29,10 +24,10 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       SESSION_REPOSITORY,
       (c) =>
         new RedisSessionRepository(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
+          c.resolve(VALIDATOR),
+          c.resolve(CONFIG),
+          c.resolve(LOGGER),
+          c.resolve(DATABASE_CONNECTOR)
         )
     )
   }
@@ -41,9 +36,9 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
     logger: Logger,
-    connection: RedisDatabaseConnection
+    connector: DatabaseConnector
   ) {
-    super(validator, config, logger, connection, 'session')
+    super(validator, config, logger, connector, 'session')
 
     this.validator.addSchemas(sessionSchemas)
 

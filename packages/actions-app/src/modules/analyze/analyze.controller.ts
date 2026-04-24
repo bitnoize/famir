@@ -18,14 +18,14 @@ export class AnalyzeController extends BaseController {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<AnalyzeController>(
       ANALYZE_CONTROLLER,
       (c) =>
         new AnalyzeController(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ConsumeRouter>(CONSUME_ROUTER),
-          c.resolve<AnalyzeService>(ANALYZE_SERVICE)
+          c.resolve(VALIDATOR),
+          c.resolve(LOGGER),
+          c.resolve(CONSUME_ROUTER),
+          c.resolve(ANALYZE_SERVICE)
         )
     )
   }
@@ -34,7 +34,7 @@ export class AnalyzeController extends BaseController {
    * Resolve dependency
    */
   static resolve(container: DIContainer): AnalyzeController {
-    return container.resolve<AnalyzeController>(ANALYZE_CONTROLLER)
+    return container.resolve(ANALYZE_CONTROLLER)
   }
 
   constructor(

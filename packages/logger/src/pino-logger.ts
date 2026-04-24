@@ -26,11 +26,7 @@ export class PinoLogger implements Logger {
     container.registerSingleton<Logger>(
       LOGGER,
       (c) =>
-        new PinoLogger(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<PinoLoggerConfig>>(CONFIG),
-          c.resolveOptional<PinoLoggerBackend>(LOGGER_BACKEND)
-        )
+        new PinoLogger(c.resolve(VALIDATOR), c.resolve(CONFIG), c.resolveOptional(LOGGER_BACKEND))
     )
   }
 
@@ -39,7 +35,7 @@ export class PinoLogger implements Logger {
 
   constructor(
     protected readonly validator: Validator,
-    config: Config<PinoLoggerConfig>,
+    protected readonly config: Config<PinoLoggerConfig>,
     loggerBackend: PinoLoggerBackend | null
   ) {
     this.options = this.buildOptions(config.data)

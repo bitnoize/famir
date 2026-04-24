@@ -7,6 +7,7 @@ import { ConsumeRouter } from '../../consume-router.js'
 import {
   BullConsumeConfig,
   BullConsumeWorkerOptions,
+  ConsumeConnector,
   ConsumeSpec,
   RedisConsumeConnection,
 } from '../../consume.js'
@@ -19,18 +20,21 @@ import {
  */
 export abstract class BullBaseWorker {
   protected readonly options: BullConsumeWorkerOptions
+  protected readonly connection: RedisConsumeConnection
   protected readonly spec: ConsumeSpec
   protected readonly worker: Worker<unknown, unknown>
 
   constructor(
     protected readonly validator: Validator,
-    config: Config<BullConsumeConfig>,
+    protected readonly config: Config<BullConsumeConfig>,
     protected readonly logger: Logger,
-    protected readonly connection: RedisConsumeConnection,
+    protected readonly connector: ConsumeConnector,
     protected readonly router: ConsumeRouter,
     protected readonly queueName: string
   ) {
     this.options = this.buildOptions(config.data)
+
+    this.connection = connector.getConnection<RedisConsumeConnection>()
 
     this.spec = this.router.getSpec(this.queueName)
 

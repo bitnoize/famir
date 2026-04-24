@@ -14,7 +14,7 @@ export class DatabaseService {
   static register(container: DIContainer) {
     container.registerSingleton<DatabaseService>(
       DATABASE_SERVICE,
-      (c) => new DatabaseService(c.resolve<DatabaseManager>(DATABASE_MANAGER))
+      (c) => new DatabaseService(c.resolve(DATABASE_MANAGER))
     )
   }
 

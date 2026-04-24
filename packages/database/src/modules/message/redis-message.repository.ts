@@ -11,12 +11,7 @@ import {
 } from '@famir/http-proto'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import {
-  DATABASE_CONNECTOR,
-  DatabaseConnector,
-  RedisDatabaseConfig,
-  RedisDatabaseConnection,
-} from '../../database.js'
+import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 import { MESSAGE_REPOSITORY, MessageRepository } from './message.js'
@@ -37,10 +32,10 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       MESSAGE_REPOSITORY,
       (c) =>
         new RedisMessageRepository(
-          c.resolve<Validator>(VALIDATOR),
-          c.resolve<Config<RedisDatabaseConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
+          c.resolve(VALIDATOR),
+          c.resolve(CONFIG),
+          c.resolve(LOGGER),
+          c.resolve(DATABASE_CONNECTOR)
         )
     )
   }
@@ -49,9 +44,9 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
     logger: Logger,
-    connection: RedisDatabaseConnection
+    connector: DatabaseConnector
   ) {
-    super(validator, config, logger, connection, 'message')
+    super(validator, config, logger, connector, 'message')
 
     this.validator.addSchemas(messageSchemas)
 
