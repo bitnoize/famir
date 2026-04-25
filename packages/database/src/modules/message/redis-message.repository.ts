@@ -70,7 +70,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     connection: HttpConnection,
     payload: HttpPayload,
     errors: HttpError[],
-    processor: string,
+    analyze: string,
     startTime: number,
     finishTime: number
   ): Promise<void> {
@@ -93,7 +93,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         this.encodeJson(connection),
         this.encodeJson(payload),
         this.encodeJson(errors),
-        processor,
+        analyze,
         startTime.toString(),
         finishTime.toString(),
         Date.now().toString()
@@ -179,7 +179,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       rawModel.method,
       rawModel.url,
       rawModel.status,
-      rawModel.processor,
+      rawModel.analyze,
       rawModel.start_time,
       rawModel.finish_time,
       new Date(rawModel.created_at)
@@ -212,7 +212,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       this.parseConnection(rawModel.connection),
       this.parsePayload(rawModel.payload),
       this.parseErrors(rawModel.errors),
-      rawModel.processor,
+      rawModel.analyze,
       rawModel.start_time,
       rawModel.finish_time,
       new Date(rawModel.created_at)

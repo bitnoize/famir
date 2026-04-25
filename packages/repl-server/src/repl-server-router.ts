@@ -1,7 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import {
-  REPL_SERVER_ASSETS,
   REPL_SERVER_ROUTER,
   ReplServerApiCall,
   ReplServerApiCalls,
@@ -17,10 +16,10 @@ export class ReplServerRouter {
   /**
    * Register dependency
    */
-  static register(container: DIContainer) {
+  static register(container: DIContainer, assets: ReplServerAssets) {
     container.registerSingleton<ReplServerRouter>(
       REPL_SERVER_ROUTER,
-      (c) => new ReplServerRouter(c.resolve(LOGGER), c.resolve(REPL_SERVER_ASSETS))
+      (c) => new ReplServerRouter(c.resolve(LOGGER), assets)
     )
   }
 

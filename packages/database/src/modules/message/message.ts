@@ -41,7 +41,7 @@ export interface MessageRepository {
     connection: HttpConnection,
     payload: HttpPayload,
     errors: HttpError[],
-    processor: string,
+    analyze: string,
     startTime: number,
     finishTime: number
   ): Promise<void>

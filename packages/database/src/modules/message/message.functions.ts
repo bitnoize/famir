@@ -15,7 +15,7 @@ export interface RawMessage {
   method: string
   url: string
   status: number
-  processor: string
+  analyze: string
   start_time: number
   finish_time: number
   created_at: number
@@ -63,7 +63,7 @@ export const messageFunctions = {
         connection: string,
         payload: string,
         errors: string,
-        processor: string,
+        analyze: string,
         startTime: string,
         finishTime: string,
         createdAt: string
@@ -90,7 +90,7 @@ export const messageFunctions = {
         parser.push(connection)
         parser.push(payload)
         parser.push(errors)
-        parser.push(processor)
+        parser.push(analyze)
         parser.push(startTime)
         parser.push(finishTime)
         parser.push(createdAt)

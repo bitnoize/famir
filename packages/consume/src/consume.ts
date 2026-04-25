@@ -10,18 +10,6 @@ export const CONSUME_CONNECTOR = Symbol('ConsumeConnector')
  * @category none
  * @internal
  */
-export const CONSUME_SPECS = Symbol('ConsumeSpecs')
-
-/**
- * @category none
- * @internal
- */
-export const CONSUME_ASSETS = Symbol('ConsumeAssets')
-
-/**
- * @category none
- * @internal
- */
 export const CONSUME_ROUTER = Symbol('ConsumeRouter')
 
 /**

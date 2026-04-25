@@ -26,7 +26,7 @@ export class ConsoleApp {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<ConsoleApp>(
       CONSOLE_APP,
       (c) =>
         new ConsoleApp(

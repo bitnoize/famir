@@ -21,12 +21,6 @@ export const HTTP_SERVER = Symbol('HttpServer')
  * @category none
  * @internal
  */
-export const HTTP_SERVER_ASSETS = Symbol('HttpServerAssets')
-
-/**
- * @category none
- * @internal
- */
 export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
 
 /**

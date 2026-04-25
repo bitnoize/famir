@@ -53,7 +53,7 @@ export class AnalyzeService {
           method: message.method,
           url: message.url,
           status: message.status,
-          processor: message.processor,
+          analyze: message.analyze,
           startTime: message.startTime,
           finishTime: message.finishTime,
           totalTime: message.totalTime,

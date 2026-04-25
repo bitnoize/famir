@@ -21,18 +21,18 @@ export class RedisDatabaseManager implements DatabaseManager {
   static register(container: DIContainer) {
     container.registerSingleton<DatabaseManager>(
       DATABASE_MANAGER,
-      (c) =>
-        new RedisDatabaseManager(
-          c.resolve(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR).getConnection<RedisDatabaseConnection>()
-        )
+      (c) => new RedisDatabaseManager(c.resolve(LOGGER), c.resolve(DATABASE_CONNECTOR))
     )
   }
 
+  protected readonly connection: RedisDatabaseConnection
+
   constructor(
     protected readonly logger: Logger,
-    protected readonly connection: RedisDatabaseConnection
+    protected readonly connector: DatabaseConnector
   ) {
+    this.connection = connector.getConnection<RedisDatabaseConnection>()
+
     this.logger.debug(`DatabaseManager initialized`)
   }
 

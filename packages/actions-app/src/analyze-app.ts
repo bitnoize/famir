@@ -27,16 +27,16 @@ export class ActionsApp {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<ActionsApp>(
       ACTIONS_APP,
       (c) =>
         new ActionsApp(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
-          c.resolve<ProduceConnector>(PRODUCE_CONNECTOR),
-          c.resolve<ConsumeConnector>(CONSUME_CONNECTOR),
-          c.resolve<ConsumeRouter>(CONSUME_ROUTER),
-          c.resolve<AnalyzeWorker>(ANALYZE_WORKER)
+          c.resolve(LOGGER),
+          c.resolve(DATABASE_CONNECTOR),
+          c.resolve(PRODUCE_CONNECTOR),
+          c.resolve(CONSUME_CONNECTOR),
+          c.resolve(CONSUME_ROUTER),
+          c.resolve(ANALYZE_WORKER)
         )
     )
   }

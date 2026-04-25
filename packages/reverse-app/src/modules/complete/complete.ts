@@ -40,7 +40,7 @@ export interface CreateMessageData {
   connection: HttpConnection
   payload: HttpPayload
   errors: HttpError[]
-  processor: string | null
+  analyze: string | null
   startTime: number
   finishTime: number
 }

@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { JSONSchemaType, Validator, VALIDATOR } from '@famir/validator'
-import { Config, CONFIG, CONFIG_SCHEMA } from './config.js'
+import { Config, CONFIG } from './config.js'
 
 /**
  * Env config implementation
@@ -11,17 +11,16 @@ export class EnvConfig<T> implements Config<T> {
   /**
    * Register dependency
    */
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  static register<C>(container: DIContainer) {
+  static register<C>(container: DIContainer, configSchema: JSONSchemaType<C>) {
     container.registerSingleton<Config<C>>(
       CONFIG,
-      (c) => new EnvConfig<C>(c.resolve(VALIDATOR), c.resolve(CONFIG_SCHEMA))
+      (c) => new EnvConfig<C>(c.resolve(VALIDATOR), configSchema)
     )
   }
 
   constructor(
     protected readonly validator: Validator,
-    protected readonly configSchema: JSONSchemaType<T>
+    configSchema: JSONSchemaType<T>
   ) {
     this.validator.addSchemas({
       config: configSchema,

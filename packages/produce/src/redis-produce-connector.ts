@@ -23,11 +23,7 @@ export class RedisProduceConnector implements ProduceConnector {
   static register(container: DIContainer) {
     container.registerSingleton<ProduceConnector>(
       PRODUCE_CONNECTOR,
-      (c) =>
-        new RedisProduceConnector(
-          c.resolve<Config<BullProduceConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER)
-        )
+      (c) => new RedisProduceConnector(c.resolve(CONFIG), c.resolve(LOGGER))
     )
   }
 
@@ -35,7 +31,7 @@ export class RedisProduceConnector implements ProduceConnector {
   protected readonly redis: RedisProduceConnection
 
   constructor(
-    config: Config<BullProduceConfig>,
+    protected readonly config: Config<BullProduceConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)

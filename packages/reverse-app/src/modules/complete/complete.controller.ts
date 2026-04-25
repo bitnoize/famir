@@ -82,7 +82,7 @@ export class CompleteController extends BaseController {
         connection: message.connection,
         payload: message.payload,
         errors: message.errors,
-        processor: message.processor,
+        analyze: message.analyze,
         startTime: ctx.startTime,
         finishTime: ctx.finishTime,
       })

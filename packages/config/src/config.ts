@@ -5,12 +5,6 @@
 export const CONFIG = Symbol('Config')
 
 /**
- * @category none
- * @internal
- */
-export const CONFIG_SCHEMA = Symbol('ConfigSchema')
-
-/**
  * Represents a config
  *
  * @category none

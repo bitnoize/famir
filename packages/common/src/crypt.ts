@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypto'
 import { deflateSync, inflateSync, constants as zlibConst } from 'zlib'
-import { safeBase64Decode, safeBase64Encode } from './utils.js'
+import { safeBase64Decode, safeBase64Encode } from './base64.js'
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12 // recommended for GCM

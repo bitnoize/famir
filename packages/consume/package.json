@@ -45,7 +45,7 @@
     "@famir/logger": "*",
     "@famir/produce": "*",
     "@famir/validator": "*",
-    "bullmq": "^5.76.1"
+    "bullmq": "^5.76.2"
   },
   "peerDependencies": {
     "ioredis": "^5.10.1"

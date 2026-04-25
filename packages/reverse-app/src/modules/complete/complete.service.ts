@@ -27,7 +27,7 @@ export class CompleteService {
 
   async createMessage(data: CreateMessageData): Promise<void> {
     try {
-      if (data.processor) {
+      if (data.analyze) {
         await this.messageRepository.create(
           data.campaignId,
           data.messageId,
@@ -45,12 +45,12 @@ export class CompleteService {
           data.connection,
           data.payload,
           data.errors,
-          data.processor,
+          data.analyze,
           data.startTime,
           data.finishTime
         )
 
-        await this.analyzeQueue.addJob(data.processor, {
+        await this.analyzeQueue.addJob(data.analyze, {
           campaignId: data.campaignId,
           messageId: data.messageId,
         })

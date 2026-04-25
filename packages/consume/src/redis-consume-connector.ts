@@ -23,11 +23,7 @@ export class RedisConsumeConnector implements ConsumeConnector {
   static register(container: DIContainer) {
     container.registerSingleton<ConsumeConnector>(
       CONSUME_CONNECTOR,
-      (c) =>
-        new RedisConsumeConnector(
-          c.resolve<Config<BullConsumeConfig>>(CONFIG),
-          c.resolve<Logger>(LOGGER)
-        )
+      (c) => new RedisConsumeConnector(c.resolve(CONFIG), c.resolve(LOGGER))
     )
   }
 
@@ -35,7 +31,7 @@ export class RedisConsumeConnector implements ConsumeConnector {
   private readonly redis: RedisConsumeConnection
 
   constructor(
-    config: Config<BullConsumeConfig>,
+    protected readonly config: Config<BullConsumeConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)

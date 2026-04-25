@@ -1,7 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import {
-  HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
   HttpServerAssets,
   HttpServerMiddleware,
@@ -17,10 +16,10 @@ export class HttpServerRouter {
   /**
    * Register dependency
    */
-  static register(container: DIContainer) {
+  static register(container: DIContainer, assets: HttpServerAssets) {
     container.registerSingleton<HttpServerRouter>(
       HTTP_SERVER_ROUTER,
-      (c) => new HttpServerRouter(c.resolve(LOGGER), c.resolve(HTTP_SERVER_ASSETS))
+      (c) => new HttpServerRouter(c.resolve(LOGGER), assets)
     )
   }
 
@@ -38,7 +37,6 @@ export class HttpServerRouter {
     protected readonly logger: Logger,
     assets: HttpServerAssets
   ) {
-    // FIXME
     assets.forEach(([assetName, asset]) => {
       if (this.assets.has(assetName)) {
         throw new Error(`Duplicate asset: ${assetName}`)

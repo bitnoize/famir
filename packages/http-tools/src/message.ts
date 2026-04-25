@@ -114,7 +114,7 @@ export class HttpMessage {
     this.errors.push([serializeError(error), ...path])
   }
 
-  processor: string | null = null
+  analyze: string | null = null
 
   #contentTypes: HttpContentTypes = {
     text: [],

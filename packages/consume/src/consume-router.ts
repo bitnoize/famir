@@ -1,9 +1,7 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
 import {
-  CONSUME_ASSETS,
   CONSUME_ROUTER,
-  CONSUME_SPECS,
   ConsumeAssets,
   ConsumeProcessor,
   ConsumeSpec,
@@ -19,15 +17,10 @@ export class ConsumeRouter {
   /**
    * Register dependency
    */
-  static register(container: DIContainer) {
+  static register(container: DIContainer, specs: ConsumeSpecs, assets: ConsumeAssets) {
     container.registerSingleton<ConsumeRouter>(
       CONSUME_ROUTER,
-      (c) =>
-        new ConsumeRouter(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<ConsumeSpecs>(CONSUME_SPECS),
-          c.resolve<ConsumeAssets>(CONSUME_ASSETS)
-        )
+      (c) => new ConsumeRouter(c.resolve(LOGGER), specs, assets)
     )
   }
 

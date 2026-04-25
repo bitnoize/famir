@@ -28,7 +28,7 @@ export class MessageModel {
     readonly method: HttpMethod,
     readonly url: string,
     readonly status: number,
-    readonly processor: string,
+    readonly analyze: string,
     readonly startTime: number,
     readonly finishTime: number,
     readonly createdAt: Date
@@ -62,7 +62,7 @@ export class FullMessageModel extends MessageModel {
     readonly connection: HttpConnection,
     readonly payload: HttpPayload,
     readonly errors: HttpError[],
-    processor: string,
+    analyze: string,
     startTime: number,
     finishTime: number,
     createdAt: Date
@@ -77,7 +77,7 @@ export class FullMessageModel extends MessageModel {
       method,
       url,
       status,
-      processor,
+      analyze,
       startTime,
       finishTime,
       createdAt

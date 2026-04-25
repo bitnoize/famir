@@ -20,16 +20,16 @@ export class ReverseApp {
    * Register dependency
    */
   static register(container: DIContainer) {
-    container.registerSingleton(
+    container.registerSingleton<ReverseApp>(
       REVERSE_APP,
       (c) =>
         new ReverseApp(
-          c.resolve<Logger>(LOGGER),
-          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
-          c.resolve<ProduceConnector>(PRODUCE_CONNECTOR),
-          c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<HttpServer>(HTTP_SERVER)
+          c.resolve(LOGGER),
+          c.resolve(DATABASE_CONNECTOR),
+          c.resolve(PRODUCE_CONNECTOR),
+          c.resolve(ANALYZE_QUEUE),
+          c.resolve(HTTP_SERVER_ROUTER),
+          c.resolve(HTTP_SERVER)
         )
     )
   }
