@@ -11,12 +11,6 @@ import { REPL_SERVER, REPL_SERVER_ROUTER, ReplServer, ReplServerRouter } from '@
 export const CONSOLE_APP = Symbol('ConsoleApp')
 
 /**
- * @category none
- * @internal
- */
-//export const SHUTDOWN_SIGNALS: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGQUIT'] as const
-
-/**
  * Represents a console app
  *
  * @category none
@@ -55,20 +49,6 @@ export class ConsoleApp {
     protected readonly router: ReplServerRouter,
     protected readonly replServer: ReplServer
   ) {
-    /*
-    SHUTDOWN_SIGNALS.forEach((signal) => {
-      process.once(signal, () => {
-        this.stop().catch((error: unknown) => {
-          this.logger.error(`App critical error`, {
-            error: serializeError(error),
-          })
-
-          process.exit(2)
-        })
-      })
-    })
-    */
-
     this.logger.debug(`App initialized`)
   }
 

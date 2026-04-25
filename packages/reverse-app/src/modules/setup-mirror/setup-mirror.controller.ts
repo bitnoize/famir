@@ -63,13 +63,20 @@ export class SetupMirrorController extends BaseController {
     this.router.addMiddleware('setup-mirror', async (ctx, next) => {
       const mirrorHost = this.parseMirrorHost(ctx)
 
-      const [campaignShare, campaign, target, targets] = await this.setupMirrorService.findTarget({
+      const target = await this.setupMirrorService.findTarget({
         mirrorHost,
+      })
+
+      const campaign = await this.setupMirrorService.readCampaign({
+        campaignId: target.campaignId,
+      })
+
+      const targets = await this.setupMirrorService.listTargets({
+        campaignId: target.campaignId,
       })
 
       const message = HttpMessage.create(ctx.type)
 
-      this.setState(ctx, 'campaignShare', campaignShare)
       this.setState(ctx, 'campaign', campaign)
       this.setState(ctx, 'target', target)
       this.setState(ctx, 'targets', targets)

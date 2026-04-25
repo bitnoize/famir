@@ -146,16 +146,17 @@ redis.register_function({
   Read full campaign
 --]]
 local function read_full_campaign(keys, args)
-  if #keys ~= 6 or #args ~= 0 then
+  if #keys ~= 7 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local campaign_lock_key = keys[2]
-  local proxy_index_key = keys[3]
-  local target_index_key = keys[4]
-  local redirector_index_key = keys[5]
-  local lure_index_key = keys[6]
+  local campaign_session_cookie_names_key = keys[2]
+  local campaign_lock_key = keys[3]
+  local proxy_index_key = keys[4]
+  local target_index_key = keys[5]
+  local redirector_index_key = keys[6]
+  local lure_index_key = keys[7]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
@@ -189,6 +190,7 @@ local function read_full_campaign(keys, args)
     crypt_secret = values[4],
     upgrade_session_path = values[5],
     session_cookie_name = values[6],
+    session_cookie_names = redis.call('SMEMBERS', campaign_session_cookie_names_key),
     session_expire = tonumber(values[7]),
     new_session_expire = tonumber(values[8]),
     message_expire = tonumber(values[9]),
@@ -216,46 +218,6 @@ redis.register_function({
   callback = read_full_campaign,
   flags = { 'no-writes' },
   description = 'Read full campaign',
-})
-
---[[
-  Read campaign mirror domains
---]]
-local function read_campaign_mirror_domains(keys, args)
-  if #keys ~= 1 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
-  end
-
-  local campaign_mirror_domains_key = keys[1]
-
-  return redis.call('SMEMBERS', campaign_mirror_domains_key)
-end
-
-redis.register_function({
-  function_name = 'read_campaign_mirror_domains',
-  callback = read_campaign_mirror_domains,
-  flags = { 'no-writes' },
-  description = 'Read campaign mirror domains',
-})
-
---[[
-  Read campaign session cookie names
---]]
-local function read_campaign_session_cookie_names(keys, args)
-  if #keys ~= 1 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
-  end
-
-  local campaign_session_cookie_names_key = keys[1]
-
-  return redis.call('SMEMBERS', campaign_session_cookie_names_key)
-end
-
-redis.register_function({
-  function_name = 'read_campaign_session_cookie_names',
-  callback = read_campaign_session_cookie_names,
-  flags = { 'no-writes' },
-  description = 'Read campaign session cookie names',
 })
 
 --[[

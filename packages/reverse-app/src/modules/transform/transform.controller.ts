@@ -48,7 +48,6 @@ export class TransformController extends BaseController {
 
   use() {
     this.router.addMiddleware('transform', async (ctx, next) => {
-      const campaignShare = this.getState(ctx, 'campaignShare')
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const targets = this.getState(ctx, 'targets')
@@ -86,7 +85,7 @@ export class TransformController extends BaseController {
 
         const cookies = message.requestHeaders.getCookies()
         if (cookies) {
-          campaignShare.sessionCookieNames.forEach((sessionCookieName) => {
+          campaign.sessionCookieNames.forEach((sessionCookieName) => {
             if (cookies[sessionCookieName]) {
               cookies[sessionCookieName] = undefined
             }

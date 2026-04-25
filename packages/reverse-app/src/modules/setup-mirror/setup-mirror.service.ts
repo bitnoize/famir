@@ -2,7 +2,6 @@ import { DIContainer } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignRepository,
-  CampaignShare,
   EnabledFullTargetModel,
   FullCampaignModel,
   TARGET_REPOSITORY,
@@ -10,7 +9,12 @@ import {
   TargetRepository,
 } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
-import { FindTargetData, SETUP_MIRROR_SERVICE } from './setup-mirror.js'
+import {
+  FindTargetData,
+  ListTargetsData,
+  ReadCampaignData,
+  SETUP_MIRROR_SERVICE,
+} from './setup-mirror.js'
 
 /**
  * Represents a setup-mirror service
@@ -33,9 +37,23 @@ export class SetupMirrorService {
     protected readonly targetRepository: TargetRepository
   ) {}
 
-  async findTarget(
-    data: FindTargetData
-  ): Promise<[CampaignShare, FullCampaignModel, EnabledFullTargetModel, TargetModel[]]> {
+  async readCampaign(data: ReadCampaignData): Promise<FullCampaignModel> {
+    const campaign = await this.campaignRepository.readFull(data.campaignId)
+
+    if (!campaign) {
+      throw new HttpServerError(`Service unavailable`, {
+        context: {
+          reason: `Read campaign failed`,
+          data,
+        },
+        code: 'SERVICE_UNAVAILABLE',
+      })
+    }
+
+    return campaign
+  }
+
+  async findTarget(data: FindTargetData): Promise<EnabledFullTargetModel> {
     const target = await this.targetRepository.findFull(data.mirrorHost)
 
     if (!(target && TargetModel.isEnabled(target))) {
@@ -48,21 +66,11 @@ export class SetupMirrorService {
       })
     }
 
-    const campaign = await this.campaignRepository.readFull(target.campaignId)
+    return target
+  }
 
-    if (!campaign) {
-      throw new HttpServerError(`Service unavailable`, {
-        context: {
-          reason: `Read campaign failed`,
-          data,
-        },
-        code: 'SERVICE_UNAVAILABLE',
-      })
-    }
-
-    const campaignShare = await this.campaignRepository.readShare()
-
-    const targets = await this.targetRepository.list(target.campaignId)
+  async listTargets(data: ListTargetsData): Promise<TargetModel[]> {
+    const targets = await this.targetRepository.list(data.campaignId)
 
     if (!targets) {
       throw new HttpServerError(`Service unavailable`, {
@@ -74,6 +82,6 @@ export class SetupMirrorService {
       })
     }
 
-    return [campaignShare, campaign, target, targets]
+    return targets
   }
 }

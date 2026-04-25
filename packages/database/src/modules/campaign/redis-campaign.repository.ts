@@ -10,7 +10,7 @@ import {
 } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
-import { CAMPAIGN_REPOSITORY, CampaignRepository, CampaignShare } from './campaign.js'
+import { CAMPAIGN_REPOSITORY, CampaignRepository } from './campaign.js'
 import { CampaignModel, FullCampaignModel } from './campaign.models.js'
 import { campaignSchemas } from './campaign.schemas.js'
 
@@ -103,25 +103,6 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       return this.buildFullModel(rawModel)
     } catch (error) {
       this.raiseError(error, 'readFull', { campaignId })
-    }
-  }
-
-  async readShare(): Promise<CampaignShare> {
-    try {
-      const [mirrorDomains, sessionCookieNames] = await Promise.all([
-        this.connection.campaign.read_campaign_mirror_domains(this.options.prefix),
-        this.connection.campaign.read_campaign_session_cookie_names(this.options.prefix),
-      ])
-
-      this.validateArrayStringsReply(mirrorDomains)
-      this.validateArrayStringsReply(sessionCookieNames)
-
-      return {
-        mirrorDomains: mirrorDomains.sort(),
-        sessionCookieNames: sessionCookieNames.sort(),
-      }
-    } catch (error) {
-      this.raiseError(error, 'readShare', null)
     }
   }
 
@@ -272,6 +253,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       rawModel.crypt_secret,
       rawModel.upgrade_session_path,
       rawModel.session_cookie_name,
+      rawModel.session_cookie_names,
       rawModel.session_expire,
       rawModel.new_session_expire,
       rawModel.message_expire,

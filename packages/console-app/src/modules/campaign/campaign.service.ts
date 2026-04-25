@@ -3,7 +3,6 @@ import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
-  CampaignShare,
   DatabaseError,
   DatabaseErrorCode,
   FullCampaignModel,
@@ -77,10 +76,6 @@ export class CampaignService {
     }
 
     return campaign
-  }
-
-  async readShare(): Promise<CampaignShare> {
-    return await this.campaignRepository.readShare()
   }
 
   async lock(data: LockCampaignData): Promise<string> {

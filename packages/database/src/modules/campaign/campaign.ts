@@ -38,11 +38,6 @@ export interface CampaignRepository {
   readFull(campaignId: string): Promise<FullCampaignModel | null>
 
   /**
-   * Read campaign share
-   */
-  readShare(): Promise<CampaignShare>
-
-  /**
    * Lock campaign
    */
   lock(campaignId: string): Promise<string>
@@ -78,14 +73,4 @@ export interface CampaignRepository {
    * List extended campaigns
    */
   listFull(): Promise<CampaignModel[]>
-}
-
-/**
- * Represents a campaign share
- *
- * @category Campaign
- */
-export interface CampaignShare {
-  mirrorDomains: string[]
-  sessionCookieNames: string[]
 }

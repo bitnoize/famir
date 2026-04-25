@@ -1,36 +1,10 @@
-import {
-  CampaignShare,
-  EnabledFullTargetModel,
-  EnabledProxyModel,
-  FullCampaignModel,
-  FullRedirectorModel,
-  SessionModel,
-  TargetModel,
-} from '@famir/database'
+import { EnabledFullTargetModel, FullRedirectorModel } from '@famir/database'
 import { HttpClientError } from '@famir/http-client'
-import {
-  HttpServerContext,
-  HttpServerContextState,
-  HttpServerError,
-  HttpServerRouter,
-} from '@famir/http-server'
-import { HttpMessage } from '@famir/http-tools'
+import { HttpServerContext, HttpServerError, HttpServerRouter } from '@famir/http-server'
 import { Logger } from '@famir/logger'
 import { Templater } from '@famir/templater'
 import { Validator } from '@famir/validator'
-
-/**
- * @category none
- */
-export interface ReverseState extends HttpServerContextState {
-  campaignShare?: CampaignShare
-  campaign?: FullCampaignModel
-  proxy?: EnabledProxyModel
-  target?: EnabledFullTargetModel
-  targets?: TargetModel[]
-  session?: SessionModel
-  message?: HttpMessage
-}
+import { ReverseContextState } from './base.js'
 
 /**
  * Represents a base controller
@@ -45,7 +19,7 @@ export abstract class BaseController {
     protected readonly router: HttpServerRouter
   ) {}
 
-  protected getState<T extends ReverseState, K extends keyof T>(
+  protected getState<T extends ReverseContextState, K extends keyof T>(
     ctx: HttpServerContext,
     key: K
   ): NonNullable<T[K]> {
@@ -58,7 +32,7 @@ export abstract class BaseController {
     return state[key]
   }
 
-  protected setState<T extends ReverseState, K extends keyof T>(
+  protected setState<T extends ReverseContextState, K extends keyof T>(
     ctx: HttpServerContext,
     key: K,
     value: T[K]

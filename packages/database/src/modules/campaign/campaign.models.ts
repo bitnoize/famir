@@ -31,6 +31,7 @@ export class FullCampaignModel extends CampaignModel {
     readonly cryptSecret: string,
     readonly upgradeSessionPath: string,
     readonly sessionCookieName: string,
+    readonly sessionCookieNames: string[],
     readonly sessionExpire: number,
     readonly newSessionExpire: number,
     readonly messageExpire: number,

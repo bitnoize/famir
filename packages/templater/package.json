@@ -26,7 +26,10 @@
     "build": "tsc -b",
     "clean": "rimraf dist *.tsbuildinfo"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bitnoize/famir.git",
@@ -38,6 +41,6 @@
   "homepage": "https://fake-mirrors.net",
   "dependencies": {
     "@famir/common": "*",
-    "eta": "^4.5.1"
+    "eta": "^4.6.0"
   }
 }

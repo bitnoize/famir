@@ -39,6 +39,20 @@ export type SetupMirrorDispatchContextType = Record<HttpServerContextType, Setup
 /**
  * @category SetupMirror
  */
+export interface ReadCampaignData {
+  campaignId: string
+}
+
+/**
+ * @category SetupMirror
+ */
 export interface FindTargetData {
   mirrorHost: string
+}
+
+/**
+ * @category SetupMirror
+ */
+export interface ListTargetsData {
+  campaignId: string
 }

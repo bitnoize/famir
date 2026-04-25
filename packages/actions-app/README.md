@@ -1,3 +1,3 @@
 # @famir/actions-app
 
-Analyze captured data.
+Actions with captured data.

@@ -49,20 +49,6 @@ export class ReverseApp {
     protected readonly router: HttpServerRouter,
     protected readonly httpServer: HttpServer
   ) {
-    /*
-    SHUTDOWN_SIGNALS.forEach((signal) => {
-      process.once(signal, () => {
-        this.stop().catch((error: unknown) => {
-          this.logger.error(`App critical error`, {
-            error: serializeError(error),
-          })
-
-          process.exit(2)
-        })
-      })
-    })
-    */
-
     this.logger.debug(`App initialized`)
   }
 

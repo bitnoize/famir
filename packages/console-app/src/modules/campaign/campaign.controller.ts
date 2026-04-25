@@ -71,10 +71,6 @@ export class CampaignController extends BaseController {
       return await this.campaignService.read(data)
     })
 
-    this.router.addApiCall('readCampaignShare', async () => {
-      return await this.campaignService.readShare()
-    })
-
     this.router.addApiCall('lockCampaign', async (data) => {
       this.validateData<LockCampaignData>('console-lock-campaign-data', data)
 

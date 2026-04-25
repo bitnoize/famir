@@ -33,6 +33,7 @@ export interface RawFullCampaign extends RawCampaign {
   crypt_secret: string
   upgrade_session_path: string
   session_cookie_name: string
+  session_cookie_names: string[]
   session_expire: number
   new_session_expire: number
   message_expire: number
@@ -97,35 +98,16 @@ export const campaignFunctions = {
     },
 
     read_full_campaign: {
-      NUMBER_OF_KEYS: 6,
+      NUMBER_OF_KEYS: 7,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignSessionCookieNamesKey(prefix))
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(proxyIndexKey(prefix, campaignId))
         parser.pushKey(targetIndexKey(prefix, campaignId))
         parser.pushKey(redirectorIndexKey(prefix, campaignId))
         parser.pushKey(lureIndexKey(prefix, campaignId))
-      },
-
-      transformReply: undefined as unknown as () => unknown,
-    },
-
-    read_campaign_mirror_domains: {
-      NUMBER_OF_KEYS: 1,
-
-      parseCommand(parser: CommandParser, prefix: string) {
-        parser.pushKey(campaignMirrorDomainsKey(prefix))
-      },
-
-      transformReply: undefined as unknown as () => unknown,
-    },
-
-    read_campaign_session_cookie_names: {
-      NUMBER_OF_KEYS: 1,
-
-      parseCommand(parser: CommandParser, prefix: string) {
-        parser.pushKey(campaignSessionCookieNamesKey(prefix))
       },
 
       transformReply: undefined as unknown as () => unknown,

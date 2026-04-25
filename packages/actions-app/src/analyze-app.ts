@@ -56,20 +56,6 @@ export class ActionsApp {
     protected readonly router: ConsumeRouter,
     protected readonly analyzeWorker: AnalyzeWorker
   ) {
-    /*
-    SHUTDOWN_SIGNALS.forEach((signal) => {
-      process.once(signal, () => {
-        this.stop().catch((error: unknown) => {
-          this.logger.error(`App critical error`, {
-            error: serializeError(error),
-          })
-
-          process.exit(2)
-        })
-      })
-    })
-    */
-
     this.logger.debug(`App initialized`)
   }
 

@@ -51,6 +51,7 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'crypt_secret',
     'upgrade_session_path',
     'session_cookie_name',
+    'session_cookie_names',
     'session_expire',
     'new_session_expire',
     'message_expire',
@@ -81,6 +82,12 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     },
     session_cookie_name: {
       type: 'string',
+    },
+    session_cookie_names: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
     },
     session_expire: {
       type: 'integer',
