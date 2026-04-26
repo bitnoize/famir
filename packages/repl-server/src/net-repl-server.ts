@@ -58,11 +58,11 @@ export class NetReplServer implements ReplServer {
       })
 
       socket.on('error', (error) => {
-        socket.destroy()
-
         this.logger.error(`ReplServer socket error`, {
           error: serializeError(error),
         })
+
+        socket.destroy()
       })
 
       socket.setTimeout(this.options.socketTimeout)
@@ -104,7 +104,9 @@ export class NetReplServer implements ReplServer {
         error: serializeError(error),
       })
 
-      socket.end()
+      if (!socket.writableEnded) {
+        socket.end()
+      }
     }
   }
 
@@ -115,7 +117,7 @@ export class NetReplServer implements ReplServer {
     const replServer = repl.start({
       input: socket,
       output: socket,
-      terminal: true,
+      terminal: false,
       useGlobal: false,
       prompt: this.options.prompt,
       ignoreUndefined: true,
