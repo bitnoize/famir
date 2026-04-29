@@ -11,5 +11,9 @@
     "includeCategories": true,
     "includeGroups": false
   },
+  "navigationLinks": {
+    "GitHub": "https://github.com/bitnoize/famir",
+    "Example": "https://github.com/bitnoize/famir-demo"
+  },
   "githubPages": true
 }

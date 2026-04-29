@@ -1,5 +1,4 @@
 {
   "extends": ["../../typedoc.base.json"],
-  "entryPoints": ["src/index.ts"],
-  "categoryOrder": ["DI", "HTTP", "Utils", "*"]
+  "entryPoints": ["src/index.ts"]
 }

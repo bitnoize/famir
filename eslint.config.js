@@ -26,5 +26,14 @@ export default defineConfig(
     },
   },
   tsdocRequire.configs.recommended,
+  {
+    files: ['**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+    }
+  },
   prettierConfig
 )

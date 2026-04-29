@@ -1,7 +1,7 @@
 {
   "name": "@famir/common",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Famir common module",
   "keywords": [
     "famir",
@@ -35,7 +35,7 @@
   "bugs": {
     "url": "https://github.com/bitnoize/famir/issues"
   },
-  "homepage": "https://fake-mirrors.net",
+  "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
     "serialize-error": "^13.0.1"
   }

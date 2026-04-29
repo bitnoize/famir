@@ -9,8 +9,20 @@ const SALT_LENGTH = 16
 const KEY_LENGTH = 32 // 256 bytes
 
 /**
- * Encrypt string with secret
+ * Encrypt a string with a secret using AES-256-GCM.
+ *
+ * The string is first compressed using deflate, then encrypted with a random IV and salt.
+ * The result is encoded as URL-safe Base64.
+ *
  * @category none
+ * @param text - The plaintext to encrypt
+ * @param secret - The secret key for encryption
+ * @returns URL-safe Base64 encoded ciphertext (includes salt, IV, and auth tag)
+ * @example
+ * ```ts
+ * const encrypted = encrypt('Secret message', 'mySecret123')
+ * console.log(encrypted)
+ * ```
  */
 export function encrypt(text: string, secret: string): string {
   const compressed = deflateSync(text, {
@@ -34,8 +46,22 @@ export function encrypt(text: string, secret: string): string {
 }
 
 /**
- * Decrypt string with secret
+ * Decrypt a string with a secret using AES-256-GCM.
+ *
+ * The input should be a URL-safe Base64 encoded string from {@link encrypt}.
+ * Extracts the salt, IV, and auth tag, then decrypts and decompresses the data.
+ *
  * @category none
+ * @param value - URL-safe Base64 encoded ciphertext
+ * @param secret - The secret key for decryption
+ * @returns The decrypted plaintext
+ * @throws Error if decryption fails or auth tag is invalid
+ * @example
+ * ```ts
+ * const encrypted = encrypt('Secret message', 'mySecret123')
+ * const decrypted = decrypt(encrypted, 'mySecret123')
+ * console.log(decrypted) // Secret message
+ * ```
  */
 export function decrypt(value: string, secret: string): string {
   const data = safeBase64Decode(value)
