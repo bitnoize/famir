@@ -1,3 +1,3 @@
 # @famir/http-tools
 
-HTTP-specific wrappers and tools.
+Comprehensive HTTP utilities and wrappers for request/response manipulation.

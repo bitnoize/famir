@@ -1,36 +1,25 @@
-import { HttpQueryString } from '@famir/http-proto'
-import qs from 'qs'
+/**
+ * Options for parsing query strings.
+ *
+ * @category none
+ */
+export { IParseBaseOptions as ParseQueryStringOptions } from 'qs'
+
+/**
+ * Options for formatting query strings.
+ *
+ * @category none
+ */
+export { IStringifyBaseOptions as FormatQueryStringOptions } from 'qs'
 
 /**
  * @category none
  * @internal
  */
-export type HttpParseQueryStringOptions = qs.IParseBaseOptions
+export { parse as parseQueryString } from 'qs'
 
 /**
  * @category none
  * @internal
  */
-export type HttpFormatQueryStringOptions = qs.IStringifyBaseOptions
-
-/**
- * @category none
- * @internal
- */
-export function parseQueryString(
-  value: string,
-  options: HttpParseQueryStringOptions
-): HttpQueryString {
-  return qs.parse(value.trim(), options)
-}
-
-/**
- * @category none
- * @internal
- */
-export function formatQueryString(
-  queryString: HttpQueryString,
-  options: HttpFormatQueryStringOptions
-) {
-  return qs.stringify(queryString, options)
-}
+export { stringify as formatQueryString } from 'qs'

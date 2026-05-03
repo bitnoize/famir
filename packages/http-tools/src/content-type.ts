@@ -1,6 +1,3 @@
-import { HttpContentType } from '@famir/http-proto'
-import contenttype from 'content-type'
-
 /**
  * @category none
  * @internal
@@ -31,14 +28,10 @@ export type HttpContentTypes = Record<HttpContentTypeName, string[]>
  * @category none
  * @internal
  */
-export function parseContentType(value: string): HttpContentType {
-  return contenttype.parse(value.trim())
-}
+export { parse as parseContentType } from 'content-type'
 
 /**
  * @category none
  * @internal
  */
-export function formatContentType(contentType: HttpContentType) {
-  return contenttype.format(contentType)
-}
+export { format as formatContentType } from 'content-type'

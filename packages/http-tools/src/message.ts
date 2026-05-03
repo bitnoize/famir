@@ -18,6 +18,8 @@ import { HttpStatusWrap } from './status.js'
 import { HttpUrlWrap } from './url.js'
 
 /**
+ * Interceptor function type for HTTP message processing.
+ *
  * @category none
  */
 export type HttpMessageInterceptor = (message: HttpMessage) => void
@@ -29,13 +31,17 @@ export type HttpMessageInterceptor = (message: HttpMessage) => void
 export type HttpMessageInterceptors = Array<[string, HttpMessageInterceptor]>
 
 /**
- * Represents a HTTP message
+ * Complete HTTP message representation with request/response components.
  *
  * @category none
  */
 export class HttpMessage {
   /**
-   * Create message
+   * Factory method to create message by type.
+   *
+   * @param type - Message type ('normal' or 'websocket')
+   * @returns New message instance
+   * @throws Error if message type is unknown
    */
   static create(type: string): HttpMessage {
     if (type === 'normal') {
@@ -47,8 +53,6 @@ export class HttpMessage {
     }
   }
 
-  readonly id = randomIdent()
-
   #type: HttpType
 
   readonly method: HttpMethodWrap
@@ -58,6 +62,8 @@ export class HttpMessage {
   readonly status: HttpStatusWrap
   readonly responseHeaders: HttpHeadersWrap
   readonly responseBody: HttpBodyWrap
+
+  readonly id = randomIdent()
 
   constructor(type: HttpType) {
     this.#type = type
@@ -73,18 +79,37 @@ export class HttpMessage {
 
   #isReady: boolean = false
 
+  /**
+   * Check if message is ready for processing.
+   *
+   * @returns true if message is ready, false otherwise
+   */
   get isReady(): boolean {
     return this.#isReady
   }
 
+  /**
+   * Mark message as ready for processing.
+   */
   ready() {
     this.#isReady = true
   }
 
+  /**
+   * Get message type.
+   *
+   * @returns Current message type
+   */
   get type(): HttpType {
     return this.#type
   }
 
+  /**
+   * Set message type with validation.
+   *
+   * @param type - New message type
+   * @throws Error if message is ready or invalid type transition
+   */
   setType(type: HttpType) {
     this.sureNotReady('setType')
 
@@ -96,8 +121,16 @@ export class HttpMessage {
     this.#type = type
   }
 
+  /**
+   * Connection metadata.
+   */
   readonly connection: HttpConnection = {}
 
+  /**
+   * Merge connection metadata.
+   *
+   * @param connection - Connection data to merge
+   */
   mergeConnection(connection: HttpConnection) {
     Object.entries(connection).forEach(([name, value]) => {
       if (value != null) {
@@ -106,15 +139,31 @@ export class HttpMessage {
     })
   }
 
+  /**
+   * Message payload data.
+   */
   readonly payload: HttpPayload = {}
 
+  /**
+   * Accumulated errors during processing.
+   */
   readonly errors: HttpError[] = []
 
+  /**
+   * Add error with path context.
+   *
+   * @param error - Error object or unknown value
+   * @param path - Error location path segments
+   */
   addError(error: unknown, ...path: string[]) {
     this.errors.push([serializeError(error), ...path])
   }
 
+  /**
+   * Analysis result string.
+   */
   analyze: string | null = null
+  /////////////
 
   #contentTypes: HttpContentTypes = {
     text: [],
@@ -126,24 +175,50 @@ export class HttpMessage {
     urlEncoded: [],
   }
 
+  /**
+   * Register content-types for a category.
+   *
+   * @param name - Content type category
+   * @param types - Array of MIME types
+   * @throws Error if message is ready
+   */
   addContentTypes(name: HttpContentTypeName, types: string[]) {
     this.sureNotReady('addContentTypes')
 
     this.#contentTypes[name].push(...types)
   }
 
+  /**
+   * Check if content-type belongs to category.
+   *
+   * @param name - Content type category
+   * @param contentType - Parsed content-type to check
+   * @returns true if content-type matches category, false otherwise
+   */
   isContentType(name: HttpContentTypeName, contentType: HttpContentType): boolean {
     return this.#contentTypes[name].includes(contentType.type)
   }
 
   #rewriteUrlContentTypes: string[] = []
 
+  /**
+   * Add content-types eligible for URL rewriting.
+   *
+   * @param types - Array of MIME types
+   * @throws Error if message is ready
+   */
   addRewriteUrlContentTypes(types: string[]) {
     this.sureNotReady('addRewriteUrlContentTypes')
 
     this.#rewriteUrlContentTypes.push(...types)
   }
 
+  /**
+   * Check if content-type supports URL rewriting.
+   *
+   * @param contentType - Parsed content-type to check
+   * @returns true if rewriting is applicable, false otherwise
+   */
   isRewriteUrlContentType(contentType: HttpContentType): boolean {
     return this.#rewriteUrlContentTypes.includes(contentType.type)
   }
@@ -153,6 +228,11 @@ export class HttpMessage {
     ['//', false],
   ]
 
+  /**
+   * Add extra URL rewriting schemes (percent and unicode encoded).
+   *
+   * @throws Error if message is ready
+   */
   addRewriteUrlExtraSchemes() {
     this.sureNotReady('addRewriteUrlExtraSchemes')
 
@@ -167,18 +247,37 @@ export class HttpMessage {
   #requestHeadInterceptors: HttpMessageInterceptors = []
   #requestBodyInterceptors: HttpMessageInterceptors = []
 
+  /**
+   * Add request head interceptor.
+   *
+   * @param name - Interceptor identifier
+   * @param interceptor - Interceptor function
+   * @throws Error if message is ready
+   */
   addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addRequestHeadInterceptor')
 
     this.#requestHeadInterceptors.push([name, interceptor])
   }
 
+  /**
+   * Add request body interceptor.
+   *
+   * @param name - Interceptor identifier
+   * @param interceptor - Interceptor function
+   * @throws Error if message is ready
+   */
   addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addRequestBodyInterceptor')
 
     this.#requestBodyInterceptors.push([name, interceptor])
   }
 
+  /**
+   * Execute all request head interceptors.
+   *
+   * @throws Error if message is not ready
+   */
   runRequestHeadInterceptors() {
     this.sureIsReady('runRequestHeadInterceptors')
 
@@ -194,6 +293,11 @@ export class HttpMessage {
     this.url.freeze()
   }
 
+  /**
+   * Execute all request body interceptors.
+   *
+   * @throws Error if message is not ready
+   */
   runRequestBodyInterceptors() {
     this.sureIsReady('runRequestBodyInterceptors')
 
@@ -213,31 +317,61 @@ export class HttpMessage {
 
   #requestTransforms: Transform[] = []
 
+  /**
+   * Add stream transform for request body.
+   *
+   * @param transform - Node.js Transform stream
+   * @throws Error if message is ready
+   */
   addRequestTransform(transform: Transform) {
     this.sureNotReady('addRequestTransform')
 
     this.#requestTransforms.push(transform)
   }
 
-  getRequestTransforms(): Readonly<Transform[]> {
+  /**
+   * Get request transforms.
+   *
+   * @returns Array of transforms
+   */
+  getRequestTransforms(): Transform[] {
     return this.#requestTransforms
   }
 
   #responseHeadInterceptors: HttpMessageInterceptors = []
   #responseBodyInterceptors: HttpMessageInterceptors = []
 
+  /**
+   * Add response head interceptor.
+   *
+   * @param name - Interceptor identifier
+   * @param interceptor - Interceptor function
+   * @throws Error if message is ready
+   */
   addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addResponseHeadInterceptor')
 
     this.#responseHeadInterceptors.push([name, interceptor])
   }
 
+  /**
+   * Add response body interceptor.
+   *
+   * @param name - Interceptor identifier
+   * @param interceptor - Interceptor function
+   * @throws Error if message is ready
+   */
   addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
     this.sureNotReady('addResponseBodyInterceptor')
 
     this.#responseBodyInterceptors.push([name, interceptor])
   }
 
+  /**
+   * Execute all response head interceptors.
+   *
+   * @throws Error if message is not ready
+   */
   runResponseHeadInterceptors() {
     this.sureIsReady('runResponseHeadInterceptors')
 
@@ -252,6 +386,11 @@ export class HttpMessage {
     this.status.freeze()
   }
 
+  /**
+   * Execute all response body interceptors.
+   *
+   * @throws Error if message is not ready
+   */
   runResponseBodyInterceptors() {
     this.sureIsReady('runResponseBodyInterceptors')
 
@@ -271,21 +410,46 @@ export class HttpMessage {
 
   #responseTransforms: Transform[] = []
 
+  /**
+   * Add stream transform for response body.
+   *
+   * @param transform - Node.js Transform stream
+   * @throws Error if message is ready
+   */
   addResponseTransform(transform: Transform) {
     this.sureNotReady('addResponseTransform')
 
     this.#responseTransforms.push(transform)
   }
 
-  getResponseTransforms(): Readonly<Transform[]> {
+  /**
+   * Get response transforms.
+   *
+   * @returns Array of transforms
+   */
+  getResponseTransforms(): Transform[] {
     return this.#responseTransforms
   }
 
+  /**
+   * Check if value is absolute URL.
+   *
+   * @param value - URL string to check
+   * @returns true if absolute URL
+   */
   isAbsoluteUrl(value: string): boolean {
     const regExp = /^https?:\/\/|^\/\//i
     return regExp.test(value)
   }
 
+  /**
+   * Rewrite URLs in text.
+   *
+   * @param text - Text content containing URLs
+   * @param rev - Reverse rewriting (mirror to donor)
+   * @param targets - URL rewrite targets
+   * @returns Text with rewritten URLs
+   */
   rewriteUrl(text: string, rev: boolean, targets: RewriteUrlTarget[]): string {
     return rewriteUrl(text, rev, targets, this.#rewriteUrlSchemes)
   }

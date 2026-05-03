@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-tools",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Famir HTTP tools module",
   "keywords": [
     "famir",
@@ -23,6 +23,7 @@
     "format": "prettier -w \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "node --test dist/**/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage dist/**/*.test.js",
     "build": "tsc -b",
     "clean": "rimraf dist *.tsbuildinfo"
   },
@@ -35,7 +36,7 @@
   "bugs": {
     "url": "https://github.com/bitnoize/famir/issues"
   },
-  "homepage": "https://fake-mirrors.net",
+  "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
     "@famir/common": "*",
     "@famir/http-proto": "*",

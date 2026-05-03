@@ -2,19 +2,21 @@ import { HttpBody, HttpJson, HttpQueryString, HttpText } from '@famir/http-proto
 import * as iconv from 'iconv-lite'
 import {
   formatQueryString,
-  HttpFormatQueryStringOptions,
-  HttpParseQueryStringOptions,
+  FormatQueryStringOptions,
   parseQueryString,
+  ParseQueryStringOptions,
 } from './query-string.js'
 
 /**
- * Represents a HTTP body wrapper
+ * Wrapper for HTTP message body.
  *
  * @category none
  */
 export class HttpBodyWrap {
   /**
-   * Create wrapper from scratch
+   * Factory method to create wrapper from scratch.
+   *
+   * @returns New wrapper instance
    */
   static fromScratch(): HttpBodyWrap {
     return new HttpBodyWrap(Buffer.alloc(0))
@@ -27,7 +29,9 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Clone wrapper
+   * Clone wrapper with a copy of the body.
+   *
+   * @returns New independent wrapper instance
    */
   clone(): HttpBodyWrap {
     return new HttpBodyWrap(Buffer.from(this.#body))
@@ -36,14 +40,18 @@ export class HttpBodyWrap {
   #isFrozen: boolean = false
 
   /**
-   * Wrapper frozen state
+   * Check if wrapper is frozen (read-only).
+   *
+   * @returns true if wrapper is frozen, false otherwise
    */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
   /**
-   * Freeze wrapper
+   * Freeze wrapper to prevent modifications.
+   *
+   * @returns This wrapper for method chaining
    */
   freeze(): this {
     this.#isFrozen = true
@@ -52,21 +60,29 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Body size
+   * Get body buffer size in bytes.
+   *
+   * @returns Size of the body
    */
   get length(): number {
     return this.#body.length
   }
 
   /**
-   * Get body
+   * Get raw body buffer.
+   *
+   * @returns Buffer containing the body
    */
   get(): HttpBody {
     return this.#body
   }
 
   /**
-   * Set body
+   * Set raw body buffer.
+   *
+   * @param body - Buffer to set as body
+   * @returns This wrapper for method chaining
+   * @throws If wrapper is frozen
    */
   set(body: HttpBody): this {
     this.sureNotFrozen('set')
@@ -81,7 +97,9 @@ export class HttpBodyWrap {
   #cacheBase64: string | null = null
 
   /**
-   * Get base64 body
+   * Get body as base64 string (cached).
+   *
+   * @returns Base64 encoded body
    */
   getBase64(): string {
     if (this.#cacheBase64 != null) {
@@ -96,7 +114,11 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Set base64 body
+   * Set body from base64 string.
+   *
+   * @param base64 - Base64 encoded string
+   * @returns This wrapper for method chaining
+   * @throws If invalid base64 format or wrapper is frozen
    */
   setBase64(base64: string): this {
     this.sureNotFrozen('setBase64')
@@ -111,7 +133,11 @@ export class HttpBodyWrap {
   #cacheText: string | null = null
 
   /**
-   * Get text body
+   * Get body as text string (cached).
+   *
+   * @param charset - Character encoding (default: 'utf8').
+   * @returns Decoded text
+   * @throws If charset is not supported by iconv-lite
    */
   getText(charset: string = 'utf8'): HttpText {
     if (this.#cacheText != null) {
@@ -126,7 +152,12 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Set text body
+   * Set body from text string.
+   *
+   * @param text - Text to set as body
+   * @param charset - Character encoding (default: 'utf8')
+   * @returns This wrapper for method chaining
+   * @throws If charset is not supported or wrapper is frozen
    */
   setText(text: HttpText, charset: string = 'utf8'): this {
     this.sureNotFrozen('setText')
@@ -141,7 +172,11 @@ export class HttpBodyWrap {
   #cacheJson: HttpJson | null = null
 
   /**
-   * Get json body
+   * Get body as JSON object (cached).
+   *
+   * @param charset - Character encoding for decoding (optional)
+   * @returns Parsed JSON object
+   * @throws If body is not valid JSON
    */
   getJson(charset?: string): HttpJson {
     if (this.#cacheJson != null) {
@@ -152,7 +187,7 @@ export class HttpBodyWrap {
     const json: unknown = JSON.parse(text)
 
     if (json == null) {
-      throw new Error(`Body wrong json`)
+      throw new Error(`Invalid JSON in body`)
     }
 
     this.#cacheJson = json
@@ -161,7 +196,12 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Set json body
+   * Set body from JSON object.
+   *
+   * @param json - JSON object to stringify
+   * @param charset - Character encoding (optional)
+   * @returns This wrapper for method chaining
+   * @throws If wrapper is frozen
    */
   setJson(json: HttpJson, charset?: string): this {
     this.sureNotFrozen('setJson')
@@ -175,19 +215,22 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Custom parse query-string options
+   * Custom options for parsing query strings.
    */
-  readonly parseQueryStringOptions: HttpParseQueryStringOptions = {}
+  readonly parseQueryStringOptions: ParseQueryStringOptions = {}
 
   /**
-   * Custom format query-string options
+   * Custom options for formatting query strings.
    */
-  readonly formatQueryStringOptions: HttpFormatQueryStringOptions = {}
+  readonly formatQueryStringOptions: FormatQueryStringOptions = {}
 
   #cacheQueryString: HttpQueryString | null = null
 
   /**
-   * Get query-string body
+   * Get body as query string object (cached).
+   *
+   * @param charset - Character encoding for decoding (optional)
+   * @returns Parsed query string as object
    */
   getQueryString(charset?: string): HttpQueryString {
     if (this.#cacheQueryString != null) {
@@ -206,7 +249,12 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Set query-string body
+   * Set body from query string object.
+   *
+   * @param queryString - Query string object
+   * @param charset - Character encoding (optional)
+   * @returns This wrapper for method chaining
+   * @throws If wrapper is frozen
    */
   setQueryString(queryString: HttpQueryString, charset?: string): this {
     this.sureNotFrozen('setQueryString')
@@ -223,7 +271,10 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Cleanup wrapper
+   * Clear body and reset all caches.
+   *
+   * @returns This wrapper for method chaining
+   * @throws If wrapper is frozen
    */
   reset(): this {
     this.sureNotFrozen('reset')
