@@ -4,14 +4,43 @@ import { ValidatorError } from './validator.error.js'
 import { VALIDATOR, Validator, ValidatorSchemas } from './validator.js'
 
 /**
- * Ajv validator implementation
+ * Ajv-based JSON schema validator implementation.
  *
+ * Provides thread-safe schema validation with comprehensive error reporting.
+ * Uses Ajv with strict configuration for production use.
+ *
+ * @example
+ * ```ts
+ * // Register in DI container
+ * AjvValidator.register(container)
+ *
+ * // Get validator
+ * const validator = container.resolve<Validator>(VALIDATOR)
+ *
+ * // Add and validate schemas
+ * validator.addSchema('user', {
+ *   type: 'object',
+ *   properties: {
+ *     name: { type: 'string' },
+ *     age: { type: 'number', minimum: 0 }
+ *   },
+ *   required: ['name']
+ * })
+ *
+ * // Type-safe validation
+ * if (validator.guardSchema<User>('user', data)) {
+ *   console.log(data.name)
+ * }
+ * ```
+ *
+ * @see https://ajv.js.org/ - Ajv documentation
  * @category none
- * @see [Ajv home](https://ajv.js.org/)
  */
 export class AjvValidator implements Validator {
   /**
-   * Register dependency
+   * Register AjvValidator as singleton in DI container.
+   *
+   * @param container - DI container to register in
    */
   static register(container: DIContainer) {
     container.registerSingleton<Validator>(VALIDATOR, () => new AjvValidator())
