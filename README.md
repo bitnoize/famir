@@ -1,28 +1,48 @@
 # Famir
 
-A framework for building complex infrastructure for HTTP traffic security research through a
-man-in-the-middle attack. It helps organize a network of mirrors for sites and process/modify
-intercepted data. See [demo-project](https://github.com/bitnoize/famir-demo) for example usage.
+[![Build and Deploy](https://github.com/bitnoize/famir/actions/workflows/main.yml/badge.svg)](https://github.com/bitnoize/famir/actions/workflows/main.yml)
 
-## Features
+An extensible ecosystem for creating fake website mirrors.
 
-- Clean architecture, modular design.
-- Multiple phishing campaigns in one project.
+## What it does
+
+Organizes a **man-in-the-middle** attack on the target site through a fake mirror on an arbitrary
+domain. The ability to intercept and modify requests and responses from or to the victim.
+
+## Applications
+
+- **reverse-app** - Reverse proxy server with extended functionality via middleware.
+- **console-app** - Campaign management console.
+- **actions-app** - Task queues for background processing intercepted data.
+
+## Key features
+
+- Clean, modular architecture.
+- Multiple phishing campaigns in one backend.
 - Support HTTP streaming requests and responses.
-- Reverse proxying both in transparent mode and through secret links aka 'lures'.
-- Bypass any of TLS fingerprint checks.
+- Reverse proxying both in transparent mode and authenticated through secret links.
+- Bypass any of TLS fingerprint checks via curl-impersonate.
 - Outgoing traffic via http or socks proxies.
+- Resistant to errors, follows HTTP standards.
 - Minimum third-party dependencies.
-- Resistant to errors, follows standards.
 
-## Stack
+## Technology stack
 
-- Node.js, Typescript.
-- Any of fast web-server like Nginx or Caddy.
-- Redis as main database.
-- S3-like storage.
+- **Runtime:** Node.js (TypeScript)
+- **Database:** Redis
+- **Storage:** S3‑compatible storage
+- **Edge server:** Nginx or Caddy
 
 ## Disclaimer
 
-This tool is made only for educational purposes and can be used in legitimate penetration tests or
-research only. Author does not take any responsibility for any actions taken by its users.
+> This tool is intended **only for educational purposes** and legitimate penetration testing /
+> research. The author assumes no responsibility for misuse.
+
+## Links
+
+- [Documentation](https://docs.fake-mirrors.net/)
+- [Demo project](https://github.com/bitnoize/famir-demo#readme) (see the repo for usage examples)
+
+---
+
+_Built for security research. Use responsibly._

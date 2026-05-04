@@ -5,6 +5,7 @@
   "name": "Fake Mirrors",
   "plugin": ["typedoc-theme-fresh"],
   "theme": "fresh",
+  "hostedBaseUrl": "https://docs.fake-mirrors.net",
   "titleLink": "https://fake-mirrors.net",
   "navigation": {
     "includeFolders": false,
