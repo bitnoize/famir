@@ -12,19 +12,23 @@ import {
 } from '../../database.keys.js'
 
 /**
+ * Raw campaign data structure.
+ *
  * @category Campaign
  * @internal
  */
 export interface RawCampaign {
   campaign_id: string
   mirror_domain: string
-  is_locked: number
+  is_locked: boolean
   session_count: number
   message_count: number
   created_at: number
 }
 
 /**
+ * Raw full campaign data structure.
+ *
  * @category Campaign
  * @internal
  */
@@ -44,6 +48,8 @@ export interface RawFullCampaign extends RawCampaign {
 }
 
 /**
+ * Redis Lua function definitions for campaign operations.
+ *
  * @category Campaign
  * @internal
  */
@@ -61,10 +67,10 @@ export const campaignFunctions = {
         cryptSecret: string,
         upgradeSessionPath: string,
         sessionCookieName: string,
-        sessionExpire: string,
-        newSessionExpire: string,
-        messageExpire: string,
-        createdAt: string
+        sessionExpire: number,
+        newSessionExpire: number,
+        messageExpire: number,
+        createdAt: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignMirrorDomainsKey(prefix))
@@ -77,10 +83,10 @@ export const campaignFunctions = {
         parser.push(cryptSecret)
         parser.push(upgradeSessionPath)
         parser.push(sessionCookieName)
-        parser.push(sessionExpire)
-        parser.push(newSessionExpire)
-        parser.push(messageExpire)
-        parser.push(createdAt)
+        parser.push(sessionExpire.toString())
+        parser.push(newSessionExpire.toString())
+        parser.push(messageExpire.toString())
+        parser.push(createdAt.toString())
       },
 
       transformReply: undefined as unknown as () => unknown,
@@ -131,13 +137,13 @@ export const campaignFunctions = {
         prefix: string,
         campaignId: string,
         lockSecret: string,
-        lockTimeout: string
+        lockTimeout: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
 
         parser.push(lockSecret)
-        parser.push(lockTimeout)
+        parser.push(lockTimeout.toString())
       },
 
       transformReply: undefined as unknown as () => unknown,
@@ -163,10 +169,10 @@ export const campaignFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        description: string | null,
-        sessionExpire: string | null,
-        newSessionExpire: string | null,
-        messageExpire: string | null,
+        description: string | null | undefined,
+        sessionExpire: number | null | undefined,
+        newSessionExpire: number | null | undefined,
+        messageExpire: number | null | undefined,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -179,17 +185,17 @@ export const campaignFunctions = {
 
         if (sessionExpire != null) {
           parser.push('session_expire')
-          parser.push(sessionExpire)
+          parser.push(sessionExpire.toString())
         }
 
         if (newSessionExpire != null) {
           parser.push('new_session_expire')
-          parser.push(newSessionExpire)
+          parser.push(newSessionExpire.toString())
         }
 
         if (messageExpire != null) {
           parser.push('message_expire')
-          parser.push(messageExpire)
+          parser.push(messageExpire.toString())
         }
 
         parser.push(lockSecret)

@@ -9,6 +9,8 @@ import {
 } from '../../database.keys.js'
 
 /**
+ * Raw proxy data structure.
+ *
  * @category Proxy
  * @internal
  */
@@ -16,12 +18,14 @@ export interface RawProxy {
   campaign_id: string
   proxy_id: string
   url: string
-  is_enabled: number
+  is_enabled: boolean
   message_count: number
   created_at: number
 }
 
 /**
+ * Redis Lua function definitions for proxy operations.
+ *
  * @category Proxy
  * @internal
  */
@@ -36,7 +40,7 @@ export const proxyFunctions = {
         campaignId: string,
         proxyId: string,
         url: string,
-        createdAt: string,
+        createdAt: number,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -48,7 +52,7 @@ export const proxyFunctions = {
         parser.push(campaignId)
         parser.push(proxyId)
         parser.push(url)
-        parser.push(createdAt)
+        parser.push(createdAt.toString())
         parser.push(lockSecret)
       },
 

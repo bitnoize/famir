@@ -16,6 +16,14 @@ export interface RewriteUrlTarget {
 export type RewriteUrlScheme = [string, boolean] // separator, withProto
 
 /**
+ * Rewrite URLs in text content for proxy/mirror scenarios.
+ *
+ * @param text - Source text containing URLs to rewrite
+ * @param rev - Reverse mode (mirror → donor instead of donor → mirror)
+ * @param targets - Array of target configurations with donor/mirror hosts
+ * @param schemes - URL schemes to match (e.g., ['://', true] for protocol + separator)
+ * @returns Text with rewritten URLs
+ *
  * @category none
  * @internal
  */

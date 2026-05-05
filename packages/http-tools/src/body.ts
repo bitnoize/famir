@@ -24,6 +24,11 @@ export class HttpBodyWrap {
 
   #body: HttpBody
 
+  /**
+   * Create a new wrapper instance.
+   *
+   * @param body - The body to wrap
+   */
   constructor(body: HttpBody) {
     this.#body = body
   }
@@ -100,6 +105,7 @@ export class HttpBodyWrap {
    * Get body as base64 string (cached).
    *
    * @returns Base64 encoded body
+   * @throws If Base64 encode fails
    */
   getBase64(): string {
     if (this.#cacheBase64 != null) {
@@ -118,7 +124,8 @@ export class HttpBodyWrap {
    *
    * @param base64 - Base64 encoded string
    * @returns This wrapper for method chaining
-   * @throws If invalid base64 format or wrapper is frozen
+   * @throws If wrapper is frozen
+   * @throws If Base64 decode fails
    */
   setBase64(base64: string): this {
     this.sureNotFrozen('setBase64')
@@ -135,9 +142,9 @@ export class HttpBodyWrap {
   /**
    * Get body as text string (cached).
    *
-   * @param charset - Character encoding (default: 'utf8').
+   * @param charset - Character encoding (default: 'utf8')
    * @returns Decoded text
-   * @throws If charset is not supported by iconv-lite
+   * @throws If Iconv decode fails
    */
   getText(charset: string = 'utf8'): HttpText {
     if (this.#cacheText != null) {
@@ -157,7 +164,8 @@ export class HttpBodyWrap {
    * @param text - Text to set as body
    * @param charset - Character encoding (default: 'utf8')
    * @returns This wrapper for method chaining
-   * @throws If charset is not supported or wrapper is frozen
+   * @throws If wrapper is frozen
+   * @throws If Iconv encode fails
    */
   setText(text: HttpText, charset: string = 'utf8'): this {
     this.sureNotFrozen('setText')
@@ -174,9 +182,9 @@ export class HttpBodyWrap {
   /**
    * Get body as JSON object (cached).
    *
-   * @param charset - Character encoding for decoding (optional)
+   * @param charset - Character encoding (optional)
    * @returns Parsed JSON object
-   * @throws If body is not valid JSON
+   * @throws If Iconv decode fails, or JSON parse fails
    */
   getJson(charset?: string): HttpJson {
     if (this.#cacheJson != null) {
@@ -186,7 +194,7 @@ export class HttpBodyWrap {
     const text = this.getText(charset)
     const json: unknown = JSON.parse(text)
 
-    if (json == null) {
+    if (!(typeof json === 'object' && json != null)) {
       throw new Error(`Invalid JSON in body`)
     }
 
@@ -202,6 +210,7 @@ export class HttpBodyWrap {
    * @param charset - Character encoding (optional)
    * @returns This wrapper for method chaining
    * @throws If wrapper is frozen
+   * @throws If JSON stringify fails, or Iconv encode fails
    */
   setJson(json: HttpJson, charset?: string): this {
     this.sureNotFrozen('setJson')
@@ -214,14 +223,10 @@ export class HttpBodyWrap {
     return this
   }
 
-  /**
-   * Custom options for parsing query strings.
-   */
+  /** Custom options for parsing query strings */
   readonly parseQueryStringOptions: ParseQueryStringOptions = {}
 
-  /**
-   * Custom options for formatting query strings.
-   */
+  /** Custom options for formatting query strings */
   readonly formatQueryStringOptions: FormatQueryStringOptions = {}
 
   #cacheQueryString: HttpQueryString | null = null
@@ -229,8 +234,9 @@ export class HttpBodyWrap {
   /**
    * Get body as query string object (cached).
    *
-   * @param charset - Character encoding for decoding (optional)
+   * @param charset - Character encoding (optional)
    * @returns Parsed query string as object
+   * @throws If parse query string fails
    */
   getQueryString(charset?: string): HttpQueryString {
     if (this.#cacheQueryString != null) {
@@ -255,6 +261,7 @@ export class HttpBodyWrap {
    * @param charset - Character encoding (optional)
    * @returns This wrapper for method chaining
    * @throws If wrapper is frozen
+   * @throws If format query string fails
    */
   setQueryString(queryString: HttpQueryString, charset?: string): this {
     this.sureNotFrozen('setQueryString')

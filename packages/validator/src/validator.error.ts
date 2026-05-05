@@ -1,14 +1,14 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * Details of a single JSON schema validation error.
+ * Details of a single schema validation error.
  *
  * Contains information about what failed validation and why.
  *
  * @category none
  */
 export interface ValidatorValidateError {
-  /** Validation keyword that failed (e.g., 'required', 'type', 'format') */
+  /** Validation keyword that failed */
   keyword: string
   /** JSONPointer to the instance that failed validation */
   instancePath: string
@@ -16,14 +16,14 @@ export interface ValidatorValidateError {
   schemaPath: string
   /** Additional parameters for this validation error */
   params: object
-  /** Name of the property that caused the error (if applicable) */
+  /** Name of the property that caused the error */
   propertyName: string | undefined
   /** Human-readable error message */
   message: string | undefined
 }
 
 /**
- * Options for creating a ValidatorError with error collection.
+ * Options for creating a validator error.
  *
  * @category none
  */
@@ -32,38 +32,19 @@ export type ValidatorErrorOptions = CommonErrorOptions & {
 }
 
 /**
- * Error thrown when JSON schema validation fails.
- *
- * Contains validation error details and context for debugging.
- *
- * @example
- * ```ts
- * try {
- *   validator.assertSchema<Config>('config', data)
- * } catch (error) {
- *   if (error instanceof ValidatorError) {
- *     console.log('Validation failed:')
- *     error.validateErrors.forEach((err) => {
- *       console.log(`  - ${err.instancePath}: ${err.message}`)
- *     })
- *     console.log('Context:', error.context)
- *   }
- * }
- * ```
+ * Error thrown when schema validation fails.
  *
  * @category none
  */
 export class ValidatorError extends CommonError {
-  /**
-   * Detailed validation errors.
-   */
+  /** Detailed validation errors */
   validateErrors: ValidatorValidateError[]
 
   /**
-   * Create a new validator error.
+   * Create a new validator error instance.
    *
-   * @param message - Error message
-   * @param options - Error options including validateErrors and context
+   * @param message - A human-readable description of the error
+   * @param options - Error options
    */
   constructor(message: string, options: ValidatorErrorOptions) {
     super(message, {

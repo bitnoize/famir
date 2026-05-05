@@ -24,7 +24,7 @@ local function create_lure(keys, args)
   end
 
   if redis.call('EXISTS', lure_key) ~= 0 then
-    return redis.status_reply('CONFLICT Lure allready exists')
+    return redis.status_reply('CONFLICT Lure already exists')
   end
 
   if redis.call('EXISTS', redirector_key) ~= 1 then
@@ -34,6 +34,7 @@ local function create_lure(keys, args)
   local stash = {
     lock_secret = args[6],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
+    redirector_campaign_id = redis.call('HGET', redirector_key, 'campaign_id'),
   }
 
   for k, v in pairs(stash) do
@@ -41,7 +42,7 @@ local function create_lure(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+    if (k == 'lock_secret' or k == 'orig_lock_secret' and 'redirector_campaign_id') and v == '' then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
@@ -67,6 +68,14 @@ local function create_lure(keys, args)
     then
       return redis.error_reply('ERR Wrong model.' .. k)
     end
+  end
+
+  if stash.redirector_campaign_id ~= model.campaign_id then
+    return redis.status_reply('FORBIDDEN Redirector not belong same campaign')
+  end
+
+  if redis.call('HEXISTS', lure_paths_key, model.path) ~= 0 then
+    return redis.status_reply('CONFLICT Lure path already taken')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -149,6 +158,8 @@ local function read_lure(keys, args)
       return redis.error_reply('ERR Malform model.' .. k)
     end
   end
+
+  model['is_enabled'] = (model['is_enabled'] ~= 0)
 
   return { map = model }
 end
@@ -267,7 +278,7 @@ local function enable_lure(keys, args)
   end
 
   if stash.is_enabled ~= 0 then
-    return redis.status_reply('OK Lure allready enabled')
+    return redis.status_reply('OK Lure already enabled')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -276,7 +287,7 @@ local function enable_lure(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', lure_key, 'is_enabled', 1)
+  redis.call('HSET', lure_key, 'is_enabled', 1, 'session_count', 0)
 
   return redis.status_reply('OK Lure enabled')
 end
@@ -328,7 +339,7 @@ local function disable_lure(keys, args)
   end
 
   if stash.is_enabled == 0 then
-    return redis.status_reply('OK Lure allready disabled')
+    return redis.status_reply('OK Lure already disabled')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -384,8 +395,10 @@ local function delete_lure(keys, args)
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     lure_id = redis.call('HGET', lure_key, 'lure_id'),
     path = redis.call('HGET', lure_key, 'path'),
-    redirector_id = redis.call('HGET', lure_key, 'redirector_id'),
-    orig_redirector_id = redis.call('HGET', redirector_key, 'redirector_id'),
+    lure_redirector_id = redis.call('HGET', lure_key, 'redirector_id'),
+    lure_campaign_id = redis.call('HGET', lure_key, 'campaign_id'),
+    redirector_id = redis.call('HGET', redirector_key, 'redirector_id'),
+    redirector_campaign_id = redis.call('HGET', redirector_key, 'campaign_id'),
     is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
   }
 
@@ -400,16 +413,23 @@ local function delete_lure(keys, args)
         or k == 'orig_lock_secret'
         or k == 'lure_id'
         or k == 'path'
+        or k == 'lure_redirector_id'
+        or k == 'lure_campaign_id'
         or k == 'redirector_id'
-        or k == 'orig_redirector_id'
+        or k == 'redirector_campaign_id'
       ) and v == ''
     then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
 
-  if stash.orig_redirector_id ~= stash.redirector_id then
-    return redis.status_reply('FORBIDDEN Lure redirector not match')
+  if
+    not (
+      stash.lure_redirector_id == stash.redirector_id
+      and stash.lure_campaign_id == stash.redirector_campaign_id
+    )
+  then
+    return redis.status_reply('FORBIDDEN Redirector not belong lure')
   end
 
   if stash.is_enabled ~= 0 then

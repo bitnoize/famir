@@ -4,6 +4,7 @@ import {
   DatabaseErrorCode,
   FullTargetModel,
   TARGET_REPOSITORY,
+  TargetHosts,
   TargetModel,
   TargetRepository,
 } from '@famir/database'
@@ -90,6 +91,10 @@ export class TargetService {
     }
 
     return target
+  }
+
+  async readHosts(): Promise<TargetHosts> {
+    return await this.targetRepository.readHosts()
   }
 
   async update(data: UpdateTargetData): Promise<true> {

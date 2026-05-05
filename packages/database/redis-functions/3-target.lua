@@ -13,7 +13,7 @@ local function create_target(keys, args)
   local target_key = keys[3]
   local target_donors_key = keys[4]
   local target_mirrors_key = keys[5]
-  local target_mirror_hosts_key = keys[6]
+  local target_hosts_key = keys[6]
   local target_index_key = keys[7]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
@@ -25,7 +25,7 @@ local function create_target(keys, args)
   end
 
   if redis.call('EXISTS', target_key) ~= 0 then
-    return redis.status_reply('CONFLICT Target allready exists')
+    return redis.status_reply('CONFLICT Target already exists')
   end
 
   local stash = {
@@ -99,7 +99,7 @@ local function create_target(keys, args)
     .. '\t' .. model.donor_port
 
   if redis.call('SISMEMBER', target_donors_key, donor_str) ~= 0 then
-    return redis.status_reply('CONFLICT Target donor allready taken')
+    return redis.status_reply('CONFLICT Target donor already taken')
   end
 
   -- stylua: ignore
@@ -108,16 +108,16 @@ local function create_target(keys, args)
     .. '\t' .. model.mirror_port
 
   if redis.call('SISMEMBER', target_mirrors_key, mirror_str) ~= 0 then
-    return redis.status_reply('CONFLICT Target mirror allready taken')
+    return redis.status_reply('CONFLICT Target mirror already taken')
   end
 
-  local mirror_hostname = model.mirror_sub ~= '.'
+  local mirror_hostname = model.mirror_sub ~= '@'
       and (model.mirror_sub .. '.' .. stash.mirror_domain)
     or stash.mirror_domain
   local mirror_host = mirror_hostname .. ':' .. model.mirror_port
 
-  if redis.call('HEXISTS', target_mirror_hosts_key, mirror_host) ~= 0 then
-    return redis.error_reply('ERR Target mirror host allready taken')
+  if redis.call('HEXISTS', target_hosts_key, mirror_host) ~= 0 then
+    return redis.error_reply('ERR Target mirror host already taken')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -139,7 +139,7 @@ local function create_target(keys, args)
   redis.call('SADD', target_mirrors_key, mirror_str)
 
   local target_link = model.campaign_id .. '\t' .. model.target_id
-  redis.call('HSET', target_mirror_hosts_key, mirror_host, target_link)
+  redis.call('HSET', target_hosts_key, mirror_host, target_link)
 
   redis.call('ZADD', target_index_key, model.created_at, model.target_id)
 
@@ -215,6 +215,10 @@ local function read_target(keys, args)
       return redis.error_reply('ERR Malform model.' .. k)
     end
   end
+
+  model['donor_secure'] = (model['donor_secure'] ~= 0)
+  model['mirror_secure'] = (model['mirror_secure'] ~= 0)
+  model['is_enabled'] = (model['is_enabled'] ~= 0)
 
   return { map = model }
 end
@@ -314,6 +318,11 @@ local function read_full_target(keys, args)
     end
   end
 
+  model['donor_secure'] = (model['donor_secure'] ~= 0)
+  model['mirror_secure'] = (model['mirror_secure'] ~= 0)
+  model['allow_websockets'] = (model['allow_websockets'] ~= 0)
+  model['is_enabled'] = (model['is_enabled'] ~= 0)
+
   return { map = model }
 end
 
@@ -325,6 +334,40 @@ redis.register_function({
 })
 
 --[[
+  Read target hosts
+--]]
+local function read_target_hosts(keys, args)
+  if #keys ~= 1 or #args ~= 0 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local target_hosts_key = keys[1]
+
+  local hosts = {}
+
+  local values = redis.call('HGETALL', target_hosts_key)
+
+  for i = 1, #values, 2 do
+    local campaign_id, target_id = string.match(values[i + 1], '([^\t]+)\t([^\t]+)')
+
+    if not (campaign_id and campaign_id ~= '' and target_id and target_id ~= '') then
+      return redis.error_reply('ERR Malform target_link')
+    end
+
+    hosts[values[i]] = { campaign_id, target_id }
+  end
+
+  return { map = hosts }
+end
+
+redis.register_function({
+  function_name = 'read_target_hosts',
+  callback = read_target_hosts,
+  flags = { 'no-writes' },
+  description = 'Read target hosts',
+})
+
+--[[
   Find target link
 --]]
 local function find_target_link(keys, args)
@@ -332,7 +375,7 @@ local function find_target_link(keys, args)
     return redis.error_reply('ERR Wrong function use')
   end
 
-  local target_mirror_hosts_key = keys[1]
+  local target_hosts_key = keys[1]
 
   local mirror_host = args[1]
 
@@ -340,11 +383,11 @@ local function find_target_link(keys, args)
     return redis.error_reply('ERR Wrong mirror_host')
   end
 
-  if redis.call('HEXISTS', target_mirror_hosts_key, mirror_host) ~= 1 then
+  if redis.call('HEXISTS', target_hosts_key, mirror_host) ~= 1 then
     return nil
   end
 
-  local target_link = redis.call('HGET', target_mirror_hosts_key, mirror_host)
+  local target_link = redis.call('HGET', target_hosts_key, mirror_host)
   local campaign_id, target_id = string.match(target_link, '([^\t]+)\t([^\t]+)')
 
   if not (campaign_id and campaign_id ~= '' and target_id and target_id ~= '') then
@@ -540,7 +583,7 @@ local function enable_target(keys, args)
   end
 
   if stash.is_enabled ~= 0 then
-    return redis.status_reply('OK Target allready enabled')
+    return redis.status_reply('OK Target already enabled')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -549,7 +592,7 @@ local function enable_target(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', target_key, 'is_enabled', 1)
+  redis.call('HSET', target_key, 'is_enabled', 1, 'message_count', 0)
 
   return redis.status_reply('OK Target enabled')
 end
@@ -601,7 +644,7 @@ local function disable_target(keys, args)
   end
 
   if stash.is_enabled == 0 then
-    return redis.status_reply('OK Target allready disabled')
+    return redis.status_reply('OK Target already disabled')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -612,7 +655,7 @@ local function disable_target(keys, args)
 
   redis.call('HSET', target_key, 'is_enabled', 0)
 
-  return redis.status_reply('OK Target diabled')
+  return redis.status_reply('OK Target disabled')
 end
 
 redis.register_function({
@@ -663,7 +706,7 @@ local function append_target_label(keys, args)
   end
 
   if redis.call('SISMEMBER', target_labels_key, stash.label) ~= 0 then
-    return redis.status_reply('OK Target label allready exists')
+    return redis.status_reply('OK Target label already exists')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -759,7 +802,7 @@ local function delete_target(keys, args)
   local target_labels_key = keys[4]
   local target_donors_key = keys[5]
   local target_mirrors_key = keys[6]
-  local target_mirror_hosts_key = keys[7]
+  local target_hosts_key = keys[7]
   local target_index_key = keys[8]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
@@ -822,7 +865,7 @@ local function delete_target(keys, args)
     .. '\t' .. stash.mirror_sub
     .. '\t' .. stash.mirror_port
 
-  local mirror_hostname = stash.mirror_sub ~= '.'
+  local mirror_hostname = stash.mirror_sub ~= '@'
       and (stash.mirror_sub .. '.' .. stash.mirror_domain)
     or stash.mirror_domain
   local mirror_host = mirror_hostname .. ':' .. stash.mirror_port
@@ -843,7 +886,7 @@ local function delete_target(keys, args)
   redis.call('SREM', target_donors_key, donor_str)
   redis.call('SREM', target_mirrors_key, mirror_str)
 
-  redis.call('HDEL', target_mirror_hosts_key, mirror_host)
+  redis.call('HDEL', target_hosts_key, mirror_host)
 
   redis.call('ZREM', target_index_key, stash.target_id)
 

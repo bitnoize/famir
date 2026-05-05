@@ -10,13 +10,15 @@ import {
 import { redisFunctions } from './redis-functions.js'
 
 /**
- * Redis database manager implementation
+ * Redis database manager implementation.
  *
  * @category none
  */
 export class RedisDatabaseManager implements DatabaseManager {
   /**
-   * Register dependency
+   * Register manager instance as singleton in DI container.
+   *
+   * @param container - DI container to register in
    */
   static register(container: DIContainer) {
     container.registerSingleton<DatabaseManager>(
@@ -25,8 +27,15 @@ export class RedisDatabaseManager implements DatabaseManager {
     )
   }
 
+  /** Underlying Redis connection instance */
   protected readonly connection: RedisDatabaseConnection
 
+  /**
+   * Creates a new database manager instance.
+   *
+   * @param logger - The logger instance
+   * @param connector - The database connector instance
+   */
   constructor(
     protected readonly logger: Logger,
     protected readonly connector: DatabaseConnector
@@ -40,9 +49,13 @@ export class RedisDatabaseManager implements DatabaseManager {
     await this.connection.FUNCTION_FLUSH()
 
     for (const [name, data] of redisFunctions) {
-      this.logger.info(`Load redis functions: ${name}`)
+      try {
+        await this.connection.FUNCTION_LOAD(data)
 
-      await this.connection.FUNCTION_LOAD(data)
+        this.logger.info(`Load redis functions`, { name })
+      } catch (error) {
+        this.logger.info(`Load redis functions error`, { name, error })
+      }
     }
   }
 

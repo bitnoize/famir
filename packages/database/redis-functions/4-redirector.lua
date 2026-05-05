@@ -22,7 +22,7 @@ local function create_redirector(keys, args)
   end
 
   if redis.call('EXISTS', redirector_key) ~= 0 then
-    return redis.status_reply('CONFLICT Redirector allready exists')
+    return redis.status_reply('CONFLICT Redirector already exists')
   end
 
   local stash = {
@@ -53,7 +53,7 @@ local function create_redirector(keys, args)
       return redis.error_reply('ERR Wrong model.' .. k)
     end
 
-    if (k == 'campaign_id' or k == 'redirector_id') and v == '' then
+    if (k == 'campaign_id' or k == 'redirector_id' or k == 'page') and v == '' then
       return redis.error_reply('ERR Wrong model.' .. k)
     end
   end
@@ -286,6 +286,10 @@ local function update_redirector(keys, args)
     if not v then
       return redis.error_reply('ERR Wrong model.' .. k)
     end
+
+    if (k == 'page') and v == '' then
+      return redis.error_reply('ERR Wrong model.' .. k)
+    end
   end
 
   if next(model) == nil then
@@ -358,7 +362,7 @@ local function append_redirector_field(keys, args)
   end
 
   if redis.call('SISMEMBER', redirector_fields_key, stash.field) ~= 0 then
-    return redis.status_reply('OK Redirector field allready exists')
+    return redis.status_reply('OK Redirector field already exists')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -455,7 +459,7 @@ local function delete_redirector(keys, args)
   local redirector_index_key = keys[5]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND campaign not exists')
+    return redis.status_reply('NOT_FOUND Campaign not exists')
   end
 
   if redis.call('EXISTS', campaign_lock_key) ~= 1 then

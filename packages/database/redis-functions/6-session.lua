@@ -17,7 +17,7 @@ local function create_session(keys, args)
   end
 
   if redis.call('EXISTS', session_key) ~= 0 then
-    return redis.status_reply('CONFLICT Session allready exists')
+    return redis.status_reply('CONFLICT Session already exists')
   end
 
   local stash = {
@@ -138,6 +138,8 @@ local function read_session(keys, args)
       return redis.error_reply('ERR Malform model.' .. k)
     end
   end
+
+  model['is_upgraded'] = (model['is_upgraded'] ~= 0)
 
   return { map = model }
 end
@@ -268,7 +270,7 @@ local function upgrade_session(keys, args)
   end
 
   if stash.is_upgraded ~= 0 then
-    return redis.status_reply('OK Session allready upgraded')
+    return redis.status_reply('OK Session already upgraded')
   end
 
   -- Point of no return

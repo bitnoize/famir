@@ -7,6 +7,8 @@ import { sessionFunctions } from './modules/session/session.functions.js'
 import { targetFunctions } from './modules/target/target.functions.js'
 
 /**
+ * Redis Lua function definitions.
+ *
  * @category none
  * @internal
  */

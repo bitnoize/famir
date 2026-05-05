@@ -1,5 +1,5 @@
 /**
- * Dependency injection token for validator singleton.
+ * DI token for a validator.
  *
  * @category none
  * @internal
@@ -7,7 +7,7 @@
 export const VALIDATOR = Symbol('Validator')
 
 /**
- * JSON Schema validation interface.
+ * Represents a validator.
  *
  * Provides type-safe schema validation with Ajv.
  * Supports both safe guards and assertion-based validation.
@@ -19,7 +19,7 @@ export interface Validator {
    * Retrieve a registered JSON schema by name.
    *
    * @param name - The schema identifier
-   * @returns Schema object or undefined if not found
+   * @returns Schema object, or `undefined` if not found
    */
   getSchema(name: string): object | undefined
 
@@ -78,7 +78,7 @@ export interface Validator {
    * @typeParam T - Expected data type after validation
    * @param name - Schema name to validate against
    * @param data - Unknown data to validate
-   * @throws ValidatorError with validation error details
+   * @throws {@link ValidatorError} with validation error details
    *
    * @example
    * ```ts

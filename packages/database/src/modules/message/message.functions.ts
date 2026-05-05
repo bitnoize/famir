@@ -1,7 +1,10 @@
+import { HttpMethod, HttpType } from '@famir/http-proto'
 import { CommandParser } from '@redis/client'
 import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../database.keys.js'
 
 /**
+ * Raw message data structure.
+ *
  * @category Message
  * @internal
  */
@@ -11,8 +14,8 @@ export interface RawMessage {
   proxy_id: string
   target_id: string
   session_id: string
-  type: string
-  method: string
+  type: HttpType
+  method: HttpMethod
   url: string
   status: number
   analyze: string
@@ -22,6 +25,8 @@ export interface RawMessage {
 }
 
 /**
+ * Raw full message data structure.
+ *
  * @category Message
  * @internal
  */
@@ -36,6 +41,8 @@ export interface RawFullMessage extends RawMessage {
 }
 
 /**
+ * Redis Lua function definitions for message operations.
+ *
  * @category Message
  * @internal
  */
@@ -57,16 +64,16 @@ export const messageFunctions = {
         url: string,
         requestHeaders: string,
         requestBody: string,
-        status: string,
+        status: number,
         responseHeaders: string,
         responseBody: string,
         connection: string,
         payload: string,
         errors: string,
         analyze: string,
-        startTime: string,
-        finishTime: string,
-        createdAt: string
+        startTime: number,
+        finishTime: number,
+        createdAt: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))
@@ -84,16 +91,16 @@ export const messageFunctions = {
         parser.push(url)
         parser.push(requestHeaders)
         parser.push(requestBody)
-        parser.push(status)
+        parser.push(status.toString())
         parser.push(responseHeaders)
         parser.push(responseBody)
         parser.push(connection)
         parser.push(payload)
         parser.push(errors)
         parser.push(analyze)
-        parser.push(startTime)
-        parser.push(finishTime)
-        parser.push(createdAt)
+        parser.push(startTime.toString())
+        parser.push(finishTime.toString())
+        parser.push(createdAt.toString())
       },
 
       transformReply: undefined as unknown as () => unknown,

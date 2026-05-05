@@ -15,6 +15,11 @@ export class HttpStatusWrap {
 
   #status: number
 
+  /**
+   * Create a new wrapper instance.
+   *
+   * @param status - The status to wrap
+   */
   constructor(status: number) {
     this.#status = status
   }
@@ -122,7 +127,7 @@ export class HttpStatusWrap {
   /**
    * Check status is not in 100-599 range.
    *
-   * @returns true if status is in valid range, false otherwise
+   * @returns true if status is not in valid range, false otherwise
    */
   isUnknown(): boolean {
     return !this.between(100, 600)

@@ -1,7 +1,28 @@
-import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
+import {
+  JSONSchemaType,
+  ValidatorSchemas,
+  booleanSchema,
+  counterSchema,
+  customIdentSchema,
+  timestampSchema,
+} from '@famir/validator'
 import { RawLure } from './lure.functions.js'
 
 /**
+ * Schema for validating lure path.
+ *
+ * @category Lure
+ * @internal
+ */
+export const lurePathSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 1,
+  maxLength: 256,
+} as const
+
+/**
+ * Schema for validating raw lure data from Redis.
+ *
  * @category Lure
  * @internal
  */
@@ -17,42 +38,20 @@ const rawLureSchema: JSONSchemaType<RawLure> = {
     'created_at',
   ],
   properties: {
-    campaign_id: {
-      type: 'string',
-    },
-    lure_id: {
-      type: 'string',
-    },
-    path: {
-      type: 'string',
-    },
-    redirector_id: {
-      type: 'string',
-    },
-    is_enabled: {
-      type: 'integer',
-    },
-    session_count: {
-      type: 'integer',
-    },
-    created_at: {
-      type: 'integer',
-    },
+    campaign_id: customIdentSchema,
+    lure_id: customIdentSchema,
+    path: lurePathSchema,
+    redirector_id: customIdentSchema,
+    is_enabled: booleanSchema,
+    session_count: counterSchema,
+    created_at: timestampSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * @category Lure
- * @internal
- */
-export const lurePathSchema: JSONSchemaType<string> = {
-  type: 'string',
-  minLength: 1,
-  maxLength: 128,
-} as const
-
-/**
+ * Collection of all schemas used by the lure module.
+ *
  * @category Lure
  * @internal
  */

@@ -6,32 +6,37 @@ import {
   targetIndexKey,
   targetKey,
   targetLabelsKey,
-  targetMirrorHostsKey,
+  targetHostsKey,
   targetMirrorsKey,
 } from '../../database.keys.js'
+import { TargetAccessLevel } from './target.models.js'
 
 /**
+ * Raw target data structure.
+ *
  * @category Target
  * @internal
  */
 export interface RawTarget {
   campaign_id: string
   target_id: string
-  access_level: string
-  donor_secure: number
+  access_level: TargetAccessLevel
+  donor_secure: boolean
   donor_sub: string
   donor_domain: string
   donor_port: number
-  mirror_secure: number
+  mirror_secure: boolean
   mirror_sub: string
   mirror_domain: string
   mirror_port: number
-  is_enabled: number
+  is_enabled: boolean
   message_count: number
   created_at: number
 }
 
 /**
+ * Raw full target data structure.
+ *
  * @category Target
  * @internal
  */
@@ -47,10 +52,12 @@ export interface RawFullTarget extends RawTarget {
   favicon_ico: string
   robots_txt: string
   sitemap_xml: string
-  allow_websockets: number
+  allow_websockets: boolean
 }
 
 /**
+ * Redis Lua function definitions for target operations.
+ *
  * @category Target
  * @internal
  */
@@ -65,25 +72,25 @@ export const targetFunctions = {
         campaignId: string,
         targetId: string,
         accessLevel: string,
-        donorSecure: string,
+        donorSecure: boolean,
         donorSub: string,
         donorDomain: string,
-        donorPort: string,
-        mirrorSecure: string,
+        donorPort: number,
+        mirrorSecure: boolean,
         mirrorSub: string,
-        mirrorPort: string,
-        connectTimeout: string,
-        simpleTimeout: string,
-        streamTimeout: string,
-        headersSizeLimit: string,
-        bodySizeLimit: string,
+        mirrorPort: number,
+        connectTimeout: number,
+        simpleTimeout: number,
+        streamTimeout: number,
+        headersSizeLimit: number,
+        bodySizeLimit: number,
         mainPage: string,
         notFoundPage: string,
         faviconIco: string,
         robotsTxt: string,
         sitemapXml: string,
-        allowWebSockets: string,
-        createdAt: string,
+        allowWebSockets: boolean,
+        createdAt: number,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -91,31 +98,31 @@ export const targetFunctions = {
         parser.pushKey(targetKey(prefix, campaignId, targetId))
         parser.pushKey(targetDonorsKey(prefix, campaignId))
         parser.pushKey(targetMirrorsKey(prefix, campaignId))
-        parser.pushKey(targetMirrorHostsKey(prefix))
+        parser.pushKey(targetHostsKey(prefix))
         parser.pushKey(targetIndexKey(prefix, campaignId))
 
         parser.push(campaignId)
         parser.push(targetId)
         parser.push(accessLevel)
-        parser.push(donorSecure)
+        parser.push(donorSecure ? '1' : '0')
         parser.push(donorSub)
         parser.push(donorDomain)
-        parser.push(donorPort)
-        parser.push(mirrorSecure)
+        parser.push(donorPort.toString())
+        parser.push(mirrorSecure ? '1' : '0')
         parser.push(mirrorSub)
-        parser.push(mirrorPort)
-        parser.push(connectTimeout)
-        parser.push(simpleTimeout)
-        parser.push(streamTimeout)
-        parser.push(headersSizeLimit)
-        parser.push(bodySizeLimit)
+        parser.push(mirrorPort.toString())
+        parser.push(connectTimeout.toString())
+        parser.push(simpleTimeout.toString())
+        parser.push(streamTimeout.toString())
+        parser.push(headersSizeLimit.toString())
+        parser.push(bodySizeLimit.toString())
         parser.push(mainPage)
         parser.push(notFoundPage)
         parser.push(faviconIco)
         parser.push(robotsTxt)
         parser.push(sitemapXml)
-        parser.push(allowWebSockets)
-        parser.push(createdAt)
+        parser.push(allowWebSockets ? '1' : '0')
+        parser.push(createdAt.toString())
         parser.push(lockSecret)
       },
 
@@ -145,11 +152,21 @@ export const targetFunctions = {
       transformReply: undefined as unknown as () => unknown,
     },
 
+    read_target_hosts: {
+      NUMBER_OF_KEYS: 1,
+
+      parseCommand(parser: CommandParser, prefix: string) {
+        parser.pushKey(targetHostsKey(prefix))
+      },
+
+      transformReply: undefined as unknown as () => unknown,
+    },
+
     find_target_link: {
       NUMBER_OF_KEYS: 1,
 
       parseCommand(parser: CommandParser, prefix: string, mirrorHost: string) {
-        parser.pushKey(targetMirrorHostsKey(prefix))
+        parser.pushKey(targetHostsKey(prefix))
 
         parser.push(mirrorHost)
       },
@@ -176,17 +193,17 @@ export const targetFunctions = {
         prefix: string,
         campaignId: string,
         targetId: string,
-        connectTimeout: string | null,
-        simpleTimeout: string | null,
-        streamTimeout: string | null,
-        headersSizeLimit: string | null,
-        bodySizeLimit: string | null,
-        mainPage: string | null,
-        notFoundPage: string | null,
-        faviconIco: string | null,
-        robotsTxt: string | null,
-        sitemapXml: string | null,
-        allowWebSockets: string | null,
+        connectTimeout: number | null | undefined,
+        simpleTimeout: number | null | undefined,
+        streamTimeout: number | null | undefined,
+        headersSizeLimit: number | null | undefined,
+        bodySizeLimit: number | null | undefined,
+        mainPage: string | null | undefined,
+        notFoundPage: string | null | undefined,
+        faviconIco: string | null | undefined,
+        robotsTxt: string | null | undefined,
+        sitemapXml: string | null | undefined,
+        allowWebSockets: boolean | null | undefined,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -195,27 +212,27 @@ export const targetFunctions = {
 
         if (connectTimeout != null) {
           parser.push('connect_timeout')
-          parser.push(connectTimeout)
+          parser.push(connectTimeout.toString())
         }
 
         if (simpleTimeout != null) {
           parser.push('simple_timeout')
-          parser.push(simpleTimeout)
+          parser.push(simpleTimeout.toString())
         }
 
         if (streamTimeout != null) {
           parser.push('stream_timeout')
-          parser.push(streamTimeout)
+          parser.push(streamTimeout.toString())
         }
 
         if (headersSizeLimit != null) {
           parser.push('headers_size_limit')
-          parser.push(headersSizeLimit)
+          parser.push(headersSizeLimit.toString())
         }
 
         if (bodySizeLimit != null) {
           parser.push('body_size_limit')
-          parser.push(bodySizeLimit)
+          parser.push(bodySizeLimit.toString())
         }
 
         if (mainPage != null) {
@@ -245,7 +262,7 @@ export const targetFunctions = {
 
         if (allowWebSockets != null) {
           parser.push('allow_websockets')
-          parser.push(allowWebSockets)
+          parser.push(allowWebSockets ? '1' : '0')
         }
 
         parser.push(lockSecret)
@@ -356,7 +373,7 @@ export const targetFunctions = {
         parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
         parser.pushKey(targetDonorsKey(prefix, campaignId))
         parser.pushKey(targetMirrorsKey(prefix, campaignId))
-        parser.pushKey(targetMirrorHostsKey(prefix))
+        parser.pushKey(targetHostsKey(prefix))
         parser.pushKey(targetIndexKey(prefix, campaignId))
 
         parser.push(lockSecret)

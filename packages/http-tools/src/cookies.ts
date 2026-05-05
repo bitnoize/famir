@@ -2,6 +2,11 @@ import { HttpCookies, HttpSetCookies } from '@famir/http-proto'
 import { Cookie as ToughCookie } from 'tough-cookie'
 
 /**
+ * Parse Cookie header values into key-value object.
+ *
+ * @param values - Array of raw cookie strings
+ * @returns Object mapping cookie names to values
+ *
  * @category none
  * @internal
  */
@@ -23,6 +28,11 @@ export function parseCookies(values: string[]): HttpCookies {
 }
 
 /**
+ * Format Cookie object back to header string.
+ *
+ * @param cookies - Cookie object to format
+ * @returns String suitable for Cookie header
+ *
  * @category none
  * @internal
  */
@@ -44,6 +54,11 @@ export function formatCookies(cookies: HttpCookies): string {
 }
 
 /**
+ * Parse Set-Cookie header values into key-value object.
+ *
+ * @param values - Array of raw set-cookie strings
+ * @returns Object mapping set-cookie names to values
+ *
  * @category none
  * @internal
  */
@@ -100,13 +115,18 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
 }
 
 /**
+ * Format Set-Cookie object back to header string.
+ *
+ * @param cookies - Set-Cookie object to format
+ * @returns String suitable for Set-Cookie header
+ *
  * @category none
  * @internal
  */
-export function formatSetCookies(cookies: HttpSetCookies): string[] {
+export function formatSetCookies(setCookies: HttpSetCookies): string[] {
   const toughCookies: ToughCookie[] = []
 
-  Object.entries(cookies).forEach(([name, cookie]) => {
+  Object.entries(setCookies).forEach(([name, cookie]) => {
     if (cookie != null) {
       const toughCookie = new ToughCookie({
         key: name,

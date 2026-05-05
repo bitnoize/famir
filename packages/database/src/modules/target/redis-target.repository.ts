@@ -7,17 +7,25 @@ import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../.
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullTarget, RawTarget } from './target.functions.js'
 import { TARGET_REPOSITORY, TargetRepository } from './target.js'
-import { FullTargetModel, TargetAccessLevel, TargetModel } from './target.models.js'
+import {
+  FullTargetModel,
+  TargetAccessLevel,
+  TargetHosts,
+  TargetLink,
+  TargetModel,
+} from './target.models.js'
 import { targetSchemas } from './target.schemas.js'
 
 /**
- * Redis target repository implementation
+ * Redis target repository implementation.
  *
  * @category Target
  */
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
   /**
-   * Register dependency
+   * Register target repository instance as singleton in DI container.
+   *
+   * @param container - DI container to register in
    */
   static register(container: DIContainer) {
     container.registerSingleton<TargetRepository>(
@@ -32,6 +40,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     )
   }
 
+  /**
+   * Creates a new target repository instance.
+   *
+   * @param validator - The validator instance
+   * @param config - The database config instance
+   * @param logger - The logger instance
+   * @param connector - The database connector instance
+   */
   constructor(
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
@@ -75,29 +91,33 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         campaignId,
         targetId,
         accessLevel,
-        donorSecure ? '1' : '0',
+        donorSecure,
         donorSub,
         donorDomain,
-        donorPort.toString(),
-        mirrorSecure ? '1' : '0',
+        donorPort,
+        mirrorSecure,
         mirrorSub,
-        mirrorPort.toString(),
-        connectTimeout.toString(),
-        simpleTimeout.toString(),
-        streamTimeout.toString(),
-        headersSizeLimit.toString(),
-        bodySizeLimit.toString(),
+        mirrorPort,
+        connectTimeout,
+        simpleTimeout,
+        streamTimeout,
+        headersSizeLimit,
+        bodySizeLimit,
         mainPage,
         notFoundPage,
         faviconIco,
         robotsTxt,
         sitemapXml,
-        allowWebSockets ? '1' : '0',
-        Date.now().toString(),
+        allowWebSockets,
+        Date.now(),
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
@@ -133,18 +153,29 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
+  async readHosts(): Promise<TargetHosts> {
+    try {
+      const hosts = await this.connection.target.read_target_hosts(this.options.prefix)
+
+      this.validateRawData<TargetHosts>('database-target-hosts', hosts)
+
+      return hosts
+    } catch (error) {
+      this.raiseError(error, 'readHosts', null)
+    }
+  }
+
   async find(mirrorHost: string): Promise<TargetModel | null> {
     try {
-      const targetLink = await this.connection.target.find_target_link(
-        this.options.prefix,
-        mirrorHost
-      )
+      const link = await this.connection.target.find_target_link(this.options.prefix, mirrorHost)
 
-      if (targetLink === null) {
+      if (link === null) {
         return null
       }
 
-      const [campaignId, targetId] = this.buildTargetLink(targetLink)
+      this.validateRawData<TargetLink>('database-target-link', link)
+
+      const [campaignId, targetId] = link
 
       const rawModel = await this.connection.target.read_target(
         this.options.prefix,
@@ -160,16 +191,15 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async findFull(mirrorHost: string): Promise<FullTargetModel | null> {
     try {
-      const targetLink = await this.connection.target.find_target_link(
-        this.options.prefix,
-        mirrorHost
-      )
+      const link = await this.connection.target.find_target_link(this.options.prefix, mirrorHost)
 
-      if (targetLink === null) {
+      if (link === null) {
         return null
       }
 
-      const [campaignId, targetId] = this.buildTargetLink(targetLink)
+      this.validateRawData<TargetLink>('database-target-link', link)
+
+      const [campaignId, targetId] = link
 
       const rawModel = await this.connection.target.read_full_target(
         this.options.prefix,
@@ -204,21 +234,25 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         this.options.prefix,
         campaignId,
         targetId,
-        connectTimeout != null ? connectTimeout.toString() : null,
-        simpleTimeout != null ? simpleTimeout.toString() : null,
-        streamTimeout != null ? streamTimeout.toString() : null,
-        headersSizeLimit != null ? headersSizeLimit.toString() : null,
-        bodySizeLimit != null ? bodySizeLimit.toString() : null,
-        mainPage ?? null,
-        notFoundPage ?? null,
-        faviconIco ?? null,
-        robotsTxt ?? null,
-        sitemapXml ?? null,
-        allowWebSockets != null ? (allowWebSockets ? '1' : '0') : null,
+        connectTimeout,
+        simpleTimeout,
+        streamTimeout,
+        headersSizeLimit,
+        bodySizeLimit,
+        mainPage,
+        notFoundPage,
+        faviconIco,
+        robotsTxt,
+        sitemapXml,
+        allowWebSockets,
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
@@ -235,7 +269,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
@@ -252,7 +290,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
@@ -275,7 +317,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { target: { campaignId, targetId, label } })
     } catch (error) {
@@ -298,7 +344,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { target: { campaignId, targetId, label } })
     } catch (error) {
@@ -315,7 +365,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
@@ -367,49 +421,63 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
+  /**
+   * Converts raw Redis data to a target model.
+   *
+   * @param rawModel - The raw data from Redis
+   * @returns The target model, or `null` if the raw data is `null`
+   * @throws {@link DatabaseError} If the raw data fails validation
+   * @internal
+   */
   protected buildModel(rawModel: unknown): TargetModel | null {
     if (rawModel === null) {
       return null
     }
 
     this.validateRawData<RawTarget>('database-raw-target', rawModel)
-    this.validateRawData<TargetAccessLevel>('database-target-access-level', rawModel.access_level)
 
     return new TargetModel(
       rawModel.campaign_id,
       rawModel.target_id,
       rawModel.access_level,
-      !!rawModel.donor_secure,
+      rawModel.donor_secure,
       rawModel.donor_sub,
       rawModel.donor_domain,
       rawModel.donor_port,
-      !!rawModel.mirror_secure,
+      rawModel.mirror_secure,
       rawModel.mirror_sub,
       rawModel.mirror_domain,
       rawModel.mirror_port,
-      !!rawModel.is_enabled,
+      rawModel.is_enabled,
       rawModel.message_count,
       new Date(rawModel.created_at)
     )
   }
 
+  /**
+   * Converts raw Redis data to a full target model.
+   *
+   * @param rawModel - The raw data from Redis
+   * @returns The full target model, or `null` if the raw data is `null`
+   * @throws {@link DatabaseError} If the raw data fails validation
+   * @internal
+   */
   protected buildFullModel(rawModel: unknown): FullTargetModel | null {
     if (rawModel === null) {
       return null
     }
 
     this.validateRawData<RawFullTarget>('database-raw-full-target', rawModel)
-    this.validateRawData<TargetAccessLevel>('database-target-access-level', rawModel.access_level)
 
     return new FullTargetModel(
       rawModel.campaign_id,
       rawModel.target_id,
       rawModel.access_level,
-      !!rawModel.donor_secure,
+      rawModel.donor_secure,
       rawModel.donor_sub,
       rawModel.donor_domain,
       rawModel.donor_port,
-      !!rawModel.mirror_secure,
+      rawModel.mirror_secure,
       rawModel.mirror_sub,
       rawModel.mirror_domain,
       rawModel.mirror_port,
@@ -424,38 +492,40 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       rawModel.favicon_ico,
       rawModel.robots_txt,
       rawModel.sitemap_xml,
-      !!rawModel.allow_websockets,
-      !!rawModel.is_enabled,
+      rawModel.allow_websockets,
+      rawModel.is_enabled,
       rawModel.message_count,
       new Date(rawModel.created_at)
     )
   }
 
+  /**
+   * Converts an array of raw Redis data to an array of target models.
+   *
+   * @param rawCollection - The array of raw data from Redis
+   * @returns An array of target models
+   * @throws {@link DatabaseError} If the array of raw data fails validation
+   * @internal
+   */
   protected buildCollection(rawCollection: unknown): TargetModel[] {
     this.validateArrayReply(rawCollection)
 
     return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(TargetModel.isNotNull)
   }
 
+  /**
+   * Converts an array of raw Redis data to an array of full target models.
+   *
+   * @param rawCollection - The array of raw data from Redis
+   * @returns An array of full target models
+   * @throws {@link DatabaseError} If the array of raw data fails validation
+   * @internal
+   */
   protected buildFullCollection(rawCollection: unknown): FullTargetModel[] {
     this.validateArrayReply(rawCollection)
 
     return rawCollection
       .map((rawModel) => this.buildFullModel(rawModel))
       .filter(TargetModel.isNotNull)
-  }
-
-  protected buildTargetLink(value: unknown): [string, string] {
-    this.validateArrayStringsReply(value)
-
-    const [campaignId, targetId] = value
-
-    if (!(campaignId && targetId)) {
-      throw new DatabaseError(`TargetLink validate failed`, {
-        code: 'INTERNAL_ERROR',
-      })
-    }
-
-    return [campaignId, targetId]
   }
 }

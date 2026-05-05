@@ -2,26 +2,24 @@ import { DIContainer, randomIdent } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import {
-  DATABASE_CONNECTOR,
-  DATABASE_LOCK_TIMEOUT,
-  DatabaseConnector,
-  RedisDatabaseConfig,
-} from '../../database.js'
+import { DatabaseError } from '../../database.error.js'
+import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
-import { CAMPAIGN_REPOSITORY, CampaignRepository } from './campaign.js'
+import { CAMPAIGN_LOCK_TIMEOUT, CAMPAIGN_REPOSITORY, CampaignRepository } from './campaign.js'
 import { CampaignModel, FullCampaignModel } from './campaign.models.js'
 import { campaignSchemas } from './campaign.schemas.js'
 
 /**
- * Redis campaign repository implementation
+ * Redis campaign repository implementation.
  *
  * @category Campaign
  */
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {
   /**
-   * Register dependency
+   * Register campaign repository instance as singleton in DI container.
+   *
+   * @param container - DI container to register in
    */
   static register(container: DIContainer) {
     container.registerSingleton<CampaignRepository>(
@@ -36,6 +34,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     )
   }
 
+  /**
+   * Creates a new campaign repository instance.
+   *
+   * @param validator - The validator instance
+   * @param config - The database config instance
+   * @param logger - The logger instance
+   * @param connector - The database connector instance
+   */
   constructor(
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
@@ -69,13 +75,17 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         cryptSecret,
         upgradeSessionPath,
         sessionCookieName,
-        sessionExpire.toString(),
-        newSessionExpire.toString(),
-        messageExpire.toString(),
-        Date.now().toString()
+        sessionExpire,
+        newSessionExpire,
+        messageExpire,
+        Date.now()
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { campaign: { campaignId, mirrorDomain } })
     } catch (error) {
@@ -114,10 +124,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         this.options.prefix,
         campaignId,
         lockSecret,
-        DATABASE_LOCK_TIMEOUT.toString()
+        CAMPAIGN_LOCK_TIMEOUT
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { campaign: { campaignId } })
 
@@ -135,7 +149,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { campaign: { campaignId } })
     } catch (error) {
@@ -155,14 +173,18 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       const statusReply = await this.connection.campaign.update_campaign(
         this.options.prefix,
         campaignId,
-        description ?? null,
-        sessionExpire != null ? sessionExpire.toString() : null,
-        newSessionExpire != null ? newSessionExpire.toString() : null,
-        messageExpire != null ? messageExpire.toString() : null,
+        description,
+        sessionExpire,
+        newSessionExpire,
+        messageExpire,
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { campaign: { campaignId } })
     } catch (error) {
@@ -178,7 +200,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { campaign: { campaignId } })
     } catch (error) {
@@ -222,6 +248,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  /**
+   * Converts raw Redis data to a campaign model.
+   *
+   * @param rawModel - The raw data from Redis
+   * @returns The campaign model, or `null` if the raw data is `null`
+   * @throws {@link DatabaseError} If the raw data fails validation
+   * @internal
+   */
   protected buildModel(rawModel: unknown): CampaignModel | null {
     if (rawModel === null) {
       return null
@@ -232,13 +266,21 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     return new CampaignModel(
       rawModel.campaign_id,
       rawModel.mirror_domain,
-      !!rawModel.is_locked,
+      rawModel.is_locked,
       rawModel.session_count,
       rawModel.message_count,
       new Date(rawModel.created_at)
     )
   }
 
+  /**
+   * Converts raw Redis data to a full campaign model.
+   *
+   * @param rawModel - The raw data from Redis
+   * @returns The full campaign model, or `null` if the raw data is `null`
+   * @throws {@link DatabaseError} If the raw data fails validation
+   * @internal
+   */
   protected buildFullModel(rawModel: unknown): FullCampaignModel | null {
     if (rawModel === null) {
       return null
@@ -257,7 +299,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       rawModel.session_expire,
       rawModel.new_session_expire,
       rawModel.message_expire,
-      !!rawModel.is_locked,
+      rawModel.is_locked,
       rawModel.proxy_count,
       rawModel.target_count,
       rawModel.redirector_count,
@@ -268,6 +310,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     )
   }
 
+  /**
+   * Converts an array of raw Redis data to an array of campaign models.
+   *
+   * @param rawCollection - The array of raw data from Redis
+   * @returns An array of campaign models
+   * @throws {@link DatabaseError} If the array of raw data fails validation
+   * @internal
+   */
   protected buildCollection(rawCollection: unknown): CampaignModel[] {
     this.validateArrayReply(rawCollection)
 
@@ -276,6 +326,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       .filter(CampaignModel.isNotNull)
   }
 
+  /**
+   * Converts an array of raw Redis data to an array of full campaign models.
+   *
+   * @param rawCollection - The array of raw data from Redis
+   * @returns An array of full campaign models
+   * @throws {@link DatabaseError} If the array of raw data fails validation
+   * @internal
+   */
   protected buildFullCollection(rawCollection: unknown): FullCampaignModel[] {
     this.validateArrayReply(rawCollection)
 

@@ -1,6 +1,8 @@
 import { JSONSchemaType } from '@famir/validator'
 
 /**
+ * Schema for config redis database connection url.
+ *
  * @category none
  * @internal
  */
@@ -9,6 +11,8 @@ export const configRedisDatabaseConnectionUrlSchema: JSONSchemaType<string> = {
 } as const
 
 /**
+ * Schema for config redis database prefix.
+ *
  * @category none
  * @internal
  */

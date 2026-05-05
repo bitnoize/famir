@@ -36,6 +36,11 @@ export class HttpHeadersWrap {
 
   #headers: HttpHeaders
 
+  /**
+   * Create a new wrapper instance.
+   *
+   * @param headers - The headers to wrap
+   */
   constructor(headers: HttpHeaders) {
     this.#headers = Object.fromEntries(
       Object.entries(headers).map(([name, value]) => [name.toLowerCase(), value])
@@ -85,8 +90,8 @@ export class HttpHeadersWrap {
   /**
    * Get header value as string or array of strings.
    *
-   * @param name - Header name
-   * @returns Header value as string or array of strings or undefined if header is not exists
+   * @param name - Header name (case-insensitive)
+   * @returns Header value as string, array of strings, or undefined if header is not exists
    */
   get(name: string): HttpHeader | undefined {
     const normName = name.toLowerCase()
@@ -95,10 +100,10 @@ export class HttpHeadersWrap {
   }
 
   /**
-   * Get header value as string.
+   * Get header value as a single string.
    *
-   * @param name - Header name
-   * @returns Header value as string or undefined if header is not exists
+   * @param name - Header name (case-insensitive)
+   * @returns First header value or undefined if header is not exists
    */
   getString(name: string): string | undefined {
     const value = this.get(name)
@@ -117,7 +122,7 @@ export class HttpHeadersWrap {
   /**
    * Get header values as array of strings.
    *
-   * @param name - Header name
+   * @param name - Header name (case-insensitive)
    * @returns Header values as array of strings or undefined if header is not exists
    */
   getArray(name: string): string[] | undefined {
@@ -179,7 +184,7 @@ export class HttpHeadersWrap {
   }
 
   /**
-   * Check header exists
+   * Check header exists.
    *
    * @param name - Header name
    * @returns true if header exists, false otherwise
@@ -191,7 +196,7 @@ export class HttpHeadersWrap {
   }
 
   /**
-   * Delete header(s)
+   * Delete header(s).
    *
    * @param arg - Single name string or array of names to delete
    * @returns This wrapper for method chaining
@@ -235,10 +240,10 @@ export class HttpHeadersWrap {
   #cacheContentType: HttpContentType | null = null
 
   /**
-   * Get content-type header as parsed object (cached).
+   * Get Content-Type header as parsed object (cached).
    *
    * @returns Parsed content-type as object, or null if header is not exists
-   * @throws If invalid content-type format
+   * @throws If parse content-type fails
    */
   getContentType(): HttpContentType | null {
     if (this.#cacheContentType != null) {
@@ -256,11 +261,12 @@ export class HttpHeadersWrap {
   }
 
   /**
-   * Set content-type header from object.
+   * Set Content-Type header from object.
    *
    * @param contentType - Content-type object
    * @returns This wrapper for method chaining
    * @throws If wrapper is frozen
+   * @throws If format content-type fails
    */
   setContentType(contentType: HttpContentType): this {
     this.sureNotFrozen('setContentType')
@@ -276,7 +282,7 @@ export class HttpHeadersWrap {
   #cacheCookies: HttpCookies | null = null
 
   /**
-   * Get cookie header as parsed object (cached).
+   * Get Cookie header as parsed object (cached).
    *
    * @returns Parsed cookie as object, or null if header is not exists
    */
@@ -296,7 +302,7 @@ export class HttpHeadersWrap {
   }
 
   /**
-   * Set cookie header from object.
+   * Set Cookie header from object.
    *
    * @param cookies - Cookies object
    * @returns This wrapper for method chaining
@@ -316,7 +322,7 @@ export class HttpHeadersWrap {
   #cacheSetCookies: HttpSetCookies | null = null
 
   /**
-   * Get set-cookie header as parsed object (cached).
+   * Get Set-Cookie header as parsed object (cached).
    *
    * @returns Parsed set-cookie as object, or null if header is not exists
    */
@@ -336,7 +342,7 @@ export class HttpHeadersWrap {
   }
 
   /**
-   * Set set-cookie header from object.
+   * Set Set-Cookie header from object.
    *
    * @param setCookies - SetCookies object
    * @returns This wrapper for method chaining

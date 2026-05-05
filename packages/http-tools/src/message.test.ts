@@ -103,15 +103,15 @@ describe('HttpMessage', () => {
     it('should add error with path', () => {
       const msg = HttpMessage.create('normal')
       const err = new Error('test error')
-      msg.addError(err, 'request', 'parser')
+      msg.addError(err, ['request', 'parser'])
       assert.strictEqual(msg.errors.length, 1)
       //assert.ok(msg.errors[0][1])
     })
 
     it('should track multiple errors', () => {
       const msg = HttpMessage.create('normal')
-      msg.addError(new Error('error1'), 'req')
-      msg.addError(new Error('error2'), 'res')
+      msg.addError(new Error('error1'), ['req'])
+      msg.addError(new Error('error2'), ['res'])
       assert.strictEqual(msg.errors.length, 2)
     })
   })

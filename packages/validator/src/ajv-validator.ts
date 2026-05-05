@@ -4,7 +4,7 @@ import { ValidatorError } from './validator.error.js'
 import { VALIDATOR, Validator, ValidatorSchemas } from './validator.js'
 
 /**
- * Ajv-based JSON schema validator implementation.
+ * Ajv-based validator implementation.
  *
  * Provides thread-safe schema validation with comprehensive error reporting.
  * Uses Ajv with strict configuration for production use.
@@ -38,7 +38,7 @@ import { VALIDATOR, Validator, ValidatorSchemas } from './validator.js'
  */
 export class AjvValidator implements Validator {
   /**
-   * Register AjvValidator as singleton in DI container.
+   * Register validator instance as singleton in DI container.
    *
    * @param container - DI container to register in
    */
@@ -46,8 +46,12 @@ export class AjvValidator implements Validator {
     container.registerSingleton<Validator>(VALIDATOR, () => new AjvValidator())
   }
 
+  /** Underlying Ajv instance */
   protected readonly ajv: Ajv
 
+  /**
+   * Creates a new validator instance.
+   */
   constructor() {
     this.ajv = new Ajv({
       allErrors: true,
@@ -56,7 +60,7 @@ export class AjvValidator implements Validator {
       removeAdditional: true,
       allowUnionTypes: true,
       strictTypes: true,
-      //strictTuples: true // FIXME
+      strictTuples: true,
     })
   }
 
@@ -67,7 +71,7 @@ export class AjvValidator implements Validator {
   addSchema(name: string, schema: object) {
     const existsSchema = this.getSchema(name)
     if (existsSchema) {
-      throw new Error(`JSON-Schema '${name}' already exists`)
+      throw new Error(`JSON-Schema already exists: ${name}`)
     }
 
     this.ajv.addSchema(schema, name)
@@ -83,7 +87,7 @@ export class AjvValidator implements Validator {
     const validate = this.ajv.getSchema<T>(name)
 
     if (!validate) {
-      throw new Error(`JSON-Schema '${name}' not known`)
+      throw new Error(`JSON-Schema not known: ${name}`)
     }
 
     return validate
@@ -101,7 +105,7 @@ export class AjvValidator implements Validator {
     const validate = this.getValidate<T>(name)
 
     if (!validate(data)) {
-      const validateErrors = (validate.errors || []).map((error) => {
+      const validateErrors = (validate.errors ?? []).map((error) => {
         return {
           keyword: error.keyword,
           instancePath: error.instancePath,

@@ -11,6 +11,7 @@ import {
 } from '@famir/http-proto'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
+import { DatabaseError } from '../../database.error.js'
 import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage, RawMessage } from './message.functions.js'
@@ -19,13 +20,15 @@ import { FullMessageModel, MessageModel } from './message.models.js'
 import { messageSchemas } from './message.schemas.js'
 
 /**
- * Redis message repository implementation
+ * Redis message repository implementation.
  *
  * @category Message
  */
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {
   /**
-   * Register dependency
+   * Register message repository instance as singleton in DI container.
+   *
+   * @param container - DI container to register in
    */
   static register(container: DIContainer) {
     container.registerSingleton<MessageRepository>(
@@ -40,6 +43,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     )
   }
 
+  /**
+   * Creates a new message repository instance.
+   *
+   * @param validator - The validator instance
+   * @param config - The database config instance
+   * @param logger - The logger instance
+   * @param connector - The database connector instance
+   */
   constructor(
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
@@ -87,19 +98,23 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         url,
         this.encodeJson(requestHeaders),
         this.encodeBase64(requestBody),
-        status.toString(),
+        status,
         this.encodeJson(responseHeaders),
         this.encodeBase64(responseBody),
         this.encodeJson(connection),
         this.encodeJson(payload),
         this.encodeJson(errors),
         analyze,
-        startTime.toString(),
-        finishTime.toString(),
-        Date.now().toString()
+        startTime,
+        finishTime,
+        Date.now()
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
     } catch (error) {
@@ -124,7 +139,11 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         sessionId
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
     } catch (error) {
@@ -160,14 +179,20 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
+  /**
+   * Converts raw Redis data to a message model.
+   *
+   * @param rawModel - The raw data from Redis
+   * @returns The message model, or `null` if the raw data is `null`
+   * @throws {@link DatabaseError} If the raw data fails validation
+   * @internal
+   */
   protected buildModel(rawModel: unknown): MessageModel | null {
     if (rawModel === null) {
       return null
     }
 
     this.validateRawData<RawMessage>('database-raw-message', rawModel)
-    this.validateRawData<HttpType>('database-message-type', rawModel.type)
-    this.validateRawData<HttpMethod>('database-message-method', rawModel.method)
 
     return new MessageModel(
       rawModel.campaign_id,
@@ -186,14 +211,20 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     )
   }
 
+  /**
+   * Converts raw Redis data to a full message model.
+   *
+   * @param rawModel - The raw data from Redis
+   * @returns The full message model, or `null` if the raw data is `null`
+   * @throws {@link DatabaseError} If the raw data fails validation
+   * @internal
+   */
   protected buildFullModel(rawModel: unknown): FullMessageModel | null {
     if (rawModel === null) {
       return null
     }
 
     this.validateRawData<RawFullMessage>('database-raw-full-message', rawModel)
-    this.validateRawData<HttpType>('database-message-type', rawModel.type)
-    this.validateRawData<HttpMethod>('database-message-method', rawModel.method)
 
     return new FullMessageModel(
       rawModel.campaign_id,
@@ -219,6 +250,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     )
   }
 
+  /**
+   * Parses a JSON string to HTTP headers object.
+   *
+   * @param value - The JSON string to parse
+   * @returns The HTTP headers object
+   * @throws {@link DatabaseError} If parsing fails
+   * @internal
+   */
   protected parseHeaders(value: string): HttpHeaders {
     const data = this.decodeJson(value)
 
@@ -227,6 +266,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     return data
   }
 
+  /**
+   * Parses a JSON string to HTTP connection object.
+   *
+   * @param value - The JSON string to parse
+   * @returns The HTTP connection object
+   * @throws {@link DatabaseError} If parsing fails
+   * @internal
+   */
   protected parseConnection(value: string): HttpConnection {
     const data = this.decodeJson(value)
 
@@ -235,6 +282,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     return data
   }
 
+  /**
+   * Parses a JSON string to HTTP payload object.
+   *
+   * @param value - The JSON string to parse
+   * @returns The HTTP payload object
+   * @throws {@link DatabaseError} If parsing fails
+   * @internal
+   */
   protected parsePayload(value: string): HttpPayload {
     const data = this.decodeJson(value)
 
@@ -243,6 +298,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     return data
   }
 
+  /**
+   * Parses a JSON string to HTTP errors object.
+   *
+   * @param value - The JSON string to parse
+   * @returns The HTTP errors object
+   * @throws {@link DatabaseError} If parsing fails
+   * @internal
+   */
   protected parseErrors(value: string): HttpError[] {
     const data = this.decodeJson(value)
 

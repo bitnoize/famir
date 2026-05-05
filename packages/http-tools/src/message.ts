@@ -31,7 +31,8 @@ export type HttpMessageInterceptor = (message: HttpMessage) => void
 export type HttpMessageInterceptors = Array<[string, HttpMessageInterceptor]>
 
 /**
- * Complete HTTP message representation with request/response components.
+ * Complete HTTP message representation with request and response components.
+ * Supports normal HTTP and WebSocket messages with interceptor pipelines.
  *
  * @category none
  */
@@ -55,16 +56,29 @@ export class HttpMessage {
 
   #type: HttpType
 
+  /** Method wrapper instance */
   readonly method: HttpMethodWrap
+  /** Url wrapper instance */
   readonly url: HttpUrlWrap
+  /** Request headers wrapper instance */
   readonly requestHeaders: HttpHeadersWrap
+  /** Request body wrapper instance */
   readonly requestBody: HttpBodyWrap
+  /** Response status wrapper instance */
   readonly status: HttpStatusWrap
+  /** Response headers wrapper instance */
   readonly responseHeaders: HttpHeadersWrap
+  /** Response body wrapper instance */
   readonly responseBody: HttpBodyWrap
 
+  /** Unique message ID */
   readonly id = randomIdent()
 
+  /**
+   * Create a new message instance.
+   *
+   * @param type - The message type
+   */
   constructor(type: HttpType) {
     this.#type = type
 
@@ -121,9 +135,7 @@ export class HttpMessage {
     this.#type = type
   }
 
-  /**
-   * Connection metadata.
-   */
+  /** Connection metadata */
   readonly connection: HttpConnection = {}
 
   /**
@@ -139,14 +151,10 @@ export class HttpMessage {
     })
   }
 
-  /**
-   * Message payload data.
-   */
+  /** Message payload data */
   readonly payload: HttpPayload = {}
 
-  /**
-   * Accumulated errors during processing.
-   */
+  /** Accumulated errors during processing */
   readonly errors: HttpError[] = []
 
   /**
@@ -155,15 +163,12 @@ export class HttpMessage {
    * @param error - Error object or unknown value
    * @param path - Error location path segments
    */
-  addError(error: unknown, ...path: string[]) {
-    this.errors.push([serializeError(error), ...path])
+  addError(error: unknown, path: string[]) {
+    this.errors.push([serializeError(error), path])
   }
 
-  /**
-   * Analysis result string.
-   */
+  /** Analyze queue job name */
   analyze: string | null = null
-  /////////////
 
   #contentTypes: HttpContentTypes = {
     text: [],
@@ -274,7 +279,8 @@ export class HttpMessage {
   }
 
   /**
-   * Execute all request head interceptors.
+   * Run all registered request head interceptors in order.
+   * This method freezes method and URL after execution.
    *
    * @throws Error if message is not ready
    */
@@ -285,7 +291,7 @@ export class HttpMessage {
       try {
         interceptor(this)
       } catch (error) {
-        this.addError(error, 'request-head-interceptor', name)
+        this.addError(error, ['request-head-interceptor', name])
       }
     }
 
@@ -294,7 +300,8 @@ export class HttpMessage {
   }
 
   /**
-   * Execute all request body interceptors.
+   * Run all registered request body interceptors in order.
+   * This method freezes headers and body after execution.
    *
    * @throws Error if message is not ready
    */
@@ -305,7 +312,7 @@ export class HttpMessage {
       try {
         interceptor(this)
       } catch (error) {
-        this.addError(error, 'request-body-interceptor', name)
+        this.addError(error, ['request-body-interceptor', name])
       }
     }
 
@@ -320,7 +327,7 @@ export class HttpMessage {
   /**
    * Add stream transform for request body.
    *
-   * @param transform - Node.js Transform stream
+   * @param transform - Transform stream
    * @throws Error if message is ready
    */
   addRequestTransform(transform: Transform) {
@@ -368,7 +375,8 @@ export class HttpMessage {
   }
 
   /**
-   * Execute all response head interceptors.
+   * Run all registered response head interceptors in order.
+   * This method freezes status after execution.
    *
    * @throws Error if message is not ready
    */
@@ -379,7 +387,7 @@ export class HttpMessage {
       try {
         interceptor(this)
       } catch (error) {
-        this.addError(error, 'response-head-interceptor', name)
+        this.addError(error, ['response-head-interceptor', name])
       }
     }
 
@@ -387,7 +395,8 @@ export class HttpMessage {
   }
 
   /**
-   * Execute all response body interceptors.
+   * Run all registered response body interceptors in order.
+   * This method freezes headers and body after execution.
    *
    * @throws Error if message is not ready
    */
@@ -398,7 +407,7 @@ export class HttpMessage {
       try {
         interceptor(this)
       } catch (error) {
-        this.addError(error, 'response-body-interceptor', name)
+        this.addError(error, ['response-body-interceptor', name])
       }
     }
 
@@ -413,7 +422,7 @@ export class HttpMessage {
   /**
    * Add stream transform for response body.
    *
-   * @param transform - Node.js Transform stream
+   * @param transform - Transform stream
    * @throws Error if message is ready
    */
   addResponseTransform(transform: Transform) {

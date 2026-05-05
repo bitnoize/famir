@@ -50,6 +50,11 @@ export class HttpMethodWrap {
 
   #method: HttpMethod
 
+  /**
+   * Create a new wrapper instance.
+   *
+   * @param method - The method to wrap
+   */
   constructor(method: HttpMethod) {
     this.#method = method
   }
@@ -101,7 +106,7 @@ export class HttpMethodWrap {
    * @returns This wrapper for method chaining
    * @throws If wrapper is frozen
    */
-  set(method: HttpMethod) {
+  set(method: HttpMethod): this {
     this.sureNotFrozen('set')
 
     this.#method = method

@@ -12,15 +12,17 @@ import {
 } from './database.js'
 
 /**
- * Redis database connector implementation
+ * Redis database connector implementation.
  *
  * @category none
- * @see [Redis home](https://redis.io)
- * @see [Node Redis client](https://github.com/redis/node-redis)
+ * @see https://redis.io/ - Redis documentation
+ * @see https://github.com/redis/node-redis - Node Redis client
  */
 export class RedisDatabaseConnector implements DatabaseConnector {
   /**
-   * Register dependency
+   * Register connector instance as singleton in DI container.
+   *
+   * @param container - DI container to register in
    */
   static register(container: DIContainer) {
     container.registerSingleton<DatabaseConnector>(
@@ -29,23 +31,31 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     )
   }
 
+  /** Builded connector options */
   protected readonly options: RedisDatabaseConnectorOptions
-  protected readonly redis: RedisDatabaseConnection
+  /** Underlying Redis connection instance */
+  protected readonly connection: RedisDatabaseConnection
 
+  /**
+   * Creates a new connector instance.
+   *
+   * @param config - The database config instance
+   * @param logger - The logger instance
+   */
   constructor(
     protected readonly config: Config<RedisDatabaseConfig>,
     protected readonly logger: Logger
   ) {
     this.options = this.buildOptions(config.data)
 
-    this.redis = createClient({
+    this.connection = createClient({
       url: this.options.connectionUrl,
       functions: databaseFunctions,
       name: 'database',
       RESP: 3,
     })
 
-    this.redis.on('error', (error) => {
+    this.connection.on('error', (error) => {
       this.logger.error(`Redis error event`, {
         error: serializeError(error),
       })
@@ -56,21 +66,28 @@ export class RedisDatabaseConnector implements DatabaseConnector {
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   getConnection<T>(): T {
-    return this.redis as T
+    return this.connection as T
   }
 
   async connect(): Promise<void> {
-    await this.redis.connect()
+    await this.connection.connect()
 
     this.logger.debug(`DatabaseConnector connected`)
   }
 
   async close(): Promise<void> {
-    await this.redis.close()
+    await this.connection.close()
 
     this.logger.debug(`DatabaseConnector closed`)
   }
 
+  /**
+   * Converts a database config to a connector options.
+   *
+   * @param config - The database config
+   * @returns A connector options object
+   * @internal
+   */
   private buildOptions(config: RedisDatabaseConfig): RedisDatabaseConnectorOptions {
     return {
       connectionUrl: config.DATABASE_CONNECTION_URL,

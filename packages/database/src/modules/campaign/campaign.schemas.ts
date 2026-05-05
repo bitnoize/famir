@@ -1,7 +1,112 @@
-import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
+import {
+  JSONSchemaType,
+  ValidatorSchemas,
+  booleanSchema,
+  counterSchema,
+  customIdentSchema,
+  randomIdentSchema,
+  timestampSchema,
+} from '@famir/validator'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 
 /**
+ * Schema for a campaign mirror domain.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const campaignMirrorDomainSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 1,
+  maxLength: 256,
+} as const
+
+/**
+ * Schema for a campaign description.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const campaignDescriptionSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 0,
+  maxLength: 1024,
+} as const
+
+/**
+ * Schema for a campaign upgrade session path.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const campaignUpgradeSessionPathSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 3,
+  maxLength: 64,
+} as const
+
+/**
+ * Schema for a campaign session cookie name.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const campaignSessionCookieNameSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 3,
+  maxLength: 64,
+} as const
+
+/**
+ * Schema for a campaign session cookie names.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const campaignSessionCookieNamesSchema: JSONSchemaType<string[]> = {
+  type: 'array',
+  items: campaignSessionCookieNameSchema,
+} as const
+
+/**
+ * Schema for a campaign session expire.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const campaignSessionExpireSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  minimum: 3600 * 1000,
+  maximum: 365 * 24 * 3600 * 1000,
+} as const
+
+/**
+ * Schema for a campaign new session expire.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const campaignNewSessionExpireSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  minimum: 1000,
+  maximum: 900 * 1000,
+} as const
+
+/**
+ * Schema for a campaign message expire.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const campaignMessageExpireSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  minimum: 60 * 1000,
+  maximum: 24 * 3600 * 1000,
+} as const
+
+/**
+ * Schema for validating raw campaign data from Redis.
+ *
  * @category Campaign
  * @internal
  */
@@ -16,29 +121,19 @@ const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
     'created_at',
   ],
   properties: {
-    campaign_id: {
-      type: 'string',
-    },
-    mirror_domain: {
-      type: 'string',
-    },
-    is_locked: {
-      type: 'integer',
-    },
-    session_count: {
-      type: 'integer',
-    },
-    message_count: {
-      type: 'integer',
-    },
-    created_at: {
-      type: 'integer',
-    },
+    campaign_id: customIdentSchema,
+    mirror_domain: campaignMirrorDomainSchema,
+    is_locked: booleanSchema,
+    session_count: counterSchema,
+    message_count: counterSchema,
+    created_at: timestampSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * Schema for validating raw full campaign data from Redis.
+ *
  * @category Campaign
  * @internal
  */
@@ -65,138 +160,31 @@ const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'created_at',
   ],
   properties: {
-    campaign_id: {
-      type: 'string',
-    },
-    mirror_domain: {
-      type: 'string',
-    },
-    description: {
-      type: 'string',
-    },
-    crypt_secret: {
-      type: 'string',
-    },
-    upgrade_session_path: {
-      type: 'string',
-    },
-    session_cookie_name: {
-      type: 'string',
-    },
-    session_cookie_names: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-    },
-    session_expire: {
-      type: 'integer',
-    },
-    new_session_expire: {
-      type: 'integer',
-    },
-    message_expire: {
-      type: 'integer',
-    },
-    is_locked: {
-      type: 'integer',
-    },
-    proxy_count: {
-      type: 'integer',
-    },
-    target_count: {
-      type: 'integer',
-    },
-    redirector_count: {
-      type: 'integer',
-    },
-    lure_count: {
-      type: 'integer',
-    },
-    session_count: {
-      type: 'integer',
-    },
-    message_count: {
-      type: 'integer',
-    },
-    created_at: {
-      type: 'integer',
-    },
+    campaign_id: customIdentSchema,
+    mirror_domain: campaignMirrorDomainSchema,
+    description: campaignDescriptionSchema,
+    crypt_secret: randomIdentSchema,
+    upgrade_session_path: campaignUpgradeSessionPathSchema,
+    session_cookie_name: campaignSessionCookieNameSchema,
+    session_cookie_names: campaignSessionCookieNamesSchema,
+    session_expire: campaignSessionExpireSchema,
+    new_session_expire: campaignNewSessionExpireSchema,
+    message_expire: campaignMessageExpireSchema,
+    is_locked: booleanSchema,
+    proxy_count: counterSchema,
+    target_count: counterSchema,
+    redirector_count: counterSchema,
+    lure_count: counterSchema,
+    session_count: counterSchema,
+    message_count: counterSchema,
+    created_at: timestampSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * @category Campaign
- * @internal
- */
-export const campaignMirrorDomainSchema: JSONSchemaType<string> = {
-  type: 'string',
-  minLength: 1,
-  maxLength: 256,
-} as const
-
-/**
- * @category Campaign
- * @internal
- */
-export const campaignDescriptionSchema: JSONSchemaType<string> = {
-  type: 'string',
-  minLength: 0,
-  maxLength: 1024,
-} as const
-
-/**
- * @category Campaign
- * @internal
- */
-export const campaignUpgradeSessionPathSchema: JSONSchemaType<string> = {
-  type: 'string',
-  minLength: 3,
-  maxLength: 64,
-} as const
-
-/**
- * @category Campaign
- * @internal
- */
-export const campaignSessionCookieNameSchema: JSONSchemaType<string> = {
-  type: 'string',
-  minLength: 3,
-  maxLength: 64,
-} as const
-
-/**
- * @category Campaign
- * @internal
- */
-export const campaignSessionExpireSchema: JSONSchemaType<number> = {
-  type: 'integer',
-  minimum: 3600 * 1000,
-  maximum: 365 * 24 * 3600 * 1000,
-} as const
-
-/**
- * @category Campaign
- * @internal
- */
-export const campaignNewSessionExpireSchema: JSONSchemaType<number> = {
-  type: 'integer',
-  minimum: 1000,
-  maximum: 900 * 1000,
-} as const
-
-/**
- * @category Campaign
- * @internal
- */
-export const campaignMessageExpireSchema: JSONSchemaType<number> = {
-  type: 'integer',
-  minimum: 60 * 1000,
-  maximum: 24 * 3600 * 1000,
-} as const
-
-/**
+ * Collection of all schemas used by the campaign module.
+ *
  * @category Campaign
  * @internal
  */

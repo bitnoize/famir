@@ -14,7 +14,7 @@ local function create_campaign(keys, args)
   local campaign_index_key = keys[4]
 
   if redis.call('EXISTS', campaign_key) ~= 0 then
-    return redis.status_reply('CONFLICT Campaign allready exists')
+    return redis.status_reply('CONFLICT Campaign already exists')
   end
 
   local model = {
@@ -55,11 +55,11 @@ local function create_campaign(keys, args)
   end
 
   if redis.call('SISMEMBER', campaign_mirror_domains_key, model.mirror_domain) ~= 0 then
-    return redis.status_reply('CONFLICT Campaign mirror_domain allready taken')
+    return redis.status_reply('CONFLICT Campaign mirror_domain already taken')
   end
 
   if redis.call('SISMEMBER', campaign_session_cookie_names_key, model.session_cookie_name) ~= 0 then
-    return redis.status_reply('CONFLICT Campaign session_cookie_name allready taken')
+    return redis.status_reply('CONFLICT Campaign session_cookie_name already taken')
   end
 
   -- Point of no return
@@ -131,6 +131,8 @@ local function read_campaign(keys, args)
       return redis.error_reply('ERR Malform model.' .. k)
     end
   end
+
+  model['is_locked'] = (model['is_locked'] ~= 0)
 
   return { map = model }
 end
@@ -210,6 +212,8 @@ local function read_full_campaign(keys, args)
     end
   end
 
+  model['is_locked'] = (model['is_locked'] ~= 0)
+
   return { map = model }
 end
 
@@ -256,7 +260,7 @@ local function lock_campaign(keys, args)
   end
 
   if redis.call('EXISTS', campaign_lock_key) ~= 0 then
-    return redis.status_reply('FORBIDDEN Campaign allready locked')
+    return redis.status_reply('FORBIDDEN Campaign already locked')
   end
 
   local stash = {
@@ -278,9 +282,12 @@ local function lock_campaign(keys, args)
     end
   end
 
+  -- Min lock timeout is one second
+  local norm_lock_timeout = math.max(stash.lock_timeout, 1000)
+
   -- Point of no return
 
-  redis.call('SET', campaign_lock_key, stash.lock_secret, 'PX', stash.lock_timeout)
+  redis.call('SET', campaign_lock_key, stash.lock_secret, 'PX', norm_lock_timeout)
 
   return redis.status_reply('OK Campaign locked')
 end
@@ -404,6 +411,10 @@ local function update_campaign(keys, args)
 
   for k, v in pairs(model) do
     if not v then
+      return redis.error_reply('ERR Wrong model.' .. k)
+    end
+
+    if (k == 'session_expire' or k == 'new_session_expire' or k == 'message_expire') and v <= 0 then
       return redis.error_reply('ERR Wrong model.' .. k)
     end
   end

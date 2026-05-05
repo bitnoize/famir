@@ -1,75 +1,28 @@
-import { JSONSchemaType, ValidatorSchemas } from '@famir/validator'
+import {
+  JSONSchemaType,
+  ValidatorSchemas,
+  counterSchema,
+  customIdentSchema,
+  timestampSchema,
+} from '@famir/validator'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 import { RedirectorParams } from './redirector.models.js'
 
 /**
- * @category Redirector
- * @internal
- */
-const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
-  type: 'object',
-  required: ['campaign_id', 'redirector_id', 'lure_count', 'created_at'],
-  properties: {
-    campaign_id: {
-      type: 'string',
-    },
-    redirector_id: {
-      type: 'string',
-    },
-    lure_count: {
-      type: 'integer',
-    },
-    created_at: {
-      type: 'integer',
-    },
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * @category Redirector
- * @internal
- */
-const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
-  type: 'object',
-  required: ['campaign_id', 'redirector_id', 'page', 'fields', 'lure_count', 'created_at'],
-  properties: {
-    campaign_id: {
-      type: 'string',
-    },
-    redirector_id: {
-      type: 'string',
-    },
-    page: {
-      type: 'string',
-    },
-    fields: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
-    },
-    lure_count: {
-      type: 'integer',
-    },
-    created_at: {
-      type: 'integer',
-    },
-  },
-  additionalProperties: false,
-} as const
-
-/**
+ * Schema for validating redirector page.
+ *
  * @category Redirector
  * @internal
  */
 export const redirectorPageSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 0,
-  maxLength: 10485760,
+  maxLength: 10 * 1024 * 1024,
 } as const
 
 /**
+ * Schema for validating redirector field.
+ *
  * @category Redirector
  * @internal
  */
@@ -79,6 +32,8 @@ export const redirectorFieldSchema: JSONSchemaType<string> = {
 }
 
 /**
+ * Schema for validating redirector fields.
+ *
  * @category Redirector
  * @internal
  */
@@ -88,6 +43,8 @@ export const redirectorFieldsSchema: JSONSchemaType<string[]> = {
 } as const
 
 /**
+ * Schema for validating redirector params.
+ *
  * @category Redirector
  * @internal
  */
@@ -101,6 +58,46 @@ export const redirectorParamsSchema: JSONSchemaType<RedirectorParams> = {
 } as const
 
 /**
+ * Schema for validating raw redirector data from Redis.
+ *
+ * @category Redirector
+ * @internal
+ */
+const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
+  type: 'object',
+  required: ['campaign_id', 'redirector_id', 'lure_count', 'created_at'],
+  properties: {
+    campaign_id: customIdentSchema,
+    redirector_id: customIdentSchema,
+    lure_count: counterSchema,
+    created_at: timestampSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * Schema for validating raw full redirector data from Redis.
+ *
+ * @category Redirector
+ * @internal
+ */
+const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
+  type: 'object',
+  required: ['campaign_id', 'redirector_id', 'page', 'fields', 'lure_count', 'created_at'],
+  properties: {
+    campaign_id: customIdentSchema,
+    redirector_id: customIdentSchema,
+    page: redirectorPageSchema,
+    fields: redirectorFieldsSchema,
+    lure_count: counterSchema,
+    created_at: timestampSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * Collection of all schemas used by the redirector module.
+ *
  * @category Redirector
  * @internal
  */

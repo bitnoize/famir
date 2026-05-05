@@ -1,34 +1,70 @@
 /**
+ * Available values for target access levels.
+ *
  * @category Target
  * @internal
  */
 export const TARGET_ACCESS_LEVELS = ['transparent', 'landing'] as const
 
 /**
+ * Target access level.
+ *
  * @category Target
  */
 export type TargetAccessLevel = (typeof TARGET_ACCESS_LEVELS)[number]
 
 /**
+ * Special value representing the empty subdomain.
+ *
  * @category Target
  * @internal
  */
-export const TARGET_SUB_ROOT = '.'
+export const TARGET_SUB_APEX = '@'
 
 /**
- * Represents target model
+ * Represents a target model.
  *
  * @category Target
  */
 export class TargetModel {
+  /**
+   * Type guard to filter out null values in arrays.
+   *
+   * @param model - The model to check
+   * @returns `true` if the model is not null, `false` otherwise
+   */
   static isNotNull = <T extends TargetModel>(model: T | null): model is T => {
     return model != null
   }
 
+  /**
+   * Type guard to check if a target is enabled.
+   *
+   * @param model - The target model to check
+   * @returns `true` if the target is enabled, `false` otherwise
+   */
   static isEnabled = <T extends TargetModel>(model: T): model is T & { isEnabled: true } => {
     return model.isEnabled
   }
 
+  /**
+   * Creates a new target model instance.
+   *
+   * @param campaignId - The ID of the campaign this target belongs to
+   * @param targetId - The unique identifier of the target
+   * @param accessLevel - The access level
+   * @param donorSecure - Whether the donor server uses HTTPS
+   * @param donorSub - The donor subdomain
+   * @param donorDomain - The donor domain name
+   * @param donorPort - The donor server port
+   * @param mirrorSecure - Whether the mirror uses HTTPS
+   * @param mirrorSub - The mirror subdomain
+   * @param mirrorDomain - The mirror domain
+   * @param mirrorPort - The mirror server port
+   * @param isEnabled - Whether the target is currently enabled
+   * @param messageCount - Total number of messages processed for this target
+   * @param createdAt - The date and time when the target was created
+   */
   constructor(
     readonly campaignId: string,
     readonly targetId: string,
@@ -46,16 +82,25 @@ export class TargetModel {
     readonly createdAt: Date
   ) {}
 
+  /**
+   * Returns the donor protocol.
+   */
   get donorProtocol(): string {
     return this.donorSecure ? 'https:' : 'http:'
   }
 
+  /**
+   * Returns the full donor hostname.
+   */
   get donorHostname(): string {
-    return this.donorSub !== TARGET_SUB_ROOT
+    return this.donorSub !== TARGET_SUB_APEX
       ? [this.donorSub, this.donorDomain].join('.')
       : this.donorDomain
   }
 
+  /**
+   * Returns the donor host.
+   */
   get donorHost(): string {
     if (
       (!this.donorSecure && this.donorPort === 80) ||
@@ -67,20 +112,32 @@ export class TargetModel {
     }
   }
 
+  /**
+   * Returns the full donor URL.
+   */
   get donorUrl(): string {
     return [this.donorProtocol, '//', this.donorHost].join('')
   }
 
+  /**
+   * Returns the mirror protocol.
+   */
   get mirrorProtocol(): string {
     return this.mirrorSecure ? 'https:' : 'http:'
   }
 
+  /**
+   * Returns the full mirror hostname.
+   */
   get mirrorHostname(): string {
-    return this.mirrorSub !== TARGET_SUB_ROOT
+    return this.mirrorSub !== TARGET_SUB_APEX
       ? [this.mirrorSub, this.mirrorDomain].join('.')
       : this.mirrorDomain
   }
 
+  /**
+   * Returns the mirror host.
+   */
   get mirrorHost(): string {
     if (
       (!this.mirrorSecure && this.mirrorPort === 80) ||
@@ -92,17 +149,50 @@ export class TargetModel {
     }
   }
 
+  /**
+   * Returns the full mirror URL.
+   */
   get mirrorUrl(): string {
     return [this.mirrorProtocol, '//', this.mirrorHost].join('')
   }
 }
 
 /**
- * Represents full target model
+ * Represents a full target model.
  *
  * @category Target
  */
 export class FullTargetModel extends TargetModel {
+  /**
+   * Creates a new full target model instance.
+   *
+   * @param campaignId - The ID of the campaign this target belongs to
+   * @param targetId - The unique identifier of the target
+   * @param accessLevel - The access level
+   * @param donorSecure - Whether the donor server uses HTTPS
+   * @param donorSub - The donor subdomain
+   * @param donorDomain - The donor domain name
+   * @param donorPort - The donor server port
+   * @param mirrorSecure - Whether the mirror uses HTTPS
+   * @param mirrorSub - The mirror subdomain
+   * @param mirrorDomain - The mirror domain
+   * @param mirrorPort - The mirror server port
+   * @param labels - Array of labels for categorization
+   * @param connectTimeout - Connection timeout
+   * @param simpleTimeout - Simple request timeout
+   * @param streamTimeout - Streaming request timeout
+   * @param headersSizeLimit - Maximum headers size in bytes
+   * @param bodySizeLimit - Maximum body size in bytes
+   * @param mainPage - Custom main page content
+   * @param notFoundPage - Custom 404 page content
+   * @param faviconIco - Custom favicon content
+   * @param robotsTxt - Custom robots.txt content
+   * @param sitemapXml - Custom sitemap.xml content
+   * @param allowWebSockets - Whether to allow WebSocket connections
+   * @param isEnabled - Whether the target is currently enabled
+   * @param messageCount - Total number of messages processed for this target
+   * @param createdAt - The date and time when the target was created
+   */
   constructor(
     campaignId: string,
     targetId: string,
@@ -149,25 +239,47 @@ export class FullTargetModel extends TargetModel {
     )
   }
 
+  /**
+   * Checks if the target has a specific label.
+   *
+   * @param value - The label to check
+   * @returns `true` if the label exists, `false` otherwise
+   */
   hasLabel(value: string): boolean {
     return this.labels.includes(value)
   }
 }
 
 /**
- * Represents enabled target model
+ * Represents an enabled target model.
  *
  * @category Target
  */
 export interface EnabledTargetModel extends TargetModel {
+  /** Guaranteed to be `true` for enabled targets */
   isEnabled: true
 }
 
 /**
- * Represents enabled full target model
+ * Represents an enabled full target model.
  *
  * @category Target
  */
 export interface EnabledFullTargetModel extends FullTargetModel {
+  /** Guaranteed to be `true` for enabled targets */
   isEnabled: true
 }
+
+/**
+ * Target link (campaignId and targetId).
+ *
+ * @category Target
+ */
+export type TargetLink = [string, string]
+
+/**
+ * Target hosts dictionary.
+ *
+ * @category Target
+ */
+export type TargetHosts = Record<string, TargetLink>

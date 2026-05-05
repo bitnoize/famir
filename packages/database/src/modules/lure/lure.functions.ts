@@ -9,6 +9,8 @@ import {
 } from '../../database.keys.js'
 
 /**
+ * Raw lure data structure.
+ *
  * @category Lure
  * @internal
  */
@@ -17,12 +19,14 @@ export interface RawLure {
   lure_id: string
   path: string
   redirector_id: string
-  is_enabled: number
+  is_enabled: boolean
   session_count: number
   created_at: number
 }
 
 /**
+ * Redis Lua function definitions for lure operations.
+ *
  * @category Lure
  * @internal
  */
@@ -38,7 +42,7 @@ export const lureFunctions = {
         lureId: string,
         path: string,
         redirectorId: string,
-        createdAt: string,
+        createdAt: number,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -52,7 +56,7 @@ export const lureFunctions = {
         parser.push(lureId)
         parser.push(path)
         parser.push(redirectorId)
-        parser.push(createdAt)
+        parser.push(createdAt.toString())
         parser.push(lockSecret)
       },
 

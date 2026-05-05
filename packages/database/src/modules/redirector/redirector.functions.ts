@@ -8,6 +8,8 @@ import {
 } from '../../database.keys.js'
 
 /**
+ * Raw redirector data structure.
+ *
  * @category Redirector
  * @internal
  */
@@ -19,6 +21,8 @@ export interface RawRedirector {
 }
 
 /**
+ * Raw full redirector data structure.
+ *
  * @category Redirector
  * @internal
  */
@@ -28,6 +32,8 @@ export interface RawFullRedirector extends RawRedirector {
 }
 
 /**
+ * Redis Lua function definitions for redirector operations.
+ *
  * @category Redirector
  * @internal
  */
@@ -42,7 +48,7 @@ export const redirectorFunctions = {
         campaignId: string,
         redirectorId: string,
         page: string,
-        createdAt: string,
+        createdAt: number,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -53,7 +59,7 @@ export const redirectorFunctions = {
         parser.push(campaignId)
         parser.push(redirectorId)
         parser.push(page)
-        parser.push(createdAt)
+        parser.push(createdAt.toString())
         parser.push(lockSecret)
       },
 

@@ -19,7 +19,7 @@ local function create_message(keys, args)
   end
 
   if redis.call('EXISTS', message_key) ~= 0 then
-    return redis.status_reply('CONFLICT Message allready exists')
+    return redis.status_reply('CONFLICT Message already exists')
   end
 
   if redis.call('EXISTS', proxy_key) ~= 1 then
@@ -138,7 +138,7 @@ local function create_dummy_message(keys, args)
   end
 
   if redis.call('EXISTS', message_key) ~= 0 then
-    return redis.status_reply('CONFLICT Message allready exists')
+    return redis.status_reply('CONFLICT Message already exists')
   end
 
   if redis.call('EXISTS', proxy_key) ~= 1 then

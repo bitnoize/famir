@@ -72,6 +72,10 @@ export class TargetController extends BaseController {
       return await this.targetService.read(data)
     })
 
+    this.router.addApiCall('readTargetHosts', async () => {
+      return await this.targetService.readHosts()
+    })
+
     this.router.addApiCall('updateTarget', async (data) => {
       this.validateData<UpdateTargetData>('console-update-target-data', data)
 

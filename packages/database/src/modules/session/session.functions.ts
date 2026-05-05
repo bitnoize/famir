@@ -2,6 +2,8 @@ import { CommandParser } from '@redis/client'
 import { campaignKey, enabledProxyIndexKey, lureKey, sessionKey } from '../../database.keys.js'
 
 /**
+ * Raw session data structure.
+ *
  * @category Session
  * @internal
  */
@@ -10,13 +12,15 @@ export interface RawSession {
   session_id: string
   proxy_id: string
   secret: string
-  is_upgraded: number
+  is_upgraded: boolean
   message_count: number
   created_at: number
   authorized_at: number
 }
 
 /**
+ * Redis Lua function definitions for session operations.
+ *
  * @category Session
  * @internal
  */
@@ -31,7 +35,7 @@ export const sessionFunctions = {
         campaignId: string,
         sessionId: string,
         secret: string,
-        createdAt: string
+        createdAt: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(sessionKey(prefix, campaignId, sessionId))
@@ -40,7 +44,7 @@ export const sessionFunctions = {
         parser.push(campaignId)
         parser.push(sessionId)
         parser.push(secret)
-        parser.push(createdAt)
+        parser.push(createdAt.toString())
       },
 
       transformReply: undefined as unknown as () => unknown,
@@ -65,13 +69,13 @@ export const sessionFunctions = {
         prefix: string,
         campaignId: string,
         sessionId: string,
-        authorizedAt: string
+        authorizedAt: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(sessionKey(prefix, campaignId, sessionId))
         parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
-        parser.push(authorizedAt)
+        parser.push(authorizedAt.toString())
       },
 
       transformReply: undefined as unknown as () => unknown,

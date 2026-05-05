@@ -12,6 +12,8 @@ import {
 } from './http-proto.js'
 
 /**
+ * Schema for validating a HTTP type.
+ *
  * @category none
  * @internal
  */
@@ -21,6 +23,8 @@ export const httpTypeSchema: JSONSchemaType<HttpType> = {
 } as const
 
 /**
+ * Schema for validating a HTTP method.
+ *
  * @category none
  * @internal
  */
@@ -30,6 +34,29 @@ export const httpMethodSchema: JSONSchemaType<HttpMethod> = {
 } as const
 
 /**
+ * Schema for validating a relative URL.
+ *
+ * @category none
+ * @internal
+ */
+export const httpRelativeUrlSchema: JSONSchemaType<string> = {
+  type: 'string',
+  //pattern: '^\\/[^\\s]*$'
+} as const
+
+/**
+ * Schema for validating a response status.
+ *
+ * @category none
+ * @internal
+ */
+export const httpStatusSchema: JSONSchemaType<number> = {
+  type: 'integer',
+} as const
+
+/**
+ * Schema for validating a single header.
+ *
  * @category none
  * @internal
  */
@@ -49,6 +76,8 @@ export const httpHeaderSchema: JSONSchemaType<HttpHeader> = {
 } as const
 
 /**
+ * Schema for validating a headers data.
+ *
  * @category none
  * @internal
  */
@@ -62,17 +91,30 @@ export const httpHeadersSchema: JSONSchemaType<HttpHeaders> = {
 } as const
 
 /**
+ * Schema for validating a connection data.
+ *
  * @category none
  * @internal
  */
 export const httpConnectionSchema: JSONSchemaType<HttpConnection> = {
   type: 'object',
   additionalProperties: {
-    anyOf: [{ type: 'number' }, { type: 'string' }],
+    anyOf: [
+      {
+        type: 'number',
+        nullable: true,
+      },
+      {
+        type: 'string',
+        nullable: true,
+      },
+    ],
   },
 } as const
 
 /**
+ * Schema for validating a payload data.
+ *
  * @category none
  * @internal
  */
@@ -82,24 +124,31 @@ export const httpPayloadSchema: JSONSchemaType<HttpPayload> = {
 } as const
 
 /**
+ * Schema for validating a single processing error.
+ *
  * @category none
  * @internal
  */
 export const httpErrorSchema: JSONSchemaType<HttpError> = {
   type: 'array',
-  minItems: 1,
-  maxItems: 10,
   items: [
     {
       type: 'object',
     },
+    {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+    },
   ],
-  additionalItems: {
-    type: 'string',
-  },
+  minItems: 2,
+  maxItems: 2,
 } as const
 
 /**
+ * Schema for validating an array of processing errors.
+ *
  * @category none
  * @internal
  */

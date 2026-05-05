@@ -2,6 +2,7 @@ import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
+import { DatabaseError } from '../../database.error.js'
 import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawLure } from './lure.functions.js'
@@ -10,13 +11,15 @@ import { LureModel } from './lure.models.js'
 import { lureSchemas } from './lure.schemas.js'
 
 /**
- * Redis lure repository implementation
+ * Redis lure repository implementation.
  *
  * @category Lure
  */
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {
   /**
-   * Register dependency
+   * Register lure repository instance as singleton in DI container.
+   *
+   * @param container - DI container to register in
    */
   static register(container: DIContainer) {
     container.registerSingleton<LureRepository>(
@@ -31,6 +34,14 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     )
   }
 
+  /**
+   * Creates a new lure repository instance.
+   *
+   * @param validator - The validator instance
+   * @param config - The database config instance
+   * @param logger - The logger instance
+   * @param connector - The database connector instance
+   */
   constructor(
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
@@ -58,11 +69,15 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lureId,
         path,
         redirectorId,
-        Date.now().toString(),
+        Date.now(),
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { lure: { campaignId, lureId, path, redirectorId } })
     } catch (error) {
@@ -107,7 +122,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { lure: { campaignId, lureId } })
     } catch (error) {
@@ -124,7 +143,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { lure: { campaignId, lureId } })
     } catch (error) {
@@ -147,7 +170,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { lure: { campaignId, lureId, redirectorId } })
     } catch (error) {
@@ -177,6 +204,14 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     }
   }
 
+  /**
+   * Converts raw Redis data to a lure model.
+   *
+   * @param rawModel - The raw data from Redis
+   * @returns The lure model, or `null` if the raw data is `null`
+   * @throws {@link DatabaseError} If the raw data fails validation
+   * @internal
+   */
   protected buildModel(rawModel: unknown): LureModel | null {
     if (rawModel === null) {
       return null
@@ -189,12 +224,20 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       rawModel.lure_id,
       rawModel.path,
       rawModel.redirector_id,
-      !!rawModel.is_enabled,
+      rawModel.is_enabled,
       rawModel.session_count,
       new Date(rawModel.created_at)
     )
   }
 
+  /**
+   * Converts an array of raw Redis data to an array of lure models.
+   *
+   * @param rawCollection - The array of raw data from Redis
+   * @returns An array of lure models
+   * @throws {@link DatabaseError} If the array of raw data fails validation
+   * @internal
+   */
   protected buildCollection(rawCollection: unknown): LureModel[] {
     this.validateArrayReply(rawCollection)
 

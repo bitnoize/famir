@@ -2,6 +2,7 @@ import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
+import { DatabaseError } from '../../database.error.js'
 import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawProxy } from './proxy.functions.js'
@@ -10,13 +11,15 @@ import { ProxyModel } from './proxy.models.js'
 import { proxySchemas } from './proxy.schemas.js'
 
 /**
- * Redis proxy repository implementation
+ * Redis proxy repository implementation.
  *
  * @category Proxy
  */
 export class RedisProxyRepository extends RedisBaseRepository implements ProxyRepository {
   /**
-   * Register dependency
+   * Register proxy repository instance as singleton in DI container.
+   *
+   * @param container - DI container to register in
    */
   static register(container: DIContainer) {
     container.registerSingleton<ProxyRepository>(
@@ -31,6 +34,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     )
   }
 
+  /**
+   * Creates a new proxy repository instance.
+   *
+   * @param validator - The validator instance
+   * @param config - The database config instance
+   * @param logger - The logger instance
+   * @param connector - The database connector instance
+   */
   constructor(
     validator: Validator,
     config: Config<RedisDatabaseConfig>,
@@ -56,11 +67,15 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         campaignId,
         proxyId,
         url,
-        Date.now().toString(),
+        Date.now(),
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
@@ -91,7 +106,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
@@ -108,7 +127,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
@@ -125,7 +148,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.handleStatusReply(statusReply)
+      const [code, mesg] = this.parseStatusReply(statusReply)
+
+      if (code !== 'OK') {
+        throw new DatabaseError(mesg, { code })
+      }
 
       this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
@@ -155,6 +182,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     }
   }
 
+  /**
+   * Converts raw Redis data to a proxy model.
+   *
+   * @param rawModel - The raw data from Redis
+   * @returns The proxy model, or `null` if the raw data is `null`
+   * @throws {@link DatabaseError} If the raw data fails validation
+   * @internal
+   */
   protected buildModel(rawModel: unknown): ProxyModel | null {
     if (rawModel === null) {
       return null
@@ -166,12 +201,20 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       rawModel.campaign_id,
       rawModel.proxy_id,
       rawModel.url,
-      !!rawModel.is_enabled,
+      rawModel.is_enabled,
       rawModel.message_count,
       new Date(rawModel.created_at)
     )
   }
 
+  /**
+   * Converts an array of raw Redis data to an array of proxy models.
+   *
+   * @param rawCollection - The array of raw data from Redis
+   * @returns An array of proxy models
+   * @throws {@link DatabaseError} If the array of raw data fails validation
+   * @internal
+   */
   protected buildCollection(rawCollection: unknown): ProxyModel[] {
     this.validateArrayReply(rawCollection)
 

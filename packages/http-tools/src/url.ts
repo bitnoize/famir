@@ -86,6 +86,11 @@ export class HttpUrlWrap {
 
   #url: HttpUrl
 
+  /**
+   * Create a new wrapper instance.
+   *
+   * @param url - The URL to wrap
+   */
   constructor(url: HttpUrl) {
     this.#url = url
   }
@@ -124,7 +129,7 @@ export class HttpUrlWrap {
   /**
    * Get URL part by name.
    *
-   * @param name - URL component name (protocol, hostname, port, pathname, search, hash)
+   * @param name - URL component name
    * @returns Value of the URL component
    */
   get<K extends keyof HttpUrl>(name: K): HttpUrl[K] {
@@ -134,7 +139,7 @@ export class HttpUrlWrap {
   /**
    * Set URL part by name.
    *
-   * @param name - URL component name (protocol, hostname, port, pathname, search, hash)
+   * @param name - URL component name
    * @param value - New value for the component
    * @returns This wrapper for method chaining
    * @throws If wrapper is frozen
@@ -185,14 +190,10 @@ export class HttpUrlWrap {
     }
   }
 
-  /**
-   * Custom options for parsing query strings.
-   */
+  /** Custom options for parsing query strings */
   readonly parseQueryStringOptions: ParseQueryStringOptions = {}
 
-  /**
-   * Custom options for formatting query strings.
-   */
+  /** Custom options for formatting query strings */
   readonly formatQueryStringOptions: FormatQueryStringOptions = {}
 
   #cacheQueryString: HttpQueryString | null = null
@@ -201,6 +202,7 @@ export class HttpUrlWrap {
    * Get URL query string as parsed object (cached).
    *
    * @returns Parsed query string as object
+   * @throws If parse query string fails
    */
   getQueryString(): HttpQueryString {
     if (this.#cacheQueryString != null) {
@@ -225,6 +227,7 @@ export class HttpUrlWrap {
    * @param queryString - Query string object
    * @returns This wrapper for method chaining
    * @throws If wrapper is frozen
+   * @throws If format query string fails
    */
   setQueryString(queryString: HttpQueryString): this {
     this.sureNotFrozen('setQueryString')

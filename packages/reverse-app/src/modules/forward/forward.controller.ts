@@ -90,7 +90,7 @@ export class ForwardController extends BaseController {
       })
 
       if (result.error) {
-        message.addError(result.error, 'forward', 'normal-simple')
+        message.addError(result.error, ['forward', 'normal-simple'])
         message.mergeConnection(result.connection)
 
         await this.sendErrorPage(ctx, result.error, true)
@@ -131,7 +131,7 @@ export class ForwardController extends BaseController {
         requestStream,
         (error) => {
           if (error) {
-            message.addError(error, 'forward', 'normal-stream-request', 'pipeline')
+            message.addError(error, ['forward', 'normal-stream-request', 'pipeline'])
 
             this.logger.warn(`HttpServer request stream pipeline error`, { error })
 
@@ -153,7 +153,7 @@ export class ForwardController extends BaseController {
       })
 
       if (result.error) {
-        message.addError(result.error, 'forward', 'normal-stream-request')
+        message.addError(result.error, ['forward', 'normal-stream-request'])
         message.mergeConnection(result.connection)
 
         await this.sendErrorPage(ctx, result.error, false)
@@ -200,7 +200,7 @@ export class ForwardController extends BaseController {
       })
 
       if (result.error) {
-        message.addError(result.error, 'forward', 'normal-stream-response')
+        message.addError(result.error, ['forward', 'normal-stream-response'])
         message.mergeConnection(result.connection)
 
         await this.sendErrorPage(ctx, result.error, false)
@@ -226,7 +226,7 @@ export class ForwardController extends BaseController {
             ctx.responseStream
           )
         } catch (error) {
-          message.addError(error, 'forward', 'normal-stream-response', 'pipeline')
+          message.addError(error, ['forward', 'normal-stream-response', 'pipeline'])
 
           this.logger.warn(`HttpServer response stream pipeline error`, { error })
 

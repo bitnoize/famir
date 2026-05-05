@@ -23,7 +23,7 @@ local function create_proxy(keys, args)
   end
 
   if redis.call('EXISTS', proxy_key) ~= 0 then
-    return redis.status_reply('CONFLICT Proxy allready exists')
+    return redis.status_reply('CONFLICT Proxy already exists')
   end
 
   local stash = {
@@ -61,7 +61,7 @@ local function create_proxy(keys, args)
   end
 
   if redis.call('SISMEMBER', proxy_urls_key, model.url) ~= 0 then
-    return redis.status_reply('CONFLICT Proxy url allready taken')
+    return redis.status_reply('CONFLICT Proxy url already taken')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -141,6 +141,8 @@ local function read_proxy(keys, args)
     end
   end
 
+  model['is_enabled'] = (model['is_enabled'] ~= 0)
+
   return { map = model }
 end
 
@@ -219,7 +221,7 @@ local function enable_proxy(keys, args)
   end
 
   if stash.is_enabled ~= 0 then
-    return redis.status_reply('OK Proxy allready enabled')
+    return redis.status_reply('OK Proxy already enabled')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -228,7 +230,7 @@ local function enable_proxy(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', proxy_key, 'is_enabled', 1)
+  redis.call('HSET', proxy_key, 'is_enabled', 1, 'message_count', 0)
 
   redis.call('SADD', enabled_proxy_index_key, stash.proxy_id)
 
@@ -284,7 +286,7 @@ local function disable_proxy(keys, args)
   end
 
   if stash.is_enabled == 0 then
-    return redis.status_reply('OK Proxy allready disabled')
+    return redis.status_reply('OK Proxy already disabled')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
