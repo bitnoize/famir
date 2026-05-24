@@ -1,28 +1,27 @@
-import { ConsumeError, ConsumeRouter } from '@famir/consume'
+import { ConsumerRouter } from '@famir/consumer'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
 
 /**
- * Represents a base controller
+ * Abstract base class for all application controllers.
+ *
+ * All specific controller implementations should extend this class to ensure
+ * consistent behavior and reduce code duplication.
  *
  * @category none
+ * @internal
  */
 export abstract class BaseController {
+  /**
+   * Creates a new controller instance.
+   *
+   * @param validator - The validator instance.
+   * @param logger - The logger instance.
+   * @param router - The consumer router instance.
+   */
   constructor(
     protected readonly validator: Validator,
     protected readonly logger: Logger,
-    protected readonly router: ConsumeRouter
+    protected readonly router: ConsumerRouter
   ) {}
-
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  protected validateData<T>(schema: string, value: unknown): asserts value is T {
-    try {
-      this.validator.assertSchema<T>(schema, value)
-    } catch (error) {
-      throw new ConsumeError(`Data validate failed`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
-    }
-  }
 }

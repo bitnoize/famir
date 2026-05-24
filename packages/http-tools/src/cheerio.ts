@@ -1,20 +1,20 @@
 /**
- * Cheerio API.
+ * Represents Cheerio API.
  *
- * @category none
+ * @internal
  */
 export { CheerioAPI } from 'cheerio'
 
 /**
- * Cheerio options.
+ * Options for configuring Cheerio.
  *
- * @category none
+ * @internal
  */
 export { CheerioOptions } from 'cheerio'
 
 /**
- * Cheerio load file to manipulate.
+ * Loads HTML into Cheerio for manipulation.
  *
- * @category none
+ * @internal
  */
 export { load as cheerioLoad } from 'cheerio'

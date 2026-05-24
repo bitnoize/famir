@@ -1,57 +1,60 @@
 /**
+ * Arguments for creating a campaign.
+ *
  * @category Campaign
  * @internal
  */
-export const CAMPAIGN_CONTROLLER = Symbol('CampaignController')
-
-/**
- * @category Campaign
- * @internal
- */
-export const CAMPAIGN_SERVICE = Symbol('CampaignService')
-
-/**
- * @category Campaign
- */
-export interface CreateCampaignData {
-  campaignId: string
+export interface CreateCampaignArgs {
+  _: [string]
   mirrorDomain: string
   description: string
   cryptSecret?: string | null | undefined
   upgradeSessionPath: string
-  sessionCookieName: string
+  sessionCookieName?: string | null | undefined
   sessionExpire: number
   newSessionExpire: number
   messageExpire: number
 }
 
 /**
+ * Arguments for reading the campaign.
+ *
  * @category Campaign
+ * @internal
  */
-export interface ReadCampaignData {
-  campaignId: string
+export interface ReadCampaignArgs {
+  _: [string]
 }
 
 /**
+ * Arguments for locking the campaign.
+ *
  * @category Campaign
+ * @internal
  */
-export interface LockCampaignData {
-  campaignId: string
+export interface LockCampaignArgs {
+  _: [string]
 }
 
 /**
+ * Arguments for unlocking the campaign.
+ *
  * @category Campaign
+ * @internal
  */
-export interface UnlockCampaignData {
-  campaignId: string
+export interface UnlockCampaignArgs {
+  _: [string]
   lockSecret: string
 }
 
 /**
+ * Arguments for updating the campaign.
+ *
  * @category Campaign
+ * @internal
  */
-export interface UpdateCampaignData {
-  campaignId: string
+export interface UpdateCampaignArgs {
+  _: [string]
   description: string | null | undefined
   sessionExpire: number | null | undefined
   newSessionExpire: number | null | undefined
@@ -60,9 +63,22 @@ export interface UpdateCampaignData {
 }
 
 /**
+ * Arguments for deleting the campaign.
+ *
  * @category Campaign
+ * @internal
  */
-export interface DeleteCampaignData {
-  campaignId: string
+export interface DeleteCampaignArgs {
+  _: [string]
   lockSecret: string
+}
+
+/**
+ * Arguments for listing campaigns.
+ *
+ * @category Campaign
+ * @internal
+ */
+export interface ListCampaignsArgs {
+  _: string[]
 }

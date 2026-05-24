@@ -1,76 +1,64 @@
-import { RedirectorParams } from '@famir/database'
-
 /**
+ * Arguments for creating a lure.
+ *
  * @category Lure
  * @internal
  */
-export const LURE_CONTROLLER = Symbol('LureController')
+export interface CreateLureArgs {
+  _: [string, string, string]
+  path: string
+  lockSecret: string
+}
 
 /**
+ * Arguments for reading the lure.
+ *
  * @category Lure
  * @internal
  */
-export const LURE_SERVICE = Symbol('LureService')
+export interface ReadLureArgs {
+  _: [string, string]
+}
 
 /**
+ * Arguments for toggling the lure.
+ *
  * @category Lure
+ * @internal
  */
-export interface CreateLureData {
-  campaignId: string
-  lureId: string
-  path: string
-  redirectorId: string
+export interface ToggleLureArgs {
+  _: [string, string]
   lockSecret: string
 }
 
 /**
+ * Arguments for deleting the lure.
+ *
  * @category Lure
+ * @internal
  */
-export interface ReadLureData {
-  campaignId: string
-  lureId: string
-}
-
-/**
- * @category Lure
- */
-export interface ReadLurePathData {
-  campaignId: string
-  path: string
-}
-
-/**
- * @category Lure
- */
-export interface ToggleLureData {
-  campaignId: string
-  lureId: string
+export interface DeleteLureArgs {
+  _: [string, string, string]
   lockSecret: string
 }
 
 /**
+ * Arguments for listing lures.
+ *
  * @category Lure
+ * @internal
  */
-export interface DeleteLureData {
-  campaignId: string
-  lureId: string
-  redirectorId: string
-  lockSecret: string
+export interface ListLuresArgs {
+  _: [string]
 }
 
 /**
+ * Arguments for making the lure url.
+ *
  * @category Lure
+ * @internal
  */
-export interface ListLuresData {
-  campaignId: string
-}
-
-/**
- * @category Lure
- */
-export interface MakeLureUrlData {
-  campaignId: string
-  targetId: string
-  lureId: string
-  params: RedirectorParams
+export interface MakeLureUrlArgs {
+  _: [string, string, string]
+  params: string
 }

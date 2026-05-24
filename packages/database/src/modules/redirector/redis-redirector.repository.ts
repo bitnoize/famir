@@ -2,34 +2,56 @@ import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { DatabaseError } from '../../database.error.js'
-import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
+import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 import { REDIRECTOR_REPOSITORY, RedirectorRepository } from './redirector.js'
 import { FullRedirectorModel, RedirectorModel } from './redirector.models.js'
-import { redirectorSchemas } from './redirector.schemas.js'
+import { rawFullRedirectorSchema, rawRedirectorSchema } from './redirector.schemas.js'
 
 /**
- * Redis redirector repository implementation.
+ * Redis-based redirector repository implementation.
+ *
+ * Depends:
+ * - {@link Validator} via {@link VALIDATOR} token
+ * - {@link Config} via {@link CONFIG} token
+ * - {@link Logger} via {@link LOGGER} token
+ * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { REDIRECTOR_REPOSITORY, RedirectorRepository, RedisRedirectorRepository } from '@famir/database'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
+ *
+ * // Register dependency in container
+ * RedisRedirectorRepository.register(container)
+ *
+ * // Resolve dependency from container
+ * const redirectorRepository = container.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY)
+ *
+ * // TODO more examples
+ * ```
  *
  * @category Redirector
  */
 export class RedisRedirectorRepository extends RedisBaseRepository implements RedirectorRepository {
   /**
-   * Register redirector repository instance as singleton in DI container.
+   * Registers the redirector repository as a singleton in the DI container.
    *
-   * @param container - DI container to register in
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<RedirectorRepository>(
       REDIRECTOR_REPOSITORY,
       (c) =>
         new RedisRedirectorRepository(
-          c.resolve(VALIDATOR),
-          c.resolve(CONFIG),
-          c.resolve(LOGGER),
-          c.resolve(DATABASE_CONNECTOR)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR)
         )
     )
   }
@@ -37,22 +59,17 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
   /**
    * Creates a new redirector repository instance.
    *
-   * @param validator - The validator instance
-   * @param config - The database config instance
-   * @param logger - The logger instance
-   * @param connector - The database connector instance
+   * @param validator - The validator instance.
+   * @param config - The config instance.
+   * @param logger - The logger instance.
+   * @param connector - The connector instance.
    */
-  constructor(
-    validator: Validator,
-    config: Config<RedisDatabaseConfig>,
-    logger: Logger,
-    connector: DatabaseConnector
-  ) {
+  constructor(validator: Validator, config: Config, logger: Logger, connector: DatabaseConnector) {
     super(validator, config, logger, connector, 'redirector')
 
-    this.validator.addSchemas(redirectorSchemas)
-
-    this.logger.debug(`RedirectorRepository initialized`)
+    this.validator
+      .addSchema('database-raw-redirector', rawRedirectorSchema)
+      .addSchema('database-raw-full-redirector', rawFullRedirectorSchema)
   }
 
   async create(
@@ -71,15 +88,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
     } catch (error) {
-      this.raiseError(error, 'create', { campaignId, redirectorId })
+      this.handleRepositoryError(error, 'create', { campaignId, redirectorId })
     }
   }
 
@@ -93,7 +106,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'read', { campaignId, redirectorId })
+      this.handleRepositoryError(error, 'read', { campaignId, redirectorId })
     }
   }
 
@@ -107,7 +120,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'readFull', { campaignId, redirectorId })
+      this.handleRepositoryError(error, 'readFull', { campaignId, redirectorId })
     }
   }
 
@@ -126,15 +139,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
     } catch (error) {
-      this.raiseError(error, 'update', { campaignId, redirectorId })
+      this.handleRepositoryError(error, 'update', { campaignId, redirectorId })
     }
   }
 
@@ -153,15 +162,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId, field } })
     } catch (error) {
-      this.raiseError(error, 'appendField', { campaignId, redirectorId, field })
+      this.handleRepositoryError(error, 'appendField', { campaignId, redirectorId, field })
     }
   }
 
@@ -180,15 +185,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId, field } })
     } catch (error) {
-      this.raiseError(error, 'removeField', { campaignId, redirectorId, field })
+      this.handleRepositoryError(error, 'removeField', { campaignId, redirectorId, field })
     }
   }
 
@@ -201,15 +202,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
     } catch (error) {
-      this.raiseError(error, 'delete', { campaignId, redirectorId })
+      this.handleRepositoryError(error, 'delete', { campaignId, redirectorId })
     }
   }
 
@@ -234,7 +231,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.raiseError(error, 'list', { campaignId })
+      this.handleRepositoryError(error, 'list', { campaignId })
     }
   }
 
@@ -263,24 +260,23 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildFullCollection(rawCollection)
     } catch (error) {
-      this.raiseError(error, 'listFull', { campaignId })
+      this.handleRepositoryError(error, 'listFull', { campaignId })
     }
   }
 
   /**
    * Converts raw Redis data to a redirector model.
    *
-   * @param rawModel - The raw data from Redis
-   * @returns The redirector model, or `null` if the raw data is `null`
-   * @throws {@link DatabaseError} If the raw data fails validation
-   * @internal
+   * @param rawModel - The raw data from Redis.
+   * @returns The redirector model, or `null` if the raw data is `null`.
+   * @throws {@link DatabaseError} If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): RedirectorModel | null {
     if (rawModel === null) {
       return null
     }
 
-    this.validateRawData<RawRedirector>('database-raw-redirector', rawModel)
+    this.validateReply<RawRedirector>('database-raw-redirector', rawModel)
 
     return new RedirectorModel(
       rawModel.campaign_id,
@@ -293,17 +289,16 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
   /**
    * Converts raw Redis data to a full redirector model.
    *
-   * @param rawModel - The raw data from Redis
-   * @returns The full redirector model, or `null` if the raw data is `null`
-   * @throws {@link DatabaseError} If the raw data fails validation
-   * @internal
+   * @param rawModel - The raw data from Redis.
+   * @returns The full redirector model, or `null` if the raw data is `null`.
+   * @throws {@link DatabaseError} If the raw data fails validation.
    */
   protected buildFullModel(rawModel: unknown): FullRedirectorModel | null {
     if (rawModel === null) {
       return null
     }
 
-    this.validateRawData<RawFullRedirector>('database-raw-full-redirector', rawModel)
+    this.validateReply<RawFullRedirector>('database-raw-full-redirector', rawModel)
 
     return new FullRedirectorModel(
       rawModel.campaign_id,
@@ -316,12 +311,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
   }
 
   /**
-   * Converts an array of raw Redis data to an array of redirector models.
+   * Converts a list of raw Redis data to a list of redirector models.
    *
-   * @param rawCollection - The array of raw data from Redis
-   * @returns An array of redirector models
-   * @throws {@link DatabaseError} If the array of raw data fails validation
-   * @internal
+   * @param rawCollection - The array of raw data from Redis.
+   * @returns The array of redirector models.
+   * @throws {@link DatabaseError} If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): RedirectorModel[] {
     this.validateArrayReply(rawCollection)
@@ -332,12 +326,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
   }
 
   /**
-   * Converts an array of raw Redis data to an array of full redirector models.
+   * Converts a list of raw Redis data to a list of full redirector models.
    *
-   * @param rawCollection - The array of raw data from Redis
-   * @returns An array of full redirector models
-   * @throws {@link DatabaseError} If the array of raw data fails validation
-   * @internal
+   * @param rawCollection - The array of raw data from Redis.
+   * @returns The array of full redirector models.
+   * @throws {@link DatabaseError} If the array of raw data fails validation.
    */
   protected buildFullCollection(rawCollection: unknown): FullRedirectorModel[] {
     this.validateArrayReply(rawCollection)

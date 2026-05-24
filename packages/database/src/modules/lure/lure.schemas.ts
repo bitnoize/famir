@@ -1,6 +1,5 @@
 import {
   JSONSchemaType,
-  ValidatorSchemas,
   booleanSchema,
   counterSchema,
   customIdentSchema,
@@ -9,24 +8,23 @@ import {
 import { RawLure } from './lure.functions.js'
 
 /**
- * Schema for validating lure path.
+ * JSON Schema for validating a lure URL path.
  *
  * @category Lure
- * @internal
  */
 export const lurePathSchema: JSONSchemaType<string> = {
   type: 'string',
-  minLength: 1,
+  minLength: 2,
   maxLength: 256,
 } as const
 
 /**
- * Schema for validating raw lure data from Redis.
+ * JSON Schema for validating raw lure data from Redis.
  *
  * @category Lure
  * @internal
  */
-const rawLureSchema: JSONSchemaType<RawLure> = {
+export const rawLureSchema: JSONSchemaType<RawLure> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -47,14 +45,4 @@ const rawLureSchema: JSONSchemaType<RawLure> = {
     created_at: timestampSchema,
   },
   additionalProperties: false,
-} as const
-
-/**
- * Collection of all schemas used by the lure module.
- *
- * @category Lure
- * @internal
- */
-export const lureSchemas: ValidatorSchemas = {
-  'database-raw-lure': rawLureSchema,
 } as const

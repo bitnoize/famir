@@ -11,7 +11,7 @@
     { "path": "../config" },
     { "path": "../logger" },
     { "path": "../database" },
-    { "path": "../produce" },
+    { "path": "../producer" },
     { "path": "../repl-server" }
   ]
 }

@@ -1,21 +1,24 @@
 /**
- * A token used to identify dependencies in the DI container.
- * Can be a string or symbol for unique identification.
+ * A token that uniquely identifies a dependency within the container.
  *
- * @category none
+ * Can be either a string or a symbol to prevent naming collisions.
  */
 export type DIToken = string | symbol
 
 /**
- * A factory function that creates instances of a dependency.
+ * A factory function that creates an instance of a dependency.
  *
- * @category none
- * @template T - The type of the dependency
- * @param container - The DI container for resolving nested dependencies
- * @returns The created instance
+ * @typeParam T - The type of the dependency.
+ * @param container - The container used to resolve other dependencies.
+ * @returns The created instance of the dependency.
  */
 export type DIFactory<T = unknown> = (container: DIContainer) => T
 
+/**
+ * Internal record for a registered dependency.
+ *
+ * @typeParam T - The type of the dependency.
+ */
 interface DIRegistration<T = unknown> {
   factory: DIFactory<T>
   isSingleton: boolean
@@ -25,37 +28,56 @@ interface DIRegistration<T = unknown> {
 /**
  * A lightweight Dependency Injection container.
  *
- * Supports registering and resolving dependencies as singletons or transients,
- * with built-in circular dependency detection.
+ * Supports registering dependencies as singletons or transients and includes
+ * built-in detection for circular dependencies.
  *
- * @category none
  * @example
  * ```ts
+ * import { DIContainer } from '@famir/common'
+ *
+ * // Get the global container instance.
  * const container = DIContainer.getInstance()
  *
- * // Register a singleton
- * container.registerSingleton('config', () => ({ port: 3000 }))
+ * // Register a singleton dependency.
+ * container.registerSingleton('config', () => ({ level: 'warn' }))
  *
- * // Register a transient
- * container.registerTransient('logger', (c) => new Logger())
+ * // Register a transient dependency.
+ * container.registerTransient('logger', (c) => new Logger(c.resolve('config')))
  *
- * // Resolve dependencies
+ * // Resolve dependencies.
  * const config = container.resolve('config')
  * const logger = container.resolve('logger')
  * ```
  */
 export class DIContainer {
+  /**
+   * The global singleton instance of the container.
+   */
   private static instance: DIContainer | null = null
 
+  /**
+   * The registry mapping tokens to their registration records.
+   */
   private readonly registry: Map<DIToken, DIRegistration> = new Map()
+
+  /**
+   * A set tracking tokens currently being resolved to detect circular dependencies.
+   */
   private readonly resolutionStack: Set<DIToken> = new Set()
 
+  /**
+   * Private constructor to enforce the singleton pattern.
+   *
+   * Use {@link getInstance} to obtain the container instance.
+   */
   private constructor() {}
 
   /**
-   * Get or create the singleton container instance.
+   * Retrieves the global singleton instance of the container.
    *
-   * @returns The global DIContainer instance
+   * Creates a new instance if none exists.
+   *
+   * @returns The global `DIContainer` instance.
    */
   static getInstance(): DIContainer {
     DIContainer.instance ??= new DIContainer()
@@ -63,6 +85,15 @@ export class DIContainer {
     return DIContainer.instance
   }
 
+  /**
+   * Internal method to register a dependency.
+   *
+   * @typeParam T - The type of the dependency.
+   * @param token - The unique identifier for the dependency.
+   * @param factory - The function to create the dependency instance.
+   * @param isSingleton - Determines whether the dependency is a singleton.
+   * @throws Error If the token is already registered.
+   */
   private register<T>(token: DIToken, factory: DIFactory<T>, isSingleton: boolean) {
     if (this.exists(token)) {
       throw new Error(`Dependency already registered: ${token.toString()}`)
@@ -72,36 +103,40 @@ export class DIContainer {
   }
 
   /**
-   * Register a transient dependency (new instance each time).
+   * Registers a transient dependency.
    *
-   * @template T - The type of the dependency
-   * @param token - Unique identifier for the dependency
-   * @param factory - Function to create instances
-   * @throws Error if the token is already registered
+   * A new instance is created each time the dependency is resolved.
+   *
+   * @typeParam T - The type of the dependency.
+   * @param token - The unique identifier for the dependency.
+   * @param factory - The function to create the dependency instance.
+   * @throws Error If the token is already registered.
    */
   registerTransient<T>(token: DIToken, factory: DIFactory<T>) {
     this.register(token, factory, false)
   }
 
   /**
-   * Register a singleton dependency (same instance always).
+   * Registers a singleton dependency.
    *
-   * @template T - The type of the dependency
-   * @param token - Unique identifier for the dependency
-   * @param factory - Function to create the instance
-   * @throws Error if the token is already registered
+   * The same instance is returned on every resolution.
+   *
+   * @typeParam T - The type of the dependency.
+   * @param token - The unique identifier for the dependency.
+   * @param factory - The function to create the dependency instance.
+   * @throws Error If the token is already registered.
    */
   registerSingleton<T>(token: DIToken, factory: DIFactory<T>) {
     this.register(token, factory, true)
   }
 
   /**
-   * Resolve a registered dependency.
+   * Resolves a registered dependency.
    *
-   * @template T - The type of the dependency
-   * @param token - The dependency token
-   * @returns The resolved instance
-   * @throws Error if the token is not registered or circular dependency is detected
+   * @typeParam T - The type of the dependency.
+   * @param token - The unique identifier for the dependency.
+   * @returns The resolved dependency instance.
+   * @throws Error If the token is not registered or a circular dependency is detected.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   resolve<T>(token: DIToken): T {
@@ -131,11 +166,11 @@ export class DIContainer {
   }
 
   /**
-   * Resolve an optional dependency (returns null if not registered).
+   * Resolves a dependency, returning `null` if it is not registered.
    *
-   * @template T - The type of the dependency
-   * @param token - The dependency token
-   * @returns The resolved instance or null if not found
+   * @typeParam T - The type of the dependency.
+   * @param token - The unique identifier for the dependency.
+   * @returns The resolved dependency instance, or `null` if the token is not found.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   resolveOptional<T>(token: DIToken): T | null {
@@ -147,26 +182,26 @@ export class DIContainer {
   }
 
   /**
-   * Check if a dependency is registered.
+   * Checks if a dependency token is registered in the container.
    *
-   * @param token - The dependency token
-   * @returns True if the token is registered
+   * @param token - The unique identifier for the dependency.
+   * @returns `true` if the token is registered, `false` otherwise.
    */
   exists(token: DIToken): boolean {
     return this.registry.has(token)
   }
 
   /**
-   * Get all registered dependency tokens.
+   * Retrieves a list of all registered dependency tokens.
    *
-   * @returns Array of registered tokens
+   * @returns An array of all registered tokens.
    */
   getTokens(): DIToken[] {
     return Array.from(this.registry.keys())
   }
 
   /**
-   * Clear all registered dependencies and resolution state (for testing purposes).
+   * Clears all registered dependencies and resets the resolution stack.
    */
   reset() {
     this.registry.clear()
@@ -175,9 +210,10 @@ export class DIContainer {
 }
 
 /**
- * A composer function for setting up the DI container.
- * Used to register multiple dependencies in a single call.
+ * A function that composes multiple dependency registrations.
  *
- * @category none
+ * Designed to be used as a callback to set up the container with a group of dependencies.
+ *
+ * @param container - The DI container for registering dependencies.
  */
 export type DIComposer = (container: DIContainer) => void

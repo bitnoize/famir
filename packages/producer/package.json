@@ -1,0 +1,52 @@
+{
+  "name": "@famir/producer",
+  "type": "module",
+  "version": "0.0.4",
+  "description": "Famir producer module",
+  "keywords": [
+    "famir",
+    "fake-mirrors",
+    "man-in-the-middle",
+    "phishing",
+    "reverse-proxy",
+    "red-teaming"
+  ],
+  "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "format": "prettier -w \"src/**/*.ts\" README.md",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "node --test dist/**/*.test.js",
+    "build": "tsc -b",
+    "clean": "rimraf dist *.tsbuildinfo"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitnoize/famir.git",
+    "directory": "packages/producer"
+  },
+  "bugs": {
+    "url": "https://github.com/bitnoize/famir/issues"
+  },
+  "homepage": "https://docs.fake-mirrors.net",
+  "dependencies": {
+    "@famir/common": "*",
+    "@famir/config": "*",
+    "@famir/logger": "*",
+    "@famir/validator": "*",
+    "bullmq": "^5.81.2"
+  },
+  "peerDependencies": {
+    "ioredis": "^5.11.1"
+  }
+}

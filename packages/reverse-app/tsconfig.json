@@ -13,7 +13,7 @@
     { "path": "../templater" },
     { "path": "../http-proto" },
     { "path": "../database" },
-    { "path": "../produce" },
+    { "path": "../producer" },
     { "path": "../http-client" },
     { "path": "../http-server" },
     { "path": "../http-tools" }

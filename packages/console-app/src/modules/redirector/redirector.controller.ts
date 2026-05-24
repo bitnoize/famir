@@ -1,50 +1,76 @@
 import { DIContainer } from '@famir/common'
+import { FullRedirectorModel, RedirectorModel, redirectorPageSchema } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
-  AlterRedirectorFieldData,
-  CreateRedirectorData,
-  DeleteRedirectorData,
-  ListRedirectorsData,
-  ReadRedirectorData,
-  REDIRECTOR_CONTROLLER,
-  REDIRECTOR_SERVICE,
-  UpdateRedirectorData,
+  AlterRedirectorFieldArgs,
+  CreateRedirectorArgs,
+  DeleteRedirectorArgs,
+  ListRedirectorsArgs,
+  ReadRedirectorArgs,
+  UpdateRedirectorArgs,
 } from './redirector.js'
-import { redirectorSchemas } from './redirector.schemas.js'
-import { type RedirectorService } from './redirector.service.js'
+import {
+  alterRedirectorFieldArgsSchema,
+  createRedirectorArgsSchema,
+  deleteRedirectorArgsSchema,
+  listRedirectorsArgsSchema,
+  readRedirectorArgsSchema,
+  updateRedirectorArgsSchema,
+} from './redirector.schemas.js'
+import { type RedirectorService, REDIRECTOR_SERVICE } from './redirector.service.js'
 
 /**
- * Represents a redirector controller
+ * DI token for the redirector controller.
+ *
+ * @category Redirector
+ */
+export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')
+
+/**
+ * Represents the redirector controller.
  *
  * @category Redirector
  */
 export class RedirectorController extends BaseController {
   /**
-   * Register dependency
+   * Registers the controller as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<RedirectorController>(
       REDIRECTOR_CONTROLLER,
       (c) =>
         new RedirectorController(
-          c.resolve(VALIDATOR),
-          c.resolve(LOGGER),
-          c.resolve(REPL_SERVER_ROUTER),
-          c.resolve(REDIRECTOR_SERVICE)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
+          c.resolve<RedirectorService>(REDIRECTOR_SERVICE)
         )
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the controller from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The controller instance.
    */
-  static resolve(container: DIContainer): RedirectorController {
-    return container.resolve(REDIRECTOR_CONTROLLER)
+  static resolve(container: DIContainer) {
+    return container.resolve<RedirectorController>(REDIRECTOR_CONTROLLER)
   }
 
+  /**
+   * Creates a new controller instance.
+   *
+   * @param validator - The validator instance.
+   * @param logger - The logger instance.
+   * @param router - The repl-server router instance.
+   * @param redirectorService - The redirector service instance.
+   */
   constructor(
     validator: Validator,
     logger: Logger,
@@ -53,52 +79,307 @@ export class RedirectorController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas(redirectorSchemas)
-
-    this.logger.debug(`RedirectorController initialized`)
+    this.validator
+      .addSchema('console-redirector-page', redirectorPageSchema)
+      .addSchema('console-create-redirector-args', createRedirectorArgsSchema)
+      .addSchema('console-read-redirector-args', readRedirectorArgsSchema)
+      .addSchema('console-update-redirector-args', updateRedirectorArgsSchema)
+      .addSchema('console-alter-redirector-field-args', alterRedirectorFieldArgsSchema)
+      .addSchema('console-delete-redirector-args', deleteRedirectorArgsSchema)
+      .addSchema('console-list-redirectors-args', listRedirectorsArgsSchema)
   }
 
+  /**
+   * Registers used commands in the router.
+   */
   use() {
-    this.router.addApiCall('createRedirector', async (data) => {
-      this.validateData<CreateRedirectorData>('console-create-redirector-data', data)
+    this.router.addCommand<CreateRedirectorArgs>(
+      {
+        name: 'redirector-create',
+        description: `Creates a new redirector.`,
+        schemaName: 'console-create-redirector-args',
+        options: [
+          {
+            name: 'page-file',
+            description: `The path to file with page template.`,
+            type: 'string',
+            default: null,
+          },
+          {
+            name: 'lock-secret',
+            description: `The campaign lock secret.`,
+            type: 'string',
+            alias: 's',
+          },
+        ],
+        params: ['campaign-id', 'redirector-id'],
+      },
+      (console, spec) => {
+        console.log(`Returns the redirector model.\n`)
 
-      return await this.redirectorService.create(data)
+        console.log(
+          `// Creates a 'simple' redirector in 'hackernews' campaign:\n` +
+            `.${spec.name} hackernews simple --page-file misc/redirectors/simple.html -s f2c2ef66...\n`
+        )
+      },
+      async (console, spec, args) => {
+        let page: string = ''
+
+        if (args.pageFile) {
+          const body = await this.readFile(args.pageFile)
+
+          page = this.parsePageFile(body)
+        }
+
+        const redirector = await this.redirectorService.create({
+          campaignId: args._[0],
+          redirectorId: args._[1],
+          page,
+          lockSecret: args.lockSecret,
+        })
+
+        this.showRedirectorModel(console, redirector)
+      }
+    )
+
+    this.router.addCommand<ReadRedirectorArgs>(
+      {
+        name: 'redirector-read',
+        description: `Reads the redirector by its ID.`,
+        schemaName: 'console-read-redirector-args',
+        options: [],
+        params: ['campaign-id', 'redirector-id'],
+      },
+      (console, spec) => {
+        console.log(`Returns the redirector model.\n`)
+
+        console.log(
+          `// Reads the 'simple' redirector in 'hackernews' campaign:\n` +
+            `.${spec.name} hackernews simple\n`
+        )
+      },
+      async (console, spec, args) => {
+        const redirector = await this.redirectorService.read({
+          campaignId: args._[0],
+          redirectorId: args._[1],
+        })
+
+        this.showRedirectorModel(console, redirector)
+      }
+    )
+
+    this.router.addCommand<UpdateRedirectorArgs>(
+      {
+        name: 'redirector-update',
+        description: `Updates the redirector specific fields.`,
+        schemaName: 'console-update-redirector-args',
+        options: [
+          {
+            name: 'page-file',
+            description: `The path to file with page template.`,
+            type: 'string',
+            default: null,
+          },
+          {
+            name: 'lock-secret',
+            description: `The campaign lock secret.`,
+            type: 'string',
+            alias: 's',
+          },
+        ],
+        params: ['campaign-id', 'redirector-id'],
+      },
+      (console, spec) => {
+        console.log(`All update parameters are optional. Only provided fields will be updated.\n`)
+
+        console.log(
+          `// Updates the 'simple' redirector page:\n` +
+            `.${spec.name} hackernews simple --page-file misc/redirectors/simple.html -s f2c2ef66...\n`
+        )
+      },
+      async (console, spec, args) => {
+        let page: string | null = null
+
+        if (args.pageFile) {
+          const body = await this.readFile(args.pageFile)
+
+          page = this.parsePageFile(body)
+        }
+
+        await this.redirectorService.update({
+          campaignId: args._[0],
+          redirectorId: args._[1],
+          page,
+          lockSecret: args.lockSecret,
+        })
+
+        console.log(`Redirector updated!`)
+      }
+    )
+
+    this.router.addCommand<AlterRedirectorFieldArgs>(
+      {
+        name: 'redirector-append-field',
+        description: `Appends a required field to the redirector.`,
+        schemaName: 'console-alter-redirector-field-args',
+        options: [
+          {
+            name: 'field',
+            description: `The field name to append to the fields list.`,
+            type: 'string',
+          },
+          {
+            name: 'lock-secret',
+            description: `The campaign lock secret.`,
+            type: 'string',
+            alias: 's',
+          },
+        ],
+        params: ['campaign-id', 'redirector-id'],
+      },
+      (console, spec) => {
+        console.log(
+          `// Append field to 'simple' redirector:\n` +
+            `.${spec.name} hackernews simple --field firstName -s f2c2ef66...\n`
+        )
+      },
+      async (console, spec, args) => {
+        await this.redirectorService.appendField({
+          campaignId: args._[0],
+          redirectorId: args._[1],
+          field: args.field,
+          lockSecret: args.lockSecret,
+        })
+
+        console.log(`Redirector field appended!`)
+      }
+    )
+
+    this.router.addCommand<AlterRedirectorFieldArgs>(
+      {
+        name: 'redirector-remove-field',
+        description: `Removes a required field from the redirector.`,
+        schemaName: 'console-alter-redirector-field-args',
+        options: [
+          {
+            name: 'field',
+            description: `The field name to remove from the fields list.`,
+            type: 'string',
+          },
+          {
+            name: 'lock-secret',
+            description: `The campaign lock secret.`,
+            type: 'string',
+            alias: 's',
+          },
+        ],
+        params: ['campaign-id', 'redirector-id'],
+      },
+      (console, spec) => {
+        console.log(
+          `// Remove field from 'simple' redirector:\n` +
+            `.${spec.name} hackernews simple --field firstName -s f2c2ef66...\n`
+        )
+      },
+      async (console, spec, args) => {
+        await this.redirectorService.removeField({
+          campaignId: args._[0],
+          redirectorId: args._[1],
+          field: args.field,
+          lockSecret: args.lockSecret,
+        })
+
+        console.log(`Redirector field removed!`)
+      }
+    )
+
+    this.router.addCommand<DeleteRedirectorArgs>(
+      {
+        name: 'redirector-delete',
+        description: `Deletes the redirector by its ID.`,
+        schemaName: 'console-delete-redirector-args',
+        options: [
+          {
+            name: 'lock-secret',
+            description: `The campaign lock secret.`,
+            type: 'string',
+            alias: 's',
+          },
+        ],
+        params: ['campaign-id', 'redirector-id'],
+      },
+      (console, spec) => {
+        console.log(
+          `// Deletes the 'simple' redirector from the 'hackernews' campaign:\n` +
+            `.${spec.name} hackernews test -s f2c2ef66...\n`
+        )
+      },
+      async (console, spec, args) => {
+        await this.redirectorService.delete({
+          campaignId: args._[0],
+          redirectorId: args._[1],
+          lockSecret: args.lockSecret,
+        })
+
+        console.log(`Redirector deleted!`)
+      }
+    )
+
+    this.router.addCommand<ListRedirectorsArgs>(
+      {
+        name: 'redirector-list',
+        description: `Lists all redirectors for the campaign.`,
+        schemaName: 'console-list-redirectors-args',
+        options: [],
+        params: ['campaign-id'],
+      },
+      (console, spec) => {
+        console.log(`Returns the array of redirector models.\n`)
+
+        console.log(`The redirectors are ordered by creation time (oldest first).\n`)
+
+        console.log(
+          `// Lists all redirectors in 'hackernews' campaign:\n` + `.${spec.name} hackernews\n`
+        )
+      },
+      async (console, spec, args) => {
+        const redirectors = await this.redirectorService.list({
+          campaignId: args._[0],
+        })
+
+        this.showRedirectorCollection(console, redirectors)
+      }
+    )
+  }
+
+  private showRedirectorModel(console: Console, redirector: FullRedirectorModel) {
+    console.table({
+      campaignId: redirector.campaignId,
+      redirectorId: redirector.redirectorId,
+      page: redirector.page.length,
+      lureCount: redirector.lureCount,
+      createdAt: redirector.createdAt.toISOString(),
     })
+  }
 
-    this.router.addApiCall('readRedirector', async (data) => {
-      this.validateData<ReadRedirectorData>('console-read-redirector-data', data)
+  private showRedirectorCollection(console: Console, redirectors: RedirectorModel[]) {
+    console.table(
+      redirectors.map((redirector) => {
+        return {
+          campaignId: redirector.campaignId,
+          redirectorId: redirector.redirectorId,
+          lureCount: redirector.lureCount,
+          createdAt: redirector.createdAt.toISOString(),
+        }
+      })
+    )
+  }
 
-      return await this.redirectorService.read(data)
-    })
+  protected parsePageFile(body: Buffer): string {
+    const page = this.buf2str(body)
 
-    this.router.addApiCall('updateRedirector', async (data) => {
-      this.validateData<UpdateRedirectorData>('console-update-redirector-data', data)
+    this.validateData<string>('console-redirector-page', page)
 
-      return await this.redirectorService.update(data)
-    })
-
-    this.router.addApiCall('appendRedirectorField', async (data) => {
-      this.validateData<AlterRedirectorFieldData>('console-alter-redirector-field-data', data)
-
-      return await this.redirectorService.appendField(data)
-    })
-
-    this.router.addApiCall('removeRedirectorField', async (data) => {
-      this.validateData<AlterRedirectorFieldData>('console-alter-redirector-field-data', data)
-
-      return await this.redirectorService.removeField(data)
-    })
-
-    this.router.addApiCall('deleteRedirector', async (data) => {
-      this.validateData<DeleteRedirectorData>('console-delete-redirector-data', data)
-
-      return await this.redirectorService.delete(data)
-    })
-
-    this.router.addApiCall('listRedirectors', async (data) => {
-      this.validateData<ListRedirectorsData>('console-list-redirectors-data', data)
-
-      return await this.redirectorService.list(data)
-    })
+    return page
   }
 }

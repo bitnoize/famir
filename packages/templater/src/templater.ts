@@ -1,17 +1,32 @@
 /**
- * @category none
- * @internal
+ * DI token for a templater implementation.
  */
 export const TEMPLATER = Symbol('Templater')
 
 /**
- * Represents a templater
+ * Data for template variable substitution.
  *
- * @category none
+ * A key-value map where keys are variable names and values are the data
+ * to be interpolated into the template.
+ */
+export type TemplaterData = Record<string, unknown>
+
+/**
+ * Defines the public contract for a templater.
+ *
+ * Provides a simple method for rendering templates with variable substitution.
  */
 export interface Templater {
   /**
-   * Render template
+   * Renders a template string with the provided data.
+   *
+   * This method takes a template containing placeholders and a data object,
+   * and returns the rendered string with all placeholders replaced.
+   *
+   * @param template - The template string to render.
+   * @param data - Key-value pairs for variable substitution.
+   * @returns The rendered string.
+   * @throws {@link TemplaterError} If template rendering fails.
    */
-  render(template: string, data: object): string
+  render(template: string, data: TemplaterData): string
 }

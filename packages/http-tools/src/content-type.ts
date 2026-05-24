@@ -1,5 +1,6 @@
 /**
- * @category none
+ * Available values for Content-Type names.
+ *
  * @internal
  */
 export const HTTP_CONTENT_TYPE_NAMES = [
@@ -13,25 +14,29 @@ export const HTTP_CONTENT_TYPE_NAMES = [
 ] as const
 
 /**
- * @category none
+ * Type for Content-Type name.
+ *
  * @internal
  */
 export type HttpContentTypeName = (typeof HTTP_CONTENT_TYPE_NAMES)[number]
 
 /**
- * @category none
+ * Dictionary for grouping Content-Types.
+ *
  * @internal
  */
 export type HttpContentTypes = Record<HttpContentTypeName, string[]>
 
 /**
- * @category none
+ * Parse Content-Type object from a string.
+ *
  * @internal
  */
 export { parse as parseContentType } from 'content-type'
 
 /**
- * @category none
+ * Format Content-Type object to a string.
+ *
  * @internal
  */
 export { format as formatContentType } from 'content-type'

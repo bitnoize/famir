@@ -1,43 +1,73 @@
 import { DIContainer } from '@famir/common'
-import { ConsumeError } from '@famir/consume'
+import { ConsumerError } from '@famir/consumer'
 import { FullMessageModel, MESSAGE_REPOSITORY, MessageRepository } from '@famir/database'
-import { AnalyzeJobData } from '@famir/produce'
 import { Storage, STORAGE } from '@famir/storage'
-import { ANALYZE_SERVICE } from './analyze.js'
 
 /**
- * Represents an analyze service
+ * DI token for the analyze service.
+ *
+ * @category Analyze
+ */
+export const ANALYZE_SERVICE = Symbol('AnalyzeService')
+
+/**
+ * Represents the analyze service.
  *
  * @category Analyze
  */
 export class AnalyzeService {
   /**
-   * Register dependency
+   * Registers the service as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<AnalyzeService>(
       ANALYZE_SERVICE,
-      (c) => new AnalyzeService(c.resolve(MESSAGE_REPOSITORY), c.resolve(STORAGE))
+      (c) =>
+        new AnalyzeService(
+          c.resolve<MessageRepository>(MESSAGE_REPOSITORY),
+          c.resolve<Storage>(STORAGE)
+        )
     )
   }
 
+  /**
+   * Creates a new service instance.
+   *
+   * @param messageRepository - The message repository instance.
+   * @param storage - The storage instance.
+   */
   constructor(
     protected readonly messageRepository: MessageRepository,
     protected readonly storage: Storage
   ) {}
 
-  async readMessage(data: AnalyzeJobData): Promise<FullMessageModel> {
+  /**
+   * Reads a full message from the database.
+   *
+   * @param data - The job data.
+   * @returns The full message model.
+   * @throws {@link ConsumerError} If the message is not found.
+   */
+  async readMessage(data: { campaignId: string; messageId: string }): Promise<FullMessageModel> {
     const message = await this.messageRepository.readFull(data.campaignId, data.messageId)
 
     if (!message) {
-      throw new ConsumeError(`Message not found`, {
-        code: 'INTERNAL_ERROR',
+      throw new ConsumerError(`Message not found`, {
+        code: 'NOT_FOUND',
       })
     }
 
     return message
   }
 
+  /**
+   * Saves a processed message to storage.
+   *
+   * @param message - The full message model to save.
+   * @throws {@link StorageError} If saving to storage fails.
+   */
   async saveMessage(message: FullMessageModel): Promise<void> {
     const basePath = [message.campaignId, message.sessionId, message.messageId].join('/')
 

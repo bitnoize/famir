@@ -1,18 +1,8 @@
 import { TargetAccessLevel } from '@famir/database'
 
 /**
- * @category Phishmap
- * @internal
- */
-export const PHISHMAP_CONTROLLER = Symbol('PhishmapController')
-
-/**
- * @category Phishmap
- * @internal
- */
-export const PHISHMAP_SERVICE = Symbol('PhishmapService')
-
-/**
+ * Represents a phishmap campaign.
+ *
  * @category Phishmap
  * @internal
  */
@@ -28,6 +18,8 @@ export interface PhishmapCampaign {
 }
 
 /**
+ * Represents a phishmap proxy.
+ *
  * @category Phishmap
  * @internal
  */
@@ -38,6 +30,8 @@ export interface PhishmapProxy {
 }
 
 /**
+ * Represents a phishmap target.
+ *
  * @category Phishmap
  * @internal
  */
@@ -67,6 +61,8 @@ export interface PhishmapTarget {
 }
 
 /**
+ * Represents a phishmap redirector.
+ *
  * @category Phishmap
  * @internal
  */
@@ -77,6 +73,8 @@ export interface PhishmapRedirector {
 }
 
 /**
+ * Represents a phishmap lure.
+ *
  * @category Phishmap
  * @internal
  */
@@ -88,6 +86,8 @@ export interface PhishmapLure {
 }
 
 /**
+ * Represents a phishmap.
+ *
  * @category Phishmap
  */
 export interface Phishmap {
@@ -99,17 +99,25 @@ export interface Phishmap {
 }
 
 /**
+ * Represents a dump phishmap args.
+ *
  * @category Phishmap
+ * @internal
  */
-export interface DumpPhishmapData {
-  campaignId: string
+export interface DumpPhishmapArgs {
+  _: [string]
+  file: string
 }
 
 /**
+ * Represents a restore phishmap args.
+ *
  * @category Phishmap
+ * @internal
  */
-export interface RestorePhishmapData {
-  phishmap: Phishmap
+export interface RestorePhishmapArgs {
+  _: string[]
+  file: string
   campaignId?: string | null | undefined
   mirrorDomain?: string | null | undefined
   description?: string | null | undefined
@@ -122,8 +130,12 @@ export interface RestorePhishmapData {
 }
 
 /**
+ * Represents a purge phishmap args.
+ *
  * @category Phishmap
+ * @internal
  */
-export interface PurgePhishmapData {
-  campaignId: string
+export interface PurgePhishmapArgs {
+  _: [string]
+  force: boolean
 }

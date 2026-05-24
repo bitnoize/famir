@@ -1,66 +1,32 @@
-import { redirectorFieldSchema, redirectorPageSchema } from '@famir/database'
+import { redirectorFieldSchema } from '@famir/database'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
 import {
-  JSONSchemaType,
-  ValidatorSchemas,
-  customIdentSchema,
-  randomIdentSchema,
-} from '@famir/validator'
-import {
-  AlterRedirectorFieldData,
-  CreateRedirectorData,
-  DeleteRedirectorData,
-  ListRedirectorsData,
-  ReadRedirectorData,
-  UpdateRedirectorData,
+  AlterRedirectorFieldArgs,
+  CreateRedirectorArgs,
+  DeleteRedirectorArgs,
+  ListRedirectorsArgs,
+  ReadRedirectorArgs,
+  UpdateRedirectorArgs,
 } from './redirector.js'
 
-const DEFAULT_PAGE = ``
-
 /**
+ * JSON Schema for validating a create redirector args.
+ *
  * @category Redirector
  * @internal
  */
-const createRedirectorDataSchema: JSONSchemaType<CreateRedirectorData> = {
+export const createRedirectorArgsSchema: JSONSchemaType<CreateRedirectorArgs> = {
   type: 'object',
-  required: ['campaignId', 'redirectorId', 'page', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    redirectorId: customIdentSchema,
-    page: {
-      ...redirectorPageSchema,
-      default: DEFAULT_PAGE,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
     },
-    lockSecret: randomIdentSchema,
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * @category Redirector
- * @internal
- */
-const readRedirectorDataSchema: JSONSchemaType<ReadRedirectorData> = {
-  type: 'object',
-  required: ['campaignId', 'redirectorId'],
-  properties: {
-    campaignId: customIdentSchema,
-    redirectorId: customIdentSchema,
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * @category Redirector
- * @internal
- */
-const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
-  type: 'object',
-  required: ['campaignId', 'redirectorId', 'lockSecret'],
-  properties: {
-    campaignId: customIdentSchema,
-    redirectorId: customIdentSchema,
-    page: {
-      ...redirectorPageSchema,
+    pageFile: {
+      type: 'string',
       nullable: true,
     },
     lockSecret: randomIdentSchema,
@@ -69,15 +35,66 @@ const updateRedirectorDataSchema: JSONSchemaType<UpdateRedirectorData> = {
 } as const
 
 /**
+ * JSON Schema for validating a read redirector args.
+ *
  * @category Redirector
  * @internal
  */
-const alterRedirectorFieldDataSchema: JSONSchemaType<AlterRedirectorFieldData> = {
+export const readRedirectorArgsSchema: JSONSchemaType<ReadRedirectorArgs> = {
   type: 'object',
-  required: ['campaignId', 'redirectorId', 'field', 'lockSecret'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
-    redirectorId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * JSON Schema for validating an update redirector args.
+ *
+ * @category Redirector
+ * @internal
+ */
+export const updateRedirectorArgsSchema: JSONSchemaType<UpdateRedirectorArgs> = {
+  type: 'object',
+  required: ['_', 'lockSecret'],
+  properties: {
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
+    pageFile: {
+      type: 'string',
+      nullable: true,
+    },
+    lockSecret: randomIdentSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * JSON Schema for validating an alter redirector field args.
+ *
+ * @category Redirector
+ * @internal
+ */
+export const alterRedirectorFieldArgsSchema: JSONSchemaType<AlterRedirectorFieldArgs> = {
+  type: 'object',
+  required: ['_', 'field', 'lockSecret'],
+  properties: {
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     field: redirectorFieldSchema,
     lockSecret: randomIdentSchema,
   },
@@ -85,42 +102,42 @@ const alterRedirectorFieldDataSchema: JSONSchemaType<AlterRedirectorFieldData> =
 } as const
 
 /**
+ * JSON Schema for validating a delete redirector args.
+ *
  * @category Redirector
  * @internal
  */
-const deleteRedirectorDataSchema: JSONSchemaType<DeleteRedirectorData> = {
+export const deleteRedirectorArgsSchema: JSONSchemaType<DeleteRedirectorArgs> = {
   type: 'object',
-  required: ['campaignId', 'redirectorId', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    redirectorId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a list redirectors args.
+ *
  * @category Redirector
  * @internal
  */
-const listRedirectorsDataSchema: JSONSchemaType<ListRedirectorsData> = {
+export const listRedirectorsArgsSchema: JSONSchemaType<ListRedirectorsArgs> = {
   type: 'object',
-  required: ['campaignId'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
   },
   additionalProperties: false,
-} as const
-
-/**
- * @category Redirector
- * @internal
- */
-export const redirectorSchemas: ValidatorSchemas = {
-  'console-create-redirector-data': createRedirectorDataSchema,
-  'console-read-redirector-data': readRedirectorDataSchema,
-  'console-update-redirector-data': updateRedirectorDataSchema,
-  'console-alter-redirector-field-data': alterRedirectorFieldDataSchema,
-  'console-delete-redirector-data': deleteRedirectorDataSchema,
-  'console-list-redirectors-data': listRedirectorsDataSchema,
 } as const

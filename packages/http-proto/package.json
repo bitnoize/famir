@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-proto",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Famir http-proto module",
   "keywords": [
     "famir",

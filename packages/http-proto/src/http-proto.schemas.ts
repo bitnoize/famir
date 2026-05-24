@@ -12,10 +12,7 @@ import {
 } from './http-proto.js'
 
 /**
- * Schema for validating a HTTP type.
- *
- * @category none
- * @internal
+ * JSON Schema for validating an HTTP type.
  */
 export const httpTypeSchema: JSONSchemaType<HttpType> = {
   type: 'string',
@@ -23,10 +20,7 @@ export const httpTypeSchema: JSONSchemaType<HttpType> = {
 } as const
 
 /**
- * Schema for validating a HTTP method.
- *
- * @category none
- * @internal
+ * JSON Schema for validating an HTTP method.
  */
 export const httpMethodSchema: JSONSchemaType<HttpMethod> = {
   type: 'string',
@@ -34,10 +28,7 @@ export const httpMethodSchema: JSONSchemaType<HttpMethod> = {
 } as const
 
 /**
- * Schema for validating a relative URL.
- *
- * @category none
- * @internal
+ * JSON Schema for validating a relative URL.
  */
 export const httpRelativeUrlSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -45,20 +36,14 @@ export const httpRelativeUrlSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * Schema for validating a response status.
- *
- * @category none
- * @internal
+ * JSON Schema for validating an HTTP response status.
  */
 export const httpStatusSchema: JSONSchemaType<number> = {
   type: 'integer',
 } as const
 
 /**
- * Schema for validating a single header.
- *
- * @category none
- * @internal
+ * JSON Schema for validating a single HTTP header.
  */
 export const httpHeaderSchema: JSONSchemaType<HttpHeader> = {
   type: ['string', 'array'],
@@ -76,10 +61,7 @@ export const httpHeaderSchema: JSONSchemaType<HttpHeader> = {
 } as const
 
 /**
- * Schema for validating a headers data.
- *
- * @category none
- * @internal
+ * JSON Schema for validating an HTTP headers object.
  */
 export const httpHeadersSchema: JSONSchemaType<HttpHeaders> = {
   type: 'object',
@@ -91,10 +73,7 @@ export const httpHeadersSchema: JSONSchemaType<HttpHeaders> = {
 } as const
 
 /**
- * Schema for validating a connection data.
- *
- * @category none
- * @internal
+ * JSON Schema for validating connection details.
  */
 export const httpConnectionSchema: JSONSchemaType<HttpConnection> = {
   type: 'object',
@@ -113,10 +92,7 @@ export const httpConnectionSchema: JSONSchemaType<HttpConnection> = {
 } as const
 
 /**
- * Schema for validating a payload data.
- *
- * @category none
- * @internal
+ * JSON Schema for validating payload data.
  */
 export const httpPayloadSchema: JSONSchemaType<HttpPayload> = {
   type: 'object',
@@ -124,10 +100,7 @@ export const httpPayloadSchema: JSONSchemaType<HttpPayload> = {
 } as const
 
 /**
- * Schema for validating a single processing error.
- *
- * @category none
- * @internal
+ * JSON Schema for validating a single processing error.
  */
 export const httpErrorSchema: JSONSchemaType<HttpError> = {
   type: 'array',
@@ -147,10 +120,7 @@ export const httpErrorSchema: JSONSchemaType<HttpError> = {
 } as const
 
 /**
- * Schema for validating an array of processing errors.
- *
- * @category none
- * @internal
+ * JSON Schema for validating a list of processing errors.
  */
 export const httpErrorsSchema: JSONSchemaType<HttpError[]> = {
   type: 'array',

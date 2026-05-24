@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { describe, it } from 'node:test'
 import { arrayIncludes } from './array-includes.js'
 
-test('arrayIncludes', async (t) => {
-  await t.test('should return true if array includes value', () => {
+describe('arrayIncludes', () => {
+  it('should return true if array includes value', () => {
     const arr = [1, 2, 3] as const
     const value = 2
 
@@ -12,7 +12,7 @@ test('arrayIncludes', async (t) => {
     assert.ok(result)
   })
 
-  await t.test('should return false if array does not include value', () => {
+  it('should return false if array does not include value', () => {
     const arr = [1, 2, 3] as const
     const value = 5
 
@@ -21,7 +21,7 @@ test('arrayIncludes', async (t) => {
     assert.ok(!result)
   })
 
-  await t.test('should work with strings', () => {
+  it('should work with strings', () => {
     const arr = ['a', 'b', 'c'] as const
     const value = 'b'
 
@@ -30,7 +30,7 @@ test('arrayIncludes', async (t) => {
     assert.ok(result)
   })
 
-  await t.test('should work with objects', () => {
+  it('should work with objects', () => {
     const obj = { id: 1 }
     const arr = [obj] as const
     const value = obj
@@ -40,7 +40,7 @@ test('arrayIncludes', async (t) => {
     assert.ok(result)
   })
 
-  await t.test('should be type-safe', () => {
+  it('should be type-safe', () => {
     const arr = [1, 2, 3] as const
     const value: unknown = 2
 
@@ -50,7 +50,7 @@ test('arrayIncludes', async (t) => {
     }
   })
 
-  await t.test('should return false for empty array', () => {
+  it('should return false for empty array', () => {
     const arr: number[] = []
     const value = 1
 

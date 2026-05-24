@@ -9,16 +9,16 @@ import {
 } from '@famir/http-proto'
 
 /**
- * Represents a message model.
+ * Represents the message model.
  *
  * @category Message
  */
 export class MessageModel {
   /**
-   * Type guard to filter out null values in arrays.
+   * Type guard to filter out null models from a list.
    *
-   * @param model - The model to check
-   * @returns `true` if the model is not null, `false` otherwise
+   * @param model - The model to check.
+   * @returns `true` if the model is not null, `false` otherwise.
    */
   static isNotNull = <T extends MessageModel>(model: T | null): model is T => {
     return model != null
@@ -27,19 +27,19 @@ export class MessageModel {
   /**
    * Creates a new message model instance.
    *
-   * @param campaignId - The ID of the campaign this message belongs to
-   * @param messageId - The unique identifier of the message
-   * @param proxyId - The ID of the proxy that processed this message
-   * @param targetId - The ID of the target that handled this message
-   * @param sessionId - The ID of the session that generated this message
-   * @param type - The message type
-   * @param method - The HTTP method
-   * @param url - The request URL
-   * @param status - The HTTP status code
-   * @param analyze - Analyze identifier
-   * @param startTime - Start timestamp
-   * @param finishTime - Finish timestamp
-   * @param createdAt - The date and time when the message was created
+   * @param campaignId - The ID of the campaign this message belongs to.
+   * @param messageId - The unique identifier for the message.
+   * @param proxyId - The ID of the proxy that processed this message.
+   * @param targetId - The ID of the target that handled this message.
+   * @param sessionId - The ID of the session that generated this message.
+   * @param type - The message type.
+   * @param method - The HTTP method.
+   * @param url - The HTTP request URL.
+   * @param status - The HTTP status code.
+   * @param analyze - The analyze identifier.
+   * @param startTime - The start processing timestamp.
+   * @param finishTime - The finish processing timestamp.
+   * @param createdAt - The date and time when the message was created.
    */
   constructor(
     readonly campaignId: string,
@@ -60,7 +60,7 @@ export class MessageModel {
   /**
    * Calculates the total processing time of the message.
    *
-   * @returns The difference between `finishTime` and `startTime`
+   * @returns The difference between `finishTime` and `startTime`.
    */
   get totalTime(): number {
     return this.finishTime > this.startTime ? this.finishTime - this.startTime : 0
@@ -68,7 +68,7 @@ export class MessageModel {
 }
 
 /**
- * Represents a full message model.
+ * Represents the full message model.
  *
  * @category Message
  */
@@ -76,26 +76,26 @@ export class FullMessageModel extends MessageModel {
   /**
    * Creates a new full message model instance.
    *
-   * @param campaignId - The ID of the campaign this message belongs to
-   * @param messageId - The unique identifier of the message
-   * @param proxyId - The ID of the proxy that processed this message
-   * @param targetId - The ID of the target that handled this message
-   * @param sessionId - The ID of the session that generated this message
-   * @param type - The message type
-   * @param method - The HTTP method
-   * @param url - The request URL
-   * @param requestHeaders - The request headers
-   * @param requestBody - The request body
-   * @param status - The HTTP status code
-   * @param responseHeaders - The response headers
-   * @param responseBody - The response body
-   * @param connection - Connection details
-   * @param payload - Payload information
-   * @param errors - Array of errors that occurred during processing
-   * @param analyze - Analyze identifier
-   * @param startTime - Start timestamp
-   * @param finishTime - Finish timestamp
-   * @param createdAt - The date and time when the message was created
+   * @param campaignId - The ID of the campaign this message belongs to.
+   * @param messageId - The unique identifier for the message.
+   * @param proxyId - The ID of the proxy that processed this message.
+   * @param targetId - The ID of the target that handled this message.
+   * @param sessionId - The ID of the session that generated this message.
+   * @param type - The message type.
+   * @param method - The HTTP method.
+   * @param url - The HTTP request URL.
+   * @param requestHeaders - The HTTP request headers.
+   * @param requestBody - The HTTP request body.
+   * @param status - The HTTP status code.
+   * @param responseHeaders - The HTTP response headers.
+   * @param responseBody - The HTTP response body.
+   * @param connection - The connection details.
+   * @param payload - The payload data extracted from the transaction.
+   * @param errors - The list of errors that occurred during processing.
+   * @param analyze - The analyze identifier.
+   * @param startTime - The start processing timestamp.
+   * @param finishTime - The finish processing timestamp.
+   * @param createdAt - The date and time when the message was created.
    */
   constructor(
     campaignId: string,
@@ -134,5 +134,14 @@ export class FullMessageModel extends MessageModel {
       finishTime,
       createdAt
     )
+  }
+
+  /**
+   * Determines if there are errors in the message.
+   *
+   * @returns `true` if there are errors, `false` otherwise.
+   */
+  get hasErrors(): boolean {
+    return this.errors.length > 0
   }
 }

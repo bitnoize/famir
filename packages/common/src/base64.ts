@@ -1,40 +1,31 @@
 /**
- * Safe Base64 encode using URL-safe alphabet.
+ * Encodes a Buffer into a URL-safe Base64 string.
  *
- * Converts a buffer to Base64 string using URL-safe characters.
+ * This function uses a standard Base64 encoding and then replaces
+ * '+' with '-', '/' with '_', and removes trailing '=' padding
+ * to make the result safe for use in URLs and file names.
  *
- * @category none
- * @param data - The buffer to encode
- * @returns URL-safe Base64 encoded string without padding
- * @example
- * ```ts
- * const buffer = Buffer.from('Hello, World!')
- * const encoded = safeBase64Encode(buffer)
- * console.log(encoded) // SGVsbG8sIFdvcmxkIQ
- * ```
+ * @param data - The Buffer to encode.
+ * @returns The URL-safe Base64 string.
+ * @throws Error If Base64 encoding fails.
  */
-export const safeBase64Encode = (data: Buffer): string => {
+export function safeBase64Encode(data: Buffer): string {
   const base64 = data.toString('base64')
+
   return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
 /**
- * Safe Base64 decode from URL-safe alphabet.
+ * Decodes a URL-safe Base64 string back into a Buffer.
  *
- * Converts a URL-safe Base64 string back to a buffer.
+ * This function reverses the transformation applied by `safeBase64Encode`.
+ * It restores the standard Base64 characters and padding before decoding.
  *
- * @category none
- * @param value - URL-safe Base64 encoded string
- * @returns Decoded buffer
- * @throws Error if the input is not valid Base64
- * @example
- * ```ts
- * const encoded = 'SGVsbG8sIFdvcmxkIQ'
- * const decoded = safeBase64Decode(encoded)
- * console.log(decoded.toString()) // Hello, World!
- * ```
+ * @param value - The URL-safe Base64 string to decode.
+ * @returns The decoded Buffer.
+ * @throws Error If Base64 decoding fails.
  */
-export const safeBase64Decode = (value: string): Buffer => {
+export function safeBase64Decode(value: string): Buffer {
   let base64 = value.replace(/-/g, '+').replace(/_/g, '/')
 
   while (base64.length % 4) {

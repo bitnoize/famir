@@ -2,58 +2,96 @@ import { DIContainer, serializeError } from '@famir/common'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
 import { HTTP_SERVER, HTTP_SERVER_ROUTER, HttpServer, HttpServerRouter } from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
-import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCE_CONNECTOR, ProduceConnector } from '@famir/produce'
+import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCER_CONNECTOR, ProducerConnector } from '@famir/producer'
 
 /**
+ * DI token for the reverse application.
+ *
  * @category none
- * @internal
  */
 export const REVERSE_APP = Symbol('ReverseApp')
 
 /**
- * Represents a reverse app
+ * Represents the reverse application.
+ *
+ * Depends:
+ * - {@link Logger} via {@link LOGGER} token
+ * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
+ * - {@link ProducerConnector} via {@link PRODUCER_CONNECTOR} token
+ * - {@link AnalyzeQueue} via {@link ANALYZE_QUEUE} token
+ * - {@link HttpServerRouter} via {@link HTTP_SERVER_ROUTER} token
+ * - {@link HttpServer} via {@link HTTP_SERVER} token
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { ReverseApp } from '@famir/reverse-app'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
+ *
+ * // Register all dependencies
+ * // ...
+ *
+ * // Resolve and start the application
+ * const app = ReverseApp.resolve(container)
+ * await app.start()
+ * ```
  *
  * @category none
  */
 export class ReverseApp {
   /**
-   * Register dependency
+   * Registers the application as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<ReverseApp>(
       REVERSE_APP,
       (c) =>
         new ReverseApp(
-          c.resolve(LOGGER),
-          c.resolve(DATABASE_CONNECTOR),
-          c.resolve(PRODUCE_CONNECTOR),
-          c.resolve(ANALYZE_QUEUE),
-          c.resolve(HTTP_SERVER_ROUTER),
-          c.resolve(HTTP_SERVER)
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
+          c.resolve<ProducerConnector>(PRODUCER_CONNECTOR),
+          c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<HttpServer>(HTTP_SERVER)
         )
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the application from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The application instance.
    */
-  static resolve(container: DIContainer): ReverseApp {
-    return container.resolve(REVERSE_APP)
-  }
-
-  constructor(
-    protected readonly logger: Logger,
-    protected readonly databaseConnector: DatabaseConnector,
-    protected readonly produceConnector: ProduceConnector,
-    protected readonly analyzeQueue: AnalyzeQueue,
-    protected readonly router: HttpServerRouter,
-    protected readonly httpServer: HttpServer
-  ) {
-    this.logger.debug(`App initialized`)
+  static resolve(container: DIContainer) {
+    return container.resolve<ReverseApp>(REVERSE_APP)
   }
 
   /**
-   * Start app
+   * Creates a new application instance.
+   *
+   * @param logger - The logger instance.
+   * @param databaseConnector - The database connector instance.
+   * @param producerConnector - The producer connector instance.
+   * @param analyzeQueue - The analyze queue instance.
+   * @param router - The http-server router instance.
+   * @param httpServer - The http-server instance.
+   */
+  constructor(
+    protected readonly logger: Logger,
+    protected readonly databaseConnector: DatabaseConnector,
+    protected readonly producerConnector: ProducerConnector,
+    protected readonly analyzeQueue: AnalyzeQueue,
+    protected readonly router: HttpServerRouter,
+    protected readonly httpServer: HttpServer
+  ) {}
+
+  /**
+   * Starts the application.
    */
   async start(): Promise<void> {
     try {
@@ -63,18 +101,18 @@ export class ReverseApp {
 
       await this.httpServer.start()
 
-      this.logger.debug(`App started`)
+      this.logger.debug(`Application started`)
     } catch (error) {
-      this.logger.error(`App start failed`, {
+      this.logger.error(`Application start failed`, {
         error: serializeError(error),
       })
 
-      process.exit(1)
+      throw error
     }
   }
 
   /**
-   * Stop app
+   * Stops the application.
    */
   async stop(): Promise<void> {
     try {
@@ -82,17 +120,17 @@ export class ReverseApp {
 
       await this.analyzeQueue.close()
 
-      await this.produceConnector.close()
+      await this.producerConnector.close()
 
       await this.databaseConnector.close()
 
-      this.logger.debug(`App stopped`)
+      this.logger.debug(`Application stopped`)
     } catch (error) {
-      this.logger.error(`App stop failed`, {
+      this.logger.error(`Application stop failed`, {
         error: serializeError(error),
       })
 
-      process.exit(1)
+      throw error
     }
   }
 }

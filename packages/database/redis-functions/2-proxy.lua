@@ -230,7 +230,7 @@ local function enable_proxy(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', proxy_key, 'is_enabled', 1, 'message_count', 0)
+  redis.call('HSET', proxy_key, 'is_enabled', 1)
 
   redis.call('SADD', enabled_proxy_index_key, stash.proxy_id)
 

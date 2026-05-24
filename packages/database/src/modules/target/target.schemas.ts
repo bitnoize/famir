@@ -1,6 +1,5 @@
 import {
   JSONSchemaType,
-  ValidatorSchemas,
   booleanSchema,
   counterSchema,
   customIdentSchema,
@@ -15,10 +14,9 @@ import {
 } from './target.models.js'
 
 /**
- * Schema for validating target access level.
+ * JSON Schema for validating a target access level.
  *
  * @category Target
- * @internal
  */
 export const targetAccessLevelSchema: JSONSchemaType<TargetAccessLevel> = {
   type: 'string',
@@ -26,10 +24,9 @@ export const targetAccessLevelSchema: JSONSchemaType<TargetAccessLevel> = {
 } as const
 
 /**
- * Schema for validating target subdomain.
+ * JSON Schema for validating a target subdomain.
  *
  * @category Target
- * @internal
  */
 export const targetSubSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -38,10 +35,9 @@ export const targetSubSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * Schema for validating target domain.
+ * JSON Schema for validating a target domain.
  *
  * @category Target
- * @internal
  */
 export const targetDomainSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -50,10 +46,9 @@ export const targetDomainSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * Schema for validating target port.
+ * JSON Schema for validating a target port.
  *
  * @category Target
- * @internal
  */
 export const targetPortSchema: JSONSchemaType<number> = {
   type: 'number',
@@ -62,22 +57,20 @@ export const targetPortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * Schema for validating target label.
+ * JSON Schema for validating a target label.
  *
  * @category Target
- * @internal
  */
 export const targetLabelSchema: JSONSchemaType<string> = {
   type: 'string',
-  minLength: 3,
+  minLength: 2,
   maxLength: 64,
 }
 
 /**
- * Schema for validating target labels.
+ * JSON Schema for validating a list of target labels.
  *
  * @category Target
- * @internal
  */
 export const targetLabelsSchema: JSONSchemaType<string[]> = {
   type: 'array',
@@ -85,10 +78,9 @@ export const targetLabelsSchema: JSONSchemaType<string[]> = {
 } as const
 
 /**
- * Schema for validating target connect timeout.
+ * JSON Schema for validating a target connection timeout.
  *
  * @category Target
- * @internal
  */
 export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
@@ -97,10 +89,9 @@ export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * Schema for validating target simple timeout.
+ * JSON Schema for validating a target simple request timeout.
  *
  * @category Target
- * @internal
  */
 export const targetSimpleTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
@@ -109,10 +100,9 @@ export const targetSimpleTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * Schema for validating target stream timeout.
+ * JSON Schema for validating a target streaming request timeout.
  *
  * @category Target
- * @internal
  */
 export const targetStreamTimeoutSchema: JSONSchemaType<number> = {
   type: 'integer',
@@ -121,10 +111,9 @@ export const targetStreamTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * Schema for validating target headers size limit.
+ * JSON Schema for validating a target headers size limit.
  *
  * @category Target
- * @internal
  */
 export const targetHeadersSizeLimitSchema: JSONSchemaType<number> = {
   type: 'integer',
@@ -133,10 +122,9 @@ export const targetHeadersSizeLimitSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * Schema for validating target body size limit.
+ * JSON Schema for validating a target body size limit.
  *
  * @category Target
- * @internal
  */
 export const targetBodySizeLimitSchema: JSONSchemaType<number> = {
   type: 'integer',
@@ -145,10 +133,9 @@ export const targetBodySizeLimitSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * Schema for validating target content size limit.
+ * JSON Schema for validating target content.
  *
  * @category Target
- * @internal
  */
 export const targetContentSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -157,12 +144,12 @@ export const targetContentSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * Schema for validating raw target data from Redis.
+ * JSON Schema for validating raw target data from Redis.
  *
  * @category Target
  * @internal
  */
-const rawTargetSchema: JSONSchemaType<RawTarget> = {
+export const rawTargetSchema: JSONSchemaType<RawTarget> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -200,12 +187,12 @@ const rawTargetSchema: JSONSchemaType<RawTarget> = {
 } as const
 
 /**
- * Schema for validating raw full target data from Redis.
+ * JSON Schema for validating raw full target data from Redis.
  *
  * @category Target
  * @internal
  */
-const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
+export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -267,7 +254,7 @@ const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
 } as const
 
 /**
- * Schema for validating target link.
+ * JSON Schema for validating a target link.
  *
  * @category Target
  * @internal
@@ -280,7 +267,7 @@ export const targetLinkSchema: JSONSchemaType<TargetLink> = {
 } as const
 
 /**
- * Schema for validating target hosts.
+ * JSON Schema for validating target hosts dictionary.
  *
  * @category Target
  * @internal
@@ -289,17 +276,4 @@ export const targetHostsSchema: JSONSchemaType<TargetHosts> = {
   type: 'object',
   required: [],
   additionalProperties: targetLinkSchema,
-} as const
-
-/**
- * Collection of all schemas used by the target module.
- *
- * @category Target
- * @internal
- */
-export const targetSchemas: ValidatorSchemas = {
-  'database-raw-target': rawTargetSchema,
-  'database-raw-full-target': rawFullTargetSchema,
-  'database-target-link': targetLinkSchema,
-  'database-target-hosts': targetHostsSchema,
 } as const

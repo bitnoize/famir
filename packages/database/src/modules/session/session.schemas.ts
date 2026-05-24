@@ -1,6 +1,5 @@
 import {
   JSONSchemaType,
-  ValidatorSchemas,
   booleanSchema,
   counterSchema,
   customIdentSchema,
@@ -11,10 +10,9 @@ import { RawSession } from './session.functions.js'
 import { UpgradeSessionParams } from './session.models.js'
 
 /**
- * Schema for validating upgrade session params.
+ * JSON Schema for validating session upgrade parameters.
  *
  * @category Session
- * @internal
  */
 export const upgradeSessionParamsSchema: JSONSchemaType<UpgradeSessionParams> = {
   type: 'object',
@@ -32,12 +30,12 @@ export const upgradeSessionParamsSchema: JSONSchemaType<UpgradeSessionParams> = 
 } as const
 
 /**
- * Schema for validating raw session data from Redis.
+ * JSON Schema for validating raw session data from Redis.
  *
  * @category Session
  * @internal
  */
-const rawSessionSchema: JSONSchemaType<RawSession> = {
+export const rawSessionSchema: JSONSchemaType<RawSession> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -60,14 +58,4 @@ const rawSessionSchema: JSONSchemaType<RawSession> = {
     authorized_at: timestampSchema,
   },
   additionalProperties: false,
-} as const
-
-/**
- * Collection of all schemas used by the session module.
- *
- * @category Session
- * @internal
- */
-export const sessionSchemas: ValidatorSchemas = {
-  'database-raw-session': rawSessionSchema,
 } as const

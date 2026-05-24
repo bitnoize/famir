@@ -1,40 +1,50 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * @category none
+ * Error codes that can be returned by the http-client.
+ *
+ * These codes provide a standardized way to categorize and handle
+ * http-client-related errors in the application.
  */
 export type HttpClientErrorCode = 'BAD_GATEWAY' | 'GATEWAY_TIMEOUT'
 
 /**
- * @category none
+ * Options for creating an http-client error.
  */
 export type HttpClientErrorOptions = CommonErrorOptions & {
   code: HttpClientErrorCode
 }
 
-const codeToStatusMap: Record<HttpClientErrorCode, number> = {
+/**
+ * Mapping of error codes to their corresponding HTTP status codes.
+ */
+const codeToStatus: Record<HttpClientErrorCode, number> = {
   BAD_GATEWAY: 502,
   GATEWAY_TIMEOUT: 504,
 } as const
 
 /**
- * Represents HTTP client error
- *
- * @category none
+ * Error class for http-client operation failures.
  */
 export class HttpClientError extends CommonError {
+  /** Associated error code. */
   code: HttpClientErrorCode
+
+  /** Associated HTTP status code. */
   status: number
 
+  /**
+   * Creates a new http-client error instance.
+   *
+   * @param message - The human-readable description of the error.
+   * @param options - The error options, including the error code.
+   */
   constructor(message: string, options: HttpClientErrorOptions) {
-    super(message, {
-      cause: options.cause,
-      context: options.context,
-    })
+    super(message, options)
 
     this.name = 'HttpClientError'
     this.code = options.code
 
-    this.status = codeToStatusMap[this.code]
+    this.status = codeToStatus[this.code]
   }
 }

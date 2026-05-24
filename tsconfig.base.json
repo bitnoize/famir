@@ -1,8 +1,5 @@
 {
-  "include": ["src"],
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
     "target": "esnext",
     "module": "nodenext",
     "moduleResolution": "nodenext",
@@ -18,6 +15,8 @@
     "composite": true,
     "skipLibCheck": true,
     "removeComments": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true
   }
 }

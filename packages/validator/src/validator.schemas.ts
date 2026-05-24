@@ -1,31 +1,22 @@
 import { JSONSchemaType } from './validator.js'
 
 /**
- * Schema for a boolean.
- *
- * @category none
- * @internal
+ * JSON Schema for validating a boolean value.
  */
 export const booleanSchema: JSONSchemaType<boolean> = {
   type: 'boolean',
 } as const
 
 /**
- * Schema for a custom identificator.
- *
- * @category none
- * @internal
+ * JSON Schema for validating custom identifiers.
  */
 export const customIdentSchema: JSONSchemaType<string> = {
   type: 'string',
-  pattern: '^[0-9a-zA-Z-_]{1,64}$',
+  pattern: '^[0-9a-zA-Z-_]{2,64}$',
 } as const
 
 /**
- * Schema for a random identificator.
- *
- * @category none
- * @internal
+ * JSON Schema for validating random identifiers.
  */
 export const randomIdentSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -33,10 +24,7 @@ export const randomIdentSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * Schema for a counter.
- *
- * @category none
- * @internal
+ * JSON Schema for validating a counter number.
  */
 export const counterSchema: JSONSchemaType<number> = {
   type: 'integer',
@@ -45,23 +33,10 @@ export const counterSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * Schema for a timestamp.
- *
- * @category none
- * @internal
+ * JSON Schema for validating a timestamp.
  */
 export const timestampSchema: JSONSchemaType<number> = {
   type: 'integer',
   minimum: 0,
-  maximum: 8640000000000000,
-} as const
-
-/**
- * Schema for a serializable data.
- *
- * @category none
- * @internal
- */
-export const serializableSchema: JSONSchemaType<string> = {
-  type: 'string',
+  maximum: 8_640_000_000_000_000,
 } as const

@@ -1,28 +1,29 @@
 import { proxyUrlSchema } from '@famir/database'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
 import {
-  JSONSchemaType,
-  ValidatorSchemas,
-  customIdentSchema,
-  randomIdentSchema,
-} from '@famir/validator'
-import {
-  CreateProxyData,
-  DeleteProxyData,
-  ListProxiesData,
-  ReadProxyData,
-  ToggleProxyData,
+  CreateProxyArgs,
+  DeleteProxyArgs,
+  ListProxiesArgs,
+  ReadProxyArgs,
+  ToggleProxyArgs,
 } from './proxy.js'
 
 /**
+ * JSON Schema for validating a create proxy args.
+ *
  * @category Proxy
  * @internal
  */
-const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
+export const createProxyArgsSchema: JSONSchemaType<CreateProxyArgs> = {
   type: 'object',
-  required: ['campaignId', 'proxyId', 'url', 'lockSecret'],
+  required: ['_', 'url', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    proxyId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     url: proxyUrlSchema,
     lockSecret: randomIdentSchema,
   },
@@ -30,70 +31,83 @@ const createProxyDataSchema: JSONSchemaType<CreateProxyData> = {
 } as const
 
 /**
+ * JSON Schema for validating a read proxy args.
+ *
  * @category Proxy
  * @internal
  */
-const readProxyDataSchema: JSONSchemaType<ReadProxyData> = {
+export const readProxyArgsSchema: JSONSchemaType<ReadProxyArgs> = {
   type: 'object',
-  required: ['campaignId', 'proxyId'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
-    proxyId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a toggle proxy args.
+ *
  * @category Proxy
  * @internal
  */
-const toggleProxyDataSchema: JSONSchemaType<ToggleProxyData> = {
+export const toggleProxyArgsSchema: JSONSchemaType<ToggleProxyArgs> = {
   type: 'object',
-  required: ['campaignId', 'proxyId', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    proxyId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a delete proxy args.
+ *
  * @category Proxy
  * @internal
  */
-const deleteProxyDataSchema: JSONSchemaType<DeleteProxyData> = {
+export const deleteProxyArgsSchema: JSONSchemaType<DeleteProxyArgs> = {
   type: 'object',
-  required: ['campaignId', 'proxyId', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    proxyId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a list proxies args.
+ *
  * @category Proxy
  * @internal
  */
-const listProxiesDataSchema: JSONSchemaType<ListProxiesData> = {
+export const listProxiesArgsSchema: JSONSchemaType<ListProxiesArgs> = {
   type: 'object',
-  required: ['campaignId'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
   },
   additionalProperties: false,
-} as const
-
-/**
- * @category Proxy
- * @internal
- */
-export const proxySchemas: ValidatorSchemas = {
-  'console-create-proxy-data': createProxyDataSchema,
-  'console-read-proxy-data': readProxyDataSchema,
-  'console-toggle-proxy-data': toggleProxyDataSchema,
-  'console-delete-proxy-data': deleteProxyDataSchema,
-  'console-list-proxies-data': listProxiesDataSchema,
 } as const

@@ -1,27 +1,47 @@
 import { DIContainer } from '@famir/common'
 import { FullMessageModel, MESSAGE_REPOSITORY, MessageRepository } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import { MESSAGE_SERVICE, ReadMessageData } from './message.js'
 
 /**
- * Represents a message service
+ * DI token for the message service.
+ *
+ * @category Message
+ */
+export const MESSAGE_SERVICE = Symbol('MessageService')
+
+/**
+ * Represents the message service.
  *
  * @category Message
  */
 export class MessageService {
   /**
-   * Register dependency
+   * Registers the service as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<MessageService>(
       MESSAGE_SERVICE,
-      (c) => new MessageService(c.resolve(MESSAGE_REPOSITORY))
+      (c) => new MessageService(c.resolve<MessageRepository>(MESSAGE_REPOSITORY))
     )
   }
 
+  /**
+   * Creates a new service instance.
+   *
+   * @param messageRepository - The message repository instance.
+   */
   constructor(protected readonly messageRepository: MessageRepository) {}
 
-  async read(data: ReadMessageData): Promise<FullMessageModel> {
+  /**
+   * Reads the message by its ID.
+   *
+   * @param data - The data object.
+   * @returns The message model.
+   * @throws {@link ReplServerError} If the message is not found.
+   */
+  async read(data: { campaignId: string; messageId: string }): Promise<FullMessageModel> {
     const message = await this.messageRepository.readFull(data.campaignId, data.messageId)
 
     if (!message) {

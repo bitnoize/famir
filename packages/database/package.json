@@ -1,7 +1,7 @@
 {
   "name": "@famir/database",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Famir database module",
   "keywords": [
     "famir",
@@ -44,10 +44,10 @@
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
     "@famir/common": "*",
-    "@famir/http-proto": "*",
     "@famir/config": "*",
+    "@famir/http-proto": "*",
     "@famir/logger": "*",
     "@famir/validator": "*",
-    "redis": "^5.12.1"
+    "redis": "^6.1.0"
   }
 }

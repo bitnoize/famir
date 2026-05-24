@@ -8,15 +8,13 @@ import {
 } from './query-string.js'
 
 /**
- * Wrapper for HTTP message body.
- *
- * @category none
+ * Wrapper class for HTTP message bodies.
  */
 export class HttpBodyWrap {
   /**
-   * Factory method to create wrapper from scratch.
+   * Factory method to create a wrapper from scratch.
    *
-   * @returns New wrapper instance
+   * @returns A new wrapper instance with an empty body.
    */
   static fromScratch(): HttpBodyWrap {
     return new HttpBodyWrap(Buffer.alloc(0))
@@ -25,18 +23,18 @@ export class HttpBodyWrap {
   #body: HttpBody
 
   /**
-   * Create a new wrapper instance.
+   * Creates a new wrapper instance.
    *
-   * @param body - The body to wrap
+   * @param body - The body buffer to wrap.
    */
   constructor(body: HttpBody) {
     this.#body = body
   }
 
   /**
-   * Clone wrapper with a copy of the body.
+   * Clones the wrapper with a copy of the body.
    *
-   * @returns New independent wrapper instance
+   * @returns A new independent wrapper instance.
    */
   clone(): HttpBodyWrap {
     return new HttpBodyWrap(Buffer.from(this.#body))
@@ -45,18 +43,18 @@ export class HttpBodyWrap {
   #isFrozen: boolean = false
 
   /**
-   * Check if wrapper is frozen (read-only).
+   * Checks if the wrapper is frozen (read-only).
    *
-   * @returns true if wrapper is frozen, false otherwise
+   * @returns `true` if the wrapper is frozen, `false` otherwise.
    */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
   /**
-   * Freeze wrapper to prevent modifications.
+   * Freezes the wrapper to prevent modifications.
    *
-   * @returns This wrapper for method chaining
+   * @returns This wrapper for method chaining.
    */
   freeze(): this {
     this.#isFrozen = true
@@ -65,29 +63,29 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Get body buffer size in bytes.
+   * Gets the body buffer size in bytes.
    *
-   * @returns Size of the body
+   * @returns The size of the body.
    */
   get length(): number {
     return this.#body.length
   }
 
   /**
-   * Get raw body buffer.
+   * Gets the raw body buffer.
    *
-   * @returns Buffer containing the body
+   * @returns The Buffer containing the body.
    */
   get(): HttpBody {
     return this.#body
   }
 
   /**
-   * Set raw body buffer.
+   * Sets the raw body buffer.
    *
-   * @param body - Buffer to set as body
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
+   * @param body - The Buffer to set as the body.
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
    */
   set(body: HttpBody): this {
     this.sureNotFrozen('set')
@@ -102,10 +100,10 @@ export class HttpBodyWrap {
   #cacheBase64: string | null = null
 
   /**
-   * Get body as base64 string (cached).
+   * Gets the body as a Base64 string (cached).
    *
-   * @returns Base64 encoded body
-   * @throws If Base64 encode fails
+   * @returns The Base64 encoded body.
+   * @throws Error If Base64 encoding fails.
    */
   getBase64(): string {
     if (this.#cacheBase64 != null) {
@@ -120,12 +118,12 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Set body from base64 string.
+   * Sets the body from a Base64 string.
    *
-   * @param base64 - Base64 encoded string
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
-   * @throws If Base64 decode fails
+   * @param base64 - The Base64 encoded string.
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
+   * @throws Error If Base64 decoding fails.
    */
   setBase64(base64: string): this {
     this.sureNotFrozen('setBase64')
@@ -140,11 +138,11 @@ export class HttpBodyWrap {
   #cacheText: string | null = null
 
   /**
-   * Get body as text string (cached).
+   * Gets the body as a text string (cached).
    *
-   * @param charset - Character encoding (default: 'utf8')
-   * @returns Decoded text
-   * @throws If Iconv decode fails
+   * @param charset - The character encoding, default: 'utf8'.
+   * @returns The decoded text.
+   * @throws Error If decoding fails.
    */
   getText(charset: string = 'utf8'): HttpText {
     if (this.#cacheText != null) {
@@ -159,13 +157,13 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Set body from text string.
+   * Sets the body from a text string.
    *
-   * @param text - Text to set as body
-   * @param charset - Character encoding (default: 'utf8')
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
-   * @throws If Iconv encode fails
+   * @param text - The text to set as the body.
+   * @param charset - The character encoding, default: 'utf8'.
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
+   * @throws Error If encoding fails.
    */
   setText(text: HttpText, charset: string = 'utf8'): this {
     this.sureNotFrozen('setText')
@@ -180,11 +178,11 @@ export class HttpBodyWrap {
   #cacheJson: HttpJson | null = null
 
   /**
-   * Get body as JSON object (cached).
+   * Gets the body as a JSON object (cached).
    *
-   * @param charset - Character encoding (optional)
-   * @returns Parsed JSON object
-   * @throws If Iconv decode fails, or JSON parse fails
+   * @param charset - The optional character encoding.
+   * @returns The parsed JSON object.
+   * @throws Error If decoding or JSON parsing fails.
    */
   getJson(charset?: string): HttpJson {
     if (this.#cacheJson != null) {
@@ -204,13 +202,13 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Set body from JSON object.
+   * Sets the body from a JSON object.
    *
-   * @param json - JSON object to stringify
-   * @param charset - Character encoding (optional)
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
-   * @throws If JSON stringify fails, or Iconv encode fails
+   * @param json - The JSON object to stringify.
+   * @param charset - The optional character encoding.
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
+   * @throws Error If JSON stringification or encoding fails.
    */
   setJson(json: HttpJson, charset?: string): this {
     this.sureNotFrozen('setJson')
@@ -223,20 +221,20 @@ export class HttpBodyWrap {
     return this
   }
 
-  /** Custom options for parsing query strings */
+  /** Custom options for parsing query strings. */
   readonly parseQueryStringOptions: ParseQueryStringOptions = {}
 
-  /** Custom options for formatting query strings */
+  /** Custom options for formatting query strings. */
   readonly formatQueryStringOptions: FormatQueryStringOptions = {}
 
   #cacheQueryString: HttpQueryString | null = null
 
   /**
-   * Get body as query string object (cached).
+   * Gets the body as a query string object (cached).
    *
-   * @param charset - Character encoding (optional)
-   * @returns Parsed query string as object
-   * @throws If parse query string fails
+   * @param charset - The optional character encoding.
+   * @returns The parsed query string object.
+   * @throws Error If parsing fails.
    */
   getQueryString(charset?: string): HttpQueryString {
     if (this.#cacheQueryString != null) {
@@ -255,13 +253,13 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Set body from query string object.
+   * Sets the body from a query string object.
    *
-   * @param queryString - Query string object
-   * @param charset - Character encoding (optional)
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
-   * @throws If format query string fails
+   * @param queryString - The query string object.
+   * @param charset - The optional character encoding.
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
+   * @throws Error If formatting fails.
    */
   setQueryString(queryString: HttpQueryString, charset?: string): this {
     this.sureNotFrozen('setQueryString')
@@ -278,10 +276,10 @@ export class HttpBodyWrap {
   }
 
   /**
-   * Clear body and reset all caches.
+   * Clears the body and resets all caches.
    *
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
    */
   reset(): this {
     this.sureNotFrozen('reset')

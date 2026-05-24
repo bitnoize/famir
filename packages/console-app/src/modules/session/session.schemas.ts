@@ -1,29 +1,22 @@
-import {
-  JSONSchemaType,
-  ValidatorSchemas,
-  customIdentSchema,
-  randomIdentSchema,
-} from '@famir/validator'
-import { ReadSessionData } from './session.js'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
+import { ReadSessionArgs } from './session.js'
 
 /**
+ * JSON Schema for validating a read session args.
+ *
  * @category Session
  * @internal
  */
-const readSessionDataSchema: JSONSchemaType<ReadSessionData> = {
+export const readSessionArgsSchema: JSONSchemaType<ReadSessionArgs> = {
   type: 'object',
-  required: ['campaignId', 'sessionId'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
-    sessionId: randomIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, randomIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
   },
   additionalProperties: false,
-} as const
-
-/**
- * @category Session
- * @internal
- */
-export const sessionSchemas: ValidatorSchemas = {
-  'console-read-session-data': readSessionDataSchema,
 } as const

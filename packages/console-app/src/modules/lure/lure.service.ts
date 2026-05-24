@@ -8,43 +8,52 @@ import {
   LureModel,
   LureRepository,
   REDIRECTOR_REPOSITORY,
+  RedirectorParams,
   RedirectorRepository,
   TARGET_REPOSITORY,
   TargetRepository,
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import {
-  CreateLureData,
-  DeleteLureData,
-  LURE_SERVICE,
-  ListLuresData,
-  MakeLureUrlData,
-  ReadLureData,
-  ToggleLureData,
-} from './lure.js'
 
 /**
- * Represents a lure service
+ * DI token for the lure service.
+ *
+ * @category Lure
+ */
+export const LURE_SERVICE = Symbol('LureService')
+
+/**
+ * Represents the lure service.
  *
  * @category Lure
  */
 export class LureService {
   /**
-   * Register dependency
+   * Registers the service as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<LureService>(
       LURE_SERVICE,
       (c) =>
         new LureService(
-          c.resolve(CAMPAIGN_REPOSITORY),
-          c.resolve(TARGET_REPOSITORY),
-          c.resolve(REDIRECTOR_REPOSITORY),
-          c.resolve(LURE_REPOSITORY)
+          c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
+          c.resolve<TargetRepository>(TARGET_REPOSITORY),
+          c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
+          c.resolve<LureRepository>(LURE_REPOSITORY)
         )
     )
   }
 
+  /**
+   * Creates a new service instance.
+   *
+   * @param campaignRepository - The campaign repository instance.
+   * @param targetRepository - The target repository instance.
+   * @param redirectorRepository - The redirector repository instance.
+   * @param lureRepository - The lure repository instance.
+   */
   constructor(
     protected readonly campaignRepository: CampaignRepository,
     protected readonly targetRepository: TargetRepository,
@@ -52,7 +61,19 @@ export class LureService {
     protected readonly lureRepository: LureRepository
   ) {}
 
-  async create(data: CreateLureData): Promise<true> {
+  /**
+   * Creates a new lure.
+   *
+   * @param data - The data object.
+   * @returns The created lure model.
+   */
+  async create(data: {
+    campaignId: string
+    lureId: string
+    path: string
+    redirectorId: string
+    lockSecret: string
+  }): Promise<LureModel> {
     try {
       await this.lureRepository.create(
         data.campaignId,
@@ -61,8 +82,6 @@ export class LureService {
         data.redirectorId,
         data.lockSecret
       )
-
-      return true
     } catch (error) {
       if (error instanceof DatabaseError) {
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN']
@@ -76,9 +95,7 @@ export class LureService {
 
       throw error
     }
-  }
 
-  async read(data: ReadLureData): Promise<LureModel> {
     const lure = await this.lureRepository.read(data.campaignId, data.lureId)
 
     if (!lure) {
@@ -90,11 +107,33 @@ export class LureService {
     return lure
   }
 
-  async enable(data: ToggleLureData): Promise<true> {
+  /**
+   * Reads the lure by its ID.
+   *
+   * @param data - The data object.
+   * @returns The lure model.
+   * @throws {@link ReplServerError} If the lure is not found.
+   */
+  async read(data: { campaignId: string; lureId: string }): Promise<LureModel> {
+    const lure = await this.lureRepository.read(data.campaignId, data.lureId)
+
+    if (!lure) {
+      throw new ReplServerError(`Lure not found`, {
+        code: 'NOT_FOUND',
+      })
+    }
+
+    return lure
+  }
+
+  /**
+   * Enables the lure, making it available for request routing.
+   *
+   * @param data - The data object.
+   */
+  async enable(data: { campaignId: string; lureId: string; lockSecret: string }): Promise<void> {
     try {
       await this.lureRepository.enable(data.campaignId, data.lureId, data.lockSecret)
-
-      return true
     } catch (error) {
       if (error instanceof DatabaseError) {
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
@@ -110,11 +149,14 @@ export class LureService {
     }
   }
 
-  async disable(data: ToggleLureData): Promise<true> {
+  /**
+   * Disables the lure, stopping request routing.
+   *
+   * @param data - The data object.
+   */
+  async disable(data: { campaignId: string; lureId: string; lockSecret: string }): Promise<void> {
     try {
       await this.lureRepository.disable(data.campaignId, data.lureId, data.lockSecret)
-
-      return true
     } catch (error) {
       if (error instanceof DatabaseError) {
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
@@ -130,7 +172,17 @@ export class LureService {
     }
   }
 
-  async delete(data: DeleteLureData): Promise<true> {
+  /**
+   * Deletes the lure by its ID.
+   *
+   * @param data - The data object.
+   */
+  async delete(data: {
+    campaignId: string
+    lureId: string
+    redirectorId: string
+    lockSecret: string
+  }): Promise<void> {
     try {
       await this.lureRepository.delete(
         data.campaignId,
@@ -138,8 +190,6 @@ export class LureService {
         data.redirectorId,
         data.lockSecret
       )
-
-      return true
     } catch (error) {
       if (error instanceof DatabaseError) {
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
@@ -155,7 +205,13 @@ export class LureService {
     }
   }
 
-  async list(data: ListLuresData): Promise<LureModel[]> {
+  /**
+   * Lists all lures for the campaign.
+   *
+   * @param data - The data object.
+   * @returns The array of lure models.
+   */
+  async list(data: { campaignId: string }): Promise<LureModel[]> {
     const lures = await this.lureRepository.list(data.campaignId)
 
     if (!lures) {
@@ -167,7 +223,22 @@ export class LureService {
     return lures
   }
 
-  async makeUrl(data: MakeLureUrlData): Promise<string> {
+  /**
+   * Makes the lure URL with optional params.
+   *
+   * @param data - The data object.
+   * @returns The lure URL string.
+   * @throws {@link ReplServerError} If the campaign is not found.
+   * @throws {@link ReplServerError} If the lure is not found.
+   * @throws {@link ReplServerError} If the target is not found.
+   * @throws {@link ReplServerError} If the redirector is not found.
+   */
+  async makeUrl(data: {
+    campaignId: string
+    lureId: string
+    targetId: string
+    params: RedirectorParams
+  }): Promise<string> {
     const lure = await this.lureRepository.read(data.campaignId, data.lureId)
 
     if (!lure) {

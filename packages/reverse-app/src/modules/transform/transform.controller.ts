@@ -4,48 +4,51 @@ import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import { TRANSFORM_CONTROLLER } from './transform.js'
 
 /**
- * Represents a transform controller
+ * DI token for the transform controller.
+ *
+ * @category Transform
+ */
+export const TRANSFORM_CONTROLLER = Symbol('TransformController')
+
+/**
+ * Represents the transform controller.
  *
  * @category Transform
  */
 export class TransformController extends BaseController {
   /**
-   * Register dependency
+   * Registers the controller as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<TransformController>(
       TRANSFORM_CONTROLLER,
       (c) =>
         new TransformController(
-          c.resolve(VALIDATOR),
-          c.resolve(LOGGER),
-          c.resolve(TEMPLATER),
-          c.resolve(HTTP_SERVER_ROUTER)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the controller from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The controller instance.
    */
-  static resolve(container: DIContainer): TransformController {
-    return container.resolve(TRANSFORM_CONTROLLER)
+  static resolve(container: DIContainer) {
+    return container.resolve<TransformController>(TRANSFORM_CONTROLLER)
   }
 
-  constructor(
-    validator: Validator,
-    logger: Logger,
-    templater: Templater,
-    router: HttpServerRouter
-  ) {
-    super(validator, logger, templater, router)
-
-    this.logger.debug(`TransformController initialized`)
-  }
-
+  /**
+   * Registers used middleware in the router.
+   */
   use() {
     this.router.addMiddleware('transform', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')

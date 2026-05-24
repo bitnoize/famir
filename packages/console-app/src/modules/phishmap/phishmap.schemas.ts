@@ -24,24 +24,25 @@ import {
 } from '@famir/database'
 import {
   JSONSchemaType,
-  ValidatorSchemas,
   booleanSchema,
   customIdentSchema,
   randomIdentSchema,
 } from '@famir/validator'
 import {
-  DumpPhishmapData,
+  DumpPhishmapArgs,
   Phishmap,
   PhishmapCampaign,
   PhishmapLure,
   PhishmapProxy,
   PhishmapRedirector,
   PhishmapTarget,
-  PurgePhishmapData,
-  RestorePhishmapData,
+  PurgePhishmapArgs,
+  RestorePhishmapArgs,
 } from './phishmap.js'
 
 /**
+ * JSON Schema for validating a phishmap campaign.
+ *
  * @category Phishmap
  * @internal
  */
@@ -71,6 +72,8 @@ const phishmapCampaignSchema: JSONSchemaType<PhishmapCampaign> = {
 } as const
 
 /**
+ * JSON Schema for validating a phishmap proxy.
+ *
  * @category Phishmap
  * @internal
  */
@@ -86,6 +89,8 @@ const phishmapProxySchema: JSONSchemaType<PhishmapProxy> = {
 } as const
 
 /**
+ * JSON Schema for validating a phishmap target.
+ *
  * @category Phishmap
  * @internal
  */
@@ -143,6 +148,8 @@ const phishmapTargetSchema: JSONSchemaType<PhishmapTarget> = {
 } as const
 
 /**
+ * JSON Schema for validating a phishmap redirector.
+ *
  * @category Phishmap
  * @internal
  */
@@ -159,6 +166,8 @@ const phishmapRedirectorSchema: JSONSchemaType<PhishmapRedirector> = {
 } as const
 
 /**
+ * JSON Schema for validating a phishmap lure.
+ *
  * @category Phishmap
  * @internal
  */
@@ -175,10 +184,12 @@ const phishmapLureSchema: JSONSchemaType<PhishmapLure> = {
 } as const
 
 /**
+ * JSON Schema for validating a phishmap.
+ *
  * @category Phishmap
  * @internal
  */
-const phishmapSchema: JSONSchemaType<Phishmap> = {
+export const phishmapSchema: JSONSchemaType<Phishmap> = {
   type: 'object',
   required: ['campaign', 'proxies', 'targets', 'redirectors', 'lures'],
   properties: {
@@ -204,27 +215,49 @@ const phishmapSchema: JSONSchemaType<Phishmap> = {
 } as const
 
 /**
+ * JSON Schema for validating a dump phishmap args.
+ *
  * @category Phishmap
  * @internal
  */
-const dumpPhishmapDataSchema: JSONSchemaType<DumpPhishmapData> = {
+export const dumpPhishmapArgsSchema: JSONSchemaType<DumpPhishmapArgs> = {
   type: 'object',
-  required: ['campaignId'],
+  required: ['_', 'file'],
   properties: {
-    campaignId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
+    file: {
+      type: 'string',
+    },
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a restore phishmap args.
+ *
  * @category Phishmap
  * @internal
  */
-const restorePhishmapDataSchema: JSONSchemaType<RestorePhishmapData> = {
+export const restorePhishmapArgsSchema: JSONSchemaType<RestorePhishmapArgs> = {
   type: 'object',
-  required: ['phishmap'],
+  required: ['_', 'file'],
   properties: {
-    phishmap: phishmapSchema,
+    _: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      minItems: 0,
+      maxItems: 0,
+    },
+    file: {
+      type: 'string',
+    },
     campaignId: {
       ...customIdentSchema,
       nullable: true,
@@ -266,24 +299,22 @@ const restorePhishmapDataSchema: JSONSchemaType<RestorePhishmapData> = {
 } as const
 
 /**
+ * JSON Schema for validating a purge phishmap args.
+ *
  * @category Phishmap
  * @internal
  */
-const purgePhishmapDataSchema: JSONSchemaType<PurgePhishmapData> = {
+export const purgePhishmapArgsSchema: JSONSchemaType<PurgePhishmapArgs> = {
   type: 'object',
-  required: ['campaignId'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
+    force: booleanSchema,
   },
   additionalProperties: false,
-} as const
-
-/**
- * @category Phishmap
- * @internal
- */
-export const phishmapSchemas: ValidatorSchemas = {
-  'console-dump-phishmap-data': dumpPhishmapDataSchema,
-  'console-restore-phishmap-data': restorePhishmapDataSchema,
-  'console-purge-phishmap-data': purgePhishmapDataSchema,
 } as const

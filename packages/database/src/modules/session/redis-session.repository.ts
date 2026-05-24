@@ -2,34 +2,57 @@ import { DIContainer, randomIdent } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
+import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
 import { DatabaseError } from '../../database.error.js'
-import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawSession } from './session.functions.js'
 import { SESSION_REPOSITORY, SessionRepository } from './session.js'
 import { SessionModel } from './session.models.js'
-import { sessionSchemas } from './session.schemas.js'
+import { rawSessionSchema } from './session.schemas.js'
 
 /**
- * Redis session repository implementation.
+ * Redis-based session repository implementation.
+ *
+ * Depends:
+ * - {@link Validator} via {@link VALIDATOR} token
+ * - {@link Config} via {@link CONFIG} token
+ * - {@link Logger} via {@link LOGGER} token
+ * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { SESSION_REPOSITORY, SessionRepository, RedisSessionRepository } from '@famir/database'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
+ *
+ * // Register dependency in container
+ * RedisSessionRepository.register(container)
+ *
+ * // Resolve dependency from container
+ * const sessionRepository = container.resolve<SessionRepository>(SESSION_REPOSITORY)
+ *
+ * // TODO more examples
+ * ```
  *
  * @category Session
  */
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {
   /**
-   * Register session repository instance as singleton in DI container.
+   * Registers the session repository as a singleton in the DI container.
    *
-   * @param container - DI container to register in
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<SessionRepository>(
       SESSION_REPOSITORY,
       (c) =>
         new RedisSessionRepository(
-          c.resolve(VALIDATOR),
-          c.resolve(CONFIG),
-          c.resolve(LOGGER),
-          c.resolve(DATABASE_CONNECTOR)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR)
         )
     )
   }
@@ -37,22 +60,15 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
   /**
    * Creates a new session repository instance.
    *
-   * @param validator - The validator instance
-   * @param config - The database config instance
-   * @param logger - The logger instance
-   * @param connector - The database connector instance
+   * @param validator - The validator instance.
+   * @param config - The config instance.
+   * @param logger - The logger instance.
+   * @param connector - The connector instance.
    */
-  constructor(
-    validator: Validator,
-    config: Config<RedisDatabaseConfig>,
-    logger: Logger,
-    connector: DatabaseConnector
-  ) {
+  constructor(validator: Validator, config: Config, logger: Logger, connector: DatabaseConnector) {
     super(validator, config, logger, connector, 'session')
 
-    this.validator.addSchemas(sessionSchemas)
-
-    this.logger.debug(`SessionRepository initialized`)
+    this.validator.addSchema('database-raw-session', rawSessionSchema)
   }
 
   async create(campaignId: string): Promise<SessionModel> {
@@ -71,17 +87,13 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { session: { campaignId, sessionId } })
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
-      this.raiseError(error, 'create', { campaignId, sessionId })
+      this.handleRepositoryError(error, 'create', { campaignId, sessionId })
     }
   }
 
@@ -95,7 +107,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'read', { campaignId, sessionId })
+      this.handleRepositoryError(error, 'read', { campaignId, sessionId })
     }
   }
 
@@ -112,17 +124,13 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { session: { campaignId, sessionId } })
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
-      this.raiseError(error, 'auth', { campaignId, sessionId })
+      this.handleRepositoryError(error, 'auth', { campaignId, sessionId })
     }
   }
 
@@ -141,32 +149,27 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         secret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { session: { campaignId, lureId, sessionId } })
     } catch (error) {
-      this.raiseError(error, 'upgrade', { campaignId, lureId, sessionId })
+      this.handleRepositoryError(error, 'upgrade', { campaignId, lureId, sessionId })
     }
   }
 
   /**
    * Converts raw Redis data to a session model.
    *
-   * @param rawModel - The raw data from Redis
-   * @returns The session model, or `null` if the raw data is `null`
-   * @throws {@link DatabaseError} If the raw data fails validation
-   * @internal
+   * @param rawModel - The raw data from Redis.
+   * @returns The session model, or `null` if the raw data is `null`.
+   * @throws {@link DatabaseError} If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): SessionModel | null {
     if (rawModel === null) {
       return null
     }
 
-    this.validateRawData<RawSession>('database-raw-session', rawModel)
+    this.validateReply<RawSession>('database-raw-session', rawModel)
 
     return new SessionModel(
       rawModel.campaign_id,
@@ -183,10 +186,10 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
   /**
    * Converts raw Redis data to a session model and asserts it exists.
    *
-   * @param rawModel - The raw data from Redis
-   * @returns The session model
-   * @throws {@link DatabaseError} If the raw data fails validation
-   * @internal
+   * @param rawModel - The raw data from Redis.
+   * @returns The session model.
+   * @throws {@link DatabaseError} If the raw data is `null`.
+   * @throws {@link DatabaseError} If the raw data fails validation.
    */
   protected buildModelStrict(rawModel: unknown): SessionModel {
     const model = this.buildModel(rawModel)

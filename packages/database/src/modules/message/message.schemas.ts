@@ -1,30 +1,24 @@
 import {
-  httpConnectionSchema,
-  httpErrorsSchema,
-  httpHeadersSchema,
   httpMethodSchema,
-  httpPayloadSchema,
   httpRelativeUrlSchema,
   httpStatusSchema,
   httpTypeSchema,
 } from '@famir/http-proto'
 import {
   JSONSchemaType,
-  ValidatorSchemas,
   customIdentSchema,
   randomIdentSchema,
-  serializableSchema,
   timestampSchema,
 } from '@famir/validator'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
 /**
- * Schema for validating raw message data from Redis.
+ * JSON Schema for validating raw message data from Redis.
  *
  * @category Message
  * @internal
  */
-const rawMessageSchema: JSONSchemaType<RawMessage> = {
+export const rawMessageSchema: JSONSchemaType<RawMessage> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -60,12 +54,12 @@ const rawMessageSchema: JSONSchemaType<RawMessage> = {
 } as const
 
 /**
- * Schema for validating raw full message data from Redis.
+ * JSON Schema for validating raw full message data from Redis.
  *
  * @category Message
  * @internal
  */
-const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
+export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
   type: 'object',
   required: [
     'campaign_id',
@@ -98,33 +92,32 @@ const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     type: httpTypeSchema,
     method: httpMethodSchema,
     url: httpRelativeUrlSchema,
-    request_headers: serializableSchema,
-    request_body: serializableSchema,
+    request_headers: {
+      type: 'string',
+    },
+    request_body: {
+      type: 'string',
+    },
     status: httpStatusSchema,
-    response_headers: serializableSchema,
-    response_body: serializableSchema,
-    connection: serializableSchema,
-    payload: serializableSchema,
-    errors: serializableSchema,
+    response_headers: {
+      type: 'string',
+    },
+    response_body: {
+      type: 'string',
+    },
+    connection: {
+      type: 'string',
+    },
+    payload: {
+      type: 'string',
+    },
+    errors: {
+      type: 'string',
+    },
     analyze: customIdentSchema,
     start_time: timestampSchema,
     finish_time: timestampSchema,
     created_at: timestampSchema,
   },
   additionalProperties: false,
-} as const
-
-/**
- * Collection of all schemas used by the message module.
- *
- * @category Message
- * @internal
- */
-export const messageSchemas: ValidatorSchemas = {
-  'database-raw-message': rawMessageSchema,
-  'database-raw-full-message': rawFullMessageSchema,
-  'database-message-headers': httpHeadersSchema,
-  'database-message-connection': httpConnectionSchema,
-  'database-message-payload': httpPayloadSchema,
-  'database-message-errors': httpErrorsSchema,
 } as const

@@ -1,17 +1,55 @@
-import { EnabledFullTargetModel, FullRedirectorModel } from '@famir/database'
+import {
+  EnabledFullTargetModel,
+  EnabledProxyModel,
+  FullCampaignModel,
+  FullRedirectorModel,
+  SessionModel,
+  TargetModel,
+} from '@famir/database'
 import { HttpClientError } from '@famir/http-client'
-import { HttpServerContext, HttpServerError, HttpServerRouter } from '@famir/http-server'
+import {
+  HttpServerContext,
+  HttpServerContextState,
+  HttpServerError,
+  HttpServerRouter,
+} from '@famir/http-server'
+import { HttpMessage } from '@famir/http-tools'
 import { Logger } from '@famir/logger'
-import { Templater } from '@famir/templater'
+import { Templater, TemplaterData } from '@famir/templater'
 import { Validator } from '@famir/validator'
-import { ReverseContextState } from './base.js'
 
 /**
- * Represents a base controller
+ * Represents the controller context state.
  *
  * @category none
  */
+export interface ControllerContextState extends HttpServerContextState {
+  campaign?: FullCampaignModel
+  proxy?: EnabledProxyModel
+  target?: EnabledFullTargetModel
+  targets?: TargetModel[]
+  session?: SessionModel
+  message?: HttpMessage
+}
+
+/**
+ * Abstract base class for all application controllers.
+ *
+ * All specific controller implementations should extend this class to ensure
+ * consistent behavior and reduce code duplication.
+ *
+ * @category none
+ * @internal
+ */
 export abstract class BaseController {
+  /**
+   * Creates a new controller instance.
+   *
+   * @param validator - The validator instance.
+   * @param logger - The logger instance.
+   * @param templater - The templater instance.
+   * @param router - The http-server router instance.
+   */
   constructor(
     protected readonly validator: Validator,
     protected readonly logger: Logger,
@@ -19,7 +57,7 @@ export abstract class BaseController {
     protected readonly router: HttpServerRouter
   ) {}
 
-  protected getState<T extends ReverseContextState, K extends keyof T>(
+  protected getState<T extends ControllerContextState, K extends keyof T>(
     ctx: HttpServerContext,
     key: K
   ): NonNullable<T[K]> {
@@ -32,7 +70,7 @@ export abstract class BaseController {
     return state[key]
   }
 
-  protected setState<T extends ReverseContextState, K extends keyof T>(
+  protected setState<T extends ControllerContextState, K extends keyof T>(
     ctx: HttpServerContext,
     key: K,
     value: T[K]
@@ -297,7 +335,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel,
     redirector: FullRedirectorModel,
-    data: object
+    data: TemplaterData
   ): Promise<void> {
     if (ctx.method.is(['GET', 'HEAD'])) {
       ctx.status.set(200)

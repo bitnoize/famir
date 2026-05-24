@@ -1,97 +1,132 @@
 import { DIContainer } from '@famir/common'
 import { Logger, LOGGER } from '@famir/logger'
-import {
-  HTTP_SERVER_ASSETS,
-  HTTP_SERVER_ROUTER,
-  HttpServerAssets,
-  HttpServerMiddleware,
-  HttpServerMiddlewares,
-} from './http-server.js'
-
-type HttpServerMiddlewaresMap = Map<string, HttpServerMiddleware>
+import { HttpServerMiddleware } from './http-server-middleware.js'
 
 /**
- * Represents a HTTP server router
+ * DI token for the http-server router.
+ */
+export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
+
+/**
+ * Represents the http-server router.
  *
- * @category none
+ * Depends:
+ * - {@link Logger} via {@link LOGGER} token
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
+ *
+ * // Register in DI container
+ * HttpServerRouter.register(container)
+ *
+ * // Resolve from DI container
+ * const router = container.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
+ *
+ * // Add custom middleware
+ * router.addMiddleware('test', async (ctx, next) => {
+ *   // Send simple response
+ *   ctx.status(200)
+ *   ctx.responseBody.setText('Hello')
+ *
+ *   await ctx.sendResponse()
+ *
+ *   // Goto next middleware
+ *   await next()
+ * })
+ *
+ * // Activate router
+ * router.activate()
+ * ```
  */
 export class HttpServerRouter {
   /**
-   * Register dependency
+   * Registers the router as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
-  static register(container: DIContainer, assets: HttpServerAssets) {
-    container.registerSingleton<HttpServerAssets>(HTTP_SERVER_ASSETS, () => assets)
-
+  static register(container: DIContainer) {
     container.registerSingleton<HttpServerRouter>(
       HTTP_SERVER_ROUTER,
-      (c) => new HttpServerRouter(c.resolve(LOGGER), c.resolve(HTTP_SERVER_ASSETS))
+      (c) => new HttpServerRouter(c.resolve<Logger>(LOGGER))
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the router from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The router instance.
    */
-  static resolve(container: DIContainer): HttpServerRouter {
-    return container.resolve(HTTP_SERVER_ROUTER)
+  static resolve(container: DIContainer) {
+    return container.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
   }
 
-  protected readonly middlewares: HttpServerMiddlewaresMap = new Map()
+  /** Underlying middleware chain. */
+  protected readonly middlewareChain: [string, HttpServerMiddleware][] = []
 
-  constructor(
-    protected readonly logger: Logger,
-    protected readonly assets: HttpServerAssets
-  ) {
-    this.logger.debug(`HttpServerRouter initialized`)
-  }
+  /**
+   * Creates a new router instance.
+   *
+   * @param logger - The logger instance.
+   */
+  constructor(protected readonly logger: Logger) {}
 
   #isActive: boolean = false
 
   /**
-   * Check if router is active
-   */
-  get isActive(): boolean {
-    return this.#isActive
-  }
-
-  /**
-   * Activate router
+   * Activates the router, enabling middleware processing.
+   *
+   * Once activated, middleware can be retrieved but not added.
    */
   activate() {
-    this.#isActive = true
+    if (!this.#isActive) {
+      this.#isActive = true
+    }
   }
 
   /**
-   * Get asset by name
+   * Adds a middleware in the chain.
+   *
+   * Middleware can only be added before the router is activated.
+   *
+   * @param name - The unique name for the middleware.
+   * @param handler - The middleware handler function.
+   * @throws Error If the router is already active.
+   * @throws Error If a middleware with the same name already exists.
    */
-  getAsset(assetName: string): string | undefined {
-    return this.assets.get(assetName)
-  }
-
-  /**
-   * Add middleware
-   */
-  addMiddleware(middlewareName: string, middleware: HttpServerMiddleware) {
-    if (this.isActive) {
+  addMiddleware(name: string, handler: HttpServerMiddleware) {
+    if (this.#isActive) {
       throw new Error(`Router is active`)
     }
 
-    if (this.middlewares.has(middlewareName)) {
-      throw new Error(`Middleware already exists: ${middlewareName}`)
+    if (this.middlewareChain.find(([existName]) => existName === name)) {
+      throw new Error(`Middleware already exists: ${name}`)
     }
 
-    this.middlewares.set(middlewareName, middleware)
+    this.middlewareChain.push([name, handler])
 
-    this.logger.debug(`HttpServerRouter add middleware: ${middlewareName}`)
+    this.logger.debug(`HttpServerRouter add middleware: ${name}`)
   }
 
   /**
-   * Get middlewares
+   * Retrieves a middleware by its index.
+   *
+   * Middleware can only be retrieved after the router is activated.
+   *
+   * @param idx - The index position of the middleware.
+   * @returns The middleware tuple with name and handler, or `undefined` if not found.
+   * @throws Error If the router is not active.
    */
-  getMiddlewares(): HttpServerMiddlewares {
-    if (!this.isActive) {
+  getMiddleware(idx: number): [string, HttpServerMiddleware] | undefined {
+    if (!this.#isActive) {
       throw new Error(`Router not active`)
     }
 
-    return Array.from(this.middlewares)
+    return this.middlewareChain[idx]
   }
 }

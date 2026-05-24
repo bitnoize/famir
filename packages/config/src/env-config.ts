@@ -1,61 +1,102 @@
-import { DIContainer } from '@famir/common'
-import { JSONSchemaType, Validator, VALIDATOR } from '@famir/validator'
-import { Config, CONFIG, CONFIG_SCHEMA } from './config.js'
+import { BootstrapError, DIContainer } from '@famir/common'
+import { Validator, VALIDATOR } from '@famir/validator'
+import { Config, CONFIG, ConfigData } from './config.js'
 
 /**
- * Env config implementation
+ * Env-based config implementation.
  *
- * @category none
+ * Provides loading configuration data from environment variables.
+ *
+ * Depends:
+ * - {@link Validator} via {@link VALIDATOR} token
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { VALIDATOR, Validator, AjvValidator, JSONSchemaType } from '@famir/validator'
+ * import { CONFIG, Config, EnvConfig, ConfigData } from '@famir/config'
+ *
+ * // Get container singleton.
+ * const container = DIContainer.getInstance()
+ *
+ * // Register dependencies in container
+ * AjvValidator.register(container)
+ * EnvConfig.register(container)
+ *
+ * // Resolve dependencies from container
+ * const validator = container.resolve<Validator>(VALIDATOR)
+ * const config = container.resolve<Config>(CONFIG)
+ *
+ * // Define your configuration interface
+ * interface ServerConfig extends ConfigData {
+ *   PORT: number
+ *   SECRET: string
+ * }
+ *
+ * // Define your configuration schema
+ * const serverConfigSchema: JSONSchemaType<ServerConfig> = {
+ *   type: 'object',
+ *   required: ['PORT', 'SECRET'],
+ *   properties: {
+ *     PORT: { type: 'number', default: 3000 },
+ *     SECRET: { type: 'string' }
+ *   },
+ *   additionalProperties: false,
+ * } as const
+ *
+ * // Add schema to validator
+ * validator.addSchema('server-config', serverConfigSchema)
+ *
+ * // Get parsed and validated configuration object
+ * const configData = config.get<ServerConfig>('server-config')
+ *
+ * // TypeScript knows this is ServerConfig
+ * console.log(configData.PORT)
+ * ```
  */
-export class EnvConfig<T> implements Config<T> {
+export class EnvConfig implements Config {
   /**
-   * Register dependency
+   * Registers the config as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
-  static register<C>(container: DIContainer, configSchema: JSONSchemaType<C>) {
-    container.registerSingleton<JSONSchemaType<C>>(CONFIG_SCHEMA, () => configSchema)
-
-    container.registerSingleton<Config<C>>(
+  static register(container: DIContainer) {
+    container.registerSingleton<Config>(
       CONFIG,
-      (c) => new EnvConfig<C>(c.resolve(VALIDATOR), c.resolve(CONFIG_SCHEMA))
+      (c) => new EnvConfig(c.resolve<Validator>(VALIDATOR))
     )
   }
 
-  constructor(
-    protected readonly validator: Validator,
-    configSchema: JSONSchemaType<T>
-  ) {
-    this.validator.addSchemas({
-      config: configSchema,
-    })
-  }
+  /**
+   * Creates a new config instance.
+   *
+   * @param validator - The validator instance.
+   */
+  constructor(protected readonly validator: Validator) {}
 
-  #data: T | null = null
+  #cache: Record<string, ConfigData> = {}
 
-  get data(): T {
-    if (this.#data) {
-      return this.#data
-    }
-
-    this.#data = this.buildData()
-
-    return this.#data
-  }
-
-  reset() {
-    this.#data = null
-  }
-
-  private buildData(): T {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  get<T extends ConfigData>(schemaName: string): T {
     try {
+      if (this.#cache[schemaName]) {
+        return this.#cache[schemaName] as T
+      }
+
       const data = { ...process.env }
 
-      this.validator.assertSchema<T>('config', data)
+      this.validator.assertSchema<T>(schemaName, data)
+
+      this.#cache[schemaName] = data
 
       return data
     } catch (error) {
-      console.error(`Build config failed`, { error })
-
-      process.exit(1)
+      throw new BootstrapError(`Build configuration failed`, {
+        cause: error,
+        context: {
+          service: 'config',
+        },
+      })
     }
   }
 }

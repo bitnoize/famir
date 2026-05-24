@@ -14,37 +14,49 @@ import {
   TargetRepository,
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
-import {
-  DumpPhishmapData,
-  Phishmap,
-  PHISHMAP_SERVICE,
-  PurgePhishmapData,
-  RestorePhishmapData,
-} from './phishmap.js'
+import { Phishmap } from './phishmap.js'
 
 /**
- * Represents a phishmap service
+ * DI token for the phishmap service.
+ *
+ * @category Phishmap
+ */
+export const PHISHMAP_SERVICE = Symbol('PhishmapService')
+
+/**
+ * Represents the phishmap service.
  *
  * @category Phishmap
  */
 export class PhishmapService {
   /**
-   * Register dependency
+   * Registers the service as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<PhishmapService>(
       PHISHMAP_SERVICE,
       (c) =>
         new PhishmapService(
-          c.resolve(CAMPAIGN_REPOSITORY),
-          c.resolve(PROXY_REPOSITORY),
-          c.resolve(TARGET_REPOSITORY),
-          c.resolve(REDIRECTOR_REPOSITORY),
-          c.resolve(LURE_REPOSITORY)
+          c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
+          c.resolve<ProxyRepository>(PROXY_REPOSITORY),
+          c.resolve<TargetRepository>(TARGET_REPOSITORY),
+          c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
+          c.resolve<LureRepository>(LURE_REPOSITORY)
         )
     )
   }
 
+  /**
+   * Creates a new service instance.
+   *
+   * @param campaignRepository - The campaign repository instance.
+   * @param proxyRepository - The proxy repository instance.
+   * @param targetRepository - The target repository instance.
+   * @param redirectorRepository - The redirector repository instance.
+   * @param lureRepository - The lure repository instance.
+   */
   constructor(
     protected readonly campaignRepository: CampaignRepository,
     protected readonly proxyRepository: ProxyRepository,
@@ -53,7 +65,7 @@ export class PhishmapService {
     protected readonly lureRepository: LureRepository
   ) {}
 
-  async dump(data: DumpPhishmapData): Promise<Phishmap> {
+  async dump(data: { campaignId: string }): Promise<Phishmap> {
     let lockSecret: string
     try {
       lockSecret = await this.campaignRepository.lock(data.campaignId)
@@ -149,7 +161,18 @@ export class PhishmapService {
     }
   }
 
-  async restore(data: RestorePhishmapData): Promise<true> {
+  async restore(data: {
+    phishmap: Phishmap
+    campaignId?: string | null | undefined
+    mirrorDomain?: string | null | undefined
+    description?: string | null | undefined
+    cryptSecret?: string | null | undefined
+    upgradeSessionPath?: string | null | undefined
+    sessionCookieName?: string | null | undefined
+    sessionExpire?: number | null | undefined
+    newSessionExpire?: number | null | undefined
+    messageExpire?: number | null | undefined
+  }): Promise<void> {
     const { campaign, proxies, targets, redirectors, lures } = data.phishmap
 
     const campaignId = data.campaignId ?? campaign.campaignId
@@ -272,14 +295,12 @@ export class PhishmapService {
           await this.lureRepository.enable(campaignId, lure.lureId, lockSecret)
         }
       }
-
-      return true
     } finally {
       await this.campaignRepository.unlock(campaignId, lockSecret)
     }
   }
 
-  async purge(data: PurgePhishmapData): Promise<true> {
+  async purge(data: { campaignId: string }): Promise<void> {
     let lockSecret: string
     try {
       lockSecret = await this.campaignRepository.lock(data.campaignId)
@@ -356,7 +377,5 @@ export class PhishmapService {
         code: 'INTERNAL_ERROR',
       })
     }
-
-    return true
   }
 }

@@ -1,54 +1,53 @@
 /**
+ * Arguments for creating a proxy.
+ *
  * @category Proxy
  * @internal
  */
-export const PROXY_CONTROLLER = Symbol('ProxyController')
-
-/**
- * @category Proxy
- * @internal
- */
-export const PROXY_SERVICE = Symbol('ProxyService')
-
-/**
- * @category Proxy
- */
-export interface CreateProxyData {
-  campaignId: string
-  proxyId: string
+export interface CreateProxyArgs {
+  _: [string, string]
   url: string
   lockSecret: string
 }
 
 /**
+ * Arguments for reading the proxy.
+ *
  * @category Proxy
+ * @internal
  */
-export interface ReadProxyData {
-  campaignId: string
-  proxyId: string
+export interface ReadProxyArgs {
+  _: [string, string]
 }
 
 /**
+ * Arguments for toggling the proxy.
+ *
  * @category Proxy
+ * @internal
  */
-export interface ToggleProxyData {
-  campaignId: string
-  proxyId: string
+export interface ToggleProxyArgs {
+  _: [string, string]
   lockSecret: string
 }
 
 /**
+ * Arguments for deleting the proxy.
+ *
  * @category Proxy
+ * @internal
  */
-export interface DeleteProxyData {
-  campaignId: string
-  proxyId: string
+export interface DeleteProxyArgs {
+  _: [string, string]
   lockSecret: string
 }
 
 /**
+ * Arguments for listing proxies.
+ *
  * @category Proxy
+ * @internal
  */
-export interface ListProxiesData {
-  campaignId: string
+export interface ListProxiesArgs {
+  _: [string]
 }

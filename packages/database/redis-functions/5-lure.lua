@@ -28,7 +28,7 @@ local function create_lure(keys, args)
   end
 
   if redis.call('EXISTS', redirector_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Redirector not found')
+    return redis.status_reply('NOT_FOUND Redirector not exists')
   end
 
   local stash = {
@@ -42,7 +42,7 @@ local function create_lure(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (k == 'lock_secret' or k == 'orig_lock_secret' and 'redirector_campaign_id') and v == '' then
+    if (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'redirector_campaign_id') and v == '' then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
@@ -287,7 +287,7 @@ local function enable_lure(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', lure_key, 'is_enabled', 1, 'session_count', 0)
+  redis.call('HSET', lure_key, 'is_enabled', 1)
 
   return redis.status_reply('OK Lure enabled')
 end

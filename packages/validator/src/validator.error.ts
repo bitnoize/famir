@@ -1,56 +1,46 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * Details of a single schema validation error.
- *
- * Contains information about what failed validation and why.
- *
- * @category none
+ * Single JSON Schema validation error.
  */
 export interface ValidatorValidateError {
-  /** Validation keyword that failed */
+  /** Validation keyword that failed. */
   keyword: string
-  /** JSONPointer to the instance that failed validation */
+  /** JSON Pointer to the instance that failed validation. */
   instancePath: string
-  /** JSONPointer to the schema keyword that failed */
+  /** JSON Pointer to the schema keyword that failed. */
   schemaPath: string
-  /** Additional parameters for this validation error */
+  /** Additional parameters for the specific error. */
   params: object
-  /** Name of the property that caused the error */
+  /** Name of the property that caused the error. */
   propertyName: string | undefined
-  /** Human-readable error message */
+  /** Human-readable error message. */
   message: string | undefined
 }
 
 /**
  * Options for creating a validator error.
- *
- * @category none
  */
 export type ValidatorErrorOptions = CommonErrorOptions & {
+  /** A list of validation errors. */
   validateErrors: ValidatorValidateError[]
 }
 
 /**
- * Error thrown when schema validation fails.
- *
- * @category none
+ * Error class for validator operation failures.
  */
 export class ValidatorError extends CommonError {
-  /** Detailed validation errors */
-  validateErrors: ValidatorValidateError[]
+  /** Associated list of validation errors. */
+  readonly validateErrors: ValidatorValidateError[]
 
   /**
-   * Create a new validator error instance.
+   * Creates a new validator error instance.
    *
-   * @param message - A human-readable description of the error
-   * @param options - Error options
+   * @param message - The human-readable description of the error.
+   * @param options - The error options including validation errors.
    */
   constructor(message: string, options: ValidatorErrorOptions) {
-    super(message, {
-      cause: options.cause,
-      context: options.context,
-    })
+    super(message, options)
 
     this.name = 'ValidatorError'
     this.validateErrors = options.validateErrors

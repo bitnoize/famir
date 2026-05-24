@@ -1,7 +1,7 @@
 {
   "name": "@famir/common",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Famir common module",
   "keywords": [
     "famir",
@@ -20,13 +20,16 @@
     }
   },
   "scripts": {
-    "format": "prettier -w \"src/**/*.ts\"",
+    "format": "prettier -w \"src/**/*.ts\" README.md",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "node --test dist/**/*.test.js",
     "build": "tsc -b",
     "clean": "rimraf dist *.tsbuildinfo"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bitnoize/famir.git",

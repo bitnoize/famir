@@ -12,7 +12,7 @@
     { "path": "../logger" },
     { "path": "../database" },
     { "path": "../storage" },
-    { "path": "../produce" },
-    { "path": "../consume" }
+    { "path": "../producer" },
+    { "path": "../consumer" }
   ]
 }

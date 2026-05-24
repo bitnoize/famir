@@ -592,7 +592,7 @@ local function enable_target(keys, args)
 
   -- Point of no return
 
-  redis.call('HSET', target_key, 'is_enabled', 1, 'message_count', 0)
+  redis.call('HSET', target_key, 'is_enabled', 1)
 
   return redis.status_reply('OK Target enabled')
 end

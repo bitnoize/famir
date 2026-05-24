@@ -1,13 +1,11 @@
 /**
- * Wrapper for HTTP message status.
- *
- * @category none
+ * Wrapper class for HTTP message status codes.
  */
 export class HttpStatusWrap {
   /**
-   * Factory method to create wrapper from scratch.
+   * Factory method to create a wrapper from scratch.
    *
-   * @returns New wrapper instance
+   * @returns A new wrapper instance with default status `0`.
    */
   static fromScratch(): HttpStatusWrap {
     return new HttpStatusWrap(0)
@@ -16,18 +14,18 @@ export class HttpStatusWrap {
   #status: number
 
   /**
-   * Create a new wrapper instance.
+   * Creates a new wrapper instance.
    *
-   * @param status - The status to wrap
+   * @param status - The status code to wrap.
    */
   constructor(status: number) {
     this.#status = status
   }
 
   /**
-   * Clone wrapper with a copy of the status.
+   * Clones the wrapper with a copy of the status.
    *
-   * @returns New independent wrapper instance
+   * @returns A new independent wrapper instance.
    */
   clone(): HttpStatusWrap {
     return new HttpStatusWrap(this.#status)
@@ -36,18 +34,18 @@ export class HttpStatusWrap {
   #isFrozen: boolean = false
 
   /**
-   * Check if wrapper is frozen (read-only).
+   * Checks if the wrapper is frozen (read-only).
    *
-   * @returns true if wrapper is frozen, false otherwise
+   * @returns `true` if the wrapper is frozen, `false` otherwise.
    */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
   /**
-   * Freeze wrapper to prevent modifications.
+   * Freezes the wrapper to prevent modifications.
    *
-   * @returns This wrapper for method chaining
+   * @returns This wrapper for method chaining.
    */
   freeze(): this {
     this.#isFrozen = true
@@ -56,20 +54,20 @@ export class HttpStatusWrap {
   }
 
   /**
-   * Get status value.
+   * Gets the status value.
    *
-   * @returns Status value
+   * @returns The status code.
    */
   get(): number {
     return this.#status
   }
 
   /**
-   * Set status value.
+   * Sets the status value.
    *
-   * @param status - Status value to set
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
+   * @param status - The status code to set.
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
    */
   set(status: number): this {
     this.sureNotFrozen('set')
@@ -80,64 +78,64 @@ export class HttpStatusWrap {
   }
 
   /**
-   * Check status is in range 100-199.
+   * Checks if the status is in the information range (100-199).
    *
-   * @returns true if wrapper is in range, false otherwise
+   * @returns `true` if the status is in the range, `false` otherwise.
    */
   isInformation(): boolean {
     return this.between(100, 200)
   }
 
   /**
-   * Check status is in range 200-299.
+   * Checks if the status is in the success range (200-299).
    *
-   * @returns true if status is in range, false otherwise
+   * @returns `true` if the status is in the range, `false` otherwise.
    */
   isSuccess(): boolean {
     return this.between(200, 300)
   }
 
   /**
-   * Check status is in range 300-399.
+   * Checks if the status is in the redirect range (300-399).
    *
-   * @returns true if status is in range, false otherwise
+   * @returns `true` if the status is in the range, `false` otherwise.
    */
   isRedirect(): boolean {
     return this.between(300, 400)
   }
 
   /**
-   * Check status is in range 400-499.
+   * Checks if the status is in the client error range (400-499).
    *
-   * @returns true if status is in range, false otherwise
+   * @returns `true` if the status is in the range, `false` otherwise.
    */
   isClientError(): boolean {
     return this.between(400, 500)
   }
 
   /**
-   * Check status is in range 500-599.
+   * Checks if the status is in the server error range (500-599).
    *
-   * @returns true if status is in range, false otherwise
+   * @returns `true` if the status is in the range, `false` otherwise.
    */
   isServerError(): boolean {
     return this.between(500, 600)
   }
 
   /**
-   * Check status is not in 100-599 range.
+   * Checks if the status is not in the valid range (100-599).
    *
-   * @returns true if status is not in valid range, false otherwise
+   * @returns `true` if the status is outside the valid range, `false` otherwise.
    */
   isUnknown(): boolean {
     return !this.between(100, 600)
   }
 
   /**
-   * Clear status and reset to default.
+   * Resets the status to the default value `0`.
    *
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
    */
   reset(): this {
     this.sureNotFrozen('reset')

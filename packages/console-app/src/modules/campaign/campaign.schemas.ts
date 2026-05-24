@@ -7,121 +7,136 @@ import {
   campaignSessionExpireSchema,
   campaignUpgradeSessionPathSchema,
 } from '@famir/database'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
 import {
-  JSONSchemaType,
-  ValidatorSchemas,
-  customIdentSchema,
-  randomIdentSchema,
-} from '@famir/validator'
-import {
-  CreateCampaignData,
-  DeleteCampaignData,
-  LockCampaignData,
-  ReadCampaignData,
-  UnlockCampaignData,
-  UpdateCampaignData,
+  CreateCampaignArgs,
+  DeleteCampaignArgs,
+  ListCampaignsArgs,
+  LockCampaignArgs,
+  ReadCampaignArgs,
+  UnlockCampaignArgs,
+  UpdateCampaignArgs,
 } from './campaign.js'
 
 /**
+ * JSON Schema for validating a create campaign args.
+ *
  * @category Campaign
  * @internal
  */
-const createCampaignDataSchema: JSONSchemaType<CreateCampaignData> = {
+export const createCampaignArgsSchema: JSONSchemaType<CreateCampaignArgs> = {
   type: 'object',
   required: [
-    'campaignId',
+    '_',
     'mirrorDomain',
     'description',
     'upgradeSessionPath',
-    'sessionCookieName',
     'sessionExpire',
     'newSessionExpire',
     'messageExpire',
   ],
   properties: {
-    campaignId: customIdentSchema,
-    mirrorDomain: campaignMirrorDomainSchema,
-    description: {
-      ...campaignDescriptionSchema,
-      default: '',
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
     },
+    mirrorDomain: campaignMirrorDomainSchema,
+    description: campaignDescriptionSchema,
     cryptSecret: {
       ...randomIdentSchema,
       nullable: true,
     },
-    upgradeSessionPath: {
-      ...campaignUpgradeSessionPathSchema,
-      default: '/fake-upgrade-session',
-    },
+    upgradeSessionPath: campaignUpgradeSessionPathSchema,
     sessionCookieName: {
       ...campaignSessionCookieNameSchema,
-      default: 'fake-sess', // FIXME
+      nullable: true,
     },
-    sessionExpire: {
-      ...campaignSessionExpireSchema,
-      default: 24 * 3600 * 1000,
+    sessionExpire: campaignSessionExpireSchema,
+    newSessionExpire: campaignNewSessionExpireSchema,
+    messageExpire: campaignMessageExpireSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * JSON Schema for validating a read campaign args.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const readCampaignArgsSchema: JSONSchemaType<ReadCampaignArgs> = {
+  type: 'object',
+  required: ['_'],
+  properties: {
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
     },
-    newSessionExpire: {
-      ...campaignNewSessionExpireSchema,
-      default: 300 * 1000,
-    },
-    messageExpire: {
-      ...campaignMessageExpireSchema,
-      default: 3600 * 1000,
+  },
+  additionalProperties: false,
+} as const /**
+
+/**
+ * JSON Schema for validating a lock campaign args.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const lockCampaignArgsSchema: JSONSchemaType<LockCampaignArgs> = {
+  type: 'object',
+  required: ['_'],
+  properties: {
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
     },
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating an unlock campaign args.
+ *
  * @category Campaign
  * @internal
  */
-const readCampaignDataSchema: JSONSchemaType<ReadCampaignData> = {
+export const unlockCampaignArgsSchema: JSONSchemaType<UnlockCampaignArgs> = {
   type: 'object',
-  required: ['campaignId'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-  },
-  additionalProperties: false,
-}
-
-/**
- * @category Campaign
- * @internal
- */
-const lockCampaignDataSchema: JSONSchemaType<LockCampaignData> = {
-  type: 'object',
-  required: ['campaignId'],
-  properties: {
-    campaignId: customIdentSchema,
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * @category Campaign
- * @internal
- */
-const unlockCampaignDataSchema: JSONSchemaType<UnlockCampaignData> = {
-  type: 'object',
-  required: ['campaignId', 'lockSecret'],
-  properties: {
-    campaignId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating an update campaign args.
+ *
  * @category Campaign
  * @internal
  */
-const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
+export const updateCampaignArgsSchema: JSONSchemaType<UpdateCampaignArgs> = {
   type: 'object',
-  required: ['campaignId', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
     description: {
       ...campaignDescriptionSchema,
       nullable: true,
@@ -144,28 +159,44 @@ const updateCampaignDataSchema: JSONSchemaType<UpdateCampaignData> = {
 } as const
 
 /**
+ * JSON Schema for validating a delete campaign args.
+ *
  * @category Campaign
  * @internal
  */
-const deleteCampaignDataSchema: JSONSchemaType<DeleteCampaignData> = {
+export const deleteCampaignArgsSchema: JSONSchemaType<DeleteCampaignArgs> = {
   type: 'object',
-  required: ['campaignId', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a list campaigns args.
+ *
  * @category Campaign
  * @internal
  */
-export const campaignSchemas: ValidatorSchemas = {
-  'console-create-campaign-data': createCampaignDataSchema,
-  'console-read-campaign-data': readCampaignDataSchema,
-  'console-lock-campaign-data': lockCampaignDataSchema,
-  'console-unlock-campaign-data': unlockCampaignDataSchema,
-  'console-update-campaign-data': updateCampaignDataSchema,
-  'console-delete-campaign-data': deleteCampaignDataSchema,
+export const listCampaignsArgsSchema: JSONSchemaType<ListCampaignsArgs> = {
+  type: 'object',
+  required: ['_'],
+  properties: {
+    _: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      minItems: 0,
+      maxItems: 0,
+    },
+  },
+  additionalProperties: false,
 } as const

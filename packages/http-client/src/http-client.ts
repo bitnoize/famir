@@ -1,21 +1,40 @@
+import { ConfigData } from '@famir/config'
 import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-proto'
 import type { PassThrough, Readable } from 'node:stream'
 import { HttpClientError } from './http-client.error.js'
 
 /**
- * @category none
- * @internal
+ * DI token for an http-client implementation.
  */
 export const HTTP_CLIENT = Symbol('HttpClient')
 
 /**
- * Represents a HTTP client
+ * Defines the public contract for an http-client.
  *
- * @category none
+ * Provides methods for making HTTP requests:
+ * - Simple request/response
+ * - Streaming request with simple response
+ * - Simple request with streaming response
+ *
+ * All methods support proxy configuration and timeouts.
  */
 export interface HttpClient {
   /**
-   * Simple HTTP request and response
+   * Performs a simple HTTP request and returns a simple response.
+   *
+   * Both the request body and response body are fully loaded into memory.
+   * Suitable for small to medium-sized payloads.
+   *
+   * @param proxy - The proxy URL.
+   * @param method - The request method.
+   * @param url - The target URL.
+   * @param requestHeaders - The request headers to send.
+   * @param requestBody - The request body as a Buffer.
+   * @param connectTimeout - The connection timeout in milliseconds.
+   * @param timeout - The total request timeout in milliseconds.
+   * @param headersSizeLimit - The maximum headers size in bytes.
+   * @param bodySizeLimit - The maximum body size in bytes.
+   * @returns The result object containing the response or error details.
    */
   simple(
     proxy: string,
@@ -30,7 +49,21 @@ export interface HttpClient {
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
 
   /**
-   * Streaming HTTP request and simple response
+   * Performs a streaming HTTP request and returns a simple response.
+   *
+   * The request body is streamed from a readable stream, allowing large uploads.
+   * The response body is fully loaded into memory.
+   *
+   * @param proxy - The proxy URL.
+   * @param method - The request method.
+   * @param url - The target URL.
+   * @param requestHeaders - The request headers to send.
+   * @param requestStream - The request body as a readable stream.
+   * @param connectTimeout - The connection timeout in milliseconds.
+   * @param timeout - The total request timeout in milliseconds.
+   * @param headersSizeLimit - The maximum headers size in bytes.
+   * @param bodySizeLimit - The maximum body size in bytes.
+   * @returns The result object containing the response or error details.
    */
   streamRequest(
     proxy: string,
@@ -45,7 +78,20 @@ export interface HttpClient {
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
 
   /**
-   * Simple HTTP request and streaming response
+   * Performs a simple HTTP request and returns a streaming response.
+   *
+   * The request body is fully loaded into memory, but the response is streamed,
+   * allowing large downloads to be processed incrementally.
+   *
+   * @param proxy - The proxy URL.
+   * @param method - The request method.
+   * @param url - The target URL.
+   * @param requestHeaders - The request headers to send.
+   * @param requestBody - The request body as a Buffer.
+   * @param connectTimeout - The connection timeout in milliseconds.
+   * @param timeout - The total request timeout in milliseconds.
+   * @param headersSizeLimit - The maximum headers size in bytes.
+   * @returns The result object containing the response or error details.
    */
   streamResponse(
     proxy: string,
@@ -60,7 +106,8 @@ export interface HttpClient {
 }
 
 /**
- * @category none
+ * Base state for an HTTP interaction.
+ *
  * @internal
  */
 export interface HttpClientBaseState {
@@ -77,7 +124,8 @@ export interface HttpClientBaseState {
 }
 
 /**
- * @category none
+ * State for a simple request with a simple response.
+ *
  * @internal
  */
 export interface HttpClientSimpleState extends HttpClientBaseState {
@@ -87,7 +135,8 @@ export interface HttpClientSimpleState extends HttpClientBaseState {
 }
 
 /**
- * @category none
+ * State for a streaming request with a simple response.
+ *
  * @internal
  */
 export interface HttpClientStreamRequestState extends HttpClientBaseState {
@@ -97,7 +146,8 @@ export interface HttpClientStreamRequestState extends HttpClientBaseState {
 }
 
 /**
- * @category none
+ * State for a simple request with a streaming response.
+ *
  * @internal
  */
 export interface HttpClientStreamResponseState extends HttpClientBaseState {
@@ -106,7 +156,7 @@ export interface HttpClientStreamResponseState extends HttpClientBaseState {
 }
 
 /**
- * @category none
+ * Error result of an HTTP interaction.
  */
 export interface HttpClientErrorResult {
   readonly error: HttpClientError
@@ -114,7 +164,8 @@ export interface HttpClientErrorResult {
 }
 
 /**
- * @category none
+ * Base result for a successful HTTP interaction.
+ *
  * @internal
  */
 export interface HttpClientBaseResult {
@@ -125,30 +176,23 @@ export interface HttpClientBaseResult {
 }
 
 /**
- * @category none
+ * Simple response result with the full body in memory.
  */
 export interface HttpClientSimpleResult extends HttpClientBaseResult {
   readonly responseBody: HttpBody
 }
 
 /**
- * @category none
+ * Streaming response result with a readable stream.
  */
 export interface HttpClientStreamResult extends HttpClientBaseResult {
   readonly responseStream: Readable
 }
 
 /**
- * @category none
+ * Configuration for a Curl http-client.
  */
-export interface CurlHttpClientConfig {
+export interface CurlHttpClientConfig extends ConfigData {
+  /** Whether to enable verbose logging. */
   HTTP_CLIENT_VERBOSE: boolean
-}
-
-/**
- * @category none
- * @internal
- */
-export interface CurlHttpClientOptions {
-  verbose: boolean
 }

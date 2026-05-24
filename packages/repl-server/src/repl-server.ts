@@ -1,105 +1,56 @@
+import { ConfigData } from '@famir/config'
+
 /**
- * @category none
- * @internal
+ * DI token for a repl-server implementation.
  */
 export const REPL_SERVER = Symbol('ReplServer')
 
 /**
- * @category none
- * @internal
- */
-export const REPL_SERVER_ASSETS = Symbol('ReplServerAssets')
-
-/**
- * @category none
- * @internal
- */
-export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
-
-/**
- * Represents a REPL server
+ * Defines the public contract for a repl-server.
  *
- * @category none
+ * The REPL (Read-Eval-Print-Loop) server provides an interactive
+ * command-line interface for system administration and debugging.
  */
 export interface ReplServer {
   /**
-   * Start server
+   * Starts the REPL server and begins accepting connections.
+   *
+   * @throws {@link BootstrapError} If the server cannot be started.
    */
   start(): Promise<void>
 
   /**
-   * Stop server
+   * Stops the REPL server and closes all active connections.
+   *
+   * @throws {@link BootstrapError} If the server cannot be stopped.
    */
   stop(): Promise<void>
 }
 
 /**
- * @category none
- * @internal
+ * Configuration for a Cli repl-server.
  */
-export type ReplServerAssets = Map<string, string>
-
-/**
- * @category none
- */
-export type ReplServerApiCall = (data: unknown) => Promise<unknown>
-
-/**
- * @category none
- * @internal
- */
-export type ReplServerApiCalls = [string, ReplServerApiCall][]
-
-/**
- * @category none
- */
-export interface CliReplServerConfig {
+export interface CliReplServerConfig extends ConfigData {
+  /** Prompt string displayed to users. */
   REPL_SERVER_PROMPT: string
+  /** Whether to use ANSI colors in the REPL. */
   REPL_SERVER_USE_COLORS: boolean
 }
 
 /**
- * @category none
- * @internal
+ * Configuration for a Net repl-server.
  */
-export interface CliReplServerOptions {
-  prompt: string
-  useColors: boolean
-}
-
-/**
- * @category none
- */
-export interface NetReplServerConfig {
+export interface NetReplServerConfig extends ConfigData {
+  /** Listening address. */
   REPL_SERVER_ADDRESS: string
+  /** Listening port. */
   REPL_SERVER_PORT: number
+  /** Maximum number of concurrent clients. */
   REPL_SERVER_MAX_CLIENTS: number
+  /** Socket timeout in milliseconds. */
   REPL_SERVER_SOCKET_TIMEOUT: number
+  /** Prompt string displayed to users. */
   REPL_SERVER_PROMPT: string
+  /** Whether to use ANSI colors in the REPL. */
   REPL_SERVER_USE_COLORS: boolean
 }
-
-/**
- * @category none
- * @internal
- */
-export interface NetReplServerOptions {
-  address: string
-  port: number
-  maxClients: number
-  socketTimeout: number
-  prompt: string
-  useColors: boolean
-}
-
-/**
- * @category none
- * @internal
- */
-export const REPL_SERVER_BANNER_GREET = `Welcome to Famir!`
-
-/**
- * @category none
- * @internal
- */
-export const REPL_SERVER_BANNER_LEAVE = `So long!`

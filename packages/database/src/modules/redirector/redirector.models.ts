@@ -6,16 +6,16 @@
 export type RedirectorParams = Record<string, string>
 
 /**
- * Represents a redirector model.
+ * Represents the redirector model.
  *
  * @category Redirector
  */
 export class RedirectorModel {
   /**
-   * Type guard to filter out null values in arrays.
+   * Type guard to filter out null models from a list.
    *
-   * @param model - The model to check
-   * @returns `true` if the model is not null, `false` otherwise
+   * @param model - The model to check.
+   * @returns `true` if the model is not null, `false` otherwise.
    */
   static isNotNull = <T extends RedirectorModel>(model: T | null): model is T => {
     return model != null
@@ -24,10 +24,10 @@ export class RedirectorModel {
   /**
    * Creates a new redirector model instance.
    *
-   * @param campaignId - The ID of the campaign this redirector belongs to
-   * @param redirectorId - The unique identifier of the redirector
-   * @param lureCount - Number of lures pointing to this redirector
-   * @param createdAt - The date and time when the redirector was created
+   * @param campaignId - The ID of the campaign this redirector belongs to.
+   * @param redirectorId - The unique identifier for the redirector.
+   * @param lureCount - The total number of lures pointing to this redirector.
+   * @param createdAt - The date and time when the redirector was created.
    */
   constructor(
     readonly campaignId: string,
@@ -38,7 +38,7 @@ export class RedirectorModel {
 }
 
 /**
- * Represents a full redirector model.
+ * Represents the full redirector model.
  *
  * @category Redirector
  */
@@ -46,12 +46,12 @@ export class FullRedirectorModel extends RedirectorModel {
   /**
    * Creates a new full redirector model instance.
    *
-   * @param campaignId - The ID of the campaign this redirector belongs to
-   * @param redirectorId - The unique identifier of the redirector
-   * @param page - The page template
-   * @param fields - Array of required field names
-   * @param lureCount - Number of lures pointing to this redirector
-   * @param createdAt - The date and time when the redirector was created
+   * @param campaignId - The ID of the campaign this redirector belongs to.
+   * @param redirectorId - The unique identifier for the redirector.
+   * @param page - The page template.
+   * @param fields - The list of required field names for this redirector.
+   * @param lureCount - The total number of lures pointing to this redirector.
+   * @param createdAt - The date and time when the redirector was created.
    */
   constructor(
     campaignId: string,
@@ -65,11 +65,13 @@ export class FullRedirectorModel extends RedirectorModel {
   }
 
   /**
-   * Indicates whether this redirector is "loose" (has no required fields).
+   * Indicates whether this redirector is 'loose'.
    *
-   * Loose redirectors accept any parameters without validation.
+   * A loose redirector has no required fields and accepts any parameters
+   * without validation. This is useful for simple redirectors that don't
+   * need to collect specific data.
    *
-   * @returns `true` if there are no required fields, `false` otherwise
+   * @returns `true` if there are no required fields, `false` otherwise.
    */
   get isLoose(): boolean {
     return this.fields.length === 0
@@ -78,14 +80,21 @@ export class FullRedirectorModel extends RedirectorModel {
   /**
    * Checks if the provided parameters satisfy all required fields.
    *
-   * If the redirector is loose (`isLoose === true`), this always returns `true`.
+   * If the redirector is loose (`isLoose === true`), this method always returns `true`.
    * Otherwise, it checks that every required field exists in the parameters
-   * and has a non-null, non-empty value.
+   * and has a non-null, non-empty string value.
    *
-   * @param params - The key-value parameters to check
-   * @returns `true` if all required fields are present, `false` otherwise
+   * @param params - The key-value parameters to validate.
+   * @returns `true` if all required fields are present and have values, `false` otherwise.
    */
   checkParams(params: RedirectorParams): boolean {
-    return this.isLoose || this.fields.every((field) => params[field] != null)
+    if (this.isLoose) {
+      return true
+    }
+
+    return this.fields.every((field) => {
+      const value = params[field]
+      return value != null && value.length > 0
+    })
   }
 }

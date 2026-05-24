@@ -1,7 +1,7 @@
 {
   "name": "@famir/console-app",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Famir console app",
   "keywords": [
     "famir",
@@ -41,11 +41,12 @@
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
     "@famir/common": "*",
-    "@famir/validator": "*",
     "@famir/config": "*",
-    "@famir/logger": "*",
     "@famir/database": "*",
-    "@famir/produce": "*",
-    "@famir/repl-server": "*"
+    "@famir/logger": "*",
+    "@famir/producer": "*",
+    "@famir/repl-server": "*",
+    "@famir/validator": "*",
+    "ascii-table3": "^1.0.3"
   }
 }

@@ -19,7 +19,7 @@ export default {
       files: ['*.md'],
       options: {
         parser: 'markdown',
-        proseWrap: 'always',
+        printWidth: 150,
       },
     },
     {
@@ -40,7 +40,6 @@ export default {
       files: ['*.yaml', '*.yml'],
       options: {
         parser: 'yaml',
-        tabWidth: 2,
       },
     },
   ],

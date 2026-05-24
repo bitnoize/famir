@@ -1,14 +1,14 @@
 /**
- * Represents a campaign model.
+ * Represents the campaign model.
  *
  * @category Campaign
  */
 export class CampaignModel {
   /**
-   * Type guard to filter out null values in arrays.
+   * Type guard to filter out null models from a list.
    *
-   * @param model - The model to check
-   * @returns `true` if the model is not null, `false` otherwise
+   * @param model - The model to check.
+   * @returns `true` if the model is not null, `false` otherwise.
    */
   static isNotNull = <T extends CampaignModel>(model: T | null): model is T => {
     return model != null
@@ -17,12 +17,12 @@ export class CampaignModel {
   /**
    * Creates a new campaign model instance.
    *
-   * @param campaignId - The unique identifier of the campaign
-   * @param mirrorDomain - The public-facing mirror domain
-   * @param isLocked - Determines whether a campaign is blocked
-   * @param sessionCount - Total number of sessions processed through this campaign
-   * @param messageCount - Total number of messages processed through this campaign
-   * @param createdAt - The date and time when the campaign was created
+   * @param campaignId - The unique identifier for the campaign.
+   * @param mirrorDomain - The public-facing mirror domain for the campaign.
+   * @param isLocked - The flag indicating if the campaign is blocked.
+   * @param sessionCount - The total number of sessions processed through this campaign.
+   * @param messageCount - The total number of messages processed through this campaign.
+   * @param createdAt - The date and time when the campaign was created.
    */
   constructor(
     readonly campaignId: string,
@@ -35,7 +35,7 @@ export class CampaignModel {
 }
 
 /**
- * Represents a full campaign model.
+ * Represents the full campaign model.
  *
  * @category Campaign
  */
@@ -43,23 +43,24 @@ export class FullCampaignModel extends CampaignModel {
   /**
    * Creates a new full campaign model instance.
    *
-   * @param campaignId - The unique identifier of the campaign
-   * @param mirrorDomain - The public-facing mirror domain
-   * @param description - Human-readable description
-   * @param cryptSecret - Secret used for encrypting session data
-   * @param upgradeSessionPath - URL path that triggers session upgrade
-   * @param sessionCookieName - Name of the cookie used to track sessions
-   * @param sessionExpire - TTL for an authorized session
-   * @param newSessionExpire - TTL for a newly created, not-yet-authorized session
-   * @param messageExpire - TTL for message logs
-   * @param isLocked - Determines whether a campaign is blocked
-   * @param proxyCount - Total number of proxies related to this campaign
-   * @param targetCount - Total number of targets related to this campaign
-   * @param redirectorCount - Total number of redirectors related to this campaign
-   * @param lureCount - Total number of lures related to this campaign
-   * @param sessionCount - Total number of sessions processed through this campaign
-   * @param messageCount - Total number of messages processed through this campaign
-   * @param createdAt - The date and time when the campaign was created
+   * @param campaignId - The unique identifier for the campaign.
+   * @param mirrorDomain - The public-facing mirror domain for the campaign.
+   * @param description - The human-readable description for the campaign.
+   * @param cryptSecret - The secret used for encrypting session data.
+   * @param upgradeSessionPath - The URL path that triggers a session upgrade.
+   * @param sessionCookieName - The name of the cookie used to track authorized sessions.
+   * @param sessionCookieNames - The names of the cookies used by all campaigns.
+   * @param sessionExpire - The TTL for an authorized session in milliseconds.
+   * @param newSessionExpire - The TTL for a not-yet-authorized session in milliseconds.
+   * @param messageExpire - The TTL for a message in milliseconds.
+   * @param isLocked - The flag indicating if the campaign is blocked.
+   * @param proxyCount - The total number of proxies related to this campaign.
+   * @param targetCount - The total number of targets related to this campaign.
+   * @param redirectorCount - The total number of redirectors related to this campaign.
+   * @param lureCount - The total number of lures related to this campaign.
+   * @param sessionCount - The total number of sessions processed through this campaign.
+   * @param messageCount - The total number of messages processed through this campaign.
+   * @param createdAt - The date and time when the campaign was created.
    */
   constructor(
     campaignId: string,

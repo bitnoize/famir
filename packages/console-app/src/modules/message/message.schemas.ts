@@ -1,29 +1,22 @@
-import {
-  JSONSchemaType,
-  ValidatorSchemas,
-  customIdentSchema,
-  randomIdentSchema,
-} from '@famir/validator'
-import { ReadMessageData } from './message.js'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
+import { ReadMessageArgs } from './message.js'
 
 /**
+ * JSON Schema for validating a read message args.
+ *
  * @category Message
  * @internal
  */
-const readMessageDataSchema: JSONSchemaType<ReadMessageData> = {
+export const readMessageArgsSchema: JSONSchemaType<ReadMessageArgs> = {
   type: 'object',
-  required: ['campaignId', 'messageId'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
-    messageId: randomIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, randomIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
   },
   additionalProperties: false,
-} as const
-
-/**
- * @category Message
- * @internal
- */
-export const messageSchemas: ValidatorSchemas = {
-  'console-read-message-data': readMessageDataSchema,
 } as const

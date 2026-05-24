@@ -1,70 +1,89 @@
+import { ConfigData } from '@famir/config'
+
 /**
- * @category none
- * @internal
+ * DI token for a logger implementation.
  */
 export const LOGGER = Symbol('Logger')
 
 /**
- * @category none
+ * Available log levels, ordered by increasing severity.
+ *
  * @internal
  */
-export const LOGGER_BACKEND = Symbol('LoggerBackend')
+export const LOGGER_LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const
 
 /**
- * Represents a logger
+ * Valid log level for a logger.
+ */
+export type LoggerLogLevel = (typeof LOGGER_LOG_LEVELS)[number]
+
+/**
+ * Defines the public contract for a logger.
  *
- * @category none
+ * Provides structured logging with methods for different severity levels.
+ * All methods accept an optional data object for structured context.
  */
 export interface Logger {
   /**
-   * Log debug message
+   * Logs a trace message — application flow tracing.
+   *
+   * @param msg - The log message.
+   * @param data - Optional structured data to attach to the log entry.
+   */
+  trace(msg: string, data?: LoggerData): void
+
+  /**
+   * Logs a debug message — detailed information for debugging.
+   *
+   * @param msg - The log message.
+   * @param data - Optional structured data to attach to the log entry.
    */
   debug(msg: string, data?: LoggerData): void
 
   /**
-   * Log info message
+   * Logs an info message — general application events.
+   *
+   * @param msg - The log message.
+   * @param data - Optional structured data to attach to the log entry.
    */
   info(msg: string, data?: LoggerData): void
 
   /**
-   * Log warn message
+   * Logs a warning message — potentially problematic situations.
+   *
+   * @param msg - The log message.
+   * @param data - Optional structured data to attach to the log entry.
    */
   warn(msg: string, data?: LoggerData): void
 
   /**
-   * Log error message
+   * Logs an error message — errors that can be handled.
+   *
+   * @param msg - The log message.
+   * @param data - Optional structured data to attach to the log entry.
    */
   error(msg: string, data?: LoggerData): void
 
   /**
-   * Log fatal message
+   * Logs a fatal message — unrecoverable errors causing application shutdown.
+   *
+   * @param msg - The log message.
+   * @param data - Optional structured data to attach to the log entry.
    */
   fatal(msg: string, data?: LoggerData): void
 }
 
 /**
- * @category none
- */
-export { Logger as PinoLoggerBackend } from 'pino'
-
-/**
- * @category none
+ * Structured log data.
  */
 export type LoggerData = Record<string, unknown>
 
 /**
- * @category none
+ * Configuration for a Pino logger.
  */
-export type PinoLoggerConfig = {
+export interface PinoLoggerConfig extends ConfigData {
+  /** Application name to be used for logging. */
   LOGGER_APP_NAME: string
-  LOGGER_LOG_LEVEL: string
-}
-
-/**
- * @category none
- * @internal
- */
-export interface PinoLoggerOptions {
-  appName: string
-  logLevel: string
+  /** Logging level for the application. */
+  LOGGER_LOG_LEVEL: LoggerLogLevel
 }

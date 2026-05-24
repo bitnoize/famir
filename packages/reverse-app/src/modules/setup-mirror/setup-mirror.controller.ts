@@ -1,8 +1,11 @@
 import { DIContainer } from '@famir/common'
+import { type EnabledFullTargetModel, type FullCampaignModel } from '@famir/database'
 import {
   HTTP_SERVER_ROUTER,
   HttpServerContext,
+  HttpServerContextType,
   HttpServerError,
+  HttpServerNextFunction,
   HttpServerRouter,
 } from '@famir/http-server'
 import { HttpMessage } from '@famir/http-tools'
@@ -10,43 +13,77 @@ import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import {
-  SETUP_MIRROR_CONTROLLER,
-  SETUP_MIRROR_SERVICE,
-  SetupMirrorDispatchContextType,
-} from './setup-mirror.js'
-import { type SetupMirrorService } from './setup-mirror.service.js'
+import { type SetupMirrorService, SETUP_MIRROR_SERVICE } from './setup-mirror.service.js'
 
 /**
- * Represents a setup-mirror controller
+ * DI token for the setup-mirror controller.
+ *
+ * @category SetupMirror
+ */
+export const SETUP_MIRROR_CONTROLLER = Symbol('SetupMirrorController')
+
+/**
+ * @category SetupMirror
+ * @internal
+ */
+type SetupMirrorHandler = (
+  ctx: HttpServerContext,
+  campaign: FullCampaignModel,
+  target: EnabledFullTargetModel,
+  message: HttpMessage,
+  next: HttpServerNextFunction
+) => Promise<void>
+
+/**
+ * @category SetupMirror
+ * @internal
+ */
+type SetupMirrorDispatchContextType = Record<HttpServerContextType, SetupMirrorHandler>
+
+/**
+ * Represents the setup-mirror controller.
  *
  * @category SetupMirror
  */
 export class SetupMirrorController extends BaseController {
   /**
-   * Register dependency
+   * Registers the controller as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<SetupMirrorController>(
       SETUP_MIRROR_CONTROLLER,
       (c) =>
         new SetupMirrorController(
-          c.resolve(VALIDATOR),
-          c.resolve(LOGGER),
-          c.resolve(TEMPLATER),
-          c.resolve(HTTP_SERVER_ROUTER),
-          c.resolve(SETUP_MIRROR_SERVICE)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<SetupMirrorService>(SETUP_MIRROR_SERVICE)
         )
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the controller from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The controller instance.
    */
-  static resolve(container: DIContainer): SetupMirrorController {
-    return container.resolve(SETUP_MIRROR_CONTROLLER)
+  static resolve(container: DIContainer) {
+    return container.resolve<SetupMirrorController>(SETUP_MIRROR_CONTROLLER)
   }
 
+  /**
+   * Creates a new controller instance.
+   *
+   * @param validator - The validator instance.
+   * @param logger - The logger instance.
+   * @param templater - The templater instance.
+   * @param router - The http-server router instance.
+   * @param setupMirrorService - The setup-mirror service instance.
+   */
   constructor(
     validator: Validator,
     logger: Logger,
@@ -55,10 +92,11 @@ export class SetupMirrorController extends BaseController {
     protected readonly setupMirrorService: SetupMirrorService
   ) {
     super(validator, logger, templater, router)
-
-    this.logger.debug(`SetupMirrorController initialized`)
   }
 
+  /**
+   * Registers used middleware in the router.
+   */
   use() {
     this.router.addMiddleware('setup-mirror', async (ctx, next) => {
       const mirrorHost = this.parseMirrorHost(ctx)

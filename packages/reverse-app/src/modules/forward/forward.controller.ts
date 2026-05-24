@@ -1,45 +1,90 @@
 import { DIContainer } from '@famir/common'
-import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
-import { LimiterTransform } from '@famir/http-tools'
+import { EnabledFullTargetModel, EnabledProxyModel } from '@famir/database'
+import { HttpType } from '@famir/http-proto'
+import {
+  HTTP_SERVER_ROUTER,
+  HttpServerContext,
+  HttpServerNextFunction,
+  HttpServerRouter,
+} from '@famir/http-server'
+import { LimiterTransform, type HttpMessage } from '@famir/http-tools'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { PassThrough, pipeline as pipelineSync } from 'node:stream'
 import { pipeline as pipelineAsync } from 'node:stream/promises'
 import { BaseController } from '../base/index.js'
-import { FORWARD_CONTROLLER, FORWARD_SERVICE, ForwardDispatchHttpType } from './forward.js'
-import { type ForwardService } from './forward.service.js'
+import { FORWARD_SERVICE, type ForwardService } from './forward.service.js'
 
 /**
- * Represents a forward controller
+ * @category Forward
+ * @internal
+ */
+type ForwardHandler = (
+  ctx: HttpServerContext,
+  proxy: EnabledProxyModel,
+  target: EnabledFullTargetModel,
+  message: HttpMessage,
+  next: HttpServerNextFunction
+) => Promise<void>
+
+/**
+ * @category Forward
+ * @internal
+ */
+type ForwardDispatchHttpType = Record<HttpType, ForwardHandler>
+
+/**
+ * DI token for the forward controller.
+ *
+ * @category Forward
+ */
+export const FORWARD_CONTROLLER = Symbol('ForwardController')
+
+/**
+ * Represents the forward controller.
  *
  * @category Forward
  */
 export class ForwardController extends BaseController {
   /**
-   * Register dependency
+   * Registers the controller as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<ForwardController>(
       FORWARD_CONTROLLER,
       (c) =>
         new ForwardController(
-          c.resolve(VALIDATOR),
-          c.resolve(LOGGER),
-          c.resolve(TEMPLATER),
-          c.resolve(HTTP_SERVER_ROUTER),
-          c.resolve(FORWARD_SERVICE)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<ForwardService>(FORWARD_SERVICE)
         )
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the controller from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The controller instance.
    */
-  static resolve(container: DIContainer): ForwardController {
-    return container.resolve(FORWARD_CONTROLLER)
+  static resolve(container: DIContainer) {
+    return container.resolve<ForwardController>(FORWARD_CONTROLLER)
   }
 
+  /**
+   * Creates a new controller instance.
+   *
+   * @param validator - The validator instance.
+   * @param logger - The logger instance.
+   * @param templater - The templater instance.
+   * @param router - The http-server router instance.
+   * @param forwardService - The forward service instance.
+   */
   constructor(
     validator: Validator,
     logger: Logger,
@@ -48,10 +93,11 @@ export class ForwardController extends BaseController {
     protected readonly forwardService: ForwardService
   ) {
     super(validator, logger, templater, router)
-
-    this.logger.debug(`ForwardController initialized`)
   }
 
+  /**
+   * Registers used middleware in the router.
+   */
   use() {
     this.router.addMiddleware('round-trip', async (ctx, next) => {
       const proxy = this.getState(ctx, 'proxy')

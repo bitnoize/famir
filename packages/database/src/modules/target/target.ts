@@ -1,55 +1,55 @@
 import { FullTargetModel, TargetAccessLevel, TargetHosts, TargetModel } from './target.models.js'
 
 /**
- * DI token for target repository.
+ * DI token for a target repository implementation.
  *
  * @category Target
- * @internal
  */
 export const TARGET_REPOSITORY = Symbol('TargetRepository')
 
 /**
- * Represents a target repository.
+ * Defines the public contract for a target repository.
+ *
+ * A target contains the configuration that maps a mirror server to a donor server.
  *
  * @category Target
  */
 export interface TargetRepository {
   /**
-   * Creates a new target in the specified campaign.
+   * Creates a new target.
    *
    * The target will be created in a disabled state (`isEnabled = false`).
-   * Use `enable()` to activate it for traffic routing.
+   * Use {@link enable} to activate it for traffic routing.
    *
-   * @param campaignId - The ID of the campaign to create the target in
-   * @param targetId - The unique identifier for the new target
-   * @param accessLevel - The access level
-   * @param donorSecure - Whether the donor server uses HTTPS
-   * @param donorSub - The donor subdomain
-   * @param donorDomain - The donor domain name
-   * @param donorPort - The donor server port
-   * @param mirrorSecure - Whether the mirror uses HTTPS
-   * @param mirrorSub - The mirror subdomain
-   * @param mirrorPort - The mirror server port
-   * @param connectTimeout - Connection timeout
-   * @param simpleTimeout - Simple request timeout
-   * @param streamTimeout - Streaming request timeout
-   * @param headersSizeLimit - Maximum headers size in bytes
-   * @param bodySizeLimit - Maximum body size in bytes
-   * @param mainPage - Custom main page content
-   * @param notFoundPage - Custom 404 page content
-   * @param faviconIco - Custom favicon content
-   * @param robotsTxt - Custom robots.txt content
-   * @param sitemapXml - Custom sitemap.xml content
-   * @param allowWebSockets - Whether to allow WebSocket connections
-   * @param lockSecret - The campaign lock secret obtained from `CampaignRepository.lock()`
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is not locked
-   * @throws {@link DatabaseError} If the lock secret does not match
-   * @throws {@link DatabaseError} If a target with the same ID already exists
-   * @throws {@link DatabaseError} If the target donor is already used
-   * @throws {@link DatabaseError} If the target mirror is already used
-   * @throws {@link DatabaseError} If the mirror hostname is already taken
+   * @param campaignId - The ID of the campaign to create the target in.
+   * @param targetId - The new target ID to create.
+   * @param accessLevel - The access level.
+   * @param donorSecure - The flag indicating if the donor server uses HTTPS.
+   * @param donorSub - The donor subdomain.
+   * @param donorDomain - The donor domain name.
+   * @param donorPort - The donor server port.
+   * @param mirrorSecure - The flag indicating if the mirror server uses HTTPS.
+   * @param mirrorSub - The mirror subdomain.
+   * @param mirrorPort - The mirror server port.
+   * @param connectTimeout - The connection timeout in milliseconds.
+   * @param simpleTimeout - The simple request timeout in milliseconds.
+   * @param streamTimeout - The streaming request timeout in milliseconds.
+   * @param headersSizeLimit - The maximum headers size in bytes.
+   * @param bodySizeLimit - The maximum body size in bytes.
+   * @param mainPage - The custom main page content.
+   * @param notFoundPage - The custom not-found page content.
+   * @param faviconIco - The custom favicon.ico content.
+   * @param robotsTxt - The custom robots.txt content.
+   * @param sitemapXml - The custom sitemap.xml content.
+   * @param allowWebSockets - The flag indicating if WebSocket connections allowed.
+   * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is not locked.
+   * @throws {@link DatabaseError} If the campaign lock secret does not match.
+   * @throws {@link DatabaseError} If a target with the same ID already exists.
+   * @throws {@link DatabaseError} If the target donor is already used.
+   * @throws {@link DatabaseError} If the target mirror is already used.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   create(
     campaignId: string,
@@ -77,27 +77,33 @@ export interface TargetRepository {
   ): Promise<void>
 
   /**
-   * Reads a target model by its ID.
+   * Reads the target by its ID.
    *
-   * @param campaignId - The ID of the campaign containing the target
-   * @param targetId - The target ID to read
-   * @returns The target model, or `null` if not found
+   * @param campaignId - The ID of the campaign containing the target.
+   * @param targetId - The target ID to read.
+   * @returns The target model, or `null` if the target is not found.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   read(campaignId: string, targetId: string): Promise<TargetModel | null>
 
   /**
-   * Reads a full target model by its ID.
+   * Reads the full target by its ID.
    *
-   * @param campaignId - The ID of the campaign containing the target
-   * @param targetId - The target ID to read
-   * @returns The full target model, or `null` if not found
+   * @param campaignId - The ID of the campaign containing the target.
+   * @param targetId - The target ID to read.
+   * @returns The full target model, or `null` if the target is not found.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   readFull(campaignId: string, targetId: string): Promise<FullTargetModel | null>
 
   /**
-   * Read a target hosts entire all campaigns.
+   * Reads all target hosts across all campaigns.
    *
-   * @returns The target hosts object
+   * This method returns a dictionary mapping mirror hostnames to target links,
+   * used for fast routing lookups.
+   *
+   * @returns The dictionary of target hosts and their links.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   readHosts(): Promise<TargetHosts>
 
@@ -105,43 +111,47 @@ export interface TargetRepository {
    * Finds a target by its mirror hostname.
    *
    * This is the primary lookup method for routing incoming HTTP requests.
-   * Given a `Host` header from a request, it returns the corresponding target model.
+   * Given a `Host` header from a request, it returns the corresponding target.
    *
-   * @param mirrorHost - The mirror hostname
-   * @returns The target model, or `null` if no target matches the hostname
+   * @param mirrorHost - The mirror hostname to look up.
+   * @returns The target model, or `null` if no target matches the hostname.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   find(mirrorHost: string): Promise<TargetModel | null>
 
   /**
    * Finds a full target by its mirror hostname.
    *
-   * @param mirrorHost - The mirror hostname
-   * @returns The full target model, or `null` if no target matches the hostname
+   * @param mirrorHost - The mirror hostname to look up.
+   * @returns The full target model, or `null` if no target matches the hostname.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   findFull(mirrorHost: string): Promise<FullTargetModel | null>
 
   /**
-   * Updates specific fields of a target model.
+   * Updates the target specific fields.
    *
-   * @param campaignId - The ID of the campaign containing the target
-   * @param targetId - The target ID to update
-   * @param connectTimeout - Connection timeout
-   * @param simpleTimeout - Simple request timeout
-   * @param streamTimeout - Streaming request timeout
-   * @param headersSizeLimit - Maximum headers size in bytes
-   * @param bodySizeLimit - Maximum body size in bytes
-   * @param mainPage - Custom main page content
-   * @param notFoundPage - Custom 404 page content
-   * @param faviconIco - Custom favicon content
-   * @param robotsTxt - Custom robots.txt content
-   * @param sitemapXml - Custom sitemap.xml content
-   * @param allowWebSockets - Whether to allow WebSocket connections
-   * @param lockSecret - The campaign lock secret obtained from `CampaignRepository.lock()`
+   * All update parameters are optional. Only provided fields will be updated.
    *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is not locked
-   * @throws {@link DatabaseError} If the lock secret does not match
-   * @throws {@link DatabaseError} If the target does not exist
+   * @param campaignId - The ID of the campaign containing the target.
+   * @param targetId - The target ID to update.
+   * @param connectTimeout - The connection timeout in milliseconds.
+   * @param simpleTimeout - The simple request timeout in milliseconds.
+   * @param streamTimeout - The streaming request timeout in milliseconds.
+   * @param headersSizeLimit - The maximum headers size in bytes.
+   * @param bodySizeLimit - The maximum body size in bytes.
+   * @param mainPage - The custom main page content.
+   * @param notFoundPage - The custom not-found page content.
+   * @param faviconIco - The custom favicon.ico content.
+   * @param robotsTxt - The custom robots.txt content.
+   * @param sitemapXml - The custom sitemap.xml content.
+   * @param allowWebSockets - The flag indicating if WebSocket connections allowed.
+   * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is not locked.
+   * @throws {@link DatabaseError} If the campaign lock secret does not match.
+   * @throws {@link DatabaseError} If the target does not exist.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   update(
     campaignId: string,
@@ -161,50 +171,53 @@ export interface TargetRepository {
   ): Promise<void>
 
   /**
-   * Enables a target, making it available for traffic routing.
+   * Enables the target, making it available for traffic routing.
    *
    * When enabled, the mirror hostname becomes active and can be used
    * for proxying requests to the donor server.
    *
-   * @param campaignId - The ID of the campaign containing the target
-   * @param targetId - The target ID to enable
-   * @param lockSecret - The campaign lock secret obtained from `CampaignRepository.lock()`
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is not locked
-   * @throws {@link DatabaseError} If the lock secret does not match
-   * @throws {@link DatabaseError} If the target does not exist
+   * @param campaignId - The ID of the campaign containing the target.
+   * @param targetId - The target ID to enable.
+   * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is not locked.
+   * @throws {@link DatabaseError} If the campaign lock secret does not match.
+   * @throws {@link DatabaseError} If the target does not exist.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   enable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
   /**
-   * Disables a target, stopping traffic routing.
+   * Disables the target, stopping traffic routing.
    *
    * When disabled, requests to the mirror hostname will not be proxied.
    *
-   * @param campaignId - The ID of the campaign containing the target
-   * @param targetId - The target ID to disable
-   * @param lockSecret - The campaign lock secret obtained from `CampaignRepository.lock()`
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is not locked
-   * @throws {@link DatabaseError} If the lock secret does not match
-   * @throws {@link DatabaseError} If the target does not exist
+   * @param campaignId - The ID of the campaign containing the target.
+   * @param targetId - The target ID to disable.
+   * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is not locked.
+   * @throws {@link DatabaseError} If the campaign lock secret does not match.
+   * @throws {@link DatabaseError} If the target does not exist.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   disable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
   /**
-   * Appends a label to a target.
+   * Appends a label to the target.
    *
-   * @param campaignId - The ID of the campaign containing the target
-   * @param targetId - The target ID to append label to
-   * @param label - The label to add
-   * @param lockSecret - The campaign lock secret obtained from `CampaignRepository.lock()`
+   * Labels are used for categorization and filtering of targets.
+   * The label is automatically converted to lowercase.
    *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is not locked
-   * @throws {@link DatabaseError} If the lock secret does not match
-   * @throws {@link DatabaseError} If the target does not exist
+   * @param campaignId - The ID of the campaign containing the target.
+   * @param targetId - The target ID to append label to.
+   * @param label - The label to append to the target.
+   * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is not locked.
+   * @throws {@link DatabaseError} If the campaign lock secret does not match.
+   * @throws {@link DatabaseError} If the target does not exist.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   appendLabel(
     campaignId: string,
@@ -214,17 +227,17 @@ export interface TargetRepository {
   ): Promise<void>
 
   /**
-   * Removes a label from a target.
+   * Removes a label from the target.
    *
-   * @param campaignId - The ID of the campaign containing the target
-   * @param targetId - The target ID to remove label from
-   * @param label - The label to remove
-   * @param lockSecret - The campaign lock secret obtained from `CampaignRepository.lock()`
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is not locked
-   * @throws {@link DatabaseError} If the lock secret does not match
-   * @throws {@link DatabaseError} If the target does not exist
+   * @param campaignId - The ID of the campaign containing the target.
+   * @param targetId - The target ID to remove label from.
+   * @param label - The label to remove from the target.
+   * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is not locked.
+   * @throws {@link DatabaseError} If the campaign lock secret does not match.
+   * @throws {@link DatabaseError} If the target does not exist.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   removeLabel(
     campaignId: string,
@@ -234,39 +247,41 @@ export interface TargetRepository {
   ): Promise<void>
 
   /**
-   * Delete a target model by its ID.
+   * Deletes the target by its ID.
    *
-   * The target must be **disabled **before it can be deleted.
+   * The target must be disabled before it can be deleted.
    *
-   * @param campaignId - The ID of the campaign containing the target
-   * @param targetId - The target ID to delete
-   * @param lockSecret - The campaign lock secret obtained from `CampaignRepository.lock()`
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is not locked
-   * @throws {@link DatabaseError} If the lock secret does not match
-   * @throws {@link DatabaseError} If the target does not exist
-   * @throws {@link DatabaseError} If the target is still enabled
+   * @param campaignId - The ID of the campaign containing the target.
+   * @param targetId - The target ID to delete.
+   * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is not locked.
+   * @throws {@link DatabaseError} If the campaign lock secret does not match.
+   * @throws {@link DatabaseError} If the target does not exist.
+   * @throws {@link DatabaseError} If the target is still enabled.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   delete(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
   /**
-   * Lists all targets in a campaign.
+   * Lists all targets for the campaign.
    *
    * Targets are ordered by creation time (oldest first).
    *
-   * @param campaignId - The ID of the campaign to list targets for
-   * @returns An array of target models, or `null` if the campaign does not exist
+   * @param campaignId - The ID of the campaign to list targets for.
+   * @returns The array of target models, or `null` if the campaign does not exist.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   list(campaignId: string): Promise<TargetModel[] | null>
 
   /**
-   * Lists all full targets in a campaign.
+   * Lists all full targets for the campaign.
    *
    * Targets are ordered by creation time (oldest first).
    *
-   * @param campaignId - The ID of the campaign to list targets for
-   * @returns An array of full target models, or `null` if the campaign does not exist
+   * @param campaignId - The ID of the campaign to list targets for.
+   * @returns The array of full target models, or `null` if the campaign does not exist.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   listFull(campaignId: string): Promise<FullTargetModel[] | null>
 }

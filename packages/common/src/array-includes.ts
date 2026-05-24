@@ -1,25 +1,14 @@
 /**
- * Check array includes a value, type-safe version.
+ * A type-safe wrapper for `Array.includes()`.
  *
- * This function provides a type-guard version of Array.includes that properly
- * narrows the type of the element after checking.
+ * This function acts as a type predicate, narrowing the type of the element
+ * after a successful check. It is useful for filtering or validating array contents.
  *
- * @category none
- * @param coll - The collection to search in
- * @param el - The element to check for
- * @returns Type guard indicating if the element is in the collection
- * @example
- * ```ts
- * const colors = ['red', 'green', 'blue'] as const
- * const value = 'red'
- *
- * if (arrayIncludes(colors, value)) {
- *   // value is now typed as 'red' | 'green' | 'blue'
- *   console.log(value)
- * }
- * ```
- * @see https://oida.dev/typescript-array-includes/
+ * @typeParam T - The type of elements in the array.
+ * @param coll - The read-only array to search within.
+ * @param el - The element to search for.
+ * @returns `true` if the element exists in the array, and narrows the type of `el` to `T`.
  */
-export const arrayIncludes = <T extends U, U>(coll: ReadonlyArray<T>, el: U): el is T => {
+export function arrayIncludes<T>(coll: ReadonlyArray<T>, el: unknown): el is T {
   return coll.includes(el as T)
 }

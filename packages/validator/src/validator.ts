@@ -1,120 +1,57 @@
 /**
- * DI token for a validator.
- *
- * @category none
- * @internal
+ * DI token for a validator implementation.
  */
 export const VALIDATOR = Symbol('Validator')
 
 /**
- * Represents a validator.
+ * Defines the public contract for a validator.
  *
- * Provides type-safe schema validation with Ajv.
- * Supports both safe guards and assertion-based validation.
- *
- * @category none
+ * Provides type-safe methods for guarding and asserting data structures
+ * against registered JSON Schemas.
  */
 export interface Validator {
   /**
-   * Retrieve a registered JSON schema by name.
+   * Registers a JSON Schema with a unique name.
    *
-   * @param name - The schema identifier
-   * @returns Schema object, or `undefined` if not found
+   * The schema will be compiled and cached for later validation.
+   *
+   * @param name - The unique identifier for the schema.
+   * @param schema - The JSON Schema object.
+   * @returns This validator for method chaining.
+   * @throws Error If a schema with the given name is already registered.
    */
-  getSchema(name: string): object | undefined
+  addSchema(name: string, schema: object): this
 
   /**
-   * Register a JSON schema with a unique name.
+   * Validates data against a JSON Schema, acting as a type guard.
    *
-   * @param name - Unique schema identifier
-   * @param schema - JSON schema object
-   * @throws Error if schema with name already exists
-   */
-  addSchema(name: string, schema: object): void
-
-  /**
-   * Register multiple schemas in bulk.
+   * On success, it narrows the type of the data to the specified type `T`.
    *
-   * @param schemas - Dictionary mapping schema names to schema objects
-   * @throws Error if any schema name already exists
-   */
-  addSchemas(schemas: ValidatorSchemas): void
-
-  /**
-   * Type-safe validation using type guard.
-   *
-   * Returns false instead of throwing on validation failure.
-   * Use this for non-critical validation.
-   *
-   * @typeParam T - Expected data type after validation
-   * @param name - Schema name to validate against
-   * @param data - Unknown data to validate
-   * @returns true if data matches schema (and narrows type to T)
-   *
-   * @example
-   * ```ts
-   * interface User {
-   *   id: string
-   *   name: string
-   * }
-   *
-   * if (validator.guardSchema<User>('user', inputData)) {
-   *   // TypeScript knows this is User
-   *   console.log(inputData.name)
-   * } else {
-   *   console.log('Invalid user data')
-   * }
-   * ```
+   * @typeParam T - The expected type after validation.
+   * @param name - The name of the schema to validate against.
+   * @param data - The data to be validated.
+   * @returns `true` if the data is valid, `false` otherwise.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   guardSchema<T>(name: string, data: unknown): data is T
 
   /**
-   * Strict validation using assertion.
+   * Validates data against a JSON Schema, acting as a type assertion.
    *
-   * Throws ValidatorError with detailed validation errors on failure.
-   * Use this for critical validation in request/response processing.
+   * On failure, it throws a detailed validation error.
    *
-   * @typeParam T - Expected data type after validation
-   * @param name - Schema name to validate against
-   * @param data - Unknown data to validate
-   * @throws {@link ValidatorError} with validation error details
-   *
-   * @example
-   * ```ts
-   * interface Request {
-   *   method: string
-   *   path: string
-   * }
-   *
-   * try {
-   *   validator.assertSchema<Request>('request', inputData)
-   *   // TypeScript knows this is Request
-   *   processRequest(inputData.path)
-   * } catch (error) {
-   *   if (error instanceof ValidatorError) {
-   *     // Detailed error info
-   *     console.log(error.validateErrors)
-   *   }
-   * }
-   * ```
+   * @typeParam T - The expected type after validation.
+   * @param name - The name of the schema to validate against.
+   * @param data - The data to be validated.
+   * @throws {@link ValidatorError} If validation fails, containing detailed error information.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   assertSchema<T>(name: string, data: unknown): asserts data is T
 }
 
 /**
- * Dictionary mapping schema names to schema objects.
+ * JSON Schema type from Ajv.
  *
- * @category none
- */
-export type ValidatorSchemas = Record<string, object>
-
-/**
- * JSON Schema type from Ajv library.
- *
- * Re-exported for convenience when defining typed schemas.
- *
- * @category none
+ * @typeParam T - The expected type of the validated result.
  */
 export { JSONSchemaType } from 'ajv'

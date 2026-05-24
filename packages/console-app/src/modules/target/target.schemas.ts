@@ -2,7 +2,6 @@ import {
   targetAccessLevelSchema,
   targetBodySizeLimitSchema,
   targetConnectTimeoutSchema,
-  targetContentSchema,
   targetDomainSchema,
   targetHeadersSizeLimitSchema,
   targetLabelSchema,
@@ -13,141 +12,161 @@ import {
 } from '@famir/database'
 import {
   JSONSchemaType,
-  ValidatorSchemas,
   booleanSchema,
   customIdentSchema,
   randomIdentSchema,
 } from '@famir/validator'
 import {
-  AlterTargetLabelData,
-  CreateTargetData,
-  DeleteTargetData,
-  ListTargetsData,
-  ReadTargetData,
-  ToggleTargetData,
-  UpdateTargetData,
+  AlterTargetLabelArgs,
+  CreateTargetArgs,
+  DeleteTargetArgs,
+  ListTargetsArgs,
+  ReadTargetArgs,
+  ReadTargetHostsArgs,
+  ToggleTargetArgs,
+  UpdateTargetArgs,
 } from './target.js'
 
 /**
+ * JSON Schema for validating a create target args.
+ *
  * @category Target
  * @internal
  */
-const createTargetDataSchema: JSONSchemaType<CreateTargetData> = {
+export const createTargetArgsSchema: JSONSchemaType<CreateTargetArgs> = {
   type: 'object',
   required: [
-    'campaignId',
-    'targetId',
+    '_',
     'accessLevel',
     'donorSecure',
     'donorSub',
     'donorDomain',
-    'donorPort',
     'mirrorSecure',
     'mirrorSub',
-    'mirrorPort',
     'connectTimeout',
     'simpleTimeout',
     'streamTimeout',
     'headersSizeLimit',
     'bodySizeLimit',
-    'mainPage',
-    'notFoundPage',
-    'faviconIco',
-    'robotsTxt',
-    'sitemapXml',
     'allowWebSockets',
     'lockSecret',
   ],
   properties: {
-    campaignId: customIdentSchema,
-    targetId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     accessLevel: targetAccessLevelSchema,
     donorSecure: booleanSchema,
     donorSub: targetSubSchema,
     donorDomain: targetDomainSchema,
-    donorPort: targetPortSchema,
+    donorPort: {
+      ...targetPortSchema,
+      nullable: true,
+    },
     mirrorSecure: booleanSchema,
     mirrorSub: targetSubSchema,
-    mirrorPort: targetPortSchema,
+    mirrorPort: {
+      ...targetPortSchema,
+      nullable: true,
+    },
+    connectTimeout: targetConnectTimeoutSchema,
+    simpleTimeout: targetSimpleTimeoutSchema,
+    streamTimeout: targetStreamTimeoutSchema,
+    headersSizeLimit: targetHeadersSizeLimitSchema,
+    bodySizeLimit: targetBodySizeLimitSchema,
+    mainPageFile: {
+      type: 'string',
+      nullable: true,
+    },
+    notFoundPageFile: {
+      type: 'string',
+      nullable: true,
+    },
+    faviconIcoFile: {
+      type: 'string',
+      nullable: true,
+    },
+    robotsTxtFile: {
+      type: 'string',
+      nullable: true,
+    },
+    sitemapXmlFile: {
+      type: 'string',
+      nullable: true,
+    },
+    allowWebSockets: booleanSchema,
+    lockSecret: randomIdentSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * JSON Schema for validating a read target args.
+ *
+ * @category Target
+ * @internal
+ */
+export const readTargetArgsSchema: JSONSchemaType<ReadTargetArgs> = {
+  type: 'object',
+  required: ['_'],
+  properties: {
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * JSON Schema for validating a read target hosts args.
+ *
+ * @category Target
+ * @internal
+ */
+export const readTargetHostsArgsSchema: JSONSchemaType<ReadTargetHostsArgs> = {
+  type: 'object',
+  required: ['_'],
+  properties: {
+    _: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      minItems: 0,
+      maxItems: 0,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * JSON Schema for validating an update target args.
+ *
+ * @category Target
+ * @internal
+ */
+export const updateTargetArgsSchema: JSONSchemaType<UpdateTargetArgs> = {
+  type: 'object',
+  required: ['_', 'lockSecret'],
+  properties: {
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     connectTimeout: {
       ...targetConnectTimeoutSchema,
-      default: 10 * 1000, // 10 sec
+      nullable: true,
     },
     simpleTimeout: {
       ...targetSimpleTimeoutSchema,
-      default: 60 * 1000, // 1 min
-    },
-    streamTimeout: {
-      ...targetStreamTimeoutSchema,
-      default: 300 * 1000, // 5 min
-    },
-    headersSizeLimit: {
-      ...targetHeadersSizeLimitSchema,
-      default: 10 * 1024, // 10 kb
-    },
-    bodySizeLimit: {
-      ...targetBodySizeLimitSchema,
-      default: 10 * 1024 * 1024, // 10 mb
-    },
-    mainPage: {
-      ...targetContentSchema,
-      default: '',
-    },
-    notFoundPage: {
-      ...targetContentSchema,
-      default: '',
-    },
-    faviconIco: {
-      ...targetContentSchema,
-      default: '',
-    },
-    robotsTxt: {
-      ...targetContentSchema,
-      default: '',
-    },
-    sitemapXml: {
-      ...targetContentSchema,
-      default: '',
-    },
-    allowWebSockets: {
-      ...booleanSchema,
-      default: false,
-    },
-    lockSecret: randomIdentSchema,
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * @category Target
- * @internal
- */
-const readTargetDataSchema: JSONSchemaType<ReadTargetData> = {
-  type: 'object',
-  required: ['campaignId', 'targetId'],
-  properties: {
-    campaignId: customIdentSchema,
-    targetId: customIdentSchema,
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * @category Target
- * @internal
- */
-const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
-  type: 'object',
-  required: ['campaignId', 'targetId', 'lockSecret'],
-  properties: {
-    campaignId: customIdentSchema,
-    targetId: customIdentSchema,
-    connectTimeout: {
-      ...targetConnectTimeoutSchema,
-      nullable: true,
-    },
-    simpleTimeout: {
-      ...targetSimpleTimeoutSchema,
       nullable: true,
     },
     streamTimeout: {
@@ -162,24 +181,24 @@ const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
       ...targetBodySizeLimitSchema,
       nullable: true,
     },
-    mainPage: {
-      ...targetContentSchema,
+    mainPageFile: {
+      type: 'string',
       nullable: true,
     },
-    notFoundPage: {
-      ...targetContentSchema,
+    notFoundPageFile: {
+      type: 'string',
       nullable: true,
     },
-    faviconIco: {
-      ...targetContentSchema,
+    faviconIcoFile: {
+      type: 'string',
       nullable: true,
     },
-    robotsTxt: {
-      ...targetContentSchema,
+    robotsTxtFile: {
+      type: 'string',
       nullable: true,
     },
-    sitemapXml: {
-      ...targetContentSchema,
+    sitemapXmlFile: {
+      type: 'string',
       nullable: true,
     },
     allowWebSockets: {
@@ -192,30 +211,42 @@ const updateTargetDataSchema: JSONSchemaType<UpdateTargetData> = {
 } as const
 
 /**
+ * JSON Schema for validating a toggle target args.
+ *
  * @category Target
  * @internal
  */
-const toggleTargetDataSchema: JSONSchemaType<ToggleTargetData> = {
+export const toggleTargetArgsSchema: JSONSchemaType<ToggleTargetArgs> = {
   type: 'object',
-  required: ['campaignId', 'targetId', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    targetId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating an alter target args.
+ *
  * @category Target
  * @internal
  */
-const alterTargetLabelDataSchema: JSONSchemaType<AlterTargetLabelData> = {
+export const alterTargetLabelArgsSchema: JSONSchemaType<AlterTargetLabelArgs> = {
   type: 'object',
-  required: ['campaignId', 'targetId', 'label', 'lockSecret'],
+  required: ['_', 'label', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    targetId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     label: targetLabelSchema,
     lockSecret: randomIdentSchema,
   },
@@ -223,43 +254,42 @@ const alterTargetLabelDataSchema: JSONSchemaType<AlterTargetLabelData> = {
 } as const
 
 /**
+ * JSON Schema for validating a delete target args.
+ *
  * @category Target
  * @internal
  */
-const deleteTargetDataSchema: JSONSchemaType<DeleteTargetData> = {
+export const deleteTargetArgsSchema: JSONSchemaType<DeleteTargetArgs> = {
   type: 'object',
-  required: ['campaignId', 'targetId', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    targetId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a list targets args.
+ *
  * @category Target
  * @internal
  */
-const listTargetsDataSchema: JSONSchemaType<ListTargetsData> = {
+export const listTargetsArgsSchema: JSONSchemaType<ListTargetsArgs> = {
   type: 'object',
-  required: ['campaignId'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
   },
   additionalProperties: false,
-} as const
-
-/**
- * @category Target
- * @internal
- */
-export const targetSchemas: ValidatorSchemas = {
-  'console-create-target-data': createTargetDataSchema,
-  'console-read-target-data': readTargetDataSchema,
-  'console-update-target-data': updateTargetDataSchema,
-  'console-toggle-target-data': toggleTargetDataSchema,
-  'console-alter-target-label-data': alterTargetLabelDataSchema,
-  'console-delete-target-data': deleteTargetDataSchema,
-  'console-list-targets-data': listTargetsDataSchema,
 } as const

@@ -3,10 +3,10 @@ import {
   campaignKey,
   campaignLockKey,
   targetDonorsKey,
+  targetHostsKey,
   targetIndexKey,
   targetKey,
   targetLabelsKey,
-  targetHostsKey,
   targetMirrorsKey,
 } from '../../database.keys.js'
 import { TargetAccessLevel } from './target.models.js'

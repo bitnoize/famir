@@ -2,8 +2,7 @@ import { DIContainer } from '@famir/common'
 import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
-import { DatabaseError } from '../../database.error.js'
-import { DATABASE_CONNECTOR, DatabaseConnector, RedisDatabaseConfig } from '../../database.js'
+import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullTarget, RawTarget } from './target.functions.js'
 import { TARGET_REPOSITORY, TargetRepository } from './target.js'
@@ -14,28 +13,56 @@ import {
   TargetLink,
   TargetModel,
 } from './target.models.js'
-import { targetSchemas } from './target.schemas.js'
+import {
+  rawFullTargetSchema,
+  rawTargetSchema,
+  targetHostsSchema,
+  targetLinkSchema,
+} from './target.schemas.js'
 
 /**
- * Redis target repository implementation.
+ * Redis-based target repository implementation.
+ *
+ * Depends:
+ * - {@link Validator} via {@link VALIDATOR} token
+ * - {@link Config} via {@link CONFIG} token
+ * - {@link Logger} via {@link LOGGER} token
+ * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { TARGET_REPOSITORY, TargetRepository, RedisTargetRepository } from '@famir/database'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
+ *
+ * // Register dependency in container
+ * RedisTargetRepository.register(container)
+ *
+ * // Resolve dependency from container
+ * const targetRepository = container.resolve<TargetRepository>(TARGET_REPOSITORY)
+ *
+ * // TODO more examples
+ * ```
  *
  * @category Target
  */
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {
   /**
-   * Register target repository instance as singleton in DI container.
+   * Registers the target repository as a singleton in the DI container.
    *
-   * @param container - DI container to register in
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<TargetRepository>(
       TARGET_REPOSITORY,
       (c) =>
         new RedisTargetRepository(
-          c.resolve(VALIDATOR),
-          c.resolve(CONFIG),
-          c.resolve(LOGGER),
-          c.resolve(DATABASE_CONNECTOR)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config>(CONFIG),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<DatabaseConnector>(DATABASE_CONNECTOR)
         )
     )
   }
@@ -43,22 +70,19 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   /**
    * Creates a new target repository instance.
    *
-   * @param validator - The validator instance
-   * @param config - The database config instance
-   * @param logger - The logger instance
-   * @param connector - The database connector instance
+   * @param validator - The validator instance.
+   * @param config - The config instance.
+   * @param logger - The logger instance.
+   * @param connector - The connector instance.
    */
-  constructor(
-    validator: Validator,
-    config: Config<RedisDatabaseConfig>,
-    logger: Logger,
-    connector: DatabaseConnector
-  ) {
+  constructor(validator: Validator, config: Config, logger: Logger, connector: DatabaseConnector) {
     super(validator, config, logger, connector, 'target')
 
-    this.validator.addSchemas(targetSchemas)
-
-    this.logger.debug(`TargetRepository initialized`)
+    this.validator
+      .addSchema('database-raw-target', rawTargetSchema)
+      .addSchema('database-raw-full-target', rawFullTargetSchema)
+      .addSchema('database-target-link', targetLinkSchema)
+      .addSchema('database-target-hosts', targetHostsSchema)
   }
 
   async create(
@@ -113,15 +137,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.raiseError(error, 'create', { campaignId, targetId })
+      this.handleRepositoryError(error, 'create', { campaignId, targetId })
     }
   }
 
@@ -135,7 +155,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'read', { campaignId, targetId })
+      this.handleRepositoryError(error, 'read', { campaignId, targetId })
     }
   }
 
@@ -149,7 +169,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'readFull', { campaignId, targetId })
+      this.handleRepositoryError(error, 'readFull', { campaignId, targetId })
     }
   }
 
@@ -157,11 +177,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     try {
       const hosts = await this.connection.target.read_target_hosts(this.options.prefix)
 
-      this.validateRawData<TargetHosts>('database-target-hosts', hosts)
+      this.validateReply<TargetHosts>('database-target-hosts', hosts)
 
       return hosts
     } catch (error) {
-      this.raiseError(error, 'readHosts', null)
+      this.handleRepositoryError(error, 'readHosts', null)
     }
   }
 
@@ -173,7 +193,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         return null
       }
 
-      this.validateRawData<TargetLink>('database-target-link', link)
+      this.validateReply<TargetLink>('database-target-link', link)
 
       const [campaignId, targetId] = link
 
@@ -185,7 +205,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'find', { mirrorHost })
+      this.handleRepositoryError(error, 'find', { mirrorHost })
     }
   }
 
@@ -197,7 +217,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         return null
       }
 
-      this.validateRawData<TargetLink>('database-target-link', link)
+      this.validateReply<TargetLink>('database-target-link', link)
 
       const [campaignId, targetId] = link
 
@@ -209,7 +229,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.raiseError(error, 'findFull', { mirrorHost })
+      this.handleRepositoryError(error, 'findFull', { mirrorHost })
     }
   }
 
@@ -248,15 +268,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.raiseError(error, 'update', { campaignId, targetId })
+      this.handleRepositoryError(error, 'update', { campaignId, targetId })
     }
   }
 
@@ -269,15 +285,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.raiseError(error, 'enable', { campaignId, targetId })
+      this.handleRepositoryError(error, 'enable', { campaignId, targetId })
     }
   }
 
@@ -290,15 +302,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.raiseError(error, 'disable', { campaignId, targetId })
+      this.handleRepositoryError(error, 'disable', { campaignId, targetId })
     }
   }
 
@@ -317,15 +325,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { target: { campaignId, targetId, label } })
     } catch (error) {
-      this.raiseError(error, 'appendLabel', { campaignId, targetId, label })
+      this.handleRepositoryError(error, 'appendLabel', { campaignId, targetId, label })
     }
   }
 
@@ -344,15 +348,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { target: { campaignId, targetId, label } })
     } catch (error) {
-      this.raiseError(error, 'removeLabel', { campaignId, targetId, label })
+      this.handleRepositoryError(error, 'removeLabel', { campaignId, targetId, label })
     }
   }
 
@@ -365,15 +365,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const [code, mesg] = this.parseStatusReply(statusReply)
-
-      if (code !== 'OK') {
-        throw new DatabaseError(mesg, { code })
-      }
+      const mesg = this.checkStatusReply(statusReply)
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.raiseError(error, 'delete', { campaignId, targetId })
+      this.handleRepositoryError(error, 'delete', { campaignId, targetId })
     }
   }
 
@@ -395,7 +391,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.raiseError(error, 'list', { campaignId })
+      this.handleRepositoryError(error, 'list', { campaignId })
     }
   }
 
@@ -417,24 +413,23 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullCollection(rawCollection)
     } catch (error) {
-      this.raiseError(error, 'listFull', { campaignId })
+      this.handleRepositoryError(error, 'listFull', { campaignId })
     }
   }
 
   /**
    * Converts raw Redis data to a target model.
    *
-   * @param rawModel - The raw data from Redis
-   * @returns The target model, or `null` if the raw data is `null`
-   * @throws {@link DatabaseError} If the raw data fails validation
-   * @internal
+   * @param rawModel - The raw data from Redis.
+   * @returns The target model, or `null` if the raw data is `null`.
+   * @throws {@link DatabaseError} If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): TargetModel | null {
     if (rawModel === null) {
       return null
     }
 
-    this.validateRawData<RawTarget>('database-raw-target', rawModel)
+    this.validateReply<RawTarget>('database-raw-target', rawModel)
 
     return new TargetModel(
       rawModel.campaign_id,
@@ -457,17 +452,16 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   /**
    * Converts raw Redis data to a full target model.
    *
-   * @param rawModel - The raw data from Redis
-   * @returns The full target model, or `null` if the raw data is `null`
-   * @throws {@link DatabaseError} If the raw data fails validation
-   * @internal
+   * @param rawModel - The raw data from Redis.
+   * @returns The full target model, or `null` if the raw data is `null`.
+   * @throws {@link DatabaseError} If the raw data fails validation.
    */
   protected buildFullModel(rawModel: unknown): FullTargetModel | null {
     if (rawModel === null) {
       return null
     }
 
-    this.validateRawData<RawFullTarget>('database-raw-full-target', rawModel)
+    this.validateReply<RawFullTarget>('database-raw-full-target', rawModel)
 
     return new FullTargetModel(
       rawModel.campaign_id,
@@ -500,12 +494,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   }
 
   /**
-   * Converts an array of raw Redis data to an array of target models.
+   * Converts a list of raw Redis data to a list of target models.
    *
-   * @param rawCollection - The array of raw data from Redis
-   * @returns An array of target models
-   * @throws {@link DatabaseError} If the array of raw data fails validation
-   * @internal
+   * @param rawCollection - The array of raw data from Redis.
+   * @returns The array of target models.
+   * @throws {@link DatabaseError} If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): TargetModel[] {
     this.validateArrayReply(rawCollection)
@@ -514,12 +507,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   }
 
   /**
-   * Converts an array of raw Redis data to an array of full target models.
+   * Converts a list of raw Redis data to a list of full target models.
    *
-   * @param rawCollection - The array of raw data from Redis
-   * @returns An array of full target models
-   * @throws {@link DatabaseError} If the array of raw data fails validation
-   * @internal
+   * @param rawCollection - The array of raw data from Redis.
+   * @returns The array of full target models.
+   * @throws {@link DatabaseError} If the array of raw data fails validation.
    */
   protected buildFullCollection(rawCollection: unknown): FullTargetModel[] {
     this.validateArrayReply(rawCollection)

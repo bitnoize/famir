@@ -1,6 +1,6 @@
 /**
- * Identify bots via user-agent string.
+ * Identifies bots via user-agent string.
  *
- * @category none
+ * @internal
  */
 export { isbot } from 'isbot'

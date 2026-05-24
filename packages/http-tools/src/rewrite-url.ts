@@ -1,30 +1,37 @@
 /**
- * @category none
+ * Target configuration for URL rewriting.
+ *
+ * Contains both donor and mirror host information for the rewrite operation.
+ *
  * @internal
  */
 export interface RewriteUrlTarget {
+  /** Whether the donor server uses HTTPS. */
   donorSecure: boolean
+  /** The donor server host. */
   donorHost: string
+  /** Whether the mirror server uses HTTPS. */
   mirrorSecure: boolean
+  /** The mirror server host. */
   mirrorHost: string
 }
 
 /**
- * @category none
+ * URL scheme configuration for rewriting.
+ *
  * @internal
  */
 export type RewriteUrlScheme = [string, boolean] // separator, withProto
 
 /**
- * Rewrite URLs in text content for proxy/mirror scenarios.
+ * Rewrite URLs in text content.
  *
  * @param text - Source text containing URLs to rewrite
- * @param rev - Reverse mode (mirror → donor instead of donor → mirror)
- * @param targets - Array of target configurations with donor/mirror hosts
- * @param schemes - URL schemes to match (e.g., ['://', true] for protocol + separator)
+ * @param rev - Reverse mode (mirror - donor instead of donor - mirror)
+ * @param targets - Array of target configurations with hosts
+ * @param schemes - URL schemes to match
  * @returns Text with rewritten URLs
  *
- * @category none
  * @internal
  */
 export function rewriteUrl(

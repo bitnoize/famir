@@ -6,32 +6,52 @@ import {
   HttpClientSimpleResult,
   HttpClientStreamResult,
 } from '@famir/http-client'
-import {
-  FORWARD_SERVICE,
-  ForwardSimpleData,
-  ForwardStreamRequestData,
-  ForwardStreamResponseData,
-} from './forward.js'
+import { HttpBody, HttpHeaders, HttpMethod } from '@famir/http-proto'
+import type { Readable } from 'node:stream'
 
 /**
- * Represents a forward service
+ * DI token for the forward service.
+ *
+ * @category Forward
+ */
+export const FORWARD_SERVICE = Symbol('ForwardService')
+
+/**
+ * Represents the forward service.
  *
  * @category Forward
  */
 export class ForwardService {
   /**
-   * Register dependency
+   * Registers the service as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<ForwardService>(
       FORWARD_SERVICE,
-      (c) => new ForwardService(c.resolve(HTTP_CLIENT))
+      (c) => new ForwardService(c.resolve<HttpClient>(HTTP_CLIENT))
     )
   }
 
+  /**
+   * Creates a new service instance.
+   *
+   * @param httpClient - The http-client instance.
+   */
   constructor(protected readonly httpClient: HttpClient) {}
 
-  async simple(data: ForwardSimpleData): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
+  async simple(data: {
+    proxy: string
+    method: HttpMethod
+    url: string
+    requestHeaders: HttpHeaders
+    requestBody: HttpBody
+    connectTimeout: number
+    timeout: number
+    headersSizeLimit: number
+    bodySizeLimit: number
+  }): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
     return await this.httpClient.simple(
       data.proxy,
       data.method,
@@ -45,9 +65,17 @@ export class ForwardService {
     )
   }
 
-  async streamRequest(
-    data: ForwardStreamRequestData
-  ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
+  async streamRequest(data: {
+    proxy: string
+    method: HttpMethod
+    url: string
+    requestHeaders: HttpHeaders
+    requestStream: Readable
+    connectTimeout: number
+    timeout: number
+    headersSizeLimit: number
+    bodySizeLimit: number
+  }): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
     return await this.httpClient.streamRequest(
       data.proxy,
       data.method,
@@ -61,9 +89,16 @@ export class ForwardService {
     )
   }
 
-  async streamResponse(
-    data: ForwardStreamResponseData
-  ): Promise<HttpClientStreamResult | HttpClientErrorResult> {
+  async streamResponse(data: {
+    proxy: string
+    method: HttpMethod
+    url: string
+    requestHeaders: HttpHeaders
+    requestBody: HttpBody
+    connectTimeout: number
+    timeout: number
+    headersSizeLimit: number
+  }): Promise<HttpClientStreamResult | HttpClientErrorResult> {
     return await this.httpClient.streamResponse(
       data.proxy,
       data.method,

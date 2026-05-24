@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-tools",
   "type": "module",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Famir HTTP tools module",
   "keywords": [
     "famir",
@@ -45,10 +45,10 @@
     "@famir/http-proto": "*",
     "cheerio": "^1.2.0",
     "content-type": "^2.0.0",
-    "iconv-lite": "^0.7.2",
-    "isbot": "^5.1.40",
-    "qs": "^6.15.2",
-    "tough-cookie": "^6.0.1",
+    "iconv-lite": "^0.7.3",
+    "isbot": "^5.2.1",
+    "qs": "^6.15.3",
+    "tough-cookie": "^6.0.2",
     "ua-parser-js": "^2.0.10"
   },
   "devDependencies": {

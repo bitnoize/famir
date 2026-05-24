@@ -1,6 +1,5 @@
 import {
   JSONSchemaType,
-  ValidatorSchemas,
   booleanSchema,
   counterSchema,
   customIdentSchema,
@@ -9,24 +8,23 @@ import {
 import { RawProxy } from './proxy.functions.js'
 
 /**
- * Schema for validating a proxy URL.
+ * JSON Schema for validating a proxy URL.
  *
  * @category Proxy
- * @internal
  */
 export const proxyUrlSchema: JSONSchemaType<string> = {
   type: 'string',
-  minLength: 1,
+  minLength: 2,
   maxLength: 256,
 } as const
 
 /**
- * Schema for validating raw proxy data from Redis.
+ * JSON Schema for validating raw proxy data from Redis.
  *
  * @category Proxy
  * @internal
  */
-const rawProxySchema: JSONSchemaType<RawProxy> = {
+export const rawProxySchema: JSONSchemaType<RawProxy> = {
   type: 'object',
   required: ['campaign_id', 'proxy_id', 'url', 'is_enabled', 'message_count', 'created_at'],
   properties: {
@@ -38,14 +36,4 @@ const rawProxySchema: JSONSchemaType<RawProxy> = {
     created_at: timestampSchema,
   },
   additionalProperties: false,
-} as const
-
-/**
- * Collection of all schemas used by the proxy module.
- *
- * @category Proxy
- * @internal
- */
-export const proxySchemas: ValidatorSchemas = {
-  'database-raw-proxy': rawProxySchema,
 } as const

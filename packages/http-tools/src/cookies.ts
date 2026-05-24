@@ -2,12 +2,11 @@ import { HttpCookies, HttpSetCookies } from '@famir/http-proto'
 import { Cookie as ToughCookie } from 'tough-cookie'
 
 /**
- * Parse Cookie header values into key-value object.
+ * Parses a Cookie header values to a key-value object.
  *
- * @param values - Array of raw cookie strings
- * @returns Object mapping cookie names to values
+ * @param values - The array of raw Cookie strings.
+ * @returns The object mapping cookie names to their values.
  *
- * @category none
  * @internal
  */
 export function parseCookies(values: string[]): HttpCookies {
@@ -28,12 +27,11 @@ export function parseCookies(values: string[]): HttpCookies {
 }
 
 /**
- * Format Cookie object back to header string.
+ * Formats a Cookie object to a header string.
  *
- * @param cookies - Cookie object to format
- * @returns String suitable for Cookie header
+ * @param cookies - The Cookie object to format.
+ * @returns The string suitable for the Cookie header.
  *
- * @category none
  * @internal
  */
 export function formatCookies(cookies: HttpCookies): string {
@@ -54,12 +52,11 @@ export function formatCookies(cookies: HttpCookies): string {
 }
 
 /**
- * Parse Set-Cookie header values into key-value object.
+ * Parses a Set-Cookie header values into a key-value object.
  *
- * @param values - Array of raw set-cookie strings
- * @returns Object mapping set-cookie names to values
+ * @param values - The array of raw Set-Cookie strings.
+ * @returns The object mapping cookie names to their parsed attributes.
  *
- * @category none
  * @internal
  */
 export function parseSetCookies(values: string[]): HttpSetCookies {
@@ -115,12 +112,11 @@ export function parseSetCookies(values: string[]): HttpSetCookies {
 }
 
 /**
- * Format Set-Cookie object back to header string.
+ * Formats a Set-Cookie object to header strings.
  *
- * @param cookies - Set-Cookie object to format
- * @returns String suitable for Set-Cookie header
+ * @param setCookies - The Set-Cookie object to format.
+ * @returns The array of strings suitable for Set-Cookie headers.
  *
- * @category none
  * @internal
  */
 export function formatSetCookies(setCookies: HttpSetCookies): string[] {

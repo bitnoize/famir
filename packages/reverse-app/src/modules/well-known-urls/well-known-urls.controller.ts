@@ -1,51 +1,77 @@
 import { DIContainer } from '@famir/common'
-import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
+import { type EnabledFullTargetModel } from '@famir/database'
+import {
+  HTTP_SERVER_ROUTER,
+  HttpServerContext,
+  HttpServerContextType,
+  HttpServerNextFunction,
+  HttpServerRouter,
+} from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import { WELL_KNOWN_URLS_CONTROLLER, WellKnownUrlsDispatchContextType } from './well-known-urls.js'
 
 /**
- * Represents a well-known-urls controller
+ * DI token for the well-known-urls controller.
+ *
+ * @category WellKnownUrls
+ */
+export const WELL_KNOWN_URLS_CONTROLLER = Symbol('WellKnownUrlsController')
+
+/**
+ * @category WellKnownUrls
+ * @internal
+ */
+type WellKnownUrlsHandler = (
+  ctx: HttpServerContext,
+  target: EnabledFullTargetModel,
+  next: HttpServerNextFunction
+) => Promise<void>
+
+/**
+ * @category WellKnownUrls
+ * @internal
+ */
+type WellKnownUrlsDispatchContextType = Record<HttpServerContextType, WellKnownUrlsHandler>
+
+/**
+ * Represents the well-known-urls controller.
  *
  * @category WellKnownUrls
  */
 export class WellKnownUrlsController extends BaseController {
   /**
-   * Register dependency
+   * Registers the controller as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<WellKnownUrlsController>(
       WELL_KNOWN_URLS_CONTROLLER,
       (c) =>
         new WellKnownUrlsController(
-          c.resolve(VALIDATOR),
-          c.resolve(LOGGER),
-          c.resolve(TEMPLATER),
-          c.resolve(HTTP_SERVER_ROUTER)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the controller from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The controller instance.
    */
-  static resolve(container: DIContainer): WellKnownUrlsController {
-    return container.resolve(WELL_KNOWN_URLS_CONTROLLER)
+  static resolve(container: DIContainer) {
+    return container.resolve<WellKnownUrlsController>(WELL_KNOWN_URLS_CONTROLLER)
   }
 
-  constructor(
-    validator: Validator,
-    logger: Logger,
-    templater: Templater,
-    router: HttpServerRouter
-  ) {
-    super(validator, logger, templater, router)
-
-    this.logger.debug(`WellKnownUrlsController initialized`)
-  }
-
+  /**
+   * Registers used middleware in the router.
+   */
   use() {
     this.router.addMiddleware('well-known-urls', async (ctx, next) => {
       const target = this.getState(ctx, 'target')

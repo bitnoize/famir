@@ -1,28 +1,32 @@
 /**
- * @category none
- * @internal
+ * DI token for a config implementation.
  */
 export const CONFIG = Symbol('Config')
 
 /**
- * @category none
- * @internal
+ * Base type for configuration data.
  */
-export const CONFIG_SCHEMA = Symbol('ConfigSchema')
+export type ConfigData = Record<string, string | number | boolean>
 
 /**
- * Represents a config
+ * Defines the public contract for a config.
  *
- * @category none
+ * Implementations are responsible for loading, parsing, and validating
+ * configuration data from a specific source.
  */
-export interface Config<T> {
+export interface Config {
   /**
-   * Config object
+   * Retrieves and validates a configuration object.
+   *
+   * The configuration data is loaded from the implementation's source
+   * and validated against a pre-registered JSON Schema.
+   * The result is cached to avoid redundant processing.
+   *
+   * @typeParam T - The expected type of the configuration object.
+   * @param schemaName - The name of the schema registered in the validator.
+   * @returns The validated and typed configuration object.
+   * @throws {@link BootstrapError} If loading or validation of the configuration fails.
    */
-  readonly data: T
-
-  /**
-   * Cleanup config
-   */
-  reset(): void
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  get<T extends ConfigData>(schemaName: string): T
 }

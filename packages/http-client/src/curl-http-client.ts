@@ -2,12 +2,12 @@ import { DIContainer } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-proto'
 import { Logger, LOGGER } from '@famir/logger'
+import { Validator, VALIDATOR } from '@famir/validator'
 import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
 import { PassThrough, pipeline, Readable } from 'node:stream'
 import { HttpClientError, HttpClientErrorCode } from './http-client.error.js'
 import {
   CurlHttpClientConfig,
-  CurlHttpClientOptions,
   HTTP_CLIENT,
   HttpClient,
   HttpClientErrorResult,
@@ -17,32 +17,82 @@ import {
   HttpClientStreamResponseState,
   HttpClientStreamResult,
 } from './http-client.js'
+import { curlHttpClientConfigSchema } from './http-client.schemas.js'
 
 /**
- * Curl HTTP client implementation
+ * Options for a Curl http-client.
+ */
+interface CurlHttpClientOptions {
+  verbose: boolean
+}
+
+/**
+ * Curl-based http-client implementation.
  *
- * @category none
+ * Uses the high-performance libcurl library via the node-libcurl bindings.
+ *
+ * @see https://github.com/JCMais/node-libcurl - node-libcurl bindings
+ * @see https://curl.se/libcurl/c/ - libcurl documentation
+ *
+ * Depends:
+ * - {@link Validator} via {@link VALIDATOR} token
+ * - {@link Config} via {@link CONFIG} token
+ * - {@link Logger} via {@link LOGGER} token
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { HTTP_CLIENT, HttpClient, CurlHttpClient } from '@famir/http-client'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
+ *
+ * // Register dependency in container
+ * CurlHttpClient.register(container)
+ *
+ * // Resolve dependency from container
+ * const httpClient = container.resolve<HttpClient>(HTTP_CLIENT)
+ *
+ * // TODO more examples
+ * ```
  */
 export class CurlHttpClient implements HttpClient {
   /**
-   * Register dependency
+   * Registers the http-client as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<HttpClient>(
       HTTP_CLIENT,
-      (c) => new CurlHttpClient(c.resolve(CONFIG), c.resolve(LOGGER))
+      (c) =>
+        new CurlHttpClient(
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Config>(CONFIG),
+          c.resolve<Logger>(LOGGER)
+        )
     )
   }
 
+  /** Built http-client options. */
   protected readonly options: CurlHttpClientOptions
 
+  /**
+   * Creates a new http-client instance.
+   *
+   * @param validator - The validator instance.
+   * @param config - The config instance.
+   * @param logger - The logger instance.
+   */
   constructor(
-    protected readonly config: Config<CurlHttpClientConfig>,
+    protected readonly validator: Validator,
+    protected readonly config: Config,
     protected readonly logger: Logger
   ) {
-    this.options = this.buildOptions(config.data)
+    this.validator.addSchema('http-client-config', curlHttpClientConfigSchema)
 
-    this.logger.debug(`HttpClient initialized`)
+    const configData = this.config.get<CurlHttpClientConfig>('http-client-config')
+    this.options = this.buildOptions(configData)
   }
 
   simple(
@@ -179,19 +229,12 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
-  /*
-  private browserHeaders: RegExp[] = [
-    /^Accept-Encoding$/i,
-    /^User-Agent$/i,
-    /^Upgrade-Insecure-Requests$/i,
-    /^Sec-CH-/i,
-    /^Sec-Fetch-/i,
-    /^Priority$/i,
-    /^DNT$/i,
-    /^TE$/i,
-  ]
-  */
-
+  /**
+   * Configures common curl options for all request types.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   */
   private setupCurlOptions(
     curl: Curl,
     state: {
@@ -203,16 +246,6 @@ export class CurlHttpClient implements HttpClient {
       timeout: number
     }
   ) {
-    /*
-    if (process.env['CURL_IMPERSONATE']) {
-      Object.keys(state.requestHeaders).forEach((name) => {
-        if (this.browserHeaders.some((re) => re.test(name))) {
-          state.requestHeaders[name] = undefined
-        }
-      })
-    }
-    */
-
     if (this.options.verbose) {
       curl.setOpt(Curl.option.VERBOSE, true)
     }
@@ -231,6 +264,12 @@ export class CurlHttpClient implements HttpClient {
     curl.setOpt(Curl.option.ACCEPT_ENCODING, '') // Means all encodings!
   }
 
+  /**
+   * Sets up the read function for uploading a request body from a buffer.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   */
   private setupCurlReadfunction(
     curl: Curl,
     state: {
@@ -273,6 +312,12 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /**
+   * Sets up the upload stream for streaming request bodies.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   */
   private setupCurlUploadStream(
     curl: Curl,
     state: {
@@ -284,6 +329,12 @@ export class CurlHttpClient implements HttpClient {
     curl.setUploadStream(state.requestStream)
   }
 
+  /**
+   * Sets up the header function for capturing response headers.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   */
   private setupCurlHeaderfunction(
     curl: Curl,
     state: {
@@ -306,7 +357,7 @@ export class CurlHttpClient implements HttpClient {
         if (responseHeadersSize + chunkSize > state.headersSizeLimit) {
           state.error = new HttpClientError('Bad gateway', {
             context: {
-              reason: 'Response headers size limit exceeded',
+              reason: `Response headers size limit exceeded`,
             },
             code: 'BAD_GATEWAY',
           })
@@ -334,6 +385,12 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /**
+   * Sets up the write function for downloading response bodies to buffer.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   */
   private setupCurlWritefunction(
     curl: Curl,
     state: {
@@ -383,6 +440,14 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /**
+   * Sets up the end event handler for simple requests.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   * @param resolve - The promise resolve function.
+   * @param reject - The promise reject function.
+   */
   private setupCurlSimpleEndEvent(
     curl: Curl,
     state: {
@@ -433,6 +498,14 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /**
+   * Sets up the error event handler for simple requests.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   * @param resolve - The promise resolve function.
+   * @param reject - The promise reject function.
+   */
   private setupCurlSimpleErrorEvent(
     curl: Curl,
     state: {
@@ -474,6 +547,14 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /**
+   * Sets up the stream event handler for streaming responses.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   * @param resolve - The promise resolve function.
+   * @param reject - The promise reject function.
+   */
   private setupCurlStreamEvent(
     curl: Curl,
     state: {
@@ -516,6 +597,14 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /**
+   * Sets up the end event handler for streaming responses.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   * @param resolve - The promise resolve function.
+   * @param reject - The promise reject function.
+   */
   private setupCurlStreamEndEvent(
     curl: Curl,
     state: {
@@ -572,6 +661,14 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /**
+   * Sets up the error event handler for streaming responses.
+   *
+   * @param curl - The curl instance.
+   * @param state - The request state.
+   * @param resolve - The promise resolve function.
+   * @param reject - The promise reject function.
+   */
   private setupCurlStreamErrorEvent(
     curl: Curl,
     state: {
@@ -624,6 +721,12 @@ export class CurlHttpClient implements HttpClient {
     })
   }
 
+  /**
+   * Parses connection information from a curl instance.
+   *
+   * @param curl - The curl instance.
+   * @returns The connection details.
+   */
   private parseConnection(curl: Curl): HttpConnection {
     try {
       const totalTime = curl.getInfo('TOTAL_TIME_T')
@@ -647,6 +750,12 @@ export class CurlHttpClient implements HttpClient {
     }
   }
 
+  /**
+   * Parses raw header buffers into a key-value object.
+   *
+   * @param curlHeaders - The raw header buffers from curl.
+   * @returns The parsed headers object.
+   */
   private parseRawHeaders(curlHeaders: Buffer[]): HttpHeaders {
     const headers: HttpHeaders = {}
 
@@ -679,6 +788,12 @@ export class CurlHttpClient implements HttpClient {
     return headers
   }
 
+  /**
+   * Formats headers into a string array for curl.
+   *
+   * @param headers - The headers object to format.
+   * @returns The formatted header strings.
+   */
   private formatRawHeaders(headers: HttpHeaders): string[] {
     const curlHeaders: string[] = []
 
@@ -699,6 +814,12 @@ export class CurlHttpClient implements HttpClient {
     return curlHeaders
   }
 
+  /**
+   * Concatenates buffer chunks into a single Buffer.
+   *
+   * @param chunks - The buffer chunks to concatenate.
+   * @returns The concatenated buffer, or an empty buffer on error.
+   */
   private parseRawBody(chunks: Buffer[]): HttpBody {
     try {
       return Buffer.concat(chunks)
@@ -707,15 +828,27 @@ export class CurlHttpClient implements HttpClient {
     }
   }
 
+  /**
+   * Parses a curl error code into an http-client error code and message.
+   *
+   * @param curlCode - The curl error code.
+   * @returns The tuple containing the error code and message.
+   */
   private parseCurlCode(curlCode: CurlCode): [HttpClientErrorCode, string] {
     return curlCode === CurlCode.CURLE_OPERATION_TIMEOUTED
       ? ['GATEWAY_TIMEOUT', 'Gateway timeout']
       : ['BAD_GATEWAY', 'Bad gateway']
   }
 
-  private buildOptions(config: CurlHttpClientConfig): CurlHttpClientOptions {
+  /**
+   * Converts validated configuration to an http-client options.
+   *
+   * @param data - The validated configuration object.
+   * @returns The http-client options object.
+   */
+  private buildOptions(data: CurlHttpClientConfig): CurlHttpClientOptions {
     return {
-      verbose: config.HTTP_CLIENT_VERBOSE,
+      verbose: data.HTTP_CLIENT_VERBOSE,
     }
   }
 }

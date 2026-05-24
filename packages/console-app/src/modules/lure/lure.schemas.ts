@@ -1,119 +1,141 @@
-import { lurePathSchema, redirectorParamsSchema } from '@famir/database'
+import { lurePathSchema } from '@famir/database'
 import {
   JSONSchemaType,
-  ValidatorSchemas,
   customIdentSchema,
   randomIdentSchema,
 } from '@famir/validator'
 import {
-  CreateLureData,
-  DeleteLureData,
-  ListLuresData,
-  MakeLureUrlData,
-  ReadLureData,
-  ToggleLureData,
+  CreateLureArgs,
+  DeleteLureArgs,
+  ListLuresArgs,
+  MakeLureUrlArgs,
+  ReadLureArgs,
+  ToggleLureArgs,
 } from './lure.js'
 
 /**
+ * JSON Schema for validating a create lure args.
+ *
  * @category Lure
  * @internal
  */
-const createLureDataSchema: JSONSchemaType<CreateLureData> = {
+export const createLureArgsSchema: JSONSchemaType<CreateLureArgs> = {
   type: 'object',
-  required: ['campaignId', 'lureId', 'path', 'redirectorId', 'lockSecret'],
+  required: ['_', 'path', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    lureId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema, customIdentSchema],
+      minItems: 3,
+      maxItems: 3,
+    },
     path: lurePathSchema,
-    redirectorId: customIdentSchema,
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a read lure args.
+ *
  * @category Lure
  * @internal
  */
-const readLureDataSchema: JSONSchemaType<ReadLureData> = {
+export const readLureArgsSchema: JSONSchemaType<ReadLureArgs> = {
   type: 'object',
-  required: ['campaignId', 'lureId'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
-    lureId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a toggle lure args.
+ *
  * @category Lure
  * @internal
  */
-const toggleLureDataSchema: JSONSchemaType<ToggleLureData> = {
+export const toggleLureArgsSchema: JSONSchemaType<ToggleLureArgs> = {
   type: 'object',
-  required: ['campaignId', 'lureId', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    lureId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema],
+      minItems: 2,
+      maxItems: 2,
+    },
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a delete lure args.
+ *
  * @category Lure
  * @internal
  */
-const deleteLureDataSchema: JSONSchemaType<DeleteLureData> = {
+export const deleteLureArgsSchema: JSONSchemaType<DeleteLureArgs> = {
   type: 'object',
-  required: ['campaignId', 'lureId', 'redirectorId', 'lockSecret'],
+  required: ['_', 'lockSecret'],
   properties: {
-    campaignId: customIdentSchema,
-    lureId: customIdentSchema,
-    redirectorId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema, customIdentSchema],
+      minItems: 3,
+      maxItems: 3,
+    },
     lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a list lures args.
+ *
  * @category Lure
  * @internal
  */
-const listLuresDataSchema: JSONSchemaType<ListLuresData> = {
+export const listLuresArgsSchema: JSONSchemaType<ListLuresArgs> = {
   type: 'object',
-  required: ['campaignId'],
+  required: ['_'],
   properties: {
-    campaignId: customIdentSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
   },
   additionalProperties: false,
 } as const
 
 /**
+ * JSON Schema for validating a make lure url args.
+ *
  * @category Lure
  * @internal
  */
-const makeLureUrlDataSchema: JSONSchemaType<MakeLureUrlData> = {
+export const makeLureUrlArgsSchema: JSONSchemaType<MakeLureUrlArgs> = {
   type: 'object',
-  required: ['campaignId', 'targetId', 'lureId', 'params'],
+  required: ['_', 'params'],
   properties: {
-    campaignId: customIdentSchema,
-    targetId: customIdentSchema,
-    lureId: customIdentSchema,
-    params: redirectorParamsSchema,
+    _: {
+      type: 'array',
+      items: [customIdentSchema, customIdentSchema, customIdentSchema],
+      minItems: 3,
+      maxItems: 3,
+    },
+    params: {
+      type: 'string',
+    },
   },
   additionalProperties: false,
-} as const
-
-/**
- * @category Lure
- * @internal
- */
-export const lureSchemas: ValidatorSchemas = {
-  'console-create-lure-data': createLureDataSchema,
-  'console-read-lure-data': readLureDataSchema,
-  'console-toggle-lure-data': toggleLureDataSchema,
-  'console-delete-lure-data': deleteLureDataSchema,
-  'console-list-lures-data': listLuresDataSchema,
-  'console-make-lure-url-data': makeLureUrlDataSchema,
 } as const

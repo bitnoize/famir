@@ -1,13 +1,13 @@
 /**
  * User-agent string parser.
  *
- * @category none
+ * @internal
  */
 export { UAParser } from 'ua-parser-js'
 
 /**
- * Result of parsing user-agent string.
+ * Result of parsing a user-agent string.
  *
- * @category none
+ * @internal
  */
 export { IResult as UAResult } from 'ua-parser-js'

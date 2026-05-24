@@ -5,5 +5,8 @@
     "rootDir": "src",
     "outDir": "dist"
   },
-  "references": [{ "path": "../common" }, { "path": "../http-proto" }]
+  "references": [
+    { "path": "../common" },
+    { "path": "../http-proto" }
+  ]
 }

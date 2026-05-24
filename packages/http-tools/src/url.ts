@@ -7,26 +7,24 @@ import {
 } from './query-string.js'
 
 /**
- * Wrapper for HTTP message URL.
- *
- * @category none
+ * Wrapper class for HTTP message URLs.
  */
 export class HttpUrlWrap {
   /**
-   * Factory method to create wrapper from scratch.
+   * Factory method to create a wrapper from scratch.
    *
-   * @returns New wrapper instance
+   * @returns A new wrapper instance with default values.
    */
   static fromScratch(): HttpUrlWrap {
     return HttpUrlWrap.fromRelative('/')
   }
 
   /**
-   * Factory method to create wrapper from request-like object.
+   * Factory method to create a wrapper from a request-like object.
    *
-   * @param req - Object with optional url property
-   * @returns New wrapper instance
-   * @throws If req.url is not defined
+   * @param req - The object with an optional `url` property.
+   * @returns A new wrapper instance.
+   * @throws Error If `req.url` is not defined.
    */
   static fromReq(req: { url?: string | undefined }): HttpUrlWrap {
     if (req.url == null) {
@@ -37,11 +35,11 @@ export class HttpUrlWrap {
   }
 
   /**
-   * Factory method to create wrapper from relative URL string.
+   * Factory method to create a wrapper from a relative URL string.
    *
-   * @param value - Relative URL string
-   * @returns New wrapper instance
-   * @throws If URL cannot be parsed
+   * @param value - The relative URL string.
+   * @returns A new wrapper instance.
+   * @throws Error If the URL cannot be parsed.
    */
   static fromRelative(value: string): HttpUrlWrap {
     const parsedUrl = URL.parse(value, 'http://localhost')
@@ -61,11 +59,11 @@ export class HttpUrlWrap {
   }
 
   /**
-   * Factory method to create wrapper from absolute URL string.
+   * Factory method to create a wrapper from an absolute URL string.
    *
-   * @param value - Absolute URL string
-   * @returns New wrapper instance
-   * @throws If URL cannot be parsed
+   * @param value - The absolute URL string.
+   * @returns A new wrapper instance.
+   * @throws Error If the URL cannot be parsed.
    */
   static fromAbsolute(value: string): HttpUrlWrap {
     const parsedUrl = URL.parse(value)
@@ -87,18 +85,18 @@ export class HttpUrlWrap {
   #url: HttpUrl
 
   /**
-   * Create a new wrapper instance.
+   * Creates a new wrapper instance.
    *
-   * @param url - The URL to wrap
+   * @param url - The URL object to wrap.
    */
   constructor(url: HttpUrl) {
     this.#url = url
   }
 
   /**
-   * Clone wrapper with a copy of the URL.
+   * Clones the wrapper with a copy of the URL.
    *
-   * @returns New independent wrapper instance
+   * @returns A new independent wrapper instance.
    */
   clone(): HttpUrlWrap {
     return new HttpUrlWrap({ ...this.#url })
@@ -107,18 +105,18 @@ export class HttpUrlWrap {
   #isFrozen: boolean = false
 
   /**
-   * Check if wrapper is frozen (read-only).
+   * Checks if the wrapper is frozen (read-only).
    *
-   * @returns true if wrapper is frozen, false otherwise
+   * @returns `true` if the wrapper is frozen, `false` otherwise.
    */
   get isFrozen(): boolean {
     return this.#isFrozen
   }
 
   /**
-   * Freeze wrapper to prevent modifications.
+   * Freezes the wrapper to prevent modifications.
    *
-   * @returns This wrapper for method chaining
+   * @returns This wrapper for method chaining.
    */
   freeze(): this {
     this.#isFrozen = true
@@ -127,22 +125,22 @@ export class HttpUrlWrap {
   }
 
   /**
-   * Get URL part by name.
+   * Gets a URL component by name.
    *
-   * @param name - URL component name
-   * @returns Value of the URL component
+   * @param name - The name of the URL component.
+   * @returns The value of the URL component.
    */
   get<K extends keyof HttpUrl>(name: K): HttpUrl[K] {
     return this.#url[name]
   }
 
   /**
-   * Set URL part by name.
+   * Sets a URL component by name.
    *
-   * @param name - URL component name
-   * @param value - New value for the component
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
+   * @param name - The name of the URL component to set.
+   * @param value - The new value for the component.
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
    */
   set<K extends keyof HttpUrl>(name: K, value: HttpUrl[K]): this {
     this.sureNotFrozen('set')
@@ -155,11 +153,11 @@ export class HttpUrlWrap {
   }
 
   /**
-   * Merge partial URL object.
+   * Merges a partial URL object into the current URL.
    *
-   * @param url - Partial URL object with properties to update
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
+   * @param url - The partial URL object with properties to update.
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
    */
   merge(url: Partial<HttpUrl>): this {
     this.sureNotFrozen('merge')
@@ -172,9 +170,9 @@ export class HttpUrlWrap {
   }
 
   /**
-   * Get host part (hostname:port or just hostname).
+   * Gets the host part.
    *
-   * @returns Host string
+   * @returns The host string.
    */
   getHost(): string {
     const { protocol, hostname, port } = this.#url
@@ -190,19 +188,19 @@ export class HttpUrlWrap {
     }
   }
 
-  /** Custom options for parsing query strings */
+  /** Custom options for parsing query strings. */
   readonly parseQueryStringOptions: ParseQueryStringOptions = {}
 
-  /** Custom options for formatting query strings */
+  /** Custom options for formatting query strings. */
   readonly formatQueryStringOptions: FormatQueryStringOptions = {}
 
   #cacheQueryString: HttpQueryString | null = null
 
   /**
-   * Get URL query string as parsed object (cached).
+   * Gets the URL query string as a parsed object (cached).
    *
-   * @returns Parsed query string as object
-   * @throws If parse query string fails
+   * @returns The parsed query string as an object.
+   * @throws Error If parsing the query string fails.
    */
   getQueryString(): HttpQueryString {
     if (this.#cacheQueryString != null) {
@@ -222,12 +220,12 @@ export class HttpUrlWrap {
   }
 
   /**
-   * Set URL query string from object.
+   * Sets the URL query string from an object.
    *
-   * @param queryString - Query string object
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
-   * @throws If format query string fails
+   * @param queryString - The query string object to set.
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
+   * @throws Error If formatting the query string fails.
    */
   setQueryString(queryString: HttpQueryString): this {
     this.sureNotFrozen('setQueryString')
@@ -245,10 +243,10 @@ export class HttpUrlWrap {
   }
 
   /**
-   * Match URL pathname against string or regex.
+   * Checks if the URL pathname matches a string or regular expression.
    *
-   * @param value - String path or RegExp pattern
-   * @returns true if pathname matches, false otherwise
+   * @param value - The string path or RegExp pattern to match.
+   * @returns `true` if the pathname matches, `false` otherwise.
    */
   isPath(value: string | RegExp): boolean {
     if (typeof value === 'string') {
@@ -261,27 +259,27 @@ export class HttpUrlWrap {
   }
 
   /**
-   * Get URL as object.
+   * Returns the URL as an object.
    *
-   * @returns Copy of URL object
+   * @returns A copy of the URL object.
    */
   toObject(): HttpUrl {
     return { ...this.#url }
   }
 
   /**
-   * Get URL as relative string.
+   * Returns the URL as a relative string.
    *
-   * @returns Relative URL string
+   * @returns The relative URL string.
    */
   toRelative(): string {
     return [this.#url.pathname, this.#url.search, this.#url.hash].join('')
   }
 
   /**
-   * Get URL as absolute string.
+   * Returns the URL as an absolute string.
    *
-   * @returns Absolute URL string
+   * @returns The absolute URL string.
    */
   toAbsolute(): string {
     return [
@@ -295,10 +293,10 @@ export class HttpUrlWrap {
   }
 
   /**
-   * Clear URL and reset to default.
+   * Resets the URL to default values.
    *
-   * @returns This wrapper for method chaining
-   * @throws If wrapper is frozen
+   * @returns This wrapper for method chaining.
+   * @throws Error If the wrapper is frozen.
    */
   reset(): this {
     this.sureNotFrozen('reset')

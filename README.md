@@ -11,7 +11,7 @@ domain. The ability to intercept and modify requests and responses from or to th
 
 ## Applications
 
-- **reverse-app** - Reverse proxy server with extended functionality via middleware.
+- **reverse-app** - Multi-tenant reverse proxy with extended functionality via middleware.
 - **console-app** - Campaign management console.
 - **actions-app** - Task queues for background processing intercepted data.
 

@@ -1,7 +1,10 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * @category none
+ * Error codes that can be returned by the http-server.
+ *
+ * These codes provide a standardized way to categorize and handle
+ * http-server-related errors in the application.
  */
 export type HttpServerErrorCode =
   | 'BAD_REQUEST'
@@ -17,13 +20,16 @@ export type HttpServerErrorCode =
   | 'GATEWAY_TIMEOUT'
 
 /**
- * @category none
+ * Options for creating an http-server error.
  */
 export type HttpServerErrorOptions = CommonErrorOptions & {
   code: HttpServerErrorCode
 }
 
-const codeToStatusMap: Record<HttpServerErrorCode, number> = {
+/**
+ * Mapping of error codes to their corresponding HTTP status codes.
+ */
+const codeToStatus: Record<HttpServerErrorCode, number> = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
@@ -38,23 +44,27 @@ const codeToStatusMap: Record<HttpServerErrorCode, number> = {
 } as const
 
 /**
- * Represents HTTP server error
- *
- * @category none
+ * Error class for http-server operation failures.
  */
 export class HttpServerError extends CommonError {
-  code: HttpServerErrorCode
-  status: number
+  /** Associated error code. */
+  readonly code: HttpServerErrorCode
 
+  /** Associated HTTP status code. */
+  readonly status: number
+
+  /**
+   * Creates a new http-server error instance.
+   *
+   * @param message - The human-readable description of the error.
+   * @param options - The error options, including the error code.
+   */
   constructor(message: string, options: HttpServerErrorOptions) {
-    super(message, {
-      cause: options.cause,
-      context: options.context,
-    })
+    super(message, options)
 
     this.name = 'HttpServerError'
     this.code = options.code
 
-    this.status = codeToStatusMap[this.code]
+    this.status = codeToStatus[this.code]
   }
 }

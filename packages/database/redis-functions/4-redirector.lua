@@ -467,7 +467,7 @@ local function delete_redirector(keys, args)
   end
 
   if redis.call('EXISTS', redirector_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND redirector not exists')
+    return redis.status_reply('NOT_FOUND Redirector not exists')
   end
 
   local stash = {

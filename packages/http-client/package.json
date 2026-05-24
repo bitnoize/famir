@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-client",
   "type": "module",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Famir HTTP client module",
   "keywords": [
     "famir",
@@ -20,13 +20,16 @@
     }
   },
   "scripts": {
-    "format": "prettier -w \"src/**/*.ts\"",
+    "format": "prettier -w \"src/**/*.ts\" README.md",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "node --test dist/**/*.test.js",
     "build": "tsc -b",
     "clean": "rimraf dist *.tsbuildinfo"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bitnoize/famir.git",
@@ -35,13 +38,13 @@
   "bugs": {
     "url": "https://github.com/bitnoize/famir/issues"
   },
-  "homepage": "https://fake-mirrors.net",
+  "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
     "@famir/common": "*",
     "@famir/config": "*",
+    "@famir/http-proto": "*",
     "@famir/logger": "*",
     "@famir/validator": "*",
-    "@famir/http-proto": "*",
-    "node-libcurl": "~4.1.0"
+    "node-libcurl": "^5.1.2"
   }
 }

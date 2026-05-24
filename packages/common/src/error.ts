@@ -1,52 +1,27 @@
 /**
  * Context object attached to errors for additional diagnostic information.
- *
- * @category none
  */
 export type ErrorContext = Record<string, unknown>
 
 /**
- * Options for creating a CommonError with optional context.
- *
- * @category none
+ * Options for creating a common error.
  */
 export type CommonErrorOptions = ErrorOptions & {
   context?: ErrorContext | undefined
 }
 
 /**
- * Base class for application errors.
- *
- * Provides support for error context and causes, useful for debugging
- * and error chain tracking.
- *
- * @category none
- * @example
- * ```ts
- * class ValidationError extends CommonError {
- *   constructor(message: string, context?: ErrorContext) {
- *     super(message, { context })
- *   }
- * }
- *
- * try {
- *   throw new ValidationError('Invalid input', { field: 'email' })
- * } catch (error) {
- *   console.log(error.context) // { field: 'email' }
- * }
- * ```
+ * Abstract base class for all application-specific errors.
  */
 export abstract class CommonError extends Error {
-  /**
-   * Additional diagnostic context for the error.
-   */
-  context: ErrorContext = {}
+  /** Additional diagnostic context for the error. */
+  readonly context: ErrorContext
 
   /**
-   * Create a new CommonError.
+   * Creates a new common error instance.
    *
-   * @param message - The error message
-   * @param options - Error options including context and cause
+   * @param message - The human-readable description of the error.
+   * @param options - The error options.
    */
   constructor(message: string, options: CommonErrorOptions) {
     const parentOptions: ErrorOptions = {}
@@ -57,14 +32,23 @@ export abstract class CommonError extends Error {
 
     super(message, parentOptions)
 
-    if (options.context) {
-      this.context = options.context
-    }
+    this.context = options.context ? options.context : {}
+  }
+}
 
-    Object.defineProperty(this, 'stack', {
-      value: undefined,
-      writable: true,
-      configurable: true,
-    })
+/**
+ * Error class for application bootstrap failures.
+ */
+export class BootstrapError extends CommonError {
+  /**
+   * Creates a new bootstrap error instance.
+   *
+   * @param message - The human-readable description of the error.
+   * @param options - The error options.
+   */
+  constructor(message: string, options: CommonErrorOptions) {
+    super(message, options)
+
+    this.name = 'BootstrapError'
   }
 }

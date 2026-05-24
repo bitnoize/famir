@@ -1,41 +1,62 @@
 import { DIContainer } from '@famir/common'
+import { FullMessageModel } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import { MESSAGE_CONTROLLER, MESSAGE_SERVICE, ReadMessageData } from './message.js'
-import { messageSchemas } from './message.schemas.js'
-import { type MessageService } from './message.service.js'
+import { ReadMessageArgs } from './message.js'
+import { readMessageArgsSchema } from './message.schemas.js'
+import { type MessageService, MESSAGE_SERVICE } from './message.service.js'
 
 /**
- * Represents a message controller
+ * DI token for the message controller.
+ *
+ * @category Message
+ */
+export const MESSAGE_CONTROLLER = Symbol('MessageController')
+
+/**
+ * Represents the message controller.
  *
  * @category Message
  */
 export class MessageController extends BaseController {
   /**
-   * Register dependency
+   * Registers the controller as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<MessageController>(
       MESSAGE_CONTROLLER,
       (c) =>
         new MessageController(
-          c.resolve(VALIDATOR),
-          c.resolve(LOGGER),
-          c.resolve(REPL_SERVER_ROUTER),
-          c.resolve(MESSAGE_SERVICE)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
+          c.resolve<MessageService>(MESSAGE_SERVICE)
         )
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the controller from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The controller instance.
    */
-  static resolve(container: DIContainer): MessageController {
-    return container.resolve(MESSAGE_CONTROLLER)
+  static resolve(container: DIContainer) {
+    return container.resolve<MessageController>(MESSAGE_CONTROLLER)
   }
 
+  /**
+   * Creates a new controller instance.
+   *
+   * @param validator - The validator instance.
+   * @param logger - The logger instance.
+   * @param router - The repl-server router instance.
+   * @param messageService - The message service instance.
+   */
   constructor(
     validator: Validator,
     logger: Logger,
@@ -44,16 +65,65 @@ export class MessageController extends BaseController {
   ) {
     super(validator, logger, router)
 
-    this.validator.addSchemas(messageSchemas)
-
-    this.logger.debug(`MessageController initialized`)
+    this.validator.addSchema('console-read-message-args', readMessageArgsSchema)
   }
 
+  /**
+   * Registers used commands in the router.
+   */
   use() {
-    this.router.addApiCall('readMessage', async (data) => {
-      this.validateData<ReadMessageData>('console-read-message-data', data)
+    this.router.addCommand<ReadMessageArgs>(
+      {
+        name: 'message-read',
+        description: `Reads the message by its ID.`,
+        schemaName: 'console-read-message-args',
+        options: [],
+        params: ['campaign-id', 'message-id'],
+      },
+      (console, spec) => {
+        console.log(`Returns the message model.\n`)
 
-      return await this.messageService.read(data)
+        console.log(
+          `// Reads a message:\n` + `.${spec.name} httpbin 5ad44dbcf927457eadc57d8de23eb7c1\n`
+        )
+      },
+      async (console, spec, args) => {
+        const message = await this.messageService.read({
+          campaignId: args._[0],
+          messageId: args._[1],
+        })
+
+        this.showMessageModel(console, message)
+      }
+    )
+  }
+
+  private showMessageModel(console: Console, message: FullMessageModel) {
+    console.table({
+      campaignId: message.campaignId,
+      messageId: message.messageId,
+      proxyId: message.proxyId,
+      targetId: message.targetId,
+      sessionId: message.sessionId,
+      type: message.type,
+      method: message.method,
+      url: message.url,
+      requestHeaders: Object.keys(message.requestHeaders).length,
+      requestBody: message.requestBody.length,
+      status: message.status,
+      responseHeaders: Object.keys(message.responseHeaders).length,
+      responseBody: message.responseBody.length,
+      analyze: message.analyze,
+      totalTime: message.totalTime,
+      createdAt: message.createdAt.toISOString(),
     })
+
+    console.log(`Request headers:`, message.requestHeaders)
+    console.log(`Response headers:`, message.responseHeaders)
+    console.log(`Connection:`, message.connection)
+    console.log(`Payload:`, message.payload)
+    if (message.hasErrors) {
+      console.log(`Errors:`, message.errors)
+    }
   }
 }

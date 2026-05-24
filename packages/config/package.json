@@ -1,7 +1,7 @@
 {
   "name": "@famir/config",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Famir config module",
   "keywords": [
     "famir",
@@ -20,13 +20,16 @@
     }
   },
   "scripts": {
-    "format": "prettier -w \"src/**/*.ts\"",
+    "format": "prettier -w \"src/**/*.ts\" README.md",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "node --test dist/**/*.test.js",
     "build": "tsc -b",
     "clean": "rimraf dist *.tsbuildinfo"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bitnoize/famir.git",
@@ -35,7 +38,7 @@
   "bugs": {
     "url": "https://github.com/bitnoize/famir/issues"
   },
-  "homepage": "https://fake-mirrors.net",
+  "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
     "@famir/common": "*",
     "@famir/validator": "*"

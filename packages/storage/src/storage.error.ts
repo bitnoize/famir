@@ -1,32 +1,18 @@
 import { CommonError, CommonErrorOptions } from '@famir/common'
 
 /**
- * @category none
- */
-export type StorageErrorCode = 'INTERNAL_ERROR'
-
-/**
- * @category none
- */
-export type StorageErrorOptions = CommonErrorOptions & {
-  code: StorageErrorCode
-}
-
-/**
- * Represents storage error
- *
- * @category none
+ * Error class for storage operation failures.
  */
 export class StorageError extends CommonError {
-  code: StorageErrorCode
-
-  constructor(message: string, options: StorageErrorOptions) {
-    super(message, {
-      cause: options.cause,
-      context: options.context,
-    })
+  /**
+   * Creates a new storage error instance.
+   *
+   * @param message - The human-readable description of the error.
+   * @param options - The error options.
+   */
+  constructor(message: string, options: CommonErrorOptions) {
+    super(message, options)
 
     this.name = 'StorageError'
-    this.code = options.code
   }
 }

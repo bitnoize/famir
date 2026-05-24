@@ -11,16 +11,16 @@ export interface UpgradeSessionParams {
 }
 
 /**
- * Represents a session model.
+ * Represents the session model.
  *
  * @category Session
  */
 export class SessionModel {
   /**
-   * Type guard to filter out null values in arrays.
+   * Type guard to filter out null models from a list.
    *
-   * @param model - The model to check
-   * @returns `true` if the model is not null, `false` otherwise
+   * @param model - The model to check.
+   * @returns `true` if the model is not null, `false` otherwise.
    */
   static isNotNull = <T extends SessionModel>(model: T | null): model is T => {
     return model != null
@@ -29,14 +29,14 @@ export class SessionModel {
   /**
    * Creates a new session model instance.
    *
-   * @param campaignId - The ID of the campaign this session belongs to
-   * @param sessionId - The unique identifier of the session
-   * @param proxyId - The ID of the proxy assigned to this session
-   * @param secret - The session secret for secure operations
-   * @param isUpgraded - Whether the session has been upgraded
-   * @param messageCount - Total number of messages processed in this session
-   * @param createdAt - The date and time when the session was created
-   * @param authorizedAt - The date and time when the session was last authorized
+   * @param campaignId - The ID of the campaign this session belongs to.
+   * @param sessionId - The unique identifier for the session.
+   * @param proxyId - The ID of the proxy assigned to this session.
+   * @param secret - The session secret for secure operations.
+   * @param isUpgraded - The flag indicating if the session has been upgraded.
+   * @param messageCount - The total number of messages processed through this session.
+   * @param createdAt - The date and time when the session was created.
+   * @param authorizedAt - The date and time when the session was last authorized.
    */
   constructor(
     readonly campaignId: string,
@@ -50,9 +50,9 @@ export class SessionModel {
   ) {}
 
   /**
-   * Indicates whether this session is "new".
+   * Indicates whether this session is considered 'new'.
    *
-   * @returns `true` if the session has processed 0 or 1 messages, `false` otherwise
+   * @returns `true` if the session has processed 0 or 1 messages, `false` otherwise.
    */
   get isNew(): boolean {
     return this.messageCount <= 1

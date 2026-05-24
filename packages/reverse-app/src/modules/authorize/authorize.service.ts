@@ -17,38 +17,46 @@ import {
   SessionRepository,
 } from '@famir/database'
 import { HttpServerError } from '@famir/http-server'
-import {
-  AUTHORIZE_SERVICE,
-  AuthSessionData,
-  CreateSessionData,
-  FindLureData,
-  ReadProxyData,
-  ReadRedirectorData,
-  UpgradeSessionData,
-} from './authorize.js'
 
 /**
- * Represents an authorize service
+ * DI token for the authorize service.
+ *
+ * @category Authorize
+ */
+export const AUTHORIZE_SERVICE = Symbol('AuthorizeService')
+
+/**
+ * Represents the authorize service.
  *
  * @category Authorize
  */
 export class AuthorizeService {
   /**
-   * Register dependency
+   * Registers the service as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<AuthorizeService>(
       AUTHORIZE_SERVICE,
       (c) =>
         new AuthorizeService(
-          c.resolve(PROXY_REPOSITORY),
-          c.resolve(REDIRECTOR_REPOSITORY),
-          c.resolve(LURE_REPOSITORY),
-          c.resolve(SESSION_REPOSITORY)
+          c.resolve<ProxyRepository>(PROXY_REPOSITORY),
+          c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
+          c.resolve<LureRepository>(LURE_REPOSITORY),
+          c.resolve<SessionRepository>(SESSION_REPOSITORY)
         )
     )
   }
 
+  /**
+   * Creates a new service instance.
+   *
+   * @param proxyRepository - The proxy repository instance.
+   * @param redirectorRepository - The redirector repository instance.
+   * @param lureRepository - The lure repository instance.
+   * @param sessionRepository - The session repository instance.
+   */
   constructor(
     protected readonly proxyRepository: ProxyRepository,
     protected readonly redirectorRepository: RedirectorRepository,
@@ -56,7 +64,7 @@ export class AuthorizeService {
     protected readonly sessionRepository: SessionRepository
   ) {}
 
-  async readProxy(data: ReadProxyData): Promise<EnabledProxyModel> {
+  async readProxy(data: { campaignId: string; proxyId: string }): Promise<EnabledProxyModel> {
     const proxy = await this.proxyRepository.read(data.campaignId, data.proxyId)
 
     if (!(proxy && ProxyModel.isEnabled(proxy))) {
@@ -72,7 +80,10 @@ export class AuthorizeService {
     return proxy
   }
 
-  async readRedirector(data: ReadRedirectorData): Promise<FullRedirectorModel> {
+  async readRedirector(data: {
+    campaignId: string
+    redirectorId: string
+  }): Promise<FullRedirectorModel> {
     const redirector = await this.redirectorRepository.readFull(data.campaignId, data.redirectorId)
 
     if (!redirector) {
@@ -88,7 +99,7 @@ export class AuthorizeService {
     return redirector
   }
 
-  async findLure(data: FindLureData): Promise<EnabledLureModel | null> {
+  async findLure(data: { campaignId: string; path: string }): Promise<EnabledLureModel | null> {
     const lure = await this.lureRepository.find(data.campaignId, data.path)
 
     if (!(lure && LureModel.isEnabled(lure))) {
@@ -98,7 +109,7 @@ export class AuthorizeService {
     return lure
   }
 
-  async createSession(data: CreateSessionData): Promise<SessionModel> {
+  async createSession(data: { campaignId: string }): Promise<SessionModel> {
     try {
       return await this.sessionRepository.create(data.campaignId)
     } catch (error) {
@@ -118,7 +129,7 @@ export class AuthorizeService {
     }
   }
 
-  async authSession(data: AuthSessionData): Promise<SessionModel | null> {
+  async authSession(data: { campaignId: string; sessionId: string }): Promise<SessionModel | null> {
     try {
       return await this.sessionRepository.auth(data.campaignId, data.sessionId)
     } catch (error) {
@@ -140,7 +151,12 @@ export class AuthorizeService {
     }
   }
 
-  async upgradeSession(data: UpgradeSessionData): Promise<boolean> {
+  async upgradeSession(data: {
+    campaignId: string
+    lureId: string
+    sessionId: string
+    secret: string
+  }): Promise<boolean> {
     try {
       await this.sessionRepository.upgrade(
         data.campaignId,

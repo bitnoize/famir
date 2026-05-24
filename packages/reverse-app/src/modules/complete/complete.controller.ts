@@ -4,39 +4,59 @@ import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import { COMPLETE_CONTROLLER, COMPLETE_SERVICE } from './complete.js'
-import { type CompleteService } from './complete.service.js'
+import { type CompleteService, COMPLETE_SERVICE } from './complete.service.js'
 
 /**
- * Represents a complete controller
+ * DI token for the complete controller.
+ *
+ * @category Complete
+ */
+export const COMPLETE_CONTROLLER = Symbol('CompleteController')
+
+/**
+ * Represents the complete controller.
  *
  * @category Complete
  */
 export class CompleteController extends BaseController {
   /**
-   * Register dependency
+   * Registers the controller as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<CompleteController>(
       COMPLETE_CONTROLLER,
       (c) =>
         new CompleteController(
-          c.resolve(VALIDATOR),
-          c.resolve(LOGGER),
-          c.resolve(TEMPLATER),
-          c.resolve(HTTP_SERVER_ROUTER),
-          c.resolve(COMPLETE_SERVICE)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<CompleteService>(COMPLETE_SERVICE)
         )
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the controller from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The controller instance.
    */
-  static resolve(container: DIContainer): CompleteController {
-    return container.resolve(COMPLETE_CONTROLLER)
+  static resolve(container: DIContainer) {
+    return container.resolve<CompleteController>(COMPLETE_CONTROLLER)
   }
 
+  /**
+   * Creates a new controller instance.
+   *
+   * @param validator - The validator instance.
+   * @param logger - The logger instance.
+   * @param templater - The templater instance.
+   * @param router - The http-server router instance.
+   * @param completeService - The complete service instance.
+   */
   constructor(
     validator: Validator,
     logger: Logger,
@@ -45,10 +65,11 @@ export class CompleteController extends BaseController {
     protected readonly completeService: CompleteService
   ) {
     super(validator, logger, templater, router)
-
-    this.logger.debug(`CompleteController initialized`)
   }
 
+  /**
+   * Registers used middleware in the router.
+   */
   use() {
     this.router.addMiddleware('complete', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')

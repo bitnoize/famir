@@ -1,47 +1,69 @@
+import { ConfigData } from '@famir/config'
+
 /**
- * @category none
- * @internal
+ * DI token for a storage implementation.
  */
 export const STORAGE = Symbol('Storage')
 
 /**
- * Represents a storage
+ * Defines the public contract for a storage.
  *
- * @category none
+ * Provides methods for basic S3-compatible storage operations: get, put, and delete.
  */
 export interface Storage {
   /**
-   * Get object
+   * Ensures that the configured bucket exists.
+   *
+   * This method is typically called during application startup to verify
+   * that the storage bucket is accessible. If the bucket does not exist,
+   * a bootstrap error is thrown.
+   *
+   * @throws {@link BootstrapError} If the bucket does not exist or is inaccessible.
+   */
+  ensureBucketExists(): Promise<void>
+
+  /**
+   * Retrieves an object from the storage.
+   *
+   * @param objectName - The path of the object to retrieve.
+   * @returns The object content as a Buffer.
+   * @throws {@link StorageError} If the object cannot be retrieved.
    */
   getObject(objectName: string): Promise<Buffer>
 
   /**
-   * Put object
+   * Stores an object in the storage.
+   *
+   * @param objectName - The path to assign to the object.
+   * @param data - The object content as a Buffer.
+   * @param headers - Custom headers to attach to the object.
+   * @throws {@link StorageError} If the object cannot be stored.
    */
-  putObject(objectName: string, data: Buffer, metaData: Record<string, string>): Promise<void>
+  putObject(objectName: string, data: Buffer, headers: Record<string, string>): Promise<void>
+
+  /**
+   * Deletes an object from the storage.
+   *
+   * @param objectName - The path of the object to delete.
+   * @throws {@link StorageError} If the object cannot be deleted.
+   */
+  deleteObject(objectName: string): Promise<void>
 }
 
 /**
- * @category none
+ * Configuration for a MinIO storage.
  */
-export interface MinioStorageConfig {
-  STORAGE_END_POINT: string
+export interface MinioStorageConfig extends ConfigData {
+  /** MinIO server endpoint. */
+  STORAGE_ENDPOINT: string
+  /** MinIO server port. */
   STORAGE_PORT: number
+  /** Whether to use SSL/TLS for the connection. */
   STORAGE_USE_SSL: boolean
+  /** MinIO access key (username). */
   STORAGE_ACCESS_KEY: string
+  /** MinIO secret key (password). */
   STORAGE_SECRET_KEY: string
+  /** Name of the bucket to use for storage operations. */
   STORAGE_BUCKET_NAME: string
-}
-
-/**
- * @category none
- * @internal
- */
-export interface MinioStorageOptions {
-  endPoint: string
-  port: number
-  useSSL: boolean
-  accessKey: string
-  secretKey: string
-  bucketName: string
 }

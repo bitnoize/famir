@@ -1,76 +1,71 @@
 import { SessionModel } from './session.models.js'
 
 /**
- * DI token for session repository.
+ * DI token for a session repository implementation.
  *
  * @category Session
- * @internal
  */
 export const SESSION_REPOSITORY = Symbol('SessionRepository')
 
 /**
- * Represents a session repository.
+ * Defines the public contract for a session repository.
+ *
+ * A session tracks a user's interaction with the mirror, including
+ * their assigned proxy, upgrade status, and message count.
  *
  * @category Session
  */
 export interface SessionRepository {
   /**
-   * Creates a new session in the specified campaign.
+   * Creates a new session.
    *
    * The session is automatically assigned to a random enabled proxy.
-   * A unique session ID and secret are generated automatically.
    *
-   * @param campaignId - The ID of the campaign to create the session in
-   * @returns The newly created session model
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If no enabled proxies are available
+   * @param campaignId - The ID of the campaign to create the session in.
+   * @returns The newly created session model.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If no enabled proxies are available.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   create(campaignId: string): Promise<SessionModel>
 
   /**
-   * Reads a session by its ID.
+   * Reads the session by its ID.
    *
-   * @param campaignId - The ID of the campaign containing the session
-   * @param sessionId - The session ID to read
-   * @returns The session model, or `null` if not found
+   * @param campaignId - The ID of the campaign containing the session.
+   * @param sessionId - The session ID to read.
+   * @returns The session model, or `null` if the session is not found.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   read(campaignId: string, sessionId: string): Promise<SessionModel | null>
 
   /**
-   * Authorizes a session.
+   * Authorizes the session by its ID.
    *
-   * This method:
-   * 1. Updates the session `authorized_at` timestamp.
-   * 2. Extends the session TTL using `session_expire`.
-   * 3. If the current proxy is disabled, re-assigns to a random enabled proxy.
+   * If the session proxy is disabled, re-assigns it to a random enabled proxy.
    *
-   * @param campaignId - The ID of the campaign containing the session
-   * @param sessionId - The session ID to authorize
-   * @returns The updated session model
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the session does not exist
-   * @throws {@link DatabaseError} If no enabled proxies are available
+   * @param campaignId - The ID of the campaign containing the session.
+   * @param sessionId - The session ID to authorize.
+   * @returns The authorized session model.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the session does not exist.
+   * @throws {@link DatabaseError} If no enabled proxies are available.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   auth(campaignId: string, sessionId: string): Promise<SessionModel>
 
   /**
-   * Upgrades a session.
+   * Upgrades the session by its ID and secret.
    *
-   * This method:
-   * 1. Marks the session as "upgraded".
-   * 2. Increments the `session_count` of the associated lure.
-   *
-   * @param campaignId - The ID of the campaign containing the session
-   * @param lureId - The Lure ID through which the session is updated
-   * @param sessionId - The session ID to upgrade
-   * @param secret - The session secret
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the lure does not exist
-   * @throws {@link DatabaseError} If the session does not exist
-   * @throws {@link DatabaseError} If the secret does not match
+   * @param campaignId - The ID of the campaign containing the session.
+   * @param lureId - The Lure ID through which the session is upgraded.
+   * @param sessionId - The session ID to upgrade.
+   * @param secret - The session secret.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the lure does not exist.
+   * @throws {@link DatabaseError} If the session does not exist.
+   * @throws {@link DatabaseError} If the secret does not match.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   upgrade(campaignId: string, lureId: string, sessionId: string, secret: string): Promise<void>
 }

@@ -1,11 +1,21 @@
 /**
+ * Arguments for loading database functions.
+ *
  * @category Database
  * @internal
  */
-export const DATABASE_CONTROLLER = Symbol('DatabaseController')
+export interface LoadDatabaseFunctionsArgs {
+  _: string[]
+  force: boolean
+}
 
 /**
+ * Arguments for cleaning up the database.
+ *
  * @category Database
  * @internal
  */
-export const DATABASE_SERVICE = Symbol('DatabaseService')
+export interface CleanupDatabaseArgs {
+  _: string[]
+  force: boolean
+}

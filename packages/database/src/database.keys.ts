@@ -1,9 +1,10 @@
 /**
  * Helper function to build a Redis key by joining parts with a colon.
  *
- * @param args - The parts of the key
- * @returns A colon-separated key string
- * @internal
+ * It is important that the parts do not contain the ':' separator symbol.
+ *
+ * @param args - The parts of the key.
+ * @returns The colon-separated key string.
  */
 const buildKey = (...args: string[]): string => {
   return args.join(':')
@@ -14,9 +15,10 @@ const buildKey = (...args: string[]): string => {
 /**
  * Key for a specific campaign.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The unique identifier of the campaign
- * @returns The Redis `Hash` key, like `"famir:campaign:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Hash` key, like 'famir:campaign:httpbin'.
+ *
  * @category Campaign
  * @internal
  */
@@ -27,9 +29,10 @@ export const campaignKey = (prefix: string, campaignId: string) => {
 /**
  * Key for a campaign distributed lock.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The unique identifier of the campaign
- * @returns The Redis `String` key, like `"famir:campaign-lock:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `String` key, like 'famir:campaign-lock:httpbin'.
+ *
  * @category Campaign
  * @internal
  */
@@ -40,8 +43,9 @@ export const campaignLockKey = (prefix: string, campaignId: string) => {
 /**
  * Key for all mirror domains used across campaigns.
  *
- * @param prefix - The global prefix for all keys
- * @returns The Redis `Set` key, like `"famir:campaign-mirror-domains"`
+ * @param prefix - The global prefix for all keys.
+ * @returns The Redis `Set` key, like 'famir:campaign-mirror-domains'.
+ *
  * @category Campaign
  * @internal
  */
@@ -52,8 +56,9 @@ export const campaignMirrorDomainsKey = (prefix: string) => {
 /**
  * Key for all session cookie names used across campaigns.
  *
- * @param prefix - The global prefix for all keys
- * @returns The Redis `Set` key, like `"famir:campaign-session-cookie-names"`
+ * @param prefix - The global prefix for all keys.
+ * @returns The Redis `Set` key, like 'famir:campaign-session-cookie-names'.
+ *
  * @category Campaign
  * @internal
  */
@@ -64,8 +69,9 @@ export const campaignSessionCookieNamesKey = (prefix: string) => {
 /**
  * Key for index campaigns by their creation time.
  *
- * @param prefix - The global prefix for all keys
- * @returns The Redis `Sorted set` key, like `"famir:campaign-index"`
+ * @param prefix - The global prefix for all keys.
+ * @returns The Redis `Sorted set` key, like 'famir:campaign-index'.
+ *
  * @category Campaign
  * @internal
  */
@@ -78,10 +84,11 @@ export const campaignIndexKey = (prefix: string) => {
 /**
  * Key for a specific proxy within a campaign.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign this proxy belongs to
- * @param proxyId - The unique identifier of the proxy
- * @returns The Redis `Hash` key, like `"famir:proxy:my-phish:default-tor"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @param proxyId - The unique proxy ID.
+ * @returns The Redis `Hash` key, like 'famir:proxy:httpbin:default-tor'.
+ *
  * @category Proxy
  * @internal
  */
@@ -92,9 +99,10 @@ export const proxyKey = (prefix: string, campaignId: string, proxyId: string) =>
 /**
  * Key for all proxies URLs in campaign to ensure uniqueness.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign
- * @returns The Redis `Set` key, like `"famir:proxy-urls:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Set` key, like 'famir:proxy-urls:httpbin'.
+ *
  * @category Proxy
  * @internal
  */
@@ -105,9 +113,10 @@ export const proxyUrlsKey = (prefix: string, campaignId: string) => {
 /**
  * Key for index campaign proxies by their creation time.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign
- * @returns The Redis `Sorted set` key, like `"famir:proxy-index:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Sorted set` key, like 'famir:proxy-index:httpbin'.
+ *
  * @category Proxy
  * @internal
  */
@@ -116,11 +125,12 @@ export const proxyIndexKey = (prefix: string, campaignId: string) => {
 }
 
 /**
- * Key for index all enabled campaign proxies by their creation time.
+ * Key for index all enabled campaign proxies.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign
- * @returns The Redis `Sorted set` key, like `"famir:enabled-proxy-index:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Set` key, like 'famir:enabled-proxy-index:httpbin'.
+ *
  * @category Proxy
  * @internal
  */
@@ -133,10 +143,11 @@ export const enabledProxyIndexKey = (prefix: string, campaignId: string) => {
 /**
  * Key for a specific target within a campaign.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign this target belongs to
- * @param targetId - The unique identifier of the target
- * @returns The Redis `Hash` key, like `"famir:target:my-phish:www"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @param targetId - The unique target ID.
+ * @returns The Redis `Hash` key, like 'famir:target:httpbin:www'.
+ *
  * @category Target
  * @internal
  */
@@ -147,10 +158,11 @@ export const targetKey = (prefix: string, campaignId: string, targetId: string) 
 /**
  * Key for labels attached to a specific target.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign this target belongs to
- * @param targetId - The unique identifier of the target
- * @returns The Redis `Set` key, like `"famir:target-labels:my-phish:www"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @param targetId - The unique target ID.
+ * @returns The Redis `Set` key, like 'famir:target-labels:httpbin:www'.
+ *
  * @category Target
  * @internal
  */
@@ -161,9 +173,10 @@ export const targetLabelsKey = (prefix: string, campaignId: string, targetId: st
 /**
  * Key for all target donors (sub/domain/port) in campaign to ensure uniqueness.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign
- * @returns The Redis `Set` key, like `"famir:target-donors:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Set` key, like 'famir:target-donors:httpbin'.
+ *
  * @category Target
  * @internal
  */
@@ -174,9 +187,10 @@ export const targetDonorsKey = (prefix: string, campaignId: string) => {
 /**
  * Key for all target mirrors (sub/port) in campaign to ensure uniqueness.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign
- * @returns The Redis `Set` key, like `"famir:target-mirrors:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Set` key, like 'famir:target-mirrors:httpbin'.
+ *
  * @category Target
  * @internal
  */
@@ -187,9 +201,10 @@ export const targetMirrorsKey = (prefix: string, campaignId: string) => {
 /**
  * Key for index campaign targets by their creation time.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign
- * @returns The index key, like `"famir:target-index:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Sorted set` key, like 'famir:target-index:httpbin'.
+ *
  * @category Target
  * @internal
  */
@@ -200,9 +215,10 @@ export const targetIndexKey = (prefix: string, campaignId: string) => {
 /**
  * Key for mapping a mirror hostnames to the corresponding campaign and targets IDs.
  *
- * @param prefix - The global prefix for all keys
- * @returns The Redis `Hash` key, like `"famir:target-mirror-hosts"`
- * @category Campaign
+ * @param prefix - The global prefix for all keys.
+ * @returns The Redis `Hash` key, like 'famir:target-hosts'.
+ *
+ * @category Target
  * @internal
  */
 export const targetHostsKey = (prefix: string) => {
@@ -214,10 +230,11 @@ export const targetHostsKey = (prefix: string) => {
 /**
  * Key for a specific redirector within a campaign.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign this redirector belongs to
- * @param proxyId - The unique identifier of the redirector
- * @returns The Redis `Hash` key, like `"famir:redirector:my-phish:simple"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @param redirectorId - The unique redirector ID.
+ * @returns The Redis `Hash` key, like 'famir:redirector:httpbin:simple'.
+ *
  * @category Redirector
  * @internal
  */
@@ -228,10 +245,11 @@ export const redirectorKey = (prefix: string, campaignId: string, redirectorId: 
 /**
  * Key for a dynamic fields associated with a redirector.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign this redirector belongs to
- * @param proxyId - The unique identifier of the redirector
- * @returns The Redis `Set` key, like `"famir:redirector-fields:my-phish:simple"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @param redirectorId - The unique redirector ID.
+ * @returns The Redis `Set` key, like 'famir:redirector-fields:httpbin:simple'.
+ *
  * @category Redirector
  * @internal
  */
@@ -242,9 +260,10 @@ export const redirectorFieldsKey = (prefix: string, campaignId: string, redirect
 /**
  * Key for index campaign redirectors by their creation time.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign
- * @returns The Redis `Sorted set` key, like `"famir:redirector-index:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Sorted set` key, like 'famir:redirector-index:httpbin'.
+ *
  * @category Redirector
  * @internal
  */
@@ -257,10 +276,11 @@ export const redirectorIndexKey = (prefix: string, campaignId: string) => {
 /**
  * Key for a specific lure within a campaign.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign this lure belongs to
- * @param proxyId - The unique identifier of the lure
- * @returns The Redis `Hash` key, like `"famir:lure:my-phish:test"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @param lureId - The unique lure ID.
+ * @returns The Redis `Hash` key, like 'famir:lure:httpbin:test'.
+ *
  * @category Lure
  * @internal
  */
@@ -271,9 +291,10 @@ export const lureKey = (prefix: string, campaignId: string, lureId: string) => {
 /**
  * Key for mapping a url paths to the corresponding lure IDs.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign
- * @returns The Redis `Hash` key, like `"famir:lure-paths:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Hash` key, like 'famir:lure-paths:httpbin'.
+ *
  * @category Lure
  * @internal
  */
@@ -284,9 +305,10 @@ export const lurePathsKey = (prefix: string, campaignId: string) => {
 /**
  * Key for index campaign lures by their creation time.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign
- * @returns The Redis `Sorted set` key, like `"famir:lure-index:my-phish"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Sorted set` key, like 'famir:lure-index:httpbin'.
+ *
  * @category Lure
  * @internal
  */
@@ -299,10 +321,11 @@ export const lureIndexKey = (prefix: string, campaignId: string) => {
 /**
  * Key for a specific session within a campaign.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign this session belongs to
- * @param proxyId - The unique identifier of the session
- * @returns The Redis `Hash` key, like `"famir:session:my-phish:5bfe210ae6c244c69fd91cd6c9f486b4"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @param sessionId - The unique session ID.
+ * @returns The Redis `Hash` key, like 'famir:session:httpbin:5bfe210ae6c244c69fd91cd6c9f486b4'.
+ *
  * @category Session
  * @internal
  */
@@ -315,10 +338,11 @@ export const sessionKey = (prefix: string, campaignId: string, sessionId: string
 /**
  * Key for a specific message within a campaign.
  *
- * @param prefix - The global prefix for all keys
- * @param campaignId - The ID of the campaign this message belongs to
- * @param proxyId - The unique identifier of the message
- * @returns The Redis `Hash` key, like `"famir:message:my-phish:eefb9884f0674ff583869aa36b4383b4"`
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @param messageId - The unique message ID.
+ * @returns The Redis `Hash` key, like 'famir:message:httpbin:eefb9884f0674ff583869aa36b4383b4'.
+ *
  * @category Message
  * @internal
  */

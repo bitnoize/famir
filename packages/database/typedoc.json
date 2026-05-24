@@ -1,5 +1,14 @@
 {
   "extends": ["../../typedoc.base.json"],
   "entryPoints": ["src/index.ts"],
-  "categoryOrder": ["Campaign", "Proxy", "Target", "Redirector", "Lure", "Session", "Message", "*"]
+  "categoryOrder": [
+    "Campaign",
+    "Proxy",
+    "Target",
+    "Redirector",
+    "Lure",
+    "Session",
+    "Message",
+    "*"
+  ]
 }

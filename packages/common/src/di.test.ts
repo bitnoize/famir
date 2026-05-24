@@ -1,16 +1,16 @@
 import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { describe, it } from 'node:test'
 import { DIContainer } from './di.js'
 
-test('DIContainer', async (t) => {
-  await t.test('should be a singleton', () => {
+describe('DIContainer', () => {
+  it('should be a singleton', () => {
     const container1 = DIContainer.getInstance()
     const container2 = DIContainer.getInstance()
 
     assert.strictEqual(container1, container2)
   })
 
-  await t.test('should register transient dependencies', () => {
+  it('should register transient dependencies', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -26,7 +26,7 @@ test('DIContainer', async (t) => {
     assert.deepEqual(instance1, { id: 1 })
   })
 
-  await t.test('should register singleton dependencies', () => {
+  it('should register singleton dependencies', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -41,7 +41,7 @@ test('DIContainer', async (t) => {
     assert.strictEqual(instance1, instance2)
   })
 
-  await t.test('should throw when registering duplicate token', () => {
+  it('should throw when registering duplicate token', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -54,7 +54,7 @@ test('DIContainer', async (t) => {
     }, /already registered/)
   })
 
-  await t.test('should throw when resolving non-existent dependency', () => {
+  it('should throw when resolving non-existent dependency', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -63,7 +63,7 @@ test('DIContainer', async (t) => {
     }, /not registered/)
   })
 
-  await t.test('should throw when detect circular dependencies', () => {
+  it('should throw when detect circular dependencies', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -78,7 +78,7 @@ test('DIContainer', async (t) => {
     }, /Circular dependency detected/)
   })
 
-  await t.test('should resolve optional dependencies', () => {
+  it('should resolve optional dependencies', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -87,7 +87,7 @@ test('DIContainer', async (t) => {
     assert.equal(result, null)
   })
 
-  await t.test('should check if dependency exists', () => {
+  it('should check if dependency exists', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -100,7 +100,7 @@ test('DIContainer', async (t) => {
     assert.ok(container.exists(token))
   })
 
-  await t.test('should return registered tokens', () => {
+  it('should return registered tokens', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -116,7 +116,7 @@ test('DIContainer', async (t) => {
     assert.ok(tokens.includes(tokenB))
   })
 
-  await t.test('should resolve nested dependencies', () => {
+  it('should resolve nested dependencies', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -133,7 +133,7 @@ test('DIContainer', async (t) => {
     assert.strictEqual(b.a.value, 42)
   })
 
-  await t.test('should support symbol tokens', () => {
+  it('should support symbol tokens', () => {
     const container = DIContainer.getInstance()
     container.reset()
 
@@ -146,7 +146,7 @@ test('DIContainer', async (t) => {
     assert.deepEqual(instance, { id: 1 })
   })
 
-  await t.test('should reset container', () => {
+  it('should reset container', () => {
     const container = DIContainer.getInstance()
 
     container.registerSingleton('service', () => ({}))

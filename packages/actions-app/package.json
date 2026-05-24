@@ -1,7 +1,7 @@
 {
   "name": "@famir/actions-app",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Famir actions app",
   "keywords": [
     "famir",
@@ -26,7 +26,10 @@
     "build": "tsc -b",
     "clean": "rimraf dist *.tsbuildinfo"
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bitnoize/famir.git",
@@ -43,7 +46,7 @@
     "@famir/logger": "*",
     "@famir/database": "*",
     "@famir/storage": "*",
-    "@famir/produce": "*",
-    "@famir/consume": "*"
+    "@famir/producer": "*",
+    "@famir/consumer": "*"
   }
 }

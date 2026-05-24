@@ -1,65 +1,66 @@
 /**
+ * Arguments for creating a redirector.
+ *
  * @category Redirector
  * @internal
  */
-export const REDIRECTOR_CONTROLLER = Symbol('RedirectorController')
-
-/**
- * @category Redirector
- * @internal
- */
-export const REDIRECTOR_SERVICE = Symbol('RedirectorService')
-
-/**
- * @category Redirector
- */
-export interface CreateRedirectorData {
-  campaignId: string
-  redirectorId: string
-  page: string
+export interface CreateRedirectorArgs {
+  _: [string, string]
+  pageFile: string | null | undefined
   lockSecret: string
 }
 
 /**
+ * Arguments for reading the redirector.
+ *
  * @category Redirector
+ * @internal
  */
-export interface ReadRedirectorData {
-  campaignId: string
-  redirectorId: string
+export interface ReadRedirectorArgs {
+  _: [string, string]
 }
 
 /**
+ * Arguments for updating the redirector.
+ *
  * @category Redirector
+ * @internal
  */
-export interface UpdateRedirectorData {
-  campaignId: string
-  redirectorId: string
-  page: string | null | undefined
+export interface UpdateRedirectorArgs {
+  _: [string, string]
+  pageFile: string | null | undefined
   lockSecret: string
 }
 
 /**
+ * Arguments for altering the redirector field.
+ *
  * @category Redirector
+ * @internal
  */
-export interface AlterRedirectorFieldData {
-  campaignId: string
-  redirectorId: string
+export interface AlterRedirectorFieldArgs {
+  _: [string, string]
   field: string
   lockSecret: string
 }
 
 /**
+ * Arguments for deleting the redirector.
+ *
  * @category Redirector
+ * @internal
  */
-export interface DeleteRedirectorData {
-  campaignId: string
-  redirectorId: string
+export interface DeleteRedirectorArgs {
+  _: [string, string]
   lockSecret: string
 }
 
 /**
+ * Arguments for listing redirectors.
+ *
  * @category Redirector
+ * @internal
  */
-export interface ListRedirectorsData {
-  campaignId: string
+export interface ListRedirectorsArgs {
+  _: [string]
 }

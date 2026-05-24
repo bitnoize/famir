@@ -1,15 +1,17 @@
 import { CampaignModel, FullCampaignModel } from './campaign.models.js'
 
 /**
- * DI token for campaign repository.
+ * DI token for a campaign repository implementation.
  *
  * @category Campaign
- * @internal
  */
 export const CAMPAIGN_REPOSITORY = Symbol('CampaignRepository')
 
 /**
- * Represents a campaign repository.
+ * Defines the public contract for a campaign repository.
+ *
+ * A campaign is the top-level container that groups all related
+ * proxies, targets, redirectors, lures, sessions and messages.
  *
  * @category Campaign
  */
@@ -17,19 +19,19 @@ export interface CampaignRepository {
   /**
    * Creates a new campaign.
    *
-   * @param campaignId - The unique identifier for the new campaign
-   * @param mirrorDomain - The public-facing mirror domain
-   * @param description - Human-readable description
-   * @param cryptSecret - Secret used for encrypting session data
-   * @param upgradeSessionPath - URL path that triggers session upgrade
-   * @param sessionCookieName - Name of the cookie used to track sessions
-   * @param sessionExpire - TTL for an authorized session
-   * @param newSessionExpire - TTL for a newly created, not-yet-authorized session
-   * @param messageExpire - TTL for message logs
-   *
-   * @throws {@link DatabaseError} If a campaign with the same ID already exists
-   * @throws {@link DatabaseError} If `mirrorDomain` is already used by another campaign
-   * @throws {@link DatabaseError} If `sessionCookieName` is already used by another campaign
+   * @param campaignId - The new campaign ID to create.
+   * @param mirrorDomain - The public-facing mirror domain for the campaign.
+   * @param description - The human-readable description for the campaign.
+   * @param cryptSecret - The secret used for encrypting session data.
+   * @param upgradeSessionPath - The URL path that triggers session upgrade.
+   * @param sessionCookieName - The name of the cookie used to track authorized sessions.
+   * @param sessionExpire - The TTL for an authorized session in milliseconds.
+   * @param newSessionExpire - The TTL for a not-yet-authorized session in milliseconds.
+   * @param messageExpire - The TTL for a message in milliseconds.
+   * @throws {@link DatabaseError} If a campaign with the same ID already exists.
+   * @throws {@link DatabaseError} If the mirror domain is already used by another campaign.
+   * @throws {@link DatabaseError} If the session cookie name is already used by another campaign.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   create(
     campaignId: string,
@@ -44,58 +46,64 @@ export interface CampaignRepository {
   ): Promise<void>
 
   /**
-   * Reads a campaign model by its ID.
+   * Reads the campaign by its ID.
    *
-   * @param campaignId - The campaign ID to read
-   * @returns The campaign model, or `null` if not found
+   * @param campaignId - The campaign ID to read.
+   * @returns The campaign model, or `null` if the campaign is not found.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   read(campaignId: string): Promise<CampaignModel | null>
 
   /**
-   * Reads a full campaign model by its ID.
+   * Reads the full campaign by its ID.
    *
-   * @param campaignId - The campaign ID to read
-   * @returns The full campaign model, or `null` if not found
+   * @param campaignId - The campaign ID to read.
+   * @returns The full campaign model, or `null` if the campaign is not found.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   readFull(campaignId: string): Promise<FullCampaignModel | null>
 
   /**
-   * Acquires a distributed lock for a campaign.
+   * Acquires a distributed lock for the campaign.
    *
-   * @param campaignId - The campaign ID to lock
-   * @returns A unique lock secret that must be used for subsequent operations
+   * This lock is required for any mutating operations.
    *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is already locked
+   * @param campaignId - The campaign ID to lock.
+   * @returns The unique lock secret that must be used for subsequent operations.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is already locked.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   lock(campaignId: string): Promise<string>
 
   /**
-   * Releases a previously acquired lock on a campaign.
+   * Releases a previously acquired lock on the campaign.
    *
-   * The lock secret must match the one returned by `lock()`.
+   * The lock secret must match the one returned by {@link lock}.
    *
-   * @param campaignId - The campaign ID to unlock
-   * @param lockSecret - The lock secret returned by the `lock()`
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the lock secret does not match
+   * @param campaignId - The campaign ID to unlock.
+   * @param lockSecret - The lock secret returned by the {@link lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the lock secret does not match.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   unlock(campaignId: string, lockSecret: string): Promise<void>
 
   /**
-   * Updates specific fields of a campaign.
+   * Updates the campaign specific fields.
    *
-   * @param campaignId - The campaign ID to update
-   * @param description - New description
-   * @param sessionExpire - New session expire TTL
-   * @param newSessionExpire - New new-session expire TTL
-   * @param messageExpire - New message expire TTL
-   * @param lockSecret - The lock secret obtained from `lock()`
+   * All update parameters are optional. Only provided fields will be updated.
    *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is not locked
-   * @throws {@link DatabaseError} If the lock secret does not match
+   * @param campaignId - The campaign ID to update.
+   * @param description - The new human-readable description for the campaign.
+   * @param sessionExpire - The new TTL for an authorized session in milliseconds.
+   * @param newSessionExpire - The new TTL for a not-yet-authorized session in milliseconds.
+   * @param messageExpire - The new TTL for a message in milliseconds.
+   * @param lockSecret - The lock secret obtained from {@link lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is not locked.
+   * @throws {@link DatabaseError} If the lock secret does not match.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   update(
     campaignId: string,
@@ -107,24 +115,25 @@ export interface CampaignRepository {
   ): Promise<void>
 
   /**
-   * Delete a campaign model by its ID.
+   * Deletes the campaign by its ID.
    *
-   * @param campaignId - The campaign ID to delete
-   * @param lockSecret - The lock secret obtained from `lock()`
-   *
-   * @throws {@link DatabaseError} If the campaign does not exist
-   * @throws {@link DatabaseError} If the campaign is not locked
-   * @throws {@link DatabaseError} If the lock secret does not match
-   * @throws {@link DatabaseError} If the campaign still has associated entities
+   * @param campaignId - The campaign ID to delete.
+   * @param lockSecret - The lock secret obtained from {@link lock}.
+   * @throws {@link DatabaseError} If the campaign does not exist.
+   * @throws {@link DatabaseError} If the campaign is not locked.
+   * @throws {@link DatabaseError} If the lock secret does not match.
+   * @throws {@link DatabaseError} If the campaign still has associated entities.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   delete(campaignId: string, lockSecret: string): Promise<void>
 
   /**
-   * Lists all campaigns models.
+   * Lists all campaigns.
    *
    * The campaigns are ordered by creation time (oldest first).
    *
-   * @returns An array of campaign models
+   * @returns The array of campaign models.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   list(): Promise<CampaignModel[]>
 
@@ -133,13 +142,14 @@ export interface CampaignRepository {
    *
    * The campaigns are ordered by creation time (oldest first).
    *
-   * @returns An array of full campaign models
+   * @returns The array of full campaign models.
+   * @throws {@link DatabaseError} If the data validation fails.
    */
   listFull(): Promise<FullCampaignModel[]>
 }
 
 /**
- * The time for which the campaign is blocked.
+ * Time for which a campaign is blocked in milliseconds.
  *
  * @category none
  * @internal

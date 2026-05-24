@@ -1,56 +1,103 @@
 import { decrypt, DIContainer, encrypt, randomName } from '@famir/common'
 import {
+  EnabledFullTargetModel,
   FullCampaignModel,
   FullRedirectorModel,
   RedirectorParams,
+  redirectorParamsSchema,
   SessionModel,
+  TargetAccessLevel,
   UpgradeSessionParams,
+  upgradeSessionParamsSchema,
 } from '@famir/database'
 import { HttpCookie } from '@famir/http-proto'
-import { HTTP_SERVER_ROUTER, HttpServerContext, HttpServerRouter } from '@famir/http-server'
+import {
+  HTTP_SERVER_ROUTER,
+  HttpServerContext,
+  HttpServerContextType,
+  HttpServerNextFunction,
+  HttpServerRouter,
+} from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
+import { randomIdentSchema, Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import {
-  AUTHORIZE_CONTROLLER,
-  AUTHORIZE_SERVICE,
-  AuthorizeDispatchAccessLevel,
-  AuthorizeDispatchContextType,
-} from './authorize.js'
-import { authorizeSchemas } from './authorize.schemas.js'
-import { type AuthorizeService } from './authorize.service.js'
+import { type AuthorizeService, AUTHORIZE_SERVICE } from './authorize.service.js'
 
 /**
- * Represents an authorize controller
+ * DI token for the authorize controller.
+ *
+ * @category Authorize
+ */
+export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
+
+/**
+ * @category Authorize
+ * @internal
+ */
+type AuthorizeHandler = (
+  ctx: HttpServerContext,
+  campaign: FullCampaignModel,
+  target: EnabledFullTargetModel,
+  next: HttpServerNextFunction
+) => Promise<void>
+
+/**
+ * @category Authorize
+ * @internal
+ */
+type AuthorizeDispatchContextType = Record<HttpServerContextType, AuthorizeHandler>
+
+/**
+ * @category Authorize
+ * @internal
+ */
+type AuthorizeDispatchAccessLevel = Record<TargetAccessLevel, AuthorizeHandler>
+
+/**
+ * Represents the authorize controller.
  *
  * @category Authorize
  */
 export class AuthorizeController extends BaseController {
   /**
-   * Register dependency
+   * Registers the controller as a singleton in the DI container.
+   *
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<AuthorizeController>(
       AUTHORIZE_CONTROLLER,
       (c) =>
         new AuthorizeController(
-          c.resolve(VALIDATOR),
-          c.resolve(LOGGER),
-          c.resolve(TEMPLATER),
-          c.resolve(HTTP_SERVER_ROUTER),
-          c.resolve(AUTHORIZE_SERVICE)
+          c.resolve<Validator>(VALIDATOR),
+          c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<AuthorizeService>(AUTHORIZE_SERVICE)
         )
     )
   }
 
   /**
-   * Resolve dependency
+   * Resolves the controller from the DI container.
+   *
+   * @param container - The DI container to resolve from.
+   * @returns The controller instance.
    */
-  static resolve(container: DIContainer): AuthorizeController {
-    return container.resolve(AUTHORIZE_CONTROLLER)
+  static resolve(container: DIContainer) {
+    return container.resolve<AuthorizeController>(AUTHORIZE_CONTROLLER)
   }
 
+  /**
+   * Creates a new controller instance.
+   *
+   * @param validator - The validator instance.
+   * @param logger - The logger instance.
+   * @param templater - The templater instance.
+   * @param router - The http-server router instance.
+   * @param authorizeService - The authorize service instance.
+   */
   constructor(
     validator: Validator,
     logger: Logger,
@@ -60,11 +107,15 @@ export class AuthorizeController extends BaseController {
   ) {
     super(validator, logger, templater, router)
 
-    this.validator.addSchemas(authorizeSchemas)
-
-    this.logger.debug(`AuthorizeController initialized`)
+    this.validator
+      .addSchema('reverse-authorize-session-cookie', randomIdentSchema)
+      .addSchema('reverse-authorize-upgrade-session-params', upgradeSessionParamsSchema)
+      .addSchema('reverse-authorize-redirector-params', redirectorParamsSchema)
   }
 
+  /**
+   * Registers used middleware in the router.
+   */
   use() {
     this.router.addMiddleware('authorize', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')

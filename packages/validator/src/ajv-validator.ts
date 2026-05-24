@@ -1,52 +1,92 @@
 import { DIContainer } from '@famir/common'
 import { Ajv, ValidateFunction } from 'ajv'
 import { ValidatorError } from './validator.error.js'
-import { VALIDATOR, Validator, ValidatorSchemas } from './validator.js'
+import { VALIDATOR, Validator } from './validator.js'
 
 /**
  * Ajv-based validator implementation.
  *
- * Provides thread-safe schema validation with comprehensive error reporting.
- * Uses Ajv with strict configuration for production use.
+ * Provides thread-safe JSON Schema validation with comprehensive error reporting.
+ * Uses the Ajv library as the underlying validation engine.
+ *
+ * @see https://ajv.js.org/ - Ajv documentation
  *
  * @example
  * ```ts
- * // Register in DI container
+ * import { DIContainer } from '@famir/common'
+ * import {
+ *   VALIDATOR,
+ *   Validator,
+ *   AjvValidator,
+ *   ValidatorError,
+ *   JSONSchemaType,
+ * } from '@famir/validator'
+ *
+ * // Get the container singleton.
+ * const container = DIContainer.getInstance()
+ *
+ * // Register dependency in container
  * AjvValidator.register(container)
  *
- * // Get validator
+ * // Resolve dependency from container
  * const validator = container.resolve<Validator>(VALIDATOR)
  *
- * // Add and validate schemas
- * validator.addSchema('user', {
+ * // Define your user interface
+ * interface User {
+ *   name: string
+ *   age: number
+ * }
+ *
+ * // Define your user schema
+ * const userSchema: JSONSchemaType<User> = {
  *   type: 'object',
+ *   required: ['name', 'age'],
  *   properties: {
  *     name: { type: 'string' },
  *     age: { type: 'number', minimum: 0 }
  *   },
- *   required: ['name']
- * })
+ *   additionalProperties: false,
+ * } as const
  *
- * // Type-safe validation
+ * // Add schema to validator
+ * validator.addSchema('user', userSchema)
+ *
+ * // Any data to validate
+ * const data: unknown = { name: 'John', age: 30 }
+ *
+ * // Type-safe guard validation
  * if (validator.guardSchema<User>('user', data)) {
+ *   // TypeScript knows this is User
  *   console.log(data.name)
+ * } else {
+ *   console.warn('Invalid user data')
+ * }
+ *
+ * // Type-safe assert validation with exception filter
+ * try {
+ *   validator.assertSchema<User>('user', data)
+ *   // TypeScript knows this is User
+ *   console.log(data.age)
+ * } catch (error) {
+ *   if (error instanceof ValidatorError) {
+ *     console.warn(error.validateErrors)
+ *   } else {
+ *     console.error(error)
+ *   }
  * }
  * ```
- *
- * @see https://ajv.js.org/ - Ajv documentation
- * @category none
  */
 export class AjvValidator implements Validator {
   /**
-   * Register validator instance as singleton in DI container.
+   * Registers the validator as a singleton in the DI container.
    *
-   * @param container - DI container to register in
+   * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
     container.registerSingleton<Validator>(VALIDATOR, () => new AjvValidator())
   }
 
-  /** Underlying Ajv instance */
+  /** Underlying Ajv instance. */
   protected readonly ajv: Ajv
 
   /**
@@ -64,25 +104,25 @@ export class AjvValidator implements Validator {
     })
   }
 
-  getSchema(name: string): object | undefined {
-    return this.ajv.getSchema(name)
-  }
+  addSchema(name: string, schema: object): this {
+    const existsSchema = this.ajv.getSchema(name)
 
-  addSchema(name: string, schema: object) {
-    const existsSchema = this.getSchema(name)
     if (existsSchema) {
       throw new Error(`JSON-Schema already exists: ${name}`)
     }
 
     this.ajv.addSchema(schema, name)
+
+    return this
   }
 
-  addSchemas(schemas: ValidatorSchemas) {
-    Object.entries(schemas).forEach(([name, schema]) => {
-      this.addSchema(name, schema)
-    })
-  }
-
+  /**
+   * Retrieves a compiled validation function for a given schema.
+   *
+   * @param name - The unique identifier for the schema.
+   * @returns The compiled validation function.
+   * @throws Error If a schema with the given name is not found.
+   */
   protected getValidate<T>(name: string): ValidateFunction<T> {
     const validate = this.ajv.getSchema<T>(name)
 
@@ -97,7 +137,7 @@ export class AjvValidator implements Validator {
   guardSchema<T>(name: string, data: unknown): data is T {
     const validate = this.getValidate<T>(name)
 
-    return validate(data) ? true : false
+    return validate(data)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
@@ -119,7 +159,6 @@ export class AjvValidator implements Validator {
       throw new ValidatorError(`JSON-Schema assertion failed`, {
         context: {
           schemaName: name,
-          //data
         },
         validateErrors,
       })
