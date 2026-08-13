@@ -137,7 +137,7 @@ export class ForwardController extends BaseController {
 
       if (result.error) {
         message.addError(result.error, ['forward', 'normal-simple'])
-        message.mergeConnection(result.connection)
+        message.status.set(result.error.status)
 
         await this.sendErrorPage(ctx, result.error, true)
       } else {
@@ -200,7 +200,7 @@ export class ForwardController extends BaseController {
 
       if (result.error) {
         message.addError(result.error, ['forward', 'normal-stream-request'])
-        message.mergeConnection(result.connection)
+        message.status.set(result.error.status)
 
         await this.sendErrorPage(ctx, result.error, false)
       } else {
@@ -247,7 +247,7 @@ export class ForwardController extends BaseController {
 
       if (result.error) {
         message.addError(result.error, ['forward', 'normal-stream-response'])
-        message.mergeConnection(result.connection)
+        message.status.set(result.error.status)
 
         await this.sendErrorPage(ctx, result.error, false)
       } else {

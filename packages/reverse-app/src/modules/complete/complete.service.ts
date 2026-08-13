@@ -113,13 +113,7 @@ export class CompleteService {
     } catch (error) {
       if (error instanceof DatabaseError) {
         if (error.code === 'NOT_FOUND') {
-          throw new HttpServerError(`Service unavailable`, {
-            cause: error,
-            context: {
-              reason: `Create message failed`,
-            },
-            code: 'SERVICE_UNAVAILABLE',
-          })
+          throw HttpServerError.serviceUnavailable(`Service unavailable`, null, error)
         }
       }
 

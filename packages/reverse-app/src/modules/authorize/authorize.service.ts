@@ -68,12 +68,9 @@ export class AuthorizeService {
     const proxy = await this.proxyRepository.read(data.campaignId, data.proxyId)
 
     if (!(proxy && ProxyModel.isEnabled(proxy))) {
-      throw new HttpServerError(`Service unavailable`, {
-        context: {
-          reason: `Read proxy failed`,
-          data,
-        },
-        code: 'SERVICE_UNAVAILABLE',
+      throw HttpServerError.serviceUnavailable(`Service unavailable`, {
+        reason: `Read proxy failed`,
+        data,
       })
     }
 
@@ -87,12 +84,9 @@ export class AuthorizeService {
     const redirector = await this.redirectorRepository.readFull(data.campaignId, data.redirectorId)
 
     if (!redirector) {
-      throw new HttpServerError(`Service unavailable`, {
-        context: {
-          reason: `Read redirector failed`,
-          data,
-        },
-        code: 'SERVICE_UNAVAILABLE',
+      throw HttpServerError.serviceUnavailable(`Service unavailable`, {
+        reason: `Read redirector failed`,
+        data,
       })
     }
 
@@ -115,13 +109,7 @@ export class AuthorizeService {
     } catch (error) {
       if (error instanceof DatabaseError) {
         if (error.code === 'NOT_FOUND') {
-          throw new HttpServerError(`Service unavailable`, {
-            cause: error,
-            context: {
-              reason: `Create session failed`,
-            },
-            code: 'SERVICE_UNAVAILABLE',
-          })
+          throw HttpServerError.serviceUnavailable(`Service unavailable`, null, error)
         }
       }
 
@@ -135,13 +123,7 @@ export class AuthorizeService {
     } catch (error) {
       if (error instanceof DatabaseError) {
         if (error.code === 'NOT_FOUND') {
-          throw new HttpServerError(`Service unavailable`, {
-            cause: error,
-            context: {
-              reason: `Auth session failed`,
-            },
-            code: `SERVICE_UNAVAILABLE`,
-          })
+          throw HttpServerError.serviceUnavailable(`Service unavailable`, null, error)
         } else if (error.code === 'FORBIDDEN') {
           return null
         }
@@ -169,13 +151,7 @@ export class AuthorizeService {
     } catch (error) {
       if (error instanceof DatabaseError) {
         if (error.code === 'NOT_FOUND') {
-          throw new HttpServerError(`Not found`, {
-            cause: error,
-            context: {
-              reason: `Upgrade session failed`,
-            },
-            code: `NOT_FOUND`,
-          })
+          throw HttpServerError.serviceUnavailable(`Service unavailable`, null, error)
         } else if (error.code === 'FORBIDDEN') {
           return false
         }

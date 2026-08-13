@@ -10,6 +10,7 @@ import {
 import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
 import { PRODUCER_CONNECTOR, ProducerConnector } from '@famir/producer'
+import { Storage, STORAGE } from '@famir/storage'
 
 /**
  * DI token for the actions application.
@@ -24,6 +25,7 @@ export const ACTIONS_APP = Symbol('ActionsApp')
  * Depends:
  * - {@link Logger} via {@link LOGGER} token
  * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
+ * - {@link Storage} via {@link STORAGE} token
  * - {@link ProducerConnector} via {@link PRODUCER_CONNECTOR} token
  * - {@link ConsumerConnector} via {@link CONSUMER_CONNECTOR} token
  * - {@link ConsumerRouter} via {@link CONSUMER_ROUTER} token
@@ -60,6 +62,7 @@ export class ActionsApp {
         new ActionsApp(
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
+          c.resolve<Storage>(STORAGE),
           c.resolve<ProducerConnector>(PRODUCER_CONNECTOR),
           c.resolve<ConsumerConnector>(CONSUMER_CONNECTOR),
           c.resolve<ConsumerRouter>(CONSUMER_ROUTER),
@@ -83,6 +86,7 @@ export class ActionsApp {
    *
    * @param logger - The logger instance.
    * @param databaseConnector - The database connector instance.
+   * @param storage - The storage instance.
    * @param producerConnector - The producer connector instance.
    * @param consumerConnector - The consumer connector instance.
    * @param router - The consumer router instance.
@@ -91,6 +95,7 @@ export class ActionsApp {
   constructor(
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
+    protected readonly storage: Storage,
     protected readonly producerConnector: ProducerConnector,
     protected readonly consumerConnector: ConsumerConnector,
     protected readonly router: ConsumerRouter,
@@ -106,9 +111,13 @@ export class ActionsApp {
 
       await this.databaseConnector.connect()
 
+      await this.storage.checkBucketExists()
+
+      await this.producerConnector.connect()
+
       await this.analyzeWorker.run()
 
-      this.logger.debug(`Application started`)
+      this.logger.info(`Application started`)
     } catch (error) {
       this.logger.error(`Application start failed`, {
         error: serializeError(error),
@@ -131,7 +140,7 @@ export class ActionsApp {
 
       await this.databaseConnector.close()
 
-      this.logger.debug(`Application stopped`)
+      this.logger.info(`Application stopped`)
     } catch (error) {
       this.logger.error(`Application stop failed`, {
         error: serializeError(error),

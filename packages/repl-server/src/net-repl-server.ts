@@ -1,4 +1,4 @@
-import { DIContainer, serializeError } from '@famir/common'
+import { BootstrapError, DIContainer, serializeError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -87,6 +87,9 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
   /** Set of active client socket connections. */
   protected readonly clients: Set<net.Socket> = new Set()
 
+  /** Start in-flight promise. */
+  private startPromise: Promise<void> | null = null
+
   /**
    * Creates a new repl-server instance.
    *
@@ -113,7 +116,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
     this.server = net.createServer()
 
     this.server.on('listening', () => {
-      this.logger.info(`ReplServer server event: listening`)
+      this.logger.debug(`ReplServer server event: listening`)
     })
 
     this.server.on('connection', (socket) => {
@@ -127,13 +130,9 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
         socket.destroy()
       })
 
-      socket.on('error', (error) => {
-        this.logger.error(`ReplServer socket event: error`, {
-          error: serializeError(error),
-        })
-
-        socket.destroy()
-      })
+      //socket.on('error', () => {
+      //  socket.destroy()
+      //})
 
       socket.setTimeout(this.options.socketTimeout)
 
@@ -141,43 +140,60 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
     })
 
     this.server.on('close', () => {
-      this.logger.info(`ReplServer server event: close`)
+      this.logger.debug(`ReplServer server event: close`)
     })
 
     this.server.maxConnections = this.options.maxClients
   }
 
+  #isShutdown: boolean = false
+
   #isRunning: boolean = false
 
   async start(): Promise<void> {
-    try {
-      if (!this.#isRunning) {
-        this.#isRunning = true
+    if (this.#isShutdown) {
+      this.logger.debug(`ReplServer shutdown, skip start`)
 
-        await this.listen()
-
-        this.logger.debug(`ReplServer started and listening`)
-      } else {
-        this.logger.debug(`ReplServer already listening`)
-      }
-    } catch (error) {
-      this.handleBootstrapError(error, 'start')
+      return
     }
+
+    if (this.startPromise) {
+      return this.startPromise
+    }
+
+    this.startPromise = this.performStart()
+
+    return this.startPromise
   }
 
   async stop(): Promise<void> {
     try {
+      this.#isShutdown = true
+
+      if (this.startPromise) {
+        try {
+          await this.startPromise
+        } catch {
+          // Ignore start error
+        }
+      }
+
       if (this.#isRunning) {
+        await this.waitUntilServerClose()
+
         this.#isRunning = false
 
-        await this.close()
-
-        this.logger.debug(`ReplServer stopped and closed all connections`)
+        this.logger.info(`ReplServer stopped and closed all connections`)
       } else {
-        this.logger.debug(`ReplServer already closed`)
+        this.logger.debug(`ReplServer not running, skip stop`)
       }
     } catch (error) {
-      this.handleBootstrapError(error, 'stop')
+      this.#isRunning = false
+
+      throw BootstrapError.wrap(error, {
+        service: 'repl-server',
+        method: 'stop',
+      })
     }
   }
 
@@ -240,72 +256,123 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
   }
 
   /**
-   * Starts listening on the configured address and port.
-   *
-   * @returns A promise that resolves when the server is listening.
+   * Actual start logic.
    */
-  private listen(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      const errorHandler = (error: Error) => {
-        this.server.off('listening', listeningHandler)
+  private async performStart(): Promise<void> {
+    try {
+      if (!this.#isRunning) {
+        await this.waitUntilServerListening()
 
-        reject(error)
+        this.#isRunning = true
+
+        this.logger.info(`ReplServer started and listening`)
+      } else {
+        this.logger.debug(`ReplServer already running, skip start`)
+      }
+    } catch (error) {
+      this.#isRunning = false
+
+      throw BootstrapError.wrap(error, {
+        service: 'repl-server',
+        method: 'start',
+      })
+    } finally {
+      this.startPromise = null
+    }
+  }
+
+  /**
+   * Starts the Net server and listen connections.
+   */
+  private waitUntilServerListening(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let settled = false
+
+      const cleanup = () => {
+        this.server.off('listening', onListening)
+        this.server.off('error', onError)
       }
 
-      const listeningHandler = () => {
-        this.server.off('error', errorHandler)
+      const onListening = () => {
+        if (settled) return
+        settled = true
 
+        cleanup()
         resolve()
       }
 
-      this.server.once('error', errorHandler)
-      this.server.once('listening', listeningHandler)
+      const onError = (error: Error) => {
+        if (settled) return
+        settled = true
 
-      this.server.listen(this.options.port, this.options.address)
+        cleanup()
+        reject(BootstrapError.create(`Server listen failed`, null, error))
+      }
+
+      this.server.once('listening', onListening)
+      this.server.once('error', onError)
+
+      try {
+        this.server.listen(this.options.port, this.options.address)
+      } catch (error) {
+        cleanup()
+        reject(BootstrapError.create(`Server listen critical error`, null, error))
+      }
     })
   }
 
   /**
-   * Closes the server and all client connections.
-   *
-   * @returns A promise that resolves when the server is closed.
+   * Closes the Net server and all connections.
    */
-  private close(): Promise<void> {
+  private waitUntilServerClose(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const errorHandler = (error: Error) => {
-        this.server.off('close', closeHandler)
+      let settled = false
 
-        reject(error)
+      const cleanup = () => {
+        this.server.off('close', onClose)
+        this.server.off('error', onError)
       }
 
-      const closeHandler = () => {
-        this.server.off('error', errorHandler)
+      const onClose = () => {
+        if (settled) return
+        settled = true
 
+        cleanup()
         resolve()
       }
 
-      this.server.once('error', errorHandler)
-      this.server.once('close', closeHandler)
+      const onError = (error: Error) => {
+        if (settled) return
+        settled = true
 
-      this.server.close()
+        cleanup()
+        reject(BootstrapError.create(`Server close failed`, null, error))
+      }
 
-      this.clients.forEach((socket) => {
-        if (!socket.destroyed) {
-          socket.end(`ReplServer stop\n`, () => {
-            socket.destroy()
-          })
-        }
-      })
+      this.server.once('close', onClose)
+      this.server.once('error', onError)
 
-      this.clients.clear()
+      try {
+        this.server.close()
+
+        this.clients.forEach((socket) => {
+          if (!socket.destroyed) {
+            socket.end(`ReplServer stop\n`, () => {
+              socket.destroy()
+            })
+          }
+        })
+
+        this.clients.clear()
+      } catch (error) {
+        cleanup()
+        reject(BootstrapError.create(`Server close critical error`, null, error))
+      }
     })
   }
 
   /**
    * Converts validated configuration to a repl-server options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The repl-server options object.
    */
   private buildOptions(data: NetReplServerConfig): NetReplServerOptions {
     return {

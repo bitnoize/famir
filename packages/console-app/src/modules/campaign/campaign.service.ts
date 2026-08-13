@@ -1,10 +1,9 @@
-import { DIContainer, arrayIncludes, randomIdent, randomName } from '@famir/common'
+import { DIContainer, randomIdent, randomName } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignModel,
   CampaignRepository,
   DatabaseError,
-  DatabaseErrorCode,
   FullCampaignModel,
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
@@ -72,6 +71,11 @@ export class CampaignService {
       )
     } catch (error) {
       if (error instanceof DatabaseError) {
+        if (error.code === 'CONFLICT') {
+          throw ReplServerError.conflict(error.message)
+        }
+
+        /*
         const knownErrorCodes: DatabaseErrorCode[] = ['CONFLICT']
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
@@ -79,6 +83,7 @@ export class CampaignService {
             code: error.code,
           })
         }
+        */
       }
 
       throw error
@@ -87,9 +92,7 @@ export class CampaignService {
     const campaign = await this.campaignRepository.readFull(data.campaignId)
 
     if (!campaign) {
-      throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Campaign not found`)
     }
 
     return campaign
@@ -106,9 +109,7 @@ export class CampaignService {
     const campaign = await this.campaignRepository.readFull(data.campaignId)
 
     if (!campaign) {
-      throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Campaign not found`)
     }
 
     return campaign
@@ -125,6 +126,13 @@ export class CampaignService {
       return await this.campaignRepository.lock(data.campaignId)
     } catch (error) {
       if (error instanceof DatabaseError) {
+        if (error.code === 'NOT_FOUND') {
+          throw ReplServerError.notFound(error.message)
+        } else if (error.code === 'FORBIDDEN') {
+          throw ReplServerError.forbidden(error.message)
+        }
+
+        /*
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
@@ -132,6 +140,7 @@ export class CampaignService {
             code: error.code,
           })
         }
+        */
       }
 
       throw error
@@ -148,6 +157,13 @@ export class CampaignService {
       await this.campaignRepository.unlock(data.campaignId, data.lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
+        if (error.code === 'NOT_FOUND') {
+          throw ReplServerError.notFound(error.message)
+        } else if (error.code === 'FORBIDDEN') {
+          throw ReplServerError.forbidden(error.message)
+        }
+
+        /*
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
@@ -155,6 +171,7 @@ export class CampaignService {
             code: error.code,
           })
         }
+        */
       }
 
       throw error
@@ -185,6 +202,13 @@ export class CampaignService {
       )
     } catch (error) {
       if (error instanceof DatabaseError) {
+        if (error.code === 'NOT_FOUND') {
+          throw ReplServerError.notFound(error.message)
+        } else if (error.code === 'FORBIDDEN') {
+          throw ReplServerError.forbidden(error.message)
+        }
+
+        /*
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
@@ -192,6 +216,7 @@ export class CampaignService {
             code: error.code,
           })
         }
+        */
       }
 
       throw error
@@ -208,6 +233,13 @@ export class CampaignService {
       await this.campaignRepository.delete(data.campaignId, data.lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
+        if (error.code === 'NOT_FOUND') {
+          throw ReplServerError.notFound(error.message)
+        } else if (error.code === 'FORBIDDEN') {
+          throw ReplServerError.forbidden(error.message)
+        }
+
+        /*
         const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
 
         if (arrayIncludes(knownErrorCodes, error.code)) {
@@ -215,6 +247,7 @@ export class CampaignService {
             code: error.code,
           })
         }
+        */
       }
 
       throw error

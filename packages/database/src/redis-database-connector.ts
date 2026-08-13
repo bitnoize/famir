@@ -93,6 +93,9 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   /** Underlying Redis connection instance. */
   protected readonly connection: RedisDatabaseConnection
 
+  /** Connect in-flight promise. */
+  private connectPromise: Promise<void> | null = null
+
   /**
    * Creates a new connector instance.
    *
@@ -127,11 +130,11 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     })
 
     this.connection.on('ready', () => {
-      this.logger.info(`DatabaseConnector Redis event: ready`)
+      this.logger.debug(`DatabaseConnector Redis event: ready`)
     })
 
     this.connection.on('end', () => {
-      this.logger.info(`DatabaseConnector Redis event: end`)
+      this.logger.debug(`DatabaseConnector Redis event: end`)
     })
   }
 
@@ -140,74 +143,137 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     return this.connection as T
   }
 
+  #isShutdown: boolean = false
+
   #isConnected: boolean = false
 
   async connect(): Promise<void> {
+    if (this.#isShutdown) {
+      this.logger.debug(`DatabaseConnector shutdown, skip connect`)
+
+      return
+    }
+
+    if (this.connectPromise) {
+      return this.connectPromise
+    }
+
+    this.connectPromise = this.performConnect()
+
+    return this.connectPromise
+  }
+
+  async close(): Promise<void> {
+    try {
+      this.#isShutdown = true
+
+      if (this.connectPromise) {
+        try {
+          await this.connectPromise
+        } catch {
+          // Ignore connect error
+        }
+      }
+
+      if (this.#isConnected) {
+        await this.connection.close()
+
+        this.#isConnected = false
+
+        this.logger.info(`DatabaseConnector closed connection`)
+      } else {
+        this.logger.debug(`DatabaseConnector not connected, skip close`)
+      }
+    } catch (error) {
+      this.#isConnected = false
+
+      throw BootstrapError.wrap(error, {
+        service: 'database-connector',
+        method: 'close',
+      })
+    }
+  }
+
+  /**
+   * Actual connection logic.
+   */
+  private async performConnect(): Promise<void> {
     try {
       if (!this.#isConnected) {
+        await this.waitUntilConnectionReady()
+
         this.#isConnected = true
 
-        await this.connection.connect()
-
-        this.logger.debug(`DatabaseConnector established connection`)
+        this.logger.info(`DatabaseConnector established connection`)
       } else {
         this.logger.debug(`DatabaseConnector already connected`)
       }
     } catch (error) {
       this.#isConnected = false
 
-      this.handleBootstrapError(error, 'connect')
-    }
-  }
-
-  async close(): Promise<void> {
-    try {
-      if (this.#isConnected) {
-        this.#isConnected = false
-
-        await this.connection.close()
-
-        this.logger.debug(`DatabaseConnector closed connection`)
-      } else {
-        this.logger.debug(`DatabaseConnector already closed`)
-      }
-    } catch (error) {
-      this.handleBootstrapError(error, 'close')
+      throw BootstrapError.wrap(error, {
+        service: 'database-connector',
+        method: 'connect',
+      })
+    } finally {
+      this.connectPromise = null
     }
   }
 
   /**
-   * Handles bootstrap operation errors.
-   *
-   * Re-throws `BootstrapError` instances with additional context, or wraps
-   * unknown errors into a `BootstrapError`.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @returns Never returns, always throws.
+   * Waits for the underlying redis client to become ready.
    */
-  protected handleBootstrapError(error: unknown, method: string): never {
-    if (error instanceof BootstrapError) {
-      error.context['service'] = 'database-connector'
-      error.context['method'] = method
+  private waitUntilConnectionReady(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let settled = false
 
-      throw error
-    } else {
-      throw new BootstrapError(`Unknown error`, {
-        cause: error,
-        context: {
-          service: 'database-connector',
-          method,
-        },
+      const cleanup = () => {
+        this.connection.off('ready', onReady)
+        this.connection.off('error', onError)
+        this.connection.off('end', onEnd)
+      }
+
+      const onReady = () => {
+        if (settled) return
+        settled = true
+
+        cleanup()
+        resolve()
+      }
+
+      const onError = (error: Error) => {
+        if (settled) return
+        settled = true
+
+        cleanup()
+        reject(error)
+      }
+
+      const onEnd = () => {
+        if (settled) return
+        settled = true
+
+        cleanup()
+        reject(new Error('Connection ended before ready'))
+      }
+
+      this.connection.once('ready', onReady)
+      this.connection.once('error', onError)
+      this.connection.once('end', onEnd)
+
+      this.connection.connect().catch((error: unknown) => {
+        if (settled) return
+        settled = true
+
+        cleanup()
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+        reject(error)
       })
-    }
+    })
   }
 
   /**
    * Converts validated configuration to a connector options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The connector options object.
    */
   private buildOptions(data: RedisDatabaseConfig): RedisDatabaseConnectorOptions {
     return {

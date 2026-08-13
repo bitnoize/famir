@@ -16,6 +16,7 @@ import {
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 import { MESSAGE_REPOSITORY, MessageRepository } from './message.js'
@@ -139,12 +140,16 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', {
-        campaignId,
-        messageId,
-        proxyId,
-        targetId,
-        sessionId,
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: {
+          campaignId,
+          messageId,
+          proxyId,
+          targetId,
+          sessionId,
+        },
       })
     }
   }
@@ -170,12 +175,16 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'createDummy', {
-        campaignId,
-        messageId,
-        proxyId,
-        targetId,
-        sessionId,
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'createDummy',
+        params: {
+          campaignId,
+          messageId,
+          proxyId,
+          targetId,
+          sessionId,
+        },
       })
     }
   }
@@ -190,7 +199,11 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, messageId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: { campaignId, messageId },
+      })
     }
   }
 
@@ -204,7 +217,11 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'readFull', { campaignId, messageId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'readFull',
+        params: { campaignId, messageId },
+      })
     }
   }
 

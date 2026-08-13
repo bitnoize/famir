@@ -1,4 +1,3 @@
-import { ConfigData } from '@famir/config'
 import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-proto'
 import type { PassThrough, Readable } from 'node:stream'
 import { HttpClientError } from './http-client.error.js'
@@ -7,6 +6,39 @@ import { HttpClientError } from './http-client.error.js'
  * DI token for an http-client implementation.
  */
 export const HTTP_CLIENT = Symbol('HttpClient')
+
+/**
+ * Base result for a successful HTTP interaction.
+ *
+ * @internal
+ */
+export interface HttpClientBaseResult {
+  readonly error: null
+  readonly status: number
+  readonly responseHeaders: HttpHeaders
+  readonly connection: HttpConnection
+}
+
+/**
+ * Simple response result with the full body in memory.
+ */
+export interface HttpClientSimpleResult extends HttpClientBaseResult {
+  readonly responseBody: HttpBody
+}
+
+/**
+ * Streaming response result with a readable stream.
+ */
+export interface HttpClientStreamResult extends HttpClientBaseResult {
+  readonly responseStream: Readable
+}
+
+/**
+ * Error result of an HTTP interaction.
+ */
+export interface HttpClientErrorResult {
+  readonly error: HttpClientError
+}
 
 /**
  * Defines the public contract for an http-client.
@@ -112,7 +144,7 @@ export interface HttpClient {
  */
 export interface HttpClientBaseState {
   error: HttpClientError | null
-  isResolved: boolean
+  settled: boolean
   proxy: string
   method: HttpMethod
   url: string
@@ -153,46 +185,4 @@ export interface HttpClientStreamRequestState extends HttpClientBaseState {
 export interface HttpClientStreamResponseState extends HttpClientBaseState {
   requestBody: HttpBody
   responseStream: PassThrough
-}
-
-/**
- * Error result of an HTTP interaction.
- */
-export interface HttpClientErrorResult {
-  readonly error: HttpClientError
-  readonly connection: HttpConnection
-}
-
-/**
- * Base result for a successful HTTP interaction.
- *
- * @internal
- */
-export interface HttpClientBaseResult {
-  readonly error: null
-  readonly status: number
-  readonly responseHeaders: HttpHeaders
-  readonly connection: HttpConnection
-}
-
-/**
- * Simple response result with the full body in memory.
- */
-export interface HttpClientSimpleResult extends HttpClientBaseResult {
-  readonly responseBody: HttpBody
-}
-
-/**
- * Streaming response result with a readable stream.
- */
-export interface HttpClientStreamResult extends HttpClientBaseResult {
-  readonly responseStream: Readable
-}
-
-/**
- * Configuration for a Curl http-client.
- */
-export interface CurlHttpClientConfig extends ConfigData {
-  /** Whether to enable verbose logging. */
-  HTTP_CLIENT_VERBOSE: boolean
 }

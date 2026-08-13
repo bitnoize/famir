@@ -55,13 +55,7 @@ export class EtaTemplater implements Templater {
     try {
       return this.eta.renderString(template, data)
     } catch (error) {
-      throw new TemplaterError(`Rendering template failed`, {
-        cause: error,
-        context: {
-          template: template.substring(0, 100),
-          data,
-        },
-      })
+      throw TemplaterError.create(`Render template failed`, null, error)
     }
   }
 }

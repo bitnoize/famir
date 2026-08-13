@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { BootstrapError, DIContainer } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -104,9 +104,17 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
     this.options = this.buildOptions(configData)
   }
 
+  #isShutdown: boolean = false
+
   // eslint-disable-next-line @typescript-eslint/require-await
   async start(): Promise<void> {
     try {
+      if (this.#isShutdown) {
+        this.logger.debug(`ReplServer shutdown, skip start`)
+
+        return
+      }
+
       if (!this.rs) {
         const console = this.initConsole(process.stdout, process.stderr)
 
@@ -135,24 +143,32 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
         this.logger.debug(`ReplServer already started`)
       }
     } catch (error) {
-      this.handleBootstrapError(error, 'start')
+      throw BootstrapError.wrap(error, {
+        service: 'repl-server',
+        method: 'start',
+      })
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async stop(): Promise<void> {
     try {
+      this.#isShutdown = true
+
       if (this.rs) {
         this.rs.close()
 
         this.rs = null
 
-        this.logger.debug(`ReplServer stopped`)
+        this.logger.info(`ReplServer stopped`)
       } else {
         this.logger.debug(`ReplServer already stopped`)
       }
     } catch (error) {
-      this.handleBootstrapError(error, 'stop')
+      throw BootstrapError.wrap(error, {
+        service: 'repl-server',
+        method: 'stop',
+      })
     }
   }
 
@@ -179,9 +195,6 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
 
   /**
    * Converts validated configuration to a repl-server options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The repl-server options object.
    */
   private buildOptions(data: CliReplServerConfig): CliReplServerOptions {
     return {

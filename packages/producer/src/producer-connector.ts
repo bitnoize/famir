@@ -27,6 +27,16 @@ export interface ProducerConnector {
   getConnection<T>(): T
 
   /**
+   * Establishes a connection to the producer.
+   *
+   * This method should be called during application bootstrap to ensure
+   * the connection is ready before any operations are performed.
+   *
+   * @throws {@link BootstrapError} If the producer connection cannot be established.
+   */
+  connect(): Promise<void>
+
+  /**
    * Gracefully closes a connection to the producer.
    *
    * This method should be called during application shutdown to ensure

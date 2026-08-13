@@ -3,6 +3,7 @@ import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
 import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCER_CONNECTOR, ProducerConnector } from '@famir/producer'
 import { REPL_SERVER, REPL_SERVER_ROUTER, ReplServer, ReplServerRouter } from '@famir/repl-server'
+import { Storage, STORAGE } from '@famir/storage'
 
 /**
  * DI token for the console application.
@@ -17,6 +18,7 @@ export const CONSOLE_APP = Symbol('ConsoleApp')
  * Depends:
  * - {@link Logger} via {@link LOGGER} token
  * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
+ * - {@link Storage} via {@link STORAGE} token
  * - {@link ProducerConnector} via {@link PRODUCER_CONNECTOR} token
  * - {@link AnalyzeQueue} via {@link ANALYZE_QUEUE} token
  * - {@link ReplServerRouter} via {@link REPL_SERVER_ROUTER} token
@@ -53,6 +55,7 @@ export class ConsoleApp {
         new ConsoleApp(
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
+          c.resolve<Storage>(STORAGE),
           c.resolve<ProducerConnector>(PRODUCER_CONNECTOR),
           c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
@@ -76,6 +79,7 @@ export class ConsoleApp {
    *
    * @param logger - The logger instance.
    * @param databaseConnector - The database connector instance.
+   * @param storage - The storage instance.
    * @param producerConnector - The producer connector instance.
    * @param analyzeQueue - The analyze queue instance.
    * @param router - The repl-server router instance.
@@ -84,6 +88,7 @@ export class ConsoleApp {
   constructor(
     protected readonly logger: Logger,
     protected readonly databaseConnector: DatabaseConnector,
+    protected readonly storage: Storage,
     protected readonly producerConnector: ProducerConnector,
     protected readonly analyzeQueue: AnalyzeQueue,
     protected readonly router: ReplServerRouter,
@@ -98,6 +103,10 @@ export class ConsoleApp {
       this.router.activate()
 
       await this.databaseConnector.connect()
+
+      await this.storage.checkBucketExists()
+
+      await this.producerConnector.connect()
 
       await this.replServer.start()
 

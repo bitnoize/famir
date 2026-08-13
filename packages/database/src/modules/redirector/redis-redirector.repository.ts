@@ -3,6 +3,7 @@ import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 import { REDIRECTOR_REPOSITORY, RedirectorRepository } from './redirector.js'
@@ -92,7 +93,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, redirectorId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, redirectorId },
+      })
     }
   }
 
@@ -106,7 +111,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, redirectorId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: { campaignId, redirectorId },
+      })
     }
   }
 
@@ -120,7 +129,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'readFull', { campaignId, redirectorId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'readFull',
+        params: { campaignId, redirectorId },
+      })
     }
   }
 
@@ -143,7 +156,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'update', { campaignId, redirectorId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'update',
+        params: { campaignId, redirectorId },
+      })
     }
   }
 
@@ -166,7 +183,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId, field } })
     } catch (error) {
-      this.handleRepositoryError(error, 'appendField', { campaignId, redirectorId, field })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'appendField',
+        params: { campaignId, redirectorId, field },
+      })
     }
   }
 
@@ -189,7 +210,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId, field } })
     } catch (error) {
-      this.handleRepositoryError(error, 'removeField', { campaignId, redirectorId, field })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'removeField',
+        params: { campaignId, redirectorId, field },
+      })
     }
   }
 
@@ -206,7 +231,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'delete', { campaignId, redirectorId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: { campaignId, redirectorId },
+      })
     }
   }
 
@@ -231,7 +260,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'list', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+        params: { campaignId },
+      })
     }
   }
 
@@ -260,7 +293,11 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildFullCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'listFull', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'listFull',
+        params: { campaignId },
+      })
     }
   }
 

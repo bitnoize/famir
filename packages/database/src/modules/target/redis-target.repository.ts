@@ -3,6 +3,7 @@ import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullTarget, RawTarget } from './target.functions.js'
 import { TARGET_REPOSITORY, TargetRepository } from './target.js'
@@ -141,7 +142,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, targetId },
+      })
     }
   }
 
@@ -155,7 +160,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: { campaignId, targetId },
+      })
     }
   }
 
@@ -169,7 +178,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'readFull', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'readFull',
+        params: { campaignId, targetId },
+      })
     }
   }
 
@@ -181,7 +194,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return hosts
     } catch (error) {
-      this.handleRepositoryError(error, 'readHosts', null)
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'readHosts',
+      })
     }
   }
 
@@ -205,7 +221,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'find', { mirrorHost })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'find',
+        params: { mirrorHost },
+      })
     }
   }
 
@@ -229,7 +249,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'findFull', { mirrorHost })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'findFull',
+        params: { mirrorHost },
+      })
     }
   }
 
@@ -272,7 +296,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'update', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'update',
+        params: { campaignId, targetId },
+      })
     }
   }
 
@@ -289,7 +317,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'enable', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'enable',
+        params: { campaignId, targetId },
+      })
     }
   }
 
@@ -306,7 +338,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'disable', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'disable',
+        params: { campaignId, targetId },
+      })
     }
   }
 
@@ -329,7 +365,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.logger.info(mesg, { target: { campaignId, targetId, label } })
     } catch (error) {
-      this.handleRepositoryError(error, 'appendLabel', { campaignId, targetId, label })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'appendLabel',
+        params: { campaignId, targetId, label },
+      })
     }
   }
 
@@ -352,7 +392,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.logger.info(mesg, { target: { campaignId, targetId, label } })
     } catch (error) {
-      this.handleRepositoryError(error, 'removeLabel', { campaignId, targetId, label })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'removeLabel',
+        params: { campaignId, targetId, label },
+      })
     }
   }
 
@@ -369,7 +413,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.logger.info(mesg, { target: { campaignId, targetId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'delete', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: { campaignId, targetId },
+      })
     }
   }
 
@@ -391,7 +439,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'list', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+        params: { campaignId },
+      })
     }
   }
 
@@ -413,7 +465,11 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'listFull', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'listFull',
+        params: { campaignId },
+      })
     }
   }
 

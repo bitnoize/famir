@@ -3,6 +3,7 @@ import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawProxy } from './proxy.functions.js'
 import { PROXY_REPOSITORY, ProxyRepository } from './proxy.js'
@@ -90,7 +91,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, proxyId },
+      })
     }
   }
 
@@ -104,7 +109,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: { campaignId, proxyId },
+      })
     }
   }
 
@@ -121,7 +130,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'enable', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'enable',
+        params: { campaignId, proxyId },
+      })
     }
   }
 
@@ -138,7 +151,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'disable', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'disable',
+        params: { campaignId, proxyId },
+      })
     }
   }
 
@@ -155,7 +172,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.logger.info(mesg, { proxy: { campaignId, proxyId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'delete', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: { campaignId, proxyId },
+      })
     }
   }
 
@@ -177,7 +198,11 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'list', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+        params: { campaignId },
+      })
     }
   }
 

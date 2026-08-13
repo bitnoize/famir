@@ -113,37 +113,31 @@ export abstract class BullBaseWorker implements BaseWorker {
     })
   }
 
-  #isRunning: boolean = false
-
   async run(): Promise<void> {
     try {
-      if (!this.#isRunning) {
-        this.#isRunning = true
+      await this.worker.run()
 
-        await this.worker.run()
-
-        this.logger.debug(`ConsumerWorker running: ${this.queueName}`)
-      } else {
-        this.logger.debug(`ConsumerWorker already running: ${this.queueName}`)
-      }
+      this.logger.info(`ConsumerWorker running`, { queue: this.queueName })
     } catch (error) {
-      this.handleBootstrapError(error, 'run')
+      throw BootstrapError.wrap(error, {
+        queue: this.queueName,
+        service: 'consumer-worker',
+        method: 'run',
+      })
     }
   }
 
   async close(): Promise<void> {
     try {
-      if (this.#isRunning) {
-        this.#isRunning = false
+      await this.worker.close()
 
-        await this.worker.close()
-
-        this.logger.debug(`ConsumerWorker closed: ${this.queueName}`)
-      } else {
-        this.logger.debug(`ConsumerWorker already closed: ${this.queueName}`)
-      }
+      this.logger.debug(`ConsumerWorker closed`, { queue: this.queueName })
     } catch (error) {
-      this.handleBootstrapError(error, 'close')
+      throw BootstrapError.wrap(error, {
+        queue: this.queueName,
+        service: 'consumer-worker',
+        method: 'close',
+      })
     }
   }
 
@@ -162,76 +156,13 @@ export abstract class BullBaseWorker implements BaseWorker {
       const processor = this.router.getProcessor(this.queueName, job.name)
 
       if (!processor) {
-        throw new ConsumerError(`Internal error`, {
-          code: 'INTERNAL_ERROR',
-          context: {
-            reason: `Processor not found`,
-          },
+        throw ConsumerError.internal(`Processor not found`, {
+          queue: this.queueName,
+          job: job.name,
         })
       }
 
       await processor.execute(job.data)
-    } catch (error) {
-      this.handleProcessorError(error, job)
-    }
-  }
-
-  /**
-   * Handles bootstrap operation errors.
-   *
-   * Re-throws `BootstrapError` instances with additional context, or wraps
-   * unknown errors into a `BootstrapError`.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleBootstrapError(error: unknown, method: string): never {
-    if (error instanceof BootstrapError) {
-      error.context['service'] = 'consumer-worker'
-      error.context['queue'] = this.queueName
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new BootstrapError(`Unknown error`, {
-        cause: error,
-        context: {
-          service: 'consumer-worker',
-          queue: this.queueName,
-          method,
-        },
-      })
-    }
-  }
-
-  /**
-   * Handles processor operation errors.
-   *
-   * Re-throws `ConsumerError` instances with additional context, or wraps
-   * unknown errors into a `ConsumerError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param job - The job where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleProcessorError(error: unknown, job: Job<unknown, unknown>): never {
-    try {
-      if (error instanceof ConsumerError) {
-        error.context['queue'] = this.queueName
-        error.context['job'] = this.dumpJob(job)
-
-        throw error
-      } else {
-        throw new ConsumerError(`Unknown error`, {
-          cause: error,
-          context: {
-            queue: this.queueName,
-            job: this.dumpJob(job),
-          },
-          code: 'INTERNAL_ERROR',
-        })
-      }
     } catch (error) {
       this.logger.error(`ConsumerWorker processor job failed`, {
         error: serializeError(error),
@@ -243,10 +174,6 @@ export abstract class BullBaseWorker implements BaseWorker {
 
   /**
    * Converts validated configuration to a worker options.
-   *
-   * @param data - The validated configuration object.
-   * @param spec - The worker spec object.
-   * @returns The worker options object.
    */
   private buildOptions(
     data: BullConsumerConfig,
@@ -260,9 +187,6 @@ export abstract class BullBaseWorker implements BaseWorker {
 
   /**
    * Dumps a serializable representation of a job for logging.
-   *
-   * @param job - The job to serialize.
-   * @returns A plain object with job details, or `null` if the job is nullish.
    */
   private dumpJob(job: Job<unknown, unknown> | null | undefined): object | null {
     if (!job) {
@@ -273,7 +197,6 @@ export abstract class BullBaseWorker implements BaseWorker {
       id: job.id,
       name: job.name,
       data: job.data,
-      //result: job.returnvalue,
     }
   }
 }

@@ -158,10 +158,7 @@ export class SetupMirrorController extends BaseController {
 
       return mirrorHost
     } catch (error) {
-      throw new HttpServerError(`Bad request`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
+      throw HttpServerError.badRequest(`Bad request`, null, error)
     }
   }
 }

@@ -100,9 +100,9 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    * Parses command arguments with yargs-parser.
    *
    * @param args - The raw string.
-   * @returns Parsed command args.
+   * @returns Parsed command arguments, or `null` if parsing fails.
    */
-  parseArgs(args: string): ReplServerCommandArgs {
+  parseArgs(args: string): ReplServerCommandArgs | null {
     try {
       const state: ReplServerCommandState = {
         boolean: [],
@@ -153,8 +153,8 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
       })
 
       return parsedArgs
-    } catch (error) {
-      this.handleCommandError(error, 'parse-args', args)
+    } catch {
+      return null
     }
   }
 
@@ -217,36 +217,9 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
 
       await this.action(console, this.spec, args, context)
     } catch (error) {
-      this.handleCommandError(error, 'execute', args)
-    }
-  }
-
-  /**
-   * Handles command operation errors.
-   *
-   * Re-throws `ReplServerError` instances with additional context, or wraps
-   * unknown errors into a `ReplServerError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param args - The args that were being processed.
-   * @returns Never returns, always throws.
-   */
-  protected handleCommandError(error: unknown, level: string, args: unknown): never {
-    if (error instanceof ReplServerError) {
-      error.context['level'] = level
-      error.context['spec'] = this.spec
-      error.context['args'] = args
-
-      throw error
-    } else {
-      throw new ReplServerError(`Unknown error`, {
-        cause: error,
-        context: {
-          level,
-          spec: this.spec,
-          args,
-        },
-        code: 'INTERNAL_ERROR',
+      throw ReplServerError.wrap(error, {
+        spec: this.spec,
+        args,
       })
     }
   }
@@ -261,10 +234,7 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
     try {
       this.validator.assertSchema<T>(this.spec.schemaName, value)
     } catch (error) {
-      throw new ReplServerError(`Validate args failed`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
+      throw ReplServerError.badRequest(`Validate args failed`, null, error)
     }
   }
 }

@@ -90,11 +90,14 @@ export class NativeHttpServer implements HttpServer {
   /** Built http-server options. */
   protected readonly options: NativeHttpServerOptions
 
-  /** Underlying Node.js HTTP server instance. */
+  /** Underlying HTTP server instance. */
   protected readonly server: http.Server
 
   /** Underlying WebSocket server instance. */
   protected readonly wss: WebSocketServer
+
+  /** Start in-flight promise. */
+  private startPromise: Promise<void> | null = null
 
   /**
    * Creates a new http-server instance.
@@ -130,7 +133,7 @@ export class NativeHttpServer implements HttpServer {
     })
 
     this.server.on('listening', () => {
-      this.logger.info(`HttpServer server event: listening`)
+      this.logger.debug(`HttpServer server event: listening`)
     })
 
     this.server.on('request', (req, res) => {
@@ -154,11 +157,11 @@ export class NativeHttpServer implements HttpServer {
     })
 
     this.server.on('close', () => {
-      this.logger.info(`HttpServer server event: close`)
+      this.logger.debug(`HttpServer server event: close`)
     })
 
     this.wss.on('listening', () => {
-      this.logger.info(`HttpServer wss event: listening`)
+      this.logger.debug(`HttpServer wss event: listening`)
     })
 
     this.wss.on('connection', (ws, req) => {
@@ -182,41 +185,60 @@ export class NativeHttpServer implements HttpServer {
     })
 
     this.wss.on('close', () => {
-      this.logger.info(`HttpServer wss event: close`)
+      this.logger.debug(`HttpServer wss event: close`)
     })
   }
+
+  #isShutdown: boolean = false
 
   #isRunning: boolean = false
 
   async start(): Promise<void> {
-    try {
-      if (!this.#isRunning) {
-        this.#isRunning = true
+    if (this.#isShutdown) {
+      this.logger.debug(`HttpServer shutdown, skip start`)
 
-        await this.listen()
-
-        this.logger.debug(`HttpServer started and listening`)
-      } else {
-        this.logger.debug(`HttpServer already started`)
-      }
-    } catch (error) {
-      this.handleBootstrapError(error, 'start')
+      return
     }
+
+    if (this.startPromise) {
+      return this.startPromise
+    }
+
+    this.startPromise = this.performStart()
+
+    return this.startPromise
   }
 
   async stop(): Promise<void> {
     try {
+      this.#isShutdown = true
+
+      if (this.startPromise) {
+        try {
+          await this.startPromise
+        } catch {
+          // Ignore start error
+        }
+      }
+
       if (this.#isRunning) {
+        await this.waitUntilWssClose()
+
+        await this.waitUntilServerClose()
+
         this.#isRunning = false
 
-        await this.close()
-
-        this.logger.debug(`HttpServer stopped and closed all connections`)
+        this.logger.info(`HttpServer stopped and closed all connections`)
       } else {
-        this.logger.debug(`HttpServer already stopped`)
+        this.logger.debug(`HttpServer not running, skip stop`)
       }
     } catch (error) {
-      this.handleBootstrapError(error, 'stop')
+      this.#isRunning = false
+
+      throw BootstrapError.wrap(error, {
+        service: 'http-server',
+        method: 'stop',
+      })
     }
   }
 
@@ -235,7 +257,7 @@ export class NativeHttpServer implements HttpServer {
     try {
       await this.processNormalContext(req, res)
     } catch (error) {
-      this.logger.error(`Processing Normal context failed`, {
+      this.logger.error(`Processing normal context failed`, {
         error: serializeError(error),
       })
 
@@ -270,7 +292,7 @@ export class NativeHttpServer implements HttpServer {
     try {
       await this.processWebSocketContext(ws, req)
     } catch (error) {
-      this.logger.error(`Processing WebSocket context failed`, {
+      this.logger.error(`Processing websocket context failed`, {
         error: serializeError(error),
       })
 
@@ -296,18 +318,25 @@ export class NativeHttpServer implements HttpServer {
         errorPage: this.getErrorPage(),
       })
 
-      await this.executeMiddleware(ctx)
+      await this.executeMiddlewareChain(ctx)
 
-      if (!ctx.isComplete) {
-        throw new HttpServerError(`Internal error`, {
-          context: {
-            reason: `No response after processing Normal context`,
-          },
-          code: 'INTERNAL_ERROR',
+      if (ctx.isComplete) {
+        if (ctx.state.verbose) {
+          this.logger.debug(`Complete server request`, {
+            req: this.dumpRequest(req),
+            ctx: ctx.dump(),
+          })
+        }
+      } else {
+        throw HttpServerError.internal(`Internal error`, {
+          reason: `Incomplete server request`,
+          ctx: ctx.dump(),
         })
       }
     } catch (error) {
-      this.handleContextError(error, req)
+      throw HttpServerError.wrap(error, {
+        req: this.dumpRequest(req),
+      })
     }
   }
 
@@ -326,18 +355,25 @@ export class NativeHttpServer implements HttpServer {
         errorPage: this.getErrorPage(),
       })
 
-      await this.executeMiddleware(ctx)
+      await this.executeMiddlewareChain(ctx)
 
-      if (!ctx.isComplete) {
-        throw new HttpServerError(`Internal error`, {
-          context: {
-            reason: `No response after processing WebSocket context`,
-          },
-          code: 'INTERNAL_ERROR',
+      if (ctx.isComplete) {
+        if (ctx.state.verbose) {
+          this.logger.debug(`Complete websocket connection`, {
+            req: this.dumpRequest(req),
+            ctx: ctx.dump(),
+          })
+        }
+      } else {
+        throw HttpServerError.internal(`Internal error`, {
+          reason: `Incomplete websocket connection`,
+          ctx: ctx.dump(),
         })
       }
     } catch (error) {
-      this.handleContextError(error, req)
+      throw HttpServerError.wrap(error, {
+        req: this.dumpRequest(req),
+      })
     }
   }
 
@@ -347,7 +383,7 @@ export class NativeHttpServer implements HttpServer {
    * @param ctx - The HTTP context to process.
    * @throws {@link HttpServerError} If middleware processing fails.
    */
-  protected async executeMiddleware(ctx: HttpServerContext): Promise<void> {
+  protected async executeMiddlewareChain(ctx: HttpServerContext): Promise<void> {
     try {
       let index = -1
 
@@ -368,212 +404,167 @@ export class NativeHttpServer implements HttpServer {
           await handler(ctx, async () => {
             await dispatch(idx + 1)
           })
-        } else {
-          if (this.options.verbose) {
-            this.logger.debug(`Complete middleware chain`, {
-              ctx: ctx.dump(),
-            })
-          }
         }
       }
 
       await dispatch(0)
     } catch (error) {
-      this.handleMiddlewareError(error, ctx)
-    }
-  }
-
-  /**
-   * Handles bootstrap operation errors.
-   *
-   * Re-throws `BootstrapError` instances with additional context, or wraps
-   * unknown errors into a `BootstrapError`.
-   *
-   * @param error - The caught error.
-   * @param method - The method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleBootstrapError(error: unknown, method: string): never {
-    if (error instanceof BootstrapError) {
-      error.context['service'] = 'http-server'
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new BootstrapError(`Unknown error`, {
-        cause: error,
-        context: {
-          service: 'http-server',
-          method,
-        },
+      throw HttpServerError.wrap(error, {
+        ctx: ctx.dump(),
       })
     }
   }
 
   /**
-   * Handles context operation errors.
-   *
-   * Re-throws `HttpServerError` instances with additional context, or wraps
-   * unknown errors into a `HttpServerError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param req - The request object where the error occurred.
-   * @returns Never returns, always throws.
+   * Actual start logic.
    */
-  protected handleContextError(error: unknown, req: http.IncomingMessage): never {
-    if (error instanceof HttpServerError) {
-      error.context['level'] = 'context'
-      error.context['request'] = this.dumpRequest(req)
+  private async performStart(): Promise<void> {
+    try {
+      if (!this.#isRunning) {
+        await this.waitUntilServerListening()
 
-      throw error
-    } else {
-      throw new HttpServerError(`Unknown error`, {
-        cause: error,
-        context: {
-          level: 'context',
-          request: this.dumpRequest(req),
-        },
-        code: 'INTERNAL_ERROR',
+        this.#isRunning = true
+
+        this.logger.info(`HttpServer started and listening`)
+      } else {
+        this.logger.debug(`HttpServer already running, skip start`)
+      }
+    } catch (error) {
+      this.#isRunning = false
+
+      throw BootstrapError.wrap(error, {
+        service: 'http-server',
+        method: 'start',
       })
+    } finally {
+      this.startPromise = null
     }
   }
 
   /**
-   * Handles middleware operation errors.
-   *
-   * Re-throws `HttpServerError` instances with additional context, or wraps
-   * unknown errors into a `HttpServerError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param ctx - The context object where the error occurred.
-   * @returns Never returns, always throws.
+   * Starts the HTTP server and listen connections.
    */
-  protected handleMiddlewareError(error: unknown, ctx: HttpServerContext): never {
-    if (error instanceof HttpServerError) {
-      error.context['level'] = 'middleware'
-      error.context['ctx'] = ctx.dump()
-
-      throw error
-    } else {
-      throw new HttpServerError(`Unknown error`, {
-        cause: error,
-        context: {
-          level: 'middleware',
-          ctx: ctx.dump(),
-        },
-        code: 'INTERNAL_ERROR',
-      })
-    }
-  }
-
-  /**
-   * Starts listening on the configured address and port.
-   *
-   * @returns A promise that resolves when the server is listening.
-   */
-  private listen(): Promise<void> {
+  private waitUntilServerListening(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const errorHandler = (error: Error) => {
-        this.server.off('listening', listeningHandler)
+      let settled = false
 
-        reject(error)
+      const cleanup = () => {
+        this.server.off('listening', onListening)
+        this.server.off('error', onError)
       }
 
-      const listeningHandler = () => {
-        this.server.off('error', errorHandler)
+      const onListening = () => {
+        if (settled) return
+        settled = true
 
+        cleanup()
         resolve()
       }
 
-      this.server.once('error', errorHandler)
-      this.server.once('listening', listeningHandler)
+      const onError = (error: Error) => {
+        if (settled) return
+        settled = true
 
-      this.server.listen(this.options.port, this.options.address)
+        cleanup()
+        reject(BootstrapError.create(`Server listen failed`, null, error))
+      }
+
+      this.server.once('listening', onListening)
+      this.server.once('error', onError)
+
+      try {
+        this.server.listen(this.options.port, this.options.address)
+      } catch (error) {
+        cleanup()
+        reject(BootstrapError.create(`Server listen critical error`, null, error))
+      }
     })
   }
 
   /**
-   * Closes both the WebSocket and HTTP servers.
-   *
-   * @throws {@link BootstrapError} If closing fails.
-   */
-  private async close(): Promise<void> {
-    const results = await Promise.allSettled([this.closeWss(), this.closeServer()])
-
-    const errors = results.reduce<unknown[]>((acc, result) => {
-      if (result.status === 'rejected') {
-        acc.push(result.reason)
-      }
-
-      return acc
-    }, [])
-
-    if (errors.length > 0) {
-      throw new BootstrapError(`HttpServer close wss and server failed`, {
-        cause: errors,
-      })
-    }
-  }
-
-  /**
    * Closes the WebSocket server and all connections.
-   *
-   * @returns A promise that resolves when the server is closed.
    */
-  private closeWss(): Promise<void> {
+  private waitUntilWssClose(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const errorHandler = (error: Error) => {
-        this.wss.off('close', closeHandler)
+      let settled = false
 
-        reject(error)
+      const cleanup = () => {
+        this.wss.off('close', onClose)
+        this.wss.off('error', onError)
       }
 
-      const closeHandler = () => {
-        this.wss.off('error', errorHandler)
+      const onClose = () => {
+        if (settled) return
+        settled = true
 
+        cleanup()
         resolve()
       }
 
-      this.wss.once('error', errorHandler)
-      this.wss.once('close', closeHandler)
+      const onError = (error: Error) => {
+        if (settled) return
+        settled = true
 
-      this.wss.close()
+        cleanup()
+        reject(BootstrapError.create(`Wss close failed`, null, error))
+      }
+
+      this.wss.once('close', onClose)
+      this.wss.once('error', onError)
+
+      try {
+        this.wss.close()
+      } catch (error) {
+        cleanup()
+        reject(BootstrapError.create(`Wss close critical error`, null, error))
+      }
     })
   }
 
   /**
    * Closes the HTTP server and all connections.
-   *
-   * @returns A promise that resolves when the server is closed.
    */
-  private closeServer(): Promise<void> {
+  private waitUntilServerClose(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      const errorHandler = (error: Error) => {
-        this.server.off('close', closeHandler)
+      let settled = false
 
-        reject(error)
+      const cleanup = () => {
+        this.server.off('close', onClose)
+        this.server.off('error', onError)
       }
 
-      const closeHandler = () => {
-        this.server.off('error', errorHandler)
+      const onClose = () => {
+        if (settled) return
+        settled = true
 
+        cleanup()
         resolve()
       }
 
-      this.server.once('error', errorHandler)
-      this.server.once('close', closeHandler)
+      const onError = (error: Error) => {
+        if (settled) return
+        settled = true
 
-      this.server.close()
+        cleanup()
+        reject(BootstrapError.create(`Server close failed`, null, error))
+      }
 
-      this.server.closeAllConnections()
+      this.server.once('close', onClose)
+      this.server.once('error', onError)
+
+      try {
+        this.server.close()
+
+        this.server.closeAllConnections()
+      } catch (error) {
+        cleanup()
+        reject(BootstrapError.create(`Server close critical error`, null, error))
+      }
     })
   }
 
   /**
    * Converts validated configuration to an http-server options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The http-server options object.
    */
   private buildOptions(data: NativeHttpServerConfig): NativeHttpServerOptions {
     return {
@@ -585,9 +576,6 @@ export class NativeHttpServer implements HttpServer {
 
   /**
    * Dumps a serializable representation of a request for logging.
-   *
-   * @param req - The request to serialize.
-   * @returns A plain object with request details.
    */
   private dumpRequest(req: http.IncomingMessage): object {
     return {
@@ -599,8 +587,6 @@ export class NativeHttpServer implements HttpServer {
 
   /**
    * Retrieves the error page asset.
-   *
-   * @returns The asset content.
    */
   private getErrorPage(): string {
     return this.assets.get('error-page.html') ?? HTTP_SERVER_ASSET_ERROR_PAGE

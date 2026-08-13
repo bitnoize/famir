@@ -3,6 +3,7 @@ import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 import { CAMPAIGN_LOCK_TIMEOUT, CAMPAIGN_REPOSITORY, CampaignRepository } from './campaign.js'
@@ -102,7 +103,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.logger.info(mesg, { campaign: { campaignId, mirrorDomain } })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, mirrorDomain })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, mirrorDomain },
+      })
     }
   }
 
@@ -112,7 +117,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: { campaignId },
+      })
     }
   }
 
@@ -125,7 +134,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'readFull', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'readFull',
+        params: { campaignId },
+      })
     }
   }
 
@@ -146,7 +159,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return lockSecret
     } catch (error) {
-      this.handleRepositoryError(error, 'lock', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'lock',
+        params: { campaignId },
+      })
     }
   }
 
@@ -162,7 +179,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.logger.info(mesg, { campaign: { campaignId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'unlock', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'unlock',
+        params: { campaignId },
+      })
     }
   }
 
@@ -189,7 +210,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.logger.info(mesg, { campaign: { campaignId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'update', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'update',
+        params: { campaignId },
+      })
     }
   }
 
@@ -205,7 +230,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.logger.info(mesg, { campaign: { campaignId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'delete', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: { campaignId },
+      })
     }
   }
 
@@ -223,7 +252,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'list', null)
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+      })
     }
   }
 
@@ -241,7 +273,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildFullCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'listFull', null)
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'listFull',
+      })
     }
   }
 

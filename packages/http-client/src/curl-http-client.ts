@@ -5,9 +5,8 @@ import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
 import { PassThrough, pipeline, Readable } from 'node:stream'
-import { HttpClientError, HttpClientErrorCode } from './http-client.error.js'
+import { HttpClientError } from './http-client.error.js'
 import {
-  CurlHttpClientConfig,
   HTTP_CLIENT,
   HttpClient,
   HttpClientErrorResult,
@@ -17,14 +16,6 @@ import {
   HttpClientStreamResponseState,
   HttpClientStreamResult,
 } from './http-client.js'
-import { curlHttpClientConfigSchema } from './http-client.schemas.js'
-
-/**
- * Options for a Curl http-client.
- */
-interface CurlHttpClientOptions {
-  verbose: boolean
-}
 
 /**
  * Curl-based http-client implementation.
@@ -74,9 +65,6 @@ export class CurlHttpClient implements HttpClient {
     )
   }
 
-  /** Built http-client options. */
-  protected readonly options: CurlHttpClientOptions
-
   /**
    * Creates a new http-client instance.
    *
@@ -88,14 +76,9 @@ export class CurlHttpClient implements HttpClient {
     protected readonly validator: Validator,
     protected readonly config: Config,
     protected readonly logger: Logger
-  ) {
-    this.validator.addSchema('http-client-config', curlHttpClientConfigSchema)
+  ) {}
 
-    const configData = this.config.get<CurlHttpClientConfig>('http-client-config')
-    this.options = this.buildOptions(configData)
-  }
-
-  simple(
+  async simple(
     proxy: string,
     method: HttpMethod,
     url: string,
@@ -106,10 +89,10 @@ export class CurlHttpClient implements HttpClient {
     headersSizeLimit: number,
     bodySizeLimit: number
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
-    return new Promise((resolve, reject) => {
-      const state: HttpClientSimpleState = {
+    try {
+      return await this.performSimple({
         error: null,
-        isResolved: false,
+        settled: false,
         proxy,
         method,
         url,
@@ -121,26 +104,22 @@ export class CurlHttpClient implements HttpClient {
         timeout,
         headersSizeLimit,
         bodySizeLimit,
+      })
+    } catch (error) {
+      return {
+        error: HttpClientError.wrap(error, {
+          method: 'simple',
+          request: {
+            proxy,
+            method,
+            url,
+          },
+        }),
       }
-
-      const curl = new Curl()
-
-      curl.enable(CurlFeature.NoStorage)
-
-      this.setupCurlOptions(curl, state)
-
-      this.setupCurlReadfunction(curl, state)
-      this.setupCurlHeaderfunction(curl, state)
-      this.setupCurlWritefunction(curl, state)
-
-      this.setupCurlSimpleEndEvent(curl, state, resolve, reject)
-      this.setupCurlSimpleErrorEvent(curl, state, resolve, reject)
-
-      curl.perform()
-    })
+    }
   }
 
-  streamRequest(
+  async streamRequest(
     proxy: string,
     method: HttpMethod,
     url: string,
@@ -151,10 +130,10 @@ export class CurlHttpClient implements HttpClient {
     headersSizeLimit: number,
     bodySizeLimit: number
   ): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
-    return new Promise((resolve, reject) => {
-      const state: HttpClientStreamRequestState = {
+    try {
+      return await this.performStreamRequest({
         error: null,
-        isResolved: false,
+        settled: false,
         proxy,
         method,
         url,
@@ -166,8 +145,89 @@ export class CurlHttpClient implements HttpClient {
         timeout,
         headersSizeLimit,
         bodySizeLimit,
+      })
+    } catch (error) {
+      return {
+        error: HttpClientError.wrap(error, {
+          method: 'streamRequest',
+          request: {
+            proxy,
+            method,
+            url,
+          },
+        }),
       }
+    }
+  }
 
+  async streamResponse(
+    proxy: string,
+    method: HttpMethod,
+    url: string,
+    requestHeaders: HttpHeaders,
+    requestBody: HttpBody,
+    connectTimeout: number,
+    timeout: number,
+    headersSizeLimit: number
+  ): Promise<HttpClientStreamResult | HttpClientErrorResult> {
+    try {
+      return await this.performStreamResponse({
+        error: null,
+        settled: false,
+        proxy,
+        method,
+        url,
+        requestHeaders,
+        requestBody,
+        responseHeaders: [],
+        responseStream: new PassThrough(),
+        connectTimeout,
+        timeout,
+        headersSizeLimit,
+      })
+    } catch (error) {
+      return {
+        error: HttpClientError.wrap(error, {
+          method: 'streamResponse',
+          request: {
+            proxy,
+            method,
+            url,
+          },
+        }),
+      }
+    }
+  }
+
+  /**
+   * Performs a simple HTTP request and returns a simple response.
+   */
+  private performSimple(state: HttpClientSimpleState): Promise<HttpClientSimpleResult> {
+    return new Promise<HttpClientSimpleResult>((resolve, reject) => {
+      const curl = new Curl()
+
+      curl.enable(CurlFeature.NoStorage)
+
+      this.setupCurlOptions(curl, state)
+
+      this.setupCurlReadfunction(curl, state)
+      this.setupCurlHeaderfunction(curl, state)
+      this.setupCurlWritefunction(curl, state)
+
+      this.setupCurlSimpleEndEvent(curl, state, resolve, reject)
+      this.setupCurlSimpleErrorEvent(curl, state, reject)
+
+      curl.perform()
+    })
+  }
+
+  /**
+   * Performs a streaming HTTP request and returns a simple response.
+   */
+  private performStreamRequest(
+    state: HttpClientStreamRequestState
+  ): Promise<HttpClientSimpleResult> {
+    return new Promise<HttpClientSimpleResult>((resolve, reject) => {
       const curl = new Curl()
 
       curl.enable(CurlFeature.NoStorage)
@@ -179,38 +239,19 @@ export class CurlHttpClient implements HttpClient {
       this.setupCurlWritefunction(curl, state)
 
       this.setupCurlSimpleEndEvent(curl, state, resolve, reject)
-      this.setupCurlSimpleErrorEvent(curl, state, resolve, reject)
+      this.setupCurlSimpleErrorEvent(curl, state, reject)
 
       curl.perform()
     })
   }
 
-  streamResponse(
-    proxy: string,
-    method: HttpMethod,
-    url: string,
-    requestHeaders: HttpHeaders,
-    requestBody: HttpBody,
-    connectTimeout: number,
-    timeout: number,
-    headersSizeLimit: number
-  ): Promise<HttpClientStreamResult | HttpClientErrorResult> {
-    return new Promise((resolve, reject) => {
-      const state: HttpClientStreamResponseState = {
-        error: null,
-        isResolved: false,
-        proxy,
-        method,
-        url,
-        requestHeaders,
-        requestBody,
-        responseHeaders: [],
-        responseStream: new PassThrough(),
-        connectTimeout,
-        timeout,
-        headersSizeLimit,
-      }
-
+  /**
+   * Performs a simple HTTP request and returns a streaming response.
+   */
+  private performStreamResponse(
+    state: HttpClientStreamResponseState
+  ): Promise<HttpClientStreamResult> {
+    return new Promise<HttpClientStreamResult>((resolve, reject) => {
       const curl = new Curl()
 
       curl.enable(CurlFeature.StreamResponse)
@@ -222,7 +263,7 @@ export class CurlHttpClient implements HttpClient {
       this.setupCurlHeaderfunction(curl, state)
 
       this.setupCurlStreamEvent(curl, state, resolve, reject)
-      this.setupCurlStreamEndEvent(curl, state, resolve, reject)
+      this.setupCurlStreamEndEvent(curl, state, reject)
       this.setupCurlStreamErrorEvent(curl, state, resolve, reject)
 
       curl.perform()
@@ -231,9 +272,6 @@ export class CurlHttpClient implements HttpClient {
 
   /**
    * Configures common curl options for all request types.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
    */
   private setupCurlOptions(
     curl: Curl,
@@ -246,9 +284,7 @@ export class CurlHttpClient implements HttpClient {
       timeout: number
     }
   ) {
-    if (this.options.verbose) {
-      curl.setOpt(Curl.option.VERBOSE, true)
-    }
+    //curl.setOpt(Curl.option.VERBOSE, true)
 
     curl.setOpt(Curl.option.DNS_USE_GLOBAL_CACHE, 1)
 
@@ -266,9 +302,6 @@ export class CurlHttpClient implements HttpClient {
 
   /**
    * Sets up the read function for uploading a request body from a buffer.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
    */
   private setupCurlReadfunction(
     curl: Curl,
@@ -277,17 +310,18 @@ export class CurlHttpClient implements HttpClient {
       requestBody: HttpBody
     }
   ) {
+    const requestBodySize = state.requestBody.length
     let requestBodyOffset = 0
 
     curl.setOpt(Curl.option.UPLOAD, true)
-    curl.setOpt(Curl.option.INFILESIZE_LARGE, state.requestBody.length)
+    curl.setOpt(Curl.option.INFILESIZE_LARGE, requestBodySize)
     curl.setOpt(Curl.option.READFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
       try {
         if (state.error) {
           return 0
         }
 
-        const chunkSize = Math.min(size * nmemb, state.requestBody.length - requestBodyOffset)
+        const chunkSize = Math.min(size * nmemb, requestBodySize - requestBodyOffset)
 
         if (chunkSize <= 0) {
           return 0
@@ -299,13 +333,13 @@ export class CurlHttpClient implements HttpClient {
 
         return chunkSize
       } catch (error) {
-        state.error = new HttpClientError(`Bad gateway`, {
-          cause: error,
-          context: {
-            reason: `Curl READFUNCTION callback failed`,
+        state.error = HttpClientError.internal(
+          `Internal error`,
+          {
+            reason: `Curl READFUNCTION failed`,
           },
-          code: 'BAD_GATEWAY',
-        })
+          error
+        )
 
         return 0
       }
@@ -314,9 +348,6 @@ export class CurlHttpClient implements HttpClient {
 
   /**
    * Sets up the upload stream for streaming request bodies.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
    */
   private setupCurlUploadStream(
     curl: Curl,
@@ -331,9 +362,6 @@ export class CurlHttpClient implements HttpClient {
 
   /**
    * Sets up the header function for capturing response headers.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
    */
   private setupCurlHeaderfunction(
     curl: Curl,
@@ -343,6 +371,7 @@ export class CurlHttpClient implements HttpClient {
       headersSizeLimit: number
     }
   ) {
+    const headersSizeLimit = state.headersSizeLimit
     let responseHeadersSize = 0
 
     curl.setOpt(Curl.option.HEADER, false)
@@ -354,12 +383,12 @@ export class CurlHttpClient implements HttpClient {
 
         const chunkSize = size * nmemb
 
-        if (responseHeadersSize + chunkSize > state.headersSizeLimit) {
-          state.error = new HttpClientError('Bad gateway', {
-            context: {
-              reason: `Response headers size limit exceeded`,
-            },
-            code: 'BAD_GATEWAY',
+        if (responseHeadersSize + chunkSize > headersSizeLimit) {
+          state.error = HttpClientError.badGateway(`Bad gateway`, {
+            reason: `Response headers size limit exceeded`,
+            headersSizeLimit,
+            responseHeadersSize,
+            chunkSize,
           })
 
           return 0
@@ -372,13 +401,13 @@ export class CurlHttpClient implements HttpClient {
 
         return chunkSize
       } catch (error) {
-        state.error = new HttpClientError(`Bad gateway`, {
-          cause: error,
-          context: {
-            reason: `Curl HEADERFUNCTION callback failed`,
+        state.error = HttpClientError.internal(
+          `Internal error`,
+          {
+            reason: `Curl HEADERFUNCTION failed`,
           },
-          code: 'BAD_GATEWAY',
-        })
+          error
+        )
 
         return 0
       }
@@ -387,9 +416,6 @@ export class CurlHttpClient implements HttpClient {
 
   /**
    * Sets up the write function for downloading response bodies to buffer.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
    */
   private setupCurlWritefunction(
     curl: Curl,
@@ -399,6 +425,7 @@ export class CurlHttpClient implements HttpClient {
       bodySizeLimit: number
     }
   ) {
+    const bodySizeLimit = state.bodySizeLimit
     let responseBodySize = 0
 
     curl.setOpt(Curl.option.WRITEFUNCTION, (buf: Buffer, size: number, nmemb: number) => {
@@ -409,12 +436,12 @@ export class CurlHttpClient implements HttpClient {
 
         const chunkSize = size * nmemb
 
-        if (responseBodySize + chunkSize > state.bodySizeLimit) {
-          state.error = new HttpClientError(`Bad gateway`, {
-            context: {
-              reason: `Response body size limit exceeded`,
-            },
-            code: 'BAD_GATEWAY',
+        if (responseBodySize + chunkSize > bodySizeLimit) {
+          state.error = HttpClientError.badGateway(`Bad gateway`, {
+            reason: `Response body size limit exceeded`,
+            bodySizeLimit,
+            responseBodySize,
+            chunkSize,
           })
 
           return 0
@@ -427,13 +454,13 @@ export class CurlHttpClient implements HttpClient {
 
         return chunkSize
       } catch (error) {
-        state.error = new HttpClientError(`Bad gateway`, {
-          cause: error,
-          context: {
-            reason: `Curl WRITEFUNCTION callback failed`,
+        state.error = HttpClientError.internal(
+          `Internal error`,
+          {
+            reason: `Curl WRITEFUNCTION failed`,
           },
-          code: 'BAD_GATEWAY',
-        })
+          error
+        )
 
         return 0
       }
@@ -442,22 +469,16 @@ export class CurlHttpClient implements HttpClient {
 
   /**
    * Sets up the end event handler for simple requests.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
-   * @param resolve - The promise resolve function.
-   * @param reject - The promise reject function.
    */
   private setupCurlSimpleEndEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
-      isResolved: boolean
+      settled: boolean
       responseHeaders: Buffer[]
       responseBody: Buffer[]
     },
-    resolve: (value: HttpClientSimpleResult | HttpClientErrorResult) => void,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    resolve: (value: HttpClientSimpleResult) => void,
     reject: (reason?: Error) => void
   ) {
     curl.on('end', (status) => {
@@ -467,22 +488,19 @@ export class CurlHttpClient implements HttpClient {
         curl.close()
       }
 
-      if (!state.isResolved) {
-        state.isResolved = true
+      if (state.settled) return
+      state.settled = true
 
-        if (state.error) {
-          resolve({
-            error: state.error,
-            connection,
-          })
-
-          return
-        }
-
+      if (state.error) {
+        reject(state.error)
+      } else {
         const responseHeaders = this.parseRawHeaders(state.responseHeaders)
         const responseBody = this.parseRawBody(state.responseBody)
 
-        responseHeaders['content-length'] = responseBody.length.toString()
+        if (responseHeaders['content-length']) {
+          responseHeaders['content-length'] = responseBody.length.toString()
+        }
+
         responseHeaders['content-encoding'] = undefined
 
         resolve({
@@ -492,240 +510,199 @@ export class CurlHttpClient implements HttpClient {
           responseBody,
           connection,
         })
-
-        return
       }
     })
   }
 
   /**
    * Sets up the error event handler for simple requests.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
-   * @param resolve - The promise resolve function.
-   * @param reject - The promise reject function.
    */
   private setupCurlSimpleErrorEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
-      isResolved: boolean
+      settled: boolean
     },
-    resolve: (value: HttpClientSimpleResult | HttpClientErrorResult) => void,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     reject: (reason?: Error) => void
   ) {
     curl.on('error', (error: Error, curlCode: CurlCode) => {
-      const connection = this.parseConnection(curl)
-
       if (curl.isOpen) {
         curl.close()
       }
 
-      if (!state.isResolved) {
-        state.isResolved = true
+      if (state.settled) return
+      state.settled = true
 
-        const [code, message] = this.parseCurlCode(curlCode)
-
-        const clientError = new HttpClientError(message, {
-          cause: error,
-          context: {
-            reason: `Curl perform failed`,
-            curlCode,
-          },
-          code,
-        })
-
-        resolve({
-          error: clientError,
-          connection,
-        })
-
-        return
+      if (curlCode === CurlCode.CURLE_OPERATION_TIMEOUTED) {
+        reject(HttpClientError.gatewayTimeout(`Gateway timeout`))
+      } else {
+        reject(
+          HttpClientError.internal(
+            `Internal error`,
+            {
+              reason: `Curl perform failed`,
+            },
+            error
+          )
+        )
       }
     })
   }
 
   /**
    * Sets up the stream event handler for streaming responses.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
-   * @param resolve - The promise resolve function.
-   * @param reject - The promise reject function.
    */
   private setupCurlStreamEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
-      isResolved: boolean
+      settled: boolean
       responseHeaders: Buffer[]
       responseStream: PassThrough
     },
-    resolve: (value: HttpClientStreamResult | HttpClientErrorResult) => void,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    resolve: (value: HttpClientStreamResult) => void,
     reject: (reason?: Error) => void
   ) {
     curl.on('stream', (stream, status) => {
-      if (state.isResolved || state.error) {
-        stream.destroy()
-
-        return
-      }
-
-      state.isResolved = true
-
-      pipeline(stream, state.responseStream, (error) => {
-        if (error) {
-          this.logger.warn(`HttpClient stream pipeline error`, { error })
-        }
-      })
-
-      const responseHeaders = this.parseRawHeaders(state.responseHeaders)
       const connection = this.parseConnection(curl)
 
-      responseHeaders['content-encoding'] = undefined
+      if (state.settled || state.error) {
+        if (!stream.destroyed) {
+          stream.destroy()
+        }
 
-      resolve({
-        error: null,
-        status,
-        responseHeaders,
-        responseStream: state.responseStream,
-        connection,
-      })
+        if (!state.responseStream.destroyed) {
+          state.responseStream.destroy()
+        }
+      }
+
+      if (state.settled) return
+      state.settled = true
+
+      if (state.error) {
+        reject(state.error)
+      } else {
+        const responseHeaders = this.parseRawHeaders(state.responseHeaders)
+
+        responseHeaders['content-encoding'] = undefined
+
+        pipeline(stream, state.responseStream, (error) => {
+          if (error) {
+            this.logger.warn(`HttpClient stream pipeline error`, { error })
+          }
+        })
+
+        resolve({
+          error: null,
+          status,
+          responseHeaders,
+          responseStream: state.responseStream,
+          connection,
+        })
+      }
     })
   }
 
   /**
    * Sets up the end event handler for streaming responses.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
-   * @param resolve - The promise resolve function.
-   * @param reject - The promise reject function.
    */
   private setupCurlStreamEndEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
-      isResolved: boolean
+      settled: boolean
       responseHeaders: Buffer[]
       responseStream: PassThrough
     },
-    resolve: (value: HttpClientStreamResult | HttpClientErrorResult) => void,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     reject: (reason?: Error) => void
   ) {
     curl.on('end', () => {
-      const connection = this.parseConnection(curl)
-
       if (curl.isOpen) {
         curl.close()
       }
 
-      if (!state.isResolved) {
-        state.isResolved = true
-
-        if (state.error) {
-          if (!state.responseStream.destroyed) {
-            state.responseStream.destroy(state.error)
-          }
-
-          resolve({
-            error: state.error,
-            connection,
-          })
-
-          return
-        }
-
-        const clientError = new HttpClientError(`Bad gateway`, {
-          context: {
-            reason: `Curl stream event not triggered`,
-          },
-          code: 'BAD_GATEWAY',
-        })
-
+      if (state.settled || state.error) {
         if (!state.responseStream.destroyed) {
-          state.responseStream.destroy(clientError)
+          state.responseStream.destroy()
         }
+      }
 
-        resolve({
-          error: clientError,
-          connection,
-        })
+      if (state.settled) return
+      state.settled = true
 
-        return
+      if (state.error) {
+        reject(state.error)
+      } else {
+        reject(
+          HttpClientError.internal(`Internal error`, {
+            reason: `Curl stream event not triggered`,
+          })
+        )
       }
     })
   }
 
   /**
    * Sets up the error event handler for streaming responses.
-   *
-   * @param curl - The curl instance.
-   * @param state - The request state.
-   * @param resolve - The promise resolve function.
-   * @param reject - The promise reject function.
    */
   private setupCurlStreamErrorEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
-      isResolved: boolean
+      settled: boolean
+      responseHeaders: Buffer[]
       responseStream: PassThrough
     },
-    resolve: (value: HttpClientStreamResult | HttpClientErrorResult) => void,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    resolve: (value: HttpClientStreamResult) => void,
     reject: (reason?: Error) => void
   ) {
     curl.on('error', (error: Error, curlCode: CurlCode) => {
       const connection = this.parseConnection(curl)
+      const status = this.parseStatus(curl)
 
       if (curl.isOpen) {
         curl.close()
       }
 
+      if (state.settled) return
+      state.settled = true
+
       if (curlCode === CurlCode.CURLE_OPERATION_TIMEOUTED) {
         if (!state.responseStream.writableEnded) {
           state.responseStream.end()
         }
+
+        const responseHeaders = this.parseRawHeaders(state.responseHeaders)
+
+        responseHeaders['content-encoding'] = undefined
+
+        resolve({
+          error: null,
+          status: status ?? 101,
+          responseHeaders,
+          responseStream: state.responseStream,
+          connection,
+        })
       } else {
         if (!state.responseStream.destroyed) {
           state.responseStream.destroy(error)
         }
-      }
 
-      if (!state.isResolved) {
-        state.isResolved = true
-
-        const [code, message] = this.parseCurlCode(curlCode)
-
-        const clientError = new HttpClientError(message, {
-          cause: error,
-          context: {
-            reason: `Curl perform failed`,
-            curlCode,
-          },
-          code,
-        })
-
-        resolve({
-          error: clientError,
-          connection,
-        })
-
-        return
+        reject(
+          HttpClientError.internal(
+            `Internal error`,
+            {
+              reason: `Curl perform failed`,
+            },
+            error
+          )
+        )
       }
     })
   }
 
   /**
    * Parses connection information from a curl instance.
-   *
-   * @param curl - The curl instance.
-   * @returns The connection details.
    */
   private parseConnection(curl: Curl): HttpConnection {
     try {
@@ -752,9 +729,6 @@ export class CurlHttpClient implements HttpClient {
 
   /**
    * Parses raw header buffers into a key-value object.
-   *
-   * @param curlHeaders - The raw header buffers from curl.
-   * @returns The parsed headers object.
    */
   private parseRawHeaders(curlHeaders: Buffer[]): HttpHeaders {
     const headers: HttpHeaders = {}
@@ -790,9 +764,6 @@ export class CurlHttpClient implements HttpClient {
 
   /**
    * Formats headers into a string array for curl.
-   *
-   * @param headers - The headers object to format.
-   * @returns The formatted header strings.
    */
   private formatRawHeaders(headers: HttpHeaders): string[] {
     const curlHeaders: string[] = []
@@ -816,9 +787,6 @@ export class CurlHttpClient implements HttpClient {
 
   /**
    * Concatenates buffer chunks into a single Buffer.
-   *
-   * @param chunks - The buffer chunks to concatenate.
-   * @returns The concatenated buffer, or an empty buffer on error.
    */
   private parseRawBody(chunks: Buffer[]): HttpBody {
     try {
@@ -829,26 +797,14 @@ export class CurlHttpClient implements HttpClient {
   }
 
   /**
-   * Parses a curl error code into an http-client error code and message.
-   *
-   * @param curlCode - The curl error code.
-   * @returns The tuple containing the error code and message.
+   * Parses response status from a curl instance.
    */
-  private parseCurlCode(curlCode: CurlCode): [HttpClientErrorCode, string] {
-    return curlCode === CurlCode.CURLE_OPERATION_TIMEOUTED
-      ? ['GATEWAY_TIMEOUT', 'Gateway timeout']
-      : ['BAD_GATEWAY', 'Bad gateway']
-  }
-
-  /**
-   * Converts validated configuration to an http-client options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The http-client options object.
-   */
-  private buildOptions(data: CurlHttpClientConfig): CurlHttpClientOptions {
-    return {
-      verbose: data.HTTP_CLIENT_VERBOSE,
+  private parseStatus(curl: Curl): number | null {
+    try {
+      const status = curl.getInfo('RESPONSE_CODE')
+      return typeof status === 'number' ? status : null
+    } catch {
+      return null
     }
   }
 }

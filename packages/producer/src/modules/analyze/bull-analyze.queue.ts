@@ -3,6 +3,7 @@ import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { PRODUCER_CONNECTOR, ProducerConnector } from '../../producer-connector.js'
+import { ProducerError } from '../../producer.error.js'
 import { BullBaseQueue } from '../base/index.js'
 import { AnalyzeJobData } from './analyze.job.js'
 import { ANALYZE_QUEUE, ANALYZE_QUEUE_NAME, AnalyzeQueue } from './analyze.js'
@@ -74,7 +75,11 @@ export class BullAnalyzeQueue extends BullBaseQueue implements AnalyzeQueue {
         jobId,
       })
     } catch (error) {
-      this.handleQueueError(error, 'addJob', data)
+      throw ProducerError.wrap(error, {
+        queue: this.queueName,
+        method: 'addJob',
+        data,
+      })
     }
   }
 }

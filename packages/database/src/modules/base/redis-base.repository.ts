@@ -69,13 +69,7 @@ export abstract class RedisBaseRepository {
     try {
       return JSON.stringify(obj)
     } catch (error) {
-      throw new DatabaseError(`Encode JSON failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-        context: {
-          //obj
-        },
-      })
+      throw DatabaseError.internal(`Encode JSON failed`, null, error)
     }
   }
 
@@ -90,13 +84,7 @@ export abstract class RedisBaseRepository {
     try {
       return JSON.parse(str)
     } catch (error) {
-      throw new DatabaseError(`Decode JSON failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-        context: {
-          //str
-        },
-      })
+      throw DatabaseError.internal(`Decode JSON failed`, null, error)
     }
   }
 
@@ -111,13 +99,7 @@ export abstract class RedisBaseRepository {
     try {
       return buf.toString('base64')
     } catch (error) {
-      throw new DatabaseError(`Encode Base64 failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-        context: {
-          //buf
-        },
-      })
+      throw DatabaseError.internal(`Encode Base64 failed`, null, error)
     }
   }
 
@@ -132,13 +114,7 @@ export abstract class RedisBaseRepository {
     try {
       return Buffer.from(str, 'base64')
     } catch (error) {
-      throw new DatabaseError(`Decode Base64 failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-        context: {
-          //str
-        },
-      })
+      throw DatabaseError.internal(`Decode Base64 failed`, null, error)
     }
   }
 
@@ -159,43 +135,6 @@ export abstract class RedisBaseRepository {
     }
 
     return mesg
-  }
-
-  /**
-   * Parses a status reply from a Redis Function.
-   *
-   * The expected format is a string containing a status code and a message.
-   *
-   * @param value - The status reply from a Redis Function.
-   * @returns A tuple containing the status code and message.
-   * @throws {@link DatabaseError} If the reply is invalid or cannot be parsed.
-   */
-  private parseStatusReply(value: unknown): [DatabaseStatusCode, string] {
-    try {
-      if (!(typeof value === 'string' && value.length > 0)) {
-        throw new Error(`Value is not a non-empty string`)
-      }
-
-      const [code, mesg] = value.split(/\s+(.*)/, 2)
-
-      if (!code || !mesg) {
-        throw new Error(`Value is not parsable to code and mesg`)
-      }
-
-      if (!arrayIncludes(DATABASE_STATUS_CODES, code)) {
-        throw new Error(`Status code not known: ${code}`)
-      }
-
-      return [code, mesg]
-    } catch (error) {
-      throw new DatabaseError(`Parse status reply failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-        context: {
-          //value,
-        },
-      })
-    }
   }
 
   /**
@@ -241,52 +180,37 @@ export abstract class RedisBaseRepository {
     try {
       this.validator.assertSchema<T>(schemaName, value)
     } catch (error) {
-      throw new DatabaseError(`Validate reply failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-        context: {
-          //value,
-        },
-      })
+      throw DatabaseError.internal(`Validate reply failed`, null, error)
     }
   }
 
   /**
-   * Handles repository operation errors.
-   *
-   * Re-throws `DatabaseError` instances with additional context, or wraps
-   * unknown errors into a `DatabaseError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @param params - The parameters that were being processed.
-   * @returns Never returns, always throws.
+   * Parses a status reply from a Redis Function.
    */
-  protected handleRepositoryError(error: unknown, method: string, params: unknown): never {
-    if (error instanceof DatabaseError) {
-      error.context['repository'] = this.repositoryName
-      error.context['method'] = method
-      error.context['params'] = params
+  private parseStatusReply(value: unknown): [DatabaseStatusCode, string] {
+    try {
+      if (!(typeof value === 'string' && value.length > 0)) {
+        throw new Error(`Value is not a non-empty string`)
+      }
 
-      throw error
-    } else {
-      throw new DatabaseError(`Unknown error`, {
-        cause: error,
-        context: {
-          repository: this.repositoryName,
-          method,
-          params,
-        },
-        code: 'INTERNAL_ERROR',
-      })
+      const [code, mesg] = value.split(/\s+(.*)/, 2)
+
+      if (!code || !mesg) {
+        throw new Error(`Value is not parsable to code and mesg`)
+      }
+
+      if (!arrayIncludes(DATABASE_STATUS_CODES, code)) {
+        throw new Error(`Status code not known: ${code}`)
+      }
+
+      return [code, mesg]
+    } catch (error) {
+      throw DatabaseError.internal(`Parse status reply failed`, null, error)
     }
   }
 
   /**
    * Converts validated configuration to a repository options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The repository options object.
    */
   private buildOptions(data: RedisDatabaseConfig): RedisDatabaseRepositoryOptions {
     return {

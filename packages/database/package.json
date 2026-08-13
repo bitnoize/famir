@@ -48,6 +48,6 @@
     "@famir/http-proto": "*",
     "@famir/logger": "*",
     "@famir/validator": "*",
-    "redis": "^6.1.0"
+    "redis": "^6.2.1"
   }
 }

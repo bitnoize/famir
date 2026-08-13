@@ -109,11 +109,11 @@ export class RedisConsumerConnector implements ConsumerConnector {
     })
 
     this.connection.on('ready', () => {
-      this.logger.info(`ConsumerConnector Redis event: ready`)
+      this.logger.debug(`ConsumerConnector Redis event: ready`)
     })
 
     this.connection.on('end', () => {
-      this.logger.info(`ConsumerConnector Redis event: end`)
+      this.logger.debug(`ConsumerConnector Redis event: end`)
     })
   }
 
@@ -122,48 +122,34 @@ export class RedisConsumerConnector implements ConsumerConnector {
     return this.connection as T
   }
 
+  async connect(): Promise<void> {
+    try {
+      await this.connection.ping()
+
+      this.logger.info(`ConsumerConnector established connection`)
+    } catch (error) {
+      throw BootstrapError.wrap(error, {
+        service: 'consumer-connector',
+        method: 'connect',
+      })
+    }
+  }
+
   async close(): Promise<void> {
     try {
       await this.connection.quit()
 
-      this.logger.debug(`ConsumerConnector closed connection`)
+      this.logger.info(`ConsumerConnector closed connection`)
     } catch (error) {
-      this.handleBootstrapError(error, 'close')
-    }
-  }
-
-  /**
-   * Handles bootstrap operation errors.
-   *
-   * Re-throws `BootstrapError` instances with additional context, or wraps
-   * unknown errors into a `BootstrapError`.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleBootstrapError(error: unknown, method: string): never {
-    if (error instanceof BootstrapError) {
-      error.context['service'] = 'consumer-connector'
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new BootstrapError(`Unknown error`, {
-        cause: error,
-        context: {
-          service: 'consumer-connector',
-          method,
-        },
+      throw BootstrapError.wrap(error, {
+        service: 'consumer-connector',
+        method: 'close',
       })
     }
   }
 
   /**
    * Converts validated configuration to a connector options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The connector options object.
    */
   private buildOptions(data: BullConsumerConfig): BullConsumerConnectorOptions {
     return {

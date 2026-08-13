@@ -12,7 +12,7 @@ export const STORAGE = Symbol('Storage')
  */
 export interface Storage {
   /**
-   * Ensures that the configured bucket exists.
+   * Checks that the configured bucket exists.
    *
    * This method is typically called during application startup to verify
    * that the storage bucket is accessible. If the bucket does not exist,
@@ -20,7 +20,7 @@ export interface Storage {
    *
    * @throws {@link BootstrapError} If the bucket does not exist or is inaccessible.
    */
-  ensureBucketExists(): Promise<void>
+  checkBucketExists(): Promise<void>
 
   /**
    * Retrieves an object from the storage.

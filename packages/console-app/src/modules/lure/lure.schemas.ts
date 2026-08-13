@@ -1,9 +1,5 @@
 import { lurePathSchema } from '@famir/database'
-import {
-  JSONSchemaType,
-  customIdentSchema,
-  randomIdentSchema,
-} from '@famir/validator'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
 import {
   CreateLureArgs,
   DeleteLureArgs,

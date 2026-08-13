@@ -1,4 +1,4 @@
-import { BootstrapError, serializeError } from '@famir/common'
+import { serializeError } from '@famir/common'
 import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
@@ -92,86 +92,56 @@ export abstract class BaseReplServer implements ReplServer {
         action: (args: string) => {
           rs.clearBufferedCommand()
 
-          const parsedArgs = this.parseCommand(console, rs, command, args)
+          const parsedArgs = command.parseArgs(args)
 
-          if (parsedArgs) {
-            this.executeCommand(console, rs, command, parsedArgs)
+          if (!parsedArgs) {
+            rs.displayPrompt()
+
+            return
           }
+
+          if (parsedArgs.help) {
+            command.showHelp(console, true)
+
+            rs.displayPrompt()
+
+            return
+          }
+
+          this.executeCommand(
+            console,
+            command,
+            parsedArgs,
+            rs.context as ReplServerCommandContext,
+            () => {
+              rs.displayPrompt()
+            }
+          )
         },
       })
     })
   }
 
   /**
-   * Parses command arguments.
-   *
-   * @param console - The underlying Console instance.
-   * @param rs - The underlying REPL server instance.
-   * @param command - The command instance.
-   * @returns Parsed command arguments, or `null` if parsing fails.
-   */
-  protected parseCommand(
-    console: Console,
-    rs: repl.REPLServer,
-    command: ReplServerCommand<ReplServerCommandArgs>,
-    args: string
-  ): ReplServerCommandArgs | null {
-    try {
-      const parsedArgs = command.parseArgs(args)
-
-      if (parsedArgs.help) {
-        command.showHelp(console, true)
-
-        rs.displayPrompt()
-
-        return null
-      }
-
-      return parsedArgs
-    } catch (error) {
-      if (error instanceof ReplServerError) {
-        console.error(`Parse command error: ${error.code} ${error.message}`)
-
-        if (error.code === 'INTERNAL_ERROR') {
-          this.logger.error(`ReplServer parse command internal error`, {
-            error: serializeError(error),
-          })
-        } else if (error.code === 'BAD_REQUEST') {
-          command.showHelp(console)
-        }
-      } else {
-        console.error(`Parse command critical error, see log for details`)
-
-        this.logger.error(`ReplServer parse command critical error`, {
-          error: serializeError(error),
-        })
-      }
-
-      rs.displayPrompt()
-
-      return null
-    }
-  }
-
-  /**
    * Executes command with arguments.
    *
    * @param console - The underlying Console instance.
-   * @param rs - The underlying REPL server instance.
    * @param command - The command instance.
    * @param args - The parsed command args.
+   * @param context - The REPL context.
    */
   protected executeCommand(
     console: Console,
-    rs: repl.REPLServer,
     command: ReplServerCommand<ReplServerCommandArgs>,
-    args: ReplServerCommandArgs
+    args: ReplServerCommandArgs,
+    context: ReplServerCommandContext,
+    finallyFun: () => void
   ) {
     command
-      .execute(console, args, rs.context as ReplServerCommandContext)
+      .execute(console, args, context)
       .catch((error: unknown) => {
         if (error instanceof ReplServerError) {
-          console.error(`Execute command error: ${error.code} ${error.message}`)
+          console.error(`Command error: ${error.code} ${error.message}`)
 
           if (error.code === 'INTERNAL_ERROR') {
             this.logger.error(`ReplServer execute command internal error`, {
@@ -181,43 +151,14 @@ export abstract class BaseReplServer implements ReplServer {
             command.showHelp(console)
           }
         } else {
-          console.error(`Execute command critical error, see log for details`)
+          console.error(`Command critical error, see log for details`)
 
           this.logger.error(`ReplServer process command unknown error`, {
             error: serializeError(error),
           })
         }
       })
-      .finally(() => {
-        rs.displayPrompt()
-      })
-  }
-
-  /**
-   * Handles bootstrap operation errors.
-   *
-   * Re-throws `BootstrapError` instances with additional context, or wraps
-   * unknown errors into a `BootstrapError`.
-   *
-   * @param error - The caught error.
-   * @param method - The method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleBootstrapError(error: unknown, method: string): never {
-    if (error instanceof BootstrapError) {
-      error.context['service'] = 'repl-server'
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new BootstrapError(`Unknown error`, {
-        cause: error,
-        context: {
-          service: 'repl-server',
-          method,
-        },
-      })
-    }
+      .finally(finallyFun)
   }
 
   /**

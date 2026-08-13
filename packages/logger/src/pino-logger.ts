@@ -146,9 +146,6 @@ export class PinoLogger implements Logger {
 
   /**
    * Converts validated configuration to a logger options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The logger options object.
    */
   private buildOptions(data: PinoLoggerConfig): PinoLoggerOptions {
     return {

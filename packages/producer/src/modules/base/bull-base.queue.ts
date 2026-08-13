@@ -69,9 +69,13 @@ export abstract class BullBaseQueue implements BaseQueue {
     try {
       await this.queue.close()
 
-      this.logger.debug(`ProducerQueue closed: ${this.queueName}`)
+      this.logger.info(`ProducerQueue closed`, { queue: this.queueName })
     } catch (error) {
-      this.handleBootstrapError(error, 'close')
+      throw BootstrapError.wrap(error, {
+        queue: this.queueName,
+        service: 'producer-queue',
+        method: 'close',
+      })
     }
   }
 
@@ -79,75 +83,15 @@ export abstract class BullBaseQueue implements BaseQueue {
     try {
       return await this.queue.count()
     } catch (error) {
-      this.handleQueueError(error, 'getJobCount', null)
-    }
-  }
-
-  /**
-   * Handles bootstrap operation errors.
-   *
-   * Re-throws `BootstrapError` instances with additional context, or wraps
-   * unknown errors into a `BootstrapError`.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleBootstrapError(error: unknown, method: string): never {
-    if (error instanceof BootstrapError) {
-      error.context['service'] = 'producer-queue'
-      error.context['queue'] = this.queueName
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new BootstrapError(`Unknown error`, {
-        cause: error,
-        context: {
-          service: 'producer-queue',
-          queue: this.queueName,
-          method,
-        },
-      })
-    }
-  }
-
-  /**
-   * Handles queue operation errors.
-   *
-   * Re-throws `ProducerError` instances with additional context, or wraps
-   * unknown errors into a `ProducerError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @param data - The data that was being processed.
-   * @returns Never returns, always throws.
-   */
-  protected handleQueueError(error: unknown, method: string, data: unknown): never {
-    if (error instanceof ProducerError) {
-      error.context['queue'] = this.queueName
-      error.context['method'] = method
-      error.context['data'] = data
-
-      throw error
-    } else {
-      throw new ProducerError(`Unknown error`, {
-        cause: error,
-        context: {
-          queue: this.queueName,
-          method,
-          data,
-        },
-        code: 'INTERNAL_ERROR',
+      throw ProducerError.wrap(error, {
+        queue: this.queueName,
+        method: 'getJobCount',
       })
     }
   }
 
   /**
    * Converts validated configuration to a queue options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The queue options object.
    */
   private buildOptions(data: BullProducerConfig): BullProducerQueueOptions {
     return {

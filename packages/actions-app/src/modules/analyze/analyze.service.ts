@@ -54,9 +54,7 @@ export class AnalyzeService {
     const message = await this.messageRepository.readFull(data.campaignId, data.messageId)
 
     if (!message) {
-      throw new ConsumerError(`Message not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ConsumerError.notFound(`Message not found`)
     }
 
     return message

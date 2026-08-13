@@ -93,7 +93,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, sessionId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, sessionId },
+      })
     }
   }
 
@@ -107,7 +111,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, sessionId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: { campaignId, sessionId },
+      })
     }
   }
 
@@ -130,7 +138,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'auth', { campaignId, sessionId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'auth',
+        params: { campaignId, sessionId },
+      })
     }
   }
 
@@ -153,7 +165,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       this.logger.info(mesg, { session: { campaignId, lureId, sessionId } })
     } catch (error) {
-      this.handleRepositoryError(error, 'upgrade', { campaignId, lureId, sessionId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'upgrade',
+        params: { campaignId, lureId, sessionId },
+      })
     }
   }
 

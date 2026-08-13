@@ -64,10 +64,7 @@ export abstract class BaseController {
     try {
       return JSON.stringify(obj)
     } catch (error) {
-      throw new ReplServerError(`Encode JSON failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-      })
+      throw ReplServerError.internal(`Encode JSON failed`, null, error)
     }
   }
 
@@ -82,10 +79,7 @@ export abstract class BaseController {
     try {
       return JSON.parse(str)
     } catch (error) {
-      throw new ReplServerError(`Decode JSON failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-      })
+      throw ReplServerError.internal(`Decode JSON failed`, null, error)
     }
   }
 
@@ -100,10 +94,7 @@ export abstract class BaseController {
     try {
       return buf.toString('base64')
     } catch (error) {
-      throw new ReplServerError(`Encode Base64 failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-      })
+      throw ReplServerError.internal(`Encode Base64 failed`, null, error)
     }
   }
 
@@ -118,10 +109,7 @@ export abstract class BaseController {
     try {
       return Buffer.from(str, 'base64')
     } catch (error) {
-      throw new ReplServerError(`Decode Base64 failed`, {
-        cause: error,
-        code: 'INTERNAL_ERROR',
-      })
+      throw ReplServerError.internal(`Decode Base64 failed`, null, error)
     }
   }
 
@@ -136,10 +124,7 @@ export abstract class BaseController {
     try {
       return buf.toString('utf-8')
     } catch (error) {
-      throw new ReplServerError(`Convert Buffer to String fails`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
+      throw ReplServerError.badRequest(`Convert Buffer to String failed`, null, error)
     }
   }
 
@@ -154,10 +139,7 @@ export abstract class BaseController {
     try {
       return Buffer.from(str, 'utf-8')
     } catch (error) {
-      throw new ReplServerError(`Decode UTF-8 failed`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
+      throw ReplServerError.badRequest(`Decode UTF-8 failed`, null, error)
     }
   }
 
@@ -170,14 +152,11 @@ export abstract class BaseController {
    * @throws {@link ReplServerError} If validation fails.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  protected validateData<T>(schemaName: string, data: unknown): asserts data is T {
+  protected validateData<T>(schemaName: string, value: unknown): asserts value is T {
     try {
-      this.validator.assertSchema<T>(schemaName, data)
+      this.validator.assertSchema<T>(schemaName, value)
     } catch (error) {
-      throw new ReplServerError(`Validate data failed`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
+      throw ReplServerError.badRequest(`Validate data failed`, null, error)
     }
   }
 }

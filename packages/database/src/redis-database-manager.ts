@@ -88,52 +88,25 @@ export class RedisDatabaseManager implements DatabaseManager {
       if (errors.length > 0) {
         await this.connection.FUNCTION_FLUSH()
 
-        throw new DatabaseError(`Loading Redis functions failed`, {
-          cause: errors,
-          code: 'INTERNAL_ERROR',
-        })
+        throw DatabaseError.internal(`Loading Redis functions failed`, null, errors)
       } else {
         this.logger.info(`All Redis functions successfully loaded`)
       }
     } catch (error) {
-      this.handleDatabaseError(error, 'loadFunctions')
+      throw DatabaseError.wrap(error, {
+        method: 'loadFunctions',
+      })
     }
   }
 
   async cleanup(): Promise<void> {
     try {
-      this.logger.debug(`Cleaning up database`)
-
       await this.connection.FLUSHDB()
 
       this.logger.warn(`Database cleaned up`)
     } catch (error) {
-      this.handleDatabaseError(error, 'cleanup')
-    }
-  }
-
-  /**
-   * Handles database operation errors.
-   *
-   * Re-throws `DatabaseError` instances with additional context, or wraps
-   * unknown errors into a `DatabaseError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleDatabaseError(error: unknown, method: string): never {
-    if (error instanceof DatabaseError) {
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new DatabaseError(`Unknown error`, {
-        cause: error,
-        context: {
-          method,
-        },
-        code: 'INTERNAL_ERROR',
+      throw DatabaseError.wrap(error, {
+        method: 'cleanup',
       })
     }
   }

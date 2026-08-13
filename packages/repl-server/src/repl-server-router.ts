@@ -132,7 +132,9 @@ export class ReplServerRouter {
 
     this.commands.set(spec.name, command as ReplServerCommand<ReplServerCommandArgs>)
 
-    this.logger.debug(`ReplServerRouter add command: ${spec.name}`)
+    this.logger.debug(`ReplServerRouter add command`, {
+      command: spec.name,
+    })
 
     return this
   }
