@@ -1,15 +1,12 @@
 {
   "name": "@famir/console-app",
   "type": "module",
-  "version": "0.0.5",
-  "description": "Famir console app",
+  "version": "0.0.6",
+  "description": "Console application",
   "keywords": [
     "famir",
     "fake-mirrors",
-    "man-in-the-middle",
-    "phishing",
-    "reverse-proxy",
-    "red-teaming"
+    "reverse-proxy"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
   "license": "Apache-2.0",
@@ -45,8 +42,10 @@
     "@famir/database": "*",
     "@famir/logger": "*",
     "@famir/producer": "*",
+    "@famir/edge-server": "*",
     "@famir/repl-server": "*",
     "@famir/validator": "*",
-    "ascii-table3": "^1.0.3"
+    "ascii-table3": "^1.0.3",
+    "yaml": "^2.9.0"
   }
 }

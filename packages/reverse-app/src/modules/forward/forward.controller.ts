@@ -2,7 +2,9 @@ import { DIContainer } from '@famir/common'
 import { EnabledFullTargetModel, EnabledProxyModel } from '@famir/database'
 import { HttpType } from '@famir/http-proto'
 import {
+  HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
+  HttpServerAssets,
   HttpServerContext,
   HttpServerNextFunction,
   HttpServerRouter,
@@ -60,6 +62,7 @@ export class ForwardController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<ForwardService>(FORWARD_SERVICE)
         )
@@ -82,17 +85,19 @@ export class ForwardController extends BaseController {
    * @param validator - The validator instance.
    * @param logger - The logger instance.
    * @param templater - The templater instance.
-   * @param router - The http-server router instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param forwardService - The forward service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
     templater: Templater,
+    assets: HttpServerAssets,
     router: HttpServerRouter,
     protected readonly forwardService: ForwardService
   ) {
-    super(validator, logger, templater, router)
+    super(validator, logger, templater, assets, router)
   }
 
   /**
@@ -135,17 +140,16 @@ export class ForwardController extends BaseController {
         bodySizeLimit: target.bodySizeLimit,
       })
 
+      message.status.set(result.status)
+      message.responseHeaders.merge(result.responseHeaders)
+      message.responseBody.set(result.responseBody)
+      message.mergeConnection(result.connection)
+
       if (result.error) {
         message.addError(result.error, ['forward', 'normal-simple'])
-        message.mergeConnection(result.connection)
 
         await this.sendErrorPage(ctx, result.error, true)
       } else {
-        message.status.set(result.status)
-        message.responseHeaders.merge(result.responseHeaders)
-        message.responseBody.set(result.responseBody)
-        message.mergeConnection(result.connection)
-
         message.runResponseHeadInterceptors()
         message.runResponseBodyInterceptors()
 
@@ -198,17 +202,16 @@ export class ForwardController extends BaseController {
         bodySizeLimit: target.bodySizeLimit,
       })
 
+      message.status.set(result.status)
+      message.responseHeaders.merge(result.responseHeaders)
+      message.responseBody.set(result.responseBody)
+      message.mergeConnection(result.connection)
+
       if (result.error) {
         message.addError(result.error, ['forward', 'normal-stream-request'])
-        message.mergeConnection(result.connection)
 
         await this.sendErrorPage(ctx, result.error, false)
       } else {
-        message.status.set(result.status)
-        message.responseHeaders.merge(result.responseHeaders)
-        message.responseBody.set(result.responseBody)
-        message.mergeConnection(result.connection)
-
         message.runResponseHeadInterceptors()
         message.runResponseBodyInterceptors()
 
@@ -245,16 +248,15 @@ export class ForwardController extends BaseController {
         headersSizeLimit: target.headersSizeLimit,
       })
 
+      message.status.set(result.status)
+      message.responseHeaders.merge(result.responseHeaders)
+      message.mergeConnection(result.connection)
+
       if (result.error) {
         message.addError(result.error, ['forward', 'normal-stream-response'])
-        message.mergeConnection(result.connection)
 
         await this.sendErrorPage(ctx, result.error, false)
       } else {
-        message.status.set(result.status)
-        message.responseHeaders.merge(result.responseHeaders)
-        message.mergeConnection(result.connection)
-
         message.runResponseHeadInterceptors()
 
         ctx.status.set(message.status.get())

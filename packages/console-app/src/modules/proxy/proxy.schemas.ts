@@ -1,5 +1,5 @@
 import { proxyUrlSchema } from '@famir/database'
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
+import { JSONSchemaType, customIdentSchema } from '@famir/validator'
 import {
   CreateProxyArgs,
   DeleteProxyArgs,
@@ -9,14 +9,12 @@ import {
 } from './proxy.js'
 
 /**
- * JSON Schema for validating a create proxy args.
- *
  * @category Proxy
  * @internal
  */
 export const createProxyArgsSchema: JSONSchemaType<CreateProxyArgs> = {
   type: 'object',
-  required: ['_', 'url', 'lockSecret'],
+  required: ['_', 'url'],
   properties: {
     _: {
       type: 'array',
@@ -25,14 +23,11 @@ export const createProxyArgsSchema: JSONSchemaType<CreateProxyArgs> = {
       maxItems: 2,
     },
     url: proxyUrlSchema,
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating a read proxy args.
- *
  * @category Proxy
  * @internal
  */
@@ -51,14 +46,12 @@ export const readProxyArgsSchema: JSONSchemaType<ReadProxyArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a toggle proxy args.
- *
  * @category Proxy
  * @internal
  */
 export const toggleProxyArgsSchema: JSONSchemaType<ToggleProxyArgs> = {
   type: 'object',
-  required: ['_', 'lockSecret'],
+  required: ['_'],
   properties: {
     _: {
       type: 'array',
@@ -66,20 +59,17 @@ export const toggleProxyArgsSchema: JSONSchemaType<ToggleProxyArgs> = {
       minItems: 2,
       maxItems: 2,
     },
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating a delete proxy args.
- *
  * @category Proxy
  * @internal
  */
 export const deleteProxyArgsSchema: JSONSchemaType<DeleteProxyArgs> = {
   type: 'object',
-  required: ['_', 'lockSecret'],
+  required: ['_'],
   properties: {
     _: {
       type: 'array',
@@ -87,14 +77,11 @@ export const deleteProxyArgsSchema: JSONSchemaType<DeleteProxyArgs> = {
       minItems: 2,
       maxItems: 2,
     },
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating a list proxies args.
- *
  * @category Proxy
  * @internal
  */

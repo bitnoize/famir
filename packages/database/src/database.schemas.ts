@@ -2,8 +2,6 @@ import { JSONSchemaType } from '@famir/validator'
 import { RedisDatabaseConfig } from './database.js'
 
 /**
- * JSON Schema for validating a Redis database connection URL.
- *
  * @category none
  * @internal
  */
@@ -11,12 +9,10 @@ const redisDatabaseConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 256,
-  default: 'redis://localhost:6379',
+  default: 'redis://localhost:6379/0',
 } as const
 
 /**
- * JSON Schema for validating a Redis database key prefix.
- *
  * @category none
  * @internal
  */
@@ -28,8 +24,6 @@ const redisDatabasePrefixSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a complete Redis database configuration.
- *
  * @category none
  * @internal
  */
@@ -44,8 +38,6 @@ export const redisDatabaseConfigSchema: JSONSchemaType<RedisDatabaseConfig> = {
 } as const
 
 /**
- * JSON Schema for validating a Redis string reply.
- *
  * @category none
  * @internal
  */
@@ -55,8 +47,6 @@ export const redisDatabaseStringReplySchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a Redis array reply.
- *
  * @category none
  * @internal
  */
@@ -66,8 +56,6 @@ export const redisDatabaseArrayReplySchema = {
 } as JSONSchemaType<unknown[]>
 
 /**
- * JSON Schema for validating a Redis array of non-empty strings reply.
- *
  * @category none
  * @internal
  */

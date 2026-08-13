@@ -1,4 +1,4 @@
-import { CommonError, CommonErrorOptions } from '@famir/common'
+import { CommonError, CommonErrorOptions, ErrorContext } from '@famir/common'
 
 /**
  * Error codes that can be returned by the http-client.
@@ -28,10 +28,10 @@ const codeToStatus: Record<HttpClientErrorCode, number> = {
  */
 export class HttpClientError extends CommonError {
   /** Associated error code. */
-  code: HttpClientErrorCode
+  readonly code: HttpClientErrorCode
 
   /** Associated HTTP status code. */
-  status: number
+  readonly status: number
 
   /**
    * Creates a new http-client error instance.
@@ -46,5 +46,51 @@ export class HttpClientError extends CommonError {
     this.code = options.code
 
     this.status = codeToStatus[this.code]
+  }
+
+  /**
+   * Creates a new http-client error with `BAD_GATEWAY` code.
+   *
+   * @param message - The human-readable description of the error.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static badGateway(
+    message: string,
+    context?: ErrorContext | null,
+    cause?: unknown
+  ): HttpClientError {
+    return new HttpClientError(message, {
+      cause,
+      context,
+      code: 'BAD_GATEWAY',
+    })
+  }
+
+  /**
+   * Creates a new http-client error with `GATEWAY_TIMEOUT` code.
+   *
+   * @param message - The human-readable description of the error.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static gatewayTimeout(
+    message: string,
+    context?: ErrorContext | null,
+    cause?: unknown
+  ): HttpClientError {
+    return new HttpClientError(message, {
+      cause,
+      context,
+      code: 'GATEWAY_TIMEOUT',
+    })
+  }
+
+  get isBadGateway(): boolean {
+    return this.code === 'BAD_GATEWAY'
+  }
+
+  get isGatewayTimeout(): boolean {
+    return this.code === 'GATEWAY_TIMEOUT'
   }
 }

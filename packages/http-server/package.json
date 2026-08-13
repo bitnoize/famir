@@ -1,15 +1,12 @@
 {
   "name": "@famir/http-server",
   "type": "module",
-  "version": "0.0.4",
-  "description": "Famir HTTP server module",
+  "version": "0.0.5",
+  "description": "HTTP server",
   "keywords": [
     "famir",
     "fake-mirrors",
-    "man-in-the-middle",
-    "phishing",
-    "reverse-proxy",
-    "red-teaming"
+    "reverse-proxy"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
   "license": "Apache-2.0",
@@ -47,7 +44,7 @@
     "@famir/logger": "*",
     "@famir/templater": "*",
     "@famir/validator": "*",
-    "ws": "^8.21.1"
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@types/ws": "^8.18.1"

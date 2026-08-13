@@ -193,78 +193,34 @@ export const targetFunctions = {
         prefix: string,
         campaignId: string,
         targetId: string,
-        connectTimeout: number | null | undefined,
-        simpleTimeout: number | null | undefined,
-        streamTimeout: number | null | undefined,
-        headersSizeLimit: number | null | undefined,
-        bodySizeLimit: number | null | undefined,
-        mainPage: string | null | undefined,
-        notFoundPage: string | null | undefined,
-        faviconIco: string | null | undefined,
-        robotsTxt: string | null | undefined,
-        sitemapXml: string | null | undefined,
-        allowWebSockets: boolean | null | undefined,
+        connectTimeout: number,
+        simpleTimeout: number,
+        streamTimeout: number,
+        headersSizeLimit: number,
+        bodySizeLimit: number,
+        mainPage: string,
+        notFoundPage: string,
+        faviconIco: string,
+        robotsTxt: string,
+        sitemapXml: string,
+        allowWebSockets: boolean,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
 
-        if (connectTimeout != null) {
-          parser.push('connect_timeout')
-          parser.push(connectTimeout.toString())
-        }
-
-        if (simpleTimeout != null) {
-          parser.push('simple_timeout')
-          parser.push(simpleTimeout.toString())
-        }
-
-        if (streamTimeout != null) {
-          parser.push('stream_timeout')
-          parser.push(streamTimeout.toString())
-        }
-
-        if (headersSizeLimit != null) {
-          parser.push('headers_size_limit')
-          parser.push(headersSizeLimit.toString())
-        }
-
-        if (bodySizeLimit != null) {
-          parser.push('body_size_limit')
-          parser.push(bodySizeLimit.toString())
-        }
-
-        if (mainPage != null) {
-          parser.push('main_page')
-          parser.push(mainPage)
-        }
-
-        if (notFoundPage != null) {
-          parser.push('not_found_page')
-          parser.push(notFoundPage)
-        }
-
-        if (faviconIco != null) {
-          parser.push('favicon_ico')
-          parser.push(faviconIco)
-        }
-
-        if (robotsTxt != null) {
-          parser.push('robots_txt')
-          parser.push(robotsTxt)
-        }
-
-        if (sitemapXml != null) {
-          parser.push('sitemap_xml')
-          parser.push(sitemapXml)
-        }
-
-        if (allowWebSockets != null) {
-          parser.push('allow_websockets')
-          parser.push(allowWebSockets ? '1' : '0')
-        }
-
+        parser.push(connectTimeout.toString())
+        parser.push(simpleTimeout.toString())
+        parser.push(streamTimeout.toString())
+        parser.push(headersSizeLimit.toString())
+        parser.push(bodySizeLimit.toString())
+        parser.push(mainPage)
+        parser.push(notFoundPage)
+        parser.push(faviconIco)
+        parser.push(robotsTxt)
+        parser.push(sitemapXml)
+        parser.push(allowWebSockets ? '1' : '0')
         parser.push(lockSecret)
       },
 
@@ -334,7 +290,7 @@ export const targetFunctions = {
       transformReply: undefined as unknown as () => unknown,
     },
 
-    remove_target_label: {
+    remove_target_labels: {
       NUMBER_OF_KEYS: 4,
 
       parseCommand(
@@ -342,7 +298,6 @@ export const targetFunctions = {
         prefix: string,
         campaignId: string,
         targetId: string,
-        label: string,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -350,7 +305,6 @@ export const targetFunctions = {
         parser.pushKey(targetKey(prefix, campaignId, targetId))
         parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
 
-        parser.push(label)
         parser.push(lockSecret)
       },
 

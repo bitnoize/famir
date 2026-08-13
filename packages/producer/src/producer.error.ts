@@ -1,4 +1,4 @@
-import { CommonError, CommonErrorOptions } from '@famir/common'
+import { CommonError, CommonErrorOptions, ErrorContext } from '@famir/common'
 
 /**
  * Error codes that can be returned by the producer operations.
@@ -39,5 +39,42 @@ export class ProducerError extends CommonError {
 
     this.name = 'ProducerError'
     this.code = options.code
+  }
+
+  /**
+   * Creates a new producer error with `INTERNAL_ERROR` code.
+   *
+   * @param message - The human-readable description of the error.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static internalError(
+    message: string,
+    context?: ErrorContext | null,
+    cause?: unknown
+  ): ProducerError {
+    return new ProducerError(message, {
+      cause,
+      context,
+      code: 'INTERNAL_ERROR',
+    })
+  }
+
+  /**
+   * Re-throws `ProducerError` instances with additional context, or wraps
+   * unknown errors into a `ProducerError` with an `INTERNAL_ERROR` code.
+   *
+   * @param error - The caught error.
+   * @param context - The error context.
+   * @returns A new producer instance.
+   */
+  static wrap(error: unknown, context: ErrorContext): ProducerError {
+    if (error instanceof ProducerError) {
+      Object.assign(error.context, context)
+
+      return error
+    } else {
+      return ProducerError.internalError(`Unknown error`, context, error)
+    }
   }
 }

@@ -180,7 +180,7 @@ export class HttpMessage {
   }
 
   /** Name of the analyze queue job. */
-  analyze: string | null = null
+  analyze: string = ''
 
   #contentTypes: HttpContentTypes = {
     text: [],

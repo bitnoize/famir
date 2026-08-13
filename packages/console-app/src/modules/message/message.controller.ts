@@ -1,7 +1,13 @@
 import { DIContainer } from '@famir/common'
 import { FullMessageModel } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
+import {
+  REPL_SERVER_ASSETS,
+  REPL_SERVER_ROUTER,
+  ReplServerAssets,
+  ReplServerRouter,
+} from '@famir/repl-server'
+import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ReadMessageArgs } from './message.js'
@@ -33,6 +39,8 @@ export class MessageController extends BaseController {
         new MessageController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
+          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<MessageService>(MESSAGE_SERVICE)
         )
@@ -54,16 +62,20 @@ export class MessageController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
-   * @param router - The repl-server router instance.
+   * @param templater - The templater instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param messageService - The message service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
+    assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly messageService: MessageService
   ) {
-    super(validator, logger, router)
+    super(validator, logger, templater, assets, router)
 
     this.validator.addSchema('console-read-message-args', readMessageArgsSchema)
   }
@@ -77,28 +89,61 @@ export class MessageController extends BaseController {
         name: 'message-read',
         description: `Reads the message by its ID.`,
         schemaName: 'console-read-message-args',
-        options: [],
+        options: [
+          {
+            name: 'show-headers',
+            description: `Show message headers.`,
+            type: 'boolean',
+            alias: 'i',
+            default: false,
+          },
+          {
+            name: 'show-connection',
+            description: `Show message connection.`,
+            type: 'boolean',
+            alias: 'c',
+            default: false,
+          },
+          {
+            name: 'show-payload',
+            description: `Show message payload.`,
+            type: 'boolean',
+            alias: 'p',
+            default: false,
+          },
+        ],
         params: ['campaign-id', 'message-id'],
       },
       (console, spec) => {
-        console.log(`Returns the message model.\n`)
-
-        console.log(
-          `// Reads a message:\n` + `.${spec.name} httpbin 5ad44dbcf927457eadc57d8de23eb7c1\n`
-        )
+        console.log(`// Reads some message in the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin 5ad44dbcf927457eadc57d8de23eb7c1\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, messageId] = args._
+
         const message = await this.messageService.read({
-          campaignId: args._[0],
-          messageId: args._[1],
+          campaignId,
+          messageId,
         })
 
-        this.showMessageModel(console, message)
+        this.showMessageModel(
+          console,
+          message,
+          args.showHeaders,
+          args.showConnection,
+          args.showPayload
+        )
       }
     )
   }
 
-  private showMessageModel(console: Console, message: FullMessageModel) {
+  private showMessageModel(
+    console: Console,
+    message: FullMessageModel,
+    showHeaders: boolean,
+    showConnection: boolean,
+    showPayload: boolean
+  ) {
     console.table({
       campaignId: message.campaignId,
       messageId: message.messageId,
@@ -114,16 +159,27 @@ export class MessageController extends BaseController {
       responseHeaders: Object.keys(message.responseHeaders).length,
       responseBody: message.responseBody.length,
       analyze: message.analyze,
+      //startTime: message.startTime,
+      //finishTime: message.finishTime,
       totalTime: message.totalTime,
       createdAt: message.createdAt.toISOString(),
     })
 
-    console.log(`Request headers:`, message.requestHeaders)
-    console.log(`Response headers:`, message.responseHeaders)
-    console.log(`Connection:`, message.connection)
-    console.log(`Payload:`, message.payload)
     if (message.hasErrors) {
       console.log(`Errors:`, message.errors)
+    }
+
+    if (showHeaders) {
+      console.log(`Request headers:`, message.requestHeaders)
+      console.log(`Response headers:`, message.responseHeaders)
+    }
+
+    if (showConnection) {
+      console.log(`Connection:`, message.connection)
+    }
+
+    if (showPayload) {
+      console.log(`Payload:`, message.payload)
     }
   }
 }

@@ -169,35 +169,19 @@ export const campaignFunctions = {
         parser: CommandParser,
         prefix: string,
         campaignId: string,
-        description: string | null | undefined,
-        sessionExpire: number | null | undefined,
-        newSessionExpire: number | null | undefined,
-        messageExpire: number | null | undefined,
+        description: string,
+        sessionExpire: number,
+        newSessionExpire: number,
+        messageExpire: number,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
 
-        if (description != null) {
-          parser.push('description')
-          parser.push(description)
-        }
-
-        if (sessionExpire != null) {
-          parser.push('session_expire')
-          parser.push(sessionExpire.toString())
-        }
-
-        if (newSessionExpire != null) {
-          parser.push('new_session_expire')
-          parser.push(newSessionExpire.toString())
-        }
-
-        if (messageExpire != null) {
-          parser.push('message_expire')
-          parser.push(messageExpire.toString())
-        }
-
+        parser.push(description)
+        parser.push(sessionExpire.toString())
+        parser.push(newSessionExpire.toString())
+        parser.push(messageExpire.toString())
         parser.push(lockSecret)
       },
 

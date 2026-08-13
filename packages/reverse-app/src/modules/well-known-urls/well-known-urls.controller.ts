@@ -1,7 +1,9 @@
 import { DIContainer } from '@famir/common'
 import { type EnabledFullTargetModel } from '@famir/database'
 import {
+  HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
+  HttpServerAssets,
   HttpServerContext,
   HttpServerContextType,
   HttpServerNextFunction,
@@ -54,6 +56,7 @@ export class WellKnownUrlsController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )

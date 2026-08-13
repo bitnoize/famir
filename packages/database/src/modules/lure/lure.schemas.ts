@@ -19,8 +19,6 @@ export const lurePathSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating raw lure data from Redis.
- *
  * @category Lure
  * @internal
  */

@@ -1,4 +1,4 @@
-import { DIContainer } from '@famir/common'
+import { DIContainer, LifecycleError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -6,16 +6,22 @@ import { Console } from 'node:console'
 import repl from 'node:repl'
 import type { Readable, Writable } from 'node:stream'
 import { BaseReplServer } from './base-repl-server.js'
-import { REPL_SERVER_ASSETS, ReplServerAssets } from './repl-server-assets.js'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
-import { CliReplServerConfig, REPL_SERVER, ReplServer } from './repl-server.js'
+import {
+  CliReplServerConfig,
+  REPL_SERVER,
+  REPL_SERVER_DEFAULT_BANNER_GREET,
+  REPL_SERVER_DEFAULT_BANNER_LEAVE,
+  REPL_SERVER_DEFAULT_PROMPT,
+  ReplServer,
+  ReplServerSettings,
+} from './repl-server.js'
 import { cliReplServerConfigSchema } from './repl-server.schemas.js'
 
 /**
  * Options for a Cli repl-server.
  */
-interface CliReplServerOptions {
-  prompt: string
+interface CliReplServerOptions extends ReplServerSettings {
   useColors: boolean
 }
 
@@ -30,7 +36,6 @@ interface CliReplServerOptions {
  * - {@link Validator} via {@link VALIDATOR} token
  * - {@link Config} via {@link CONFIG} token
  * - {@link Logger} via {@link LOGGER} token
- * - {@link ReplServerAssets} via {@link REPL_SERVER_ASSETS} token
  * - {@link ReplServerRouter} via {@link REPL_SERVER_ROUTER} token
  *
  * @example
@@ -60,7 +65,7 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
    *
    * @param container - The DI container to register in.
    */
-  static register(container: DIContainer) {
+  static register(container: DIContainer, settings?: Partial<ReplServerSettings>) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
       (c) =>
@@ -68,8 +73,8 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
+          settings
         )
     )
   }
@@ -86,73 +91,83 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
    * @param validator - The validator instance.
    * @param config - The config instance.
    * @param logger - The logger instance.
-   * @param assets - The assets instance.
    * @param router - The router instance.
+   * @param settings - The optional settings object.
    */
   constructor(
     validator: Validator,
     config: Config,
     logger: Logger,
-    assets: ReplServerAssets,
-    router: ReplServerRouter
+    router: ReplServerRouter,
+    settings: Partial<ReplServerSettings> = {}
   ) {
-    super(validator, config, logger, assets, router)
+    super(validator, config, logger, router)
 
     this.validator.addSchema('repl-server-config', cliReplServerConfigSchema)
 
-    const configData = this.config.get<CliReplServerConfig>('repl-server-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<CliReplServerConfig>('repl-server-config')
+    this.options = this.buildOptions(conf, settings)
   }
+
+  #isShutdown: boolean = false
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async start(): Promise<void> {
     try {
+      if (this.#isShutdown) {
+        this.logger.debug(`ReplServer shutdown, skip start`)
+
+        return
+      }
+
       if (!this.rs) {
         const console = this.initConsole(process.stdout, process.stderr)
 
         this.rs = this.initReplServer(process.stdin, process.stdout)
 
-        this.rs.on('reset', (context) => {
-          this.defineContext(context)
-        })
-
         this.rs.on('exit', () => {
-          console.log(this.getBannerLeave())
+          console.log(this.options.bannerLeave)
 
           process.kill(process.pid, 'SIGINT')
         })
 
-        this.defineContext(this.rs.context)
-
         this.defineCommands(console, this.rs)
 
-        console.log(this.getBannerGreet())
+        console.log(this.options.bannerGreet)
 
         this.rs.displayPrompt()
 
-        this.logger.debug(`ReplServer started`)
+        this.logger.info(`ReplServer started`)
       } else {
         this.logger.debug(`ReplServer already started`)
       }
     } catch (error) {
-      this.handleBootstrapError(error, 'start')
+      throw LifecycleError.wrap(error, {
+        service: 'repl-server',
+        method: 'start',
+      })
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async stop(): Promise<void> {
     try {
+      this.#isShutdown = true
+
       if (this.rs) {
         this.rs.close()
 
         this.rs = null
 
-        this.logger.debug(`ReplServer stopped`)
+        this.logger.info(`ReplServer stopped`)
       } else {
         this.logger.debug(`ReplServer already stopped`)
       }
     } catch (error) {
-      this.handleBootstrapError(error, 'stop')
+      throw LifecycleError.wrap(error, {
+        service: 'repl-server',
+        method: 'stop',
+      })
     }
   }
 
@@ -161,7 +176,10 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
       stdout,
       stderr,
       colorMode: this.options.useColors,
-      inspectOptions: { depth: 8 },
+      inspectOptions: {
+        showHidden: false,
+        depth: 8,
+      },
     })
   }
 
@@ -178,15 +196,17 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
   }
 
   /**
-   * Converts validated configuration to a repl-server options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The repl-server options object.
+   * Converts validated configuration and settings to a repl-server options.
    */
-  private buildOptions(data: CliReplServerConfig): CliReplServerOptions {
+  private buildOptions(
+    conf: CliReplServerConfig,
+    settings: Partial<ReplServerSettings>
+  ): CliReplServerOptions {
     return {
-      prompt: data.REPL_SERVER_PROMPT,
-      useColors: data.REPL_SERVER_USE_COLORS,
+      useColors: conf.REPL_SERVER_USE_COLORS,
+      prompt: settings.prompt ?? REPL_SERVER_DEFAULT_PROMPT,
+      bannerGreet: settings.bannerGreet ?? REPL_SERVER_DEFAULT_BANNER_GREET,
+      bannerLeave: settings.bannerLeave ?? REPL_SERVER_DEFAULT_BANNER_LEAVE,
     }
   }
 }

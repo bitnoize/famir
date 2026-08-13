@@ -1,5 +1,10 @@
 import { DIContainer } from '@famir/common'
-import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
+import {
+  HTTP_SERVER_ASSETS,
+  HTTP_SERVER_ROUTER,
+  HttpServerAssets,
+  HttpServerRouter,
+} from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -32,6 +37,7 @@ export class CompleteController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<CompleteService>(COMPLETE_SERVICE)
         )
@@ -54,17 +60,19 @@ export class CompleteController extends BaseController {
    * @param validator - The validator instance.
    * @param logger - The logger instance.
    * @param templater - The templater instance.
-   * @param router - The http-server router instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param completeService - The complete service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
     templater: Templater,
+    assets: HttpServerAssets,
     router: HttpServerRouter,
     protected readonly completeService: CompleteService
   ) {
-    super(validator, logger, templater, router)
+    super(validator, logger, templater, assets, router)
   }
 
   /**
@@ -86,27 +94,37 @@ export class CompleteController extends BaseController {
       message.payload['response-cookies'] = message.responseHeaders.getSetCookies()
       message.payload['response-content-type'] = message.responseHeaders.getContentType()
 
-      await this.completeService.createMessage({
-        campaignId: campaign.campaignId,
-        messageId: message.id,
-        proxyId: proxy.proxyId,
-        targetId: target.targetId,
-        sessionId: session.sessionId,
-        type: message.type,
-        method: message.method.get(),
-        url: message.url.toRelative(),
-        requestHeaders: message.requestHeaders.toObject(),
-        requestBody: message.requestBody.get(),
-        status: message.status.get(),
-        responseHeaders: message.responseHeaders.toObject(),
-        responseBody: message.responseBody.get(),
-        connection: message.connection,
-        payload: message.payload,
-        errors: message.errors,
-        analyze: message.analyze,
-        startTime: ctx.startTime,
-        finishTime: ctx.finishTime,
-      })
+      if (ctx.state.verbose || message.analyze) {
+        await this.completeService.createMessage({
+          campaignId: campaign.campaignId,
+          messageId: message.id,
+          proxyId: proxy.proxyId,
+          targetId: target.targetId,
+          sessionId: session.sessionId,
+          type: message.type,
+          method: message.method.get(),
+          url: message.url.toRelative(),
+          requestHeaders: message.requestHeaders.toObject(),
+          requestBody: message.requestBody.get(),
+          status: message.status.get(),
+          responseHeaders: message.responseHeaders.toObject(),
+          responseBody: message.responseBody.get(),
+          connection: message.connection,
+          payload: message.payload,
+          errors: message.errors,
+          analyze: message.analyze,
+          startTime: ctx.startTime,
+          finishTime: ctx.finishTime,
+        })
+      } else {
+        await this.completeService.createDummyMessage({
+          campaignId: campaign.campaignId,
+          messageId: message.id,
+          proxyId: proxy.proxyId,
+          targetId: target.targetId,
+          sessionId: session.sessionId,
+        })
+      }
 
       await next()
     })

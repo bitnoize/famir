@@ -1,9 +1,8 @@
-import { DIContainer, arrayIncludes, encrypt, randomName } from '@famir/common'
+import { DIContainer, encrypt, randomName } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
   CampaignRepository,
   DatabaseError,
-  DatabaseErrorCode,
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
@@ -63,64 +62,50 @@ export class LureService {
 
   /**
    * Creates a new lure.
-   *
-   * @param data - The data object.
-   * @returns The created lure model.
    */
   async create(data: {
     campaignId: string
     lureId: string
     path: string
     redirectorId: string
-    lockSecret: string
-  }): Promise<LureModel> {
+  }): Promise<void> {
+    const lockSecret = await this.lockCampaign(data.campaignId)
+
     try {
       await this.lureRepository.create(
         data.campaignId,
         data.lureId,
         data.path,
         data.redirectorId,
-        data.lockSecret
+        lockSecret
       )
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new ReplServerError(error.message, {
-            code: error.code,
-          })
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
         }
+
+        if (error.isConflict) {
+          throw ReplServerError.conflict(error.message)
+        }
+
+        throw ReplServerError.internalError(`Create lure failed`, null, error)
       }
 
       throw error
+    } finally {
+      await this.campaignRepository.unlock(data.campaignId, lockSecret)
     }
-
-    const lure = await this.lureRepository.read(data.campaignId, data.lureId)
-
-    if (!lure) {
-      throw new ReplServerError(`Lure not found`, {
-        code: 'NOT_FOUND',
-      })
-    }
-
-    return lure
   }
 
   /**
    * Reads the lure by its ID.
-   *
-   * @param data - The data object.
-   * @returns The lure model.
-   * @throws {@link ReplServerError} If the lure is not found.
    */
   async read(data: { campaignId: string; lureId: string }): Promise<LureModel> {
     const lure = await this.lureRepository.read(data.campaignId, data.lureId)
 
     if (!lure) {
-      throw new ReplServerError(`Lure not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Lure not found`)
     }
 
     return lure
@@ -128,110 +113,92 @@ export class LureService {
 
   /**
    * Enables the lure, making it available for request routing.
-   *
-   * @param data - The data object.
    */
-  async enable(data: { campaignId: string; lureId: string; lockSecret: string }): Promise<void> {
+  async enable(data: { campaignId: string; lureId: string }): Promise<void> {
+    const lockSecret = await this.lockCampaign(data.campaignId)
+
     try {
-      await this.lureRepository.enable(data.campaignId, data.lureId, data.lockSecret)
+      await this.lureRepository.enable(data.campaignId, data.lureId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new ReplServerError(error.message, {
-            code: error.code,
-          })
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
         }
+
+        throw ReplServerError.internalError(`Enable lure failed`, null, error)
       }
 
       throw error
+    } finally {
+      await this.campaignRepository.unlock(data.campaignId, lockSecret)
     }
   }
 
   /**
    * Disables the lure, stopping request routing.
-   *
-   * @param data - The data object.
    */
-  async disable(data: { campaignId: string; lureId: string; lockSecret: string }): Promise<void> {
+  async disable(data: { campaignId: string; lureId: string }): Promise<void> {
+    const lockSecret = await this.lockCampaign(data.campaignId)
+
     try {
-      await this.lureRepository.disable(data.campaignId, data.lureId, data.lockSecret)
+      await this.lureRepository.disable(data.campaignId, data.lureId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new ReplServerError(error.message, {
-            code: error.code,
-          })
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
         }
+
+        throw ReplServerError.internalError(`Disable lure failed`, null, error)
       }
 
       throw error
+    } finally {
+      await this.campaignRepository.unlock(data.campaignId, lockSecret)
     }
   }
 
   /**
    * Deletes the lure by its ID.
-   *
-   * @param data - The data object.
    */
-  async delete(data: {
-    campaignId: string
-    lureId: string
-    redirectorId: string
-    lockSecret: string
-  }): Promise<void> {
+  async delete(data: { campaignId: string; lureId: string; redirectorId: string }): Promise<void> {
+    const lockSecret = await this.lockCampaign(data.campaignId)
+
     try {
-      await this.lureRepository.delete(
-        data.campaignId,
-        data.lureId,
-        data.redirectorId,
-        data.lockSecret
-      )
+      await this.lureRepository.delete(data.campaignId, data.lureId, data.redirectorId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new ReplServerError(error.message, {
-            code: error.code,
-          })
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
         }
+
+        if (error.isForbidden) {
+          throw ReplServerError.forbidden(error.message)
+        }
+
+        throw ReplServerError.internalError(`Delete lure failed`, null, error)
       }
 
       throw error
+    } finally {
+      await this.campaignRepository.unlock(data.campaignId, lockSecret)
     }
   }
 
   /**
    * Lists all lures for the campaign.
-   *
-   * @param data - The data object.
-   * @returns The array of lure models.
    */
   async list(data: { campaignId: string }): Promise<LureModel[]> {
     const lures = await this.lureRepository.list(data.campaignId)
 
     if (!lures) {
-      throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Campaign not found`)
     }
 
     return lures
   }
 
   /**
-   * Makes the lure URL with optional params.
-   *
-   * @param data - The data object.
-   * @returns The lure URL string.
-   * @throws {@link ReplServerError} If the campaign is not found.
-   * @throws {@link ReplServerError} If the lure is not found.
-   * @throws {@link ReplServerError} If the target is not found.
-   * @throws {@link ReplServerError} If the redirector is not found.
+   * Makes the lure URL with redirector params.
    */
   async makeUrl(data: {
     campaignId: string
@@ -242,39 +209,29 @@ export class LureService {
     const lure = await this.lureRepository.read(data.campaignId, data.lureId)
 
     if (!lure) {
-      throw new ReplServerError(`Lure not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Lure not found`)
     }
 
     const campaign = await this.campaignRepository.readFull(data.campaignId)
 
     if (!campaign) {
-      throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Campaign not found`)
     }
 
     const target = await this.targetRepository.readFull(data.campaignId, data.targetId)
 
     if (!target) {
-      throw new ReplServerError(`Target not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Target not found`)
     }
 
     const redirector = await this.redirectorRepository.readFull(data.campaignId, lure.redirectorId)
 
     if (!redirector) {
-      throw new ReplServerError(`Redirector not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Redirector not found`)
     }
 
     if (!redirector.checkParams(data.params)) {
-      throw new ReplServerError(`Redirector wrong params`, {
-        code: 'BAD_REQUEST',
-      })
+      throw ReplServerError.badRequest(`Redirector wrong params`)
     }
 
     if (redirector.isLoose) {
@@ -288,6 +245,26 @@ export class LureService {
         '=',
         encrypt(JSON.stringify(data.params), campaign.cryptSecret),
       ].join('')
+    }
+  }
+
+  protected async lockCampaign(campaignId: string): Promise<string> {
+    try {
+      return await this.campaignRepository.lock(campaignId)
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
+        }
+
+        if (error.isForbidden) {
+          throw ReplServerError.forbidden(error.message)
+        }
+
+        throw ReplServerError.internalError(`Lock campaign failed`, null, error)
+      }
+
+      throw error
     }
   }
 }

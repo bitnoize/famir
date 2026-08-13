@@ -6,35 +6,44 @@ import {
   campaignSessionCookieNameSchema,
   campaignSessionExpireSchema,
   campaignUpgradeSessionPathSchema,
+  lurePathSchema,
+  proxyUrlSchema,
+  redirectorFieldsSchema,
+  redirectorPageSchema,
+  targetAccessLevelSchema,
+  targetBodySizeLimitSchema,
+  targetConnectTimeoutSchema,
+  targetContentSchema,
+  targetDomainSchema,
+  targetHeadersSizeLimitSchema,
+  targetLabelsSchema,
+  targetPortSchema,
+  targetSimpleTimeoutSchema,
+  targetStreamTimeoutSchema,
+  targetSubSchema,
 } from '@famir/database'
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
+import { JSONSchemaType, booleanSchema, customIdentSchema, secretSchema } from '@famir/validator'
 import {
   CreateCampaignArgs,
   DeleteCampaignArgs,
   ListCampaignsArgs,
-  LockCampaignArgs,
+  RawCampaignPreset,
+  RawCampaignPresetCampaign,
+  RawCampaignPresetLure,
+  RawCampaignPresetProxy,
+  RawCampaignPresetRedirector,
+  RawCampaignPresetTarget,
   ReadCampaignArgs,
-  UnlockCampaignArgs,
   UpdateCampaignArgs,
 } from './campaign.js'
 
 /**
- * JSON Schema for validating a create campaign args.
- *
  * @category Campaign
  * @internal
  */
 export const createCampaignArgsSchema: JSONSchemaType<CreateCampaignArgs> = {
   type: 'object',
-  required: [
-    '_',
-    'mirrorDomain',
-    'description',
-    'upgradeSessionPath',
-    'sessionExpire',
-    'newSessionExpire',
-    'messageExpire',
-  ],
+  required: ['_', 'assetName'],
   properties: {
     _: {
       type: 'array',
@@ -42,27 +51,30 @@ export const createCampaignArgsSchema: JSONSchemaType<CreateCampaignArgs> = {
       minItems: 1,
       maxItems: 1,
     },
-    mirrorDomain: campaignMirrorDomainSchema,
-    description: campaignDescriptionSchema,
-    cryptSecret: {
-      ...randomIdentSchema,
+    assetName: {
+      type: 'string',
+    },
+    mirrorDomain: {
+      ...campaignMirrorDomainSchema,
       nullable: true,
     },
-    upgradeSessionPath: campaignUpgradeSessionPathSchema,
+    cryptSecret: {
+      ...secretSchema,
+      nullable: true,
+    },
+    upgradeSessionPath: {
+      ...campaignUpgradeSessionPathSchema,
+      nullable: true,
+    },
     sessionCookieName: {
       ...campaignSessionCookieNameSchema,
       nullable: true,
     },
-    sessionExpire: campaignSessionExpireSchema,
-    newSessionExpire: campaignNewSessionExpireSchema,
-    messageExpire: campaignMessageExpireSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating a read campaign args.
- *
  * @category Campaign
  * @internal
  */
@@ -78,58 +90,15 @@ export const readCampaignArgsSchema: JSONSchemaType<ReadCampaignArgs> = {
     },
   },
   additionalProperties: false,
-} as const /**
-
-/**
- * JSON Schema for validating a lock campaign args.
- *
- * @category Campaign
- * @internal
- */
-export const lockCampaignArgsSchema: JSONSchemaType<LockCampaignArgs> = {
-  type: 'object',
-  required: ['_'],
-  properties: {
-    _: {
-      type: 'array',
-      items: [customIdentSchema],
-      minItems: 1,
-      maxItems: 1,
-    },
-  },
-  additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating an unlock campaign args.
- *
- * @category Campaign
- * @internal
- */
-export const unlockCampaignArgsSchema: JSONSchemaType<UnlockCampaignArgs> = {
-  type: 'object',
-  required: ['_', 'lockSecret'],
-  properties: {
-    _: {
-      type: 'array',
-      items: [customIdentSchema],
-      minItems: 1,
-      maxItems: 1,
-    },
-    lockSecret: randomIdentSchema,
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * JSON Schema for validating an update campaign args.
- *
  * @category Campaign
  * @internal
  */
 export const updateCampaignArgsSchema: JSONSchemaType<UpdateCampaignArgs> = {
   type: 'object',
-  required: ['_', 'lockSecret'],
+  required: ['_', 'assetName'],
   properties: {
     _: {
       type: 'array',
@@ -137,36 +106,20 @@ export const updateCampaignArgsSchema: JSONSchemaType<UpdateCampaignArgs> = {
       minItems: 1,
       maxItems: 1,
     },
-    description: {
-      ...campaignDescriptionSchema,
-      nullable: true,
+    assetName: {
+      type: 'string',
     },
-    sessionExpire: {
-      ...campaignSessionExpireSchema,
-      nullable: true,
-    },
-    newSessionExpire: {
-      ...campaignNewSessionExpireSchema,
-      nullable: true,
-    },
-    messageExpire: {
-      ...campaignMessageExpireSchema,
-      nullable: true,
-    },
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating a delete campaign args.
- *
  * @category Campaign
  * @internal
  */
 export const deleteCampaignArgsSchema: JSONSchemaType<DeleteCampaignArgs> = {
   type: 'object',
-  required: ['_', 'lockSecret'],
+  required: ['_', 'force'],
   properties: {
     _: {
       type: 'array',
@@ -174,14 +127,12 @@ export const deleteCampaignArgsSchema: JSONSchemaType<DeleteCampaignArgs> = {
       minItems: 1,
       maxItems: 1,
     },
-    lockSecret: randomIdentSchema,
+    force: booleanSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating a list campaigns args.
- *
  * @category Campaign
  * @internal
  */
@@ -196,6 +147,221 @@ export const listCampaignsArgsSchema: JSONSchemaType<ListCampaignsArgs> = {
       },
       minItems: 0,
       maxItems: 0,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Campaign
+ * @internal
+ */
+const rawCampaignPresetCampaignSchema: JSONSchemaType<RawCampaignPresetCampaign> = {
+  type: 'object',
+  required: ['mirrorDomain'],
+  properties: {
+    mirrorDomain: campaignMirrorDomainSchema,
+    description: {
+      ...campaignDescriptionSchema,
+      nullable: true,
+    },
+    cryptSecret: {
+      ...secretSchema,
+      nullable: true,
+    },
+    upgradeSessionPath: {
+      ...campaignUpgradeSessionPathSchema,
+      nullable: true,
+    },
+    sessionCookieName: {
+      ...campaignSessionCookieNameSchema,
+      nullable: true,
+    },
+    sessionExpire: {
+      ...campaignSessionExpireSchema,
+      nullable: true,
+    },
+    newSessionExpire: {
+      ...campaignNewSessionExpireSchema,
+      nullable: true,
+    },
+    messageExpire: {
+      ...campaignMessageExpireSchema,
+      nullable: true,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Campaign
+ * @internal
+ */
+const rawCampaignPresetProxySchema: JSONSchemaType<RawCampaignPresetProxy> = {
+  type: 'object',
+  required: ['proxyId', 'url'],
+  properties: {
+    proxyId: customIdentSchema,
+    url: proxyUrlSchema,
+    isEnabled: {
+      ...booleanSchema,
+      nullable: true,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Campaign
+ * @internal
+ */
+const rawCampaignPresetTargetSchema: JSONSchemaType<RawCampaignPresetTarget> = {
+  type: 'object',
+  required: [
+    'targetId',
+    'accessLevel',
+    'donorSecure',
+    'donorSub',
+    'donorDomain',
+    'donorPort',
+    'mirrorSecure',
+    'mirrorSub',
+    'mirrorPort',
+  ],
+  properties: {
+    targetId: customIdentSchema,
+    accessLevel: targetAccessLevelSchema,
+    donorSecure: booleanSchema,
+    donorSub: targetSubSchema,
+    donorDomain: targetDomainSchema,
+    donorPort: targetPortSchema,
+    mirrorSecure: booleanSchema,
+    mirrorSub: targetSubSchema,
+    mirrorPort: targetPortSchema,
+    labels: {
+      ...targetLabelsSchema,
+      nullable: true,
+    },
+    connectTimeout: {
+      ...targetConnectTimeoutSchema,
+      nullable: true,
+    },
+    simpleTimeout: {
+      ...targetSimpleTimeoutSchema,
+      nullable: true,
+    },
+    streamTimeout: {
+      ...targetStreamTimeoutSchema,
+      nullable: true,
+    },
+    headersSizeLimit: {
+      ...targetHeadersSizeLimitSchema,
+      nullable: true,
+    },
+    bodySizeLimit: {
+      ...targetBodySizeLimitSchema,
+      nullable: true,
+    },
+    mainPage: {
+      ...targetContentSchema,
+      nullable: true,
+    },
+    notFoundPage: {
+      ...targetContentSchema,
+      nullable: true,
+    },
+    faviconIco: {
+      ...targetContentSchema,
+      nullable: true,
+    },
+    robotsTxt: {
+      ...targetContentSchema,
+      nullable: true,
+    },
+    sitemapXml: {
+      ...targetContentSchema,
+      nullable: true,
+    },
+    allowWebSockets: {
+      ...booleanSchema,
+      nullable: true,
+    },
+    isEnabled: {
+      ...booleanSchema,
+      nullable: true,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Campaign
+ * @internal
+ */
+const rawCampaignPresetRedirectorSchema: JSONSchemaType<RawCampaignPresetRedirector> = {
+  type: 'object',
+  required: ['redirectorId'],
+  properties: {
+    redirectorId: customIdentSchema,
+    page: {
+      ...redirectorPageSchema,
+      nullable: true,
+    },
+    fields: {
+      ...redirectorFieldsSchema,
+      nullable: true,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Campaign
+ * @internal
+ */
+const rawCampaignPresetLureSchema: JSONSchemaType<RawCampaignPresetLure> = {
+  type: 'object',
+  required: ['lureId', 'path', 'redirectorId'],
+  properties: {
+    lureId: customIdentSchema,
+    path: lurePathSchema,
+    redirectorId: customIdentSchema,
+    isEnabled: {
+      ...booleanSchema,
+      nullable: true,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Campaign
+ * @internal
+ */
+export const rawCampaignPresetSchema: JSONSchemaType<RawCampaignPreset> = {
+  type: 'object',
+  required: ['campaign'],
+  properties: {
+    campaign: rawCampaignPresetCampaignSchema,
+    proxies: {
+      type: 'array',
+      items: rawCampaignPresetProxySchema,
+      nullable: true,
+    },
+    targets: {
+      type: 'array',
+      items: rawCampaignPresetTargetSchema,
+      nullable: true,
+    },
+    redirectors: {
+      type: 'array',
+      items: rawCampaignPresetRedirectorSchema,
+      nullable: true,
+    },
+    lures: {
+      type: 'array',
+      items: rawCampaignPresetLureSchema,
+      nullable: true,
     },
   },
   additionalProperties: false,

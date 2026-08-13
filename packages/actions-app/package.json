@@ -1,15 +1,12 @@
 {
   "name": "@famir/actions-app",
   "type": "module",
-  "version": "0.0.4",
-  "description": "Famir actions app",
+  "version": "0.0.5",
+  "description": "Actions application",
   "keywords": [
     "famir",
     "fake-mirrors",
-    "man-in-the-middle",
-    "phishing",
-    "reverse-proxy",
-    "red-teaming"
+    "reverse-proxy"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
   "license": "Apache-2.0",

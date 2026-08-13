@@ -30,8 +30,8 @@ import { redisFunctions } from './redis-functions.js'
  * // Load Redis functions
  * await manager.loadFunctions()
  *
- * // Removes all data on all Redis databases
- * await manager.cleanup()
+ * const info = await manager.getInfo()
+ * console.log(info)
  * ```
  *
  * @category none
@@ -69,6 +69,20 @@ export class RedisDatabaseManager implements DatabaseManager {
     this.connection = connector.getConnection<RedisDatabaseConnection>()
   }
 
+  async getInfo(): Promise<string[]> {
+    try {
+      const result = await this.connection.INFO('server')
+
+      return result.split('\r\n').filter((res) => {
+        return res && !res.startsWith('#')
+      })
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        method: 'getInfo',
+      })
+    }
+  }
+
   async loadFunctions(): Promise<void> {
     try {
       await this.connection.FUNCTION_FLUSH()
@@ -77,7 +91,7 @@ export class RedisDatabaseManager implements DatabaseManager {
 
       for (const [name, data] of redisFunctions) {
         try {
-          this.logger.debug(`Loading Redis functions`, { name })
+          this.logger.debug(`Loading Redis functions: ${name}`)
 
           await this.connection.FUNCTION_LOAD(data)
         } catch (error) {
@@ -88,52 +102,25 @@ export class RedisDatabaseManager implements DatabaseManager {
       if (errors.length > 0) {
         await this.connection.FUNCTION_FLUSH()
 
-        throw new DatabaseError(`Loading Redis functions failed`, {
-          cause: errors,
-          code: 'INTERNAL_ERROR',
-        })
+        throw DatabaseError.internalError(`Loading Redis functions failed`, null, errors)
       } else {
         this.logger.info(`All Redis functions successfully loaded`)
       }
     } catch (error) {
-      this.handleDatabaseError(error, 'loadFunctions')
+      throw DatabaseError.wrap(error, {
+        method: 'loadFunctions',
+      })
     }
   }
 
   async cleanup(): Promise<void> {
     try {
-      this.logger.debug(`Cleaning up database`)
-
       await this.connection.FLUSHDB()
 
-      this.logger.warn(`Database cleaned up`)
+      this.logger.info(`Database cleaned up`)
     } catch (error) {
-      this.handleDatabaseError(error, 'cleanup')
-    }
-  }
-
-  /**
-   * Handles database operation errors.
-   *
-   * Re-throws `DatabaseError` instances with additional context, or wraps
-   * unknown errors into a `DatabaseError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleDatabaseError(error: unknown, method: string): never {
-    if (error instanceof DatabaseError) {
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new DatabaseError(`Unknown error`, {
-        cause: error,
-        context: {
-          method,
-        },
-        code: 'INTERNAL_ERROR',
+      throw DatabaseError.wrap(error, {
+        method: 'cleanup',
       })
     }
   }

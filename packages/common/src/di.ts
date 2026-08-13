@@ -217,3 +217,19 @@ export class DIContainer {
  * @param container - The DI container for registering dependencies.
  */
 export type DIComposer = (container: DIContainer) => void
+
+/**
+ * Async version of DIComposer.
+ *
+ * @param container - The DI container for registering dependencies.
+ */
+export type DIComposerAsync = (container: DIContainer) => Promise<void>
+
+/**
+ * Represents a composition root object.
+ */
+export interface CompositionRoot {
+  infra: DIComposer
+  start: DIComposerAsync
+  stop: DIComposerAsync
+}

@@ -124,7 +124,7 @@ export class ConsumerRouter {
 
     this.queues.set(queueName, new Map())
 
-    this.logger.debug(`ConsumerRouter add queue`, { queueName })
+    this.logger.debug(`ConsumerRouter add queue: ${queueName}`)
 
     return this
   }

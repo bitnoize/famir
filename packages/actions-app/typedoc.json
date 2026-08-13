@@ -1,8 +1,5 @@
 {
   "extends": ["../../typedoc.base.json"],
   "entryPoints": ["src/index.ts"],
-  "navigation": {
-    "includeCategories": true
-  },
   "categoryOrder": ["Analyze", "Webhook", "*"]
 }

@@ -16,6 +16,7 @@ import {
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 import { MESSAGE_REPOSITORY, MessageRepository } from './message.js'
@@ -135,16 +136,30 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         Date.now()
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
+      this.logger.info(`Database create message`, {
+        database: {
+          message: {
+            campaignId,
+            messageId,
+            proxyId,
+            targetId,
+            sessionId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', {
-        campaignId,
-        messageId,
-        proxyId,
-        targetId,
-        sessionId,
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: {
+          campaignId,
+          messageId,
+          proxyId,
+          targetId,
+          sessionId,
+        },
       })
     }
   }
@@ -166,16 +181,30 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         sessionId
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
+      this.logger.info(`Database create dummy message`, {
+        database: {
+          message: {
+            campaignId,
+            messageId,
+            proxyId,
+            targetId,
+            sessionId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'createDummy', {
-        campaignId,
-        messageId,
-        proxyId,
-        targetId,
-        sessionId,
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'createDummy',
+        params: {
+          campaignId,
+          messageId,
+          proxyId,
+          targetId,
+          sessionId,
+        },
       })
     }
   }
@@ -190,7 +219,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, messageId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: {
+          campaignId,
+          messageId,
+        },
+      })
     }
   }
 
@@ -204,7 +240,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'readFull', { campaignId, messageId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'readFull',
+        params: {
+          campaignId,
+          messageId,
+        },
+      })
     }
   }
 
@@ -213,7 +256,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param rawModel - The raw data from Redis.
    * @returns The message model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): MessageModel | null {
     if (rawModel === null) {
@@ -244,7 +287,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param rawModel - The raw data from Redis.
    * @returns The full message model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildFullModel(rawModel: unknown): FullMessageModel | null {
     if (rawModel === null) {
@@ -282,7 +325,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param value - The JSON string to decode.
    * @returns The HTTP headers object.
-   * @throws {@link DatabaseError} If decoding or validation fails.
+   * @throws DatabaseError If decoding or validation fails.
    */
   protected parseHeaders(value: string): HttpHeaders {
     const data = this.decodeJson(value)
@@ -297,7 +340,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param value - The JSON string to decode.
    * @returns The connection details object.
-   * @throws {@link DatabaseError} If decoding or validation fails.
+   * @throws DatabaseError If decoding or validation fails.
    */
   protected parseConnection(value: string): HttpConnection {
     const data = this.decodeJson(value)
@@ -312,7 +355,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param value - The JSON string to decode.
    * @returns The payload data object.
-   * @throws {@link DatabaseError} If decoding or validation fails.
+   * @throws DatabaseError If decoding or validation fails.
    */
   protected parsePayload(value: string): HttpPayload {
     const data = this.decodeJson(value)
@@ -327,7 +370,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param value - The JSON string to decode.
    * @returns The array of error objects.
-   * @throws {@link DatabaseError} If decoding or validation fails.
+   * @throws DatabaseError If decoding or validation fails.
    */
   protected parseErrors(value: string): HttpError[] {
     const data = this.decodeJson(value)

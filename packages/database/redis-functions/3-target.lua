@@ -92,6 +92,10 @@ local function create_target(keys, args)
     end
   end
 
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
   -- stylua: ignore
   local donor_str = model.campaign_id
     .. '\t' .. model.donor_sub
@@ -118,10 +122,6 @@ local function create_target(keys, args)
 
   if redis.call('HEXISTS', target_hosts_key, mirror_host) ~= 0 then
     return redis.error_reply('ERR Target mirror host already taken')
-  end
-
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return
@@ -433,7 +433,7 @@ redis.register_function({
   Update target
 --]]
 local function update_target(keys, args)
-  if #keys ~= 3 or #args < 1 then
+  if #keys ~= 3 or #args ~= 12 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -454,7 +454,7 @@ local function update_target(keys, args)
   end
 
   local stash = {
-    lock_secret = table.remove(args),
+    lock_secret = args[12],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -468,54 +468,24 @@ local function update_target(keys, args)
     end
   end
 
-  if #args % 2 ~= 0 then
-    return redis.error_reply('ERR Odd number of args')
-  end
-
-  local model = {}
-
-  for i = 1, #args, 2 do
-    local k, v = args[i], args[i + 1]
-
-    if model[k] then
-      return redis.error_reply('ERR Duplicate model.' .. k)
-    end
-
-    if k == 'connect_timeout' then
-      model.connect_timeout = tonumber(v)
-    elseif k == 'simple_timeout' then
-      model.simple_timeout = tonumber(v)
-    elseif k == 'stream_timeout' then
-      model.stream_timeout = tonumber(v)
-    elseif k == 'headers_size_limit' then
-      model.headers_size_limit = tonumber(v)
-    elseif k == 'body_size_limit' then
-      model.body_size_limit = tonumber(v)
-    elseif k == 'main_page' then
-      model.main_page = v
-    elseif k == 'not_found_page' then
-      model.not_found_page = v
-    elseif k == 'favicon_ico' then
-      model.favicon_ico = v
-    elseif k == 'robots_txt' then
-      model.robots_txt = v
-    elseif k == 'sitemap_xml' then
-      model.sitemap_xml = v
-    elseif k == 'allow_websockets' then
-      model.allow_websockets = tonumber(v)
-    else
-      return redis.error_reply('ERR Unknown model.' .. k)
-    end
-  end
+  local model = {
+    connect_timeout = tonumber(args[1]),
+    simple_timeout = tonumber(args[2]),
+    stream_timeout = tonumber(args[3]),
+    headers_size_limit = tonumber(args[4]),
+    body_size_limit = tonumber(args[5]),
+    main_page = args[6],
+    not_found_page = args[7],
+    favicon_ico = args[8],
+    robots_txt = args[9],
+    sitemap_xml = args[10],
+    allow_websockets = tonumber(args[11]),
+  }
 
   for k, v in pairs(model) do
     if not v then
       return redis.error_reply('ERR Wrong model.' .. k)
     end
-  end
-
-  if next(model) == nil then
-    return redis.status_reply('OK Nothing to update')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -582,12 +552,12 @@ local function enable_target(keys, args)
     end
   end
 
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('OK Target already enabled')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.is_enabled ~= 0 then
+    return redis.status_reply('OK Target already enabled')
   end
 
   -- Point of no return
@@ -643,12 +613,12 @@ local function disable_target(keys, args)
     end
   end
 
-  if stash.is_enabled == 0 then
-    return redis.status_reply('OK Target already disabled')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.is_enabled == 0 then
+    return redis.status_reply('OK Target already disabled')
   end
 
   -- Point of no return
@@ -705,12 +675,12 @@ local function append_target_label(keys, args)
     end
   end
 
-  if redis.call('SISMEMBER', target_labels_key, stash.label) ~= 0 then
-    return redis.status_reply('OK Target label already exists')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if redis.call('SISMEMBER', target_labels_key, stash.label) ~= 0 then
+    return redis.status_reply('OK Target label already exists')
   end
 
   -- Point of no return
@@ -727,10 +697,10 @@ redis.register_function({
 })
 
 --[[
-  Remove target label
+  Remove all target labels
 --]]
-local function remove_target_label(keys, args)
-  if #keys ~= 4 or #args ~= 2 then
+local function remove_target_labels(keys, args)
+  if #keys ~= 4 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -752,8 +722,7 @@ local function remove_target_label(keys, args)
   end
 
   local stash = {
-    label = args[1],
-    lock_secret = args[2],
+    lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -762,30 +731,30 @@ local function remove_target_label(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (k == 'label' or k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
-  end
-
-  if redis.call('SISMEMBER', target_labels_key, stash.label) ~= 1 then
-    return redis.status_reply('OK Target label not exists')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
+  if redis.call('EXISTS', target_labels_key) ~= 1 then
+    return redis.status_reply('OK Target labels is empty')
+  end
+
   -- Point of no return
 
-  redis.call('SREM', target_labels_key, stash.label)
+  redis.call('DEL', target_labels_key)
 
-  return redis.status_reply('OK Target label removed')
+  return redis.status_reply('OK Target labels removed')
 end
 
 redis.register_function({
-  function_name = 'remove_target_label',
-  callback = remove_target_label,
-  description = 'Remove target label',
+  function_name = 'remove_target_labels',
+  callback = remove_target_labels,
+  description = 'Remove target labels',
 })
 
 --[[
@@ -854,6 +823,14 @@ local function delete_target(keys, args)
     end
   end
 
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.is_enabled ~= 0 then
+    return redis.status_reply('FORBIDDEN Target not disabled')
+  end
+
   -- stylua: ignore
   local donor_str = stash.campaign_id
     .. '\t' .. stash.donor_sub
@@ -869,14 +846,6 @@ local function delete_target(keys, args)
       and (stash.mirror_sub .. '.' .. stash.mirror_domain)
     or stash.mirror_domain
   local mirror_host = mirror_hostname .. ':' .. stash.mirror_port
-
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('FORBIDDEN Target not disabled')
-  end
-
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
-  end
 
   -- Point of no return
 

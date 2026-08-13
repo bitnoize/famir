@@ -1,4 +1,4 @@
-import { CommonError, CommonErrorOptions } from '@famir/common'
+import { CommonError, CommonErrorOptions, ErrorContext } from '@famir/common'
 
 /**
  * Error codes that can be returned by database operations.
@@ -8,7 +8,7 @@ import { CommonError, CommonErrorOptions } from '@famir/common'
  *
  * @category none
  */
-export type DatabaseErrorCode = 'NOT_FOUND' | 'CONFLICT' | 'FORBIDDEN' | 'INTERNAL_ERROR'
+export type DatabaseErrorCode = 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT' | 'INTERNAL_ERROR'
 
 /**
  * Options for creating a database error.
@@ -39,5 +39,103 @@ export class DatabaseError extends CommonError {
 
     this.name = 'DatabaseError'
     this.code = options.code
+  }
+
+  /**
+   * Creates a new database error with `FORBIDDEN` code.
+   *
+   * @param message - The human-readable description of the error.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static forbidden(message: string, context?: ErrorContext | null, cause?: unknown): DatabaseError {
+    return new DatabaseError(message, {
+      cause,
+      context,
+      code: 'FORBIDDEN',
+    })
+  }
+
+  /**
+   * Creates a new database error with `NOT_FOUND` code.
+   *
+   * @param message - The human-readable description of the error.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static notFound(message: string, context?: ErrorContext | null, cause?: unknown): DatabaseError {
+    return new DatabaseError(message, {
+      cause,
+      context,
+      code: 'NOT_FOUND',
+    })
+  }
+
+  /**
+   * Creates a new database error with `CONFLICT` code.
+   *
+   * @param message - The human-readable description of the error.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static conflict(message: string, context?: ErrorContext | null, cause?: unknown): DatabaseError {
+    return new DatabaseError(message, {
+      cause,
+      context,
+      code: 'CONFLICT',
+    })
+  }
+
+  /**
+   * Creates a new database error with `INTERNAL_ERROR` code.
+   *
+   * @param message - The human-readable description of the error.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static internalError(
+    message: string,
+    context?: ErrorContext | null,
+    cause?: unknown
+  ): DatabaseError {
+    return new DatabaseError(message, {
+      cause,
+      context,
+      code: 'INTERNAL_ERROR',
+    })
+  }
+
+  /**
+   * Re-throws `DatabaseError` instances with additional context, or wraps
+   * unknown errors into a `DatabaseError` with an `INTERNAL_ERROR` code.
+   *
+   * @param error - The caught error.
+   * @param context - The error context.
+   * @returns A new database instance.
+   */
+  static wrap(error: unknown, context: ErrorContext): DatabaseError {
+    if (error instanceof DatabaseError) {
+      Object.assign(error.context, context)
+
+      return error
+    } else {
+      return DatabaseError.internalError(`Unknown error`, context, error)
+    }
+  }
+
+  get isForbidden(): boolean {
+    return this.code === 'FORBIDDEN'
+  }
+
+  get isNotFound(): boolean {
+    return this.code === 'NOT_FOUND'
+  }
+
+  get isConflict(): boolean {
+    return this.code === 'CONFLICT'
+  }
+
+  get isInternalError(): boolean {
+    return this.code === 'INTERNAL_ERROR'
   }
 }

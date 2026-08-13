@@ -1,9 +1,5 @@
 import { lurePathSchema } from '@famir/database'
-import {
-  JSONSchemaType,
-  customIdentSchema,
-  randomIdentSchema,
-} from '@famir/validator'
+import { JSONSchemaType, customIdentSchema } from '@famir/validator'
 import {
   CreateLureArgs,
   DeleteLureArgs,
@@ -14,14 +10,12 @@ import {
 } from './lure.js'
 
 /**
- * JSON Schema for validating a create lure args.
- *
  * @category Lure
  * @internal
  */
 export const createLureArgsSchema: JSONSchemaType<CreateLureArgs> = {
   type: 'object',
-  required: ['_', 'path', 'lockSecret'],
+  required: ['_', 'path'],
   properties: {
     _: {
       type: 'array',
@@ -30,14 +24,11 @@ export const createLureArgsSchema: JSONSchemaType<CreateLureArgs> = {
       maxItems: 3,
     },
     path: lurePathSchema,
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating a read lure args.
- *
  * @category Lure
  * @internal
  */
@@ -56,14 +47,12 @@ export const readLureArgsSchema: JSONSchemaType<ReadLureArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a toggle lure args.
- *
  * @category Lure
  * @internal
  */
 export const toggleLureArgsSchema: JSONSchemaType<ToggleLureArgs> = {
   type: 'object',
-  required: ['_', 'lockSecret'],
+  required: ['_'],
   properties: {
     _: {
       type: 'array',
@@ -71,20 +60,17 @@ export const toggleLureArgsSchema: JSONSchemaType<ToggleLureArgs> = {
       minItems: 2,
       maxItems: 2,
     },
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating a delete lure args.
- *
  * @category Lure
  * @internal
  */
 export const deleteLureArgsSchema: JSONSchemaType<DeleteLureArgs> = {
   type: 'object',
-  required: ['_', 'lockSecret'],
+  required: ['_'],
   properties: {
     _: {
       type: 'array',
@@ -92,14 +78,11 @@ export const deleteLureArgsSchema: JSONSchemaType<DeleteLureArgs> = {
       minItems: 3,
       maxItems: 3,
     },
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
 
 /**
- * JSON Schema for validating a list lures args.
- *
  * @category Lure
  * @internal
  */
@@ -118,8 +101,6 @@ export const listLuresArgsSchema: JSONSchemaType<ListLuresArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a make lure url args.
- *
  * @category Lure
  * @internal
  */

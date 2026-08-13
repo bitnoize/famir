@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer } from '@famir/common'
+import { DIContainer, LifecycleError } from '@famir/common'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { Config, CONFIG, ConfigData } from './config.js'
 
@@ -83,20 +83,32 @@ export class EnvConfig implements Config {
         return this.#cache[schemaName] as T
       }
 
-      const data = { ...process.env }
+      const conf = { ...process.env }
 
-      this.validator.assertSchema<T>(schemaName, data)
+      this.validateConfig<T>(schemaName, conf)
 
-      this.#cache[schemaName] = data
+      this.#cache[schemaName] = conf
 
-      return data
+      return conf
     } catch (error) {
-      throw new BootstrapError(`Build configuration failed`, {
-        cause: error,
-        context: {
-          service: 'config',
-        },
+      throw LifecycleError.wrap(error, {
+        service: 'config',
       })
+    }
+  }
+
+  /**
+   * Validates config against a registered JSON Schema.
+   *
+   * @param value - The config to validate.
+   * @throws LifecycleError If validation fails.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  protected validateConfig<T>(schemaName: string, value: unknown): asserts value is T {
+    try {
+      this.validator.assertSchema<T>(schemaName, value)
+    } catch (error) {
+      throw LifecycleError.create(`Validate config failed`, null, error)
     }
   }
 }

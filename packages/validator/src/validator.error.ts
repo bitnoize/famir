@@ -1,29 +1,11 @@
-import { CommonError, CommonErrorOptions } from '@famir/common'
-
-/**
- * Single JSON Schema validation error.
- */
-export interface ValidatorValidateError {
-  /** Validation keyword that failed. */
-  keyword: string
-  /** JSON Pointer to the instance that failed validation. */
-  instancePath: string
-  /** JSON Pointer to the schema keyword that failed. */
-  schemaPath: string
-  /** Additional parameters for the specific error. */
-  params: object
-  /** Name of the property that caused the error. */
-  propertyName: string | undefined
-  /** Human-readable error message. */
-  message: string | undefined
-}
+import { CommonError, CommonErrorOptions, ErrorContext } from '@famir/common'
 
 /**
  * Options for creating a validator error.
  */
 export type ValidatorErrorOptions = CommonErrorOptions & {
   /** A list of validation errors. */
-  validateErrors: ValidatorValidateError[]
+  validateErrors?: unknown[] | null | undefined
 }
 
 /**
@@ -31,7 +13,7 @@ export type ValidatorErrorOptions = CommonErrorOptions & {
  */
 export class ValidatorError extends CommonError {
   /** Associated list of validation errors. */
-  readonly validateErrors: ValidatorValidateError[]
+  readonly validateErrors: unknown[]
 
   /**
    * Creates a new validator error instance.
@@ -43,6 +25,27 @@ export class ValidatorError extends CommonError {
     super(message, options)
 
     this.name = 'ValidatorError'
-    this.validateErrors = options.validateErrors
+    this.validateErrors = options.validateErrors ?? []
+  }
+
+  /**
+   * Creates a new validator error.
+   *
+   * @param message - The human-readable description of the error.
+   * @param validateErrors - The optional validation errors.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static create(
+    message: string,
+    validateErrors?: unknown[] | null,
+    context?: ErrorContext | null,
+    cause?: unknown
+  ): ValidatorError {
+    return new ValidatorError(message, {
+      cause,
+      validateErrors,
+      context,
+    })
   }
 }

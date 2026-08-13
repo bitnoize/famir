@@ -11,6 +11,7 @@
     "packages/storage",
     "packages/producer",
     "packages/consumer",
+    "packages/edge-server",
     "packages/http-client",
     "packages/http-server",
     "packages/http-tools",
@@ -24,7 +25,6 @@
   "plugin": ["typedoc-theme-fresh"],
   "theme": "fresh",
   "hostedBaseUrl": "https://docs.fake-mirrors.net",
-  "titleLink": "https://fake-mirrors.net",
   "navigation": {
     "includeFolders": false,
     "includeCategories": true,

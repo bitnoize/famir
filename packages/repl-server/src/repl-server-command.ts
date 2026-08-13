@@ -38,21 +38,14 @@ export interface ReplServerCommandArgs {
 }
 
 /**
- * Represents the repl-server context.
- */
-export interface ReplServerCommandContext {
-  famir: Record<string, unknown>
-  [key: string]: unknown
-}
-
-/**
  * Represents the repl-server command action function.
+ *
+ * @param spec - The command spec object.
  */
 export type ReplServerCommandAction<T extends ReplServerCommandArgs> = (
   console: Console,
   spec: ReplServerCommandSpec,
-  args: T,
-  context: ReplServerCommandContext
+  args: T
 ) => Promise<void>
 
 /**
@@ -100,9 +93,9 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    * Parses command arguments with yargs-parser.
    *
    * @param args - The raw string.
-   * @returns Parsed command args.
+   * @returns Parsed command arguments, or `null` if parsing fails.
    */
-  parseArgs(args: string): ReplServerCommandArgs {
+  parseArgs(args: string): ReplServerCommandArgs | null {
     try {
       const state: ReplServerCommandState = {
         boolean: [],
@@ -113,14 +106,21 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
       }
 
       this.spec.options.forEach((option) => {
-        if (option.type === 'boolean') {
-          state.boolean.push(option.name)
-        } else if (option.type === 'number') {
-          state.number.push(option.name)
-        } else if (option.type === 'string') {
-          state.string.push(option.name)
-        } else {
-          throw new Error(`Unknown command option type`)
+        switch (option.type) {
+          case 'boolean':
+            state.boolean.push(option.name)
+            break
+
+          case 'number':
+            state.number.push(option.name)
+            break
+
+          case 'string':
+            state.string.push(option.name)
+            break
+
+          default:
+            throw new Error(`Unknown command option type`)
         }
 
         if (option.alias) {
@@ -153,8 +153,8 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
       })
 
       return parsedArgs
-    } catch (error) {
-      this.handleCommandError(error, 'parse-args', args)
+    } catch {
+      return null
     }
   }
 
@@ -163,7 +163,7 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    *
    * @param console - The underlying Console instance.
    */
-  showHelp(console: Console, detail = false) {
+  showHelp(console: Console) {
     console.log()
 
     const usage: string = [
@@ -192,12 +192,22 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
     }
 
     try {
-      if (detail) {
-        this.help(console, this.spec)
-      }
+      this.help(console, this.spec)
     } catch (error) {
       console.error(error)
     }
+  }
+
+  /**
+   * Checks that need to show help.
+   *
+   * @param args - The parsed command args.
+   * @returns `true` if help need to show, `false` otherwise.
+   */
+  checkHelp(args: ReplServerCommandArgs): boolean {
+    const params = this.spec.params ?? []
+
+    return !!args.help || args._.length !== params.length
   }
 
   /**
@@ -205,48 +215,16 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    *
    * @param console - The underlying Console instance.
    * @param args - The parsed command args.
-   * @throws {@link ReplServerError} If validation fails.
+   * @throws ReplServerError If validation fails.
    */
-  async execute(
-    console: Console,
-    args: ReplServerCommandArgs,
-    context: ReplServerCommandContext
-  ): Promise<void> {
+  async execute(console: Console, args: ReplServerCommandArgs): Promise<void> {
     try {
       this.validateArgs(args)
 
-      await this.action(console, this.spec, args, context)
+      await this.action(console, this.spec, args)
     } catch (error) {
-      this.handleCommandError(error, 'execute', args)
-    }
-  }
-
-  /**
-   * Handles command operation errors.
-   *
-   * Re-throws `ReplServerError` instances with additional context, or wraps
-   * unknown errors into a `ReplServerError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param args - The args that were being processed.
-   * @returns Never returns, always throws.
-   */
-  protected handleCommandError(error: unknown, level: string, args: unknown): never {
-    if (error instanceof ReplServerError) {
-      error.context['level'] = level
-      error.context['spec'] = this.spec
-      error.context['args'] = args
-
-      throw error
-    } else {
-      throw new ReplServerError(`Unknown error`, {
-        cause: error,
-        context: {
-          level,
-          spec: this.spec,
-          args,
-        },
-        code: 'INTERNAL_ERROR',
+      throw ReplServerError.wrap(error, {
+        args,
       })
     }
   }
@@ -255,16 +233,13 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    * Validates args against a registered JSON Schema.
    *
    * @param value - The args to validate.
-   * @throws {@link ReplServerError} If validation fails.
+   * @throws ReplServerError If validation fails.
    */
   protected validateArgs(value: unknown): asserts value is T {
     try {
       this.validator.assertSchema<T>(this.spec.schemaName, value)
     } catch (error) {
-      throw new ReplServerError(`Validate args failed`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
+      throw ReplServerError.badRequest(`Validate args failed`, null, error)
     }
   }
 }

@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer, serializeError } from '@famir/common'
+import { DIContainer, LifecycleError, serializeError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -47,9 +47,6 @@ interface BullProducerConnectorOptions {
  * // Resolve dependency from container
  * const connector = container.resolve<ProducerConnector>(PRODUCER_CONNECTOR)
  *
- * // Connect to Redis
- * await connector.connect()
- *
  * // Get underlying Redis connection
  * const connection = connector.getConnection<RedisProducerConnection>()
  *
@@ -97,11 +94,12 @@ export class RedisProducerConnector implements ProducerConnector {
   ) {
     this.validator.addSchema('producer-config', bullProducerConfigSchema)
 
-    const configData = this.config.get<BullProducerConfig>('producer-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<BullProducerConfig>('producer-config')
+    this.options = this.buildOptions(conf)
 
     this.connection = new Redis(this.options.connectionUrl, {
       connectionName: 'producer',
+      maxRetriesPerRequest: 10,
     })
 
     this.connection.on('error', (error) => {
@@ -111,11 +109,11 @@ export class RedisProducerConnector implements ProducerConnector {
     })
 
     this.connection.on('ready', () => {
-      this.logger.info(`ProducerConnector Redis event: ready`)
+      this.logger.debug(`ProducerConnector Redis event: ready`)
     })
 
     this.connection.on('end', () => {
-      this.logger.info(`ProducerConnector Redis event: end`)
+      this.logger.debug(`ProducerConnector Redis event: end`)
     })
   }
 
@@ -124,52 +122,38 @@ export class RedisProducerConnector implements ProducerConnector {
     return this.connection as T
   }
 
+  async connect(): Promise<void> {
+    try {
+      await this.connection.ping()
+
+      this.logger.info(`ProducerConnector established connection`)
+    } catch (error) {
+      throw LifecycleError.wrap(error, {
+        service: 'producer-connector',
+        method: 'connect',
+      })
+    }
+  }
+
   async close(): Promise<void> {
     try {
       await this.connection.quit()
 
-      this.logger.debug(`ProducerConnector closed connection`)
+      this.logger.info(`ProducerConnector closed connection`)
     } catch (error) {
-      this.handleBootstrapError(error, 'close')
-    }
-  }
-
-  /**
-   * Handles bootstrap operation errors.
-   *
-   * Re-throws `BootstrapError` instances with additional context, or wraps
-   * unknown errors into a `BootstrapError`.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleBootstrapError(error: unknown, method: string): never {
-    if (error instanceof BootstrapError) {
-      error.context['service'] = 'producer-connector'
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new BootstrapError(`Unknown error`, {
-        cause: error,
-        context: {
-          service: 'producer-connector',
-          method,
-        },
+      throw LifecycleError.wrap(error, {
+        service: 'producer-connector',
+        method: 'close',
       })
     }
   }
 
   /**
    * Converts validated configuration to a connector options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The connector options object.
    */
-  private buildOptions(data: BullProducerConfig): BullProducerConnectorOptions {
+  private buildOptions(conf: BullProducerConfig): BullProducerConnectorOptions {
     return {
-      connectionUrl: data.PRODUCER_CONNECTION_URL,
+      connectionUrl: conf.PRODUCER_CONNECTION_URL,
     }
   }
 }

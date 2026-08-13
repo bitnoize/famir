@@ -18,6 +18,11 @@ export const LOGGER_LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fa
 export type LoggerLogLevel = (typeof LOGGER_LOG_LEVELS)[number]
 
 /**
+ * Structured log data.
+ */
+export type LoggerData = Record<string, unknown>
+
+/**
  * Defines the public contract for a logger.
  *
  * Provides structured logging with methods for different severity levels.
@@ -74,16 +79,17 @@ export interface Logger {
 }
 
 /**
- * Structured log data.
+ * Settings for a logger.
  */
-export type LoggerData = Record<string, unknown>
+export interface LoggerSettings {
+  /** Application name to be used for logging. */
+  appName: string
+}
 
 /**
  * Configuration for a Pino logger.
  */
 export interface PinoLoggerConfig extends ConfigData {
-  /** Application name to be used for logging. */
-  LOGGER_APP_NAME: string
   /** Logging level for the application. */
   LOGGER_LOG_LEVEL: LoggerLogLevel
 }

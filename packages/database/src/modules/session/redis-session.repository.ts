@@ -87,13 +87,27 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { session: { campaignId, sessionId } })
+      this.logger.info(`Database create session`, {
+        database: {
+          session: {
+            campaignId,
+            sessionId,
+          },
+        },
+      })
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, sessionId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: {
+          campaignId,
+          sessionId,
+        },
+      })
     }
   }
 
@@ -107,7 +121,14 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, sessionId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: {
+          campaignId,
+          sessionId,
+        },
+      })
     }
   }
 
@@ -124,13 +145,27 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { session: { campaignId, sessionId } })
+      this.logger.info(`Database auth session`, {
+        database: {
+          session: {
+            campaignId,
+            sessionId,
+          },
+        },
+      })
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'auth', { campaignId, sessionId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'auth',
+        params: {
+          campaignId,
+          sessionId,
+        },
+      })
     }
   }
 
@@ -149,11 +184,27 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         secret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { session: { campaignId, lureId, sessionId } })
+      this.logger.info(`Database upgrade session`, {
+        database: {
+          session: {
+            campaignId,
+            lureId,
+            sessionId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'upgrade', { campaignId, lureId, sessionId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'upgrade',
+        params: {
+          campaignId,
+          lureId,
+          sessionId,
+        },
+      })
     }
   }
 
@@ -162,7 +213,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
    *
    * @param rawModel - The raw data from Redis.
    * @returns The session model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): SessionModel | null {
     if (rawModel === null) {
@@ -188,8 +239,8 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
    *
    * @param rawModel - The raw data from Redis.
    * @returns The session model.
-   * @throws {@link DatabaseError} If the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data is `null`.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModelStrict(rawModel: unknown): SessionModel {
     const model = this.buildModel(rawModel)

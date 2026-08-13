@@ -3,6 +3,7 @@ import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawLure } from './lure.functions.js'
 import { LURE_REPOSITORY, LureRepository } from './lure.js'
@@ -88,11 +89,29 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { lure: { campaignId, lureId, path, redirectorId } })
+      this.logger.info(`Database create lure`, {
+        database: {
+          lure: {
+            campaignId,
+            lureId,
+            path,
+            redirectorId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, lureId, path, redirectorId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: {
+          campaignId,
+          lureId,
+          path,
+          redirectorId,
+        },
+      })
     }
   }
 
@@ -102,7 +121,14 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, lureId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: {
+          campaignId,
+          lureId,
+        },
+      })
     }
   }
 
@@ -120,7 +146,14 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'find', { campaignId, path })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'find',
+        params: {
+          campaignId,
+          path,
+        },
+      })
     }
   }
 
@@ -133,11 +166,25 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { lure: { campaignId, lureId } })
+      this.logger.info(`Database enable lure`, {
+        database: {
+          lure: {
+            campaignId,
+            lureId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'enable', { campaignId, lureId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'enable',
+        params: {
+          campaignId,
+          lureId,
+        },
+      })
     }
   }
 
@@ -150,11 +197,25 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { lure: { campaignId, lureId } })
+      this.logger.info(`Database disable lure`, {
+        database: {
+          lure: {
+            campaignId,
+            lureId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'disable', { campaignId, lureId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'disable',
+        params: {
+          campaignId,
+          lureId,
+        },
+      })
     }
   }
 
@@ -173,11 +234,27 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { lure: { campaignId, lureId, redirectorId } })
+      this.logger.info(`Database delete lure`, {
+        database: {
+          lure: {
+            campaignId,
+            lureId,
+            redirectorId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'delete', { campaignId, lureId, redirectorId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: {
+          campaignId,
+          lureId,
+          redirectorId,
+        },
+      })
     }
   }
 
@@ -199,7 +276,13 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'list', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
@@ -208,7 +291,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
    *
    * @param rawModel - The raw data from Redis.
    * @returns The lure model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): LureModel | null {
     if (rawModel === null) {
@@ -233,7 +316,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of lure models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): LureModel[] {
     this.validateArrayReply(rawCollection)

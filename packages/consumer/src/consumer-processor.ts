@@ -43,36 +43,9 @@ export class ConsumerProcessor<T> {
 
       await this.action(this.spec, data)
     } catch (error) {
-      this.handleProcessorError(error, 'execute', data)
-    }
-  }
-
-  /**
-   * Handles processor errors.
-   *
-   * Re-throws `ConsumerError` instances with additional context, or wraps
-   * unknown errors into a `ConsumerError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param data - The data that were being processed.
-   * @returns Never returns, always throws.
-   */
-  protected handleProcessorError(error: unknown, level: string, data: unknown): never {
-    if (error instanceof ConsumerError) {
-      error.context['level'] = level
-      error.context['spec'] = this.spec
-      error.context['data'] = data
-
-      throw error
-    } else {
-      throw new ConsumerError(`Unknown error`, {
-        cause: error,
-        context: {
-          level,
-          spec: this.spec,
-          data,
-        },
-        code: 'INTERNAL_ERROR',
+      throw ConsumerError.wrap(error, {
+        queue: this.spec.queueName,
+        job: this.spec.jobName,
       })
     }
   }
@@ -81,16 +54,13 @@ export class ConsumerProcessor<T> {
    * Validates data against a registered JSON Schema.
    *
    * @param value - The data to validate.
-   * @throws {@link ConsumerError} If validation fails.
+   * @throws ConsumerError If validation fails.
    */
   protected validateData(value: unknown): asserts value is T {
     try {
       this.validator.assertSchema<T>(this.spec.schemaName, value)
     } catch (error) {
-      throw new ConsumerError(`Validate data failed`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
+      throw ConsumerError.badRequest(`Validate data failed`, null, error)
     }
   }
 }

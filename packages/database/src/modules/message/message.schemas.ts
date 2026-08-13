@@ -13,8 +13,6 @@ import {
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
 /**
- * JSON Schema for validating raw message data from Redis.
- *
  * @category Message
  * @internal
  */
@@ -54,8 +52,6 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
 } as const
 
 /**
- * JSON Schema for validating raw full message data from Redis.
- *
  * @category Message
  * @internal
  */
@@ -114,7 +110,9 @@ export const rawFullMessageSchema: JSONSchemaType<RawFullMessage> = {
     errors: {
       type: 'string',
     },
-    analyze: customIdentSchema,
+    analyze: {
+      type: 'string',
+    },
     start_time: timestampSchema,
     finish_time: timestampSchema,
     created_at: timestampSchema,

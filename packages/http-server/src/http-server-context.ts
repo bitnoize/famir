@@ -78,7 +78,7 @@ export interface HttpServerContext {
    * Loads the request body into memory.
    *
    * @param bodySizeLimit - The maximum body size in bytes.
-   * @throws {@link HttpServerError} If the body exceeds the size limit.
+   * @throws HttpServerError If the body exceeds the size limit.
    */
   loadRequest(bodySizeLimit: number): Promise<void>
 
@@ -172,13 +172,13 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
       this.responseHeaders = HttpHeadersWrap.fromScratch()
       this.responseBody = HttpBodyWrap.fromScratch()
     } catch (error) {
-      throw new HttpServerError(`Bad request`, {
-        cause: error,
-        context: {
+      throw HttpServerError.badRequest(
+        `Bad request`,
+        {
           reason: `Create context failed`,
         },
-        code: 'BAD_REQUEST',
-      })
+        error
+      )
     }
   }
 
@@ -203,9 +203,9 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
       return this.#isBot
     }
 
-    const value = this.requestHeaders.getString('User-Agent') ?? ''
+    const value = this.requestHeaders.getString('User-Agent')
 
-    this.#isBot = isbot(value)
+    this.#isBot = value ? isbot(value) : true
 
     return this.#isBot
   }
@@ -254,7 +254,7 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
       responseBody: this.responseBody.length,
       isComplete: this.isComplete,
       isBot: this.isBot,
-      totalTime: this.finishTime - this.startTime,
+      totalTime: this.finishTime > this.startTime ? this.finishTime - this.startTime : 0,
     }
   }
 
@@ -264,16 +264,10 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
    * @param requestStream - The readable stream to read from.
    * @param bodySizeLimit - The maximum body size in bytes.
    * @returns A promise that resolves to the loaded body buffer.
-   * @throws {@link HttpServerError} If the body exceeds the size limit or an error occurs.
+   * @throws HttpServerError If the body exceeds the size limit or an error occurs.
    */
   protected loadRequestBody(requestStream: Readable, bodySizeLimit: number): Promise<HttpBody> {
     return new Promise<HttpBody>((resolve, reject) => {
-      if (!(bodySizeLimit > 0)) {
-        reject(new Error(`Wrong loadRequestBody params`))
-
-        return
-      }
-
       const chunks: Buffer[] = []
       let requestBodySize = 0
 
@@ -282,11 +276,9 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
           requestStream.destroy()
 
           reject(
-            new HttpServerError(`Content too large`, {
-              context: {
-                reason: `Request body size limit exceeded`,
-              },
-              code: 'CONTENT_TOO_LARGE',
+            HttpServerError.contentTooLarge(`Content too large`, {
+              reason: `Request body size limit exceeded`,
+              bodySizeLimit,
             })
           )
 
@@ -306,13 +298,13 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
 
       requestStream.on('error', (error) => {
         reject(
-          new HttpServerError(`Bad request`, {
-            cause: error,
-            context: {
+          HttpServerError.badRequest(
+            `Bad request`,
+            {
               reason: `Load request body failed`,
             },
-            code: 'BAD_REQUEST',
-          })
+            error
+          )
         )
       })
     })
@@ -324,20 +316,20 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
    * @param responseStream - The writable stream to write to.
    * @param responseBody - The body buffer to send.
    * @returns A promise that resolves when the body has been sent.
-   * @throws {@link HttpServerError} If sending fails.
+   * @throws HttpServerError If sending fails.
    */
   protected sendResponseBody(responseStream: Writable, responseBody: HttpBody): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       responseStream.end(responseBody, (error?: Error) => {
         if (error) {
           reject(
-            new HttpServerError(`Internal error`, {
-              cause: error,
-              context: {
+            HttpServerError.internalError(
+              `Internal error`,
+              {
                 reason: `Send response body failed`,
               },
-              code: 'INTERNAL_ERROR',
-            })
+              error
+            )
           )
 
           return
@@ -350,9 +342,6 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
 
   /**
    * Concatenates buffer chunks into a single Buffer.
-   *
-   * @param chunks - The buffer chunks to concatenate.
-   * @returns The concatenated buffer, or an empty buffer on error.
    */
   private parseRawBody(chunks: Buffer[]): HttpBody {
     try {
@@ -387,7 +376,7 @@ export class HttpServerNormalContext extends HttpServerBaseContext {
     this.url.freeze()
     this.requestHeaders.freeze()
 
-    this.res.on('finish', () => {
+    this.res.on('close', () => {
       this.finishTime = Date.now()
     })
   }
@@ -408,12 +397,9 @@ export class HttpServerNormalContext extends HttpServerBaseContext {
 
   override sendHead() {
     if (this.status.isUnknown()) {
-      throw new HttpServerError(`Internal error`, {
-        context: {
-          reason: `Unknown response status`,
-          status: this.status.get(),
-        },
-        code: 'INTERNAL_ERROR',
+      throw HttpServerError.internalError(`Internal error`, {
+        reason: `Unknown response status`,
+        status: this.status.get(),
       })
     }
 
@@ -477,7 +463,7 @@ export class HttpServerWebSocketContext extends HttpServerBaseContext {
 
     this.duplexStream = createWebSocketStream(ws)
 
-    this.duplexStream.on('finish', () => {
+    this.duplexStream.on('close', () => {
       this.finishTime = Date.now()
     })
   }
@@ -497,11 +483,11 @@ export class HttpServerWebSocketContext extends HttpServerBaseContext {
   }
 
   override sendHead() {
-    throw new Error(`Not implemented for WebSocket context`)
+    throw new Error(`Not implemented for websocket context`)
   }
 
   override sendResponse(): Promise<void> {
-    throw new Error(`Not implemented for WebSocket context`)
+    throw new Error(`Not implemented for websocket context`)
   }
 
   override close() {

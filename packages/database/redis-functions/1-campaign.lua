@@ -353,7 +353,7 @@ redis.register_function({
   Update campaign
 --]]
 local function update_campaign(keys, args)
-  if #keys ~= 2 or #args < 1 then
+  if #keys ~= 2 or #args ~= 5 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -369,7 +369,7 @@ local function update_campaign(keys, args)
   end
 
   local stash = {
-    lock_secret = table.remove(args),
+    lock_secret = args[5],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -383,31 +383,12 @@ local function update_campaign(keys, args)
     end
   end
 
-  if #args % 2 ~= 0 then
-    return redis.error_reply('ERR Odd number of args')
-  end
-
-  local model = {}
-
-  for i = 1, #args, 2 do
-    local k, v = args[i], args[i + 1]
-
-    if model[k] then
-      return redis.error_reply('ERR Duplicate model.' .. k)
-    end
-
-    if k == 'description' then
-      model.description = v
-    elseif k == 'session_expire' then
-      model.session_expire = tonumber(v)
-    elseif k == 'new_session_expire' then
-      model.new_session_expire = tonumber(v)
-    elseif k == 'message_expire' then
-      model.message_expire = tonumber(v)
-    else
-      return redis.error_reply('ERR Unknown model.' .. k)
-    end
-  end
+  local model = {
+    description = args[1],
+    session_expire = tonumber(args[2]),
+    new_session_expire = tonumber(args[3]),
+    message_expire = tonumber(args[4]),
+  }
 
   for k, v in pairs(model) do
     if not v then
@@ -417,10 +398,6 @@ local function update_campaign(keys, args)
     if (k == 'session_expire' or k == 'new_session_expire' or k == 'message_expire') and v <= 0 then
       return redis.error_reply('ERR Wrong model.' .. k)
     end
-  end
-
-  if next(model) == nil then
-    return redis.status_reply('OK Nothing to update')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -499,6 +476,10 @@ local function delete_campaign(keys, args)
     end
   end
 
+  if stash.orig_lock_secret ~= stash.lock_secret then
+    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
   if redis.call('ZCARD', proxy_index_key) ~= 0 then
     return redis.status_reply('FORBIDDEN Campaign proxies exists')
   end
@@ -513,10 +494,6 @@ local function delete_campaign(keys, args)
 
   if redis.call('ZCARD', lure_index_key) ~= 0 then
     return redis.status_reply('FORBIDDEN Campaign lures exists')
-  end
-
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
   -- Point of no return

@@ -52,6 +52,9 @@ export class CompleteService {
     protected readonly analyzeQueue: AnalyzeQueue
   ) {}
 
+  /**
+   * Creates a new message.
+   */
   async createMessage(data: {
     campaignId: string
     messageId: string
@@ -69,58 +72,77 @@ export class CompleteService {
     connection: HttpConnection
     payload: HttpPayload
     errors: HttpError[]
-    analyze: string | null
+    analyze: string
     startTime: number
     finishTime: number
   }): Promise<void> {
     try {
-      if (data.analyze) {
-        await this.messageRepository.create(
-          data.campaignId,
-          data.messageId,
-          data.proxyId,
-          data.targetId,
-          data.sessionId,
-          data.type,
-          data.method,
-          data.url,
-          data.requestHeaders,
-          data.requestBody,
-          data.status,
-          data.responseHeaders,
-          data.responseBody,
-          data.connection,
-          data.payload,
-          data.errors,
-          data.analyze,
-          data.startTime,
-          data.finishTime
-        )
+      await this.messageRepository.create(
+        data.campaignId,
+        data.messageId,
+        data.proxyId,
+        data.targetId,
+        data.sessionId,
+        data.type,
+        data.method,
+        data.url,
+        data.requestHeaders,
+        data.requestBody,
+        data.status,
+        data.responseHeaders,
+        data.responseBody,
+        data.connection,
+        data.payload,
+        data.errors,
+        data.analyze,
+        data.startTime,
+        data.finishTime
+      )
 
+      if (data.analyze) {
         await this.analyzeQueue.addJob(data.analyze, {
           campaignId: data.campaignId,
           messageId: data.messageId,
         })
-      } else {
-        await this.messageRepository.createDummy(
-          data.campaignId,
-          data.messageId,
-          data.proxyId,
-          data.targetId,
-          data.sessionId
-        )
       }
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
-          throw new HttpServerError(`Service unavailable`, {
-            cause: error,
-            context: {
-              reason: `Create message failed`,
-            },
-            code: 'SERVICE_UNAVAILABLE',
-          })
+        if (error.isNotFound) {
+          throw HttpServerError.serviceUnavailable(`Service unavailable`)
         }
+
+        throw HttpServerError.internalError(`Create message failed`, null, error)
+      }
+
+      throw error
+    }
+  }
+
+  /**
+   * Creates a new dummy message (only counters updated, not real message saved).
+   */
+  async createDummyMessage(data: {
+    campaignId: string
+    messageId: string
+    proxyId: string
+    targetId: string
+    sessionId: string
+  }): Promise<void> {
+    try {
+      await this.messageRepository.createDummy(
+        data.campaignId,
+        data.messageId,
+        data.proxyId,
+        data.targetId,
+        data.sessionId
+      )
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        if (error.isNotFound) {
+          throw HttpServerError.serviceUnavailable(`Service unavailable`)
+        }
+
+        throw HttpServerError.internalError(`Create dummy message failed`, null, error)
       }
 
       throw error

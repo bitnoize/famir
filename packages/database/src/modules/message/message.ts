@@ -47,12 +47,12 @@ export interface MessageRepository {
    * @param analyze - The analyze identifier.
    * @param startTime - The start processing timestamp.
    * @param finishTime - The finish processing timestamp.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the proxy does not exist.
-   * @throws {@link DatabaseError} If the target does not exist.
-   * @throws {@link DatabaseError} If the session does not exist.
-   * @throws {@link DatabaseError} If a message with the same ID already exists.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the proxy does not exist.
+   * @throws DatabaseError If the target does not exist.
+   * @throws DatabaseError If the session does not exist.
+   * @throws DatabaseError If a message with the same ID already exists.
+   * @throws DatabaseError If the data validation fails.
    */
   create(
     campaignId: string,
@@ -87,12 +87,12 @@ export interface MessageRepository {
    * @param proxyId - The ID of the proxy that processed this message.
    * @param targetId - The ID of the target that handled this message.
    * @param sessionId - The ID of the session that generated this message.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the proxy does not exist.
-   * @throws {@link DatabaseError} If the target does not exist.
-   * @throws {@link DatabaseError} If the session does not exist.
-   * @throws {@link DatabaseError} If a message with the same ID already exists.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the proxy does not exist.
+   * @throws DatabaseError If the target does not exist.
+   * @throws DatabaseError If the session does not exist.
+   * @throws DatabaseError If a message with the same ID already exists.
+   * @throws DatabaseError If the data validation fails.
    */
   createDummy(
     campaignId: string,
@@ -108,7 +108,7 @@ export interface MessageRepository {
    * @param campaignId - The ID of the campaign containing the message.
    * @param messageId - The message ID to read.
    * @returns The message model, or `null` if the message is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string, messageId: string): Promise<MessageModel | null>
 
@@ -118,7 +118,7 @@ export interface MessageRepository {
    * @param campaignId - The ID of the campaign containing the message.
    * @param messageId - The message ID to read.
    * @returns The full message model, or `null` if the message is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   readFull(campaignId: string, messageId: string): Promise<FullMessageModel | null>
 }

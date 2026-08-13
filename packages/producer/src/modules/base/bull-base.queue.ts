@@ -1,4 +1,4 @@
-import { BootstrapError, serializeError } from '@famir/common'
+import { LifecycleError, serializeError } from '@famir/common'
 import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
@@ -49,8 +49,8 @@ export abstract class BullBaseQueue implements BaseQueue {
     protected readonly connector: ProducerConnector,
     protected readonly queueName: string
   ) {
-    const configData = this.config.get<BullProducerConfig>('producer-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<BullProducerConfig>('producer-config')
+    this.options = this.buildOptions(conf)
 
     this.queue = new Queue<unknown, unknown>(this.queueName, {
       connection: connector.getConnection<RedisProducerConnection>(),
@@ -60,7 +60,6 @@ export abstract class BullBaseQueue implements BaseQueue {
     this.queue.on('error', (error: unknown) => {
       this.logger.error(`ProducerQueue Bull event: error`, {
         error: serializeError(error),
-        queue: this.queueName,
       })
     })
   }
@@ -69,9 +68,13 @@ export abstract class BullBaseQueue implements BaseQueue {
     try {
       await this.queue.close()
 
-      this.logger.debug(`ProducerQueue closed: ${this.queueName}`)
+      this.logger.info(`ProducerQueue closed: ${this.queueName}`)
     } catch (error) {
-      this.handleBootstrapError(error, 'close')
+      throw LifecycleError.wrap(error, {
+        queue: this.queueName,
+        service: 'producer-queue',
+        method: 'close',
+      })
     }
   }
 
@@ -79,79 +82,38 @@ export abstract class BullBaseQueue implements BaseQueue {
     try {
       return await this.queue.count()
     } catch (error) {
-      this.handleQueueError(error, 'getJobCount', null)
-    }
-  }
-
-  /**
-   * Handles bootstrap operation errors.
-   *
-   * Re-throws `BootstrapError` instances with additional context, or wraps
-   * unknown errors into a `BootstrapError`.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleBootstrapError(error: unknown, method: string): never {
-    if (error instanceof BootstrapError) {
-      error.context['service'] = 'producer-queue'
-      error.context['queue'] = this.queueName
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new BootstrapError(`Unknown error`, {
-        cause: error,
-        context: {
-          service: 'producer-queue',
-          queue: this.queueName,
-          method,
-        },
+      throw ProducerError.wrap(error, {
+        queue: this.queueName,
+        method: 'getJobCount',
       })
     }
   }
 
-  /**
-   * Handles queue operation errors.
-   *
-   * Re-throws `ProducerError` instances with additional context, or wraps
-   * unknown errors into a `ProducerError` with an `INTERNAL_ERROR` code.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @param data - The data that was being processed.
-   * @returns Never returns, always throws.
-   */
-  protected handleQueueError(error: unknown, method: string, data: unknown): never {
-    if (error instanceof ProducerError) {
-      error.context['queue'] = this.queueName
-      error.context['method'] = method
-      error.context['data'] = data
+  async getWorkers(): Promise<object[]> {
+    try {
+      const workers = await this.queue.getWorkers()
 
-      throw error
-    } else {
-      throw new ProducerError(`Unknown error`, {
-        cause: error,
-        context: {
-          queue: this.queueName,
-          method,
-          data,
-        },
-        code: 'INTERNAL_ERROR',
+      return workers.map((worker) => {
+        return {
+          id: worker['id'],
+          name: worker['name'],
+          age: worker['age'],
+        }
+      })
+    } catch (error) {
+      throw ProducerError.wrap(error, {
+        queue: this.queueName,
+        method: 'getWorkers',
       })
     }
   }
 
   /**
    * Converts validated configuration to a queue options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The queue options object.
    */
-  private buildOptions(data: BullProducerConfig): BullProducerQueueOptions {
+  private buildOptions(conf: BullProducerConfig): BullProducerQueueOptions {
     return {
-      prefix: data.PRODUCER_PREFIX,
+      prefix: conf.PRODUCER_PREFIX,
     }
   }
 }

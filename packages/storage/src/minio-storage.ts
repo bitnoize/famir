@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer } from '@famir/common'
+import { DIContainer, LifecycleError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -102,8 +102,8 @@ export class MinioStorage implements Storage {
   ) {
     this.validator.addSchema('storage-config', minioStorageConfigSchema)
 
-    const configData = this.config.get<MinioStorageConfig>('storage-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<MinioStorageConfig>('storage-config')
+    this.options = this.buildOptions(conf)
 
     this.minio = new MinioClient({
       endPoint: this.options.endPoint,
@@ -114,19 +114,19 @@ export class MinioStorage implements Storage {
     })
   }
 
-  async ensureBucketExists(): Promise<void> {
+  async checkBucketExists(): Promise<void> {
     try {
       const exists = await this.minio.bucketExists(this.options.bucketName)
 
       if (!exists) {
-        throw new BootstrapError(`Bucket does not exist in storage`, {
-          context: {
-            bucket: this.options.bucketName,
-          },
+        throw LifecycleError.create(`Bucket does not exist`, {
+          bucket: this.options.bucketName,
         })
       }
     } catch (error) {
-      this.handleBootstrapError(error, 'ensureBucketExists')
+      throw LifecycleError.wrap(error, {
+        service: 'storage',
+      })
     }
   }
 
@@ -136,7 +136,10 @@ export class MinioStorage implements Storage {
 
       return await consumers.buffer(stream)
     } catch (error) {
-      this.handleStorageError(error, 'getObject', { objectName })
+      throw StorageError.wrap(error, {
+        method: 'getObject',
+        params: { objectName },
+      })
     }
   }
 
@@ -148,7 +151,10 @@ export class MinioStorage implements Storage {
     try {
       await this.minio.putObject(this.options.bucketName, objectName, data, data.length, headers)
     } catch (error) {
-      this.handleStorageError(error, 'putObject', { objectName, headers })
+      throw StorageError.wrap(error, {
+        method: 'putObject',
+        params: { objectName, headers },
+      })
     }
   }
 
@@ -156,79 +162,24 @@ export class MinioStorage implements Storage {
     try {
       await this.minio.removeObject(this.options.bucketName, objectName)
     } catch (error) {
-      this.handleStorageError(error, 'deleteObject', { objectName })
-    }
-  }
-
-  /**
-   * Handles bootstrap operation errors.
-   *
-   * Re-throws `BootstrapError` instances with additional context, or wraps
-   * unknown errors into a `BootstrapError`.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @returns Never returns, always throws.
-   */
-  protected handleBootstrapError(error: unknown, method: string): never {
-    if (error instanceof BootstrapError) {
-      error.context['service'] = 'storage'
-      error.context['method'] = method
-
-      throw error
-    } else {
-      throw new BootstrapError(`Unknown error`, {
-        cause: error,
-        context: {
-          service: 'storage',
-          method,
-        },
-      })
-    }
-  }
-
-  /**
-   * Handles storage operation errors.
-   *
-   * Re-throws `StorageError` instances with additional context, or wraps
-   * unknown errors into a `StorageError`.
-   *
-   * @param error - The caught error.
-   * @param method - The name of the method where the error occurred.
-   * @param params - The params that was being processed.
-   * @returns Never returns, always throws.
-   */
-  protected handleStorageError(error: unknown, method: string, params: unknown): never {
-    if (error instanceof StorageError) {
-      error.context['method'] = method
-      error.context['params'] = params
-
-      throw error
-    } else {
-      throw new StorageError(`Unknown error`, {
-        cause: error,
-        context: {
-          method,
-          params,
-        },
+      throw StorageError.wrap(error, {
+        method: 'deleteObject',
+        params: { objectName },
       })
     }
   }
 
   /**
    * Converts validated configuration to a storage options.
-   *
-   * @param data - The validated configuration object.
-   * @returns The storage options object.
    */
-  private buildOptions(data: MinioStorageConfig): MinioStorageOptions {
+  private buildOptions(conf: MinioStorageConfig): MinioStorageOptions {
     return {
-      endPoint: data.STORAGE_ENDPOINT,
-      port: data.STORAGE_PORT,
-      useSSL: data.STORAGE_USE_SSL,
-      accessKey: data.STORAGE_ACCESS_KEY,
-      secretKey: data.STORAGE_SECRET_KEY,
-      bucketName: data.STORAGE_BUCKET_NAME,
+      endPoint: conf.STORAGE_ENDPOINT,
+      port: conf.STORAGE_PORT,
+      useSSL: conf.STORAGE_USE_SSL,
+      accessKey: conf.STORAGE_ACCESS_KEY,
+      secretKey: conf.STORAGE_SECRET_KEY,
+      bucketName: conf.STORAGE_BUCKET_NAME,
     }
   }
 }

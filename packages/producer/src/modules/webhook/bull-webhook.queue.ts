@@ -3,6 +3,7 @@ import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { PRODUCER_CONNECTOR, ProducerConnector } from '../../producer-connector.js'
+import { ProducerError } from '../../producer.error.js'
 import { BullBaseQueue } from '../base/index.js'
 import { WebhookJobData } from './webhook.job.js'
 import { WEBHOOK_QUEUE, WEBHOOK_QUEUE_NAME, WebhookQueue } from './webhook.js'
@@ -70,7 +71,11 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
     try {
       await this.queue.add(name, data)
     } catch (error) {
-      this.handleQueueError(error, 'addJob', data)
+      throw ProducerError.wrap(error, {
+        queue: this.queueName,
+        method: 'addJob',
+        data,
+      })
     }
   }
 }

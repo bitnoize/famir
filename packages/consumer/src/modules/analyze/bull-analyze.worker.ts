@@ -5,7 +5,7 @@ import { ANALYZE_QUEUE_NAME } from '@famir/producer'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { CONSUMER_CONNECTOR, ConsumerConnector } from '../../consumer-connector.js'
 import { CONSUMER_ROUTER, ConsumerRouter } from '../../consumer-router.js'
-import { BullBaseWorker, BullConsumerWorkerSpec } from '../base/index.js'
+import { BullBaseWorker, ConsumerWorkerSettings } from '../base/index.js'
 import { ANALYZE_WORKER, AnalyzeWorker } from './analyze.js'
 
 /**
@@ -47,7 +47,7 @@ export class BullAnalyzeWorker extends BullBaseWorker implements AnalyzeWorker {
    *
    * @param container - The DI container to register in.
    */
-  static register(container: DIContainer, spec?: BullConsumerWorkerSpec) {
+  static register(container: DIContainer, settings?: Partial<ConsumerWorkerSettings>) {
     container.registerSingleton<AnalyzeWorker>(
       ANALYZE_WORKER,
       (c) =>
@@ -57,7 +57,7 @@ export class BullAnalyzeWorker extends BullBaseWorker implements AnalyzeWorker {
           c.resolve<Logger>(LOGGER),
           c.resolve<ConsumerConnector>(CONSUMER_CONNECTOR),
           c.resolve<ConsumerRouter>(CONSUMER_ROUTER),
-          spec
+          settings
         )
     )
   }
@@ -70,7 +70,7 @@ export class BullAnalyzeWorker extends BullBaseWorker implements AnalyzeWorker {
    * @param logger - The logger instance.
    * @param connector - The connector instance.
    * @param router - The router instance.
-   * @param spec - The optional spec object.
+   * @param settings - The optional settings object.
    */
   constructor(
     validator: Validator,
@@ -78,12 +78,8 @@ export class BullAnalyzeWorker extends BullBaseWorker implements AnalyzeWorker {
     logger: Logger,
     connector: ConsumerConnector,
     router: ConsumerRouter,
-    spec: BullConsumerWorkerSpec = {
-      concurrency: 2,
-      limiterMax: 1,
-      limiterDuration: 1000,
-    }
+    settings: Partial<ConsumerWorkerSettings> = {}
   ) {
-    super(validator, config, logger, connector, router, ANALYZE_QUEUE_NAME, spec)
+    super(validator, config, logger, connector, router, ANALYZE_QUEUE_NAME, settings)
   }
 }

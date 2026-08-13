@@ -111,6 +111,8 @@ export class HttpServerRouter {
     this.middlewareChain.push([name, handler])
 
     this.logger.debug(`HttpServerRouter add middleware: ${name}`)
+
+    return this
   }
 
   /**

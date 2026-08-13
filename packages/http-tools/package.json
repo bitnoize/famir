@@ -1,15 +1,12 @@
 {
   "name": "@famir/http-tools",
   "type": "module",
-  "version": "0.0.6",
-  "description": "Famir HTTP tools module",
+  "version": "0.0.7",
+  "description": "HTTP protocol tools",
   "keywords": [
     "famir",
     "fake-mirrors",
-    "man-in-the-middle",
-    "phishing",
-    "reverse-proxy",
-    "red-teaming"
+    "reverse-proxy"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
   "license": "Apache-2.0",
@@ -44,10 +41,10 @@
     "@famir/common": "*",
     "@famir/http-proto": "*",
     "cheerio": "^1.2.0",
-    "content-type": "^2.0.0",
+    "content-type": "^3.0.0",
     "iconv-lite": "^0.7.3",
-    "isbot": "^5.2.1",
-    "qs": "^6.15.3",
+    "isbot": "^5.2.2",
+    "qs": "^6.16.0",
     "tough-cookie": "^6.0.2",
     "ua-parser-js": "^2.0.10"
   },

@@ -43,13 +43,13 @@ export interface TargetRepository {
    * @param sitemapXml - The custom sitemap.xml content.
    * @param allowWebSockets - The flag indicating if WebSocket connections allowed.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If a target with the same ID already exists.
-   * @throws {@link DatabaseError} If the target donor is already used.
-   * @throws {@link DatabaseError} If the target mirror is already used.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If a target with the same ID already exists.
+   * @throws DatabaseError If the target donor is already used.
+   * @throws DatabaseError If the target mirror is already used.
+   * @throws DatabaseError If the data validation fails.
    */
   create(
     campaignId: string,
@@ -82,7 +82,7 @@ export interface TargetRepository {
    * @param campaignId - The ID of the campaign containing the target.
    * @param targetId - The target ID to read.
    * @returns The target model, or `null` if the target is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string, targetId: string): Promise<TargetModel | null>
 
@@ -92,7 +92,7 @@ export interface TargetRepository {
    * @param campaignId - The ID of the campaign containing the target.
    * @param targetId - The target ID to read.
    * @returns The full target model, or `null` if the target is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   readFull(campaignId: string, targetId: string): Promise<FullTargetModel | null>
 
@@ -103,7 +103,7 @@ export interface TargetRepository {
    * used for fast routing lookups.
    *
    * @returns The dictionary of target hosts and their links.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   readHosts(): Promise<TargetHosts>
 
@@ -115,7 +115,7 @@ export interface TargetRepository {
    *
    * @param mirrorHost - The mirror hostname to look up.
    * @returns The target model, or `null` if no target matches the hostname.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   find(mirrorHost: string): Promise<TargetModel | null>
 
@@ -124,7 +124,7 @@ export interface TargetRepository {
    *
    * @param mirrorHost - The mirror hostname to look up.
    * @returns The full target model, or `null` if no target matches the hostname.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   findFull(mirrorHost: string): Promise<FullTargetModel | null>
 
@@ -147,11 +147,11 @@ export interface TargetRepository {
    * @param sitemapXml - The custom sitemap.xml content.
    * @param allowWebSockets - The flag indicating if WebSocket connections allowed.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the target does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the target does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   update(
     campaignId: string,
@@ -179,11 +179,11 @@ export interface TargetRepository {
    * @param campaignId - The ID of the campaign containing the target.
    * @param targetId - The target ID to enable.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the target does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the target does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   enable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
@@ -195,56 +195,50 @@ export interface TargetRepository {
    * @param campaignId - The ID of the campaign containing the target.
    * @param targetId - The target ID to disable.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the target does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the target does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   disable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
   /**
-   * Appends a label to the target.
+   * Appends multiple labels to the target.
    *
    * Labels are used for categorization and filtering of targets.
    * The label is automatically converted to lowercase.
    *
    * @param campaignId - The ID of the campaign containing the target.
    * @param targetId - The target ID to append label to.
-   * @param label - The label to append to the target.
+   * @param labels - The labels to append to the target.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the target does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the target does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
-  appendLabel(
+  appendLabels(
     campaignId: string,
     targetId: string,
-    label: string,
+    labels: string[],
     lockSecret: string
   ): Promise<void>
 
   /**
-   * Removes a label from the target.
+   * Removes all labels from the target.
    *
    * @param campaignId - The ID of the campaign containing the target.
-   * @param targetId - The target ID to remove label from.
-   * @param label - The label to remove from the target.
+   * @param targetId - The target ID to remove labels from.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the target does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the target does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
-  removeLabel(
-    campaignId: string,
-    targetId: string,
-    label: string,
-    lockSecret: string
-  ): Promise<void>
+  removeLabels(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
   /**
    * Deletes the target by its ID.
@@ -254,12 +248,12 @@ export interface TargetRepository {
    * @param campaignId - The ID of the campaign containing the target.
    * @param targetId - The target ID to delete.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the target does not exist.
-   * @throws {@link DatabaseError} If the target is still enabled.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the target does not exist.
+   * @throws DatabaseError If the target is still enabled.
+   * @throws DatabaseError If the data validation fails.
    */
   delete(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
@@ -270,7 +264,7 @@ export interface TargetRepository {
    *
    * @param campaignId - The ID of the campaign to list targets for.
    * @returns The array of target models, or `null` if the campaign does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   list(campaignId: string): Promise<TargetModel[] | null>
 
@@ -281,7 +275,7 @@ export interface TargetRepository {
    *
    * @param campaignId - The ID of the campaign to list targets for.
    * @returns The array of full target models, or `null` if the campaign does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   listFull(campaignId: string): Promise<FullTargetModel[] | null>
 }

@@ -145,22 +145,8 @@ export class AjvValidator implements Validator {
     const validate = this.getValidate<T>(name)
 
     if (!validate(data)) {
-      const validateErrors = (validate.errors ?? []).map((error) => {
-        return {
-          keyword: error.keyword,
-          instancePath: error.instancePath,
-          schemaPath: error.schemaPath,
-          params: error.params,
-          propertyName: error.propertyName,
-          message: error.message,
-        }
-      })
-
-      throw new ValidatorError(`JSON-Schema assertion failed`, {
-        context: {
-          schemaName: name,
-        },
-        validateErrors,
+      throw ValidatorError.create(`JSON-Schema validation failed`, validate.errors, {
+        schemaName: name,
       })
     }
   }

@@ -1,4 +1,3 @@
-import { ConfigData } from '@famir/config'
 import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-proto'
 import type { PassThrough, Readable } from 'node:stream'
 import { HttpClientError } from './http-client.error.js'
@@ -9,7 +8,36 @@ import { HttpClientError } from './http-client.error.js'
 export const HTTP_CLIENT = Symbol('HttpClient')
 
 /**
+ * Base result for a successful HTTP interaction.
+ *
+ * @internal
+ */
+export interface HttpClientBaseResult {
+  readonly error: HttpClientError | null
+  readonly status: number
+  readonly responseHeaders: HttpHeaders
+  readonly connection: HttpConnection
+}
+
+/**
+ * Simple response result with the full body in memory.
+ */
+export interface HttpClientSimpleResult extends HttpClientBaseResult {
+  readonly responseBody: HttpBody
+}
+
+/**
+ * Streaming response result with a readable stream.
+ */
+export interface HttpClientStreamResult extends HttpClientBaseResult {
+  readonly responseStream: Readable
+}
+
+/**
  * Defines the public contract for an http-client.
+ *
+ * Designed to not throw exceptions, but always return a result
+ * with an optional `error` attribute.
  *
  * Provides methods for making HTTP requests:
  * - Simple request/response
@@ -34,7 +62,7 @@ export interface HttpClient {
    * @param timeout - The total request timeout in milliseconds.
    * @param headersSizeLimit - The maximum headers size in bytes.
    * @param bodySizeLimit - The maximum body size in bytes.
-   * @returns The result object containing the response or error details.
+   * @returns The result object containing the response and error details.
    */
   simple(
     proxy: string,
@@ -46,7 +74,7 @@ export interface HttpClient {
     timeout: number,
     headersSizeLimit: number,
     bodySizeLimit: number
-  ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
+  ): Promise<HttpClientSimpleResult>
 
   /**
    * Performs a streaming HTTP request and returns a simple response.
@@ -63,7 +91,7 @@ export interface HttpClient {
    * @param timeout - The total request timeout in milliseconds.
    * @param headersSizeLimit - The maximum headers size in bytes.
    * @param bodySizeLimit - The maximum body size in bytes.
-   * @returns The result object containing the response or error details.
+   * @returns The result object containing the response and error details.
    */
   streamRequest(
     proxy: string,
@@ -75,7 +103,7 @@ export interface HttpClient {
     timeout: number,
     headersSizeLimit: number,
     bodySizeLimit: number
-  ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
+  ): Promise<HttpClientSimpleResult>
 
   /**
    * Performs a simple HTTP request and returns a streaming response.
@@ -91,7 +119,7 @@ export interface HttpClient {
    * @param connectTimeout - The connection timeout in milliseconds.
    * @param timeout - The total request timeout in milliseconds.
    * @param headersSizeLimit - The maximum headers size in bytes.
-   * @returns The result object containing the response or error details.
+   * @returns The result object containing the response and error details.
    */
   streamResponse(
     proxy: string,
@@ -102,7 +130,7 @@ export interface HttpClient {
     connectTimeout: number,
     timeout: number,
     headersSizeLimit: number
-  ): Promise<HttpClientStreamResult | HttpClientErrorResult>
+  ): Promise<HttpClientStreamResult>
 }
 
 /**
@@ -112,7 +140,7 @@ export interface HttpClient {
  */
 export interface HttpClientBaseState {
   error: HttpClientError | null
-  isResolved: boolean
+  settled: boolean
   proxy: string
   method: HttpMethod
   url: string
@@ -153,46 +181,4 @@ export interface HttpClientStreamRequestState extends HttpClientBaseState {
 export interface HttpClientStreamResponseState extends HttpClientBaseState {
   requestBody: HttpBody
   responseStream: PassThrough
-}
-
-/**
- * Error result of an HTTP interaction.
- */
-export interface HttpClientErrorResult {
-  readonly error: HttpClientError
-  readonly connection: HttpConnection
-}
-
-/**
- * Base result for a successful HTTP interaction.
- *
- * @internal
- */
-export interface HttpClientBaseResult {
-  readonly error: null
-  readonly status: number
-  readonly responseHeaders: HttpHeaders
-  readonly connection: HttpConnection
-}
-
-/**
- * Simple response result with the full body in memory.
- */
-export interface HttpClientSimpleResult extends HttpClientBaseResult {
-  readonly responseBody: HttpBody
-}
-
-/**
- * Streaming response result with a readable stream.
- */
-export interface HttpClientStreamResult extends HttpClientBaseResult {
-  readonly responseStream: Readable
-}
-
-/**
- * Configuration for a Curl http-client.
- */
-export interface CurlHttpClientConfig extends ConfigData {
-  /** Whether to enable verbose logging. */
-  HTTP_CLIENT_VERBOSE: boolean
 }

@@ -19,7 +19,7 @@ export const REPL_SERVER_ASSETS = Symbol('ReplServerAssets')
  * // Define your assets
  * const assets: [string, string][] = [
  *   [
- *     'banner-greets.txt',
+ *     'hello.txt',
  *     'Hi, there!'
  *   ]
  * ]
@@ -29,6 +29,9 @@ export const REPL_SERVER_ASSETS = Symbol('ReplServerAssets')
  *
  * // Resolve from DI container
  * const assets = container.resolve<ReplServerAssets>(REPL_SERVER_ASSETS)
+ *
+ * // Retrieve asset by name
+ * console.log(assets['hello.txt'])
  * ```
  */
 export class ReplServerAssets extends Map<string, string> {
@@ -55,17 +58,3 @@ export class ReplServerAssets extends Map<string, string> {
     return container.resolve<ReplServerAssets>(REPL_SERVER_ASSETS)
   }
 }
-
-/**
- * Default banner greet content.
- *
- * @internal
- */
-export const REPL_SERVER_ASSET_BANNER_GREET = `Welcome to Fake-Mirrors!`
-
-/**
- * Default banner leave content.
- *
- * @internal
- */
-export const REPL_SERVER_ASSET_BANNER_LEAVE = `So long!`

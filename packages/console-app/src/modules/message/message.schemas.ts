@@ -2,8 +2,6 @@ import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/val
 import { ReadMessageArgs } from './message.js'
 
 /**
- * JSON Schema for validating a read message args.
- *
  * @category Message
  * @internal
  */
@@ -16,6 +14,15 @@ export const readMessageArgsSchema: JSONSchemaType<ReadMessageArgs> = {
       items: [customIdentSchema, randomIdentSchema],
       minItems: 2,
       maxItems: 2,
+    },
+    showHeaders: {
+      type: 'boolean',
+    },
+    showConnection: {
+      type: 'boolean',
+    },
+    showPayload: {
+      type: 'boolean',
     },
   },
   additionalProperties: false,

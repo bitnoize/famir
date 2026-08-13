@@ -3,6 +3,7 @@ import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawProxy } from './proxy.functions.js'
 import { PROXY_REPOSITORY, ProxyRepository } from './proxy.js'
@@ -86,11 +87,27 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
+      this.logger.info(`Database create proxy`, {
+        database: {
+          proxy: {
+            campaignId,
+            proxyId,
+            url,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: {
+          campaignId,
+          proxyId,
+          url,
+        },
+      })
     }
   }
 
@@ -104,7 +121,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: {
+          campaignId,
+          proxyId,
+        },
+      })
     }
   }
 
@@ -117,11 +141,25 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
+      this.logger.info(`Database enable proxy`, {
+        database: {
+          proxy: {
+            campaignId,
+            proxyId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'enable', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'enable',
+        params: {
+          campaignId,
+          proxyId,
+        },
+      })
     }
   }
 
@@ -134,11 +172,25 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
+      this.logger.info(`Database disable proxy`, {
+        database: {
+          proxy: {
+            campaignId,
+            proxyId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'disable', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'disable',
+        params: {
+          campaignId,
+          proxyId,
+        },
+      })
     }
   }
 
@@ -151,11 +203,25 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
+      this.logger.info(`Database delete proxy`, {
+        database: {
+          proxy: {
+            campaignId,
+            proxyId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'delete', { campaignId, proxyId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: {
+          campaignId,
+          proxyId,
+        },
+      })
     }
   }
 
@@ -177,7 +243,13 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'list', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
@@ -186,7 +258,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
    *
    * @param rawModel - The raw data from Redis.
    * @returns The proxy model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): ProxyModel | null {
     if (rawModel === null) {
@@ -210,7 +282,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of proxy models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): ProxyModel[] {
     this.validateArrayReply(rawCollection)

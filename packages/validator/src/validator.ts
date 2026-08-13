@@ -43,7 +43,7 @@ export interface Validator {
    * @typeParam T - The expected type after validation.
    * @param name - The name of the schema to validate against.
    * @param data - The data to be validated.
-   * @throws {@link ValidatorError} If validation fails, containing detailed error information.
+   * @throws ValidatorError If validation fails, containing detailed error information.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   assertSchema<T>(name: string, data: unknown): asserts data is T

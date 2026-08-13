@@ -8,6 +8,7 @@ import {
 } from '@famir/database'
 import { HttpClientError } from '@famir/http-client'
 import {
+  HttpServerAssets,
   HttpServerContext,
   HttpServerContextState,
   HttpServerError,
@@ -48,12 +49,14 @@ export abstract class BaseController {
    * @param validator - The validator instance.
    * @param logger - The logger instance.
    * @param templater - The templater instance.
-   * @param router - The http-server router instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    */
   constructor(
     protected readonly validator: Validator,
     protected readonly logger: Logger,
     protected readonly templater: Templater,
+    protected readonly assets: HttpServerAssets,
     protected readonly router: HttpServerRouter
   ) {}
 
@@ -84,10 +87,14 @@ export abstract class BaseController {
     state[key] = value
   }
 
-  protected async sendNoContent(ctx: HttpServerContext, status = 204): Promise<void> {
+  protected checkContextTypeNormal(ctx: HttpServerContext) {
     if (ctx.type !== 'normal') {
       throw new Error(`Only 'normal' context type allowed`)
     }
+  }
+
+  protected async sendNoContent(ctx: HttpServerContext, status = 204): Promise<void> {
+    this.checkContextTypeNormal(ctx)
 
     ctx.status.set(status)
 
@@ -108,9 +115,7 @@ export abstract class BaseController {
   }
 
   protected async sendPreflightCors(ctx: HttpServerContext, status = 204): Promise<void> {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     ctx.status.set(status)
 
@@ -131,9 +136,7 @@ export abstract class BaseController {
   }
 
   protected async sendRedirectTo(ctx: HttpServerContext, url: string, status = 302): Promise<void> {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     ctx.status.set(status)
 
@@ -157,9 +160,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     if (ctx.method.is(['GET', 'HEAD']) && target.mainPage) {
       ctx.status.set(200)
@@ -187,9 +188,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     ctx.status.set(404)
 
@@ -217,9 +216,7 @@ export abstract class BaseController {
     error: HttpServerError | HttpClientError,
     isHtml: boolean
   ) {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     ctx.status.set(error.status)
 
@@ -245,9 +242,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     if (ctx.method.is(['GET', 'HEAD']) && target.faviconIco) {
       ctx.status.set(200)
@@ -275,9 +270,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     if (ctx.method.is(['GET', 'HEAD']) && target.robotsTxt) {
       ctx.status.set(200)
@@ -305,9 +298,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     if (ctx.method.is(['GET', 'HEAD']) && target.sitemapXml) {
       ctx.status.set(200)
@@ -337,6 +328,8 @@ export abstract class BaseController {
     redirector: FullRedirectorModel,
     data: TemplaterData
   ): Promise<void> {
+    this.checkContextTypeNormal(ctx)
+
     if (ctx.method.is(['GET', 'HEAD'])) {
       ctx.status.set(200)
 
@@ -364,6 +357,8 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
+    this.checkContextTypeNormal(ctx)
+
     if (ctx.url.isPath('/')) {
       await this.sendMainPage(ctx, target)
     } else {

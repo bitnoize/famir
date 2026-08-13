@@ -1,15 +1,12 @@
 {
   "name": "@famir/templater",
   "type": "module",
-  "version": "0.0.4",
-  "description": "Famir templater module",
+  "version": "0.0.5",
+  "description": "Templater service",
   "keywords": [
     "famir",
     "fake-mirrors",
-    "man-in-the-middle",
-    "phishing",
-    "reverse-proxy",
-    "red-teaming"
+    "reverse-proxy"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
   "license": "Apache-2.0",

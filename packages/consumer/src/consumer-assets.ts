@@ -19,8 +19,8 @@ export const CONSUMER_ASSETS = Symbol('ConsumerAssets')
  * // Define your assets
  * const assets: [string, string][] = [
  *   [
- *     'mail.html',
- *     `<html><body><center>Hey, <%= data.name %></center></body></html>`
+ *     'hello.txt',
+ *     'Hi, there!'
  *   ]
  * ]
  *
@@ -29,6 +29,9 @@ export const CONSUMER_ASSETS = Symbol('ConsumerAssets')
  *
  * // Resolve from DI container
  * const assets = container.resolve<ConsumerAssets>(CONSUMER_ASSETS)
+ *
+ * // Retrieve asset by name
+ * console.log(assets['hello.txt'])
  * ```
  */
 export class ConsumerAssets extends Map<string, string> {

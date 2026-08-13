@@ -27,12 +27,22 @@ export interface ProducerConnector {
   getConnection<T>(): T
 
   /**
+   * Establishes a connection to the producer.
+   *
+   * This method should be called during application bootstrap to ensure
+   * the connection is ready before any operations are performed.
+   *
+   * @throws LifecycleError If the producer connection cannot be established.
+   */
+  connect(): Promise<void>
+
+  /**
    * Gracefully closes a connection to the producer.
    *
    * This method should be called during application shutdown to ensure
    * all pending operations are completed and resources are released.
    *
-   * @throws {@link BootstrapError} If the connection cannot be closed properly.
+   * @throws LifecycleError If the connection cannot be closed properly.
    */
   close(): Promise<void>
 }

@@ -3,6 +3,7 @@ import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 import { CAMPAIGN_LOCK_TIMEOUT, CAMPAIGN_REPOSITORY, CampaignRepository } from './campaign.js'
@@ -98,11 +99,25 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         Date.now()
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId, mirrorDomain } })
+      this.logger.info(`Database create campaign`, {
+        database: {
+          campaign: {
+            campaignId,
+            mirrorDomain,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, mirrorDomain })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: {
+          campaignId,
+          mirrorDomain,
+        },
+      })
     }
   }
 
@@ -112,7 +127,13 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
@@ -125,7 +146,13 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'readFull', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'readFull',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
@@ -140,13 +167,25 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         CAMPAIGN_LOCK_TIMEOUT
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId } })
+      this.logger.info(`Database lock campaign`, {
+        database: {
+          campaign: {
+            campaignId,
+          },
+        },
+      })
 
       return lockSecret
     } catch (error) {
-      this.handleRepositoryError(error, 'lock', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'lock',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
@@ -158,20 +197,32 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId } })
+      this.logger.info(`Database unlock campaign`, {
+        database: {
+          campaign: {
+            campaignId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'unlock', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'unlock',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
   async update(
     campaignId: string,
-    description: string | null | undefined,
-    sessionExpire: number | null | undefined,
-    newSessionExpire: number | null | undefined,
-    messageExpire: number | null | undefined,
+    description: string,
+    sessionExpire: number,
+    newSessionExpire: number,
+    messageExpire: number,
     lockSecret: string
   ): Promise<void> {
     try {
@@ -185,11 +236,23 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId } })
+      this.logger.info(`Database update campaign`, {
+        database: {
+          campaign: {
+            campaignId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'update', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'update',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
@@ -201,11 +264,23 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId } })
+      this.logger.info(`Database delete campaign`, {
+        database: {
+          campaign: {
+            campaignId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'delete', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
@@ -223,7 +298,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'list', null)
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+      })
     }
   }
 
@@ -241,7 +319,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildFullCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'listFull', null)
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'listFull',
+      })
     }
   }
 
@@ -250,7 +331,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
    *
    * @param rawModel - The raw data from Redis.
    * @returns The campaign model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): CampaignModel | null {
     if (rawModel === null) {
@@ -274,7 +355,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
    *
    * @param rawModel - The raw data from Redis.
    * @returns The full campaign model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildFullModel(rawModel: unknown): FullCampaignModel | null {
     if (rawModel === null) {
@@ -310,7 +391,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of campaign models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): CampaignModel[] {
     this.validateArrayReply(rawCollection)
@@ -325,7 +406,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of full campaign models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildFullCollection(rawCollection: unknown): FullCampaignModel[] {
     this.validateArrayReply(rawCollection)

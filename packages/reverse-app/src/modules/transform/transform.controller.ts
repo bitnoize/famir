@@ -1,5 +1,10 @@
 import { DIContainer } from '@famir/common'
-import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
+import {
+  HTTP_SERVER_ASSETS,
+  HTTP_SERVER_ROUTER,
+  HttpServerAssets,
+  HttpServerRouter,
+} from '@famir/http-server'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -31,6 +36,7 @@ export class TransformController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
         )
     )

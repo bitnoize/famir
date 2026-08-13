@@ -26,12 +26,12 @@ export interface ProxyRepository {
    * @param proxyId - The new proxy ID to create.
    * @param url - The upstream URL for the proxy.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If a proxy with the same ID already exists.
-   * @throws {@link DatabaseError} If the proxy URL is already used.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If a proxy with the same ID already exists.
+   * @throws DatabaseError If the proxy URL is already used.
+   * @throws DatabaseError If the data validation fails.
    */
   create(campaignId: string, proxyId: string, url: string, lockSecret: string): Promise<void>
 
@@ -41,7 +41,7 @@ export interface ProxyRepository {
    * @param campaignId - The ID of the campaign containing the proxy.
    * @param proxyId - The proxy ID to read.
    * @returns The proxy model, or `null` if the proxy is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string, proxyId: string): Promise<ProxyModel | null>
 
@@ -54,11 +54,11 @@ export interface ProxyRepository {
    * @param campaignId - The ID of the campaign containing the proxy.
    * @param proxyId - The proxy ID to enable.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the proxy does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the proxy does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   enable(campaignId: string, proxyId: string, lockSecret: string): Promise<void>
 
@@ -71,11 +71,11 @@ export interface ProxyRepository {
    * @param campaignId - The ID of the campaign containing the proxy.
    * @param proxyId - The proxy ID to disable.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the proxy does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the proxy does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   disable(campaignId: string, proxyId: string, lockSecret: string): Promise<void>
 
@@ -87,12 +87,12 @@ export interface ProxyRepository {
    * @param campaignId - The ID of the campaign containing the proxy.
    * @param proxyId - The proxy ID to delete.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the proxy does not exist.
-   * @throws {@link DatabaseError} If the proxy is still enabled.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the proxy does not exist.
+   * @throws DatabaseError If the proxy is still enabled.
+   * @throws DatabaseError If the data validation fails.
    */
   delete(campaignId: string, proxyId: string, lockSecret: string): Promise<void>
 
@@ -103,7 +103,7 @@ export interface ProxyRepository {
    *
    * @param campaignId - The ID of the campaign to list proxies for.
    * @returns The array of proxy models, or `null` if the campaign does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   list(campaignId: string): Promise<ProxyModel[] | null>
 }

@@ -118,18 +118,14 @@ export const redirectorFunctions = {
         prefix: string,
         campaignId: string,
         redirectorId: string,
-        page: string | null,
+        page: string,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
 
-        if (page != null) {
-          parser.push('page')
-          parser.push(page)
-        }
-
+        parser.push(page)
         parser.push(lockSecret)
       },
 
@@ -159,7 +155,7 @@ export const redirectorFunctions = {
       transformReply: undefined as unknown as () => unknown,
     },
 
-    remove_redirector_field: {
+    remove_redirector_fields: {
       NUMBER_OF_KEYS: 4,
 
       parseCommand(
@@ -167,7 +163,6 @@ export const redirectorFunctions = {
         prefix: string,
         campaignId: string,
         redirectorId: string,
-        field: string,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -175,7 +170,6 @@ export const redirectorFunctions = {
         parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
         parser.pushKey(redirectorFieldsKey(prefix, campaignId, redirectorId))
 
-        parser.push(field)
         parser.push(lockSecret)
       },
 

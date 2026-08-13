@@ -2,7 +2,7 @@
   "name": "famir",
   "type": "module",
   "private": true,
-  "description": "Fake mirrors entire the Web!",
+  "description": "Famir ecosystem",
   "scripts": {
     "format": "npm --ws run format",
     "lint": "npm --ws run lint",
@@ -22,6 +22,7 @@
     "packages/storage",
     "packages/producer",
     "packages/consumer",
+    "packages/edge-server",
     "packages/http-client",
     "packages/http-server",
     "packages/http-tools",
@@ -31,12 +32,12 @@
     "packages/actions-app"
   ],
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.0.0",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-tsdoc": "^0.5.2",
-    "eslint-plugin-tsdoc-require-2": "^1.0.9",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "rimraf": "^6.1.3",

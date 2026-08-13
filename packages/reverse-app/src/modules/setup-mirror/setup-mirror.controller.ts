@@ -1,7 +1,9 @@
 import { DIContainer } from '@famir/common'
 import { type EnabledFullTargetModel, type FullCampaignModel } from '@famir/database'
 import {
+  HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
+  HttpServerAssets,
   HttpServerContext,
   HttpServerContextType,
   HttpServerError,
@@ -59,6 +61,7 @@ export class SetupMirrorController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<SetupMirrorService>(SETUP_MIRROR_SERVICE)
         )
@@ -81,17 +84,19 @@ export class SetupMirrorController extends BaseController {
    * @param validator - The validator instance.
    * @param logger - The logger instance.
    * @param templater - The templater instance.
-   * @param router - The http-server router instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param setupMirrorService - The setup-mirror service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
     templater: Templater,
+    assets: HttpServerAssets,
     router: HttpServerRouter,
     protected readonly setupMirrorService: SetupMirrorService
   ) {
-    super(validator, logger, templater, router)
+    super(validator, logger, templater, assets, router)
   }
 
   /**
@@ -158,10 +163,7 @@ export class SetupMirrorController extends BaseController {
 
       return mirrorHost
     } catch (error) {
-      throw new HttpServerError(`Bad request`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
+      throw HttpServerError.badRequest(`Bad request`, null, error)
     }
   }
 }

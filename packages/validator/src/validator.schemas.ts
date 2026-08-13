@@ -24,6 +24,15 @@ export const randomIdentSchema: JSONSchemaType<string> = {
 } as const
 
 /**
+ * JSON Schema for validating a secret value.
+ */
+export const secretSchema: JSONSchemaType<string> = {
+  type: 'string',
+  minLength: 5,
+  maxLength: 256,
+} as const
+
+/**
  * JSON Schema for validating a counter number.
  */
 export const counterSchema: JSONSchemaType<number> = {

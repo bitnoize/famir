@@ -54,13 +54,7 @@ export class SetupMirrorService {
     const campaign = await this.campaignRepository.readFull(data.campaignId)
 
     if (!campaign) {
-      throw new HttpServerError(`Service unavailable`, {
-        context: {
-          reason: `Read campaign failed`,
-          data,
-        },
-        code: 'SERVICE_UNAVAILABLE',
-      })
+      throw HttpServerError.serviceUnavailable(`Service unavailable`)
     }
 
     return campaign
@@ -70,13 +64,7 @@ export class SetupMirrorService {
     const target = await this.targetRepository.findFull(data.mirrorHost)
 
     if (!(target && TargetModel.isEnabled(target))) {
-      throw new HttpServerError(`Service unavailable`, {
-        context: {
-          reason: `Read target failed`,
-          data,
-        },
-        code: 'SERVICE_UNAVAILABLE',
-      })
+      throw HttpServerError.serviceUnavailable(`Service unavailable`)
     }
 
     return target
@@ -86,13 +74,7 @@ export class SetupMirrorService {
     const targets = await this.targetRepository.list(data.campaignId)
 
     if (!targets) {
-      throw new HttpServerError(`Service unavailable`, {
-        context: {
-          reason: `List targets failed`,
-          data,
-        },
-        code: 'SERVICE_UNAVAILABLE',
-      })
+      throw HttpServerError.serviceUnavailable(`Service unavailable`)
     }
 
     return targets

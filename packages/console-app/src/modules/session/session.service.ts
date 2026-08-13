@@ -36,18 +36,12 @@ export class SessionService {
 
   /**
    * Reads the session by its ID.
-   *
-   * @param data - The data object.
-   * @returns The session model.
-   * @throws {@link ReplServerError} If the session is not found.
    */
   async read(data: { campaignId: string; sessionId: string }): Promise<SessionModel> {
     const session = await this.sessionRepository.read(data.campaignId, data.sessionId)
 
     if (!session) {
-      throw new ReplServerError(`Session not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Session not found`)
     }
 
     return session

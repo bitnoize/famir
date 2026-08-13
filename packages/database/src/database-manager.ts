@@ -15,11 +15,16 @@ export const DATABASE_MANAGER = Symbol('DatabaseManager')
  */
 export interface DatabaseManager {
   /**
+   * Retrieves the database information.
+   *
+   * @throws DatabaseError If the operation fails.
+   */
+  getInfo(): Promise<string[]>
+
+  /**
    * Loads all custom functions into the database.
    *
-   * This method registers the application's custom Redis functions.
-   *
-   * @throws {@link DatabaseError} If the functions cannot be loaded.
+   * @throws DatabaseError If the operation fails.
    */
   loadFunctions(): Promise<void>
 
@@ -28,7 +33,7 @@ export interface DatabaseManager {
    *
    * This method removes all data and should be used with caution.
    *
-   * @throws {@link DatabaseError} If the cleanup operation fails.
+   * @throws DatabaseError If the cleanup operation fails.
    */
   cleanup(): Promise<void>
 }

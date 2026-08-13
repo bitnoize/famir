@@ -50,18 +50,6 @@ const netReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a repl-server prompt.
- *
- * @internal
- */
-const replServerPromptSchema: JSONSchemaType<string> = {
-  type: 'string',
-  minLength: 1,
-  maxLength: 256,
-  default: 'famir > ',
-} as const
-
-/**
  * JSON Schema for validating a repl-server color usage.
  *
  * @internal
@@ -78,9 +66,8 @@ const replServerUseColorsSchema: JSONSchemaType<boolean> = {
  */
 export const cliReplServerConfigSchema: JSONSchemaType<CliReplServerConfig> = {
   type: 'object',
-  required: ['REPL_SERVER_PROMPT', 'REPL_SERVER_USE_COLORS'],
+  required: ['REPL_SERVER_USE_COLORS'],
   properties: {
-    REPL_SERVER_PROMPT: replServerPromptSchema,
     REPL_SERVER_USE_COLORS: replServerUseColorsSchema,
   },
   additionalProperties: false,
@@ -98,7 +85,6 @@ export const netReplServerConfigSchema: JSONSchemaType<NetReplServerConfig> = {
     'REPL_SERVER_PORT',
     'REPL_SERVER_MAX_CLIENTS',
     'REPL_SERVER_SOCKET_TIMEOUT',
-    'REPL_SERVER_PROMPT',
     'REPL_SERVER_USE_COLORS',
   ],
   properties: {
@@ -106,7 +92,6 @@ export const netReplServerConfigSchema: JSONSchemaType<NetReplServerConfig> = {
     REPL_SERVER_PORT: netReplServerPortSchema,
     REPL_SERVER_MAX_CLIENTS: netReplServerMaxClientsSchema,
     REPL_SERVER_SOCKET_TIMEOUT: netReplServerSocketTimeoutSchema,
-    REPL_SERVER_PROMPT: replServerPromptSchema,
     REPL_SERVER_USE_COLORS: replServerUseColorsSchema,
   },
   additionalProperties: false,

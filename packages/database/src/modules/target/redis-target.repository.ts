@@ -3,6 +3,7 @@ import { CONFIG, Config } from '@famir/config'
 import { LOGGER, Logger } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
+import { DatabaseError } from '../../database.error.js'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullTarget, RawTarget } from './target.functions.js'
 import { TARGET_REPOSITORY, TargetRepository } from './target.js'
@@ -137,11 +138,25 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database create target`, {
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'create', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: {
+          campaignId,
+          targetId,
+        },
+      })
     }
   }
 
@@ -155,7 +170,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'read', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'read',
+        params: {
+          campaignId,
+          targetId,
+        },
+      })
     }
   }
 
@@ -169,7 +191,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'readFull', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'readFull',
+        params: {
+          campaignId,
+          targetId,
+        },
+      })
     }
   }
 
@@ -181,7 +210,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return hosts
     } catch (error) {
-      this.handleRepositoryError(error, 'readHosts', null)
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'readHosts',
+      })
     }
   }
 
@@ -205,7 +237,13 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'find', { mirrorHost })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'find',
+        params: {
+          mirrorHost,
+        },
+      })
     }
   }
 
@@ -229,24 +267,30 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      this.handleRepositoryError(error, 'findFull', { mirrorHost })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'findFull',
+        params: {
+          mirrorHost,
+        },
+      })
     }
   }
 
   async update(
     campaignId: string,
     targetId: string,
-    connectTimeout: number | null | undefined,
-    simpleTimeout: number | null | undefined,
-    streamTimeout: number | null | undefined,
-    headersSizeLimit: number | null | undefined,
-    bodySizeLimit: number | null | undefined,
-    mainPage: string | null | undefined,
-    notFoundPage: string | null | undefined,
-    faviconIco: string | null | undefined,
-    robotsTxt: string | null | undefined,
-    sitemapXml: string | null | undefined,
-    allowWebSockets: boolean | null | undefined,
+    connectTimeout: number,
+    simpleTimeout: number,
+    streamTimeout: number,
+    headersSizeLimit: number,
+    bodySizeLimit: number,
+    mainPage: string,
+    notFoundPage: string,
+    faviconIco: string,
+    robotsTxt: string,
+    sitemapXml: string,
+    allowWebSockets: boolean,
     lockSecret: string
   ): Promise<void> {
     try {
@@ -268,11 +312,25 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database update target`, {
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'update', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'update',
+        params: {
+          campaignId,
+          targetId,
+        },
+      })
     }
   }
 
@@ -285,11 +343,25 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database enable target`, {
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'enable', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'enable',
+        params: {
+          campaignId,
+          targetId,
+        },
+      })
     }
   }
 
@@ -302,57 +374,103 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database disable target`, {
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'disable', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'disable',
+        params: {
+          campaignId,
+          targetId,
+        },
+      })
     }
   }
 
-  async appendLabel(
+  async appendLabels(
     campaignId: string,
     targetId: string,
-    label: string,
+    labels: string[],
     lockSecret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.target.append_target_label(
-        this.options.prefix,
-        campaignId,
-        targetId,
-        label.toLowerCase(),
-        lockSecret
+      if (labels.length === 0) {
+        return
+      }
+
+      const statusReplies = await Promise.all(
+        labels.map((label) =>
+          this.connection.target.append_target_label(
+            this.options.prefix,
+            campaignId,
+            targetId,
+            label.toLowerCase(),
+            lockSecret
+          )
+        )
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReplies(statusReplies)
 
-      this.logger.info(mesg, { target: { campaignId, targetId, label } })
+      this.logger.info(`Database append target labels`, {
+        database: {
+          target: {
+            campaignId,
+            targetId,
+            labels,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'appendLabel', { campaignId, targetId, label })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'appendLabels',
+        params: {
+          campaignId,
+          targetId,
+          labels,
+        },
+      })
     }
   }
 
-  async removeLabel(
-    campaignId: string,
-    targetId: string,
-    label: string,
-    lockSecret: string
-  ): Promise<void> {
+  async removeLabels(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.target.remove_target_label(
+      const statusReply = await this.connection.target.remove_target_labels(
         this.options.prefix,
         campaignId,
         targetId,
-        label.toLowerCase(),
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId, label } })
+      this.logger.info(`Database remove target labels`, {
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'removeLabel', { campaignId, targetId, label })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'removeLabels',
+        params: {
+          campaignId,
+          targetId,
+        },
+      })
     }
   }
 
@@ -365,11 +483,25 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database delete target`, {
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
+      })
     } catch (error) {
-      this.handleRepositoryError(error, 'delete', { campaignId, targetId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: {
+          campaignId,
+          targetId,
+        },
+      })
     }
   }
 
@@ -391,7 +523,13 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'list', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
@@ -413,7 +551,13 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildFullCollection(rawCollection)
     } catch (error) {
-      this.handleRepositoryError(error, 'listFull', { campaignId })
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'listFull',
+        params: {
+          campaignId,
+        },
+      })
     }
   }
 
@@ -422,7 +566,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
    *
    * @param rawModel - The raw data from Redis.
    * @returns The target model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): TargetModel | null {
     if (rawModel === null) {
@@ -454,7 +598,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
    *
    * @param rawModel - The raw data from Redis.
    * @returns The full target model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildFullModel(rawModel: unknown): FullTargetModel | null {
     if (rawModel === null) {
@@ -498,7 +642,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of target models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): TargetModel[] {
     this.validateArrayReply(rawCollection)
@@ -511,7 +655,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of full target models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildFullCollection(rawCollection: unknown): FullTargetModel[] {
     this.validateArrayReply(rawCollection)
