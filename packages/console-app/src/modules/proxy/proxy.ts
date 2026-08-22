@@ -7,7 +7,6 @@
 export interface CreateProxyArgs {
   _: [string, string]
   url: string
-  lockSecret: string
 }
 
 /**
@@ -28,7 +27,6 @@ export interface ReadProxyArgs {
  */
 export interface ToggleProxyArgs {
   _: [string, string]
-  lockSecret: string
 }
 
 /**
@@ -39,7 +37,6 @@ export interface ToggleProxyArgs {
  */
 export interface DeleteProxyArgs {
   _: [string, string]
-  lockSecret: string
 }
 
 /**

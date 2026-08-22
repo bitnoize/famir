@@ -1,7 +1,12 @@
 import { DIContainer } from '@famir/common'
 import { SessionModel } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
+import {
+  REPL_SERVER_ASSETS,
+  REPL_SERVER_ROUTER,
+  ReplServerAssets,
+  ReplServerRouter,
+} from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ReadSessionArgs } from './session.js'
@@ -33,6 +38,7 @@ export class SessionController extends BaseController {
         new SessionController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<SessionService>(SESSION_SERVICE)
         )
@@ -54,16 +60,18 @@ export class SessionController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
+   * @param assets - The repl-server assets instance.
    * @param router - The repl-server router instance.
    * @param sessionService - The session service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly sessionService: SessionService
   ) {
-    super(validator, logger, router)
+    super(validator, logger, assets, router)
 
     this.validator.addSchema('console-read-session-args', readSessionArgsSchema)
   }
@@ -81,16 +89,15 @@ export class SessionController extends BaseController {
         params: ['campaign-id', 'session-id'],
       },
       (console, spec) => {
-        console.log(`Returns the session model.\n`)
-
-        console.log(
-          `// Reads a session:\n` + `.${spec.name} httpbin 10db93aeb3ae4a3887a839997bf8840e\n`
-        )
+        console.log(`// Reads some session in the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin 10db93aeb3ae4a3887a839997bf8840e\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, sessionId] = args._
+
         const session = await this.sessionService.read({
-          campaignId: args._[0],
-          sessionId: args._[1],
+          campaignId,
+          sessionId,
         })
 
         this.showSessionModel(console, session)

@@ -7,20 +7,26 @@ import net from 'node:net'
 import repl from 'node:repl'
 import type { Readable, Writable } from 'node:stream'
 import { BaseReplServer } from './base-repl-server.js'
-import { REPL_SERVER_ASSETS, ReplServerAssets } from './repl-server-assets.js'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
-import { NetReplServerConfig, REPL_SERVER, ReplServer } from './repl-server.js'
+import {
+  NetReplServerConfig,
+  REPL_SERVER,
+  REPL_SERVER_DEFAULT_BANNER_GREET,
+  REPL_SERVER_DEFAULT_BANNER_LEAVE,
+  REPL_SERVER_DEFAULT_PROMPT,
+  ReplServer,
+  ReplServerSettings,
+} from './repl-server.js'
 import { netReplServerConfigSchema } from './repl-server.schemas.js'
 
 /**
  * Options for a Net repl-server.
  */
-interface NetReplServerOptions {
+interface NetReplServerOptions extends ReplServerSettings {
   address: string
   port: number
   maxClients: number
   socketTimeout: number
-  prompt: string
   useColors: boolean
 }
 
@@ -34,7 +40,6 @@ interface NetReplServerOptions {
  * - {@link Validator} via {@link VALIDATOR} token
  * - {@link Config} via {@link CONFIG} token
  * - {@link Logger} via {@link LOGGER} token
- * - {@link ReplServerAssets} via {@link REPL_SERVER_ASSETS} token
  * - {@link ReplServerRouter} via {@link REPL_SERVER_ROUTER} token
  *
  * @example
@@ -64,7 +69,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
    *
    * @param container - The DI container to register in.
    */
-  static register(container: DIContainer) {
+  static register(container: DIContainer, settings?: Partial<ReplServerSettings>) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
       (c) =>
@@ -72,8 +77,8 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
+          settings
         )
     )
   }
@@ -96,22 +101,22 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
    * @param validator - The validator instance.
    * @param config - The config instance.
    * @param logger - The logger instance.
-   * @param assets - The assets instance.
    * @param router - The router instance.
+   * @param settings - The optional settings object.
    */
   constructor(
     validator: Validator,
     config: Config,
     logger: Logger,
-    assets: ReplServerAssets,
-    router: ReplServerRouter
+    router: ReplServerRouter,
+    settings: Partial<ReplServerSettings> = {}
   ) {
-    super(validator, config, logger, assets, router)
+    super(validator, config, logger, router)
 
     this.validator.addSchema('repl-server-config', netReplServerConfigSchema)
 
-    const configData = this.config.get<NetReplServerConfig>('repl-server-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<NetReplServerConfig>('repl-server-config')
+    this.options = this.buildOptions(conf, settings)
 
     this.server = net.createServer()
 
@@ -208,19 +213,13 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
 
       const rs = this.initReplServer(socket, socket)
 
-      rs.on('reset', (context) => {
-        this.defineContext(context)
-      })
-
       rs.on('exit', () => {
-        console.log(this.getBannerLeave())
+        console.log(this.options.bannerLeave)
       })
-
-      this.defineContext(rs.context)
 
       this.defineCommands(console, rs)
 
-      console.log(this.getBannerGreet())
+      console.log(this.options.bannerGreet)
 
       rs.displayPrompt()
     } catch (error) {
@@ -239,7 +238,10 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
       stdout,
       stderr,
       colorMode: this.options.useColors,
-      inspectOptions: { depth: 8 },
+      inspectOptions: {
+        showHidden: false,
+        depth: 4,
+      },
     })
   }
 
@@ -372,16 +374,21 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
   }
 
   /**
-   * Converts validated configuration to a repl-server options.
+   * Converts validated configuration and settings to a repl-server options.
    */
-  private buildOptions(data: NetReplServerConfig): NetReplServerOptions {
+  private buildOptions(
+    conf: NetReplServerConfig,
+    settings: Partial<ReplServerSettings>
+  ): NetReplServerOptions {
     return {
-      address: data.REPL_SERVER_ADDRESS,
-      port: data.REPL_SERVER_PORT,
-      maxClients: data.REPL_SERVER_MAX_CLIENTS,
-      socketTimeout: data.REPL_SERVER_SOCKET_TIMEOUT,
-      prompt: data.REPL_SERVER_PROMPT,
-      useColors: data.REPL_SERVER_USE_COLORS,
+      address: conf.REPL_SERVER_ADDRESS,
+      port: conf.REPL_SERVER_PORT,
+      maxClients: conf.REPL_SERVER_MAX_CLIENTS,
+      socketTimeout: conf.REPL_SERVER_SOCKET_TIMEOUT,
+      useColors: conf.REPL_SERVER_USE_COLORS,
+      prompt: settings.prompt ?? REPL_SERVER_DEFAULT_PROMPT,
+      bannerGreet: settings.bannerGreet ?? REPL_SERVER_DEFAULT_BANNER_GREET,
+      bannerLeave: settings.bannerLeave ?? REPL_SERVER_DEFAULT_BANNER_LEAVE,
     }
   }
 }

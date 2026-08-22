@@ -49,8 +49,8 @@ export abstract class BullBaseQueue implements BaseQueue {
     protected readonly connector: ProducerConnector,
     protected readonly queueName: string
   ) {
-    const configData = this.config.get<BullProducerConfig>('producer-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<BullProducerConfig>('producer-config')
+    this.options = this.buildOptions(conf)
 
     this.queue = new Queue<unknown, unknown>(this.queueName, {
       connection: connector.getConnection<RedisProducerConnection>(),
@@ -90,12 +90,31 @@ export abstract class BullBaseQueue implements BaseQueue {
     }
   }
 
+  async getWorkers(): Promise<object[]> {
+    try {
+      const workers = await this.queue.getWorkers()
+
+      return workers.map((worker) => {
+        return {
+          id: worker['id'],
+          name: worker['name'],
+          age: worker['age'],
+        }
+      })
+    } catch (error) {
+      throw ProducerError.wrap(error, {
+        queue: this.queueName,
+        method: 'getWorkers',
+      })
+    }
+  }
+
   /**
    * Converts validated configuration to a queue options.
    */
-  private buildOptions(data: BullProducerConfig): BullProducerQueueOptions {
+  private buildOptions(conf: BullProducerConfig): BullProducerQueueOptions {
     return {
-      prefix: data.PRODUCER_PREFIX,
+      prefix: conf.PRODUCER_PREFIX,
     }
   }
 }

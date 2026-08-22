@@ -17,18 +17,14 @@ export interface DatabaseManager {
   /**
    * Loads all custom functions into the database.
    *
-   * This method registers the application's custom Redis functions.
-   *
-   * @throws {@link DatabaseError} If the functions cannot be loaded.
+   * @throws {@link DatabaseError} If the operation fails.
    */
   loadFunctions(): Promise<void>
 
   /**
-   * Cleans up the entire database.
+   * Retrieves the database information.
    *
-   * This method removes all data and should be used with caution.
-   *
-   * @throws {@link DatabaseError} If the cleanup operation fails.
+   * @throws {@link DatabaseError} If the operation fails.
    */
-  cleanup(): Promise<void>
+  getInfo(): Promise<string[]>
 }

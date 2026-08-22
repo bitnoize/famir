@@ -99,9 +99,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         Date.now()
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId, mirrorDomain } })
+      this.logger.info(`Database create campaign`, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, mirrorDomain },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -153,9 +158,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         CAMPAIGN_LOCK_TIMEOUT
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId } })
+      this.logger.info(`Database lock campaign`, {
+        repository: this.repositoryName,
+        method: 'lock',
+        params: { campaignId },
+        result,
+      })
 
       return lockSecret
     } catch (error) {
@@ -175,9 +185,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId } })
+      this.logger.info(`Database unlock campaign`, {
+        repository: this.repositoryName,
+        method: 'unlock',
+        params: { campaignId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -189,10 +204,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async update(
     campaignId: string,
-    description: string | null | undefined,
-    sessionExpire: number | null | undefined,
-    newSessionExpire: number | null | undefined,
-    messageExpire: number | null | undefined,
+    description: string,
+    sessionExpire: number,
+    newSessionExpire: number,
+    messageExpire: number,
     lockSecret: string
   ): Promise<void> {
     try {
@@ -206,9 +221,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId } })
+      this.logger.info(`Database update campaign`, {
+        repository: this.repositoryName,
+        method: 'update',
+        params: { campaignId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -226,9 +246,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { campaign: { campaignId } })
+      this.logger.info(`Database delete campaign`, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: { campaignId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,

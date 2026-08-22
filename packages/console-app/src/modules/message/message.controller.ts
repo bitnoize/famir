@@ -1,7 +1,12 @@
 import { DIContainer } from '@famir/common'
 import { FullMessageModel } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
+import {
+  REPL_SERVER_ASSETS,
+  REPL_SERVER_ROUTER,
+  ReplServerAssets,
+  ReplServerRouter,
+} from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ReadMessageArgs } from './message.js'
@@ -33,6 +38,7 @@ export class MessageController extends BaseController {
         new MessageController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<MessageService>(MESSAGE_SERVICE)
         )
@@ -54,16 +60,18 @@ export class MessageController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
+   * @param assets - The repl-server assets instance.
    * @param router - The repl-server router instance.
    * @param messageService - The message service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly messageService: MessageService
   ) {
-    super(validator, logger, router)
+    super(validator, logger, assets, router)
 
     this.validator.addSchema('console-read-message-args', readMessageArgsSchema)
   }
@@ -81,16 +89,15 @@ export class MessageController extends BaseController {
         params: ['campaign-id', 'message-id'],
       },
       (console, spec) => {
-        console.log(`Returns the message model.\n`)
-
-        console.log(
-          `// Reads a message:\n` + `.${spec.name} httpbin 5ad44dbcf927457eadc57d8de23eb7c1\n`
-        )
+        console.log(`// Reads some message in the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin 5ad44dbcf927457eadc57d8de23eb7c1\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, messageId] = args._
+
         const message = await this.messageService.read({
-          campaignId: args._[0],
-          messageId: args._[1],
+          campaignId,
+          messageId,
         })
 
         this.showMessageModel(console, message)

@@ -1,7 +1,12 @@
 import { DIContainer } from '@famir/common'
 import { ProxyModel } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
+import {
+  REPL_SERVER_ASSETS,
+  REPL_SERVER_ROUTER,
+  ReplServerAssets,
+  ReplServerRouter,
+} from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
@@ -45,6 +50,7 @@ export class ProxyController extends BaseController {
         new ProxyController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<ProxyService>(PROXY_SERVICE)
         )
@@ -66,16 +72,18 @@ export class ProxyController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
+   * @param assets - The repl-server assets instance.
    * @param router - The repl-server router instance.
    * @param proxyService - The proxy service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly proxyService: ProxyService
   ) {
-    super(validator, logger, router)
+    super(validator, logger, assets, router)
 
     this.validator
       .addSchema('console-create-proxy-args', createProxyArgsSchema)
@@ -99,38 +107,28 @@ export class ProxyController extends BaseController {
             name: 'url',
             description: `The upstream URL for the proxy.`,
             type: 'string',
-          },
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
+            alias: 'u',
           },
         ],
         params: ['campaign-id', 'proxy-id'],
       },
       (console, spec) => {
-        console.log(`Returns the proxy model.\n`)
+        console.log(`The proxy will be created in a disabled state (isEnabled = false).`)
+        console.log(`Use '.proxy-enable' command to activate it for traffic routing.\n`)
 
-        console.log(
-          `The proxy will be created in a disabled state (isEnabled = false).\n` +
-            `Use '.proxy-enable' command to activate it for traffic routing.\n`
-        )
-
-        console.log(
-          `// Creates a 'tor' proxy in 'httpbin' campaign:\n` +
-            `.${spec.name} httpbin tor --url socks5://127.0.0.1:9050 -s f2c2ef66...\n`
-        )
+        console.log(`// Creates a 'tor' proxy in the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin tor -u "socks5://127.0.0.1:9050"\n`)
       },
       async (console, spec, args) => {
-        const proxy = await this.proxyService.create({
-          campaignId: args._[0],
-          proxyId: args._[1],
+        const [campaignId, proxyId] = args._
+
+        await this.proxyService.create({
+          campaignId,
+          proxyId,
           url: args.url,
-          lockSecret: args.lockSecret,
         })
 
-        this.showProxyModel(console, proxy)
+        console.log(`Proxy created!`)
       }
     )
 
@@ -143,16 +141,15 @@ export class ProxyController extends BaseController {
         params: ['campaign-id', 'proxy-id'],
       },
       (console, spec) => {
-        console.log(`Returns the proxy model.\n`)
-
-        console.log(
-          `// Reads a 'tor' proxy in 'httpbin' campaign:\n` + `.${spec.name} httpbin tor\n`
-        )
+        console.log(`// Reads the 'tor' proxy in the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin tor\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, proxyId] = args._
+
         const proxy = await this.proxyService.read({
-          campaignId: args._[0],
-          proxyId: args._[1],
+          campaignId,
+          proxyId,
         })
 
         this.showProxyModel(console, proxy)
@@ -164,14 +161,7 @@ export class ProxyController extends BaseController {
         name: 'proxy-enable',
         description: `Enables the proxy, making it available for traffic routing.`,
         schemaName: 'console-toggle-proxy-args',
-        options: [
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
-          },
-        ],
+        options: [],
         params: ['campaign-id', 'proxy-id'],
       },
       (console, spec) => {
@@ -180,16 +170,15 @@ export class ProxyController extends BaseController {
             `using random load balancing.\n`
         )
 
-        console.log(
-          `// Enables the 'tor' proxy in 'httpbin' campaign:\n` +
-            `.${spec.name} httpbin tor -s f2c2ef66...\n`
-        )
+        console.log(`// Enables the 'tor' proxy in the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin tor\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, proxyId] = args._
+
         await this.proxyService.enable({
-          campaignId: args._[0],
-          proxyId: args._[1],
-          lockSecret: args.lockSecret,
+          campaignId,
+          proxyId,
         })
 
         console.log(`Proxy enabled!`)
@@ -201,14 +190,7 @@ export class ProxyController extends BaseController {
         name: 'proxy-disable',
         description: `Disables the proxy, stopping traffic routing.`,
         schemaName: 'console-toggle-proxy-args',
-        options: [
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
-          },
-        ],
+        options: [],
         params: ['campaign-id', 'proxy-id'],
       },
       (console, spec) => {
@@ -217,16 +199,15 @@ export class ProxyController extends BaseController {
             `to another enabled proxy upon their next authorization.\n`
         )
 
-        console.log(
-          `// Disables the 'tor' proxy in 'httpbin' campaign:\n` +
-            `.${spec.name} httpbin tor -s f2c2ef66...\n`
-        )
+        console.log(`// Disables the 'tor' proxy in the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin tor\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, proxyId] = args._
+
         await this.proxyService.disable({
-          campaignId: args._[0],
-          proxyId: args._[1],
-          lockSecret: args.lockSecret,
+          campaignId,
+          proxyId,
         })
 
         console.log(`Proxy disabled!`)
@@ -238,29 +219,21 @@ export class ProxyController extends BaseController {
         name: 'proxy-delete',
         description: `Deletes the proxy by its ID.`,
         schemaName: 'console-delete-proxy-args',
-        options: [
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
-          },
-        ],
+        options: [],
         params: ['campaign-id', 'proxy-id'],
       },
       (console, spec) => {
         console.log(`A proxy must be disabled before it can be deleted.\n`)
 
-        console.log(
-          `// Deletes the 'tor' proxy in 'httpbin' campaign:\n` +
-            `.${spec.name} httpbin tor -s f2c2ef66...\n`
-        )
+        console.log(`// Deletes the 'tor' proxy in the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin tor\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, proxyId] = args._
+
         await this.proxyService.delete({
-          campaignId: args._[0],
-          proxyId: args._[1],
-          lockSecret: args.lockSecret,
+          campaignId,
+          proxyId,
         })
 
         console.log(`Proxy deleted!`)
@@ -276,15 +249,16 @@ export class ProxyController extends BaseController {
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`Returns the array of proxy models.\n`)
-
         console.log(`The proxies are ordered by creation time (oldest first).\n`)
 
-        console.log(`// Lists all proxies in 'httpbin' campaign:\n` + `.${spec.name} httpbin\n`)
+        console.log(`// Lists all proxies in the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin\n`)
       },
       async (console, spec, args) => {
+        const [campaignId] = args._
+
         const proxies = await this.proxyService.list({
-          campaignId: args._[0],
+          campaignId,
         })
 
         this.showProxyCollection(console, proxies)

@@ -4,6 +4,8 @@ import { CompositionRoot, DIContainer } from '@famir/common'
  * Loads all infrastructure modules and starts/stops the application.
  *
  * @param root - The composition root object.
+ *
+ * @category none
  */
 export function loader(root: CompositionRoot) {
   const container = DIContainer.getInstance()

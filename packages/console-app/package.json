@@ -45,6 +45,7 @@
     "@famir/database": "*",
     "@famir/logger": "*",
     "@famir/producer": "*",
+    "@famir/edge-server": "*",
     "@famir/repl-server": "*",
     "@famir/validator": "*",
     "ascii-table3": "^1.0.3",

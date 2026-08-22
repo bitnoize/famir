@@ -114,8 +114,8 @@ export class RedisDatabaseConnector implements DatabaseConnector {
       .addSchema('database-array-reply', redisDatabaseArrayReplySchema)
       .addSchema('database-array-strings-reply', redisDatabaseArrayStringsReplySchema)
 
-    const configData = this.config.get<RedisDatabaseConfig>('database-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<RedisDatabaseConfig>('database-config')
+    this.options = this.buildOptions(conf)
 
     this.connection = createClient({
       url: this.options.connectionUrl,
@@ -275,9 +275,9 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   /**
    * Converts validated configuration to a connector options.
    */
-  private buildOptions(data: RedisDatabaseConfig): RedisDatabaseConnectorOptions {
+  private buildOptions(conf: RedisDatabaseConfig): RedisDatabaseConnectorOptions {
     return {
-      connectionUrl: data.DATABASE_CONNECTION_URL,
+      connectionUrl: conf.DATABASE_CONNECTION_URL,
     }
   }
 }

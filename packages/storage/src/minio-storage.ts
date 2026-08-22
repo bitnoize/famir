@@ -102,8 +102,8 @@ export class MinioStorage implements Storage {
   ) {
     this.validator.addSchema('storage-config', minioStorageConfigSchema)
 
-    const configData = this.config.get<MinioStorageConfig>('storage-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<MinioStorageConfig>('storage-config')
+    this.options = this.buildOptions(conf)
 
     this.minio = new MinioClient({
       endPoint: this.options.endPoint,
@@ -172,14 +172,14 @@ export class MinioStorage implements Storage {
   /**
    * Converts validated configuration to a storage options.
    */
-  private buildOptions(data: MinioStorageConfig): MinioStorageOptions {
+  private buildOptions(conf: MinioStorageConfig): MinioStorageOptions {
     return {
-      endPoint: data.STORAGE_ENDPOINT,
-      port: data.STORAGE_PORT,
-      useSSL: data.STORAGE_USE_SSL,
-      accessKey: data.STORAGE_ACCESS_KEY,
-      secretKey: data.STORAGE_SECRET_KEY,
-      bucketName: data.STORAGE_BUCKET_NAME,
+      endPoint: conf.STORAGE_ENDPOINT,
+      port: conf.STORAGE_PORT,
+      useSSL: conf.STORAGE_USE_SSL,
+      accessKey: conf.STORAGE_ACCESS_KEY,
+      secretKey: conf.STORAGE_SECRET_KEY,
+      bucketName: conf.STORAGE_BUCKET_NAME,
     }
   }
 }

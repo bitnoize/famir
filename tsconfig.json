@@ -11,6 +11,7 @@
     { "path": "packages/storage" },
     { "path": "packages/producer" },
     { "path": "packages/consumer" },
+    { "path": "packages/edge-server" },
     { "path": "packages/http-client" },
     { "path": "packages/http-server" },
     { "path": "packages/http-tools" },

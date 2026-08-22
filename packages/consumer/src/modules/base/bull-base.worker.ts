@@ -7,28 +7,14 @@ import { ConsumerConnector } from '../../consumer-connector.js'
 import { ConsumerRouter } from '../../consumer-router.js'
 import { ConsumerError } from '../../consumer.error.js'
 import { BullConsumerConfig, RedisConsumerConnection } from '../../consumer.js'
-import { BaseWorker } from './base.worker.js'
-
-/**
- * Specification for a Bull consumer worker.
- *
- * @category none
- */
-export interface BullConsumerWorkerSpec {
-  /** Maximum number of jobs to process concurrently. */
-  concurrency: number
-  /** Maximum number of jobs to process within the duration window. */
-  limiterMax: number
-  /** Time window in milliseconds for the rate limiter. */
-  limiterDuration: number
-}
+import { BaseWorker, ConsumerWorkerSettings } from './base.worker.js'
 
 /**
  * Options for a Bull consumer worker.
  *
  * @category none
  */
-interface BullConsumerWorkerOptions extends BullConsumerWorkerSpec {
+interface BullConsumerWorkerOptions extends ConsumerWorkerSettings {
   prefix: string
 }
 
@@ -57,7 +43,7 @@ export abstract class BullBaseWorker implements BaseWorker {
    * @param connector - The connector instance.
    * @param router - The router instance.
    * @param queueName - The name of the queue.
-   * @param spec - The worker spec object.
+   * @param settings - The settings object.
    */
   constructor(
     protected readonly validator: Validator,
@@ -66,10 +52,10 @@ export abstract class BullBaseWorker implements BaseWorker {
     protected readonly connector: ConsumerConnector,
     protected readonly router: ConsumerRouter,
     protected readonly queueName: string,
-    protected readonly spec: BullConsumerWorkerSpec
+    settings: Partial<ConsumerWorkerSettings>
   ) {
-    const configData = this.config.get<BullConsumerConfig>('consumer-config')
-    this.options = this.buildOptions(configData, spec)
+    const conf = this.config.get<BullConsumerConfig>('consumer-config')
+    this.options = this.buildOptions(conf, settings)
 
     this.worker = new Worker<unknown, unknown>(queueName, this.processor, {
       connection: connector.getConnection<RedisConsumerConnection>(),
@@ -92,21 +78,21 @@ export abstract class BullBaseWorker implements BaseWorker {
     })
 
     this.worker.on('completed', (job: Job<unknown, unknown>) => {
-      this.logger.info(`ConsumeWorker Bull event: completed`, {
+      this.logger.debug(`ConsumeWorker Bull event: completed`, {
         queue: this.queueName,
         job: this.dumpJob(job),
       })
     })
 
     this.worker.on('failed', (job: Job<unknown, unknown> | undefined) => {
-      this.logger.error(`ConsumeWorker Bull event: failed`, {
+      this.logger.debug(`ConsumeWorker Bull event: failed`, {
         queue: this.queueName,
         job: this.dumpJob(job),
       })
     })
 
     this.worker.on('error', (error: unknown) => {
-      this.logger.error(`ConsumeWorker Bull event: error`, {
+      this.logger.debug(`ConsumeWorker Bull event: error`, {
         error: serializeError(error),
         queue: this.queueName,
       })
@@ -173,15 +159,17 @@ export abstract class BullBaseWorker implements BaseWorker {
   }
 
   /**
-   * Converts validated configuration to a worker options.
+   * Converts validated configuration and settings to a worker options.
    */
   private buildOptions(
-    data: BullConsumerConfig,
-    spec: BullConsumerWorkerSpec
+    conf: BullConsumerConfig,
+    settings: Partial<ConsumerWorkerSettings>
   ): BullConsumerWorkerOptions {
     return {
-      prefix: data.CONSUMER_PREFIX,
-      ...spec,
+      prefix: conf.CONSUMER_PREFIX,
+      concurrency: settings.concurrency ?? 2,
+      limiterMax: settings.limiterMax ?? 1,
+      limiterDuration: settings.limiterDuration ?? 1000,
     }
   }
 

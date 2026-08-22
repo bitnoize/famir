@@ -5,7 +5,7 @@ import { WEBHOOK_QUEUE_NAME } from '@famir/producer'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { CONSUMER_CONNECTOR, ConsumerConnector } from '../../consumer-connector.js'
 import { CONSUMER_ROUTER, ConsumerRouter } from '../../consumer-router.js'
-import { BullBaseWorker, BullConsumerWorkerSpec } from '../base/index.js'
+import { BullBaseWorker, ConsumerWorkerSettings } from '../base/index.js'
 import { WEBHOOK_WORKER, WebhookWorker } from './webhook.js'
 
 /**
@@ -47,7 +47,7 @@ export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
    *
    * @param container - The DI container to register in.
    */
-  static register(container: DIContainer, spec?: BullConsumerWorkerSpec) {
+  static register(container: DIContainer, settings?: Partial<ConsumerWorkerSettings>) {
     container.registerSingleton<WebhookWorker>(
       WEBHOOK_WORKER,
       (c) =>
@@ -57,7 +57,7 @@ export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
           c.resolve<Logger>(LOGGER),
           c.resolve<ConsumerConnector>(CONSUMER_CONNECTOR),
           c.resolve<ConsumerRouter>(CONSUMER_ROUTER),
-          spec
+          settings
         )
     )
   }
@@ -70,7 +70,7 @@ export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
    * @param logger - The logger instance.
    * @param connector - The connector instance.
    * @param router - The router instance.
-   * @param spec - The optional spec object.
+   * @param settings - The optional settings object.
    */
   constructor(
     validator: Validator,
@@ -78,12 +78,8 @@ export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
     logger: Logger,
     connector: ConsumerConnector,
     router: ConsumerRouter,
-    spec: BullConsumerWorkerSpec = {
-      concurrency: 2,
-      limiterMax: 1,
-      limiterDuration: 1000,
-    }
+    settings: Partial<ConsumerWorkerSettings> = {}
   ) {
-    super(validator, config, logger, connector, router, WEBHOOK_QUEUE_NAME, spec)
+    super(validator, config, logger, connector, router, WEBHOOK_QUEUE_NAME, settings)
   }
 }

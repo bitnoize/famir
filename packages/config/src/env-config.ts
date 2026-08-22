@@ -83,13 +83,13 @@ export class EnvConfig implements Config {
         return this.#cache[schemaName] as T
       }
 
-      const cfg = { ...process.env }
+      const conf = { ...process.env }
 
-      this.validateConfig<T>(schemaName, cfg)
+      this.validateConfig<T>(schemaName, conf)
 
-      this.#cache[schemaName] = cfg
+      this.#cache[schemaName] = conf
 
-      return cfg
+      return conf
     } catch (error) {
       throw BootstrapError.wrap(error, {
         service: 'config',

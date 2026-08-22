@@ -47,7 +47,7 @@ local function create_proxy(keys, args)
     url = args[3],
     is_enabled = 0,
     message_count = 0,
-    created_at = args[4],
+    created_at = tonumber(args[4]),
   }
 
   for k, v in pairs(model) do
@@ -60,12 +60,12 @@ local function create_proxy(keys, args)
     end
   end
 
-  if redis.call('SISMEMBER', proxy_urls_key, model.url) ~= 0 then
-    return redis.status_reply('CONFLICT Proxy url already taken')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if redis.call('SISMEMBER', proxy_urls_key, model.url) ~= 0 then
+    return redis.status_reply('CONFLICT Proxy url already taken')
   end
 
   -- Point of no return
@@ -220,12 +220,12 @@ local function enable_proxy(keys, args)
     end
   end
 
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('OK Proxy already enabled')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.is_enabled ~= 0 then
+    return redis.status_reply('OK Proxy already enabled')
   end
 
   -- Point of no return
@@ -285,12 +285,12 @@ local function disable_proxy(keys, args)
     end
   end
 
-  if stash.is_enabled == 0 then
-    return redis.status_reply('OK Proxy already disabled')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.is_enabled == 0 then
+    return redis.status_reply('OK Proxy already disabled')
   end
 
   -- Point of no return
@@ -354,12 +354,12 @@ local function delete_proxy(keys, args)
     end
   end
 
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('FORBIDDEN Proxy not disabled')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.is_enabled ~= 0 then
+    return redis.status_reply('FORBIDDEN Proxy not disabled')
   end
 
   -- Point of no return

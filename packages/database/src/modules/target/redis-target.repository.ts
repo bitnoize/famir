@@ -138,9 +138,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database create target`, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, targetId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -260,17 +265,17 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
   async update(
     campaignId: string,
     targetId: string,
-    connectTimeout: number | null | undefined,
-    simpleTimeout: number | null | undefined,
-    streamTimeout: number | null | undefined,
-    headersSizeLimit: number | null | undefined,
-    bodySizeLimit: number | null | undefined,
-    mainPage: string | null | undefined,
-    notFoundPage: string | null | undefined,
-    faviconIco: string | null | undefined,
-    robotsTxt: string | null | undefined,
-    sitemapXml: string | null | undefined,
-    allowWebSockets: boolean | null | undefined,
+    connectTimeout: number,
+    simpleTimeout: number,
+    streamTimeout: number,
+    headersSizeLimit: number,
+    bodySizeLimit: number,
+    mainPage: string,
+    notFoundPage: string,
+    faviconIco: string,
+    robotsTxt: string,
+    sitemapXml: string,
+    allowWebSockets: boolean,
     lockSecret: string
   ): Promise<void> {
     try {
@@ -292,9 +297,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database update target`, {
+        repository: this.repositoryName,
+        method: 'update',
+        params: { campaignId, targetId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -313,9 +323,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database enable target`, {
+        repository: this.repositoryName,
+        method: 'enable',
+        params: { campaignId, targetId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -334,9 +349,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database disable target`, {
+        repository: this.repositoryName,
+        method: 'disable',
+        params: { campaignId, targetId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -346,56 +366,64 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async appendLabel(
+  async appendLabels(
     campaignId: string,
     targetId: string,
-    label: string,
+    labels: string[],
     lockSecret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.target.append_target_label(
-        this.options.prefix,
-        campaignId,
-        targetId,
-        label.toLowerCase(),
-        lockSecret
+      const statusReplies = await Promise.all(
+        labels.map((label) =>
+          this.connection.target.append_target_label(
+            this.options.prefix,
+            campaignId,
+            targetId,
+            label.toLowerCase(),
+            lockSecret
+          )
+        )
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReplies(statusReplies)
 
-      this.logger.info(mesg, { target: { campaignId, targetId, label } })
+      this.logger.info(`Database append target labels`, {
+        repository: this.repositoryName,
+        method: 'appendLabels',
+        params: { campaignId, targetId, labels },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
-        method: 'appendLabel',
-        params: { campaignId, targetId, label },
+        method: 'appendLabels',
+        params: { campaignId, targetId, labels },
       })
     }
   }
 
-  async removeLabel(
-    campaignId: string,
-    targetId: string,
-    label: string,
-    lockSecret: string
-  ): Promise<void> {
+  async removeLabels(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.target.remove_target_label(
+      const statusReply = await this.connection.target.remove_target_labels(
         this.options.prefix,
         campaignId,
         targetId,
-        label.toLowerCase(),
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId, label } })
+      this.logger.info(`Database remove target labels`, {
+        repository: this.repositoryName,
+        method: 'removeLabels',
+        params: { campaignId, targetId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
-        method: 'removeLabel',
-        params: { campaignId, targetId, label },
+        method: 'removeLabels',
+        params: { campaignId, targetId },
       })
     }
   }
@@ -409,9 +437,14 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { target: { campaignId, targetId } })
+      this.logger.info(`Database delete target`, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: { campaignId, targetId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,

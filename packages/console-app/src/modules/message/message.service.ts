@@ -36,18 +36,12 @@ export class MessageService {
 
   /**
    * Reads the message by its ID.
-   *
-   * @param data - The data object.
-   * @returns The message model.
-   * @throws {@link ReplServerError} If the message is not found.
    */
   async read(data: { campaignId: string; messageId: string }): Promise<FullMessageModel> {
     const message = await this.messageRepository.readFull(data.campaignId, data.messageId)
 
     if (!message) {
-      throw new ReplServerError(`Message not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Message not found`)
     }
 
     return message

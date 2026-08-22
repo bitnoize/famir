@@ -7,7 +7,6 @@
 export interface CreateLureArgs {
   _: [string, string, string]
   path: string
-  lockSecret: string
 }
 
 /**
@@ -28,7 +27,6 @@ export interface ReadLureArgs {
  */
 export interface ToggleLureArgs {
   _: [string, string]
-  lockSecret: string
 }
 
 /**
@@ -39,7 +37,6 @@ export interface ToggleLureArgs {
  */
 export interface DeleteLureArgs {
   _: [string, string, string]
-  lockSecret: string
 }
 
 /**

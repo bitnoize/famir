@@ -227,7 +227,7 @@ redis.register_function({
   Update redirector
 --]]
 local function update_redirector(keys, args)
-  if #keys ~= 3 or #args < 1 then
+  if #keys ~= 3 or #args ~= 2 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -248,7 +248,7 @@ local function update_redirector(keys, args)
   end
 
   local stash = {
-    lock_secret = table.remove(args),
+    lock_secret = args[2],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -262,38 +262,14 @@ local function update_redirector(keys, args)
     end
   end
 
-  if #args % 2 ~= 0 then
-    return redis.error_reply('ERR Odd number of args')
-  end
-
-  local model = {}
-
-  for i = 1, #args, 2 do
-    local k, v = args[i], args[i + 1]
-
-    if model[k] then
-      return redis.error_reply('ERR Duplicate model.' .. k)
-    end
-
-    if k == 'page' then
-      model.page = v
-    else
-      return redis.error_reply('ERR Unknown model.' .. k)
-    end
-  end
+  local model = {
+    page = args[1],
+  }
 
   for k, v in pairs(model) do
     if not v then
       return redis.error_reply('ERR Wrong model.' .. k)
     end
-
-    if (k == 'page') and v == '' then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
-  end
-
-  if next(model) == nil then
-    return redis.status_reply('OK Nothing to update')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
@@ -361,12 +337,12 @@ local function append_redirector_field(keys, args)
     end
   end
 
-  if redis.call('SISMEMBER', redirector_fields_key, stash.field) ~= 0 then
-    return redis.status_reply('OK Redirector field already exists')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if redis.call('SISMEMBER', redirector_fields_key, stash.field) ~= 0 then
+    return redis.status_reply('OK Redirector field already exists')
   end
 
   -- Point of no return
@@ -383,10 +359,10 @@ redis.register_function({
 })
 
 --[[
-  Remove redirector field
+  Remove all redirector fields
 --]]
-local function remove_redirector_field(keys, args)
-  if #keys ~= 4 or #args ~= 2 then
+local function remove_redirector_fields(keys, args)
+  if #keys ~= 4 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -408,8 +384,7 @@ local function remove_redirector_field(keys, args)
   end
 
   local stash = {
-    field = args[1],
-    lock_secret = args[2],
+    lock_secret = args[1],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
   }
 
@@ -418,30 +393,30 @@ local function remove_redirector_field(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (k == 'field' or k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
+    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
-  end
-
-  if redis.call('SISMEMBER', redirector_fields_key, stash.field) ~= 1 then
-    return redis.status_reply('OK Redirector field not exists')
   end
 
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
   end
 
+  if redis.call('EXISTS', redirector_fields_key) ~= 1 then
+    return redis.status_reply('OK Redirector fields is empty')
+  end
+
   -- Point of no return
 
-  redis.call('SREM', redirector_fields_key, stash.field)
+  redis.call('DEL', redirector_fields_key)
 
-  return redis.status_reply('OK Redirector field removed')
+  return redis.status_reply('OK Redirector fields removed')
 end
 
 redis.register_function({
-  function_name = 'remove_redirector_field',
-  callback = remove_redirector_field,
-  description = 'Remove redirector field',
+  function_name = 'remove_redirector_fields',
+  callback = remove_redirector_fields,
+  description = 'Remove redirector fields',
 })
 
 --[[
@@ -491,12 +466,12 @@ local function delete_redirector(keys, args)
     end
   end
 
-  if stash.lure_count > 0 then
-    return redis.status_reply('FORBIDDEN Lures exists')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.lure_count > 0 then
+    return redis.status_reply('FORBIDDEN Lures exists')
   end
 
   -- Point of no return

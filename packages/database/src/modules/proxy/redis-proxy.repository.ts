@@ -87,9 +87,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
+      this.logger.info(`Database create proxy`, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, proxyId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -126,9 +131,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
+      this.logger.info(`Database enable proxy`, {
+        repository: this.repositoryName,
+        method: 'enable',
+        params: { campaignId, proxyId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -147,9 +157,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
+      this.logger.info(`Database disable proxy`, {
+        repository: this.repositoryName,
+        method: 'disable',
+        params: { campaignId, proxyId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -168,9 +183,14 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { proxy: { campaignId, proxyId } })
+      this.logger.info(`Database delete proxy`, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: { campaignId, proxyId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,

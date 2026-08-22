@@ -1,26 +1,41 @@
 import { DIContainer } from '@famir/common'
 import { CampaignModel, FullCampaignModel } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
+import {
+  REPL_SERVER_ASSETS,
+  REPL_SERVER_ROUTER,
+  ReplServerAssets,
+  ReplServerError,
+  ReplServerRouter,
+} from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { Console } from 'node:console'
 import { BaseController } from '../base/index.js'
 import {
+  CampaignTemplate,
+  CampaignTemplateCampaign,
+  CampaignTemplateLure,
+  CampaignTemplateProxy,
+  CampaignTemplateRedirector,
+  CampaignTemplateTarget,
   CreateCampaignArgs,
   DeleteCampaignArgs,
   ListCampaignsArgs,
-  LockCampaignArgs,
+  RawCampaignTemplate,
+  RawCampaignTemplateCampaign,
+  RawCampaignTemplateLure,
+  RawCampaignTemplateProxy,
+  RawCampaignTemplateRedirector,
+  RawCampaignTemplateTarget,
   ReadCampaignArgs,
-  UnlockCampaignArgs,
   UpdateCampaignArgs,
 } from './campaign.js'
 import {
   createCampaignArgsSchema,
   deleteCampaignArgsSchema,
   listCampaignsArgsSchema,
-  lockCampaignArgsSchema,
+  rawCampaignTemplateSchema,
   readCampaignArgsSchema,
-  unlockCampaignArgsSchema,
   updateCampaignArgsSchema,
 } from './campaign.schemas.js'
 import { type CampaignService, CAMPAIGN_SERVICE } from './campaign.service.js'
@@ -50,6 +65,7 @@ export class CampaignController extends BaseController {
         new CampaignController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<CampaignService>(CAMPAIGN_SERVICE)
         )
@@ -71,25 +87,26 @@ export class CampaignController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
+   * @param assets - The repl-server assets instance.
    * @param router - The repl-server router instance.
    * @param campaignService - The campaign service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly campaignService: CampaignService
   ) {
-    super(validator, logger, router)
+    super(validator, logger, assets, router)
 
     this.validator
       .addSchema('console-create-campaign-args', createCampaignArgsSchema)
       .addSchema('console-read-campaign-args', readCampaignArgsSchema)
-      .addSchema('console-lock-campaign-args', lockCampaignArgsSchema)
-      .addSchema('console-unlock-campaign-args', unlockCampaignArgsSchema)
       .addSchema('console-update-campaign-args', updateCampaignArgsSchema)
       .addSchema('console-delete-campaign-args', deleteCampaignArgsSchema)
       .addSchema('console-list-campaigns-args', listCampaignsArgsSchema)
+      .addSchema('console-raw-campaign-template', rawCampaignTemplateSchema)
   }
 
   /**
@@ -99,86 +116,71 @@ export class CampaignController extends BaseController {
     this.router.addCommand<CreateCampaignArgs>(
       {
         name: 'campaign-create',
-        description: `Creates a new campaign.`,
+        description: `Creates a new campaign from the template.`,
         schemaName: 'console-create-campaign-args',
         options: [
           {
-            name: 'mirror-domain',
-            description: `The public-facing mirror domain for the campaign.`,
+            name: 'asset-name',
+            description: `The name of the asset that contains campaign template.`,
             type: 'string',
+            alias: 'a',
           },
           {
-            name: 'description',
-            description: `The human-readable description for the campaign.`,
+            name: 'mirror-domain',
+            description: `Override the mirror domain from the template.`,
             type: 'string',
-            default: '',
+            alias: 'm',
+            default: null,
           },
           {
             name: 'crypt-secret',
-            description: `The secret used for encrypting session data.`,
+            description: `Override the crypt secret from the template.`,
             type: 'string',
+            alias: 's',
             default: null,
           },
           {
             name: 'upgrade-session-path',
-            description: `The URL path that triggers session upgrade.`,
+            description: `Override the upgrade session path from the template.`,
             type: 'string',
-            default: '/fake-upgrade-session',
-          },
-          {
-            name: 'session-cookie-name',
-            description: `The name of the cookie used to track authorized sessions.`,
-            type: 'string',
+            alias: 'u',
             default: null,
           },
           {
-            name: 'session-expire',
-            description: `The TTL for a session in milliseconds.`,
-            type: 'number',
-            default: 24 * 3600 * 1000,
-          },
-          {
-            name: 'new-session-expire',
-            description: `The TTL for a new session in milliseconds.`,
-            type: 'number',
-            default: 300 * 1000,
-          },
-          {
-            name: 'message-expire',
-            description: `The TTL for a message in milliseconds.`,
-            type: 'number',
-            default: 3600 * 1000,
+            name: 'session-cookie-name',
+            description: `Override the session cookie name from the template.`,
+            type: 'string',
+            alias: 'c',
+            default: null,
           },
         ],
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`Returns the campaign model.\n`)
+        console.log(`// Creates the 'httpbin' campaign from the 'httpbin-dev.yml' template:`)
+        console.log(`.${spec.name} httpbin -a httpbin-dev.yml httpbin\n`)
 
+        console.log(`// Creates the 'hackernews' campaign from the 'hackernews-dev.yml' asset`)
+        console.log(`// with overrides for mirror domain and crypt secret:`)
         console.log(
-          `// Creates a 'httpbin' campaign:\n` +
-            `.${spec.name} httpbin --mirror-domain httpbin.fake\n`
-        )
-
-        console.log(
-          `// Creates a 'hackernews' campaign:\n` +
-            `.${spec.name} hackernews --mirror-domain hackernews.fake\n`
+          `.${spec.name} hackernews -a hackernews-dev.yml hackernews -m my-hacker-news.fake -s "super-secret"\n`
         )
       },
       async (console, spec, args) => {
-        const campaign = await this.campaignService.create({
-          campaignId: args._[0],
-          mirrorDomain: args.mirrorDomain,
-          description: args.description,
-          cryptSecret: args.cryptSecret,
-          upgradeSessionPath: args.upgradeSessionPath,
-          sessionCookieName: args.sessionCookieName,
-          sessionExpire: args.sessionExpire,
-          newSessionExpire: args.newSessionExpire,
-          messageExpire: args.messageExpire,
-        })
+        const [campaignId] = args._
 
-        this.showCampaignModel(console, campaign)
+        const template = this.parseTemplate(
+          args.assetName,
+          campaignId,
+          args.mirrorDomain,
+          args.cryptSecret,
+          args.upgradeSessionPath,
+          args.sessionCookieName
+        )
+
+        await this.campaignService.create(template)
+
+        console.log(`Campaign created!`)
       }
     )
 
@@ -191,135 +193,45 @@ export class CampaignController extends BaseController {
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`Returns the campaign model.\n`)
-
-        console.log(`// Reads a 'httpbin' campaign:\n` + `.${spec.name} httpbin\n`)
+        console.log(`// Reads the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin\n`)
       },
       async (console, spec, args) => {
+        const [campaignId] = args._
+
         const campaign = await this.campaignService.read({
-          campaignId: args._[0],
+          campaignId,
         })
 
         this.showCampaignModel(console, campaign)
       }
     )
 
-    this.router.addCommand<LockCampaignArgs>(
-      {
-        name: 'campaign-lock',
-        description: `Acquires a distributed lock for the campaign.`,
-        schemaName: 'console-lock-campaign-args',
-        options: [],
-        params: ['campaign-id'],
-      },
-      (console, spec) => {
-        console.log(`Returns the unique lock secret that must be used for subsequent operations.\n`)
-
-        console.log(`This lock is required for any mutating operations.\n`)
-
-        console.log(`// Locks a 'httpbin' campaign:\n` + `.${spec.name} httpbin\n`)
-      },
-      async (console, spec, args) => {
-        const lockSecret = await this.campaignService.lock({
-          campaignId: args._[0],
-        })
-
-        console.log(`Campaign locked!\nLock secret is: ${lockSecret}`)
-      }
-    )
-
-    this.router.addCommand<UnlockCampaignArgs>(
-      {
-        name: 'campaign-unlock',
-        description: `Releases a previously acquired lock on the campaign.`,
-        schemaName: 'console-unlock-campaign-args',
-        options: [
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
-          },
-        ],
-        params: ['campaign-id'],
-      },
-      (console, spec) => {
-        console.log(`The lock secret must match the one returned by '.campaign-lock' command.\n`)
-
-        console.log(`// Unlocks a 'httpbin' campaign:\n` + `.${spec.name} httpbin -s f2c2ef66...\n`)
-      },
-      async (console, spec, args) => {
-        await this.campaignService.unlock({
-          campaignId: args._[0],
-          lockSecret: args.lockSecret,
-        })
-
-        console.log(`Campaign unlocked!`)
-      }
-    )
-
     this.router.addCommand<UpdateCampaignArgs>(
       {
         name: 'campaign-update',
-        description: `Updates the campaign specific fields.`,
+        description: `Updates the campaign from a template.`,
         schemaName: 'console-update-campaign-args',
         options: [
           {
-            name: 'description',
-            description: `The new human-readable description for the campaign.`,
+            name: 'asset-name',
+            description: `The name of the asset that contains campaign template.`,
             type: 'string',
-            alias: 'd',
-            default: null,
-          },
-          {
-            name: 'session-expire',
-            description: `The new TTL for an authorized session in milliseconds.`,
-            type: 'number',
-            default: null,
-          },
-          {
-            name: 'new-session-expire',
-            description: `The new TTL for a not-yet-authorized session in milliseconds.`,
-            type: 'number',
-            default: null,
-          },
-          {
-            name: 'message-expire',
-            description: `The new TTL for a message in milliseconds.`,
-            type: 'number',
-            default: null,
-          },
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
+            alias: 'a',
           },
         ],
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`All update parameters are optional. Only provided fields will be updated.\n`)
-
-        console.log(
-          `// Updates a 'httpbin' campaign description field:\n` +
-            `.${spec.name} httpbin --description "My own campaign" -s f2c2ef66...\n`
-        )
-
-        console.log(
-          `// Updates a 'httpbin' campaign message-expire field:\n` +
-            `.${spec.name} httpbin --message-expire 7200000 -s f2c2ef66...\n`
-        )
+        console.log(`// Updates the 'httpbin' campaign from the 'httpbin-prod.yaml' asset:`)
+        console.log(`.${spec.name} -a "httpbin-prod.yml" httpbin\n`)
       },
       async (console, spec, args) => {
-        await this.campaignService.update({
-          campaignId: args._[0],
-          description: args.description,
-          sessionExpire: args.sessionExpire,
-          newSessionExpire: args.newSessionExpire,
-          messageExpire: args.messageExpire,
-          lockSecret: args.lockSecret,
-        })
+        const [campaignId] = args._
+
+        const template = this.parseTemplate(args.assetName, campaignId)
+
+        await this.campaignService.update(template)
 
         console.log(`Campaign updated!`)
       }
@@ -332,21 +244,29 @@ export class CampaignController extends BaseController {
         schemaName: 'console-delete-campaign-args',
         options: [
           {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
+            name: 'force',
+            description: `The confirmation flag.`,
+            type: 'boolean',
+            default: false,
           },
         ],
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`// Deletes a 'httpbin' campaign:\n` + `.${spec.name} httpbin -s f2c2ef66...\n`)
+        console.log(`// Deletes the 'httpbin' campaign:`)
+        console.log(`.${spec.name} httpbin --force\n`)
       },
       async (console, spec, args) => {
+        if (!args.force) {
+          this.confirmAlert(console)
+
+          return
+        }
+
+        const [campaignId] = args._
+
         await this.campaignService.delete({
-          campaignId: args._[0],
-          lockSecret: args.lockSecret,
+          campaignId,
         })
 
         console.log(`Campaign deleted!`)
@@ -361,11 +281,10 @@ export class CampaignController extends BaseController {
         options: [],
       },
       (console, spec) => {
-        console.log(`Returns the array of campaign models.\n`)
-
         console.log(`The campaigns are ordered by creation time (oldest first).\n`)
 
-        console.log(`// Lists all campaigns:\n` + `.${spec.name}\n`)
+        console.log(`// Lists all campaigns:`)
+        console.log(`.${spec.name}\n`)
       },
       async (console) => {
         const campaigns = await this.campaignService.list()
@@ -375,6 +294,125 @@ export class CampaignController extends BaseController {
     )
   }
 
+  private parseTemplate(
+    assetName: string,
+    campaignId: string,
+    mirrorDomain?: string | null,
+    cryptSecret?: string | null,
+    upgradeSessionPath?: string | null,
+    sessionCookieName?: string | null
+  ): CampaignTemplate {
+    const asset = this.assets.get(assetName)
+
+    if (!asset) {
+      throw ReplServerError.badRequest(`Campaign template asset not found`)
+    }
+
+    const rawTemplate = this.parseYaml(asset)
+
+    this.validateData<RawCampaignTemplate>('console-raw-campaign-template', rawTemplate)
+
+    return {
+      campaign: this.parseTemplateCampaign(
+        rawTemplate.campaign,
+        campaignId,
+        mirrorDomain,
+        cryptSecret,
+        upgradeSessionPath,
+        sessionCookieName
+      ),
+      proxies: this.parseTemplateProxies(rawTemplate.proxies ?? []),
+      targets: this.parseTemplateTargets(rawTemplate.targets ?? []),
+      redirectors: this.parseTemplateRedirectors(rawTemplate.redirectors ?? []),
+      lures: this.parseTemplateLures(rawTemplate.lures ?? []),
+    }
+  }
+
+  private parseTemplateCampaign(
+    rawCampaign: RawCampaignTemplateCampaign,
+    campaignId: string,
+    mirrorDomain: string | null | undefined,
+    cryptSecret: string | null | undefined,
+    upgradeSessionPath: string | null | undefined,
+    sessionCookieName: string | null | undefined
+  ): CampaignTemplateCampaign {
+    return {
+      campaignId,
+      mirrorDomain: mirrorDomain ?? rawCampaign.mirrorDomain,
+      description: rawCampaign.description ?? '',
+      cryptSecret: cryptSecret ?? rawCampaign.cryptSecret ?? '$ecret',
+      upgradeSessionPath:
+        upgradeSessionPath ?? rawCampaign.upgradeSessionPath ?? '/famir-upgrade-session',
+      sessionCookieName:
+        sessionCookieName ?? rawCampaign.sessionCookieName ?? `famir-${rawCampaign.mirrorDomain}`,
+      sessionExpire: rawCampaign.sessionExpire ?? 24 * 3600 * 1000,
+      newSessionExpire: rawCampaign.newSessionExpire ?? 300 * 1000,
+      messageExpire: rawCampaign.messageExpire ?? 3600 * 1000,
+    }
+  }
+
+  private parseTemplateProxies(rawProxies: RawCampaignTemplateProxy[]): CampaignTemplateProxy[] {
+    return rawProxies.map((rawProxy) => {
+      return {
+        proxyId: rawProxy.proxyId,
+        url: rawProxy.url,
+        isEnabled: rawProxy.isEnabled ?? false,
+      }
+    })
+  }
+
+  private parseTemplateTargets(rawTargets: RawCampaignTemplateTarget[]): CampaignTemplateTarget[] {
+    return rawTargets.map((rawTarget) => {
+      return {
+        targetId: rawTarget.targetId,
+        accessLevel: rawTarget.accessLevel,
+        donorSecure: rawTarget.donorSecure,
+        donorSub: rawTarget.donorSub,
+        donorDomain: rawTarget.donorDomain,
+        donorPort: rawTarget.donorPort,
+        mirrorSecure: rawTarget.mirrorSecure,
+        mirrorSub: rawTarget.mirrorSub,
+        mirrorPort: rawTarget.mirrorPort,
+        labels: rawTarget.labels ?? [],
+        connectTimeout: rawTarget.connectTimeout ?? 10 * 1000,
+        simpleTimeout: rawTarget.simpleTimeout ?? 60 * 1000,
+        streamTimeout: rawTarget.streamTimeout ?? 300 * 1000,
+        headersSizeLimit: rawTarget.headersSizeLimit ?? 10 * 1024,
+        bodySizeLimit: rawTarget.bodySizeLimit ?? 10 * 1024 * 1024,
+        mainPage: rawTarget.mainPage ?? '',
+        notFoundPage: rawTarget.notFoundPage ?? '',
+        faviconIco: rawTarget.faviconIco ?? '',
+        robotsTxt: rawTarget.robotsTxt ?? '',
+        sitemapXml: rawTarget.sitemapXml ?? '',
+        allowWebSockets: rawTarget.allowWebSockets ?? false,
+        isEnabled: rawTarget.isEnabled ?? false,
+      }
+    })
+  }
+
+  private parseTemplateRedirectors(
+    rawRedirectors: RawCampaignTemplateRedirector[]
+  ): CampaignTemplateRedirector[] {
+    return rawRedirectors.map((rawRedirector) => {
+      return {
+        redirectorId: rawRedirector.redirectorId,
+        page: rawRedirector.page ?? '',
+        fields: rawRedirector.fields ?? [],
+      }
+    })
+  }
+
+  private parseTemplateLures(rawLures: RawCampaignTemplateLure[]): CampaignTemplateLure[] {
+    return rawLures.map((rawLure) => {
+      return {
+        lureId: rawLure.lureId,
+        path: rawLure.path,
+        redirectorId: rawLure.redirectorId,
+        isEnabled: rawLure.isEnabled ?? false,
+      }
+    })
+  }
+
   private showCampaignModel(console: Console, campaign: FullCampaignModel) {
     console.table({
       campaignId: campaign.campaignId,
@@ -382,7 +420,7 @@ export class CampaignController extends BaseController {
       //cryptSecret: campaign.cryptSecret,
       upgradeSessionPath: campaign.upgradeSessionPath,
       sessionCookieName: campaign.sessionCookieName,
-      sessionCookieNames: campaign.sessionCookieNames.length,
+      //sessionCookieNames: campaign.sessionCookieNames.length,
       sessionExpire: campaign.sessionExpire,
       newSessionExpire: campaign.newSessionExpire,
       messageExpire: campaign.messageExpire,

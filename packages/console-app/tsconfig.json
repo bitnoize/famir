@@ -12,6 +12,7 @@
     { "path": "../logger" },
     { "path": "../database" },
     { "path": "../producer" },
+    { "path": "../edge-server" },
     { "path": "../repl-server" }
   ]
 }

@@ -94,8 +94,8 @@ export class RedisProducerConnector implements ProducerConnector {
   ) {
     this.validator.addSchema('producer-config', bullProducerConfigSchema)
 
-    const configData = this.config.get<BullProducerConfig>('producer-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<BullProducerConfig>('producer-config')
+    this.options = this.buildOptions(conf)
 
     this.connection = new Redis(this.options.connectionUrl, {
       connectionName: 'producer',
@@ -151,9 +151,9 @@ export class RedisProducerConnector implements ProducerConnector {
   /**
    * Converts validated configuration to a connector options.
    */
-  private buildOptions(data: BullProducerConfig): BullProducerConnectorOptions {
+  private buildOptions(conf: BullProducerConfig): BullProducerConnectorOptions {
     return {
-      connectionUrl: data.PRODUCER_CONNECTION_URL,
+      connectionUrl: conf.PRODUCER_CONNECTION_URL,
     }
   }
 }

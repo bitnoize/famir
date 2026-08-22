@@ -89,9 +89,14 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { lure: { campaignId, lureId, path, redirectorId } })
+      this.logger.info(`Database create lure`, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, lureId, path, redirectorId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -146,9 +151,14 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { lure: { campaignId, lureId } })
+      this.logger.info(`Database enable lure`, {
+        repository: this.repositoryName,
+        method: 'enable',
+        params: { campaignId, lureId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -167,9 +177,14 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { lure: { campaignId, lureId } })
+      this.logger.info(`Database disable lure`, {
+        repository: this.repositoryName,
+        method: 'disable',
+        params: { campaignId, lureId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -194,9 +209,14 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { lure: { campaignId, lureId, redirectorId } })
+      this.logger.info(`Database delete lure`, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: { campaignId, lureId, redirectorId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,

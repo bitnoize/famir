@@ -38,21 +38,14 @@ export interface ReplServerCommandArgs {
 }
 
 /**
- * Represents the repl-server context.
- */
-export interface ReplServerCommandContext {
-  famir: Record<string, unknown>
-  [key: string]: unknown
-}
-
-/**
  * Represents the repl-server command action function.
+ *
+ * @param spec - The command spec object.
  */
 export type ReplServerCommandAction<T extends ReplServerCommandArgs> = (
   console: Console,
   spec: ReplServerCommandSpec,
-  args: T,
-  context: ReplServerCommandContext
+  args: T
 ) => Promise<void>
 
 /**
@@ -163,7 +156,7 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    *
    * @param console - The underlying Console instance.
    */
-  showHelp(console: Console, detail = false) {
+  showHelp(console: Console) {
     console.log()
 
     const usage: string = [
@@ -192,12 +185,22 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
     }
 
     try {
-      if (detail) {
-        this.help(console, this.spec)
-      }
+      this.help(console, this.spec)
     } catch (error) {
       console.error(error)
     }
+  }
+
+  /**
+   * Checks that need to show help.
+   *
+   * @param args - The parsed command args.
+   * @returns `true` if help need to show, `false` otherwise.
+   */
+  checkHelp(args: ReplServerCommandArgs) {
+    const params = this.spec.params ?? []
+
+    return args.help || args._.length != params.length
   }
 
   /**
@@ -207,18 +210,13 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    * @param args - The parsed command args.
    * @throws {@link ReplServerError} If validation fails.
    */
-  async execute(
-    console: Console,
-    args: ReplServerCommandArgs,
-    context: ReplServerCommandContext
-  ): Promise<void> {
+  async execute(console: Console, args: ReplServerCommandArgs): Promise<void> {
     try {
       this.validateArgs(args)
 
-      await this.action(console, this.spec, args, context)
+      await this.action(console, this.spec, args)
     } catch (error) {
       throw ReplServerError.wrap(error, {
-        spec: this.spec,
         args,
       })
     }

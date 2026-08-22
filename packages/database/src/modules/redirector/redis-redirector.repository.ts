@@ -89,9 +89,14 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
+      this.logger.info(`Database create redirector`, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, redirectorId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -140,7 +145,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
   async update(
     campaignId: string,
     redirectorId: string,
-    page: string | null | undefined,
+    page: string,
     lockSecret: string
   ): Promise<void> {
     try {
@@ -148,13 +153,18 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         this.options.prefix,
         campaignId,
         redirectorId,
-        page ?? null,
+        page,
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
+      this.logger.info(`Database update redirector`, {
+        repository: this.repositoryName,
+        method: 'update',
+        params: { campaignId, redirectorId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -164,56 +174,64 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     }
   }
 
-  async appendField(
+  async appendFields(
     campaignId: string,
     redirectorId: string,
-    field: string,
+    fields: string[],
     lockSecret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.redirector.append_redirector_field(
-        this.options.prefix,
-        campaignId,
-        redirectorId,
-        field,
-        lockSecret
+      const statusReplies = await Promise.all(
+        fields.map((field) =>
+          this.connection.redirector.append_redirector_field(
+            this.options.prefix,
+            campaignId,
+            redirectorId,
+            field,
+            lockSecret
+          )
+        )
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReplies(statusReplies)
 
-      this.logger.info(mesg, { redirector: { campaignId, redirectorId, field } })
+      this.logger.info(`Database append redirector fields`, {
+        repository: this.repositoryName,
+        method: 'appendFields',
+        params: { campaignId, redirectorId, fields },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
-        method: 'appendField',
-        params: { campaignId, redirectorId, field },
+        method: 'appendFields',
+        params: { campaignId, redirectorId, fields },
       })
     }
   }
 
-  async removeField(
-    campaignId: string,
-    redirectorId: string,
-    field: string,
-    lockSecret: string
-  ): Promise<void> {
+  async removeFields(campaignId: string, redirectorId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.redirector.remove_redirector_field(
+      const statusReply = await this.connection.redirector.remove_redirector_fields(
         this.options.prefix,
         campaignId,
         redirectorId,
-        field,
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { redirector: { campaignId, redirectorId, field } })
+      this.logger.info(`Database remove redirector fields`, {
+        repository: this.repositoryName,
+        method: 'removeFields',
+        params: { campaignId, redirectorId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
-        method: 'removeField',
-        params: { campaignId, redirectorId, field },
+        method: 'removeFields',
+        params: { campaignId, redirectorId },
       })
     }
   }
@@ -227,9 +245,14 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { redirector: { campaignId, redirectorId } })
+      this.logger.info(`Database delete redirector`, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: { campaignId, redirectorId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,

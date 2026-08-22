@@ -87,9 +87,14 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { session: { campaignId, sessionId } })
+      this.logger.info(`Database create session`, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, sessionId },
+        result,
+      })
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
@@ -132,9 +137,14 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { session: { campaignId, sessionId } })
+      this.logger.info(`Database auth session`, {
+        repository: this.repositoryName,
+        method: 'auth',
+        params: { campaignId, sessionId },
+        result,
+      })
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
@@ -161,9 +171,14 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         secret
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { session: { campaignId, lureId, sessionId } })
+      this.logger.info(`Database upgrade session`, {
+        repository: this.repositoryName,
+        method: 'upgrade',
+        params: { campaignId, lureId, sessionId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,

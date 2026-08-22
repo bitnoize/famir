@@ -204,14 +204,14 @@ export interface TargetRepository {
   disable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
   /**
-   * Appends a label to the target.
+   * Appends multiple labels to the target.
    *
    * Labels are used for categorization and filtering of targets.
    * The label is automatically converted to lowercase.
    *
    * @param campaignId - The ID of the campaign containing the target.
    * @param targetId - The target ID to append label to.
-   * @param label - The label to append to the target.
+   * @param labels - The labels to append to the target.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
    * @throws {@link DatabaseError} If the campaign does not exist.
    * @throws {@link DatabaseError} If the campaign is not locked.
@@ -219,19 +219,18 @@ export interface TargetRepository {
    * @throws {@link DatabaseError} If the target does not exist.
    * @throws {@link DatabaseError} If the data validation fails.
    */
-  appendLabel(
+  appendLabels(
     campaignId: string,
     targetId: string,
-    label: string,
+    labels: string[],
     lockSecret: string
   ): Promise<void>
 
   /**
-   * Removes a label from the target.
+   * Removes all labels from the target.
    *
    * @param campaignId - The ID of the campaign containing the target.
-   * @param targetId - The target ID to remove label from.
-   * @param label - The label to remove from the target.
+   * @param targetId - The target ID to remove labels from.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
    * @throws {@link DatabaseError} If the campaign does not exist.
    * @throws {@link DatabaseError} If the campaign is not locked.
@@ -239,12 +238,7 @@ export interface TargetRepository {
    * @throws {@link DatabaseError} If the target does not exist.
    * @throws {@link DatabaseError} If the data validation fails.
    */
-  removeLabel(
-    campaignId: string,
-    targetId: string,
-    label: string,
-    lockSecret: string
-  ): Promise<void>
+  removeLabels(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
   /**
    * Deletes the target by its ID.

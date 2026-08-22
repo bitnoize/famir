@@ -1,7 +1,8 @@
-import { DIContainer, arrayIncludes } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
+  CAMPAIGN_REPOSITORY,
+  CampaignRepository,
   DatabaseError,
-  DatabaseErrorCode,
   PROXY_REPOSITORY,
   ProxyModel,
   ProxyRepository,
@@ -29,70 +30,56 @@ export class ProxyService {
   static register(container: DIContainer) {
     container.registerSingleton<ProxyService>(
       PROXY_SERVICE,
-      (c) => new ProxyService(c.resolve<ProxyRepository>(PROXY_REPOSITORY))
+      (c) =>
+        new ProxyService(
+          c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
+          c.resolve<ProxyRepository>(PROXY_REPOSITORY)
+        )
     )
   }
 
   /**
    * Creates a new service instance.
    *
+   * @param campaignRepository - The campaign repository instance.
    * @param proxyRepository - The proxy repository instance.
    */
-  constructor(protected readonly proxyRepository: ProxyRepository) {}
+  constructor(
+    protected readonly campaignRepository: CampaignRepository,
+    protected readonly proxyRepository: ProxyRepository
+  ) {}
 
   /**
    * Creates a new proxy.
-   *
-   * @param data - The data object.
-   * @returns The created proxy model.
    */
-  async create(data: {
-    campaignId: string
-    proxyId: string
-    url: string
-    lockSecret: string
-  }): Promise<ProxyModel> {
+  async create(data: { campaignId: string; proxyId: string; url: string }): Promise<void> {
+    const lockSecret = await this.lockCampaign(data.campaignId)
+
     try {
-      await this.proxyRepository.create(data.campaignId, data.proxyId, data.url, data.lockSecret)
+      await this.proxyRepository.create(data.campaignId, data.proxyId, data.url, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'CONFLICT', 'FORBIDDEN']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new ReplServerError(error.message, {
-            code: error.code,
-          })
+        if (error.code === 'CONFLICT') {
+          throw ReplServerError.conflict(error.message)
         }
+
+        throw ReplServerError.internal(`Create proxy failed`, null, error)
       }
 
       throw error
+    } finally {
+      await this.campaignRepository.unlock(data.campaignId, lockSecret)
     }
-
-    const proxy = await this.proxyRepository.read(data.campaignId, data.proxyId)
-
-    if (!proxy) {
-      throw new ReplServerError(`Proxy not found`, {
-        code: 'NOT_FOUND',
-      })
-    }
-
-    return proxy
   }
 
   /**
    * Reads the proxy by its ID.
-   *
-   * @param data - The data object.
-   * @returns The proxy model.
-   * @throws {@link ReplServerError} If the proxy is not found.
    */
   async read(data: { campaignId: string; proxyId: string }): Promise<ProxyModel> {
     const proxy = await this.proxyRepository.read(data.campaignId, data.proxyId)
 
     if (!proxy) {
-      throw new ReplServerError(`Proxy not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Proxy not found`)
     }
 
     return proxy
@@ -100,88 +87,107 @@ export class ProxyService {
 
   /**
    * Enables the proxy, making it available for traffic routing.
-   *
-   * @param data - The data object.
    */
-  async enable(data: { campaignId: string; proxyId: string; lockSecret: string }): Promise<void> {
+  async enable(data: { campaignId: string; proxyId: string }): Promise<void> {
+    const lockSecret = await this.lockCampaign(data.campaignId)
+
     try {
-      await this.proxyRepository.enable(data.campaignId, data.proxyId, data.lockSecret)
+      await this.proxyRepository.enable(data.campaignId, data.proxyId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new ReplServerError(error.message, {
-            code: error.code,
-          })
+        if (error.code === 'NOT_FOUND') {
+          throw ReplServerError.notFound(error.message)
         }
+
+        throw ReplServerError.internal(`Enable proxy failed`, null, error)
       }
 
       throw error
+    } finally {
+      await this.campaignRepository.unlock(data.campaignId, lockSecret)
     }
   }
 
   /**
    * Disables the proxy, stopping traffic routing.
-   *
-   * @param data - The data object.
    */
-  async disable(data: { campaignId: string; proxyId: string; lockSecret: string }): Promise<void> {
+  async disable(data: { campaignId: string; proxyId: string }): Promise<void> {
+    const lockSecret = await this.lockCampaign(data.campaignId)
+
     try {
-      await this.proxyRepository.disable(data.campaignId, data.proxyId, data.lockSecret)
+      await this.proxyRepository.disable(data.campaignId, data.proxyId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new ReplServerError(error.message, {
-            code: error.code,
-          })
+        if (error.code === 'NOT_FOUND') {
+          throw ReplServerError.notFound(error.message)
         }
+
+        throw ReplServerError.internal(`Disable proxy failed`, null, error)
       }
 
       throw error
+    } finally {
+      await this.campaignRepository.unlock(data.campaignId, lockSecret)
     }
   }
 
   /**
    * Deletes the proxy by its ID.
-   *
-   * @param data - The data object.
    */
-  async delete(data: { campaignId: string; proxyId: string; lockSecret: string }): Promise<void> {
+  async delete(data: { campaignId: string; proxyId: string }): Promise<void> {
+    const lockSecret = await this.lockCampaign(data.campaignId)
+
     try {
-      await this.proxyRepository.delete(data.campaignId, data.proxyId, data.lockSecret)
+      await this.proxyRepository.delete(data.campaignId, data.proxyId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        const knownErrorCodes: DatabaseErrorCode[] = ['NOT_FOUND', 'FORBIDDEN']
-
-        if (arrayIncludes(knownErrorCodes, error.code)) {
-          throw new ReplServerError(error.message, {
-            code: error.code,
-          })
+        if (error.code === 'NOT_FOUND') {
+          throw ReplServerError.notFound(error.message)
         }
+
+        if (error.code === 'FORBIDDEN') {
+          throw ReplServerError.forbidden(error.message)
+        }
+
+        throw ReplServerError.internal(`Delete proxy failed`, null, error)
       }
 
       throw error
+    } finally {
+      await this.campaignRepository.unlock(data.campaignId, lockSecret)
     }
   }
 
   /**
    * Lists all proxies for the campaign.
-   *
-   * @param data - The data object.
-   * @returns The array of proxy models.
    */
   async list(data: { campaignId: string }): Promise<ProxyModel[]> {
     const proxies = await this.proxyRepository.list(data.campaignId)
 
     if (!proxies) {
-      throw new ReplServerError(`Campaign not found`, {
-        code: 'NOT_FOUND',
-      })
+      throw ReplServerError.notFound(`Campaign not found`)
     }
 
     return proxies
+  }
+
+  protected async lockCampaign(campaignId: string): Promise<string> {
+    try {
+      return await this.campaignRepository.lock(campaignId)
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        if (error.code === 'NOT_FOUND') {
+          throw ReplServerError.notFound(error.message)
+        }
+
+        if (error.code === 'FORBIDDEN') {
+          throw ReplServerError.forbidden(error.message)
+        }
+
+        throw ReplServerError.internal(`Lock campaign failed`, null, error)
+      }
+
+      throw error
+    }
   }
 }

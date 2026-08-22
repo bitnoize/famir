@@ -27,3 +27,17 @@ export interface BaseWorker {
    */
   close(): Promise<void>
 }
+
+/**
+ * Settings for a consumer worker.
+ *
+ * @category none
+ */
+export interface ConsumerWorkerSettings {
+  /** Maximum number of jobs to process concurrently. */
+  concurrency: number
+  /** Maximum number of jobs to process within the duration window. */
+  limiterMax: number
+  /** Time window in milliseconds for the rate limiter. */
+  limiterDuration: number
+}

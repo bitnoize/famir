@@ -20,7 +20,7 @@ export interface RedirectorRepository {
    *
    * The redirector is created with an empty `fields` array,
    * meaning it is initially 'loose' (accepts any parameters).
-   * Use {@link appendField} or {@link removeField} to manage required fields.
+   * Use {@link appendFields} or {@link removeFields} to manage required fields.
    *
    * @param campaignId - The ID of the campaign to create the redirector in.
    * @param redirectorId - The new redirector ID to create.
@@ -77,7 +77,7 @@ export interface RedirectorRepository {
   ): Promise<void>
 
   /**
-   * Appends a required field to the redirector.
+   * Appends multiple required fields to the redirector.
    *
    * When rendering a redirector with required fields, all specified fields
    * must be provided in the parameters. If the fields array is empty,
@@ -85,7 +85,7 @@ export interface RedirectorRepository {
    *
    * @param campaignId - The ID of the campaign containing the redirector.
    * @param redirectorId - The redirector ID to append field to.
-   * @param field - The field name to append to the fields list.
+   * @param fields - The field names to append to the fields list.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
    * @throws {@link DatabaseError} If the campaign does not exist.
    * @throws {@link DatabaseError} If the campaign is not locked.
@@ -93,19 +93,18 @@ export interface RedirectorRepository {
    * @throws {@link DatabaseError} If the redirector does not exist.
    * @throws {@link DatabaseError} If the data validation fails.
    */
-  appendField(
+  appendFields(
     campaignId: string,
     redirectorId: string,
-    field: string,
+    fields: string[],
     lockSecret: string
   ): Promise<void>
 
   /**
-   * Removes a required field from the redirector.
+   * Removes all fields from the redirector.
    *
    * @param campaignId - The ID of the campaign containing the redirector.
-   * @param redirectorId - The redirector ID to remove field from.
-   * @param field - The field name to remove from the fields list.
+   * @param redirectorId - The redirector ID to remove fields from.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
    * @throws {@link DatabaseError} If the campaign does not exist.
    * @throws {@link DatabaseError} If the campaign is not locked.
@@ -113,12 +112,7 @@ export interface RedirectorRepository {
    * @throws {@link DatabaseError} If the redirector does not exist.
    * @throws {@link DatabaseError} If the data validation fails.
    */
-  removeField(
-    campaignId: string,
-    redirectorId: string,
-    field: string,
-    lockSecret: string
-  ): Promise<void>
+  removeFields(campaignId: string, redirectorId: string, lockSecret: string): Promise<void>
 
   /**
    * Deletes the redirector by its ID.

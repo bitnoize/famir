@@ -1,7 +1,12 @@
 import { DIContainer } from '@famir/common'
-import { LureModel, RedirectorParams } from '@famir/database'
+import { LureModel } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
-import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
+import {
+  REPL_SERVER_ASSETS,
+  REPL_SERVER_ROUTER,
+  ReplServerAssets,
+  ReplServerRouter,
+} from '@famir/repl-server'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
@@ -47,6 +52,7 @@ export class LureController extends BaseController {
         new LureController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<LureService>(LURE_SERVICE)
         )
@@ -68,16 +74,18 @@ export class LureController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
+   * @param assets - The repl-server assets instance.
    * @param router - The repl-server router instance.
    * @param lureService - The lure service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly lureService: LureService
   ) {
-    super(validator, logger, router)
+    super(validator, logger, assets, router)
 
     this.validator
       .addSchema('console-create-lure-args', createLureArgsSchema)
@@ -103,38 +111,31 @@ export class LureController extends BaseController {
             description: `The URL path for the lure.`,
             type: 'string',
           },
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
-          },
         ],
         params: ['campaign-id', 'lure-id', 'redirector-id'],
       },
       (console, spec) => {
-        console.log(`Returns the lure model.\n`)
-
         console.log(
           `The lure will be created in a disabled state (isEnabled = false).\n` +
             `Use '.lure-enable' command to activate it for traffic routing.\n`
         )
 
         console.log(
-          `// Creates a 'test' lure in 'hackernews' campaign with 'simple' redirector:\n` +
-            `.${spec.name} hackernews test simple --path /some/secret/test.html -s f2c2ef66...\n`
+          `// Creates a 'test' lure in the 'hackernews' campaign with 'simple' redirector:`
         )
+        console.log(`.${spec.name} hackernews test simple --path /some/secret/test.html\n`)
       },
       async (console, spec, args) => {
-        const lure = await this.lureService.create({
-          campaignId: args._[0],
-          lureId: args._[1],
+        const [campaignId, lureId, redirectorId] = args._
+
+        await this.lureService.create({
+          campaignId,
+          lureId,
           path: args.path,
-          redirectorId: args._[2],
-          lockSecret: args.lockSecret,
+          redirectorId,
         })
 
-        this.showLureModel(console, lure)
+        console.log(`Lure created!`)
       }
     )
 
@@ -147,16 +148,15 @@ export class LureController extends BaseController {
         params: ['campaign-id', 'lure-id'],
       },
       (console, spec) => {
-        console.log(`Returns the lure model.\n`)
-
-        console.log(
-          `// Reads the 'test' lure in 'hackernews' campaign:\n` + `.${spec.name} hackernews test\n`
-        )
+        console.log(`// Reads the 'test' lure in the 'hackernews' campaign:`)
+        console.log(`.${spec.name} hackernews test\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, lureId] = args._
+
         const lure = await this.lureService.read({
-          campaignId: args._[0],
-          lureId: args._[1],
+          campaignId,
+          lureId,
         })
 
         this.showLureModel(console, lure)
@@ -168,14 +168,7 @@ export class LureController extends BaseController {
         name: 'lure-enable',
         description: `Enables the lure, making it available for request routing.`,
         schemaName: 'console-toggle-lure-args',
-        options: [
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
-          },
-        ],
+        options: [],
         params: ['campaign-id', 'lure-id'],
       },
       (console, spec) => {
@@ -184,16 +177,15 @@ export class LureController extends BaseController {
             `the associated redirector content.\n`
         )
 
-        console.log(
-          `// Enables the 'test' lure in 'hackernews' campaign:\n` +
-            `.${spec.name} hackernews test -s f2c2ef66...\n`
-        )
+        console.log(`// Enables the 'test' lure in the 'hackernews' campaign:`)
+        console.log(`.${spec.name} hackernews test\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, lureId] = args._
+
         await this.lureService.enable({
-          campaignId: args._[0],
-          lureId: args._[1],
-          lockSecret: args.lockSecret,
+          campaignId,
+          lureId,
         })
 
         console.log(`Lure enabled!`)
@@ -205,29 +197,21 @@ export class LureController extends BaseController {
         name: 'lure-disable',
         description: `Disables the lure, stopping request routing.`,
         schemaName: 'console-toggle-lure-args',
-        options: [
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
-          },
-        ],
+        options: [],
         params: ['campaign-id', 'lure-id'],
       },
       (console, spec) => {
         console.log(`When disabled, requests to the URL path will not be routed.\n`)
 
-        console.log(
-          `// Disables the 'test' lure in 'hackernews' campaign:\n` +
-            `.${spec.name} hackernews test -s f2c2ef66...\n`
-        )
+        console.log(`// Disables the 'test' lure in the 'hackernews' campaign:`)
+        console.log(`.${spec.name} hackernews test\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, lureId] = args._
+
         await this.lureService.disable({
-          campaignId: args._[0],
-          lureId: args._[1],
-          lockSecret: args.lockSecret,
+          campaignId,
+          lureId,
         })
 
         console.log(`Lure disabled!`)
@@ -239,30 +223,22 @@ export class LureController extends BaseController {
         name: 'lure-delete',
         description: `Deletes the lure by its ID.`,
         schemaName: 'console-delete-lure-args',
-        options: [
-          {
-            name: 'lock-secret',
-            description: `The campaign lock secret.`,
-            type: 'string',
-            alias: 's',
-          },
-        ],
+        options: [],
         params: ['campaign-id', 'lure-id', 'redirector-id'],
       },
       (console, spec) => {
         console.log(`A lure must be disabled before it can be deleted.\n`)
 
-        console.log(
-          `// Deletes the 'test' lure in 'hackernews' campaign:\n` +
-            `.${spec.name} hackernews test -s f2c2ef66...\n`
-        )
+        console.log(`// Deletes the 'test' lure in the 'hackernews' campaign:`)
+        console.log(`.${spec.name} hackernews test\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, lureId, redirectorId] = args._
+
         await this.lureService.delete({
-          campaignId: args._[0],
-          lureId: args._[1],
-          redirectorId: args._[2],
-          lockSecret: args.lockSecret,
+          campaignId,
+          lureId,
+          redirectorId,
         })
 
         console.log(`Lure deleted!`)
@@ -278,15 +254,16 @@ export class LureController extends BaseController {
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`Returns the array of lure models.\n`)
-
         console.log(`The lures are ordered by creation time (oldest first).\n`)
 
-        console.log(`// Lists all lures in 'hackernews' campaign:\n` + `.${spec.name} hackernews\n`)
+        console.log(`// Lists all lures in the 'hackernews' campaign:`)
+        console.log(`.${spec.name} hackernews\n`)
       },
       async (console, spec, args) => {
+        const [campaignId] = args._
+
         const lures = await this.lureService.list({
-          campaignId: args._[0],
+          campaignId,
         })
 
         this.showLureCollection(console, lures)
@@ -309,19 +286,19 @@ export class LureController extends BaseController {
         params: ['campaign-id', 'lure-id', 'target-id'],
       },
       (console, spec) => {
-        console.log(`Returns the lure URL string.\n`)
-
         console.log(
-          `// Makes a URL for 'test' lure in 'hackernews' campaign via 'root' target:\n` +
-            `.${spec.name} hackernews test root --params "{\\"foo\\": \\"bar\\"}"\n`
+          `// Makes a URL for the 'test' lure in the 'hackernews' campaign via 'root' target:`
         )
+        console.log(`.${spec.name} hackernews test root --params "{\\"foo\\": \\"bar\\"}"\n`)
       },
       async (console, spec, args) => {
+        const [campaignId, lureId, targetId] = args._
+
         const url = await this.lureService.makeUrl({
-          campaignId: args._[0],
-          lureId: args._[1],
-          targetId: args._[2],
-          params: JSON.parse(args.params) as RedirectorParams, // FIXME
+          campaignId,
+          lureId,
+          targetId,
+          params: {},
         })
 
         console.log(`Lure URL: ${url}`)

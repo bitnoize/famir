@@ -94,8 +94,8 @@ export class RedisConsumerConnector implements ConsumerConnector {
   ) {
     this.validator.addSchema('consumer-config', bullConsumerConfigSchema)
 
-    const configData = this.config.get<BullConsumerConfig>('consumer-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<BullConsumerConfig>('consumer-config')
+    this.options = this.buildOptions(conf)
 
     this.connection = new Redis(this.options.connectionUrl, {
       connectionName: 'consumer',
@@ -151,9 +151,9 @@ export class RedisConsumerConnector implements ConsumerConnector {
   /**
    * Converts validated configuration to a connector options.
    */
-  private buildOptions(data: BullConsumerConfig): BullConsumerConnectorOptions {
+  private buildOptions(conf: BullConsumerConfig): BullConsumerConnectorOptions {
     return {
-      connectionUrl: data.CONSUMER_CONNECTION_URL,
+      connectionUrl: conf.CONSUMER_CONNECTION_URL,
     }
   }
 }

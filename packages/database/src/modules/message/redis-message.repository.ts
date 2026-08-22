@@ -136,9 +136,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         Date.now()
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
+      this.logger.info(`Database create message`, {
+        repository: this.repositoryName,
+        method: 'create',
+        params: { campaignId, messageId, proxyId, targetId, sessionId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
@@ -171,9 +176,14 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         sessionId
       )
 
-      const mesg = this.checkStatusReply(statusReply)
+      const result = this.checkStatusReply(statusReply)
 
-      this.logger.info(mesg, { message: { campaignId, messageId, proxyId, targetId, sessionId } })
+      this.logger.info(`Database create dummy message`, {
+        repository: this.repositoryName,
+        method: 'createDummy',
+        params: { campaignId, messageId, proxyId, targetId, sessionId },
+        result,
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,

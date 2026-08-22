@@ -30,8 +30,8 @@ import { redisFunctions } from './redis-functions.js'
  * // Load Redis functions
  * await manager.loadFunctions()
  *
- * // Removes all data on all Redis databases
- * await manager.cleanup()
+ * const info = await manager.getInfo()
+ * console.log(info)
  * ```
  *
  * @category none
@@ -99,14 +99,16 @@ export class RedisDatabaseManager implements DatabaseManager {
     }
   }
 
-  async cleanup(): Promise<void> {
+  async getInfo(): Promise<string[]> {
     try {
-      await this.connection.FLUSHDB()
+      const result = await this.connection.INFO('server')
 
-      this.logger.warn(`Database cleaned up`)
+      return result.split('\r\n').filter((res) => {
+        return res && !res.startsWith('#')
+      })
     } catch (error) {
       throw DatabaseError.wrap(error, {
-        method: 'cleanup',
+        method: 'getInfo',
       })
     }
   }

@@ -3,7 +3,7 @@ import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
 import { DatabaseConnector } from '../../database-connector.js'
-import { DatabaseError } from '../../database.error.js'
+import { DatabaseError, DatabaseErrorCode } from '../../database.error.js'
 import {
   DATABASE_STATUS_CODES,
   DatabaseStatusCode,
@@ -52,8 +52,8 @@ export abstract class RedisBaseRepository {
     protected readonly connector: DatabaseConnector,
     protected readonly repositoryName: string
   ) {
-    const configData = this.config.get<RedisDatabaseConfig>('database-config')
-    this.options = this.buildOptions(configData)
+    const conf = this.config.get<RedisDatabaseConfig>('database-config')
+    this.options = this.buildOptions(conf)
 
     this.connection = connector.getConnection<RedisDatabaseConnection>()
   }
@@ -119,22 +119,58 @@ export abstract class RedisBaseRepository {
   }
 
   /**
-   * Checks a status reply from a Redis Function and returns its message.
+   * Checks a status reply from a Redis Function and returns its result.
    *
    * This method validates that the reply has a status code of 'OK'.
    *
    * @param value - The status reply from a Redis Function.
-   * @returns The message part from the status reply.
+   * @returns The tuple contains code and message.
    * @throws {@link DatabaseError} If the reply is invalid or has a non-OK status code.
    */
-  protected checkStatusReply(value: unknown): string {
-    const [code, mesg] = this.parseStatusReply(value)
+  protected checkStatusReply(value: unknown): [DatabaseStatusCode, string] {
+    const [code, message] = this.parseStatusReply(value)
 
     if (code !== 'OK') {
-      throw new DatabaseError(mesg, { code })
+      throw new DatabaseError(message, {
+        context: {
+          result: [code, message],
+        },
+        code,
+      })
     }
 
-    return mesg
+    return [code, message]
+  }
+
+  /**
+   * Checks a status replies from a Redis Functions and returns its result.
+   *
+   * This method validates that all the replies has a status code of 'OK'.
+   *
+   * @param values - The status replies from a Redis Functions.
+   * @returns The list of tuples contains code and message.
+   * @throws {@link DatabaseError} If the replies are invalid or has a non-OK status code.
+   */
+  protected checkStatusReplies(values: unknown[]): [DatabaseStatusCode, string][] {
+    if (values.length === 0) {
+      throw DatabaseError.internal(`Empty status reply`)
+    }
+
+    const result = values.map((value) => this.parseStatusReply(value))
+    const failed = result.find(([code]) => code !== 'OK')
+
+    if (failed) {
+      const [code, message] = failed as [DatabaseErrorCode, string]
+
+      throw new DatabaseError(message, {
+        context: {
+          result,
+        },
+        code,
+      })
+    }
+
+    return result
   }
 
   /**
@@ -193,17 +229,17 @@ export abstract class RedisBaseRepository {
         throw new Error(`Value is not a non-empty string`)
       }
 
-      const [code, mesg] = value.split(/\s+(.*)/, 2)
+      const [code, message] = value.split(/\s+(.*)/, 2)
 
-      if (!code || !mesg) {
-        throw new Error(`Value is not parsable to code and mesg`)
+      if (!code || !message) {
+        throw new Error(`Value is not parsable to code and message`)
       }
 
       if (!arrayIncludes(DATABASE_STATUS_CODES, code)) {
         throw new Error(`Status code not known: ${code}`)
       }
 
-      return [code, mesg]
+      return [code, message]
     } catch (error) {
       throw DatabaseError.internal(`Parse status reply failed`, null, error)
     }
@@ -212,9 +248,9 @@ export abstract class RedisBaseRepository {
   /**
    * Converts validated configuration to a repository options.
    */
-  private buildOptions(data: RedisDatabaseConfig): RedisDatabaseRepositoryOptions {
+  private buildOptions(conf: RedisDatabaseConfig): RedisDatabaseRepositoryOptions {
     return {
-      prefix: data.DATABASE_PREFIX,
+      prefix: conf.DATABASE_PREFIX,
     }
   }
 }

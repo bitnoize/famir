@@ -42,7 +42,9 @@ local function create_lure(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'redirector_campaign_id') and v == '' then
+    if
+      (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'redirector_campaign_id') and v == ''
+    then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
@@ -74,12 +76,12 @@ local function create_lure(keys, args)
     return redis.status_reply('FORBIDDEN Redirector not belong same campaign')
   end
 
-  if redis.call('HEXISTS', lure_paths_key, model.path) ~= 0 then
-    return redis.status_reply('CONFLICT Lure path already taken')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if redis.call('HEXISTS', lure_paths_key, model.path) ~= 0 then
+    return redis.status_reply('CONFLICT Lure path already taken')
   end
 
   -- Point of no return
@@ -277,12 +279,12 @@ local function enable_lure(keys, args)
     end
   end
 
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('OK Lure already enabled')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.is_enabled ~= 0 then
+    return redis.status_reply('OK Lure already enabled')
   end
 
   -- Point of no return
@@ -338,12 +340,12 @@ local function disable_lure(keys, args)
     end
   end
 
-  if stash.is_enabled == 0 then
-    return redis.status_reply('OK Lure already disabled')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.is_enabled == 0 then
+    return redis.status_reply('OK Lure already disabled')
   end
 
   -- Point of no return
@@ -432,12 +434,12 @@ local function delete_lure(keys, args)
     return redis.status_reply('FORBIDDEN Redirector not belong lure')
   end
 
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('FORBIDDEN Lure not disabled')
-  end
-
   if stash.orig_lock_secret ~= stash.lock_secret then
     return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  end
+
+  if stash.is_enabled ~= 0 then
+    return redis.status_reply('FORBIDDEN Lure not disabled')
   end
 
   -- Point of no return

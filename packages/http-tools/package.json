@@ -44,7 +44,7 @@
     "@famir/common": "*",
     "@famir/http-proto": "*",
     "cheerio": "^1.2.0",
-    "content-type": "^2.0.0",
+    "content-type": "^3.0.0",
     "iconv-lite": "^0.7.3",
     "isbot": "^5.2.1",
     "qs": "^6.15.3",

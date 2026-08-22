@@ -1,5 +1,5 @@
 import { proxyUrlSchema } from '@famir/database'
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
+import { JSONSchemaType, customIdentSchema } from '@famir/validator'
 import {
   CreateProxyArgs,
   DeleteProxyArgs,
@@ -16,7 +16,7 @@ import {
  */
 export const createProxyArgsSchema: JSONSchemaType<CreateProxyArgs> = {
   type: 'object',
-  required: ['_', 'url', 'lockSecret'],
+  required: ['_', 'url'],
   properties: {
     _: {
       type: 'array',
@@ -25,7 +25,6 @@ export const createProxyArgsSchema: JSONSchemaType<CreateProxyArgs> = {
       maxItems: 2,
     },
     url: proxyUrlSchema,
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
@@ -58,7 +57,7 @@ export const readProxyArgsSchema: JSONSchemaType<ReadProxyArgs> = {
  */
 export const toggleProxyArgsSchema: JSONSchemaType<ToggleProxyArgs> = {
   type: 'object',
-  required: ['_', 'lockSecret'],
+  required: ['_'],
   properties: {
     _: {
       type: 'array',
@@ -66,7 +65,6 @@ export const toggleProxyArgsSchema: JSONSchemaType<ToggleProxyArgs> = {
       minItems: 2,
       maxItems: 2,
     },
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const
@@ -79,7 +77,7 @@ export const toggleProxyArgsSchema: JSONSchemaType<ToggleProxyArgs> = {
  */
 export const deleteProxyArgsSchema: JSONSchemaType<DeleteProxyArgs> = {
   type: 'object',
-  required: ['_', 'lockSecret'],
+  required: ['_'],
   properties: {
     _: {
       type: 'array',
@@ -87,7 +85,6 @@ export const deleteProxyArgsSchema: JSONSchemaType<DeleteProxyArgs> = {
       minItems: 2,
       maxItems: 2,
     },
-    lockSecret: randomIdentSchema,
   },
   additionalProperties: false,
 } as const

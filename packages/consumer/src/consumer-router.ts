@@ -160,7 +160,10 @@ export class ConsumerRouter {
 
     queue.set(spec.jobName, processor as ConsumerProcessor<unknown>)
 
-    this.logger.debug(`ConsumerRouter add processor: ${spec.queueName} => ${spec.jobName}`)
+    this.logger.debug(`ConsumerRouter add processor`, {
+      queueName: spec.queueName,
+      jobName: spec.jobName,
+    })
 
     return this
   }

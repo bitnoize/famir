@@ -1,8 +1,8 @@
 import { Logger } from '@famir/logger'
-import { ReplServerError, ReplServerRouter } from '@famir/repl-server'
+import { ReplServerAssets, ReplServerError, ReplServerRouter } from '@famir/repl-server'
 import { Validator } from '@famir/validator'
-import { readFile, writeFile } from 'fs/promises'
 import { Console } from 'node:console'
+import { parse as yamlParse } from 'yaml'
 
 /**
  * Abstract base class for all application controllers.
@@ -24,6 +24,7 @@ export abstract class BaseController {
   constructor(
     protected readonly validator: Validator,
     protected readonly logger: Logger,
+    protected readonly assets: ReplServerAssets,
     protected readonly router: ReplServerRouter
   ) {}
 
@@ -31,115 +32,18 @@ export abstract class BaseController {
     console.error(`Confirmation required, use --force flag if you are sure`)
   }
 
-  protected async readFile(filePath: string): Promise<Buffer> {
-    try {
-      return await readFile(filePath)
-    } catch (error) {
-      throw new ReplServerError(`Read file error`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
-    }
-  }
-
-  protected async writeFile(filePath: string, body: Buffer): Promise<void> {
-    try {
-      await writeFile(filePath, body)
-    } catch (error) {
-      throw new ReplServerError(`Write file error`, {
-        cause: error,
-        code: 'BAD_REQUEST',
-      })
-    }
-  }
-
   /**
-   * Encodes an object to a JSON string.
+   * Parses an YAML string to an object.
    *
-   * @param obj - The object to encode.
-   * @returns The JSON string representation.
-   * @throws {@link ReplServerError} If encoding fails.
-   */
-  protected encodeJson(obj: object): string {
-    try {
-      return JSON.stringify(obj)
-    } catch (error) {
-      throw ReplServerError.internal(`Encode JSON failed`, null, error)
-    }
-  }
-
-  /**
-   * Decodes a JSON string to an object.
-   *
-   * @param str - The JSON string to decode.
-   * @returns The decoded object.
+   * @param str - The YAML string to parse.
+   * @returns The parsed object.
    * @throws {@link ReplServerError} If decoding fails.
    */
-  protected decodeJson(str: string): unknown {
+  protected parseYaml(str: string): unknown {
     try {
-      return JSON.parse(str)
+      return yamlParse(str)
     } catch (error) {
-      throw ReplServerError.internal(`Decode JSON failed`, null, error)
-    }
-  }
-
-  /**
-   * Encodes a Buffer to a Base64 string.
-   *
-   * @param buf - The Buffer to encode.
-   * @returns The Base64 string representation.
-   * @throws {@link ReplServerError} If encoding fails.
-   */
-  protected encodeBase64(buf: Buffer): string {
-    try {
-      return buf.toString('base64')
-    } catch (error) {
-      throw ReplServerError.internal(`Encode Base64 failed`, null, error)
-    }
-  }
-
-  /**
-   * Decodes a Base64 string to a Buffer.
-   *
-   * @param str - The Base64 string to decode.
-   * @returns The decoded Buffer.
-   * @throws {@link ReplServerError} If decoding fails.
-   */
-  protected decodeBase64(str: string): Buffer {
-    try {
-      return Buffer.from(str, 'base64')
-    } catch (error) {
-      throw ReplServerError.internal(`Decode Base64 failed`, null, error)
-    }
-  }
-
-  /**
-   * Converts a Buffer to a UTF-8 string.
-   *
-   * @param buf - The Buffer.
-   * @returns The UTF-8 string.
-   * @throws {@link ReplServerError} If operation fails.
-   */
-  protected buf2str(buf: Buffer): string {
-    try {
-      return buf.toString('utf-8')
-    } catch (error) {
-      throw ReplServerError.badRequest(`Convert Buffer to String failed`, null, error)
-    }
-  }
-
-  /**
-   * Converts a UTF-8 string to a Buffer.
-   *
-   * @param str - The UTF-8 string.
-   * @returns The Buffer.
-   * @throws {@link ReplServerError} If operation fails.
-   */
-  protected str2buf(str: string): Buffer {
-    try {
-      return Buffer.from(str, 'utf-8')
-    } catch (error) {
-      throw ReplServerError.badRequest(`Decode UTF-8 failed`, null, error)
+      throw ReplServerError.internal(`Parse YAML failed`, null, error)
     }
   }
 

@@ -21,4 +21,12 @@ export interface BaseQueue {
    * @throws {@link ProducerError} If the count cannot be retrieved.
    */
   getJobCount(): Promise<number>
+
+  /**
+   * Retrieves the workers for the queue.
+   *
+   * @returns The queue workers list.
+   * @throws {@link ProducerError} If the workers cannot be retrieved.
+   */
+  getWorkers(): Promise<object[]>
 }

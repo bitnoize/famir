@@ -79,11 +79,17 @@ export interface Logger {
 export type LoggerData = Record<string, unknown>
 
 /**
+ * Settings for a logger.
+ */
+export interface LoggerSettings {
+  /** Application name to be used for logging. */
+  appName: string
+}
+
+/**
  * Configuration for a Pino logger.
  */
 export interface PinoLoggerConfig extends ConfigData {
-  /** Application name to be used for logging. */
-  LOGGER_APP_NAME: string
   /** Logging level for the application. */
   LOGGER_LOG_LEVEL: LoggerLogLevel
 }

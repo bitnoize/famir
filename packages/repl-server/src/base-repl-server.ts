@@ -5,16 +5,7 @@ import { Validator } from '@famir/validator'
 import { Console } from 'node:console'
 import repl from 'node:repl'
 import type { Readable, Writable } from 'node:stream'
-import {
-  REPL_SERVER_ASSET_BANNER_GREET,
-  REPL_SERVER_ASSET_BANNER_LEAVE,
-  ReplServerAssets,
-} from './repl-server-assets.js'
-import {
-  ReplServerCommand,
-  ReplServerCommandArgs,
-  ReplServerCommandContext,
-} from './repl-server-command.js'
+import { ReplServerCommand, ReplServerCommandArgs } from './repl-server-command.js'
 import { ReplServerRouter } from './repl-server-router.js'
 import { ReplServerError } from './repl-server.error.js'
 import { ReplServer } from './repl-server.js'
@@ -34,14 +25,12 @@ export abstract class BaseReplServer implements ReplServer {
    * @param validator - The validator instance.
    * @param config - The config instance.
    * @param logger - The logger instance.
-   * @param assets - The assets instance.
    * @param router - The router instance.
    */
   constructor(
     protected readonly validator: Validator,
     protected readonly config: Config,
     protected readonly logger: Logger,
-    protected readonly assets: ReplServerAssets,
     protected readonly router: ReplServerRouter
   ) {}
 
@@ -68,17 +57,6 @@ export abstract class BaseReplServer implements ReplServer {
   protected abstract initReplServer(input: Readable, output: Writable): repl.REPLServer
 
   /**
-   * Defines the REPL server context.
-   *
-   * @param context - The context object.
-   */
-  protected defineContext(context: object) {
-    Object.defineProperty(context, 'famir', {
-      value: {},
-    })
-  }
-
-  /**
    * Defines the REPL server commands.
    *
    * @param console - The underlying Console instance.
@@ -100,23 +78,17 @@ export abstract class BaseReplServer implements ReplServer {
             return
           }
 
-          if (parsedArgs.help) {
-            command.showHelp(console, true)
+          if (command.checkHelp(parsedArgs)) {
+            command.showHelp(console)
 
             rs.displayPrompt()
 
             return
           }
 
-          this.executeCommand(
-            console,
-            command,
-            parsedArgs,
-            rs.context as ReplServerCommandContext,
-            () => {
-              rs.displayPrompt()
-            }
-          )
+          this.executeCommand(console, command, parsedArgs, () => {
+            rs.displayPrompt()
+          })
         },
       })
     })
@@ -128,54 +100,30 @@ export abstract class BaseReplServer implements ReplServer {
    * @param console - The underlying Console instance.
    * @param command - The command instance.
    * @param args - The parsed command args.
-   * @param context - The REPL context.
    */
   protected executeCommand(
     console: Console,
     command: ReplServerCommand<ReplServerCommandArgs>,
     args: ReplServerCommandArgs,
-    context: ReplServerCommandContext,
     finallyFun: () => void
   ) {
     command
-      .execute(console, args, context)
+      .execute(console, args)
       .catch((error: unknown) => {
         if (error instanceof ReplServerError) {
           console.error(`Command error: ${error.code} ${error.message}`)
 
-          if (error.code === 'INTERNAL_ERROR') {
-            this.logger.error(`ReplServer execute command internal error`, {
-              error: serializeError(error),
-            })
-          } else if (error.code === 'BAD_REQUEST') {
-            command.showHelp(console)
-          }
+          this.logger.warn(`ReplServer execute command error`, {
+            error: serializeError(error),
+          })
         } else {
-          console.error(`Command critical error, see log for details`)
+          console.error(`Command unknown error`)
 
-          this.logger.error(`ReplServer process command unknown error`, {
+          this.logger.error(`ReplServer execute command unknown error`, {
             error: serializeError(error),
           })
         }
       })
       .finally(finallyFun)
-  }
-
-  /**
-   * Retrieves the banner greet asset.
-   *
-   * @returns The asset content.
-   */
-  protected getBannerGreet(): string {
-    return this.assets.get('banner-greet.txt') ?? REPL_SERVER_ASSET_BANNER_GREET
-  }
-
-  /**
-   * Retrieves the banner leave asset.
-   *
-   * @returns The asset content.
-   */
-  protected getBannerLeave(): string {
-    return this.assets.get('banner-leave.txt') ?? REPL_SERVER_ASSET_BANNER_LEAVE
   }
 }

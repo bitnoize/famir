@@ -108,7 +108,7 @@ export class HttpClientError extends CommonError {
 
   /**
    * Re-throws `HttpClientError` instances with additional context, or wraps
-   * unknown errors into a `HttpClientError` with an `BAD_GATEWAY` code.
+   * unknown errors into a `HttpClientError` with an `INTERNAL_ERROR` code.
    *
    * @param error - The caught error.
    * @param context - The error context.

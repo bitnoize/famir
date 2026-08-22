@@ -28,12 +28,40 @@ export interface ReplServer {
 }
 
 /**
+ * Settings for a repl-server.
+ */
+export interface ReplServerSettings {
+  prompt: string
+  bannerGreet: string
+  bannerLeave: string
+}
+
+/**
+ * Default prompt.
+ *
+ * @internal
+ */
+export const REPL_SERVER_DEFAULT_PROMPT = 'famir > '
+
+/**
+ * Default greet banner content.
+ *
+ * @internal
+ */
+export const REPL_SERVER_DEFAULT_BANNER_GREET = `Welcome to Fake-Mirrors!`
+
+/**
+ * Default leave banner content.
+ *
+ * @internal
+ */
+export const REPL_SERVER_DEFAULT_BANNER_LEAVE = `So long!`
+
+/**
  * Configuration for a Cli repl-server.
  */
 export interface CliReplServerConfig extends ConfigData {
-  /** Prompt string displayed to users. */
-  REPL_SERVER_PROMPT: string
-  /** Whether to use ANSI colors in the REPL. */
+  /** Whether to use ANSI colors. */
   REPL_SERVER_USE_COLORS: boolean
 }
 
@@ -49,8 +77,6 @@ export interface NetReplServerConfig extends ConfigData {
   REPL_SERVER_MAX_CLIENTS: number
   /** Socket timeout in milliseconds. */
   REPL_SERVER_SOCKET_TIMEOUT: number
-  /** Prompt string displayed to users. */
-  REPL_SERVER_PROMPT: string
   /** Whether to use ANSI colors in the REPL. */
   REPL_SERVER_USE_COLORS: boolean
 }

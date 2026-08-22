@@ -92,8 +92,6 @@ export interface CampaignRepository {
   /**
    * Updates the campaign specific fields.
    *
-   * All update parameters are optional. Only provided fields will be updated.
-   *
    * @param campaignId - The campaign ID to update.
    * @param description - The new human-readable description for the campaign.
    * @param sessionExpire - The new TTL for an authorized session in milliseconds.
@@ -107,10 +105,10 @@ export interface CampaignRepository {
    */
   update(
     campaignId: string,
-    description: string | null | undefined,
-    sessionExpire: number | null | undefined,
-    newSessionExpire: number | null | undefined,
-    messageExpire: number | null | undefined,
+    description: string,
+    sessionExpire: number,
+    newSessionExpire: number,
+    messageExpire: number,
     lockSecret: string
   ): Promise<void>
 
