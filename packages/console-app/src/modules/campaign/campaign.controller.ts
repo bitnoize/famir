@@ -8,6 +8,7 @@ import {
   ReplServerError,
   ReplServerRouter,
 } from '@famir/repl-server'
+import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { Console } from 'node:console'
 import { BaseController } from '../base/index.js'
@@ -65,6 +66,7 @@ export class CampaignController extends BaseController {
         new CampaignController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<CampaignService>(CAMPAIGN_SERVICE)
@@ -87,18 +89,20 @@ export class CampaignController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
-   * @param assets - The repl-server assets instance.
-   * @param router - The repl-server router instance.
+   * @param templater - The templater instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param campaignService - The campaign service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
     assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly campaignService: CampaignService
   ) {
-    super(validator, logger, assets, router)
+    super(validator, logger, templater, assets, router)
 
     this.validator
       .addSchema('console-create-campaign-args', createCampaignArgsSchema)

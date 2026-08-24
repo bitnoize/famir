@@ -9,7 +9,7 @@ import { RedirectorParams } from './redirector.models.js'
  */
 export const redirectorPageSchema: JSONSchemaType<string> = {
   type: 'string',
-  minLength: 1,
+  minLength: 0,
   maxLength: 10 * 1024 * 1024,
 } as const
 

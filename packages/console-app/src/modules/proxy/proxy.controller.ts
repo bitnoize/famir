@@ -7,6 +7,7 @@ import {
   ReplServerAssets,
   ReplServerRouter,
 } from '@famir/repl-server'
+import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
@@ -50,6 +51,7 @@ export class ProxyController extends BaseController {
         new ProxyController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<ProxyService>(PROXY_SERVICE)
@@ -72,18 +74,20 @@ export class ProxyController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
-   * @param assets - The repl-server assets instance.
-   * @param router - The repl-server router instance.
+   * @param templater - The templater instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param proxyService - The proxy service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
     assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly proxyService: ProxyService
   ) {
-    super(validator, logger, assets, router)
+    super(validator, logger, templater, assets, router)
 
     this.validator
       .addSchema('console-create-proxy-args', createProxyArgsSchema)

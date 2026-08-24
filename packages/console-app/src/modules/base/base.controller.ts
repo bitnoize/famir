@@ -1,5 +1,6 @@
 import { Logger } from '@famir/logger'
 import { ReplServerAssets, ReplServerError, ReplServerRouter } from '@famir/repl-server'
+import { Templater } from '@famir/templater'
 import { Validator } from '@famir/validator'
 import { Console } from 'node:console'
 import { parse as yamlParse } from 'yaml'
@@ -19,17 +20,35 @@ export abstract class BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
+   * @param templater - The templater instance.
+   * @param assets - The assets instance.
    * @param router - The repl-server router instance.
    */
   constructor(
     protected readonly validator: Validator,
     protected readonly logger: Logger,
+    protected readonly templater: Templater,
     protected readonly assets: ReplServerAssets,
     protected readonly router: ReplServerRouter
   ) {}
 
   protected confirmAlert(console: Console) {
     console.error(`Confirmation required, use --force flag if you are sure`)
+  }
+
+  /**
+   * Decodes a JSON string to an object.
+   *
+   * @param str - The JSON string to decode.
+   * @returns The decoded object.
+   * @throws {@link ReplServerError} If decoding fails.
+   */
+  protected decodeJson(str: string): unknown {
+    try {
+      return JSON.parse(str)
+    } catch (error) {
+      throw ReplServerError.badRequest(`Decode JSON failed`, null, error)
+    }
   }
 
   /**
@@ -43,7 +62,7 @@ export abstract class BaseController {
     try {
       return yamlParse(str)
     } catch (error) {
-      throw ReplServerError.internal(`Parse YAML failed`, null, error)
+      throw ReplServerError.badRequest(`Parse YAML failed`, null, error)
     }
   }
 

@@ -12,7 +12,9 @@ import {
 } from '@famir/database'
 import { HttpCookie } from '@famir/http-proto'
 import {
+  HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
+  HttpServerAssets,
   HttpServerContext,
   HttpServerContextType,
   HttpServerNextFunction,
@@ -73,6 +75,7 @@ export class AuthorizeController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<AuthorizeService>(AUTHORIZE_SERVICE)
         )
@@ -95,17 +98,19 @@ export class AuthorizeController extends BaseController {
    * @param validator - The validator instance.
    * @param logger - The logger instance.
    * @param templater - The templater instance.
-   * @param router - The http-server router instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param authorizeService - The authorize service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
     templater: Templater,
+    assets: HttpServerAssets,
     router: HttpServerRouter,
     protected readonly authorizeService: AuthorizeService
   ) {
-    super(validator, logger, templater, router)
+    super(validator, logger, templater, assets, router)
 
     this.validator
       .addSchema('reverse-authorize-session-cookie', randomIdentSchema)

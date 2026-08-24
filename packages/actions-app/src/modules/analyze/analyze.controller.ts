@@ -1,7 +1,14 @@
 import { DIContainer } from '@famir/common'
-import { analyzeJobDataSchema, CONSUMER_ROUTER, ConsumerRouter } from '@famir/consumer'
+import {
+  analyzeJobDataSchema,
+  CONSUMER_ASSETS,
+  CONSUMER_ROUTER,
+  ConsumerAssets,
+  ConsumerRouter,
+} from '@famir/consumer'
 import { Logger, LOGGER } from '@famir/logger'
 import { ANALYZE_QUEUE_NAME, AnalyzeJobData } from '@famir/producer'
+import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { type AnalyzeService, ANALYZE_SERVICE } from './analyze.service.js'
@@ -31,6 +38,8 @@ export class AnalyzeController extends BaseController {
         new AnalyzeController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
+          c.resolve<ConsumerAssets>(CONSUMER_ASSETS),
           c.resolve<ConsumerRouter>(CONSUMER_ROUTER),
           c.resolve<AnalyzeService>(ANALYZE_SERVICE)
         )
@@ -52,16 +61,20 @@ export class AnalyzeController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
-   * @param router - The consumer router instance.
+   * @param templater - The templater instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param analyzeService - The analyze service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
+    assets: ConsumerAssets,
     router: ConsumerRouter,
     protected readonly analyzeService: AnalyzeService
   ) {
-    super(validator, logger, router)
+    super(validator, logger, templater, assets, router)
 
     this.validator.addSchema('actions-analyze-job-data', analyzeJobDataSchema)
   }

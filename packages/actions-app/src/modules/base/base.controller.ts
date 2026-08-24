@@ -1,5 +1,6 @@
-import { ConsumerRouter } from '@famir/consumer'
+import { ConsumerAssets, ConsumerRouter } from '@famir/consumer'
 import { Logger } from '@famir/logger'
+import { Templater } from '@famir/templater'
 import { Validator } from '@famir/validator'
 
 /**
@@ -17,11 +18,15 @@ export abstract class BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
-   * @param router - The consumer router instance.
+   * @param templater - The templater instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    */
   constructor(
     protected readonly validator: Validator,
     protected readonly logger: Logger,
+    protected readonly templater: Templater,
+    protected readonly assets: ConsumerAssets,
     protected readonly router: ConsumerRouter
   ) {}
 }

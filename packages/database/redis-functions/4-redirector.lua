@@ -53,7 +53,7 @@ local function create_redirector(keys, args)
       return redis.error_reply('ERR Wrong model.' .. k)
     end
 
-    if (k == 'campaign_id' or k == 'redirector_id' or k == 'page') and v == '' then
+    if (k == 'campaign_id' or k == 'redirector_id') and v == '' then
       return redis.error_reply('ERR Wrong model.' .. k)
     end
   end

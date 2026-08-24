@@ -6,8 +6,8 @@ import {
   HttpClientStreamResult,
 } from '@famir/http-client'
 import { HttpBody, HttpHeaders, HttpMethod } from '@famir/http-proto'
-import type { Readable } from 'node:stream'
 import { HttpServerError } from '@famir/http-server'
+import type { Readable } from 'node:stream'
 
 /**
  * DI token for the forward service.

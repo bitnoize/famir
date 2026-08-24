@@ -2,7 +2,9 @@ import { DIContainer } from '@famir/common'
 import { EnabledFullTargetModel, EnabledProxyModel } from '@famir/database'
 import { HttpType } from '@famir/http-proto'
 import {
+  HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
+  HttpServerAssets,
   HttpServerContext,
   HttpServerNextFunction,
   HttpServerRouter,
@@ -60,6 +62,7 @@ export class ForwardController extends BaseController {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
           c.resolve<ForwardService>(FORWARD_SERVICE)
         )
@@ -82,17 +85,19 @@ export class ForwardController extends BaseController {
    * @param validator - The validator instance.
    * @param logger - The logger instance.
    * @param templater - The templater instance.
-   * @param router - The http-server router instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param forwardService - The forward service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
     templater: Templater,
+    assets: HttpServerAssets,
     router: HttpServerRouter,
     protected readonly forwardService: ForwardService
   ) {
-    super(validator, logger, templater, router)
+    super(validator, logger, templater, assets, router)
   }
 
   /**

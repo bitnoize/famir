@@ -7,6 +7,7 @@ import {
   ReplServerError,
   ReplServerRouter,
 } from '@famir/repl-server'
+import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
@@ -50,6 +51,7 @@ export class SystemController extends BaseController {
         new SystemController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<SystemService>(SYSTEM_SERVICE)
@@ -72,18 +74,20 @@ export class SystemController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
-   * @param assets - The repl-server assets instance.
-   * @param router - The repl-server router instance.
+   * @param templater - The templater instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param systemService - The system service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
     assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly systemService: SystemService
   ) {
-    super(validator, logger, assets, router)
+    super(validator, logger, templater, assets, router)
 
     this.validator
       .addSchema('console-assets-args', assetsArgsSchema)
@@ -142,7 +146,10 @@ export class SystemController extends BaseController {
         schemaName: 'console-get-database-info-args',
         options: [],
       },
-      (console, spec) => {},
+      (console, spec) => {
+        console.log(`// Show database info:`)
+        console.log(`.${spec.name}`)
+      },
       async (console, spec, args) => {
         const info = await this.systemService.getDatabaseInfo()
 
@@ -164,7 +171,10 @@ export class SystemController extends BaseController {
           },
         ],
       },
-      (console, spec) => {},
+      (console, spec) => {
+        console.log(`// Load database functions:`)
+        console.log(`.${spec.name} --force`)
+      },
       async (console, spec, args) => {
         if (args.force) {
           await this.systemService.loadDatabaseFunctions()
@@ -183,7 +193,10 @@ export class SystemController extends BaseController {
         schemaName: 'console-get-producer-info-args',
         options: [],
       },
-      (console, spec) => {},
+      (console, spec) => {
+        console.log(`// Show producer info:`)
+        console.log(`.${spec.name}`)
+      },
       async (console, spec, args) => {
         const info = await this.systemService.getProducerInfo()
 
@@ -198,7 +211,10 @@ export class SystemController extends BaseController {
         schemaName: 'console-get-edge-server-info-args',
         options: [],
       },
-      (console, spec) => {},
+      (console, spec) => {
+        console.log(`// Show edge-server info:`)
+        console.log(`.${spec.name}`)
+      },
       async (console, spec, args) => {
         const info = await this.systemService.getEdgeServerInfo()
 

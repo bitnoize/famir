@@ -7,6 +7,7 @@ import {
   ReplServerAssets,
   ReplServerRouter,
 } from '@famir/repl-server'
+import { TEMPLATER, Templater } from '@famir/templater'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ListRedirectorsArgs, ReadRedirectorArgs } from './redirector.js'
@@ -38,6 +39,7 @@ export class RedirectorController extends BaseController {
         new RedirectorController(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
+          c.resolve<Templater>(TEMPLATER),
           c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
           c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
           c.resolve<RedirectorService>(REDIRECTOR_SERVICE)
@@ -60,18 +62,20 @@ export class RedirectorController extends BaseController {
    *
    * @param validator - The validator instance.
    * @param logger - The logger instance.
-   * @param assets - The repl-server assets instance.
-   * @param router - The repl-server router instance.
+   * @param templater - The templater instance.
+   * @param assets - The assets instance.
+   * @param router - The router instance.
    * @param redirectorService - The redirector service instance.
    */
   constructor(
     validator: Validator,
     logger: Logger,
+    templater: Templater,
     assets: ReplServerAssets,
     router: ReplServerRouter,
     protected readonly redirectorService: RedirectorService
   ) {
-    super(validator, logger, assets, router)
+    super(validator, logger, templater, assets, router)
 
     this.validator
       .addSchema('console-read-redirector-args', readRedirectorArgsSchema)
@@ -140,6 +144,8 @@ export class RedirectorController extends BaseController {
       lureCount: redirector.lureCount,
       createdAt: redirector.createdAt.toISOString(),
     })
+
+    console.log(`Required fields: ${redirector.fields.join(', ')}`)
   }
 
   private showRedirectorCollection(console: Console, redirectors: RedirectorModel[]) {
