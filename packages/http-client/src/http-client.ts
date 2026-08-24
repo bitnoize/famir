@@ -13,7 +13,7 @@ export const HTTP_CLIENT = Symbol('HttpClient')
  * @internal
  */
 export interface HttpClientBaseResult {
-  readonly error: null
+  readonly error: HttpClientError | null
   readonly status: number
   readonly responseHeaders: HttpHeaders
   readonly connection: HttpConnection
@@ -31,13 +31,6 @@ export interface HttpClientSimpleResult extends HttpClientBaseResult {
  */
 export interface HttpClientStreamResult extends HttpClientBaseResult {
   readonly responseStream: Readable
-}
-
-/**
- * Error result of an HTTP interaction.
- */
-export interface HttpClientErrorResult {
-  readonly error: HttpClientError
 }
 
 /**
@@ -78,7 +71,7 @@ export interface HttpClient {
     timeout: number,
     headersSizeLimit: number,
     bodySizeLimit: number
-  ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
+  ): Promise<HttpClientSimpleResult>
 
   /**
    * Performs a streaming HTTP request and returns a simple response.
@@ -107,7 +100,7 @@ export interface HttpClient {
     timeout: number,
     headersSizeLimit: number,
     bodySizeLimit: number
-  ): Promise<HttpClientSimpleResult | HttpClientErrorResult>
+  ): Promise<HttpClientSimpleResult>
 
   /**
    * Performs a simple HTTP request and returns a streaming response.
@@ -134,7 +127,7 @@ export interface HttpClient {
     connectTimeout: number,
     timeout: number,
     headersSizeLimit: number
-  ): Promise<HttpClientStreamResult | HttpClientErrorResult>
+  ): Promise<HttpClientStreamResult>
 }
 
 /**

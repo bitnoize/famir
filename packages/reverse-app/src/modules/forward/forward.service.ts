@@ -2,12 +2,12 @@ import { DIContainer } from '@famir/common'
 import {
   HTTP_CLIENT,
   HttpClient,
-  HttpClientErrorResult,
   HttpClientSimpleResult,
   HttpClientStreamResult,
 } from '@famir/http-client'
 import { HttpBody, HttpHeaders, HttpMethod } from '@famir/http-proto'
 import type { Readable } from 'node:stream'
+import { HttpServerError } from '@famir/http-server'
 
 /**
  * DI token for the forward service.
@@ -51,18 +51,22 @@ export class ForwardService {
     timeout: number
     headersSizeLimit: number
     bodySizeLimit: number
-  }): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
-    return await this.httpClient.simple(
-      data.proxy,
-      data.method,
-      data.url,
-      data.requestHeaders,
-      data.requestBody,
-      data.connectTimeout,
-      data.timeout,
-      data.headersSizeLimit,
-      data.bodySizeLimit
-    )
+  }): Promise<HttpClientSimpleResult> {
+    try {
+      return await this.httpClient.simple(
+        data.proxy,
+        data.method,
+        data.url,
+        data.requestHeaders,
+        data.requestBody,
+        data.connectTimeout,
+        data.timeout,
+        data.headersSizeLimit,
+        data.bodySizeLimit
+      )
+    } catch (error) {
+      throw HttpServerError.badGateway(`Bad gateway`, null, error)
+    }
   }
 
   async streamRequest(data: {
@@ -75,18 +79,22 @@ export class ForwardService {
     timeout: number
     headersSizeLimit: number
     bodySizeLimit: number
-  }): Promise<HttpClientSimpleResult | HttpClientErrorResult> {
-    return await this.httpClient.streamRequest(
-      data.proxy,
-      data.method,
-      data.url,
-      data.requestHeaders,
-      data.requestStream,
-      data.connectTimeout,
-      data.timeout,
-      data.headersSizeLimit,
-      data.bodySizeLimit
-    )
+  }): Promise<HttpClientSimpleResult> {
+    try {
+      return await this.httpClient.streamRequest(
+        data.proxy,
+        data.method,
+        data.url,
+        data.requestHeaders,
+        data.requestStream,
+        data.connectTimeout,
+        data.timeout,
+        data.headersSizeLimit,
+        data.bodySizeLimit
+      )
+    } catch (error) {
+      throw HttpServerError.badGateway(`Bad gateway`, null, error)
+    }
   }
 
   async streamResponse(data: {
@@ -98,16 +106,20 @@ export class ForwardService {
     connectTimeout: number
     timeout: number
     headersSizeLimit: number
-  }): Promise<HttpClientStreamResult | HttpClientErrorResult> {
-    return await this.httpClient.streamResponse(
-      data.proxy,
-      data.method,
-      data.url,
-      data.requestHeaders,
-      data.requestBody,
-      data.connectTimeout,
-      data.timeout,
-      data.headersSizeLimit
-    )
+  }): Promise<HttpClientStreamResult> {
+    try {
+      return await this.httpClient.streamResponse(
+        data.proxy,
+        data.method,
+        data.url,
+        data.requestHeaders,
+        data.requestBody,
+        data.connectTimeout,
+        data.timeout,
+        data.headersSizeLimit
+      )
+    } catch (error) {
+      throw HttpServerError.badGateway(`Bad gateway`, null, error)
+    }
   }
 }

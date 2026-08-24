@@ -181,6 +181,10 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     lockSecret: string
   ): Promise<void> {
     try {
+      if (fields.length === 0) {
+        return
+      }
+
       const statusReplies = await Promise.all(
         fields.map((field) =>
           this.connection.redirector.append_redirector_field(

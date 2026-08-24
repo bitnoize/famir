@@ -135,17 +135,16 @@ export class ForwardController extends BaseController {
         bodySizeLimit: target.bodySizeLimit,
       })
 
+      message.status.set(result.status)
+      message.responseHeaders.merge(result.responseHeaders)
+      message.responseBody.set(result.responseBody)
+      message.mergeConnection(result.connection)
+
       if (result.error) {
         message.addError(result.error, ['forward', 'normal-simple'])
-        message.status.set(result.error.status)
 
         await this.sendErrorPage(ctx, result.error, true)
       } else {
-        message.status.set(result.status)
-        message.responseHeaders.merge(result.responseHeaders)
-        message.responseBody.set(result.responseBody)
-        message.mergeConnection(result.connection)
-
         message.runResponseHeadInterceptors()
         message.runResponseBodyInterceptors()
 
@@ -198,17 +197,16 @@ export class ForwardController extends BaseController {
         bodySizeLimit: target.bodySizeLimit,
       })
 
+      message.status.set(result.status)
+      message.responseHeaders.merge(result.responseHeaders)
+      message.responseBody.set(result.responseBody)
+      message.mergeConnection(result.connection)
+
       if (result.error) {
         message.addError(result.error, ['forward', 'normal-stream-request'])
-        message.status.set(result.error.status)
 
         await this.sendErrorPage(ctx, result.error, false)
       } else {
-        message.status.set(result.status)
-        message.responseHeaders.merge(result.responseHeaders)
-        message.responseBody.set(result.responseBody)
-        message.mergeConnection(result.connection)
-
         message.runResponseHeadInterceptors()
         message.runResponseBodyInterceptors()
 
@@ -245,16 +243,15 @@ export class ForwardController extends BaseController {
         headersSizeLimit: target.headersSizeLimit,
       })
 
+      message.status.set(result.status)
+      message.responseHeaders.merge(result.responseHeaders)
+      message.mergeConnection(result.connection)
+
       if (result.error) {
         message.addError(result.error, ['forward', 'normal-stream-response'])
-        message.status.set(result.error.status)
 
         await this.sendErrorPage(ctx, result.error, false)
       } else {
-        message.status.set(result.status)
-        message.responseHeaders.merge(result.responseHeaders)
-        message.mergeConnection(result.connection)
-
         message.runResponseHeadInterceptors()
 
         ctx.status.set(message.status.get())

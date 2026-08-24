@@ -373,6 +373,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     lockSecret: string
   ): Promise<void> {
     try {
+      if (labels.length === 0) {
+        return
+      }
+
       const statusReplies = await Promise.all(
         labels.map((label) =>
           this.connection.target.append_target_label(
