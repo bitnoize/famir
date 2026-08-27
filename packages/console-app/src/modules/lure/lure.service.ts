@@ -81,15 +81,15 @@ export class LureService {
       )
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        if (error.code === 'CONFLICT') {
+        if (error.isConflict) {
           throw ReplServerError.conflict(error.message)
         }
 
-        throw ReplServerError.internal(`Create lure failed`, null, error)
+        throw ReplServerError.internalError(`Create lure failed`, null, error)
       }
 
       throw error
@@ -121,11 +121,11 @@ export class LureService {
       await this.lureRepository.enable(data.campaignId, data.lureId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        throw ReplServerError.internal(`Enable lure failed`, null, error)
+        throw ReplServerError.internalError(`Enable lure failed`, null, error)
       }
 
       throw error
@@ -144,11 +144,11 @@ export class LureService {
       await this.lureRepository.disable(data.campaignId, data.lureId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        throw ReplServerError.internal(`Disable lure failed`, null, error)
+        throw ReplServerError.internalError(`Disable lure failed`, null, error)
       }
 
       throw error
@@ -167,15 +167,15 @@ export class LureService {
       await this.lureRepository.delete(data.campaignId, data.lureId, data.redirectorId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        if (error.code === 'FORBIDDEN') {
+        if (error.isForbidden) {
           throw ReplServerError.forbidden(error.message)
         }
 
-        throw ReplServerError.internal(`Delete lure failed`, null, error)
+        throw ReplServerError.internalError(`Delete lure failed`, null, error)
       }
 
       throw error
@@ -198,7 +198,7 @@ export class LureService {
   }
 
   /**
-   * Makes the lure URL with optional params.
+   * Makes the lure URL with redirector params.
    */
   async makeUrl(data: {
     campaignId: string
@@ -253,15 +253,15 @@ export class LureService {
       return await this.campaignRepository.lock(campaignId)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        if (error.code === 'FORBIDDEN') {
+        if (error.isForbidden) {
           throw ReplServerError.forbidden(error.message)
         }
 
-        throw ReplServerError.internal(`Lock campaign failed`, null, error)
+        throw ReplServerError.internalError(`Lock campaign failed`, null, error)
       }
 
       throw error

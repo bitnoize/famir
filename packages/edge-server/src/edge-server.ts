@@ -9,15 +9,10 @@ export const EDGE_SERVER = Symbol('EdgeServer')
  * Defines the public contract for an edge-server.
  */
 export interface EdgeServer {
-  getInfo(): Promise<EdgeServerInfo>
-  loadConf(): Promise<void>
-}
-
-/**
- *
- */
-export interface EdgeServerInfo {
-  upstreams: object[]
+  upsertConfig(caddyfile: string): Promise<void>
+  readConfig(): Promise<unknown>
+  deleteConfig(): Promise<void>
+  readUpstreams(): Promise<unknown>
 }
 
 /**
@@ -26,15 +21,4 @@ export interface EdgeServerInfo {
 export interface CaddyEdgeServerConfig extends ConfigData {
   /** Caddy admin API url. */
   EDGE_SERVER_API_URL: string
-}
-
-/**
- * Caddy edge-server upstream.
- *
- * @internal
- */
-export interface CaddyEdgeServerUpstream {
-  address: string
-  num_requests: number
-  fails: number
 }

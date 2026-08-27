@@ -9,8 +9,6 @@ import {
 } from './proxy.js'
 
 /**
- * JSON Schema for validating a create proxy args.
- *
  * @category Proxy
  * @internal
  */
@@ -30,8 +28,6 @@ export const createProxyArgsSchema: JSONSchemaType<CreateProxyArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a read proxy args.
- *
  * @category Proxy
  * @internal
  */
@@ -50,8 +46,6 @@ export const readProxyArgsSchema: JSONSchemaType<ReadProxyArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a toggle proxy args.
- *
  * @category Proxy
  * @internal
  */
@@ -70,8 +64,6 @@ export const toggleProxyArgsSchema: JSONSchemaType<ToggleProxyArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a delete proxy args.
- *
  * @category Proxy
  * @internal
  */
@@ -90,8 +82,6 @@ export const deleteProxyArgsSchema: JSONSchemaType<DeleteProxyArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a list proxies args.
- *
  * @category Proxy
  * @internal
  */

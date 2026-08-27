@@ -48,7 +48,11 @@ export class ProducerError extends CommonError {
    * @param context - The optional error context.
    * @param cause - The optional upstream error.
    */
-  static internal(message: string, context?: ErrorContext | null, cause?: unknown): ProducerError {
+  static internalError(
+    message: string,
+    context?: ErrorContext | null,
+    cause?: unknown
+  ): ProducerError {
     return new ProducerError(message, {
       cause,
       context,
@@ -70,7 +74,7 @@ export class ProducerError extends CommonError {
 
       return error
     } else {
-      return ProducerError.internal(`Unknown error`, context, error)
+      return ProducerError.internalError(`Unknown error`, context, error)
     }
   }
 }

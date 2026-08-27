@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@famir/producer.svg)](https://www.npmjs.com/package/@famir/producer)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Producer service for the Famir ecosystem.
+Producer connector, queues and background jobs
 
 ## Features
 
@@ -16,3 +16,4 @@ Producer service for the Famir ecosystem.
 ## Modules
 
 - **Analyze** – processing catched HTTP messages from reverse-proxy
+- **Webhook** – pending outgoing requests on behalf of the client

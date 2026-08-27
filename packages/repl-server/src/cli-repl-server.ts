@@ -178,7 +178,7 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
       colorMode: this.options.useColors,
       inspectOptions: {
         showHidden: false,
-        depth: 4,
+        depth: 8,
       },
     })
   }

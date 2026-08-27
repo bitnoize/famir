@@ -246,7 +246,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
         settled = true
 
         cleanup()
-        reject(error)
+        reject(BootstrapError.create(`Redis connect failed`, null, error))
       }
 
       const onEnd = () => {
@@ -254,7 +254,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
         settled = true
 
         cleanup()
-        reject(new Error('Connection ended before ready'))
+        reject(BootstrapError.create(`Redis connection ended before ready`))
       }
 
       this.connection.once('ready', onReady)
@@ -266,8 +266,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
         settled = true
 
         cleanup()
-        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-        reject(error)
+        reject(BootstrapError.create(`Redis connect critical error`, null, error))
       })
     })
   }

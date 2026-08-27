@@ -871,18 +871,4 @@ export class CurlHttpClient implements HttpClient {
       return Buffer.alloc(0)
     }
   }
-
-  /**
-   * Parses response status from a curl instance.
-   */
-  /*
-  private parseStatus(curl: Curl): number | null {
-    try {
-      const status = curl.getInfo('RESPONSE_CODE')
-      return typeof status === 'number' ? status : null
-    } catch {
-      return null
-    }
-  }
-  */
 }

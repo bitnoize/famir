@@ -85,4 +85,12 @@ export class HttpClientError extends CommonError {
       code: 'GATEWAY_TIMEOUT',
     })
   }
+
+  get isBadGateway(): boolean {
+    return this.code === 'BAD_GATEWAY'
+  }
+
+  get isGatewayTimeout(): boolean {
+    return this.code === 'GATEWAY_TIMEOUT'
+  }
 }

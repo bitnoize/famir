@@ -112,13 +112,14 @@ export abstract class BaseReplServer implements ReplServer {
       .catch((error: unknown) => {
         if (error instanceof ReplServerError) {
           console.error(`Command error: ${error.code} ${error.message}`)
+          console.error(error.context)
 
           if (error.cause) {
             console.error(error.cause)
           }
 
-          if (error.code === 'INTERNAL_ERROR') {
-            this.logger.warn(`ReplServer execute command internal error`, {
+          if (error.isInternalError) {
+            this.logger.error(`ReplServer execute command internal error`, {
               error: serializeError(error),
             })
           }

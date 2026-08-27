@@ -2,8 +2,6 @@ import { JSONSchemaType, customIdentSchema } from '@famir/validator'
 import { ListRedirectorsArgs, ReadRedirectorArgs } from './redirector.js'
 
 /**
- * JSON Schema for validating a read redirector args.
- *
  * @category Redirector
  * @internal
  */
@@ -22,8 +20,6 @@ export const readRedirectorArgsSchema: JSONSchemaType<ReadRedirectorArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a list redirectors args.
- *
  * @category Redirector
  * @internal
  */

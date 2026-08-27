@@ -96,8 +96,6 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating raw campaign data from Redis.
- *
  * @category Campaign
  * @internal
  */
@@ -123,8 +121,6 @@ export const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
 } as const
 
 /**
- * JSON Schema for validating raw full campaign data from Redis.
- *
  * @category Campaign
  * @internal
  */

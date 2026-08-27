@@ -1,6 +1,4 @@
 /**
- * Arguments for assets.
- *
  * @category System
  * @internal
  */
@@ -10,8 +8,6 @@ export interface AssetsArgs {
 }
 
 /**
- * Arguments for get database info.
- *
  * @category System
  * @internal
  */
@@ -20,8 +16,6 @@ export interface GetDatabaseInfoArgs {
 }
 
 /**
- * Arguments for loading database functions.
- *
  * @category System
  * @internal
  */
@@ -31,8 +25,15 @@ export interface LoadDatabaseFunctionsArgs {
 }
 
 /**
- * Arguments for get producer info.
- *
+ * @category System
+ * @internal
+ */
+export interface CleanupDatabaseArgs {
+  _: string[]
+  force: boolean
+}
+
+/**
  * @category System
  * @internal
  */
@@ -41,11 +42,36 @@ export interface GetProducerInfoArgs {
 }
 
 /**
- * Arguments for get edge-server info.
- *
  * @category System
  * @internal
  */
-export interface GetEdgeServerInfoArgs {
+export interface UpsertEdgeServerConfigArgs {
+  _: string[]
+  assetName: string
+  force: boolean
+}
+
+/**
+ * @category System
+ * @internal
+ */
+export interface ReadEdgeServerConfigArgs {
+  _: string[]
+}
+
+/**
+ * @category System
+ * @internal
+ */
+export interface DeleteEdgeServerConfigArgs {
+  _: string[]
+  force: boolean
+}
+
+/**
+ * @category System
+ * @internal
+ */
+export interface ReadEdgeServerUpstreamsArgs {
   _: string[]
 }

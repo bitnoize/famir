@@ -38,8 +38,6 @@ import {
 } from './campaign.js'
 
 /**
- * JSON Schema for validating a create campaign args.
- *
  * @category Campaign
  * @internal
  */
@@ -77,8 +75,6 @@ export const createCampaignArgsSchema: JSONSchemaType<CreateCampaignArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a read campaign args.
- *
  * @category Campaign
  * @internal
  */
@@ -97,8 +93,6 @@ export const readCampaignArgsSchema: JSONSchemaType<ReadCampaignArgs> = {
 } as const
 
 /**
- * JSON Schema for validating an update campaign args.
- *
  * @category Campaign
  * @internal
  */
@@ -120,8 +114,6 @@ export const updateCampaignArgsSchema: JSONSchemaType<UpdateCampaignArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a delete campaign args.
- *
  * @category Campaign
  * @internal
  */
@@ -144,8 +136,6 @@ export const deleteCampaignArgsSchema: JSONSchemaType<DeleteCampaignArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a list campaigns args.
- *
  * @category Campaign
  * @internal
  */
@@ -166,8 +156,6 @@ export const listCampaignsArgsSchema: JSONSchemaType<ListCampaignsArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a raw campaign template campaign.
- *
  * @category Campaign
  * @internal
  */
@@ -209,8 +197,6 @@ const rawCampaignTemplateCampaignSchema: JSONSchemaType<RawCampaignTemplateCampa
 } as const
 
 /**
- * JSON Schema for validating a raw campaign template proxy.
- *
  * @category Campaign
  * @internal
  */
@@ -229,8 +215,6 @@ const rawCampaignTemplateProxySchema: JSONSchemaType<RawCampaignTemplateProxy> =
 } as const
 
 /**
- * JSON Schema for validating a raw campaign template target.
- *
  * @category Campaign
  * @internal
  */
@@ -314,8 +298,6 @@ const rawCampaignTemplateTargetSchema: JSONSchemaType<RawCampaignTemplateTarget>
 } as const
 
 /**
- * JSON Schema for validating a raw campaign template redirector.
- *
  * @category Campaign
  * @internal
  */
@@ -337,8 +319,6 @@ const rawCampaignTemplateRedirectorSchema: JSONSchemaType<RawCampaignTemplateRed
 } as const
 
 /**
- * JSON Schema for validating a raw campaign template lure.
- *
  * @category Campaign
  * @internal
  */
@@ -358,8 +338,6 @@ const rawCampaignTemplateLureSchema: JSONSchemaType<RawCampaignTemplateLure> = {
 } as const
 
 /**
- * JSON Schema for validating a raw campaign template.
- *
  * @category Campaign
  * @internal
  */

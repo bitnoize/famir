@@ -2,8 +2,6 @@ import { JSONSchemaType } from '@famir/validator'
 import { BullProducerConfig } from './producer.js'
 
 /**
- * JSON Schema for validating a Bull producer connection URL.
- *
  * @category none
  * @internal
  */
@@ -15,8 +13,6 @@ const bullProducerConnectionUrlSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a Bull producer key prefix.
- *
  * @category none
  * @internal
  */
@@ -28,8 +24,6 @@ const bullProducerPrefixSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a complete Bull producer configuration.
- *
  * @category none
  * @internal
  */

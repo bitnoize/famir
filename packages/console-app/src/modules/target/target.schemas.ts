@@ -2,8 +2,6 @@ import { JSONSchemaType, customIdentSchema } from '@famir/validator'
 import { ListTargetsArgs, ReadTargetArgs, ReadTargetHostsArgs } from './target.js'
 
 /**
- * JSON Schema for validating a read target args.
- *
  * @category Target
  * @internal
  */
@@ -22,8 +20,6 @@ export const readTargetArgsSchema: JSONSchemaType<ReadTargetArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a read target hosts args.
- *
  * @category Target
  * @internal
  */
@@ -44,8 +40,6 @@ export const readTargetHostsArgsSchema: JSONSchemaType<ReadTargetHostsArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a list targets args.
- *
  * @category Target
  * @internal
  */

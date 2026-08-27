@@ -1,6 +1,4 @@
 /**
- * Arguments for creating a lure.
- *
  * @category Lure
  * @internal
  */
@@ -10,8 +8,6 @@ export interface CreateLureArgs {
 }
 
 /**
- * Arguments for reading the lure.
- *
  * @category Lure
  * @internal
  */
@@ -20,8 +16,6 @@ export interface ReadLureArgs {
 }
 
 /**
- * Arguments for toggling the lure.
- *
  * @category Lure
  * @internal
  */
@@ -30,8 +24,6 @@ export interface ToggleLureArgs {
 }
 
 /**
- * Arguments for deleting the lure.
- *
  * @category Lure
  * @internal
  */
@@ -40,8 +32,6 @@ export interface DeleteLureArgs {
 }
 
 /**
- * Arguments for listing lures.
- *
  * @category Lure
  * @internal
  */
@@ -50,8 +40,6 @@ export interface ListLuresArgs {
 }
 
 /**
- * Arguments for making the lure url.
- *
  * @category Lure
  * @internal
  */

@@ -69,7 +69,7 @@ export abstract class RedisBaseRepository {
     try {
       return JSON.stringify(obj)
     } catch (error) {
-      throw DatabaseError.internal(`Encode JSON failed`, null, error)
+      throw DatabaseError.internalError(`Encode JSON failed`, null, error)
     }
   }
 
@@ -84,7 +84,7 @@ export abstract class RedisBaseRepository {
     try {
       return JSON.parse(str)
     } catch (error) {
-      throw DatabaseError.internal(`Decode JSON failed`, null, error)
+      throw DatabaseError.internalError(`Decode JSON failed`, null, error)
     }
   }
 
@@ -99,7 +99,7 @@ export abstract class RedisBaseRepository {
     try {
       return buf.toString('base64')
     } catch (error) {
-      throw DatabaseError.internal(`Encode Base64 failed`, null, error)
+      throw DatabaseError.internalError(`Encode Base64 failed`, null, error)
     }
   }
 
@@ -114,7 +114,7 @@ export abstract class RedisBaseRepository {
     try {
       return Buffer.from(str, 'base64')
     } catch (error) {
-      throw DatabaseError.internal(`Decode Base64 failed`, null, error)
+      throw DatabaseError.internalError(`Decode Base64 failed`, null, error)
     }
   }
 
@@ -153,7 +153,7 @@ export abstract class RedisBaseRepository {
    */
   protected checkStatusReplies(values: unknown[]): [DatabaseStatusCode, string][] {
     if (values.length === 0) {
-      throw DatabaseError.internal(`Empty status reply`)
+      throw DatabaseError.internalError(`Empty status reply`)
     }
 
     const result = values.map((value) => this.parseStatusReply(value))
@@ -216,7 +216,7 @@ export abstract class RedisBaseRepository {
     try {
       this.validator.assertSchema<T>(schemaName, value)
     } catch (error) {
-      throw DatabaseError.internal(`Validate reply failed`, null, error)
+      throw DatabaseError.internalError(`Validate reply failed`, null, error)
     }
   }
 
@@ -241,7 +241,7 @@ export abstract class RedisBaseRepository {
 
       return [code, message]
     } catch (error) {
-      throw DatabaseError.internal(`Parse status reply failed`, null, error)
+      throw DatabaseError.internalError(`Parse status reply failed`, null, error)
     }
   }
 

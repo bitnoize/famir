@@ -119,7 +119,7 @@ export class ReplServerError extends CommonError {
    * @param context - The optional error context.
    * @param cause - The optional upstream error.
    */
-  static internal(
+  static internalError(
     message: string,
     context?: ErrorContext | null,
     cause?: unknown
@@ -145,7 +145,27 @@ export class ReplServerError extends CommonError {
 
       return error
     } else {
-      return ReplServerError.internal(`Unknown error`, context, error)
+      return ReplServerError.internalError(`Unknown error`, context, error)
     }
+  }
+
+  get isBadRequest(): boolean {
+    return this.code === 'BAD_REQUEST'
+  }
+
+  get isForbidden(): boolean {
+    return this.code === 'FORBIDDEN'
+  }
+
+  get isNotFound(): boolean {
+    return this.code === 'NOT_FOUND'
+  }
+
+  get isConflict(): boolean {
+    return this.code === 'CONFLICT'
+  }
+
+  get isInternalError(): boolean {
+    return this.code === 'INTERNAL_ERROR'
   }
 }

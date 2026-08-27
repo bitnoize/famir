@@ -1,6 +1,4 @@
 /**
- * Arguments for reading the redirector.
- *
  * @category Redirector
  * @internal
  */
@@ -9,8 +7,6 @@ export interface ReadRedirectorArgs {
 }
 
 /**
- * Arguments for listing redirectors.
- *
  * @category Redirector
  * @internal
  */

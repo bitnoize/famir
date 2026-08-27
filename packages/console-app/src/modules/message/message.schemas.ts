@@ -2,8 +2,6 @@ import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/val
 import { ReadMessageArgs } from './message.js'
 
 /**
- * JSON Schema for validating a read message args.
- *
  * @category Message
  * @internal
  */

@@ -144,8 +144,6 @@ export const targetContentSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating raw target data from Redis.
- *
  * @category Target
  * @internal
  */
@@ -187,8 +185,6 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
 } as const
 
 /**
- * JSON Schema for validating raw full target data from Redis.
- *
  * @category Target
  * @internal
  */
@@ -254,8 +250,6 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
 } as const
 
 /**
- * JSON Schema for validating a target link.
- *
  * @category Target
  * @internal
  */
@@ -267,8 +261,6 @@ export const targetLinkSchema: JSONSchemaType<TargetLink> = {
 } as const
 
 /**
- * JSON Schema for validating target hosts dictionary.
- *
  * @category Target
  * @internal
  */

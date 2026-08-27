@@ -1,21 +1,23 @@
 import { JSONSchemaType, booleanSchema } from '@famir/validator'
 import {
   AssetsArgs,
+  CleanupDatabaseArgs,
+  DeleteEdgeServerConfigArgs,
   GetDatabaseInfoArgs,
-  GetEdgeServerInfoArgs,
   GetProducerInfoArgs,
   LoadDatabaseFunctionsArgs,
+  ReadEdgeServerConfigArgs,
+  ReadEdgeServerUpstreamsArgs,
+  UpsertEdgeServerConfigArgs,
 } from './system.js'
 
 /**
- * JSON Schema for validating an assets args.
- *
  * @category Database
  * @internal
  */
 export const assetsArgsSchema: JSONSchemaType<AssetsArgs> = {
   type: 'object',
-  required: ['_'],
+  required: ['_', 'assetName'],
   properties: {
     _: {
       type: 'array',
@@ -33,8 +35,6 @@ export const assetsArgsSchema: JSONSchemaType<AssetsArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a get database info args.
- *
  * @category Database
  * @internal
  */
@@ -55,14 +55,12 @@ export const getDatabaseInfoArgsSchema: JSONSchemaType<GetDatabaseInfoArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a load database functions args.
- *
  * @category Database
  * @internal
  */
 export const loadDatabaseFunctionsArgsSchema: JSONSchemaType<LoadDatabaseFunctionsArgs> = {
   type: 'object',
-  required: ['_'],
+  required: ['_', 'force'],
   properties: {
     _: {
       type: 'array',
@@ -78,8 +76,27 @@ export const loadDatabaseFunctionsArgsSchema: JSONSchemaType<LoadDatabaseFunctio
 } as const
 
 /**
- * JSON Schema for validating a get producer info args.
- *
+ * @category Database
+ * @internal
+ */
+export const cleanupDatabaseArgsSchema: JSONSchemaType<CleanupDatabaseArgs> = {
+  type: 'object',
+  required: ['_', 'force'],
+  properties: {
+    _: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      minItems: 0,
+      maxItems: 0,
+    },
+    force: booleanSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
  * @category Producer
  * @internal
  */
@@ -100,12 +117,75 @@ export const getProducerInfoArgsSchema: JSONSchemaType<GetProducerInfoArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a get edge-server info args.
- *
  * @category System
  * @internal
  */
-export const getEdgeServerInfoArgsSchema: JSONSchemaType<GetEdgeServerInfoArgs> = {
+export const upsertEdgeServerConfigArgsSchema: JSONSchemaType<UpsertEdgeServerConfigArgs> = {
+  type: 'object',
+  required: ['_', 'assetName', 'force'],
+  properties: {
+    _: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      minItems: 0,
+      maxItems: 0,
+    },
+    assetName: {
+      type: 'string',
+    },
+    force: booleanSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category System
+ * @internal
+ */
+export const readEdgeServerConfigArgsSchema: JSONSchemaType<ReadEdgeServerConfigArgs> = {
+  type: 'object',
+  required: ['_'],
+  properties: {
+    _: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      minItems: 0,
+      maxItems: 0,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category System
+ * @internal
+ */
+export const deleteEdgeServerConfigArgsSchema: JSONSchemaType<DeleteEdgeServerConfigArgs> = {
+  type: 'object',
+  required: ['_', 'force'],
+  properties: {
+    _: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      minItems: 0,
+      maxItems: 0,
+    },
+    force: booleanSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category System
+ * @internal
+ */
+export const readEdgeServerUpstreamsArgsSchema: JSONSchemaType<ReadEdgeServerUpstreamsArgs> = {
   type: 'object',
   required: ['_'],
   properties: {

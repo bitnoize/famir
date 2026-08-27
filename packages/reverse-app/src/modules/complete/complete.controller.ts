@@ -94,27 +94,37 @@ export class CompleteController extends BaseController {
       message.payload['response-cookies'] = message.responseHeaders.getSetCookies()
       message.payload['response-content-type'] = message.responseHeaders.getContentType()
 
-      await this.completeService.createMessage({
-        campaignId: campaign.campaignId,
-        messageId: message.id,
-        proxyId: proxy.proxyId,
-        targetId: target.targetId,
-        sessionId: session.sessionId,
-        type: message.type,
-        method: message.method.get(),
-        url: message.url.toRelative(),
-        requestHeaders: message.requestHeaders.toObject(),
-        requestBody: message.requestBody.get(),
-        status: message.status.get(),
-        responseHeaders: message.responseHeaders.toObject(),
-        responseBody: message.responseBody.get(),
-        connection: message.connection,
-        payload: message.payload,
-        errors: message.errors,
-        analyze: message.analyze,
-        startTime: ctx.startTime,
-        finishTime: ctx.finishTime,
-      })
+      if (ctx.state.verbose || message.analyze) {
+        await this.completeService.createMessage({
+          campaignId: campaign.campaignId,
+          messageId: message.id,
+          proxyId: proxy.proxyId,
+          targetId: target.targetId,
+          sessionId: session.sessionId,
+          type: message.type,
+          method: message.method.get(),
+          url: message.url.toRelative(),
+          requestHeaders: message.requestHeaders.toObject(),
+          requestBody: message.requestBody.get(),
+          status: message.status.get(),
+          responseHeaders: message.responseHeaders.toObject(),
+          responseBody: message.responseBody.get(),
+          connection: message.connection,
+          payload: message.payload,
+          errors: message.errors,
+          analyze: message.analyze,
+          startTime: ctx.startTime,
+          finishTime: ctx.finishTime,
+        })
+      } else {
+        await this.completeService.createDummyMessage({
+          campaignId: campaign.campaignId,
+          messageId: message.id,
+          proxyId: proxy.proxyId,
+          targetId: target.targetId,
+          sessionId: session.sessionId,
+        })
+      }
 
       await next()
     })

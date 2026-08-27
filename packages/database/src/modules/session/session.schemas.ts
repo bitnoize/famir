@@ -30,8 +30,6 @@ export const upgradeSessionParamsSchema: JSONSchemaType<UpgradeSessionParams> = 
 } as const
 
 /**
- * JSON Schema for validating raw session data from Redis.
- *
  * @category Session
  * @internal
  */

@@ -15,6 +15,13 @@ export const DATABASE_MANAGER = Symbol('DatabaseManager')
  */
 export interface DatabaseManager {
   /**
+   * Retrieves the database information.
+   *
+   * @throws {@link DatabaseError} If the operation fails.
+   */
+  getInfo(): Promise<string[]>
+
+  /**
    * Loads all custom functions into the database.
    *
    * @throws {@link DatabaseError} If the operation fails.
@@ -22,9 +29,11 @@ export interface DatabaseManager {
   loadFunctions(): Promise<void>
 
   /**
-   * Retrieves the database information.
+   * Cleans up the entire database.
    *
-   * @throws {@link DatabaseError} If the operation fails.
+   * This method removes all data and should be used with caution.
+   *
+   * @throws {@link DatabaseError} If the cleanup operation fails.
    */
-  getInfo(): Promise<string[]>
+  cleanup(): Promise<void>
 }

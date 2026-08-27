@@ -10,8 +10,6 @@ import {
 } from './lure.js'
 
 /**
- * JSON Schema for validating a create lure args.
- *
  * @category Lure
  * @internal
  */
@@ -31,8 +29,6 @@ export const createLureArgsSchema: JSONSchemaType<CreateLureArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a read lure args.
- *
  * @category Lure
  * @internal
  */
@@ -51,8 +47,6 @@ export const readLureArgsSchema: JSONSchemaType<ReadLureArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a toggle lure args.
- *
  * @category Lure
  * @internal
  */
@@ -71,8 +65,6 @@ export const toggleLureArgsSchema: JSONSchemaType<ToggleLureArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a delete lure args.
- *
  * @category Lure
  * @internal
  */
@@ -91,8 +83,6 @@ export const deleteLureArgsSchema: JSONSchemaType<DeleteLureArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a list lures args.
- *
  * @category Lure
  * @internal
  */
@@ -111,8 +101,6 @@ export const listLuresArgsSchema: JSONSchemaType<ListLuresArgs> = {
 } as const
 
 /**
- * JSON Schema for validating a make lure url args.
- *
  * @category Lure
  * @internal
  */

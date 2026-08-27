@@ -98,11 +98,11 @@ export class CampaignService {
       )
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'CONFLICT') {
+        if (error.isConflict) {
           throw ReplServerError.conflict(error.message)
         }
 
-        throw ReplServerError.internal(`Create campaign failed`, null, error)
+        throw ReplServerError.internalError(`Create campaign failed`, null, error)
       }
 
       throw error
@@ -188,7 +188,7 @@ export class CampaignService {
       }
     } catch (error) {
       if (error instanceof DatabaseError) {
-        throw ReplServerError.internal(`Create campaign template failed`, null, error)
+        throw ReplServerError.internalError(`Create campaign template failed`, null, error)
       }
 
       throw error
@@ -230,7 +230,7 @@ export class CampaignService {
       const origLures = await this.lureRepository.list(campaign.campaignId)
 
       if (!(origCampaign && origProxies && origTargets && origRedirectors && origLures)) {
-        throw ReplServerError.internal(`Build campaign template failed`)
+        throw ReplServerError.internalError(`Build campaign template failed`)
       }
 
       await this.campaignRepository.update(
@@ -459,7 +459,7 @@ export class CampaignService {
       }
     } catch (error) {
       if (error instanceof DatabaseError) {
-        throw ReplServerError.internal(`Update campaign template failed`, null, error)
+        throw ReplServerError.internalError(`Update campaign template failed`, null, error)
       }
 
       throw error
@@ -482,7 +482,7 @@ export class CampaignService {
       const lures = await this.lureRepository.list(data.campaignId)
 
       if (!(campaign && proxies && targets && redirectors && lures)) {
-        throw ReplServerError.internal(`Build campaign template failed`)
+        throw ReplServerError.internalError(`Build campaign template failed`)
       }
 
       for (const lure of lures) {
@@ -525,7 +525,7 @@ export class CampaignService {
       await this.campaignRepository.delete(campaign.campaignId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        throw ReplServerError.internal(`Delete campaign failed`, null, error)
+        throw ReplServerError.internalError(`Delete campaign failed`, null, error)
       }
 
       throw error
@@ -544,15 +544,15 @@ export class CampaignService {
       return await this.campaignRepository.lock(campaignId)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        if (error.code === 'FORBIDDEN') {
+        if (error.isForbidden) {
           throw ReplServerError.forbidden(error.message)
         }
 
-        throw ReplServerError.internal(`Lock campaign failed`, null, error)
+        throw ReplServerError.internalError(`Lock campaign failed`, null, error)
       }
 
       throw error

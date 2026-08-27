@@ -11,6 +11,7 @@
     "packages/storage",
     "packages/producer",
     "packages/consumer",
+    "packages/edge-server",
     "packages/http-client",
     "packages/http-server",
     "packages/http-tools",
@@ -20,7 +21,7 @@
     "packages/actions-app"
   ],
   "out": "docs",
-  "name": "Fake Mirrors",
+  "name": "Famir Packages",
   "plugin": ["typedoc-theme-fresh"],
   "theme": "fresh",
   "hostedBaseUrl": "https://docs.fake-mirrors.net",

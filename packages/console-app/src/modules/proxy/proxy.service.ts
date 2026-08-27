@@ -59,11 +59,11 @@ export class ProxyService {
       await this.proxyRepository.create(data.campaignId, data.proxyId, data.url, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'CONFLICT') {
+        if (error.isConflict) {
           throw ReplServerError.conflict(error.message)
         }
 
-        throw ReplServerError.internal(`Create proxy failed`, null, error)
+        throw ReplServerError.internalError(`Create proxy failed`, null, error)
       }
 
       throw error
@@ -95,11 +95,11 @@ export class ProxyService {
       await this.proxyRepository.enable(data.campaignId, data.proxyId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        throw ReplServerError.internal(`Enable proxy failed`, null, error)
+        throw ReplServerError.internalError(`Enable proxy failed`, null, error)
       }
 
       throw error
@@ -118,11 +118,11 @@ export class ProxyService {
       await this.proxyRepository.disable(data.campaignId, data.proxyId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        throw ReplServerError.internal(`Disable proxy failed`, null, error)
+        throw ReplServerError.internalError(`Disable proxy failed`, null, error)
       }
 
       throw error
@@ -141,15 +141,15 @@ export class ProxyService {
       await this.proxyRepository.delete(data.campaignId, data.proxyId, lockSecret)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        if (error.code === 'FORBIDDEN') {
+        if (error.isForbidden) {
           throw ReplServerError.forbidden(error.message)
         }
 
-        throw ReplServerError.internal(`Delete proxy failed`, null, error)
+        throw ReplServerError.internalError(`Delete proxy failed`, null, error)
       }
 
       throw error
@@ -176,15 +176,15 @@ export class ProxyService {
       return await this.campaignRepository.lock(campaignId)
     } catch (error) {
       if (error instanceof DatabaseError) {
-        if (error.code === 'NOT_FOUND') {
+        if (error.isNotFound) {
           throw ReplServerError.notFound(error.message)
         }
 
-        if (error.code === 'FORBIDDEN') {
+        if (error.isForbidden) {
           throw ReplServerError.forbidden(error.message)
         }
 
-        throw ReplServerError.internal(`Lock campaign failed`, null, error)
+        throw ReplServerError.internalError(`Lock campaign failed`, null, error)
       }
 
       throw error

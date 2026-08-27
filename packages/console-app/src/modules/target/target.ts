@@ -1,6 +1,4 @@
 /**
- * Arguments for reading the target.
- *
  * @category Target
  * @internal
  */
@@ -9,8 +7,6 @@ export interface ReadTargetArgs {
 }
 
 /**
- * Arguments for reading the target hosts.
- *
  * @category Target
  * @internal
  */
@@ -19,8 +15,6 @@ export interface ReadTargetHostsArgs {
 }
 
 /**
- * Arguments for listing targets.
- *
  * @category Target
  * @internal
  */

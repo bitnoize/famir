@@ -2,8 +2,6 @@ import { JSONSchemaType } from '@famir/validator'
 import { LOGGER_LOG_LEVELS, LoggerLogLevel, PinoLoggerConfig } from './logger.js'
 
 /**
- * JSON Schema for validating a Pino logger log level.
- *
  * @internal
  */
 const pinoLoggerLogLevelSchema: JSONSchemaType<LoggerLogLevel> = {
@@ -13,8 +11,6 @@ const pinoLoggerLogLevelSchema: JSONSchemaType<LoggerLogLevel> = {
 } as const
 
 /**
- * JSON Schema for validating a complete Pino logger configuration.
- *
  * @internal
  */
 export const pinoLoggerConfigSchema: JSONSchemaType<PinoLoggerConfig> = {

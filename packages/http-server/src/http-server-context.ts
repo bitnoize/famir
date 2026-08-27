@@ -323,7 +323,7 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
       responseStream.end(responseBody, (error?: Error) => {
         if (error) {
           reject(
-            HttpServerError.internal(
+            HttpServerError.internalError(
               `Internal error`,
               {
                 reason: `Send response body failed`,
@@ -397,7 +397,7 @@ export class HttpServerNormalContext extends HttpServerBaseContext {
 
   override sendHead() {
     if (this.status.isUnknown()) {
-      throw HttpServerError.internal(`Internal error`, {
+      throw HttpServerError.internalError(`Internal error`, {
         reason: `Unknown response status`,
         status: this.status.get(),
       })

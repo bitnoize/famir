@@ -1,6 +1,4 @@
 /**
- * Arguments for creating a proxy.
- *
  * @category Proxy
  * @internal
  */
@@ -10,8 +8,6 @@ export interface CreateProxyArgs {
 }
 
 /**
- * Arguments for reading the proxy.
- *
  * @category Proxy
  * @internal
  */
@@ -20,8 +16,6 @@ export interface ReadProxyArgs {
 }
 
 /**
- * Arguments for toggling the proxy.
- *
  * @category Proxy
  * @internal
  */
@@ -30,8 +24,6 @@ export interface ToggleProxyArgs {
 }
 
 /**
- * Arguments for deleting the proxy.
- *
  * @category Proxy
  * @internal
  */
@@ -40,8 +32,6 @@ export interface DeleteProxyArgs {
 }
 
 /**
- * Arguments for listing proxies.
- *
  * @category Proxy
  * @internal
  */

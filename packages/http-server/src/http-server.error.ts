@@ -170,7 +170,7 @@ export class HttpServerError extends CommonError {
    * @param context - The optional error context.
    * @param cause - The optional upstream error.
    */
-  static internal(
+  static internalError(
     message: string,
     context?: ErrorContext | null,
     cause?: unknown
@@ -252,7 +252,51 @@ export class HttpServerError extends CommonError {
 
       return error
     } else {
-      return HttpServerError.internal(`Unknown error`, context, error)
+      return HttpServerError.internalError(`Unknown error`, context, error)
     }
+  }
+
+  get isBadRequest(): boolean {
+    return this.code === 'BAD_REQUEST'
+  }
+
+  get isUnauthorized(): boolean {
+    return this.code === 'UNAUTHORIZED'
+  }
+
+  get isForbidden(): boolean {
+    return this.code === 'FORBIDDEN'
+  }
+
+  get isNotFound(): boolean {
+    return this.code === 'NOT_FOUND'
+  }
+
+  get isConflict(): boolean {
+    return this.code === 'CONFLICT'
+  }
+
+  get isContentTooLarge(): boolean {
+    return this.code === 'CONTENT_TOO_LARGE'
+  }
+
+  get isUnprocessableContent(): boolean {
+    return this.code === 'UNPROCESSABLE_CONTENT'
+  }
+
+  get isInternalError(): boolean {
+    return this.code === 'INTERNAL_ERROR'
+  }
+
+  get isBadGateway(): boolean {
+    return this.code === 'BAD_GATEWAY'
+  }
+
+  get isServiceUnavailable(): boolean {
+    return this.code === 'SERVICE_UNAVAILABLE'
+  }
+
+  get isGatewayTimeout(): boolean {
+    return this.code === 'GATEWAY_TIMEOUT'
   }
 }

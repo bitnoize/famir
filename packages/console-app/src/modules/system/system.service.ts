@@ -1,6 +1,6 @@
 import { DIContainer } from '@famir/common'
 import { DATABASE_MANAGER, DatabaseManager } from '@famir/database'
-import { EDGE_SERVER, EdgeServer, EdgeServerInfo } from '@famir/edge-server'
+import { EDGE_SERVER, EdgeServer } from '@famir/edge-server'
 import { ANALYZE_QUEUE, AnalyzeQueue, WEBHOOK_QUEUE, WebhookQueue } from '@famir/producer'
 
 /**
@@ -64,6 +64,13 @@ export class SystemService {
   }
 
   /**
+   * Cleanup entire the database.
+   */
+  async cleanupDatabase(): Promise<void> {
+    await this.databaseManager.cleanup()
+  }
+
+  /**
    * Gets producer info.
    */
   async getProducerInfo(): Promise<Record<string, unknown>> {
@@ -80,9 +87,30 @@ export class SystemService {
   }
 
   /**
-   * Get edge server info.
+   * Upsert edge server config.
    */
-  async getEdgeServerInfo(): Promise<EdgeServerInfo> {
-    return await this.edgeServer.getInfo()
+  async upsertEdgeServerConfig(caddyfile: string): Promise<void> {
+    await this.edgeServer.upsertConfig(caddyfile)
+  }
+
+  /**
+   * Read edge server config.
+   */
+  async readEdgeServerConfig(): Promise<unknown> {
+    return await this.edgeServer.readConfig()
+  }
+
+  /**
+   * Delete edge server config.
+   */
+  async deleteEdgeServerConfig(): Promise<void> {
+    await this.edgeServer.deleteConfig()
+  }
+
+  /**
+   * Read edge server upstreams.
+   */
+  async readEdgeServerUpstreams(): Promise<unknown> {
+    return await this.edgeServer.readUpstreams()
   }
 }

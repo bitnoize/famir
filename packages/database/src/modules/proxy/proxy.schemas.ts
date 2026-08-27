@@ -19,8 +19,6 @@ export const proxyUrlSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating raw proxy data from Redis.
- *
  * @category Proxy
  * @internal
  */

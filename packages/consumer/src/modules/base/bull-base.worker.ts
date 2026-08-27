@@ -142,7 +142,7 @@ export abstract class BullBaseWorker implements BaseWorker {
       const processor = this.router.getProcessor(this.queueName, job.name)
 
       if (!processor) {
-        throw ConsumerError.internal(`Processor not found`, {
+        throw ConsumerError.internalError(`Processor not found`, {
           queue: this.queueName,
           job: job.name,
         })

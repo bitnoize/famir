@@ -1,8 +1,6 @@
 import { TargetAccessLevel } from '@famir/database'
 
 /**
- * Arguments for creating a campaign.
- *
  * @category Campaign
  * @internal
  */
@@ -16,8 +14,6 @@ export interface CreateCampaignArgs {
 }
 
 /**
- * Arguments for reading the campaign.
- *
  * @category Campaign
  * @internal
  */
@@ -26,8 +22,6 @@ export interface ReadCampaignArgs {
 }
 
 /**
- * Arguments for updating the campaign.
- *
  * @category Campaign
  * @internal
  */
@@ -37,8 +31,6 @@ export interface UpdateCampaignArgs {
 }
 
 /**
- * Arguments for deleting the campaign.
- *
  * @category Campaign
  * @internal
  */
@@ -48,8 +40,6 @@ export interface DeleteCampaignArgs {
 }
 
 /**
- * Arguments for listing campaigns.
- *
  * @category Campaign
  * @internal
  */
@@ -58,8 +48,6 @@ export interface ListCampaignsArgs {
 }
 
 /**
- * Represents a campaign template campaign.
- *
  * @category Campaign
  * @internal
  */
@@ -76,8 +64,6 @@ export interface CampaignTemplateCampaign {
 }
 
 /**
- * Represents a raw campaign template campaign.
- *
  * @category Campaign
  * @internal
  */
@@ -93,8 +79,6 @@ export interface RawCampaignTemplateCampaign {
 }
 
 /**
- * Represents a campaign template proxy.
- *
  * @category Campaign
  * @internal
  */
@@ -105,8 +89,6 @@ export interface CampaignTemplateProxy {
 }
 
 /**
- * Represents a raw campaign template proxy.
- *
  * @category Campaign
  * @internal
  */
@@ -117,8 +99,6 @@ export interface RawCampaignTemplateProxy {
 }
 
 /**
- * Represents a campaign template target.
- *
  * @category Campaign
  * @internal
  */
@@ -148,8 +128,6 @@ export interface CampaignTemplateTarget {
 }
 
 /**
- * Represents a raw campaign template target.
- *
  * @category Campaign
  * @internal
  */
@@ -179,8 +157,6 @@ export interface RawCampaignTemplateTarget {
 }
 
 /**
- * Represents a campaign template redirector.
- *
  * @category Campaign
  * @internal
  */
@@ -191,8 +167,6 @@ export interface CampaignTemplateRedirector {
 }
 
 /**
- * Represents a raw campaign template redirector.
- *
  * @category Campaign
  * @internal
  */
@@ -203,8 +177,6 @@ export interface RawCampaignTemplateRedirector {
 }
 
 /**
- * Represents a campaign template lure.
- *
  * @category Campaign
  * @internal
  */
@@ -216,8 +188,6 @@ export interface CampaignTemplateLure {
 }
 
 /**
- * Represents a raw campaign template lure.
- *
  * @category Campaign
  * @internal
  */
@@ -229,8 +199,6 @@ export interface RawCampaignTemplateLure {
 }
 
 /**
- * Represents a campaign template.
- *
  * @category Campaign
  * @internal
  */
@@ -243,8 +211,6 @@ export interface CampaignTemplate {
 }
 
 /**
- * Represents a raw campaign template.
- *
  * @category Campaign
  * @internal
  */

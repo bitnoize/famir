@@ -328,7 +328,7 @@ export class NativeHttpServer implements HttpServer {
           })
         }
       } else {
-        throw HttpServerError.internal(`Internal error`, {
+        throw HttpServerError.internalError(`Internal error`, {
           reason: `Incomplete server request`,
           ctx: ctx.dump(),
         })
@@ -365,7 +365,7 @@ export class NativeHttpServer implements HttpServer {
           })
         }
       } else {
-        throw HttpServerError.internal(`Internal error`, {
+        throw HttpServerError.internalError(`Internal error`, {
           reason: `Incomplete websocket connection`,
           ctx: ctx.dump(),
         })

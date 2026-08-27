@@ -3,17 +3,8 @@ import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { EdgeServerError } from './edge-server.error.js'
-import {
-  CaddyEdgeServerConfig,
-  CaddyEdgeServerUpstream,
-  EDGE_SERVER,
-  EdgeServer,
-  EdgeServerInfo,
-} from './edge-server.js'
-import {
-  caddyEdgeServerConfigSchema,
-  caddyEdgeServerUpstreamsSchema,
-} from './edge-server.schemas.js'
+import { CaddyEdgeServerConfig, EDGE_SERVER, EdgeServer } from './edge-server.js'
+import { caddyEdgeServerConfigSchema } from './edge-server.schemas.js'
 
 /**
  * Options for a Caddy edge-server.
@@ -45,6 +36,10 @@ interface CaddyEdgeServerOptions {
  *
  * // Resolve from DI container
  * const edgeServer = container.resolve<EdgeServer>(EDGE_SERVER)
+ *
+ * // Get server info
+ * const info = await edgeServer.getInfo()
+ * console.log(info)
  *
  * ```
  */
@@ -81,81 +76,132 @@ export class CaddyEdgeServer implements EdgeServer {
     protected readonly config: Config,
     protected readonly logger: Logger
   ) {
-    this.validator
-      .addSchema('edge-server-config', caddyEdgeServerConfigSchema)
-      .addSchema('edge-server-upstreams', caddyEdgeServerUpstreamsSchema)
+    this.validator.addSchema('edge-server-config', caddyEdgeServerConfigSchema)
 
     const conf = this.config.get<CaddyEdgeServerConfig>('edge-server-config')
     this.options = this.buildOptions(conf)
   }
 
-  async getInfo(): Promise<EdgeServerInfo> {
+  /**
+   * API call to upsert config.
+   */
+  async upsertConfig(caddyfile: string): Promise<void> {
     try {
-      return {
-        upstreams: await this.getCaddyUpstreams(),
+      const url = new URL(`/load`, this.options.apiUrl)
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/caddyfile',
+          'Origin': this.options.apiUrl,
+        },
+        body: caddyfile,
+      })
+
+      if (!res.ok) {
+        throw EdgeServerError.create(`API upsert config failed`, {
+          status: res.status,
+        })
       }
     } catch (error) {
       throw EdgeServerError.wrap(error, {
-        method: 'getInfo',
-        params: {},
+        method: 'upsertConfig',
+        params: { caddyfile },
       })
     }
   }
 
-  async loadConf(): Promise<void> {
+  /**
+   * API call to read config.
+   */
+  async readConfig(): Promise<unknown> {
     try {
-      console.log(`TODO!`)
+      const url = new URL(`/config/`, this.options.apiUrl)
+
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Origin: this.options.apiUrl,
+        },
+      })
+
+      if (!res.ok) {
+        throw EdgeServerError.create(`API read config failed`, {
+          status: res.status,
+        })
+      }
+
+      const data = await res.json()
+
+      return data
     } catch (error) {
       throw EdgeServerError.wrap(error, {
-        method: 'load',
+        method: 'readConfig',
         params: {},
       })
     }
   }
 
   /**
-   * Validates data from a Caddy admin API against a registered JSON Schema.
-   *
-   * @typeParam T - The expected type of the data after validation.
-   * @param schemaName - The name of the schema to validate against.
-   * @param value - The data from edge server response.
-   * @throws {@link EdgeServerError} If validation fails.
+   * API call to delete config.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
-  protected validateData<T>(schemaName: string, value: unknown): asserts value is T {
+  async deleteConfig(): Promise<void> {
     try {
-      this.validator.assertSchema<T>(schemaName, value)
+      const url = new URL(`/config/`, this.options.apiUrl)
+
+      const res = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          Origin: this.options.apiUrl,
+        },
+      })
+
+      if (!res.ok) {
+        throw EdgeServerError.create(`API delete config failed`, {
+          status: res.status,
+        })
+      }
     } catch (error) {
-      throw EdgeServerError.create(`Validate data failed`, null, error)
+      throw EdgeServerError.wrap(error, {
+        method: 'deleteConfig',
+        params: {},
+      })
     }
   }
 
   /**
-   * API call to receive Caddy upstreams.
+   * API call to read upstreams.
    */
-  private async getCaddyUpstreams(): Promise<CaddyEdgeServerUpstream[]> {
-    const url = new URL('/reverse_proxy/upstreams', this.options.apiUrl)
+  async readUpstreams(): Promise<unknown> {
+    try {
+      const url = new URL('/reverse_proxy/upstreams', this.options.apiUrl)
 
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Origin': this.options.apiUrl,
-      },
-    })
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          Origin: this.options.apiUrl,
+        },
+      })
 
-    if (!res.ok) {
-      throw EdgeServerError.create(`Admin API call failed`, {
-        status: res.status,
+      if (!res.ok) {
+        throw EdgeServerError.create(`API read upstreams failed`, {
+          status: res.status,
+        })
+      }
+
+      const data = await res.json()
+
+      //this.validateData<CaddyEdgeServerApiUpstream[]>('edge-server-api-upstreams', data)
+
+      return data
+    } catch (error) {
+      throw EdgeServerError.wrap(error, {
+        method: 'readUpstreams',
+        params: {},
       })
     }
-
-    const data: unknown = await res.json()
-
-    this.validateData<CaddyEdgeServerUpstream[]>('edge-server-upstreams', data)
-
-    return data
   }
 
   /**

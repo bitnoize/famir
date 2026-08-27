@@ -240,7 +240,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
       colorMode: this.options.useColors,
       inspectOptions: {
         showHidden: false,
-        depth: 4,
+        depth: 8,
       },
     })
   }

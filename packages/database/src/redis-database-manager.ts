@@ -69,6 +69,20 @@ export class RedisDatabaseManager implements DatabaseManager {
     this.connection = connector.getConnection<RedisDatabaseConnection>()
   }
 
+  async getInfo(): Promise<string[]> {
+    try {
+      const result = await this.connection.INFO('server')
+
+      return result.split('\r\n').filter((res) => {
+        return res && !res.startsWith('#')
+      })
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        method: 'getInfo',
+      })
+    }
+  }
+
   async loadFunctions(): Promise<void> {
     try {
       await this.connection.FUNCTION_FLUSH()
@@ -88,7 +102,7 @@ export class RedisDatabaseManager implements DatabaseManager {
       if (errors.length > 0) {
         await this.connection.FUNCTION_FLUSH()
 
-        throw DatabaseError.internal(`Loading Redis functions failed`, null, errors)
+        throw DatabaseError.internalError(`Loading Redis functions failed`, null, errors)
       } else {
         this.logger.info(`All Redis functions successfully loaded`)
       }
@@ -99,16 +113,14 @@ export class RedisDatabaseManager implements DatabaseManager {
     }
   }
 
-  async getInfo(): Promise<string[]> {
+  async cleanup(): Promise<void> {
     try {
-      const result = await this.connection.INFO('server')
+      await this.connection.FLUSHDB()
 
-      return result.split('\r\n').filter((res) => {
-        return res && !res.startsWith('#')
-      })
+      this.logger.info(`Database cleaned up`)
     } catch (error) {
       throw DatabaseError.wrap(error, {
-        method: 'getInfo',
+        method: 'cleanup',
       })
     }
   }

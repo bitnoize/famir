@@ -2,8 +2,6 @@ import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/val
 import { ReadSessionArgs } from './session.js'
 
 /**
- * JSON Schema for validating a read session args.
- *
  * @category Session
  * @internal
  */

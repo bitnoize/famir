@@ -82,7 +82,11 @@ export class ConsumerError extends CommonError {
    * @param context - The optional error context.
    * @param cause - The optional upstream error.
    */
-  static internal(message: string, context?: ErrorContext | null, cause?: unknown): ConsumerError {
+  static internalError(
+    message: string,
+    context?: ErrorContext | null,
+    cause?: unknown
+  ): ConsumerError {
     return new ConsumerError(message, {
       cause,
       context,
@@ -103,7 +107,7 @@ export class ConsumerError extends CommonError {
 
       return error
     } else {
-      return ConsumerError.internal(`Unknown error`, context, error)
+      return ConsumerError.internalError(`Unknown error`, context, error)
     }
   }
 }
