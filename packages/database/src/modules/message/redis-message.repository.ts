@@ -136,13 +136,18 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         Date.now()
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create message`, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: { campaignId, messageId, proxyId, targetId, sessionId },
-        result,
+        database: {
+          message: {
+            campaignId,
+            messageId,
+            proxyId,
+            targetId,
+            sessionId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
@@ -176,13 +181,18 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
         sessionId
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create dummy message`, {
-        repository: this.repositoryName,
-        method: 'createDummy',
-        params: { campaignId, messageId, proxyId, targetId, sessionId },
-        result,
+        database: {
+          message: {
+            campaignId,
+            messageId,
+            proxyId,
+            targetId,
+            sessionId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
@@ -212,7 +222,10 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'read',
-        params: { campaignId, messageId },
+        params: {
+          campaignId,
+          messageId,
+        },
       })
     }
   }
@@ -230,7 +243,10 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'readFull',
-        params: { campaignId, messageId },
+        params: {
+          campaignId,
+          messageId,
+        },
       })
     }
   }

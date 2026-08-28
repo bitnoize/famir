@@ -2,7 +2,7 @@
   "name": "@famir/templater",
   "type": "module",
   "version": "0.0.5",
-  "description": "Lightweight template rendering tool",
+  "description": "Templater service for the Famir ecosystem",
   "keywords": [
     "famir",
     "fake-mirrors",

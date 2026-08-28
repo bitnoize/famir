@@ -2,7 +2,7 @@
   "name": "@famir/database",
   "type": "module",
   "version": "0.0.6",
-  "description": "Database connector, manager, repositories and models",
+  "description": "Database service for the Famir ecosystem",
   "keywords": [
     "famir",
     "fake-mirrors",

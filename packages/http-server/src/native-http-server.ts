@@ -322,9 +322,11 @@ export class NativeHttpServer implements HttpServer {
 
       if (ctx.isComplete) {
         if (ctx.state.verbose) {
-          this.logger.debug(`Complete server request`, {
-            req: this.dumpRequest(req),
-            ctx: ctx.dump(),
+          this.logger.debug(`HttpServer complete normal request`, {
+            httpServer: {
+              req: this.dumpRequest(req),
+              ctx: ctx.dump(),
+            },
           })
         }
       } else {
@@ -359,9 +361,11 @@ export class NativeHttpServer implements HttpServer {
 
       if (ctx.isComplete) {
         if (ctx.state.verbose) {
-          this.logger.debug(`Complete websocket connection`, {
-            req: this.dumpRequest(req),
-            ctx: ctx.dump(),
+          this.logger.debug(`HttpServer complete websocket connection`, {
+            httpServer: {
+              req: this.dumpRequest(req),
+              ctx: ctx.dump(),
+            },
           })
         }
       } else {

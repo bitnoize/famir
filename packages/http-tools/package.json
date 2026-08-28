@@ -2,7 +2,7 @@
   "name": "@famir/http-tools",
   "type": "module",
   "version": "0.0.7",
-  "description": "Comprehensive HTTP protocol tools",
+  "description": "Comprehensive HTTP tools for the Famir ecosystem",
   "keywords": [
     "famir",
     "fake-mirrors",

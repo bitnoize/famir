@@ -87,19 +87,26 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create proxy`, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: { campaignId, proxyId },
-        result,
+        database: {
+          proxy: {
+            campaignId,
+            proxyId,
+            url,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'create',
-        params: { campaignId, proxyId },
+        params: {
+          campaignId,
+          proxyId,
+          url,
+        },
       })
     }
   }
@@ -117,7 +124,10 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'read',
-        params: { campaignId, proxyId },
+        params: {
+          campaignId,
+          proxyId,
+        },
       })
     }
   }
@@ -131,19 +141,24 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database enable proxy`, {
-        repository: this.repositoryName,
-        method: 'enable',
-        params: { campaignId, proxyId },
-        result,
+        database: {
+          proxy: {
+            campaignId,
+            proxyId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'enable',
-        params: { campaignId, proxyId },
+        params: {
+          campaignId,
+          proxyId,
+        },
       })
     }
   }
@@ -157,19 +172,24 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database disable proxy`, {
-        repository: this.repositoryName,
-        method: 'disable',
-        params: { campaignId, proxyId },
-        result,
+        database: {
+          proxy: {
+            campaignId,
+            proxyId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'disable',
-        params: { campaignId, proxyId },
+        params: {
+          campaignId,
+          proxyId,
+        },
       })
     }
   }
@@ -183,19 +203,24 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete proxy`, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: { campaignId, proxyId },
-        result,
+        database: {
+          proxy: {
+            campaignId,
+            proxyId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'delete',
-        params: { campaignId, proxyId },
+        params: {
+          campaignId,
+          proxyId,
+        },
       })
     }
   }
@@ -221,7 +246,9 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'list',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }

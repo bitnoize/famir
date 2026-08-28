@@ -36,6 +36,9 @@ export interface HttpClientStreamResult extends HttpClientBaseResult {
 /**
  * Defines the public contract for an http-client.
  *
+ * Designed to not throw exceptions, but always return a result
+ * with an optional `error` attribute.
+ *
  * Provides methods for making HTTP requests:
  * - Simple request/response
  * - Streaming request with simple response
@@ -59,7 +62,7 @@ export interface HttpClient {
    * @param timeout - The total request timeout in milliseconds.
    * @param headersSizeLimit - The maximum headers size in bytes.
    * @param bodySizeLimit - The maximum body size in bytes.
-   * @returns The result object containing the response or error details.
+   * @returns The result object containing the response and error details.
    */
   simple(
     proxy: string,
@@ -88,7 +91,7 @@ export interface HttpClient {
    * @param timeout - The total request timeout in milliseconds.
    * @param headersSizeLimit - The maximum headers size in bytes.
    * @param bodySizeLimit - The maximum body size in bytes.
-   * @returns The result object containing the response or error details.
+   * @returns The result object containing the response and error details.
    */
   streamRequest(
     proxy: string,
@@ -116,7 +119,7 @@ export interface HttpClient {
    * @param connectTimeout - The connection timeout in milliseconds.
    * @param timeout - The total request timeout in milliseconds.
    * @param headersSizeLimit - The maximum headers size in bytes.
-   * @returns The result object containing the response or error details.
+   * @returns The result object containing the response and error details.
    */
   streamResponse(
     proxy: string,

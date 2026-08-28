@@ -162,7 +162,7 @@ export class SystemController extends BaseController {
         console.log(`// Show database info:`)
         console.log(`.${spec.name}`)
       },
-      async (console, spec, args) => {
+      async (console) => {
         const info = await this.systemService.getDatabaseInfo()
 
         console.log(info)
@@ -238,7 +238,7 @@ export class SystemController extends BaseController {
         console.log(`// Show producer info:`)
         console.log(`.${spec.name}`)
       },
-      async (console, spec, args) => {
+      async (console) => {
         const info = await this.systemService.getProducerInfo()
 
         console.log(info)
@@ -293,7 +293,7 @@ export class SystemController extends BaseController {
         console.log(`// Read edge-server config:`)
         console.log(`.${spec.name}`)
       },
-      async (console, spec, args) => {
+      async (console) => {
         const config = await this.systemService.readEdgeServerConfig()
 
         console.log(config)
@@ -340,7 +340,7 @@ export class SystemController extends BaseController {
         console.log(`// Read edge-server upstreams:`)
         console.log(`.${spec.name}`)
       },
-      async (console, spec, args) => {
+      async (console) => {
         const config = await this.systemService.readEdgeServerUpstreams()
 
         console.log(config)

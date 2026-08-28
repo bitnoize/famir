@@ -2,7 +2,7 @@
   "name": "@famir/storage",
   "type": "module",
   "version": "0.0.5",
-  "description": "S3 compatable object storage client",
+  "description": "Storage service for the Famir ecosystem",
   "keywords": [
     "famir",
     "fake-mirrors",

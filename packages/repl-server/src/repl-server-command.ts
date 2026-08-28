@@ -106,14 +106,21 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
       }
 
       this.spec.options.forEach((option) => {
-        if (option.type === 'boolean') {
-          state.boolean.push(option.name)
-        } else if (option.type === 'number') {
-          state.number.push(option.name)
-        } else if (option.type === 'string') {
-          state.string.push(option.name)
-        } else {
-          throw new Error(`Unknown command option type`)
+        switch (option.type) {
+          case 'boolean':
+            state.boolean.push(option.name)
+            break
+
+          case 'number':
+            state.number.push(option.name)
+            break
+
+          case 'string':
+            state.string.push(option.name)
+            break
+
+          default:
+            throw new Error(`Unknown command option type`)
         }
 
         if (option.alias) {
@@ -197,10 +204,10 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    * @param args - The parsed command args.
    * @returns `true` if help need to show, `false` otherwise.
    */
-  checkHelp(args: ReplServerCommandArgs) {
+  checkHelp(args: ReplServerCommandArgs): boolean {
     const params = this.spec.params ?? []
 
-    return args.help || args._.length != params.length
+    return !!args.help || args._.length !== params.length
   }
 
   /**

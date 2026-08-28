@@ -2,7 +2,7 @@
   "name": "@famir/producer",
   "type": "module",
   "version": "0.0.5",
-  "description": "Producer connector, queues and background jobs",
+  "description": "Producer service for the Famir ecosystem",
   "keywords": [
     "famir",
     "fake-mirrors",

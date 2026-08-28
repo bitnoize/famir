@@ -106,48 +106,48 @@ export class PinoLogger implements Logger {
   }
 
   trace(msg: string, data?: LoggerData) {
-    if (data != null) {
-      this.pino.trace({ data }, msg)
+    if (data) {
+      this.pino.trace(data, msg)
     } else {
       this.pino.trace(msg)
     }
   }
 
   debug(msg: string, data?: LoggerData) {
-    if (data != null) {
-      this.pino.debug({ data }, msg)
+    if (data) {
+      this.pino.debug(data, msg)
     } else {
       this.pino.debug(msg)
     }
   }
 
   info(msg: string, data?: LoggerData) {
-    if (data != null) {
-      this.pino.info({ data }, msg)
+    if (data) {
+      this.pino.info(data, msg)
     } else {
       this.pino.info(msg)
     }
   }
 
   warn(msg: string, data?: LoggerData) {
-    if (data != null) {
-      this.pino.warn({ data }, msg)
+    if (data) {
+      this.pino.warn(data, msg)
     } else {
       this.pino.warn(msg)
     }
   }
 
   error(msg: string, data?: LoggerData) {
-    if (data != null) {
-      this.pino.error({ data }, msg)
+    if (data) {
+      this.pino.error(data, msg)
     } else {
       this.pino.error(msg)
     }
   }
 
   fatal(msg: string, data?: LoggerData) {
-    if (data != null) {
-      this.pino.fatal({ data }, msg)
+    if (data) {
+      this.pino.fatal(data, msg)
     } else {
       this.pino.fatal(msg)
     }

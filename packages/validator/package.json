@@ -2,7 +2,7 @@
   "name": "@famir/validator",
   "type": "module",
   "version": "0.0.6",
-  "description": "JSON-Schema validation service",
+  "description": "Validator service for the Famir ecosystem",
   "keywords": [
     "famir",
     "fake-mirrors",

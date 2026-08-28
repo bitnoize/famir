@@ -124,7 +124,7 @@ export class ConsumerRouter {
 
     this.queues.set(queueName, new Map())
 
-    this.logger.debug(`ConsumerRouter add queue`, { queueName })
+    this.logger.debug(`ConsumerRouter add queue: ${queueName}`)
 
     return this
   }
@@ -160,10 +160,7 @@ export class ConsumerRouter {
 
     queue.set(spec.jobName, processor as ConsumerProcessor<unknown>)
 
-    this.logger.debug(`ConsumerRouter add processor`, {
-      queueName: spec.queueName,
-      jobName: spec.jobName,
-    })
+    this.logger.debug(`ConsumerRouter add processor: ${spec.queueName} => ${spec.jobName}`)
 
     return this
   }

@@ -138,19 +138,24 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create target`, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: { campaignId, targetId },
-        result,
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'create',
-        params: { campaignId, targetId },
+        params: {
+          campaignId,
+          targetId,
+        },
       })
     }
   }
@@ -168,7 +173,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'read',
-        params: { campaignId, targetId },
+        params: {
+          campaignId,
+          targetId,
+        },
       })
     }
   }
@@ -186,7 +194,10 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'readFull',
-        params: { campaignId, targetId },
+        params: {
+          campaignId,
+          targetId,
+        },
       })
     }
   }
@@ -229,7 +240,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'find',
-        params: { mirrorHost },
+        params: {
+          mirrorHost,
+        },
       })
     }
   }
@@ -257,7 +270,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'findFull',
-        params: { mirrorHost },
+        params: {
+          mirrorHost,
+        },
       })
     }
   }
@@ -297,19 +312,24 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database update target`, {
-        repository: this.repositoryName,
-        method: 'update',
-        params: { campaignId, targetId },
-        result,
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'update',
-        params: { campaignId, targetId },
+        params: {
+          campaignId,
+          targetId,
+        },
       })
     }
   }
@@ -323,19 +343,24 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database enable target`, {
-        repository: this.repositoryName,
-        method: 'enable',
-        params: { campaignId, targetId },
-        result,
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'enable',
-        params: { campaignId, targetId },
+        params: {
+          campaignId,
+          targetId,
+        },
       })
     }
   }
@@ -349,19 +374,24 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database disable target`, {
-        repository: this.repositoryName,
-        method: 'disable',
-        params: { campaignId, targetId },
-        result,
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'disable',
-        params: { campaignId, targetId },
+        params: {
+          campaignId,
+          targetId,
+        },
       })
     }
   }
@@ -389,19 +419,26 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         )
       )
 
-      const result = this.checkStatusReplies(statusReplies)
+      this.checkStatusReplies(statusReplies)
 
       this.logger.info(`Database append target labels`, {
-        repository: this.repositoryName,
-        method: 'appendLabels',
-        params: { campaignId, targetId, labels },
-        result,
+        database: {
+          target: {
+            campaignId,
+            targetId,
+            labels,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'appendLabels',
-        params: { campaignId, targetId, labels },
+        params: {
+          campaignId,
+          targetId,
+          labels,
+        },
       })
     }
   }
@@ -415,19 +452,24 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database remove target labels`, {
-        repository: this.repositoryName,
-        method: 'removeLabels',
-        params: { campaignId, targetId },
-        result,
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'removeLabels',
-        params: { campaignId, targetId },
+        params: {
+          campaignId,
+          targetId,
+        },
       })
     }
   }
@@ -441,19 +483,24 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete target`, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: { campaignId, targetId },
-        result,
+        database: {
+          target: {
+            campaignId,
+            targetId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'delete',
-        params: { campaignId, targetId },
+        params: {
+          campaignId,
+          targetId,
+        },
       })
     }
   }
@@ -479,7 +526,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'list',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }
@@ -505,7 +554,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'listFull',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }

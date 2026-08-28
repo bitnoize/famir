@@ -99,19 +99,24 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         Date.now()
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create campaign`, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: { campaignId, mirrorDomain },
-        result,
+        database: {
+          campaign: {
+            campaignId,
+            mirrorDomain,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'create',
-        params: { campaignId, mirrorDomain },
+        params: {
+          campaignId,
+          mirrorDomain,
+        },
       })
     }
   }
@@ -125,7 +130,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'read',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }
@@ -142,7 +149,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'readFull',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }
@@ -158,13 +167,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         CAMPAIGN_LOCK_TIMEOUT
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database lock campaign`, {
-        repository: this.repositoryName,
-        method: 'lock',
-        params: { campaignId },
-        result,
+        database: {
+          campaign: {
+            campaignId,
+          },
+        },
       })
 
       return lockSecret
@@ -172,7 +182,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'lock',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }
@@ -185,19 +197,22 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database unlock campaign`, {
-        repository: this.repositoryName,
-        method: 'unlock',
-        params: { campaignId },
-        result,
+        database: {
+          campaign: {
+            campaignId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'unlock',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }
@@ -221,19 +236,22 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database update campaign`, {
-        repository: this.repositoryName,
-        method: 'update',
-        params: { campaignId },
-        result,
+        database: {
+          campaign: {
+            campaignId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'update',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }
@@ -246,19 +264,22 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete campaign`, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: { campaignId },
-        result,
+        database: {
+          campaign: {
+            campaignId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'delete',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }

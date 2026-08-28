@@ -78,23 +78,28 @@ export abstract class BullBaseWorker implements BaseWorker {
     })
 
     this.worker.on('completed', (job: Job<unknown, unknown>) => {
-      this.logger.debug(`ConsumeWorker Bull event: completed`, {
-        queue: this.queueName,
-        job: this.dumpJob(job),
+      this.logger.debug(`ConsumerWorker Bull event: completed`, {
+        consumer: {
+          queue: this.queueName,
+          job: this.dumpJob(job),
+          status: 'completed',
+        },
       })
     })
 
     this.worker.on('failed', (job: Job<unknown, unknown> | undefined) => {
-      this.logger.debug(`ConsumeWorker Bull event: failed`, {
-        queue: this.queueName,
-        job: this.dumpJob(job),
+      this.logger.debug(`ConsumerWorker Bull event: failed`, {
+        consumer: {
+          queue: this.queueName,
+          job: this.dumpJob(job),
+          status: 'failed',
+        },
       })
     })
 
     this.worker.on('error', (error: unknown) => {
-      this.logger.debug(`ConsumeWorker Bull event: error`, {
+      this.logger.error(`ConsumerWorker Bull event: error`, {
         error: serializeError(error),
-        queue: this.queueName,
       })
     })
   }
@@ -103,7 +108,7 @@ export abstract class BullBaseWorker implements BaseWorker {
     try {
       await this.worker.run()
 
-      this.logger.info(`ConsumerWorker running`, { queue: this.queueName })
+      this.logger.info(`ConsumerWorker running: ${this.queueName}`)
     } catch (error) {
       throw BootstrapError.wrap(error, {
         queue: this.queueName,
@@ -117,7 +122,7 @@ export abstract class BullBaseWorker implements BaseWorker {
     try {
       await this.worker.close()
 
-      this.logger.debug(`ConsumerWorker closed`, { queue: this.queueName })
+      this.logger.debug(`ConsumerWorker closed: ${this.queueName}`)
     } catch (error) {
       throw BootstrapError.wrap(error, {
         queue: this.queueName,

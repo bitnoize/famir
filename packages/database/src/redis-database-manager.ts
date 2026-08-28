@@ -91,7 +91,7 @@ export class RedisDatabaseManager implements DatabaseManager {
 
       for (const [name, data] of redisFunctions) {
         try {
-          this.logger.debug(`Loading Redis functions`, { name })
+          this.logger.debug(`Loading Redis functions: ${name}`)
 
           await this.connection.FUNCTION_LOAD(data)
         } catch (error) {

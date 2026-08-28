@@ -124,10 +124,9 @@ export abstract class RedisBaseRepository {
    * This method validates that the reply has a status code of 'OK'.
    *
    * @param value - The status reply from a Redis Function.
-   * @returns The tuple contains code and message.
    * @throws {@link DatabaseError} If the reply is invalid or has a non-OK status code.
    */
-  protected checkStatusReply(value: unknown): [DatabaseStatusCode, string] {
+  protected checkStatusReply(value: unknown) {
     const [code, message] = this.parseStatusReply(value)
 
     if (code !== 'OK') {
@@ -138,8 +137,6 @@ export abstract class RedisBaseRepository {
         code,
       })
     }
-
-    return [code, message]
   }
 
   /**
@@ -148,10 +145,9 @@ export abstract class RedisBaseRepository {
    * This method validates that all the replies has a status code of 'OK'.
    *
    * @param values - The status replies from a Redis Functions.
-   * @returns The list of tuples contains code and message.
    * @throws {@link DatabaseError} If the replies are invalid or has a non-OK status code.
    */
-  protected checkStatusReplies(values: unknown[]): [DatabaseStatusCode, string][] {
+  protected checkStatusReplies(values: unknown[]) {
     if (values.length === 0) {
       throw DatabaseError.internalError(`Empty status reply`)
     }
@@ -169,8 +165,6 @@ export abstract class RedisBaseRepository {
         code,
       })
     }
-
-    return result
   }
 
   /**

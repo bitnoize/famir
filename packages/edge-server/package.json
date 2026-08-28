@@ -2,7 +2,7 @@
   "name": "@famir/edge-server",
   "type": "module",
   "version": "0.0.1",
-  "description": "Edge server management",
+  "description": "Edge server for the Famir ecosystem",
   "keywords": [
     "famir",
     "fake-mirrors",

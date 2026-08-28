@@ -110,7 +110,7 @@ export class ConsoleApp {
 
       await this.replServer.start()
 
-      this.logger.debug(`Application started`)
+      this.logger.info(`Application started`)
     } catch (error) {
       this.logger.error(`Application start failed`, {
         error: serializeError(error),
@@ -133,7 +133,7 @@ export class ConsoleApp {
 
       await this.databaseConnector.close()
 
-      this.logger.debug(`Application stopped`)
+      this.logger.info(`Application stopped`)
     } catch (error) {
       this.logger.error(`Application stop failed`, {
         error: serializeError(error),

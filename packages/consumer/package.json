@@ -2,7 +2,7 @@
   "name": "@famir/consumer",
   "type": "module",
   "version": "0.0.5",
-  "description": "Consumer connector and background workers",
+  "description": "Consumer service",
   "keywords": [
     "famir",
     "fake-mirrors",

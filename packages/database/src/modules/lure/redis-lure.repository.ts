@@ -89,19 +89,28 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create lure`, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: { campaignId, lureId, path, redirectorId },
-        result,
+        database: {
+          lure: {
+            campaignId,
+            lureId,
+            path,
+            redirectorId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'create',
-        params: { campaignId, lureId, path, redirectorId },
+        params: {
+          campaignId,
+          lureId,
+          path,
+          redirectorId,
+        },
       })
     }
   }
@@ -115,7 +124,10 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'read',
-        params: { campaignId, lureId },
+        params: {
+          campaignId,
+          lureId,
+        },
       })
     }
   }
@@ -137,7 +149,10 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'find',
-        params: { campaignId, path },
+        params: {
+          campaignId,
+          path,
+        },
       })
     }
   }
@@ -151,19 +166,24 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database enable lure`, {
-        repository: this.repositoryName,
-        method: 'enable',
-        params: { campaignId, lureId },
-        result,
+        database: {
+          lure: {
+            campaignId,
+            lureId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'enable',
-        params: { campaignId, lureId },
+        params: {
+          campaignId,
+          lureId,
+        },
       })
     }
   }
@@ -177,19 +197,24 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database disable lure`, {
-        repository: this.repositoryName,
-        method: 'disable',
-        params: { campaignId, lureId },
-        result,
+        database: {
+          lure: {
+            campaignId,
+            lureId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'disable',
-        params: { campaignId, lureId },
+        params: {
+          campaignId,
+          lureId,
+        },
       })
     }
   }
@@ -209,19 +234,26 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete lure`, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: { campaignId, lureId, redirectorId },
-        result,
+        database: {
+          lure: {
+            campaignId,
+            lureId,
+            redirectorId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'delete',
-        params: { campaignId, lureId, redirectorId },
+        params: {
+          campaignId,
+          lureId,
+          redirectorId,
+        },
       })
     }
   }
@@ -247,7 +279,9 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'list',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }

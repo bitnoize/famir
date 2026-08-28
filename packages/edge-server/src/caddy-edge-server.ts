@@ -103,6 +103,8 @@ export class CaddyEdgeServer implements EdgeServer {
           status: res.status,
         })
       }
+
+      this.logger.info(`EdgeServer config upserted`)
     } catch (error) {
       throw EdgeServerError.wrap(error, {
         method: 'upsertConfig',
@@ -132,9 +134,7 @@ export class CaddyEdgeServer implements EdgeServer {
         })
       }
 
-      const data = await res.json()
-
-      return data
+      return await res.json()
     } catch (error) {
       throw EdgeServerError.wrap(error, {
         method: 'readConfig',
@@ -162,6 +162,7 @@ export class CaddyEdgeServer implements EdgeServer {
           status: res.status,
         })
       }
+      this.logger.info(`EdgeServer config deleted`)
     } catch (error) {
       throw EdgeServerError.wrap(error, {
         method: 'deleteConfig',
@@ -191,11 +192,7 @@ export class CaddyEdgeServer implements EdgeServer {
         })
       }
 
-      const data = await res.json()
-
-      //this.validateData<CaddyEdgeServerApiUpstream[]>('edge-server-api-upstreams', data)
-
-      return data
+      return await res.json()
     } catch (error) {
       throw EdgeServerError.wrap(error, {
         method: 'readUpstreams',

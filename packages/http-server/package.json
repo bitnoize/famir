@@ -2,7 +2,7 @@
   "name": "@famir/http-server",
   "type": "module",
   "version": "0.0.5",
-  "description": "Robust HTTP server with middleware support",
+  "description": "HTTP server for the Famir ecosystem",
   "keywords": [
     "famir",
     "fake-mirrors",

@@ -2,7 +2,7 @@
   "name": "@famir/common",
   "type": "module",
   "version": "0.0.6",
-  "description": "Shared utilities for the entire ecosystem",
+  "description": "Common utilities for the Famir ecosystem",
   "keywords": [
     "famir",
     "fake-mirrors",

@@ -87,13 +87,15 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create session`, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: { campaignId, sessionId },
-        result,
+        database: {
+          session: {
+            campaignId,
+            sessionId,
+          },
+        },
       })
 
       return this.buildModelStrict(rawModel)
@@ -101,7 +103,10 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'create',
-        params: { campaignId, sessionId },
+        params: {
+          campaignId,
+          sessionId,
+        },
       })
     }
   }
@@ -119,7 +124,10 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'read',
-        params: { campaignId, sessionId },
+        params: {
+          campaignId,
+          sessionId,
+        },
       })
     }
   }
@@ -137,13 +145,15 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database auth session`, {
-        repository: this.repositoryName,
-        method: 'auth',
-        params: { campaignId, sessionId },
-        result,
+        database: {
+          session: {
+            campaignId,
+            sessionId,
+          },
+        },
       })
 
       return this.buildModelStrict(rawModel)
@@ -151,7 +161,10 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'auth',
-        params: { campaignId, sessionId },
+        params: {
+          campaignId,
+          sessionId,
+        },
       })
     }
   }
@@ -171,19 +184,26 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
         secret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database upgrade session`, {
-        repository: this.repositoryName,
-        method: 'upgrade',
-        params: { campaignId, lureId, sessionId },
-        result,
+        database: {
+          session: {
+            campaignId,
+            lureId,
+            sessionId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'upgrade',
-        params: { campaignId, lureId, sessionId },
+        params: {
+          campaignId,
+          lureId,
+          sessionId,
+        },
       })
     }
   }

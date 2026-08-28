@@ -60,7 +60,6 @@ export abstract class BullBaseQueue implements BaseQueue {
     this.queue.on('error', (error: unknown) => {
       this.logger.error(`ProducerQueue Bull event: error`, {
         error: serializeError(error),
-        queue: this.queueName,
       })
     })
   }
@@ -69,7 +68,7 @@ export abstract class BullBaseQueue implements BaseQueue {
     try {
       await this.queue.close()
 
-      this.logger.info(`ProducerQueue closed`, { queue: this.queueName })
+      this.logger.info(`ProducerQueue closed: ${this.queueName}`)
     } catch (error) {
       throw BootstrapError.wrap(error, {
         queue: this.queueName,

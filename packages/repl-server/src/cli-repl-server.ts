@@ -137,7 +137,7 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
 
         this.rs.displayPrompt()
 
-        this.logger.debug(`ReplServer started`)
+        this.logger.info(`ReplServer started`)
       } else {
         this.logger.debug(`ReplServer already started`)
       }

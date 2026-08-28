@@ -89,19 +89,24 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create redirector`, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: { campaignId, redirectorId },
-        result,
+        database: {
+          redirector: {
+            campaignId,
+            redirectorId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'create',
-        params: { campaignId, redirectorId },
+        params: {
+          campaignId,
+          redirectorId,
+        },
       })
     }
   }
@@ -119,7 +124,10 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'read',
-        params: { campaignId, redirectorId },
+        params: {
+          campaignId,
+          redirectorId,
+        },
       })
     }
   }
@@ -137,7 +145,10 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'readFull',
-        params: { campaignId, redirectorId },
+        params: {
+          campaignId,
+          redirectorId,
+        },
       })
     }
   }
@@ -157,19 +168,24 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database update redirector`, {
-        repository: this.repositoryName,
-        method: 'update',
-        params: { campaignId, redirectorId },
-        result,
+        database: {
+          redirector: {
+            campaignId,
+            redirectorId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'update',
-        params: { campaignId, redirectorId },
+        params: {
+          campaignId,
+          redirectorId,
+        },
       })
     }
   }
@@ -197,19 +213,26 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         )
       )
 
-      const result = this.checkStatusReplies(statusReplies)
+      this.checkStatusReplies(statusReplies)
 
       this.logger.info(`Database append redirector fields`, {
-        repository: this.repositoryName,
-        method: 'appendFields',
-        params: { campaignId, redirectorId, fields },
-        result,
+        database: {
+          redirector: {
+            campaignId,
+            redirectorId,
+            fields,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'appendFields',
-        params: { campaignId, redirectorId, fields },
+        params: {
+          campaignId,
+          redirectorId,
+          fields,
+        },
       })
     }
   }
@@ -223,19 +246,24 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database remove redirector fields`, {
-        repository: this.repositoryName,
-        method: 'removeFields',
-        params: { campaignId, redirectorId },
-        result,
+        database: {
+          redirector: {
+            campaignId,
+            redirectorId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'removeFields',
-        params: { campaignId, redirectorId },
+        params: {
+          campaignId,
+          redirectorId,
+        },
       })
     }
   }
@@ -249,19 +277,24 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
         lockSecret
       )
 
-      const result = this.checkStatusReply(statusReply)
+      this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete redirector`, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: { campaignId, redirectorId },
-        result,
+        database: {
+          redirector: {
+            campaignId,
+            redirectorId,
+          },
+        },
       })
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'delete',
-        params: { campaignId, redirectorId },
+        params: {
+          campaignId,
+          redirectorId,
+        },
       })
     }
   }
@@ -290,7 +323,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'list',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }
@@ -323,7 +358,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'listFull',
-        params: { campaignId },
+        params: {
+          campaignId,
+        },
       })
     }
   }
