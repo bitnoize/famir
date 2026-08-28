@@ -2,7 +2,7 @@
   "name": "@famir/templater",
   "type": "module",
   "version": "0.0.5",
-  "description": "Templater service for the Famir ecosystem",
+  "description": "Templater service",
   "keywords": [
     "famir",
     "fake-mirrors",

@@ -4,22 +4,27 @@
 
 An extensible ecosystem for creating website mirrors using reverse proxying.
 
+For web traffic security researchers and for overcoming the fragmentation of the once
+unified internet. 😎
+
 ## Applications
 
 - **reverse-app** - Multi-tenant reverse proxy with dynamic configuration.
 - **console-app** - Command interface for managing mirrors.
-- **actions-app** - Workers for background queue processing.
+- **actions-app** - Workers for background job processing.
 
 ## Key features
 
 - Clean, modular architecture.
-- Tracking users through session cookies.
-- Cloaking mirrors via personalized landing pages with bot protection.
+- Extensive capabilities for intercepting and modifying proxied messages.
+- Tracking users through session cookies with bot protection.
+- Cloaking mirrors via customized well known resources and personalized landing pages.
 - Bypass any of TLS fingerprint checks from site-donor.
 - Outgoing traffic to site-donors via pool of HTTP or SOCKS proxies.
+- Background post-processing of camptured data.
 - Integration with Caddy admin API for simple deployment.
+- Fast, capable of handling dozens of campaigns on a single low-cost virtual server.
 - Resistant to errors, follows HTTP standards.
-- Minimum third-party dependencies.
 
 ## Technology stack
 
@@ -30,7 +35,7 @@ An extensible ecosystem for creating website mirrors using reverse proxying.
 
 ## Disclaimer
 
-> This tool is intended **only for educational purposes** and legitimate security research.
+> This tool is intended only for educational purposes and legitimate security research.
 > The author assumes no responsibility for misuse.
 
 ## Links

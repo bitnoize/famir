@@ -26,11 +26,11 @@ export interface RedirectorRepository {
    * @param redirectorId - The new redirector ID to create.
    * @param page - The page template.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If a redirector with the same ID already exists.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If a redirector with the same ID already exists.
+   * @throws DatabaseError If the data validation fails.
    */
   create(campaignId: string, redirectorId: string, page: string, lockSecret: string): Promise<void>
 
@@ -40,7 +40,7 @@ export interface RedirectorRepository {
    * @param campaignId - The ID of the campaign containing the redirector.
    * @param redirectorId - The redirector ID to read.
    * @returns The redirector model, or `null` if the redirector is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string, redirectorId: string): Promise<RedirectorModel | null>
 
@@ -50,7 +50,7 @@ export interface RedirectorRepository {
    * @param campaignId - The ID of the campaign containing the redirector.
    * @param redirectorId - The redirector ID to read.
    * @returns The full redirector model, or `null` if the redirector is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   readFull(campaignId: string, redirectorId: string): Promise<FullRedirectorModel | null>
 
@@ -63,11 +63,11 @@ export interface RedirectorRepository {
    * @param redirectorId - The redirector ID to update.
    * @param page - The page template.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the redirector does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the redirector does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   update(
     campaignId: string,
@@ -87,11 +87,11 @@ export interface RedirectorRepository {
    * @param redirectorId - The redirector ID to append field to.
    * @param fields - The field names to append to the fields list.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the redirector does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the redirector does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   appendFields(
     campaignId: string,
@@ -106,11 +106,11 @@ export interface RedirectorRepository {
    * @param campaignId - The ID of the campaign containing the redirector.
    * @param redirectorId - The redirector ID to remove fields from.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the redirector does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the redirector does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   removeFields(campaignId: string, redirectorId: string, lockSecret: string): Promise<void>
 
@@ -122,12 +122,12 @@ export interface RedirectorRepository {
    * @param campaignId - The ID of the campaign containing the redirector.
    * @param redirectorId - The redirector ID to delete.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the redirector does not exist.
-   * @throws {@link DatabaseError} If the redirector still has lures.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the redirector does not exist.
+   * @throws DatabaseError If the redirector still has lures.
+   * @throws DatabaseError If the data validation fails.
    */
   delete(campaignId: string, redirectorId: string, lockSecret: string): Promise<void>
 
@@ -138,7 +138,7 @@ export interface RedirectorRepository {
    *
    * @param campaignId - The ID of the campaign to list redirectors for.
    * @returns The array of redirector models, or `null` if the campaign does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   list(campaignId: string): Promise<RedirectorModel[] | null>
 
@@ -149,7 +149,7 @@ export interface RedirectorRepository {
    *
    * @param campaignId - The ID of the campaign to list redirectors for.
    * @returns The array of full redirector models, or `null` if the campaign does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   listFull(campaignId: string): Promise<FullRedirectorModel[] | null>
 }

@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer, serializeError } from '@famir/common'
+import { DIContainer, LifecycleError, serializeError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -187,7 +187,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     } catch (error) {
       this.#isConnected = false
 
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'database-connector',
         method: 'close',
       })
@@ -211,7 +211,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     } catch (error) {
       this.#isConnected = false
 
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'database-connector',
         method: 'connect',
       })
@@ -246,7 +246,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
         settled = true
 
         cleanup()
-        reject(BootstrapError.create(`Redis connect failed`, null, error))
+        reject(LifecycleError.create(`Redis connect failed`, null, error))
       }
 
       const onEnd = () => {
@@ -254,7 +254,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
         settled = true
 
         cleanup()
-        reject(BootstrapError.create(`Redis connection ended before ready`))
+        reject(LifecycleError.create(`Redis connection ended before ready`))
       }
 
       this.connection.once('ready', onReady)
@@ -266,7 +266,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
         settled = true
 
         cleanup()
-        reject(BootstrapError.create(`Redis connect critical error`, null, error))
+        reject(LifecycleError.create(`Redis connect critical error`, null, error))
       })
     })
   }

@@ -28,10 +28,10 @@ export interface CampaignRepository {
    * @param sessionExpire - The TTL for an authorized session in milliseconds.
    * @param newSessionExpire - The TTL for a not-yet-authorized session in milliseconds.
    * @param messageExpire - The TTL for a message in milliseconds.
-   * @throws {@link DatabaseError} If a campaign with the same ID already exists.
-   * @throws {@link DatabaseError} If the mirror domain is already used by another campaign.
-   * @throws {@link DatabaseError} If the session cookie name is already used by another campaign.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If a campaign with the same ID already exists.
+   * @throws DatabaseError If the mirror domain is already used by another campaign.
+   * @throws DatabaseError If the session cookie name is already used by another campaign.
+   * @throws DatabaseError If the data validation fails.
    */
   create(
     campaignId: string,
@@ -50,7 +50,7 @@ export interface CampaignRepository {
    *
    * @param campaignId - The campaign ID to read.
    * @returns The campaign model, or `null` if the campaign is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string): Promise<CampaignModel | null>
 
@@ -59,7 +59,7 @@ export interface CampaignRepository {
    *
    * @param campaignId - The campaign ID to read.
    * @returns The full campaign model, or `null` if the campaign is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   readFull(campaignId: string): Promise<FullCampaignModel | null>
 
@@ -70,9 +70,9 @@ export interface CampaignRepository {
    *
    * @param campaignId - The campaign ID to lock.
    * @returns The unique lock secret that must be used for subsequent operations.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is already locked.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is already locked.
+   * @throws DatabaseError If the data validation fails.
    */
   lock(campaignId: string): Promise<string>
 
@@ -83,9 +83,9 @@ export interface CampaignRepository {
    *
    * @param campaignId - The campaign ID to unlock.
    * @param lockSecret - The lock secret returned by the {@link lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the lock secret does not match.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the lock secret does not match.
+   * @throws DatabaseError If the data validation fails.
    */
   unlock(campaignId: string, lockSecret: string): Promise<void>
 
@@ -98,10 +98,10 @@ export interface CampaignRepository {
    * @param newSessionExpire - The new TTL for a not-yet-authorized session in milliseconds.
    * @param messageExpire - The new TTL for a message in milliseconds.
    * @param lockSecret - The lock secret obtained from {@link lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the lock secret does not match.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the lock secret does not match.
+   * @throws DatabaseError If the data validation fails.
    */
   update(
     campaignId: string,
@@ -117,11 +117,11 @@ export interface CampaignRepository {
    *
    * @param campaignId - The campaign ID to delete.
    * @param lockSecret - The lock secret obtained from {@link lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the lock secret does not match.
-   * @throws {@link DatabaseError} If the campaign still has associated entities.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the lock secret does not match.
+   * @throws DatabaseError If the campaign still has associated entities.
+   * @throws DatabaseError If the data validation fails.
    */
   delete(campaignId: string, lockSecret: string): Promise<void>
 
@@ -131,7 +131,7 @@ export interface CampaignRepository {
    * The campaigns are ordered by creation time (oldest first).
    *
    * @returns The array of campaign models.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   list(): Promise<CampaignModel[]>
 
@@ -141,7 +141,7 @@ export interface CampaignRepository {
    * The campaigns are ordered by creation time (oldest first).
    *
    * @returns The array of full campaign models.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   listFull(): Promise<FullCampaignModel[]>
 }

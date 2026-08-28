@@ -215,7 +215,7 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    *
    * @param console - The underlying Console instance.
    * @param args - The parsed command args.
-   * @throws {@link ReplServerError} If validation fails.
+   * @throws ReplServerError If validation fails.
    */
   async execute(console: Console, args: ReplServerCommandArgs): Promise<void> {
     try {
@@ -233,7 +233,7 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    * Validates args against a registered JSON Schema.
    *
    * @param value - The args to validate.
-   * @throws {@link ReplServerError} If validation fails.
+   * @throws ReplServerError If validation fails.
    */
   protected validateArgs(value: unknown): asserts value is T {
     try {

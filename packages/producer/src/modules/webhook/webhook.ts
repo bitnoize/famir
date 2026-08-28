@@ -26,7 +26,7 @@ export interface WebhookQueue extends BaseQueue {
    *
    * @param name - The name of the job to be added.
    * @param data - The arbitrary data to append to the job.
-   * @throws {@link ProducerError} If adding job fails.
+   * @throws ProducerError If adding job fails.
    */
   addJob(name: string, data: WebhookJobData): Promise<void>
 }

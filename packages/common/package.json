@@ -2,11 +2,12 @@
   "name": "@famir/common",
   "type": "module",
   "version": "0.0.6",
-  "description": "Common utilities for the Famir ecosystem",
+  "description": "Common utilities",
   "keywords": [
     "famir",
     "fake-mirrors",
-    "reverse-proxy"
+    "reverse-proxy",
+    "security-research"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
   "license": "Apache-2.0",

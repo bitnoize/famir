@@ -2,7 +2,7 @@
   "name": "@famir/repl-server",
   "type": "module",
   "version": "0.0.5",
-  "description": "REPL server for the Famir ecosystem",
+  "description": "REPL server",
   "keywords": [
     "famir",
     "fake-mirrors",

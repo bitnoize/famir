@@ -45,10 +45,6 @@ export class AnalyzeService {
 
   /**
    * Reads a full message from the database.
-   *
-   * @param data - The job data.
-   * @returns The full message model.
-   * @throws {@link ConsumerError} If the message is not found.
    */
   async readMessage(data: { campaignId: string; messageId: string }): Promise<FullMessageModel> {
     const message = await this.messageRepository.readFull(data.campaignId, data.messageId)
@@ -62,9 +58,6 @@ export class AnalyzeService {
 
   /**
    * Saves a processed message to storage.
-   *
-   * @param message - The full message model to save.
-   * @throws {@link StorageError} If saving to storage fails.
    */
   async saveMessage(message: FullMessageModel): Promise<void> {
     try {

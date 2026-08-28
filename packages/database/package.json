@@ -2,7 +2,7 @@
   "name": "@famir/database",
   "type": "module",
   "version": "0.0.6",
-  "description": "Database service for the Famir ecosystem",
+  "description": "Database service",
   "keywords": [
     "famir",
     "fake-mirrors",

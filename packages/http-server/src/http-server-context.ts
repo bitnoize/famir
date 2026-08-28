@@ -78,7 +78,7 @@ export interface HttpServerContext {
    * Loads the request body into memory.
    *
    * @param bodySizeLimit - The maximum body size in bytes.
-   * @throws {@link HttpServerError} If the body exceeds the size limit.
+   * @throws HttpServerError If the body exceeds the size limit.
    */
   loadRequest(bodySizeLimit: number): Promise<void>
 
@@ -264,7 +264,7 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
    * @param requestStream - The readable stream to read from.
    * @param bodySizeLimit - The maximum body size in bytes.
    * @returns A promise that resolves to the loaded body buffer.
-   * @throws {@link HttpServerError} If the body exceeds the size limit or an error occurs.
+   * @throws HttpServerError If the body exceeds the size limit or an error occurs.
    */
   protected loadRequestBody(requestStream: Readable, bodySizeLimit: number): Promise<HttpBody> {
     return new Promise<HttpBody>((resolve, reject) => {
@@ -316,7 +316,7 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
    * @param responseStream - The writable stream to write to.
    * @param responseBody - The body buffer to send.
    * @returns A promise that resolves when the body has been sent.
-   * @throws {@link HttpServerError} If sending fails.
+   * @throws HttpServerError If sending fails.
    */
   protected sendResponseBody(responseStream: Writable, responseBody: HttpBody): Promise<void> {
     return new Promise<void>((resolve, reject) => {

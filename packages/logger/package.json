@@ -2,7 +2,7 @@
   "name": "@famir/logger",
   "type": "module",
   "version": "0.0.5",
-  "description": "Logger service for the Famir ecosystem",
+  "description": "Logger service",
   "keywords": [
     "famir",
     "fake-mirrors",

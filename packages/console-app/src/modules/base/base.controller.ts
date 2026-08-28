@@ -41,7 +41,7 @@ export abstract class BaseController {
    *
    * @param str - The JSON string to decode.
    * @returns The decoded object.
-   * @throws {@link ReplServerError} If decoding fails.
+   * @throws ReplServerError If decoding fails.
    */
   protected decodeJson(str: string): unknown {
     try {
@@ -56,7 +56,7 @@ export abstract class BaseController {
    *
    * @param str - The YAML string to parse.
    * @returns The parsed object.
-   * @throws {@link ReplServerError} If decoding fails.
+   * @throws ReplServerError If decoding fails.
    */
   protected parseYaml(str: string): unknown {
     try {
@@ -72,7 +72,7 @@ export abstract class BaseController {
    * @typeParam T - The expected type of the data after validation.
    * @param schemaName - The name of the schema to validate against.
    * @param data - The data to validate.
-   * @throws {@link ReplServerError} If validation fails.
+   * @throws ReplServerError If validation fails.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   protected validateData<T>(schemaName: string, value: unknown): asserts value is T {

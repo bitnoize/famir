@@ -3,5 +3,6 @@
   "includeVersion": false,
   "excludePrivate": true,
   "excludeProtected": true,
-  "excludeInternal": true
+  "excludeInternal": true,
+  "disableSources": true
 }

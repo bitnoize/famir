@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer, serializeError } from '@famir/common'
+import { DIContainer, LifecycleError, serializeError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -195,7 +195,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
     } catch (error) {
       this.#isRunning = false
 
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'repl-server',
         method: 'stop',
       })
@@ -274,7 +274,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
     } catch (error) {
       this.#isRunning = false
 
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'repl-server',
         method: 'start',
       })
@@ -308,7 +308,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
         settled = true
 
         cleanup()
-        reject(BootstrapError.create(`Server listen failed`, null, error))
+        reject(LifecycleError.create(`Server listen failed`, null, error))
       }
 
       this.server.once('listening', onListening)
@@ -318,7 +318,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
         this.server.listen(this.options.port, this.options.address)
       } catch (error) {
         cleanup()
-        reject(BootstrapError.create(`Server listen critical error`, null, error))
+        reject(LifecycleError.create(`Server listen critical error`, null, error))
       }
     })
   }
@@ -348,7 +348,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
         settled = true
 
         cleanup()
-        reject(BootstrapError.create(`Server close failed`, null, error))
+        reject(LifecycleError.create(`Server close failed`, null, error))
       }
 
       this.server.once('close', onClose)
@@ -368,7 +368,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
         this.clients.clear()
       } catch (error) {
         cleanup()
-        reject(BootstrapError.create(`Server close critical error`, null, error))
+        reject(LifecycleError.create(`Server close critical error`, null, error))
       }
     })
   }

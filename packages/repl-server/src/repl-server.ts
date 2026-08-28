@@ -15,14 +15,14 @@ export interface ReplServer {
   /**
    * Starts the REPL server and begins accepting connections.
    *
-   * @throws {@link BootstrapError} If the server cannot be started.
+   * @throws LifecycleError If the server cannot be started.
    */
   start(): Promise<void>
 
   /**
    * Stops the REPL server and closes all active connections.
    *
-   * @throws {@link BootstrapError} If the server cannot be stopped.
+   * @throws LifecycleError If the server cannot be stopped.
    */
   stop(): Promise<void>
 }

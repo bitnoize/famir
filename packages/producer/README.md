@@ -13,7 +13,7 @@ Background job queues service.
 
 ## Modules
 
-The package is divided into modules, which consist of **contract**,  **queue** and **job**.
+The package is divided into modules, which consist of **contract**, **queue** and **job**.
 
 ### Analyze
 

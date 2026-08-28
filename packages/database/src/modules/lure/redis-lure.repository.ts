@@ -291,7 +291,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
    *
    * @param rawModel - The raw data from Redis.
    * @returns The lure model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): LureModel | null {
     if (rawModel === null) {
@@ -316,7 +316,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of lure models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): LureModel[] {
     this.validateArrayReply(rawCollection)

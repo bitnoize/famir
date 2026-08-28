@@ -1,4 +1,4 @@
-import { BootstrapError, serializeError } from '@famir/common'
+import { LifecycleError, serializeError } from '@famir/common'
 import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
@@ -110,7 +110,7 @@ export abstract class BullBaseWorker implements BaseWorker {
 
       this.logger.info(`ConsumerWorker running: ${this.queueName}`)
     } catch (error) {
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         queue: this.queueName,
         service: 'consumer-worker',
         method: 'run',
@@ -124,7 +124,7 @@ export abstract class BullBaseWorker implements BaseWorker {
 
       this.logger.debug(`ConsumerWorker closed: ${this.queueName}`)
     } catch (error) {
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         queue: this.queueName,
         service: 'consumer-worker',
         method: 'close',
@@ -139,8 +139,8 @@ export abstract class BullBaseWorker implements BaseWorker {
    * appropriate processor from the router and executes it.
    *
    * @param job - The job from the queue.
-   * @throws {@link ConsumerError} If the processor is not found.
-   * @throws {@link ConsumerError} If processing fails.
+   * @throws ConsumerError If the processor is not found.
+   * @throws ConsumerError If processing fails.
    */
   protected processor: Processor<unknown, unknown> = async (job) => {
     try {

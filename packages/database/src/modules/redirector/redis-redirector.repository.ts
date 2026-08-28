@@ -370,7 +370,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
    *
    * @param rawModel - The raw data from Redis.
    * @returns The redirector model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): RedirectorModel | null {
     if (rawModel === null) {
@@ -392,7 +392,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
    *
    * @param rawModel - The raw data from Redis.
    * @returns The full redirector model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildFullModel(rawModel: unknown): FullRedirectorModel | null {
     if (rawModel === null) {
@@ -416,7 +416,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of redirector models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): RedirectorModel[] {
     this.validateArrayReply(rawCollection)
@@ -431,7 +431,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of full redirector models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildFullCollection(rawCollection: unknown): FullRedirectorModel[] {
     this.validateArrayReply(rawCollection)

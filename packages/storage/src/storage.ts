@@ -15,10 +15,9 @@ export interface Storage {
    * Checks that the configured bucket exists.
    *
    * This method is typically called during application startup to verify
-   * that the storage bucket is accessible. If the bucket does not exist,
-   * a bootstrap error is thrown.
+   * that the storage bucket is accessible.
    *
-   * @throws {@link BootstrapError} If the bucket does not exist or is inaccessible.
+   * @throws LifecycleError If the bucket does not exist or is inaccessible.
    */
   checkBucketExists(): Promise<void>
 
@@ -27,7 +26,7 @@ export interface Storage {
    *
    * @param objectName - The path of the object to retrieve.
    * @returns The object content as a Buffer.
-   * @throws {@link StorageError} If the object cannot be retrieved.
+   * @throws StorageError If the object cannot be retrieved.
    */
   getObject(objectName: string): Promise<Buffer>
 
@@ -37,7 +36,7 @@ export interface Storage {
    * @param objectName - The path to assign to the object.
    * @param data - The object content as a Buffer.
    * @param headers - Custom headers to attach to the object.
-   * @throws {@link StorageError} If the object cannot be stored.
+   * @throws StorageError If the object cannot be stored.
    */
   putObject(objectName: string, data: Buffer, headers: Record<string, string>): Promise<void>
 
@@ -45,7 +44,7 @@ export interface Storage {
    * Deletes an object from the storage.
    *
    * @param objectName - The path of the object to delete.
-   * @throws {@link StorageError} If the object cannot be deleted.
+   * @throws StorageError If the object cannot be deleted.
    */
   deleteObject(objectName: string): Promise<void>
 }

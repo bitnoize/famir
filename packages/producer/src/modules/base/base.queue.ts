@@ -10,7 +10,7 @@ export interface BaseQueue {
    *
    * This method should be called during application shutdown.
    *
-   * @throws {@link BootstrapError} If the queue cannot be closed properly.
+   * @throws LifecycleError If the queue cannot be closed properly.
    */
   close(): Promise<void>
 
@@ -18,7 +18,7 @@ export interface BaseQueue {
    * Retrieves the total number of jobs in the queue.
    *
    * @returns The total job count.
-   * @throws {@link ProducerError} If the count cannot be retrieved.
+   * @throws ProducerError If the count cannot be retrieved.
    */
   getJobCount(): Promise<number>
 
@@ -26,7 +26,7 @@ export interface BaseQueue {
    * Retrieves the workers for the queue.
    *
    * @returns The queue workers list.
-   * @throws {@link ProducerError} If the workers cannot be retrieved.
+   * @throws ProducerError If the workers cannot be retrieved.
    */
   getWorkers(): Promise<object[]>
 }

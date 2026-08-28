@@ -566,7 +566,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
    *
    * @param rawModel - The raw data from Redis.
    * @returns The target model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): TargetModel | null {
     if (rawModel === null) {
@@ -598,7 +598,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
    *
    * @param rawModel - The raw data from Redis.
    * @returns The full target model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildFullModel(rawModel: unknown): FullTargetModel | null {
     if (rawModel === null) {
@@ -642,7 +642,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of target models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): TargetModel[] {
     this.validateArrayReply(rawCollection)
@@ -655,7 +655,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of full target models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildFullCollection(rawCollection: unknown): FullTargetModel[] {
     this.validateArrayReply(rawCollection)

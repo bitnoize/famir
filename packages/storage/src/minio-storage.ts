@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer } from '@famir/common'
+import { DIContainer, LifecycleError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -119,12 +119,12 @@ export class MinioStorage implements Storage {
       const exists = await this.minio.bucketExists(this.options.bucketName)
 
       if (!exists) {
-        throw BootstrapError.create(`Bucket does not exist`, {
+        throw LifecycleError.create(`Bucket does not exist`, {
           bucket: this.options.bucketName,
         })
       }
     } catch (error) {
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'storage',
       })
     }

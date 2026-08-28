@@ -2,7 +2,7 @@
   "name": "@famir/http-client",
   "type": "module",
   "version": "0.0.7",
-  "description": "HTTP client for the Famir ecosystem",
+  "description": "HTTP client",
   "keywords": [
     "famir",
     "fake-mirrors",

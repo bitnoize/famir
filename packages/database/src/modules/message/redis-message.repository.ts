@@ -256,7 +256,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param rawModel - The raw data from Redis.
    * @returns The message model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): MessageModel | null {
     if (rawModel === null) {
@@ -287,7 +287,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param rawModel - The raw data from Redis.
    * @returns The full message model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildFullModel(rawModel: unknown): FullMessageModel | null {
     if (rawModel === null) {
@@ -325,7 +325,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param value - The JSON string to decode.
    * @returns The HTTP headers object.
-   * @throws {@link DatabaseError} If decoding or validation fails.
+   * @throws DatabaseError If decoding or validation fails.
    */
   protected parseHeaders(value: string): HttpHeaders {
     const data = this.decodeJson(value)
@@ -340,7 +340,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param value - The JSON string to decode.
    * @returns The connection details object.
-   * @throws {@link DatabaseError} If decoding or validation fails.
+   * @throws DatabaseError If decoding or validation fails.
    */
   protected parseConnection(value: string): HttpConnection {
     const data = this.decodeJson(value)
@@ -355,7 +355,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param value - The JSON string to decode.
    * @returns The payload data object.
-   * @throws {@link DatabaseError} If decoding or validation fails.
+   * @throws DatabaseError If decoding or validation fails.
    */
   protected parsePayload(value: string): HttpPayload {
     const data = this.decodeJson(value)
@@ -370,7 +370,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
    *
    * @param value - The JSON string to decode.
    * @returns The array of error objects.
-   * @throws {@link DatabaseError} If decoding or validation fails.
+   * @throws DatabaseError If decoding or validation fails.
    */
   protected parseErrors(value: string): HttpError[] {
     const data = this.decodeJson(value)

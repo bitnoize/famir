@@ -1,4 +1,4 @@
-import { BootstrapError, serializeError } from '@famir/common'
+import { LifecycleError, serializeError } from '@famir/common'
 import { Config } from '@famir/config'
 import { Logger } from '@famir/logger'
 import { Validator } from '@famir/validator'
@@ -70,7 +70,7 @@ export abstract class BullBaseQueue implements BaseQueue {
 
       this.logger.info(`ProducerQueue closed: ${this.queueName}`)
     } catch (error) {
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         queue: this.queueName,
         service: 'producer-queue',
         method: 'close',

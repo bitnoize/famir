@@ -2,7 +2,7 @@
   "name": "@famir/config",
   "type": "module",
   "version": "0.0.5",
-  "description": "Config service for the Famir ecosystem",
+  "description": "Config service",
   "keywords": [
     "famir",
     "fake-mirrors",

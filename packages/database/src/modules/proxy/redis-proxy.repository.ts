@@ -258,7 +258,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
    *
    * @param rawModel - The raw data from Redis.
    * @returns The proxy model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): ProxyModel | null {
     if (rawModel === null) {
@@ -282,7 +282,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of proxy models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): ProxyModel[] {
     this.validateArrayReply(rawCollection)

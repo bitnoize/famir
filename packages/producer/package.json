@@ -2,7 +2,7 @@
   "name": "@famir/producer",
   "type": "module",
   "version": "0.0.5",
-  "description": "Producer service for the Famir ecosystem",
+  "description": "Producer service",
   "keywords": [
     "famir",
     "fake-mirrors",

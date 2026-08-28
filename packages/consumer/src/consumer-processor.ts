@@ -54,7 +54,7 @@ export class ConsumerProcessor<T> {
    * Validates data against a registered JSON Schema.
    *
    * @param value - The data to validate.
-   * @throws {@link ConsumerError} If validation fails.
+   * @throws ConsumerError If validation fails.
    */
   protected validateData(value: unknown): asserts value is T {
     try {

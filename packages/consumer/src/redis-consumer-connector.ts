@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer, serializeError } from '@famir/common'
+import { DIContainer, LifecycleError, serializeError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -128,7 +128,7 @@ export class RedisConsumerConnector implements ConsumerConnector {
 
       this.logger.info(`ConsumerConnector established connection`)
     } catch (error) {
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'consumer-connector',
         method: 'connect',
       })
@@ -141,7 +141,7 @@ export class RedisConsumerConnector implements ConsumerConnector {
 
       this.logger.info(`ConsumerConnector closed connection`)
     } catch (error) {
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'consumer-connector',
         method: 'close',
       })

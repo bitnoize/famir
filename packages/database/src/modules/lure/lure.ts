@@ -27,13 +27,13 @@ export interface LureRepository {
    * @param path - The URL path for the lure.
    * @param redirectorId - The ID of the redirector that handles this lure.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If a lure with the same ID already exists.
-   * @throws {@link DatabaseError} If the lure URL path is already used by another campaign.
-   * @throws {@link DatabaseError} If the redirector does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If a lure with the same ID already exists.
+   * @throws DatabaseError If the lure URL path is already used by another campaign.
+   * @throws DatabaseError If the redirector does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   create(
     campaignId: string,
@@ -49,7 +49,7 @@ export interface LureRepository {
    * @param campaignId - The ID of the campaign containing the lure.
    * @param lureId - The lure ID to read.
    * @returns The lure model, or `null` if the lure is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string, lureId: string): Promise<LureModel | null>
 
@@ -63,7 +63,7 @@ export interface LureRepository {
    * @param campaignId - The ID of the campaign to search in.
    * @param path - The URL path to look up.
    * @returns The lure model, or `null` if no lure matches the URL path.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   find(campaignId: string, path: string): Promise<LureModel | null>
 
@@ -76,11 +76,11 @@ export interface LureRepository {
    * @param campaignId - The ID of the campaign containing the lure.
    * @param lureId - The lure ID to enable.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the lure does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the lure does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   enable(campaignId: string, lureId: string, lockSecret: string): Promise<void>
 
@@ -92,11 +92,11 @@ export interface LureRepository {
    * @param campaignId - The ID of the campaign containing the lure.
    * @param lureId - The lure ID to disable.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the lure does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the lure does not exist.
+   * @throws DatabaseError If the data validation fails.
    */
   disable(campaignId: string, lureId: string, lockSecret: string): Promise<void>
 
@@ -109,14 +109,14 @@ export interface LureRepository {
    * @param lureId - The lure ID to delete.
    * @param redirectorId - The ID of the redirector that handles this lure.
    * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the campaign is not locked.
-   * @throws {@link DatabaseError} If the campaign lock secret does not match.
-   * @throws {@link DatabaseError} If the lure does not exist.
-   * @throws {@link DatabaseError} If the redirector does not exist.
-   * @throws {@link DatabaseError} If the lure is still enabled.
-   * @throws {@link DatabaseError} If the lure redirector ID does not match the provided one.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the campaign is not locked.
+   * @throws DatabaseError If the campaign lock secret does not match.
+   * @throws DatabaseError If the lure does not exist.
+   * @throws DatabaseError If the redirector does not exist.
+   * @throws DatabaseError If the lure is still enabled.
+   * @throws DatabaseError If the lure redirector ID does not match the provided one.
+   * @throws DatabaseError If the data validation fails.
    */
   delete(
     campaignId: string,
@@ -132,7 +132,7 @@ export interface LureRepository {
    *
    * @param campaignId - The ID of the campaign to list lures for.
    * @returns The array of lure models, or `null` if the campaign does not exist.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   list(campaignId: string): Promise<LureModel[] | null>
 }

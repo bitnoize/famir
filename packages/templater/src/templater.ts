@@ -26,7 +26,7 @@ export interface Templater {
    * @param template - The template string to render.
    * @param data - Key-value pairs for variable substitution.
    * @returns The rendered string.
-   * @throws {@link TemplaterError} If template rendering fails.
+   * @throws TemplaterError If template rendering fails.
    */
   render(template: string, data: TemplaterData): string
 }

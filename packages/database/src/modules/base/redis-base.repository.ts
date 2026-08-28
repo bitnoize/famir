@@ -63,7 +63,7 @@ export abstract class RedisBaseRepository {
    *
    * @param obj - The object to encode.
    * @returns The JSON string representation.
-   * @throws {@link DatabaseError} If encoding fails.
+   * @throws DatabaseError If encoding fails.
    */
   protected encodeJson(obj: object): string {
     try {
@@ -78,7 +78,7 @@ export abstract class RedisBaseRepository {
    *
    * @param str - The JSON string to decode.
    * @returns The decoded object.
-   * @throws {@link DatabaseError} If decoding fails.
+   * @throws DatabaseError If decoding fails.
    */
   protected decodeJson(str: string): unknown {
     try {
@@ -93,7 +93,7 @@ export abstract class RedisBaseRepository {
    *
    * @param buf - The Buffer to encode.
    * @returns The Base64 string representation.
-   * @throws {@link DatabaseError} If encoding fails.
+   * @throws DatabaseError If encoding fails.
    */
   protected encodeBase64(buf: Buffer): string {
     try {
@@ -108,7 +108,7 @@ export abstract class RedisBaseRepository {
    *
    * @param str - The Base64 string to decode.
    * @returns The decoded Buffer.
-   * @throws {@link DatabaseError} If decoding fails.
+   * @throws DatabaseError If decoding fails.
    */
   protected decodeBase64(str: string): Buffer {
     try {
@@ -124,7 +124,7 @@ export abstract class RedisBaseRepository {
    * This method validates that the reply has a status code of 'OK'.
    *
    * @param value - The status reply from a Redis Function.
-   * @throws {@link DatabaseError} If the reply is invalid or has a non-OK status code.
+   * @throws DatabaseError If the reply is invalid or has a non-OK status code.
    */
   protected checkStatusReply(value: unknown) {
     const [code, message] = this.parseStatusReply(value)
@@ -145,7 +145,7 @@ export abstract class RedisBaseRepository {
    * This method validates that all the replies has a status code of 'OK'.
    *
    * @param values - The status replies from a Redis Functions.
-   * @throws {@link DatabaseError} If the replies are invalid or has a non-OK status code.
+   * @throws DatabaseError If the replies are invalid or has a non-OK status code.
    */
   protected checkStatusReplies(values: unknown[]) {
     if (values.length === 0) {
@@ -171,7 +171,7 @@ export abstract class RedisBaseRepository {
    * Asserts that a reply from a Redis Function is a non-empty string.
    *
    * @param value - The reply from a Redis Function.
-   * @throws {@link DatabaseError} If validation fails.
+   * @throws DatabaseError If validation fails.
    */
   protected validateStringReply(value: unknown): asserts value is string {
     this.validateReply<string>('database-string-reply', value)
@@ -181,7 +181,7 @@ export abstract class RedisBaseRepository {
    * Asserts that a reply from a Redis Function is an array of any type.
    *
    * @param value - The reply from a Redis Function.
-   * @throws {@link DatabaseError} If validation fails.
+   * @throws DatabaseError If validation fails.
    */
   protected validateArrayReply(value: unknown): asserts value is unknown[] {
     this.validateReply<unknown[]>('database-array-reply', value)
@@ -191,7 +191,7 @@ export abstract class RedisBaseRepository {
    * Asserts that a reply from a Redis Function is an array of non-empty strings.
    *
    * @param value - The reply from a Redis Function.
-   * @throws {@link DatabaseError} If validation fails.
+   * @throws DatabaseError If validation fails.
    */
   protected validateArrayStringsReply(value: unknown): asserts value is string[] {
     this.validateReply<string[]>('database-array-strings-reply', value)
@@ -203,7 +203,7 @@ export abstract class RedisBaseRepository {
    * @typeParam T - The expected type of the data after validation.
    * @param schemaName - The name of the schema to validate against.
    * @param value - The reply from a Redis Function.
-   * @throws {@link DatabaseError} If validation fails.
+   * @throws DatabaseError If validation fails.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   protected validateReply<T>(schemaName: string, value: unknown): asserts value is T {

@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer } from '@famir/common'
+import { DIContainer, LifecycleError } from '@famir/common'
 import { Validator, VALIDATOR } from '@famir/validator'
 import { Config, CONFIG, ConfigData } from './config.js'
 
@@ -91,7 +91,7 @@ export class EnvConfig implements Config {
 
       return conf
     } catch (error) {
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'config',
       })
     }
@@ -101,14 +101,14 @@ export class EnvConfig implements Config {
    * Validates config against a registered JSON Schema.
    *
    * @param value - The config to validate.
-   * @throws {@link BootstrapError} If validation fails.
+   * @throws LifecycleError If validation fails.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   protected validateConfig<T>(schemaName: string, value: unknown): asserts value is T {
     try {
       this.validator.assertSchema<T>(schemaName, value)
     } catch (error) {
-      throw BootstrapError.create(`Validate config failed`, null, error)
+      throw LifecycleError.create(`Validate config failed`, null, error)
     }
   }
 }

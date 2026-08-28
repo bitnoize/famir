@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer } from '@famir/common'
+import { DIContainer, LifecycleError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { Validator, VALIDATOR } from '@famir/validator'
@@ -142,7 +142,7 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
         this.logger.debug(`ReplServer already started`)
       }
     } catch (error) {
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'repl-server',
         method: 'start',
       })
@@ -164,7 +164,7 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
         this.logger.debug(`ReplServer already stopped`)
       }
     } catch (error) {
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'repl-server',
         method: 'stop',
       })

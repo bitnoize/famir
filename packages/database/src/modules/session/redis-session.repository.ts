@@ -213,7 +213,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
    *
    * @param rawModel - The raw data from Redis.
    * @returns The session model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): SessionModel | null {
     if (rawModel === null) {
@@ -239,8 +239,8 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
    *
    * @param rawModel - The raw data from Redis.
    * @returns The session model.
-   * @throws {@link DatabaseError} If the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data is `null`.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModelStrict(rawModel: unknown): SessionModel {
     const model = this.buildModel(rawModel)

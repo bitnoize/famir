@@ -23,9 +23,9 @@ export interface SessionRepository {
    *
    * @param campaignId - The ID of the campaign to create the session in.
    * @returns The newly created session model.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If no enabled proxies are available.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If no enabled proxies are available.
+   * @throws DatabaseError If the data validation fails.
    */
   create(campaignId: string): Promise<SessionModel>
 
@@ -35,7 +35,7 @@ export interface SessionRepository {
    * @param campaignId - The ID of the campaign containing the session.
    * @param sessionId - The session ID to read.
    * @returns The session model, or `null` if the session is not found.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string, sessionId: string): Promise<SessionModel | null>
 
@@ -47,10 +47,10 @@ export interface SessionRepository {
    * @param campaignId - The ID of the campaign containing the session.
    * @param sessionId - The session ID to authorize.
    * @returns The authorized session model.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the session does not exist.
-   * @throws {@link DatabaseError} If no enabled proxies are available.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the session does not exist.
+   * @throws DatabaseError If no enabled proxies are available.
+   * @throws DatabaseError If the data validation fails.
    */
   auth(campaignId: string, sessionId: string): Promise<SessionModel>
 
@@ -61,11 +61,11 @@ export interface SessionRepository {
    * @param lureId - The Lure ID through which the session is upgraded.
    * @param sessionId - The session ID to upgrade.
    * @param secret - The session secret.
-   * @throws {@link DatabaseError} If the campaign does not exist.
-   * @throws {@link DatabaseError} If the lure does not exist.
-   * @throws {@link DatabaseError} If the session does not exist.
-   * @throws {@link DatabaseError} If the secret does not match.
-   * @throws {@link DatabaseError} If the data validation fails.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the lure does not exist.
+   * @throws DatabaseError If the session does not exist.
+   * @throws DatabaseError If the secret does not match.
+   * @throws DatabaseError If the data validation fails.
    */
   upgrade(campaignId: string, lureId: string, sessionId: string, secret: string): Promise<void>
 }

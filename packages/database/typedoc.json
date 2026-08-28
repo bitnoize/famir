@@ -10,5 +10,6 @@
     "Session",
     "Message",
     "*"
-  ]
+  ],
+  "intentionallyNotExported": ["DatabaseFunctions"]
 }

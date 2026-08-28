@@ -2,7 +2,7 @@
   "name": "@famir/validator",
   "type": "module",
   "version": "0.0.6",
-  "description": "Validator service for the Famir ecosystem",
+  "description": "Validator service",
   "keywords": [
     "famir",
     "fake-mirrors",

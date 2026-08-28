@@ -32,7 +32,7 @@ export interface ConsumerConnector {
    * This method should be called during application bootstrap to ensure
    * the connection is ready before any operations are performed.
    *
-   * @throws {@link BootstrapError} If the consumer connection cannot be established.
+   * @throws LifecycleError If the consumer connection cannot be established.
    */
   connect(): Promise<void>
 
@@ -42,7 +42,7 @@ export interface ConsumerConnector {
    * This method should be called during application shutdown to ensure
    * all pending operations are completed and resources are released.
    *
-   * @throws {@link BootstrapError} If the connection cannot be closed properly.
+   * @throws LifecycleError If the connection cannot be closed properly.
    */
   close(): Promise<void>
 }

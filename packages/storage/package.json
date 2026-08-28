@@ -2,7 +2,7 @@
   "name": "@famir/storage",
   "type": "module",
   "version": "0.0.5",
-  "description": "Storage service for the Famir ecosystem",
+  "description": "Storage service",
   "keywords": [
     "famir",
     "fake-mirrors",

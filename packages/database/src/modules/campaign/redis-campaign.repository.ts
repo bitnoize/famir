@@ -331,7 +331,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
    *
    * @param rawModel - The raw data from Redis.
    * @returns The campaign model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildModel(rawModel: unknown): CampaignModel | null {
     if (rawModel === null) {
@@ -355,7 +355,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
    *
    * @param rawModel - The raw data from Redis.
    * @returns The full campaign model, or `null` if the raw data is `null`.
-   * @throws {@link DatabaseError} If the raw data fails validation.
+   * @throws DatabaseError If the raw data fails validation.
    */
   protected buildFullModel(rawModel: unknown): FullCampaignModel | null {
     if (rawModel === null) {
@@ -391,7 +391,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of campaign models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildCollection(rawCollection: unknown): CampaignModel[] {
     this.validateArrayReply(rawCollection)
@@ -406,7 +406,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
    *
    * @param rawCollection - The array of raw data from Redis.
    * @returns The array of full campaign models.
-   * @throws {@link DatabaseError} If the array of raw data fails validation.
+   * @throws DatabaseError If the array of raw data fails validation.
    */
   protected buildFullCollection(rawCollection: unknown): FullCampaignModel[] {
     this.validateArrayReply(rawCollection)

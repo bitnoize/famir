@@ -1,4 +1,4 @@
-import { BootstrapError, DIContainer, serializeError } from '@famir/common'
+import { DIContainer, LifecycleError, serializeError } from '@famir/common'
 import { Config, CONFIG } from '@famir/config'
 import { Logger, LOGGER } from '@famir/logger'
 import { TEMPLATER, Templater } from '@famir/templater'
@@ -235,7 +235,7 @@ export class NativeHttpServer implements HttpServer {
     } catch (error) {
       this.#isRunning = false
 
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'http-server',
         method: 'stop',
       })
@@ -305,8 +305,8 @@ export class NativeHttpServer implements HttpServer {
    *
    * @param req - The server request object.
    * @param res - The server response object.
-   * @throws {@link HttpServerError} If middleware processing fails.
-   * @throws {@link HttpServerError} If no response is sent.
+   * @throws HttpServerError If middleware processing fails.
+   * @throws HttpServerError If no response is sent.
    */
   protected async processNormalContext(
     req: http.IncomingMessage,
@@ -347,8 +347,8 @@ export class NativeHttpServer implements HttpServer {
    *
    * @param ws - The WebSocket connection.
    * @param req - The server request object.
-   * @throws {@link HttpServerError} If middleware processing fails.
-   * @throws {@link HttpServerError} If no response is sent.
+   * @throws HttpServerError If middleware processing fails.
+   * @throws HttpServerError If no response is sent.
    */
   protected async processWebSocketContext(ws: WebSocket, req: http.IncomingMessage): Promise<void> {
     try {
@@ -385,7 +385,7 @@ export class NativeHttpServer implements HttpServer {
    * Executes the middleware chain for a context.
    *
    * @param ctx - The HTTP context to process.
-   * @throws {@link HttpServerError} If middleware processing fails.
+   * @throws HttpServerError If middleware processing fails.
    */
   protected async executeMiddlewareChain(ctx: HttpServerContext): Promise<void> {
     try {
@@ -436,7 +436,7 @@ export class NativeHttpServer implements HttpServer {
     } catch (error) {
       this.#isRunning = false
 
-      throw BootstrapError.wrap(error, {
+      throw LifecycleError.wrap(error, {
         service: 'http-server',
         method: 'start',
       })
@@ -470,7 +470,7 @@ export class NativeHttpServer implements HttpServer {
         settled = true
 
         cleanup()
-        reject(BootstrapError.create(`Server listen failed`, null, error))
+        reject(LifecycleError.create(`Server listen failed`, null, error))
       }
 
       this.server.once('listening', onListening)
@@ -480,7 +480,7 @@ export class NativeHttpServer implements HttpServer {
         this.server.listen(this.options.port, this.options.address)
       } catch (error) {
         cleanup()
-        reject(BootstrapError.create(`Server listen critical error`, null, error))
+        reject(LifecycleError.create(`Server listen critical error`, null, error))
       }
     })
   }
@@ -510,7 +510,7 @@ export class NativeHttpServer implements HttpServer {
         settled = true
 
         cleanup()
-        reject(BootstrapError.create(`Wss close failed`, null, error))
+        reject(LifecycleError.create(`Wss close failed`, null, error))
       }
 
       this.wss.once('close', onClose)
@@ -520,7 +520,7 @@ export class NativeHttpServer implements HttpServer {
         this.wss.close()
       } catch (error) {
         cleanup()
-        reject(BootstrapError.create(`Wss close critical error`, null, error))
+        reject(LifecycleError.create(`Wss close critical error`, null, error))
       }
     })
   }
@@ -550,7 +550,7 @@ export class NativeHttpServer implements HttpServer {
         settled = true
 
         cleanup()
-        reject(BootstrapError.create(`Server close failed`, null, error))
+        reject(LifecycleError.create(`Server close failed`, null, error))
       }
 
       this.server.once('close', onClose)
@@ -562,7 +562,7 @@ export class NativeHttpServer implements HttpServer {
         this.server.closeAllConnections()
       } catch (error) {
         cleanup()
-        reject(BootstrapError.create(`Server close critical error`, null, error))
+        reject(LifecycleError.create(`Server close critical error`, null, error))
       }
     })
   }
