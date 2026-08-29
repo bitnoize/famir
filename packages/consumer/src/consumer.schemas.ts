@@ -9,7 +9,7 @@ const bullConsumerConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 256,
-  default: 'redis://localhost:6379',
+  default: 'redis://localhost:6379/1',
 } as const
 
 /**

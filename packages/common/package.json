@@ -6,8 +6,7 @@
   "keywords": [
     "famir",
     "fake-mirrors",
-    "reverse-proxy",
-    "security-research"
+    "reverse-proxy"
   ],
   "author": "Dmitry Krutikov <d.krutikov@gmail.com>",
   "license": "Apache-2.0",

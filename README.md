@@ -1,4 +1,4 @@
-# Famir
+# Fake Mirrors
 
 [![Build and Deploy](https://github.com/bitnoize/famir/actions/workflows/main.yml/badge.svg)](https://github.com/bitnoize/famir/actions/workflows/main.yml)
 
@@ -21,7 +21,7 @@ unified internet. 😎
 - Cloaking mirrors via customized well known resources and personalized landing pages.
 - Bypass any of TLS fingerprint checks from site-donor.
 - Outgoing traffic to site-donors via pool of HTTP or SOCKS proxies.
-- Background post-processing of camptured data.
+- Background post-processing of captured data.
 - Integration with Caddy admin API for simple deployment.
 - Fast, capable of handling dozens of campaigns on a single low-cost virtual server.
 - Resistant to errors, follows HTTP standards.

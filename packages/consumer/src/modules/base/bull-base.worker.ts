@@ -34,6 +34,9 @@ export abstract class BullBaseWorker implements BaseWorker {
   /** Underlying BullMQ worker instance. */
   protected readonly worker: Worker<unknown, unknown>
 
+  /** Run promise. */
+  private runPromise: Promise<void> | null = null
+
   /**
    * Creates a new worker instance.
    *
@@ -104,9 +107,10 @@ export abstract class BullBaseWorker implements BaseWorker {
     })
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   async run(): Promise<void> {
     try {
-      await this.worker.run()
+      this.runPromise = this.worker.run()
 
       this.logger.info(`ConsumerWorker running: ${this.queueName}`)
     } catch (error) {
@@ -122,6 +126,10 @@ export abstract class BullBaseWorker implements BaseWorker {
     try {
       await this.worker.close()
 
+      if (this.runPromise) {
+        await this.runPromise
+      }
+
       this.logger.debug(`ConsumerWorker closed: ${this.queueName}`)
     } catch (error) {
       throw LifecycleError.wrap(error, {
@@ -129,6 +137,8 @@ export abstract class BullBaseWorker implements BaseWorker {
         service: 'consumer-worker',
         method: 'close',
       })
+    } finally {
+      this.runPromise = null
     }
   }
 

@@ -9,7 +9,7 @@ const redisDatabaseConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 256,
-  default: 'redis://localhost:6379',
+  default: 'redis://localhost:6379/0',
 } as const
 
 /**

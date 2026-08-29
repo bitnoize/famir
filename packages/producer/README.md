@@ -7,7 +7,7 @@ Background job queues service.
 
 ## Features
 
-- Fast and robust queue **BullMQ** backend.
+- Fast and robust **BullMQ** backend.
 - Clear error handling with `ProducerError`.
 - Integrated with other packages of the ecosystem.
 

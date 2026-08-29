@@ -7,7 +7,7 @@ Workers for background job processing.
 
 ## Features
 
-- Fast and robust queue **BullMQ** backend.
+- Fast and robust **BullMQ** backend.
 - Scales horizontally across multiple servers.
 - Clear error handling with `ConsumerError`.
 - Integrated with other packages of the ecosystem.

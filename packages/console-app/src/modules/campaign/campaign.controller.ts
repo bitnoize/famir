@@ -161,13 +161,15 @@ export class CampaignController extends BaseController {
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`// Creates the 'httpbin' campaign from the 'httpbin-dev.yml' template:`)
-        console.log(`.${spec.name} httpbin -a httpbin-dev.yml httpbin\n`)
+        console.log(`// Creates the 'httpbin' campaign from the 'httpbin-local.yaml' template:`)
+        console.log(`.${spec.name} -a templates/httpbin-local.yaml httpbin\n`)
 
-        console.log(`// Creates the 'hackernews' campaign from the 'hackernews-dev.yml' asset`)
+        console.log(
+          `// Creates the 'hackernews' campaign from the 'hackernews-local.yaml' template:`
+        )
         console.log(`// with overrides for mirror domain and crypt secret:`)
         console.log(
-          `.${spec.name} hackernews -a hackernews-dev.yml hackernews -m my-hacker-news.fake -s "super-secret"\n`
+          `.${spec.name} hackernews -a templates/hackernews-local.yaml hackernews -m my-hacker-news.fake -s "super-secret"\n`
         )
       },
       async (console, spec, args) => {
@@ -214,7 +216,7 @@ export class CampaignController extends BaseController {
     this.router.addCommand<UpdateCampaignArgs>(
       {
         name: 'campaign-update',
-        description: `Updates the campaign from a template.`,
+        description: `Updates the campaign from the template.`,
         schemaName: 'console-update-campaign-args',
         options: [
           {
@@ -227,8 +229,8 @@ export class CampaignController extends BaseController {
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`// Updates the 'httpbin' campaign from the 'httpbin-prod.yaml' asset:`)
-        console.log(`.${spec.name} -a "httpbin-prod.yml" httpbin\n`)
+        console.log(`// Updates the 'httpbin' campaign from the 'httpbin-local.yaml' template:`)
+        console.log(`.${spec.name} -a templates/httpbin-local.yaml httpbin\n`)
       },
       async (console, spec, args) => {
         const [campaignId] = args._

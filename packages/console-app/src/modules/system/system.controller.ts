@@ -268,7 +268,7 @@ export class SystemController extends BaseController {
       },
       (console, spec) => {
         console.log(`// Upsert edge-server config:`)
-        console.log(`.${spec.name} -a Caddyfile-local --force`)
+        console.log(`.${spec.name} -a deploy/Caddyfile-local --force`)
       },
       async (console, spec, args) => {
         if (args.force) {
@@ -352,7 +352,7 @@ export class SystemController extends BaseController {
     const asset = this.assets.get(assetName)
 
     if (!asset) {
-      throw ReplServerError.badRequest(`Config  asset not found`)
+      throw ReplServerError.badRequest(`Config asset not found`)
     }
 
     return asset

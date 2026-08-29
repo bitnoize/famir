@@ -1,3 +1,6 @@
+import { HttpContentType } from '@famir/http-proto'
+import { format, parse } from 'content-type'
+
 /**
  * Available values for Content-Type names.
  *
@@ -32,11 +35,20 @@ export type HttpContentTypes = Record<HttpContentTypeName, string[]>
  *
  * @internal
  */
-export { parse as parseContentType } from 'content-type'
+export function parseContentType(str: string): HttpContentType {
+  const { type, parameters } = parse(str)
+
+  return { type, parameters }
+}
 
 /**
  * Format Content-Type object to a string.
  *
  * @internal
  */
-export { format as formatContentType } from 'content-type'
+export function formatContentType(obj: {
+  type: string
+  parameters?: Record<string, string>
+}): string {
+  return format(obj)
+}
