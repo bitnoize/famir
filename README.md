@@ -2,15 +2,15 @@
 
 [![Build and Deploy](https://github.com/bitnoize/famir/actions/workflows/main.yml/badge.svg)](https://github.com/bitnoize/famir/actions/workflows/main.yml)
 
-An extensible ecosystem for creating website mirrors using reverse proxying.
+An extensible ecosystem for creating and manage website mirrors using reverse proxying.
 
 For web traffic security researchers and for overcoming the fragmentation of the once
 unified internet. 😎
 
 ## Applications
 
-- **reverse-app** - Multi-tenant reverse proxy with dynamic configuration.
-- **console-app** - Command interface for managing mirrors.
+- **reverse-app** - Multi-target reverse proxy with dynamic configuration.
+- **console-app** - Command interface for managing infrastructure.
 - **actions-app** - Workers for background job processing.
 
 ## Key features

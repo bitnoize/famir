@@ -3,17 +3,12 @@
 [![npm version](https://img.shields.io/npm/v/@famir/reverse-app.svg)](https://www.npmjs.com/package/@famir/reverse-app)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Multi-tenant reverse proxy with dynamic configuration.
+Multi-target reverse proxy with dynamic configuration.
 
-## Features
-
-- Extensible application with a set of controllers and services.
-- Brings together all dependencies through a DI container.
-- Simple loader with external composition root to start/stop app.
+Serve hundreds of website mirrors from a single scalable backend, with per-target rules,
+private access modes, and full traffic interception.
 
 ## Modules
-
-The package is divided into modules, which consist of **controller** and optional **service**.
 
 ### Setup mirror
 

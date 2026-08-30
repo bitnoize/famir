@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@famir/console-app.svg)](https://www.npmjs.com/package/@famir/console-app)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Command interface for managing mirrors.
+Command interface for managing infrastructure.
 
 ## Features
 
