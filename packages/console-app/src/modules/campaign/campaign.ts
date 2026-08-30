@@ -51,7 +51,7 @@ export interface ListCampaignsArgs {
  * @category Campaign
  * @internal
  */
-export interface CampaignTemplateCampaign {
+export interface CampaignPresetCampaign {
   campaignId: string
   mirrorDomain: string
   description: string
@@ -67,7 +67,7 @@ export interface CampaignTemplateCampaign {
  * @category Campaign
  * @internal
  */
-export interface RawCampaignTemplateCampaign {
+export interface RawCampaignPresetCampaign {
   mirrorDomain: string
   description?: string | null | undefined
   cryptSecret?: string | null | undefined
@@ -82,7 +82,7 @@ export interface RawCampaignTemplateCampaign {
  * @category Campaign
  * @internal
  */
-export interface CampaignTemplateProxy {
+export interface CampaignPresetProxy {
   proxyId: string
   url: string
   isEnabled: boolean
@@ -92,7 +92,7 @@ export interface CampaignTemplateProxy {
  * @category Campaign
  * @internal
  */
-export interface RawCampaignTemplateProxy {
+export interface RawCampaignPresetProxy {
   proxyId: string
   url: string
   isEnabled?: boolean | null | undefined
@@ -102,7 +102,7 @@ export interface RawCampaignTemplateProxy {
  * @category Campaign
  * @internal
  */
-export interface CampaignTemplateTarget {
+export interface CampaignPresetTarget {
   targetId: string
   accessLevel: TargetAccessLevel
   donorSecure: boolean
@@ -131,7 +131,7 @@ export interface CampaignTemplateTarget {
  * @category Campaign
  * @internal
  */
-export interface RawCampaignTemplateTarget {
+export interface RawCampaignPresetTarget {
   targetId: string
   accessLevel: TargetAccessLevel
   donorSecure: boolean
@@ -160,7 +160,7 @@ export interface RawCampaignTemplateTarget {
  * @category Campaign
  * @internal
  */
-export interface CampaignTemplateRedirector {
+export interface CampaignPresetRedirector {
   redirectorId: string
   page: string
   fields: string[]
@@ -170,7 +170,7 @@ export interface CampaignTemplateRedirector {
  * @category Campaign
  * @internal
  */
-export interface RawCampaignTemplateRedirector {
+export interface RawCampaignPresetRedirector {
   redirectorId: string
   page?: string | null | undefined
   fields?: string[] | null | undefined
@@ -180,7 +180,7 @@ export interface RawCampaignTemplateRedirector {
  * @category Campaign
  * @internal
  */
-export interface CampaignTemplateLure {
+export interface CampaignPresetLure {
   lureId: string
   path: string
   redirectorId: string
@@ -191,7 +191,7 @@ export interface CampaignTemplateLure {
  * @category Campaign
  * @internal
  */
-export interface RawCampaignTemplateLure {
+export interface RawCampaignPresetLure {
   lureId: string
   path: string
   redirectorId: string
@@ -202,22 +202,22 @@ export interface RawCampaignTemplateLure {
  * @category Campaign
  * @internal
  */
-export interface CampaignTemplate {
-  campaign: CampaignTemplateCampaign
-  proxies: CampaignTemplateProxy[]
-  targets: CampaignTemplateTarget[]
-  redirectors: CampaignTemplateRedirector[]
-  lures: CampaignTemplateLure[]
+export interface CampaignPreset {
+  campaign: CampaignPresetCampaign
+  proxies: CampaignPresetProxy[]
+  targets: CampaignPresetTarget[]
+  redirectors: CampaignPresetRedirector[]
+  lures: CampaignPresetLure[]
 }
 
 /**
  * @category Campaign
  * @internal
  */
-export interface RawCampaignTemplate {
-  campaign: RawCampaignTemplateCampaign
-  proxies?: RawCampaignTemplateProxy[] | null | undefined
-  targets?: RawCampaignTemplateTarget[] | null | undefined
-  redirectors?: RawCampaignTemplateRedirector[] | null | undefined
-  lures?: RawCampaignTemplateLure[] | null | undefined
+export interface RawCampaignPreset {
+  campaign: RawCampaignPresetCampaign
+  proxies?: RawCampaignPresetProxy[] | null | undefined
+  targets?: RawCampaignPresetTarget[] | null | undefined
+  redirectors?: RawCampaignPresetRedirector[] | null | undefined
+  lures?: RawCampaignPresetLure[] | null | undefined
 }

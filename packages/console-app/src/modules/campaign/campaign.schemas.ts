@@ -27,12 +27,12 @@ import {
   CreateCampaignArgs,
   DeleteCampaignArgs,
   ListCampaignsArgs,
-  RawCampaignTemplate,
-  RawCampaignTemplateCampaign,
-  RawCampaignTemplateLure,
-  RawCampaignTemplateProxy,
-  RawCampaignTemplateRedirector,
-  RawCampaignTemplateTarget,
+  RawCampaignPreset,
+  RawCampaignPresetCampaign,
+  RawCampaignPresetLure,
+  RawCampaignPresetProxy,
+  RawCampaignPresetRedirector,
+  RawCampaignPresetTarget,
   ReadCampaignArgs,
   UpdateCampaignArgs,
 } from './campaign.js'
@@ -156,7 +156,7 @@ export const listCampaignsArgsSchema: JSONSchemaType<ListCampaignsArgs> = {
  * @category Campaign
  * @internal
  */
-const rawCampaignTemplateCampaignSchema: JSONSchemaType<RawCampaignTemplateCampaign> = {
+const rawCampaignPresetCampaignSchema: JSONSchemaType<RawCampaignPresetCampaign> = {
   type: 'object',
   required: ['mirrorDomain'],
   properties: {
@@ -197,7 +197,7 @@ const rawCampaignTemplateCampaignSchema: JSONSchemaType<RawCampaignTemplateCampa
  * @category Campaign
  * @internal
  */
-const rawCampaignTemplateProxySchema: JSONSchemaType<RawCampaignTemplateProxy> = {
+const rawCampaignPresetProxySchema: JSONSchemaType<RawCampaignPresetProxy> = {
   type: 'object',
   required: ['proxyId', 'url'],
   properties: {
@@ -215,7 +215,7 @@ const rawCampaignTemplateProxySchema: JSONSchemaType<RawCampaignTemplateProxy> =
  * @category Campaign
  * @internal
  */
-const rawCampaignTemplateTargetSchema: JSONSchemaType<RawCampaignTemplateTarget> = {
+const rawCampaignPresetTargetSchema: JSONSchemaType<RawCampaignPresetTarget> = {
   type: 'object',
   required: [
     'targetId',
@@ -298,7 +298,7 @@ const rawCampaignTemplateTargetSchema: JSONSchemaType<RawCampaignTemplateTarget>
  * @category Campaign
  * @internal
  */
-const rawCampaignTemplateRedirectorSchema: JSONSchemaType<RawCampaignTemplateRedirector> = {
+const rawCampaignPresetRedirectorSchema: JSONSchemaType<RawCampaignPresetRedirector> = {
   type: 'object',
   required: ['redirectorId'],
   properties: {
@@ -319,7 +319,7 @@ const rawCampaignTemplateRedirectorSchema: JSONSchemaType<RawCampaignTemplateRed
  * @category Campaign
  * @internal
  */
-const rawCampaignTemplateLureSchema: JSONSchemaType<RawCampaignTemplateLure> = {
+const rawCampaignPresetLureSchema: JSONSchemaType<RawCampaignPresetLure> = {
   type: 'object',
   required: ['lureId', 'path', 'redirectorId'],
   properties: {
@@ -338,29 +338,29 @@ const rawCampaignTemplateLureSchema: JSONSchemaType<RawCampaignTemplateLure> = {
  * @category Campaign
  * @internal
  */
-export const rawCampaignTemplateSchema: JSONSchemaType<RawCampaignTemplate> = {
+export const rawCampaignPresetSchema: JSONSchemaType<RawCampaignPreset> = {
   type: 'object',
   required: ['campaign'],
   properties: {
-    campaign: rawCampaignTemplateCampaignSchema,
+    campaign: rawCampaignPresetCampaignSchema,
     proxies: {
       type: 'array',
-      items: rawCampaignTemplateProxySchema,
+      items: rawCampaignPresetProxySchema,
       nullable: true,
     },
     targets: {
       type: 'array',
-      items: rawCampaignTemplateTargetSchema,
+      items: rawCampaignPresetTargetSchema,
       nullable: true,
     },
     redirectors: {
       type: 'array',
-      items: rawCampaignTemplateRedirectorSchema,
+      items: rawCampaignPresetRedirectorSchema,
       nullable: true,
     },
     lures: {
       type: 'array',
-      items: rawCampaignTemplateLureSchema,
+      items: rawCampaignPresetLureSchema,
       nullable: true,
     },
   },

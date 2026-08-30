@@ -32,6 +32,7 @@
     "packages/actions-app"
   ],
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.0.0",
     "eslint": "^10.1.0",

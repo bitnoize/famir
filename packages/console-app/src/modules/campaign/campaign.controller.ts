@@ -13,21 +13,21 @@ import { Validator, VALIDATOR } from '@famir/validator'
 import { Console } from 'node:console'
 import { BaseController } from '../base/index.js'
 import {
-  CampaignTemplate,
-  CampaignTemplateCampaign,
-  CampaignTemplateLure,
-  CampaignTemplateProxy,
-  CampaignTemplateRedirector,
-  CampaignTemplateTarget,
+  CampaignPreset,
+  CampaignPresetCampaign,
+  CampaignPresetLure,
+  CampaignPresetProxy,
+  CampaignPresetRedirector,
+  CampaignPresetTarget,
   CreateCampaignArgs,
   DeleteCampaignArgs,
   ListCampaignsArgs,
-  RawCampaignTemplate,
-  RawCampaignTemplateCampaign,
-  RawCampaignTemplateLure,
-  RawCampaignTemplateProxy,
-  RawCampaignTemplateRedirector,
-  RawCampaignTemplateTarget,
+  RawCampaignPreset,
+  RawCampaignPresetCampaign,
+  RawCampaignPresetLure,
+  RawCampaignPresetProxy,
+  RawCampaignPresetRedirector,
+  RawCampaignPresetTarget,
   ReadCampaignArgs,
   UpdateCampaignArgs,
 } from './campaign.js'
@@ -35,7 +35,7 @@ import {
   createCampaignArgsSchema,
   deleteCampaignArgsSchema,
   listCampaignsArgsSchema,
-  rawCampaignTemplateSchema,
+  rawCampaignPresetSchema,
   readCampaignArgsSchema,
   updateCampaignArgsSchema,
 } from './campaign.schemas.js'
@@ -110,7 +110,7 @@ export class CampaignController extends BaseController {
       .addSchema('console-update-campaign-args', updateCampaignArgsSchema)
       .addSchema('console-delete-campaign-args', deleteCampaignArgsSchema)
       .addSchema('console-list-campaigns-args', listCampaignsArgsSchema)
-      .addSchema('console-raw-campaign-template', rawCampaignTemplateSchema)
+      .addSchema('console-raw-campaign-preset', rawCampaignPresetSchema)
   }
 
   /**
@@ -120,39 +120,39 @@ export class CampaignController extends BaseController {
     this.router.addCommand<CreateCampaignArgs>(
       {
         name: 'campaign-create',
-        description: `Creates a new campaign from the template.`,
+        description: `Creates a new campaign from the preset.`,
         schemaName: 'console-create-campaign-args',
         options: [
           {
             name: 'asset-name',
-            description: `The name of the asset that contains campaign template.`,
+            description: `The name of the asset that contains campaign preset.`,
             type: 'string',
             alias: 'a',
           },
           {
             name: 'mirror-domain',
-            description: `Override the mirror domain from the template.`,
+            description: `Override the mirror domain from the preset.`,
             type: 'string',
             alias: 'm',
             default: null,
           },
           {
             name: 'crypt-secret',
-            description: `Override the crypt secret from the template.`,
+            description: `Override the crypt secret from the preset.`,
             type: 'string',
             alias: 's',
             default: null,
           },
           {
             name: 'upgrade-session-path',
-            description: `Override the upgrade session path from the template.`,
+            description: `Override the upgrade session path from the preset.`,
             type: 'string',
             alias: 'u',
             default: null,
           },
           {
             name: 'session-cookie-name',
-            description: `Override the session cookie name from the template.`,
+            description: `Override the session cookie name from the preset.`,
             type: 'string',
             alias: 'c',
             default: null,
@@ -161,21 +161,19 @@ export class CampaignController extends BaseController {
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`// Creates the 'httpbin' campaign from the 'httpbin-local.yaml' template:`)
-        console.log(`.${spec.name} -a templates/httpbin-local.yaml httpbin\n`)
+        console.log(`// Creates the 'httpbin' campaign from the 'httpbin-local.yaml' preset:`)
+        console.log(`.${spec.name} -a presets/httpbin-local.yaml httpbin\n`)
 
-        console.log(
-          `// Creates the 'hackernews' campaign from the 'hackernews-local.yaml' template:`
-        )
+        console.log(`// Creates the 'hackernews' campaign from the 'hackernews-local.yaml' preset:`)
         console.log(`// with overrides for mirror domain and crypt secret:`)
         console.log(
-          `.${spec.name} hackernews -a templates/hackernews-local.yaml hackernews -m my-hacker-news.fake -s "super-secret"\n`
+          `.${spec.name} hackernews -a presets/hackernews-local.yaml hackernews -m my-hacker-news.fake -s "super-secret"\n`
         )
       },
       async (console, spec, args) => {
         const [campaignId] = args._
 
-        const template = this.parseTemplate(
+        const preset = this.parsePreset(
           args.assetName,
           campaignId,
           args.mirrorDomain,
@@ -184,7 +182,7 @@ export class CampaignController extends BaseController {
           args.sessionCookieName
         )
 
-        await this.campaignService.create(template)
+        await this.campaignService.create(preset)
 
         console.log(`Campaign created!`)
       }
@@ -216,12 +214,12 @@ export class CampaignController extends BaseController {
     this.router.addCommand<UpdateCampaignArgs>(
       {
         name: 'campaign-update',
-        description: `Updates the campaign from the template.`,
+        description: `Updates the campaign from the preset.`,
         schemaName: 'console-update-campaign-args',
         options: [
           {
             name: 'asset-name',
-            description: `The name of the asset that contains campaign template.`,
+            description: `The name of the asset that contains campaign preset.`,
             type: 'string',
             alias: 'a',
           },
@@ -229,15 +227,15 @@ export class CampaignController extends BaseController {
         params: ['campaign-id'],
       },
       (console, spec) => {
-        console.log(`// Updates the 'httpbin' campaign from the 'httpbin-local.yaml' template:`)
-        console.log(`.${spec.name} -a templates/httpbin-local.yaml httpbin\n`)
+        console.log(`// Updates the 'httpbin' campaign from the 'httpbin-local.yaml' preset:`)
+        console.log(`.${spec.name} -a presets/httpbin-local.yaml httpbin\n`)
       },
       async (console, spec, args) => {
         const [campaignId] = args._
 
-        const template = this.parseTemplate(args.assetName, campaignId)
+        const preset = this.parsePreset(args.assetName, campaignId)
 
-        await this.campaignService.update(template)
+        await this.campaignService.update(preset)
 
         console.log(`Campaign updated!`)
       }
@@ -300,48 +298,48 @@ export class CampaignController extends BaseController {
     )
   }
 
-  private parseTemplate(
+  private parsePreset(
     assetName: string,
     campaignId: string,
     mirrorDomain?: string | null,
     cryptSecret?: string | null,
     upgradeSessionPath?: string | null,
     sessionCookieName?: string | null
-  ): CampaignTemplate {
+  ): CampaignPreset {
     const asset = this.assets.get(assetName)
 
     if (!asset) {
-      throw ReplServerError.badRequest(`Campaign template asset not found`)
+      throw ReplServerError.badRequest(`Campaign preset asset not found`)
     }
 
-    const rawTemplate = this.parseYaml(asset)
+    const rawPreset = this.parseYaml(asset)
 
-    this.validateData<RawCampaignTemplate>('console-raw-campaign-template', rawTemplate)
+    this.validateData<RawCampaignPreset>('console-raw-campaign-preset', rawPreset)
 
     return {
-      campaign: this.parseTemplateCampaign(
-        rawTemplate.campaign,
+      campaign: this.parsePresetCampaign(
+        rawPreset.campaign,
         campaignId,
         mirrorDomain,
         cryptSecret,
         upgradeSessionPath,
         sessionCookieName
       ),
-      proxies: this.parseTemplateProxies(rawTemplate.proxies ?? []),
-      targets: this.parseTemplateTargets(rawTemplate.targets ?? []),
-      redirectors: this.parseTemplateRedirectors(rawTemplate.redirectors ?? []),
-      lures: this.parseTemplateLures(rawTemplate.lures ?? []),
+      proxies: this.parsePresetProxies(rawPreset.proxies ?? []),
+      targets: this.parsePresetTargets(rawPreset.targets ?? []),
+      redirectors: this.parsePresetRedirectors(rawPreset.redirectors ?? []),
+      lures: this.parsePresetLures(rawPreset.lures ?? []),
     }
   }
 
-  private parseTemplateCampaign(
-    rawCampaign: RawCampaignTemplateCampaign,
+  private parsePresetCampaign(
+    rawCampaign: RawCampaignPresetCampaign,
     campaignId: string,
     mirrorDomain: string | null | undefined,
     cryptSecret: string | null | undefined,
     upgradeSessionPath: string | null | undefined,
     sessionCookieName: string | null | undefined
-  ): CampaignTemplateCampaign {
+  ): CampaignPresetCampaign {
     return {
       campaignId,
       mirrorDomain: mirrorDomain ?? rawCampaign.mirrorDomain,
@@ -357,7 +355,7 @@ export class CampaignController extends BaseController {
     }
   }
 
-  private parseTemplateProxies(rawProxies: RawCampaignTemplateProxy[]): CampaignTemplateProxy[] {
+  private parsePresetProxies(rawProxies: RawCampaignPresetProxy[]): CampaignPresetProxy[] {
     return rawProxies.map((rawProxy) => {
       return {
         proxyId: rawProxy.proxyId,
@@ -367,7 +365,7 @@ export class CampaignController extends BaseController {
     })
   }
 
-  private parseTemplateTargets(rawTargets: RawCampaignTemplateTarget[]): CampaignTemplateTarget[] {
+  private parsePresetTargets(rawTargets: RawCampaignPresetTarget[]): CampaignPresetTarget[] {
     return rawTargets.map((rawTarget) => {
       return {
         targetId: rawTarget.targetId,
@@ -396,9 +394,9 @@ export class CampaignController extends BaseController {
     })
   }
 
-  private parseTemplateRedirectors(
-    rawRedirectors: RawCampaignTemplateRedirector[]
-  ): CampaignTemplateRedirector[] {
+  private parsePresetRedirectors(
+    rawRedirectors: RawCampaignPresetRedirector[]
+  ): CampaignPresetRedirector[] {
     return rawRedirectors.map((rawRedirector) => {
       return {
         redirectorId: rawRedirector.redirectorId,
@@ -408,7 +406,7 @@ export class CampaignController extends BaseController {
     })
   }
 
-  private parseTemplateLures(rawLures: RawCampaignTemplateLure[]): CampaignTemplateLure[] {
+  private parsePresetLures(rawLures: RawCampaignPresetLure[]): CampaignPresetLure[] {
     return rawLures.map((rawLure) => {
       return {
         lureId: rawLure.lureId,

@@ -18,11 +18,11 @@ import {
 } from '@famir/database'
 import { ReplServerError } from '@famir/repl-server'
 import {
-  CampaignTemplate,
-  CampaignTemplateLure,
-  CampaignTemplateProxy,
-  CampaignTemplateRedirector,
-  CampaignTemplateTarget,
+  CampaignPreset,
+  CampaignPresetLure,
+  CampaignPresetProxy,
+  CampaignPresetRedirector,
+  CampaignPresetTarget,
 } from './campaign.js'
 
 /**
@@ -75,15 +75,9 @@ export class CampaignService {
   ) {}
 
   /**
-   * Creates a new campaign from the template.
+   * Creates a new campaign from the preset.
    */
-  async create({
-    campaign,
-    proxies,
-    targets,
-    redirectors,
-    lures,
-  }: CampaignTemplate): Promise<void> {
+  async create({ campaign, proxies, targets, redirectors, lures }: CampaignPreset): Promise<void> {
     try {
       await this.campaignRepository.create(
         campaign.campaignId,
@@ -188,7 +182,7 @@ export class CampaignService {
       }
     } catch (error) {
       if (error instanceof DatabaseError) {
-        throw ReplServerError.internalError(`Create campaign template failed`, null, error)
+        throw ReplServerError.internalError(`Create campaign preset failed`, null, error)
       }
 
       throw error
@@ -211,15 +205,9 @@ export class CampaignService {
   }
 
   /**
-   * Updates the campaign from the template.
+   * Updates the campaign from the preset.
    */
-  async update({
-    campaign,
-    proxies,
-    targets,
-    redirectors,
-    lures,
-  }: CampaignTemplate): Promise<void> {
+  async update({ campaign, proxies, targets, redirectors, lures }: CampaignPreset): Promise<void> {
     const lockSecret = await this.lockCampaign(campaign.campaignId)
 
     try {
@@ -230,7 +218,7 @@ export class CampaignService {
       const origLures = await this.lureRepository.list(campaign.campaignId)
 
       if (!(origCampaign && origProxies && origTargets && origRedirectors && origLures)) {
-        throw ReplServerError.internalError(`Build campaign template failed`)
+        throw ReplServerError.internalError(`Build campaign preset failed`)
       }
 
       await this.campaignRepository.update(
@@ -242,7 +230,7 @@ export class CampaignService {
         lockSecret
       )
 
-      const createProxies: CampaignTemplateProxy[] = []
+      const createProxies: CampaignPresetProxy[] = []
 
       proxies.forEach((proxy) => {
         const exists = origProxies.some((origProxy) => origProxy.proxyId === proxy.proxyId)
@@ -260,8 +248,8 @@ export class CampaignService {
         }
       }
 
-      const createTargets: CampaignTemplateTarget[] = []
-      const updateTargets: CampaignTemplateTarget[] = []
+      const createTargets: CampaignPresetTarget[] = []
+      const updateTargets: CampaignPresetTarget[] = []
       const deleteTargets: FullTargetModel[] = []
 
       targets.forEach((target) => {
@@ -362,8 +350,8 @@ export class CampaignService {
         await this.targetRepository.delete(campaign.campaignId, target.targetId, lockSecret)
       }
 
-      const createRedirectors: CampaignTemplateRedirector[] = []
-      const updateRedirectors: CampaignTemplateRedirector[] = []
+      const createRedirectors: CampaignPresetRedirector[] = []
+      const updateRedirectors: CampaignPresetRedirector[] = []
       const deleteRedirectors: FullRedirectorModel[] = []
 
       redirectors.forEach((redirector) => {
@@ -434,7 +422,7 @@ export class CampaignService {
         )
       }
 
-      const createLures: CampaignTemplateLure[] = []
+      const createLures: CampaignPresetLure[] = []
 
       lures.forEach((lure) => {
         const exists = origLures.some((origLure) => origLure.lureId === lure.lureId)
@@ -459,7 +447,7 @@ export class CampaignService {
       }
     } catch (error) {
       if (error instanceof DatabaseError) {
-        throw ReplServerError.internalError(`Update campaign template failed`, null, error)
+        throw ReplServerError.internalError(`Update campaign preset failed`, null, error)
       }
 
       throw error
@@ -482,7 +470,7 @@ export class CampaignService {
       const lures = await this.lureRepository.list(data.campaignId)
 
       if (!(campaign && proxies && targets && redirectors && lures)) {
-        throw ReplServerError.internalError(`Build campaign template failed`)
+        throw ReplServerError.internalError(`Build campaign preset failed`)
       }
 
       for (const lure of lures) {

@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-proto",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.3",
   "description": "HTTP protocol definitions",
   "keywords": [
     "famir",

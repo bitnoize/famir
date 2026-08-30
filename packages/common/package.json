@@ -1,7 +1,7 @@
 {
   "name": "@famir/common",
   "type": "module",
-  "version": "0.0.6",
+  "version": "0.0.5",
   "description": "Common utilities",
   "keywords": [
     "famir",
