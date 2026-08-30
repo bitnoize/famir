@@ -36,7 +36,7 @@ export interface UpdateCampaignArgs {
  */
 export interface DeleteCampaignArgs {
   _: [string]
-  force?: boolean | null | undefined
+  force: boolean
 }
 
 /**

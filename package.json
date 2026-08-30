@@ -2,7 +2,7 @@
   "name": "famir",
   "type": "module",
   "private": true,
-  "description": "Fake mirrors entire the Web!",
+  "description": "Famir ecosystem",
   "scripts": {
     "format": "npm --ws run format",
     "lint": "npm --ws run lint",

@@ -89,7 +89,29 @@ export class MessageController extends BaseController {
         name: 'message-read',
         description: `Reads the message by its ID.`,
         schemaName: 'console-read-message-args',
-        options: [],
+        options: [
+          {
+            name: 'show-headers',
+            description: `Show message headers.`,
+            type: 'boolean',
+            alias: 'i',
+            default: false,
+          },
+          {
+            name: 'show-connection',
+            description: `Show message connection.`,
+            type: 'boolean',
+            alias: 'c',
+            default: false,
+          },
+          {
+            name: 'show-payload',
+            description: `Show message payload.`,
+            type: 'boolean',
+            alias: 'p',
+            default: false,
+          },
+        ],
         params: ['campaign-id', 'message-id'],
       },
       (console, spec) => {
@@ -104,12 +126,24 @@ export class MessageController extends BaseController {
           messageId,
         })
 
-        this.showMessageModel(console, message)
+        this.showMessageModel(
+          console,
+          message,
+          args.showHeaders,
+          args.showConnection,
+          args.showPayload
+        )
       }
     )
   }
 
-  private showMessageModel(console: Console, message: FullMessageModel) {
+  private showMessageModel(
+    console: Console,
+    message: FullMessageModel,
+    showHeaders: boolean,
+    showConnection: boolean,
+    showPayload: boolean
+  ) {
     console.table({
       campaignId: message.campaignId,
       messageId: message.messageId,
@@ -125,16 +159,27 @@ export class MessageController extends BaseController {
       responseHeaders: Object.keys(message.responseHeaders).length,
       responseBody: message.responseBody.length,
       analyze: message.analyze,
+      //startTime: message.startTime,
+      //finishTime: message.finishTime,
       totalTime: message.totalTime,
       createdAt: message.createdAt.toISOString(),
     })
 
-    console.log(`Request headers:`, message.requestHeaders)
-    console.log(`Response headers:`, message.responseHeaders)
-    console.log(`Connection:`, message.connection)
-    console.log(`Payload:`, message.payload)
     if (message.hasErrors) {
       console.log(`Errors:`, message.errors)
+    }
+
+    if (showHeaders) {
+      console.log(`Request headers:`, message.requestHeaders)
+      console.log(`Response headers:`, message.responseHeaders)
+    }
+
+    if (showConnection) {
+      console.log(`Connection:`, message.connection)
+    }
+
+    if (showPayload) {
+      console.log(`Payload:`, message.payload)
     }
   }
 }

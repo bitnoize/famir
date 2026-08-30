@@ -2,7 +2,7 @@
   "name": "@famir/http-proto",
   "type": "module",
   "version": "0.0.4",
-  "description": "HTTP protocol",
+  "description": "HTTP protocol definitions",
   "keywords": [
     "famir",
     "fake-mirrors",

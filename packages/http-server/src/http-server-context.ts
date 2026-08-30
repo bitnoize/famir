@@ -203,9 +203,9 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
       return this.#isBot
     }
 
-    const value = this.requestHeaders.getString('User-Agent') ?? ''
+    const value = this.requestHeaders.getString('User-Agent')
 
-    this.#isBot = isbot(value)
+    this.#isBot = value ? isbot(value) : true
 
     return this.#isBot
   }
@@ -254,7 +254,7 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
       responseBody: this.responseBody.length,
       isComplete: this.isComplete,
       isBot: this.isBot,
-      totalTime: this.finishTime - this.startTime,
+      totalTime: this.finishTime > this.startTime ? this.finishTime - this.startTime : 0,
     }
   }
 
@@ -376,7 +376,7 @@ export class HttpServerNormalContext extends HttpServerBaseContext {
     this.url.freeze()
     this.requestHeaders.freeze()
 
-    this.res.on('finish', () => {
+    this.res.on('close', () => {
       this.finishTime = Date.now()
     })
   }
@@ -463,7 +463,7 @@ export class HttpServerWebSocketContext extends HttpServerBaseContext {
 
     this.duplexStream = createWebSocketStream(ws)
 
-    this.duplexStream.on('finish', () => {
+    this.duplexStream.on('close', () => {
       this.finishTime = Date.now()
     })
   }

@@ -36,5 +36,5 @@ export const redisFunctions: Map<string, string> = new Map(${JSON.stringify(embe
 try {
   await generateRedisFunctions('redis-functions', 'src/redis-functions.ts')
 } catch (error) {
-  console.error(`Generate redis-functions failed`, { error })
+  console.error(error)
 }

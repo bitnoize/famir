@@ -119,7 +119,7 @@ export const updateCampaignArgsSchema: JSONSchemaType<UpdateCampaignArgs> = {
  */
 export const deleteCampaignArgsSchema: JSONSchemaType<DeleteCampaignArgs> = {
   type: 'object',
-  required: ['_'],
+  required: ['_', 'force'],
   properties: {
     _: {
       type: 'array',
@@ -127,10 +127,7 @@ export const deleteCampaignArgsSchema: JSONSchemaType<DeleteCampaignArgs> = {
       minItems: 1,
       maxItems: 1,
     },
-    force: {
-      ...booleanSchema,
-      nullable: true,
-    },
+    force: booleanSchema,
   },
   additionalProperties: false,
 } as const

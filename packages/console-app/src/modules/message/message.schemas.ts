@@ -15,6 +15,15 @@ export const readMessageArgsSchema: JSONSchemaType<ReadMessageArgs> = {
       minItems: 2,
       maxItems: 2,
     },
+    showHeaders: {
+      type: 'boolean',
+    },
+    showConnection: {
+      type: 'boolean',
+    },
+    showPayload: {
+      type: 'boolean',
+    },
   },
   additionalProperties: false,
 } as const

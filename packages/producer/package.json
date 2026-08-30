@@ -41,7 +41,7 @@
     "@famir/config": "*",
     "@famir/logger": "*",
     "@famir/validator": "*",
-    "bullmq": "^5.81.3"
+    "bullmq": "^5.81.4"
   },
   "peerDependencies": {
     "ioredis": "^5.11.1"
