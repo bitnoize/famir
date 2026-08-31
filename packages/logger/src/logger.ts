@@ -18,6 +18,11 @@ export const LOGGER_LOG_LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fa
 export type LoggerLogLevel = (typeof LOGGER_LOG_LEVELS)[number]
 
 /**
+ * Structured log data.
+ */
+export type LoggerData = Record<string, unknown>
+
+/**
  * Defines the public contract for a logger.
  *
  * Provides structured logging with methods for different severity levels.
@@ -72,11 +77,6 @@ export interface Logger {
    */
   fatal(msg: string, data?: LoggerData): void
 }
-
-/**
- * Structured log data.
- */
-export type LoggerData = Record<string, unknown>
 
 /**
  * Settings for a logger.

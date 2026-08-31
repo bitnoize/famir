@@ -1,7 +1,7 @@
 {
   "name": "@famir/logger",
   "type": "module",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Logger service",
   "keywords": [
     "famir",
