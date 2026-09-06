@@ -1,7 +1,12 @@
 import { DIContainer } from '@famir/common'
-import { ConsumerError } from '@famir/consumer'
-import { FullMessageModel, MESSAGE_REPOSITORY, MessageRepository } from '@famir/database'
-import { Storage, STORAGE } from '@famir/storage'
+import {
+  ConsumerError,
+  FullMessageModel,
+  MESSAGE_REPOSITORY,
+  MessageRepository,
+  Storage,
+  STORAGE,
+} from '@famir/domain'
 
 /**
  * DI token for the analyze service.

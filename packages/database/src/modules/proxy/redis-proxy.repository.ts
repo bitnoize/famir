@@ -1,13 +1,20 @@
 import { DIContainer } from '@famir/common'
-import { CONFIG, Config } from '@famir/config'
-import { LOGGER, Logger } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
-import { DatabaseError } from '../../database.error.js'
+import {
+  CONFIG,
+  Config,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  DatabaseError,
+  LOGGER,
+  Logger,
+  PROXY_REPOSITORY,
+  ProxyModel,
+  ProxyRepository,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawProxy } from './proxy.functions.js'
-import { PROXY_REPOSITORY, ProxyRepository } from './proxy.js'
-import { ProxyModel } from './proxy.models.js'
 import { rawProxySchema } from './proxy.schemas.js'
 
 /**
@@ -22,18 +29,29 @@ import { rawProxySchema } from './proxy.schemas.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { PROXY_REPOSITORY, ProxyRepository, RedisProxyRepository } from '@famir/database'
+ * import { RedisProxyRepository } from '@famir/database'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisProxyRepository.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { PROXY_REPOSITORY, ProxyRepository } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const proxyRepository = container.resolve<ProxyRepository>(PROXY_REPOSITORY)
  *
- * // TODO more examples
+ * // Read 'default' proxy from 'httpbin' campaign
+ * const proxy = await proxyRepository.read('httpbin', 'default')
+ * console.log(proxy)
  * ```
  *
  * @category Proxy

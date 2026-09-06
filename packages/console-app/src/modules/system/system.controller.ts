@@ -1,14 +1,19 @@
 import { DIContainer } from '@famir/common'
-import { Logger, LOGGER } from '@famir/logger'
+import {
+  Logger,
+  LOGGER,
+  ReplServerError,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   REPL_SERVER_ASSETS,
   REPL_SERVER_ROUTER,
-  ReplServerAssets,
-  ReplServerError,
-  ReplServerRouter,
+  type ReplServerAssets,
+  type ReplServerRouter,
 } from '@famir/repl-server'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
   AssetsArgs,
@@ -32,7 +37,7 @@ import {
   readEdgeServerUpstreamsArgsSchema,
   upsertEdgeServerConfigArgsSchema,
 } from './system.schemas.js'
-import { type SystemService, SYSTEM_SERVICE } from './system.service.js'
+import { SYSTEM_SERVICE, type SystemService } from './system.service.js'
 
 /**
  * DI token for the system controller.

@@ -1,21 +1,27 @@
 import { DIContainer } from '@famir/common'
-import { type EnabledFullTargetModel, type FullCampaignModel } from '@famir/database'
+import {
+  type EnabledFullTargetModel,
+  type FullCampaignModel,
+  HttpServerError,
+  Logger,
+  LOGGER,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
-  HttpServerAssets,
-  HttpServerContext,
+  type HttpServerAssets,
+  type HttpServerContext,
   HttpServerContextType,
-  HttpServerError,
   HttpServerNextFunction,
-  HttpServerRouter,
+  type HttpServerRouter,
 } from '@famir/http-server'
 import { HttpMessage } from '@famir/http-tools'
-import { Logger, LOGGER } from '@famir/logger'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import { type SetupMirrorService, SETUP_MIRROR_SERVICE } from './setup-mirror.service.js'
+import { SETUP_MIRROR_SERVICE, type SetupMirrorService } from './setup-mirror.service.js'
 
 /**
  * DI token for the setup-mirror controller.
@@ -24,10 +30,6 @@ import { type SetupMirrorService, SETUP_MIRROR_SERVICE } from './setup-mirror.se
  */
 export const SETUP_MIRROR_CONTROLLER = Symbol('SetupMirrorController')
 
-/**
- * @category SetupMirror
- * @internal
- */
 type SetupMirrorHandler = (
   ctx: HttpServerContext,
   campaign: FullCampaignModel,
@@ -36,10 +38,6 @@ type SetupMirrorHandler = (
   next: HttpServerNextFunction
 ) => Promise<void>
 
-/**
- * @category SetupMirror
- * @internal
- */
 type SetupMirrorDispatchContextType = Record<HttpServerContextType, SetupMirrorHandler>
 
 /**

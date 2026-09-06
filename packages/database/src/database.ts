@@ -1,4 +1,4 @@
-import { ConfigData } from '@famir/config'
+import { ConfigData } from '@famir/domain'
 import { RedisClientType } from 'redis'
 import { DatabaseFunctions } from './database.functions.js'
 

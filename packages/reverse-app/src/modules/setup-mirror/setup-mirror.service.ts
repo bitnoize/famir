@@ -4,11 +4,11 @@ import {
   CampaignRepository,
   EnabledFullTargetModel,
   FullCampaignModel,
+  HttpServerError,
   TARGET_REPOSITORY,
   TargetModel,
   TargetRepository,
-} from '@famir/database'
-import { HttpServerError } from '@famir/http-server'
+} from '@famir/domain'
 
 /**
  * DI token for the setup-mirror service.

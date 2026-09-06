@@ -6,7 +6,7 @@
     "outDir": "dist"
   },
   "references": [
-    { "path": "../common" },
-    { "path": "../http-proto" }
+    { "path": "../domain" },
+    { "path": "../common" }
   ]
 }

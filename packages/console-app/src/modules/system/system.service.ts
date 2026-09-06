@@ -1,7 +1,14 @@
 import { DIContainer } from '@famir/common'
-import { DATABASE_MANAGER, DatabaseManager } from '@famir/database'
-import { EDGE_SERVER, EdgeServer } from '@famir/edge-server'
-import { ANALYZE_QUEUE, AnalyzeQueue, WEBHOOK_QUEUE, WebhookQueue } from '@famir/producer'
+import {
+  ANALYZE_QUEUE,
+  AnalyzeQueue,
+  DATABASE_MANAGER,
+  DatabaseManager,
+  EDGE_SERVER,
+  EdgeServer,
+  WEBHOOK_QUEUE,
+  WebhookQueue,
+} from '@famir/domain'
 
 /**
  * DI token for the system service.

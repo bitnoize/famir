@@ -1,6 +1,10 @@
 import { DIContainer } from '@famir/common'
-import { FullMessageModel, MESSAGE_REPOSITORY, MessageRepository } from '@famir/database'
-import { ReplServerError } from '@famir/repl-server'
+import {
+  FullMessageModel,
+  MESSAGE_REPOSITORY,
+  MessageRepository,
+  ReplServerError,
+} from '@famir/domain'
 
 /**
  * DI token for the message service.

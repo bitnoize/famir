@@ -1,13 +1,21 @@
 import { DIContainer } from '@famir/common'
-import { CONFIG, Config } from '@famir/config'
-import { LOGGER, Logger } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
-import { DatabaseError } from '../../database.error.js'
+import {
+  CONFIG,
+  Config,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  DatabaseError,
+  FullRedirectorModel,
+  LOGGER,
+  Logger,
+  REDIRECTOR_REPOSITORY,
+  RedirectorModel,
+  RedirectorRepository,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
-import { REDIRECTOR_REPOSITORY, RedirectorRepository } from './redirector.js'
-import { FullRedirectorModel, RedirectorModel } from './redirector.models.js'
 import { rawFullRedirectorSchema, rawRedirectorSchema } from './redirector.schemas.js'
 
 /**
@@ -22,18 +30,29 @@ import { rawFullRedirectorSchema, rawRedirectorSchema } from './redirector.schem
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { REDIRECTOR_REPOSITORY, RedirectorRepository, RedisRedirectorRepository } from '@famir/database'
+ * import { RedisRedirectorRepository } from '@famir/database'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisRedirectorRepository.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { REDIRECTOR_REPOSITORY, RedirectorRepository } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const redirectorRepository = container.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY)
  *
- * // TODO more examples
+ * // Read 'simple' redirector from 'hackernews' campaign
+ * const redirector = await redirectorRepository.read('hackernews', 'simple')
+ * console.log(redirector)
  * ```
  *
  * @category Redirector

@@ -1,5 +1,5 @@
-import { WebhookJobData } from '@famir/producer'
-import { JSONSchemaType } from '@famir/validator'
+import { JSONSchemaType } from '@famir/common'
+import { WebhookJobData } from '@famir/domain'
 
 /**
  * JSON Schema for validating webhook job data.

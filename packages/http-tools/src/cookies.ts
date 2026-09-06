@@ -1,4 +1,4 @@
-import { HttpCookies, HttpSetCookies } from '@famir/http-proto'
+import { HttpCookies, HttpSetCookies } from '@famir/domain'
 import { Cookie as ToughCookie } from 'tough-cookie'
 
 /**

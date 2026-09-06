@@ -1,4 +1,4 @@
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
 import { ReadSessionArgs } from './session.js'
 
 /**

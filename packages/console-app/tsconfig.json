@@ -6,11 +6,14 @@
     "outDir": "dist"
   },
   "references": [
+    { "path": "../domain" },
     { "path": "../common" },
     { "path": "../validator" },
     { "path": "../config" },
     { "path": "../logger" },
+    { "path": "../templater" },
     { "path": "../database" },
+    { "path": "../storage" },
     { "path": "../producer" },
     { "path": "../edge-server" },
     { "path": "../repl-server" }

@@ -7,7 +7,7 @@ import {
   HttpError,
   HttpPayload,
   HttpType,
-} from '@famir/http-proto'
+} from '@famir/domain'
 import { Transform } from 'node:stream'
 import { HttpBodyWrap } from './body.js'
 import { HttpContentTypeName, HttpContentTypes } from './content-type.js'

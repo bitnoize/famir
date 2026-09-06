@@ -1,5 +1,5 @@
 import { arrayIncludes } from '@famir/common'
-import { HTTP_METHODS, HttpMethod } from '@famir/http-proto'
+import { HTTP_METHODS, HttpMethod } from '@famir/domain'
 
 /**
  * Wrapper class for HTTP message methods.

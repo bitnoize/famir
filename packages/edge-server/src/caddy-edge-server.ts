@@ -1,9 +1,16 @@
 import { DIContainer } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { EdgeServerError } from './edge-server.error.js'
-import { CaddyEdgeServerConfig, EDGE_SERVER, EdgeServer } from './edge-server.js'
+import {
+  Config,
+  CONFIG,
+  EDGE_SERVER,
+  EdgeServer,
+  EdgeServerError,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
+import { CaddyEdgeServerConfig } from './edge-server.js'
 import { caddyEdgeServerConfigSchema } from './edge-server.schemas.js'
 
 /**

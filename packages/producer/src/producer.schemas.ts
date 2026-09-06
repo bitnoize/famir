@@ -1,10 +1,6 @@
-import { JSONSchemaType } from '@famir/validator'
+import { JSONSchemaType } from '@famir/common'
 import { BullProducerConfig } from './producer.js'
 
-/**
- * @category none
- * @internal
- */
 const bullProducerConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
@@ -12,10 +8,6 @@ const bullProducerConnectionUrlSchema: JSONSchemaType<string> = {
   default: 'redis://localhost:6379/1',
 } as const
 
-/**
- * @category none
- * @internal
- */
 const bullProducerPrefixSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,

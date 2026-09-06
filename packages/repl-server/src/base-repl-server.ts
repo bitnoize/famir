@@ -1,14 +1,10 @@
 import { serializeError } from '@famir/common'
-import { Config } from '@famir/config'
-import { Logger } from '@famir/logger'
-import { Validator } from '@famir/validator'
+import { Config, Logger, ReplServer, ReplServerError, Validator } from '@famir/domain'
 import { Console } from 'node:console'
 import repl from 'node:repl'
 import type { Readable, Writable } from 'node:stream'
 import { ReplServerCommand, ReplServerCommandArgs } from './repl-server-command.js'
 import { ReplServerRouter } from './repl-server-router.js'
-import { ReplServerError } from './repl-server.error.js'
-import { ReplServer } from './repl-server.js'
 
 /**
  * Abstract base class for all repl-servers.

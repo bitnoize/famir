@@ -37,15 +37,17 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
+    "@famir/validator": "*",
     "@famir/config": "*",
-    "@famir/database": "*",
     "@famir/logger": "*",
+    "@famir/templater": "*",
+    "@famir/database": "*",
+    "@famir/storage": "*",
     "@famir/producer": "*",
     "@famir/edge-server": "*",
     "@famir/repl-server": "*",
-    "@famir/validator": "*",
-    "ascii-table3": "^1.0.3",
     "yaml": "^2.9.0"
   }
 }

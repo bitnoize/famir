@@ -11,7 +11,7 @@ export const REPL_SERVER_ASSETS = Symbol('ReplServerAssets')
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { REPL_SERVER_ASSETS, ReplServerAssets } from '@famir/repl-server'
+ * import { ReplServerAssets } from '@famir/repl-server'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
@@ -20,18 +20,28 @@ export const REPL_SERVER_ASSETS = Symbol('ReplServerAssets')
  * const assets: [string, string][] = [
  *   [
  *     'hello.txt',
- *     'Hi, there!'
+ *     `Hi, there!`
  *   ]
  * ]
  *
  * // Register in DI container
  * ReplServerAssets.register(container, assets)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { REPL_SERVER_ASSETS, type ReplServerAssets } from '@famir/repl-server'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve from DI container
  * const assets = container.resolve<ReplServerAssets>(REPL_SERVER_ASSETS)
  *
  * // Retrieve asset by name
- * console.log(assets['hello.txt'])
+ * const asset = assets.get('hello.txt')
+ * console.log(asset)
  * ```
  */
 export class ReplServerAssets extends Map<string, string> {

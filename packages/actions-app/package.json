@@ -37,10 +37,12 @@
   },
   "homepage": "https://fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
     "@famir/validator": "*",
     "@famir/config": "*",
     "@famir/logger": "*",
+    "@famir/templater": "*",
     "@famir/database": "*",
     "@famir/storage": "*",
     "@famir/producer": "*",

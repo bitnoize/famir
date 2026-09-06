@@ -1,8 +1,9 @@
-import { Validator } from '@famir/validator'
-import { ConsumerError } from './consumer.error.js'
+import { ConsumerError, Validator } from '@famir/domain'
 
 /**
  * Represents the consumer processor spec.
+ *
+ * @category none
  */
 export interface ConsumerProcessorSpec {
   readonly queueName: string
@@ -22,6 +23,8 @@ export type ConsumerProcessorAction<T> = (spec: ConsumerProcessorSpec, data: T) 
 
 /**
  * Represents the consumer processor.
+ *
+ * @category none
  */
 export class ConsumerProcessor<T> {
   /**

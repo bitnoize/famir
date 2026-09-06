@@ -2,7 +2,7 @@
   "name": "@famir/consumer",
   "type": "module",
   "version": "0.0.5",
-  "description": "Consumer service",
+  "description": "Background job workers",
   "keywords": [
     "famir",
     "fake-mirrors",
@@ -37,11 +37,8 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/config": "*",
-    "@famir/logger": "*",
-    "@famir/producer": "*",
-    "@famir/validator": "*",
     "bullmq": "^5.81.4"
   },
   "peerDependencies": {

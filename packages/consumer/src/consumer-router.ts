@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
+import { Logger, LOGGER, Validator, VALIDATOR } from '@famir/domain'
 import {
   ConsumerProcessor,
   ConsumerProcessorAction,
@@ -24,27 +23,33 @@ export const CONSUMER_ROUTER = Symbol('ConsumerRouter')
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { CONSUMER_ROUTER, ConsumerRouter } from '@famir/consumer'
- * import { ANALYZE_QUEUE_NAME } from '@famir/producer'
+ * import { ConsumerRouter } from '@famir/consumer'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register in DI container
  * ConsumerRouter.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { CONSUMER_ROUTER, type ConsumerRouter } from '@famir/consumer'
+ * import { ANALYZE_QUEUE_NAME } from '@famir/producer'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve from DI container
  * const router = container.resolve<ConsumerRouter>(CONSUMER_ROUTER)
  *
  * // Add queue
- * router.addQueue()
+ * router.addQueue(ANALYZE_QUEUE_NAME)
  *
  * // Add custom processor
  * router.addProcessor(ANALYZE_QUEUE_NAME, async (data) => {
- *   // Worker logic here..
  *   console.log(data)
- *
- *   return true
  * })
  *
  * // Activate router

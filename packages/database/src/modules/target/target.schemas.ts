@@ -4,14 +4,9 @@ import {
   counterSchema,
   customIdentSchema,
   timestampSchema,
-} from '@famir/validator'
+} from '@famir/common'
+import { TARGET_ACCESS_LEVELS, TargetAccessLevel, TargetHosts, TargetLink } from '@famir/domain'
 import { RawFullTarget, RawTarget } from './target.functions.js'
-import {
-  TARGET_ACCESS_LEVELS,
-  TargetAccessLevel,
-  TargetHosts,
-  TargetLink,
-} from './target.models.js'
 
 /**
  * JSON Schema for validating a target access level.

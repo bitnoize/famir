@@ -1,4 +1,4 @@
-import { HttpMethod, HttpType } from '@famir/http-proto'
+import { HttpMethod, HttpType } from '@famir/domain'
 import { CommandParser } from '@redis/client'
 import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../database.keys.js'
 

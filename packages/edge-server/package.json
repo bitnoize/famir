@@ -37,9 +37,7 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
-    "@famir/common": "*",
-    "@famir/config": "*",
-    "@famir/logger": "*",
-    "@famir/validator": "*"
+    "@famir/domain": "*",
+    "@famir/common": "*"
   }
 }

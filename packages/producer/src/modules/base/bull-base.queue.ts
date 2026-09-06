@@ -1,12 +1,14 @@
 import { LifecycleError, serializeError } from '@famir/common'
-import { Config } from '@famir/config'
-import { Logger } from '@famir/logger'
-import { Validator } from '@famir/validator'
+import {
+  BaseQueue,
+  Config,
+  Logger,
+  ProducerConnector,
+  ProducerError,
+  Validator,
+} from '@famir/domain'
 import { Queue } from 'bullmq'
-import { ProducerConnector } from '../../producer-connector.js'
-import { ProducerError } from '../../producer.error.js'
 import { BullProducerConfig, RedisProducerConnection } from '../../producer.js'
-import { BaseQueue } from './base.queue.js'
 
 /**
  * Options for a Bull producer queue.
@@ -24,7 +26,6 @@ interface BullProducerQueueOptions {
  * consistent behavior and reduce code duplication.
  *
  * @category none
- * @internal
  */
 export abstract class BullBaseQueue implements BaseQueue {
   /** Built queue options. */

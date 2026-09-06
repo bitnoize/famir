@@ -4,8 +4,8 @@ import {
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository,
-} from '@famir/database'
-import { ReplServerError } from '@famir/repl-server'
+  ReplServerError,
+} from '@famir/domain'
 
 /**
  * DI token for the redirector service.

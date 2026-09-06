@@ -1,7 +1,6 @@
 import { DIContainer } from '@famir/common'
+import { TEMPLATER, Templater, TemplaterData, TemplaterError } from '@famir/domain'
 import { Eta } from 'eta'
-import { TemplaterError } from './templater.error.js'
-import { TEMPLATER, Templater, TemplaterData } from './templater.js'
 
 /**
  * Eta-based templater implementation.
@@ -13,20 +12,29 @@ import { TEMPLATER, Templater, TemplaterData } from './templater.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { TEMPLATER, Templater, EtaTemplater } from '@famir/templater'
+ * import { EtaTemplater } from '@famir/templater'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * EtaTemplater.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { TEMPLATER, Templater } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const templater = container.resolve<Templater>(TEMPLATER)
  *
  * // Render simple template
- * const result = templater.render(`Hello <%= data.name %>!`, { name: 'World' })
- * console.log(result) // 'Hello World!'
+ * const str = templater.render(`Hello <%= data.name %>!`, { name: 'World' })
+ * console.log(str) // 'Hello World!'
  * ```
  */
 export class EtaTemplater implements Templater {

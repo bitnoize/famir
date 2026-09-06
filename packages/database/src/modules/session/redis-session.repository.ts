@@ -1,13 +1,20 @@
 import { DIContainer, randomIdent } from '@famir/common'
-import { CONFIG, Config } from '@famir/config'
-import { LOGGER, Logger } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
-import { DatabaseError } from '../../database.error.js'
+import {
+  CONFIG,
+  Config,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  DatabaseError,
+  LOGGER,
+  Logger,
+  SESSION_REPOSITORY,
+  SessionModel,
+  SessionRepository,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawSession } from './session.functions.js'
-import { SESSION_REPOSITORY, SessionRepository } from './session.js'
-import { SessionModel } from './session.models.js'
 import { rawSessionSchema } from './session.schemas.js'
 
 /**
@@ -22,18 +29,29 @@ import { rawSessionSchema } from './session.schemas.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { SESSION_REPOSITORY, SessionRepository, RedisSessionRepository } from '@famir/database'
+ * import { RedisSessionRepository } from '@famir/database'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisSessionRepository.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { SESSION_REPOSITORY, SessionRepository } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const sessionRepository = container.resolve<SessionRepository>(SESSION_REPOSITORY)
  *
- * // TODO more examples
+ * // Read '7da1...' session from 'httpbin' campaign
+ * const session = await sessionRepository.read('httpbin', '7da1...')
+ * console.log(session)
  * ```
  *
  * @category Session

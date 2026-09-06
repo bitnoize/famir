@@ -1,16 +1,19 @@
 import { DIContainer, serializeError } from '@famir/common'
+import { CONSUMER_ROUTER, type ConsumerRouter } from '@famir/consumer'
 import {
   ANALYZE_WORKER,
   AnalyzeWorker,
   CONSUMER_CONNECTOR,
-  CONSUMER_ROUTER,
   ConsumerConnector,
-  ConsumerRouter,
-} from '@famir/consumer'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
-import { Logger, LOGGER } from '@famir/logger'
-import { PRODUCER_CONNECTOR, ProducerConnector } from '@famir/producer'
-import { Storage, STORAGE } from '@famir/storage'
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  Logger,
+  LOGGER,
+  PRODUCER_CONNECTOR,
+  ProducerConnector,
+  Storage,
+  STORAGE,
+} from '@famir/domain'
 
 /**
  * DI token for the actions application.
@@ -30,22 +33,6 @@ export const ACTIONS_APP = Symbol('ActionsApp')
  * - {@link ConsumerConnector} via {@link CONSUMER_CONNECTOR} token
  * - {@link ConsumerRouter} via {@link CONSUMER_ROUTER} token
  * - {@link AnalyzeWorker} via {@link ANALYZE_WORKER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { ActionsApp } from '@famir/actions-app'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register all dependencies
- * // ...
- *
- * // Resolve and start the application
- * const app = ActionsApp.resolve(container)
- * await app.start()
- * ```
  *
  * @category none
  */

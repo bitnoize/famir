@@ -1,9 +1,15 @@
 import { DIContainer, LifecycleError, serializeError } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  Config,
+  CONFIG,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { createClient } from 'redis'
-import { DATABASE_CONNECTOR, DatabaseConnector } from './database-connector.js'
 import { databaseFunctions } from './database.functions.js'
 import { RedisDatabaseConfig, RedisDatabaseConnection } from './database.js'
 import {
@@ -25,7 +31,7 @@ interface RedisDatabaseConnectorOptions {
 /**
  * Redis-based database connector implementation.
  *
- * Uses the official Node Redis client with custom Redis Functions.
+ * Uses the official **node-redis** client with custom Redis Functions.
  *
  * @see https://github.com/redis/node-redis - Node Redis client
  *
@@ -37,18 +43,23 @@ interface RedisDatabaseConnectorOptions {
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import {
- *   DATABASE_CONNECTOR,
- *   DatabaseConnector,
- *   RedisDatabaseConnector,
- *   RedisDatabaseConnection,
- * } from '@famir/database'
+ * import { RedisDatabaseConnector } from '@famir/database'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisDatabaseConnector.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/domain'
+ * import { RedisDatabaseConnection } from '@famir/database'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const connector = container.resolve<DatabaseConnector>(DATABASE_CONNECTOR)

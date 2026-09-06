@@ -1,4 +1,4 @@
-import { HttpBody, HttpJson, HttpQueryString, HttpText } from '@famir/http-proto'
+import { HttpBody, HttpJson, HttpQueryString, HttpText } from '@famir/domain'
 import * as iconv from 'iconv-lite'
 import {
   formatQueryString,

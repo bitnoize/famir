@@ -2,7 +2,7 @@
   "name": "@famir/storage",
   "type": "module",
   "version": "0.0.5",
-  "description": "Storage service",
+  "description": "Object storage service",
   "keywords": [
     "famir",
     "fake-mirrors",
@@ -37,10 +37,8 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/config": "*",
-    "@famir/logger": "*",
-    "@famir/validator": "*",
     "minio": "^8.0.7"
   }
 }

@@ -5,7 +5,7 @@ import {
   HttpHeaders,
   HttpSetCookies,
   HttpStrictHeaders,
-} from '@famir/http-proto'
+} from '@famir/domain'
 import { formatContentType, parseContentType } from './content-type.js'
 import { formatCookies, formatSetCookies, parseCookies, parseSetCookies } from './cookies.js'
 

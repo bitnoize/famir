@@ -11,7 +11,7 @@ export const HTTP_SERVER_ASSETS = Symbol('HttpServerAssets')
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { HTTP_SERVER_ASSETS, HttpServerAssets } from '@famir/http-server'
+ * import { HttpServerAssets } from '@famir/http-server'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
@@ -20,18 +20,28 @@ export const HTTP_SERVER_ASSETS = Symbol('HttpServerAssets')
  * const assets: [string, string][] = [
  *   [
  *     'hello.txt',
- *     'Hi, there!'
+ *     `Hi, there!`
  *   ]
  * ]
  *
  * // Register in DI container
  * HttpServerAssets.register(container, assets)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { HTTP_SERVER_ASSETS, type HttpServerAssets } from '@famir/http-server'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve from DI container
  * const assets = container.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS)
  *
  * // Retrieve asset by name
- * console.log(assets['hello.txt'])
+ * const asset = assets.get('hello.txt')
+ * console.log(asset)
  * ```
  */
 export class HttpServerAssets extends Map<string, string> {

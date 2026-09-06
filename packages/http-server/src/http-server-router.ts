@@ -1,5 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { Logger, LOGGER } from '@famir/logger'
+import { Logger, LOGGER } from '@famir/domain'
 import { HttpServerMiddleware } from './http-server-middleware.js'
 
 /**
@@ -16,18 +16,27 @@ export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { HTTP_SERVER_ROUTER, HttpServerRouter } from '@famir/http-server'
+ * import { HttpServerRouter } from '@famir/http-server'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register in DI container
  * HttpServerRouter.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { HTTP_SERVER_ROUTER, type HttpServerRouter } from '@famir/http-server'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve from DI container
  * const router = container.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
  *
- * // Add custom middleware
+ * // Add middleware
  * router.addMiddleware('test', async (ctx, next) => {
  *   // Send simple response
  *   ctx.status(200)

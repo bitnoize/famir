@@ -1,4 +1,4 @@
-import { HttpContentType } from '@famir/http-proto'
+import { HttpContentType } from '@famir/domain'
 import { format, parse } from 'content-type'
 
 /**

@@ -1,15 +1,21 @@
 import { DIContainer } from '@famir/common'
-import { CampaignModel, FullCampaignModel } from '@famir/database'
-import { Logger, LOGGER } from '@famir/logger'
+import {
+  CampaignModel,
+  FullCampaignModel,
+  Logger,
+  LOGGER,
+  ReplServerError,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   REPL_SERVER_ASSETS,
   REPL_SERVER_ROUTER,
-  ReplServerAssets,
-  ReplServerError,
-  ReplServerRouter,
+  type ReplServerAssets,
+  type ReplServerRouter,
 } from '@famir/repl-server'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { Console } from 'node:console'
 import { BaseController } from '../base/index.js'
 import {
@@ -39,7 +45,7 @@ import {
   readCampaignArgsSchema,
   updateCampaignArgsSchema,
 } from './campaign.schemas.js'
-import { type CampaignService, CAMPAIGN_SERVICE } from './campaign.service.js'
+import { CAMPAIGN_SERVICE, type CampaignService } from './campaign.service.js'
 
 /**
  * DI token for the campaign controller.

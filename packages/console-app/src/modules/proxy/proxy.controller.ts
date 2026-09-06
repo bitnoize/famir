@@ -1,14 +1,19 @@
 import { DIContainer } from '@famir/common'
-import { ProxyModel } from '@famir/database'
-import { Logger, LOGGER } from '@famir/logger'
+import {
+  Logger,
+  LOGGER,
+  ProxyModel,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   REPL_SERVER_ASSETS,
   REPL_SERVER_ROUTER,
-  ReplServerAssets,
-  ReplServerRouter,
+  type ReplServerAssets,
+  type ReplServerRouter,
 } from '@famir/repl-server'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
   CreateProxyArgs,
@@ -24,7 +29,7 @@ import {
   readProxyArgsSchema,
   toggleProxyArgsSchema,
 } from './proxy.schemas.js'
-import { type ProxyService, PROXY_SERVICE } from './proxy.service.js'
+import { PROXY_SERVICE, type ProxyService } from './proxy.service.js'
 
 /**
  * DI token for the proxy controller.

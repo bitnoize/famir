@@ -1,4 +1,4 @@
-import { HttpBody, HttpConnection } from '@famir/http-proto'
+import { HttpBody, HttpConnection, HttpServerError } from '@famir/domain'
 import {
   HttpBodyWrap,
   HttpHeadersWrap,
@@ -12,7 +12,6 @@ import {
 import http from 'node:http'
 import type { Duplex, Readable, Writable } from 'node:stream'
 import WebSocket, { createWebSocketStream } from 'ws'
-import { HttpServerError } from './http-server.error.js'
 
 /**
  * Represents the shared state of an http-server context.

@@ -1,4 +1,4 @@
-import { ConfigData } from '@famir/config'
+import { ConfigData } from '@famir/domain'
 import type { Redis } from 'ioredis'
 
 /**

@@ -1,9 +1,19 @@
 import { DIContainer, serializeError } from '@famir/common'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
-import { Logger, LOGGER } from '@famir/logger'
-import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCER_CONNECTOR, ProducerConnector } from '@famir/producer'
-import { REPL_SERVER, REPL_SERVER_ROUTER, ReplServer, ReplServerRouter } from '@famir/repl-server'
-import { Storage, STORAGE } from '@famir/storage'
+import {
+  ANALYZE_QUEUE,
+  AnalyzeQueue,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  Logger,
+  LOGGER,
+  PRODUCER_CONNECTOR,
+  ProducerConnector,
+  REPL_SERVER,
+  ReplServer,
+  Storage,
+  STORAGE,
+} from '@famir/domain'
+import { REPL_SERVER_ROUTER, type ReplServerRouter } from '@famir/repl-server'
 
 /**
  * DI token for the console application.
@@ -23,22 +33,6 @@ export const CONSOLE_APP = Symbol('ConsoleApp')
  * - {@link AnalyzeQueue} via {@link ANALYZE_QUEUE} token
  * - {@link ReplServerRouter} via {@link REPL_SERVER_ROUTER} token
  * - {@link ReplServer} via {@link REPL_SERVER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { ConsoleApp } from '@famir/console-app'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register all dependencies
- * // ...
- *
- * // Resolve and start the application
- * const app = ConsoleApp.resolve(container)
- * await app.start()
- * ```
  *
  * @category none
  */

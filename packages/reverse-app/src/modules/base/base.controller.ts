@@ -3,21 +3,22 @@ import {
   EnabledProxyModel,
   FullCampaignModel,
   FullRedirectorModel,
+  HttpClientError,
+  HttpServerError,
+  Logger,
   SessionModel,
   TargetModel,
-} from '@famir/database'
-import { HttpClientError } from '@famir/http-client'
-import {
+  Templater,
+  TemplaterData,
+  Validator,
+} from '@famir/domain'
+import type {
   HttpServerAssets,
   HttpServerContext,
   HttpServerContextState,
-  HttpServerError,
   HttpServerRouter,
 } from '@famir/http-server'
 import { HttpMessage } from '@famir/http-tools'
-import { Logger } from '@famir/logger'
-import { Templater, TemplaterData } from '@famir/templater'
-import { Validator } from '@famir/validator'
 
 /**
  * Represents the controller context state.
@@ -40,7 +41,6 @@ export interface ControllerContextState extends HttpServerContextState {
  * consistent behavior and reduce code duplication.
  *
  * @category none
- * @internal
  */
 export abstract class BaseController {
   /**

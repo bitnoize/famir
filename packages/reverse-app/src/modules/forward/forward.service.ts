@@ -1,12 +1,14 @@
 import { DIContainer } from '@famir/common'
 import {
   HTTP_CLIENT,
+  HttpBody,
   HttpClient,
   HttpClientSimpleResult,
   HttpClientStreamResult,
-} from '@famir/http-client'
-import { HttpBody, HttpHeaders, HttpMethod } from '@famir/http-proto'
-import { HttpServerError } from '@famir/http-server'
+  HttpHeaders,
+  HttpMethod,
+  HttpServerError,
+} from '@famir/domain'
 import type { Readable } from 'node:stream'
 
 /**

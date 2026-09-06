@@ -1,8 +1,17 @@
 import { DIContainer, serializeError } from '@famir/common'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/database'
-import { HTTP_SERVER, HTTP_SERVER_ROUTER, HttpServer, HttpServerRouter } from '@famir/http-server'
-import { Logger, LOGGER } from '@famir/logger'
-import { ANALYZE_QUEUE, AnalyzeQueue, PRODUCER_CONNECTOR, ProducerConnector } from '@famir/producer'
+import {
+  ANALYZE_QUEUE,
+  AnalyzeQueue,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  HTTP_SERVER,
+  HttpServer,
+  Logger,
+  LOGGER,
+  PRODUCER_CONNECTOR,
+  ProducerConnector,
+} from '@famir/domain'
+import { HTTP_SERVER_ROUTER, type HttpServerRouter } from '@famir/http-server'
 
 /**
  * DI token for the reverse application.
@@ -21,22 +30,6 @@ export const REVERSE_APP = Symbol('ReverseApp')
  * - {@link AnalyzeQueue} via {@link ANALYZE_QUEUE} token
  * - {@link HttpServerRouter} via {@link HTTP_SERVER_ROUTER} token
  * - {@link HttpServer} via {@link HTTP_SERVER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { ReverseApp } from '@famir/reverse-app'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register all dependencies
- * // ...
- *
- * // Resolve and start the application
- * const app = ReverseApp.resolve(container)
- * await app.start()
- * ```
  *
  * @category none
  */

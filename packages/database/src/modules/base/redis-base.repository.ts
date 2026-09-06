@@ -1,9 +1,12 @@
 import { arrayIncludes } from '@famir/common'
-import { Config } from '@famir/config'
-import { Logger } from '@famir/logger'
-import { Validator } from '@famir/validator'
-import { DatabaseConnector } from '../../database-connector.js'
-import { DatabaseError, DatabaseErrorCode } from '../../database.error.js'
+import {
+  Config,
+  DatabaseConnector,
+  DatabaseError,
+  DatabaseErrorCode,
+  Logger,
+  Validator,
+} from '@famir/domain'
 import {
   DATABASE_STATUS_CODES,
   DatabaseStatusCode,
@@ -27,7 +30,6 @@ interface RedisDatabaseRepositoryOptions {
  * consistent behavior and reduce code duplication.
  *
  * @category none
- * @internal
  */
 export abstract class RedisBaseRepository {
   /** Built repository options. */

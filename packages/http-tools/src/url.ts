@@ -1,4 +1,4 @@
-import { HttpQueryString, HttpUrl } from '@famir/http-proto'
+import { HttpQueryString, HttpUrl } from '@famir/domain'
 import {
   formatQueryString,
   FormatQueryStringOptions,

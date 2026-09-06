@@ -1,18 +1,24 @@
 import { DIContainer } from '@famir/common'
-import { FullRedirectorModel, RedirectorModel } from '@famir/database'
-import { Logger, LOGGER } from '@famir/logger'
+import {
+  FullRedirectorModel,
+  Logger,
+  LOGGER,
+  RedirectorModel,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   REPL_SERVER_ASSETS,
   REPL_SERVER_ROUTER,
-  ReplServerAssets,
-  ReplServerRouter,
+  type ReplServerAssets,
+  type ReplServerRouter,
 } from '@famir/repl-server'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ListRedirectorsArgs, ReadRedirectorArgs } from './redirector.js'
 import { listRedirectorsArgsSchema, readRedirectorArgsSchema } from './redirector.schemas.js'
-import { type RedirectorService, REDIRECTOR_SERVICE } from './redirector.service.js'
+import { REDIRECTOR_SERVICE, type RedirectorService } from './redirector.service.js'
 
 /**
  * DI token for the redirector controller.

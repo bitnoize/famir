@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/database'
-import { ReplServerError } from '@famir/repl-server'
+import { ReplServerError, SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/domain'
 
 /**
  * DI token for the session service.

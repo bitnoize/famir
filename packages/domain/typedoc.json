@@ -1,0 +1,29 @@
+{
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.ts"],
+  "categoryOrder": [
+    "HttpProto",
+    "Campaign Repository",
+    "Proxy Repository",
+    "Target Repository",
+    "Redirector Repository",
+    "Lure Repository",
+    "Session Repository",
+    "Message Repository",
+    "Analyze Queue",
+    "Webhook Queue",
+    "Validator Service",
+    "Config Service",
+    "Logger Service",
+    "Templater Service",
+    "Database Service",
+    "Storage Service",
+    "Producer Service",
+    "Consumer Service",
+    "EdgeServer Service",
+    "HttpClient Service",
+    "HttpServer Service",
+    "ReplServer Service",
+    "*"
+  ]
+}

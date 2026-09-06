@@ -1,18 +1,23 @@
 import { DIContainer } from '@famir/common'
-import { SessionModel } from '@famir/database'
-import { Logger, LOGGER } from '@famir/logger'
+import {
+  Logger,
+  LOGGER,
+  SessionModel,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   REPL_SERVER_ASSETS,
   REPL_SERVER_ROUTER,
-  ReplServerAssets,
-  ReplServerRouter,
+  type ReplServerAssets,
+  type ReplServerRouter,
 } from '@famir/repl-server'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ReadSessionArgs } from './session.js'
 import { readSessionArgsSchema } from './session.schemas.js'
-import { type SessionService, SESSION_SERVICE } from './session.service.js'
+import { SESSION_SERVICE, type SessionService } from './session.service.js'
 
 /**
  * DI token for the session controller.

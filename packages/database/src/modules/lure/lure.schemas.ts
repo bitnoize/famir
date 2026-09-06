@@ -4,7 +4,7 @@ import {
   counterSchema,
   customIdentSchema,
   timestampSchema,
-} from '@famir/validator'
+} from '@famir/common'
 import { RawLure } from './lure.functions.js'
 
 /**

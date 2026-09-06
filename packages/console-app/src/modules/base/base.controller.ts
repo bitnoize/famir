@@ -1,7 +1,5 @@
-import { Logger } from '@famir/logger'
-import { ReplServerAssets, ReplServerError, ReplServerRouter } from '@famir/repl-server'
-import { Templater } from '@famir/templater'
-import { Validator } from '@famir/validator'
+import { Logger, ReplServerError, Templater, Validator } from '@famir/domain'
+import type { ReplServerAssets, ReplServerRouter } from '@famir/repl-server'
 import { Console } from 'node:console'
 import { parse as yamlParse } from 'yaml'
 
@@ -12,7 +10,6 @@ import { parse as yamlParse } from 'yaml'
  * consistent behavior and reduce code duplication.
  *
  * @category none
- * @internal
  */
 export abstract class BaseController {
   /**

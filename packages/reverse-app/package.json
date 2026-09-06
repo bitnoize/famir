@@ -37,16 +37,16 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
+    "@famir/validator": "*",
     "@famir/config": "*",
+    "@famir/logger": "*",
+    "@famir/templater": "*",
     "@famir/database": "*",
+    "@famir/producer": "*",
     "@famir/http-client": "*",
     "@famir/http-server": "*",
-    "@famir/http-proto": "*",
-    "@famir/http-tools": "*",
-    "@famir/logger": "*",
-    "@famir/validator": "*",
-    "@famir/templater": "*",
-    "@famir/producer": "*"
+    "@famir/http-tools": "*"
   }
 }

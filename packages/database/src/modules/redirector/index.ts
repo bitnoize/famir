@@ -1,4 +1,2 @@
-export * from './redirector.js'
-export * from './redirector.models.js'
 export * from './redirector.schemas.js'
 export * from './redis-redirector.repository.js'

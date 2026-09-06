@@ -2,7 +2,7 @@
 
 [![Build and Deploy](https://github.com/bitnoize/famir/actions/workflows/main.yml/badge.svg)](https://github.com/bitnoize/famir/actions/workflows/main.yml)
 
-An extensible ecosystem for creating and manage website mirrors using reverse proxying.
+An extensible toolset for creating and manage website mirrors using reverse proxying.
 
 For web traffic security researchers and for overcoming the fragmentation of the once
 unified internet. 😎

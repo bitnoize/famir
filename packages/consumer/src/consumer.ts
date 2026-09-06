@@ -1,4 +1,4 @@
-import { ConfigData } from '@famir/config'
+import { ConfigData } from '@famir/domain'
 import type { Redis } from 'ioredis'
 
 /**
@@ -7,6 +7,20 @@ import type { Redis } from 'ioredis'
  * @category none
  */
 export type RedisConsumerConnection = Redis
+
+/**
+ * Settings for a consumer worker.
+ *
+ * @category none
+ */
+export interface ConsumerWorkerSettings {
+  /** Maximum number of jobs to process concurrently. */
+  concurrency: number
+  /** Maximum number of jobs to process within the duration window. */
+  limiterMax: number
+  /** Time window in milliseconds for the rate limiter. */
+  limiterDuration: number
+}
 
 /**
  * Configuration for a Bull consumer.

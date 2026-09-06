@@ -1,9 +1,7 @@
-import { JSONSchemaType } from '@famir/validator'
-import { LOGGER_LOG_LEVELS, LoggerLogLevel, PinoLoggerConfig } from './logger.js'
+import { JSONSchemaType } from '@famir/common'
+import { LOGGER_LOG_LEVELS, LoggerLogLevel } from '@famir/domain'
+import { PinoLoggerConfig } from './logger.js'
 
-/**
- * @internal
- */
 const pinoLoggerLogLevelSchema: JSONSchemaType<LoggerLogLevel> = {
   type: 'string',
   enum: [...LOGGER_LOG_LEVELS],

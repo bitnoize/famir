@@ -1,9 +1,15 @@
 import { DIContainer, LifecycleError, serializeError } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  Config,
+  CONFIG,
+  Logger,
+  LOGGER,
+  PRODUCER_CONNECTOR,
+  ProducerConnector,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { Redis } from 'ioredis'
-import { PRODUCER_CONNECTOR, ProducerConnector } from './producer-connector.js'
 import { BullProducerConfig, RedisProducerConnection } from './producer.js'
 import { bullProducerConfigSchema } from './producer.schemas.js'
 
@@ -31,18 +37,23 @@ interface BullProducerConnectorOptions {
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import {
- *   PRODUCER_CONNECTOR,
- *   ProducerConnector,
- *   RedisProducerConnector,
- *   RedisProducerConnection,
- * } from '@famir/producer'
+ * import { RedisProducerConnector } from '@famir/producer'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisProducerConnector.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { PRODUCER_CONNECTOR, ProducerConnector } from '@famir/domain'
+ * import { RedisProducerConnection } from '@famir/producer'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const connector = container.resolve<ProducerConnector>(PRODUCER_CONNECTOR)

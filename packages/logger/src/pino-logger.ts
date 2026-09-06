@@ -1,16 +1,16 @@
 import { DIContainer } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Validator, VALIDATOR } from '@famir/validator'
-import pino from 'pino'
-import { LOGGER_TRANSPORT, LoggerTransport } from './logger-transport.js'
 import {
+  Config,
+  CONFIG,
   Logger,
   LOGGER,
   LoggerData,
   LoggerLogLevel,
-  LoggerSettings,
-  PinoLoggerConfig,
-} from './logger.js'
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
+import pino from 'pino'
+import { LOGGER_TRANSPORT, LoggerSettings, LoggerTransport, PinoLoggerConfig } from './logger.js'
 import { pinoLoggerConfigSchema } from './logger.schemas.js'
 
 /**
@@ -23,7 +23,7 @@ interface PinoLoggerOptions extends LoggerSettings {
 /**
  * Pino-based logger implementation.
  *
- * Uses the high-performance Pino library as the backend.
+ * Uses the high-performance **Pino** library as the backend.
  *
  * @see https://getpino.io - Pino logger documentation
  *
@@ -35,20 +35,29 @@ interface PinoLoggerOptions extends LoggerSettings {
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { LOGGER, Logger, PinoLogger } from '@famir/logger'
+ * import { PinoLogger } from '@famir/logger'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
- * PinoLogger.register(container)
+ * PinoLogger.register(container, { appName: 'test' })
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { LOGGER, Logger } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const logger = container.resolve<Logger>(LOGGER)
  *
  * // Log some messages
  * logger.debug(`Simple debug log message`)
- * logger.info(`Log message with structured data`, { foo: 'bar' })
+ * logger.info(`Log message with data`, { foo: 'bar' })
  * ```
  */
 export class PinoLogger implements Logger {

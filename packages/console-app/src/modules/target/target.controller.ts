@@ -1,14 +1,20 @@
 import { DIContainer } from '@famir/common'
-import { FullTargetModel, TargetModel } from '@famir/database'
-import { Logger, LOGGER } from '@famir/logger'
+import {
+  FullTargetModel,
+  Logger,
+  LOGGER,
+  TargetModel,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   REPL_SERVER_ASSETS,
   REPL_SERVER_ROUTER,
-  ReplServerAssets,
-  ReplServerRouter,
+  type ReplServerAssets,
+  type ReplServerRouter,
 } from '@famir/repl-server'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ListTargetsArgs, ReadTargetArgs, ReadTargetHostsArgs } from './target.js'
 import {
@@ -16,7 +22,7 @@ import {
   readTargetArgsSchema,
   readTargetHostsArgsSchema,
 } from './target.schemas.js'
-import { type TargetService, TARGET_SERVICE } from './target.service.js'
+import { TARGET_SERVICE, type TargetService } from './target.service.js'
 
 /**
  * DI token for the target controller.

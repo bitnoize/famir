@@ -7,29 +7,3 @@ Multi-target reverse proxy with dynamic configuration.
 
 Serve hundreds of website mirrors from a single scalable backend, with per-target rules,
 private access modes, and full traffic interception.
-
-## Modules
-
-### Setup mirror
-
-Dynamic mirror configuration from campaign.
-
-### Well known URLs
-
-Handle static resources like /favicon.ico or /robots.txt.
-
-### Authorize
-
-User tracking via session cookies and cloaking mirror.
-
-### Transform
-
-Configure message streams transformations.
-
-### Forward
-
-Forwarding the message to the donor site.
-
-### Complete
-
-Saves the message in the database for later analysis.

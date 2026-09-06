@@ -1,13 +1,19 @@
 import { LifecycleError, serializeError } from '@famir/common'
-import { Config } from '@famir/config'
-import { Logger } from '@famir/logger'
-import { Validator } from '@famir/validator'
+import {
+  BaseWorker,
+  Config,
+  ConsumerConnector,
+  ConsumerError,
+  Logger,
+  Validator,
+} from '@famir/domain'
 import { Job, MetricsTime, Processor, Worker } from 'bullmq'
-import { ConsumerConnector } from '../../consumer-connector.js'
-import { ConsumerRouter } from '../../consumer-router.js'
-import { ConsumerError } from '../../consumer.error.js'
-import { BullConsumerConfig, RedisConsumerConnection } from '../../consumer.js'
-import { BaseWorker, ConsumerWorkerSettings } from './base.worker.js'
+import { type ConsumerRouter } from '../../consumer-router.js'
+import {
+  BullConsumerConfig,
+  ConsumerWorkerSettings,
+  RedisConsumerConnection,
+} from '../../consumer.js'
 
 /**
  * Options for a Bull consumer worker.
@@ -25,7 +31,6 @@ interface BullConsumerWorkerOptions extends ConsumerWorkerSettings {
  * consistent behavior and reduce code duplication.
  *
  * @category none
- * @internal
  */
 export abstract class BullBaseWorker implements BaseWorker {
   /** Built worker options. */

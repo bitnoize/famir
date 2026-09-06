@@ -1,5 +1,5 @@
-import { AnalyzeJobData } from '@famir/producer'
-import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/validator'
+import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
+import { AnalyzeJobData } from '@famir/domain'
 
 /**
  * JSON Schema for validating analyze job data.

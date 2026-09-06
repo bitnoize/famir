@@ -2,7 +2,7 @@
   "name": "famir",
   "type": "module",
   "private": true,
-  "description": "Famir ecosystem",
+  "description": "Create and manage website mirrors",
   "scripts": {
     "format": "npm --ws run format",
     "lint": "npm --ws run lint",
@@ -12,12 +12,12 @@
     "docs": "typedoc --cleanOutputDir"
   },
   "workspaces": [
+    "packages/domain",
     "packages/common",
     "packages/validator",
     "packages/config",
     "packages/logger",
     "packages/templater",
-    "packages/http-proto",
     "packages/database",
     "packages/storage",
     "packages/producer",

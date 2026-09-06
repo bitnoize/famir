@@ -1,4 +1,4 @@
-import { JSONSchemaType, booleanSchema } from '@famir/validator'
+import { JSONSchemaType, booleanSchema } from '@famir/common'
 import {
   AssetsArgs,
   CleanupDatabaseArgs,

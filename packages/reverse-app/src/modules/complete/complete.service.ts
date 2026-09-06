@@ -1,16 +1,19 @@
 import { DIContainer } from '@famir/common'
-import { DatabaseError, MESSAGE_REPOSITORY, MessageRepository } from '@famir/database'
 import {
+  ANALYZE_QUEUE,
+  AnalyzeQueue,
+  DatabaseError,
   HttpBody,
   HttpConnection,
   HttpError,
   HttpHeaders,
   HttpMethod,
   HttpPayload,
+  HttpServerError,
   HttpType,
-} from '@famir/http-proto'
-import { HttpServerError } from '@famir/http-server'
-import { ANALYZE_QUEUE, AnalyzeQueue } from '@famir/producer'
+  MESSAGE_REPOSITORY,
+  MessageRepository,
+} from '@famir/domain'
 
 /**
  * DI token for the complete service.

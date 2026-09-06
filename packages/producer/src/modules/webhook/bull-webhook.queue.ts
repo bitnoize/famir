@@ -1,12 +1,20 @@
 import { DIContainer } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { PRODUCER_CONNECTOR, ProducerConnector } from '../../producer-connector.js'
-import { ProducerError } from '../../producer.error.js'
+import {
+  Config,
+  CONFIG,
+  Logger,
+  LOGGER,
+  PRODUCER_CONNECTOR,
+  ProducerConnector,
+  ProducerError,
+  Validator,
+  VALIDATOR,
+  WEBHOOK_QUEUE,
+  WEBHOOK_QUEUE_NAME,
+  WebhookJobData,
+  WebhookQueue,
+} from '@famir/domain'
 import { BullBaseQueue } from '../base/index.js'
-import { WebhookJobData } from './webhook.job.js'
-import { WEBHOOK_QUEUE, WEBHOOK_QUEUE_NAME, WebhookQueue } from './webhook.js'
 
 /**
  * Bull-based webhook queue implementation.
@@ -20,13 +28,22 @@ import { WEBHOOK_QUEUE, WEBHOOK_QUEUE_NAME, WebhookQueue } from './webhook.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { WEBHOOK_QUEUE, WebhookQueue, BullWebhookQueue } from '@famir/producer'
+ * import { BullWebhookQueue } from '@famir/producer'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * BullWebhookQueue.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { WEBHOOK_QUEUE, WebhookQueue } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const webhookQueue = container.resolve<BullWebhookQueue>(WEBHOOK_QUEUE)

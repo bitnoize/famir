@@ -1,11 +1,6 @@
-import { JSONSchemaType } from '@famir/validator'
+import { JSONSchemaType } from '@famir/common'
 import { MinioStorageConfig } from './storage.js'
 
-/**
- * JSON Schema for validating a MinIO storage endpoint.
- *
- * @internal
- */
 const minioStorageEndPointSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
@@ -13,11 +8,6 @@ const minioStorageEndPointSchema: JSONSchemaType<string> = {
   default: 'localhost',
 } as const
 
-/**
- * JSON Schema for validating a MinIO storage port.
- *
- * @internal
- */
 const minioStoragePortSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 0,
@@ -25,43 +15,23 @@ const minioStoragePortSchema: JSONSchemaType<number> = {
   default: 9000,
 } as const
 
-/**
- * JSON Schema for validating a MinIO storage SSL usage.
- *
- * @internal
- */
 const minioStorageUseSSLSchema: JSONSchemaType<boolean> = {
   type: 'boolean',
   default: false,
 }
 
-/**
- * JSON Schema for validating a MinIO storage access key.
- *
- * @internal
- */
 const minioStorageAccessKeySchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 256,
 } as const
 
-/**
- * JSON Schema for validating a MinIO storage secret key.
- *
- * @internal
- */
 const minioStorageSecretKeySchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
   maxLength: 256,
 } as const
 
-/**
- * JSON Schema for validating a MinIO storage bucket name.
- *
- * @internal
- */
 const minioStorageBucketNameSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
@@ -70,8 +40,6 @@ const minioStorageBucketNameSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a complete MinIO storage configuration.
- *
  * @internal
  */
 export const minioStorageConfigSchema: JSONSchemaType<MinioStorageConfig> = {

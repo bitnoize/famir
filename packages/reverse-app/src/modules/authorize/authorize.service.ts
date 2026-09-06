@@ -4,6 +4,7 @@ import {
   EnabledLureModel,
   EnabledProxyModel,
   FullRedirectorModel,
+  HttpServerError,
   LURE_REPOSITORY,
   LureModel,
   LureRepository,
@@ -15,8 +16,7 @@ import {
   SESSION_REPOSITORY,
   SessionModel,
   SessionRepository,
-} from '@famir/database'
-import { HttpServerError } from '@famir/http-server'
+} from '@famir/domain'
 
 /**
  * DI token for the authorize service.

@@ -2,7 +2,7 @@
   "name": "@famir/logger",
   "type": "module",
   "version": "0.0.5",
-  "description": "Logger service",
+  "description": "Logging service",
   "keywords": [
     "famir",
     "fake-mirrors",
@@ -37,9 +37,8 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/config": "*",
-    "@famir/validator": "*",
     "pino": "^10.3.1"
   },
   "peerDependencies": {

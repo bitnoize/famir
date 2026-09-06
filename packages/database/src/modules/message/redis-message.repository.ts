@@ -1,26 +1,34 @@
 import { DIContainer } from '@famir/common'
-import { CONFIG, Config } from '@famir/config'
 import {
+  CONFIG,
+  Config,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  DatabaseError,
+  FullMessageModel,
   HttpBody,
   HttpConnection,
-  httpConnectionSchema,
   HttpError,
-  httpErrorsSchema,
   HttpHeaders,
-  httpHeadersSchema,
   HttpMethod,
   HttpPayload,
-  httpPayloadSchema,
   HttpType,
-} from '@famir/http-proto'
-import { LOGGER, Logger } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
-import { DatabaseError } from '../../database.error.js'
+  LOGGER,
+  Logger,
+  MESSAGE_REPOSITORY,
+  MessageModel,
+  MessageRepository,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
+import {
+  httpConnectionSchema,
+  httpErrorsSchema,
+  httpHeadersSchema,
+  httpPayloadSchema,
+} from '@famir/http-tools'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawFullMessage, RawMessage } from './message.functions.js'
-import { MESSAGE_REPOSITORY, MessageRepository } from './message.js'
-import { FullMessageModel, MessageModel } from './message.models.js'
 import { rawFullMessageSchema, rawMessageSchema } from './message.schemas.js'
 
 /**
@@ -35,18 +43,29 @@ import { rawFullMessageSchema, rawMessageSchema } from './message.schemas.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { MESSAGE_REPOSITORY, MessageRepository, RedisMessageRepository } from '@famir/database'
+ * import { RedisMessageRepository } from '@famir/database'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisMessageRepository.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { MESSAGE_REPOSITORY, MessageRepository } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const messageRepository = container.resolve<MessageRepository>(MESSAGE_REPOSITORY)
  *
- * // TODO more examples
+ * // Read '36a6...' message from 'httpbin' campaign
+ * const message = await messageRepository.read('httpbin', '36a6...')
+ * console.log(message)
  * ```
  *
  * @category Message

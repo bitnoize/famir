@@ -1,15 +1,15 @@
 import {
-  httpMethodSchema,
-  httpRelativeUrlSchema,
-  httpStatusSchema,
-  httpTypeSchema,
-} from '@famir/http-proto'
-import {
   JSONSchemaType,
   customIdentSchema,
   randomIdentSchema,
   timestampSchema,
-} from '@famir/validator'
+} from '@famir/common'
+import {
+  httpMethodSchema,
+  httpRelativeUrlSchema,
+  httpStatusSchema,
+  httpTypeSchema,
+} from '@famir/http-tools'
 import { RawFullMessage, RawMessage } from './message.functions.js'
 
 /**

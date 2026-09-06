@@ -1,3 +1,4 @@
+import { JSONSchemaType, booleanSchema, customIdentSchema, secretSchema } from '@famir/common'
 import {
   campaignDescriptionSchema,
   campaignMessageExpireSchema,
@@ -22,7 +23,6 @@ import {
   targetStreamTimeoutSchema,
   targetSubSchema,
 } from '@famir/database'
-import { JSONSchemaType, booleanSchema, customIdentSchema, secretSchema } from '@famir/validator'
 import {
   CreateCampaignArgs,
   DeleteCampaignArgs,

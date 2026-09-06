@@ -1,11 +1,18 @@
 import { DIContainer, LifecycleError } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  Config,
+  CONFIG,
+  Logger,
+  LOGGER,
+  Storage,
+  STORAGE,
+  StorageError,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { Client as MinioClient } from 'minio'
 import consumers from 'node:stream/consumers'
-import { StorageError } from './storage.error.js'
-import { MinioStorageConfig, Storage, STORAGE } from './storage.js'
+import { MinioStorageConfig } from './storage.js'
 import { minioStorageConfigSchema } from './storage.schemas.js'
 
 /**
@@ -37,13 +44,22 @@ interface MinioStorageOptions {
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { STORAGE, Storage, MinioStorage } from '@famir/storage'
+ * import { MinioStorage } from '@famir/storage'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * MinioStorage.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { STORAGE, Storage } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const storage = container.resolve<Storage>(STORAGE)

@@ -1,9 +1,7 @@
-import { JSONSchemaType } from '@famir/validator'
+import { JSONSchemaType } from '@famir/common'
 import { CliReplServerConfig, NetReplServerConfig } from './repl-server.js'
 
 /**
- * JSON Schema for validating a Net repl-server address.
- *
  * @internal
  */
 const netReplServerAddressSchema: JSONSchemaType<string> = {
@@ -14,8 +12,6 @@ const netReplServerAddressSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a Net repl-server port.
- *
  * @internal
  */
 const netReplServerPortSchema: JSONSchemaType<number> = {
@@ -26,8 +22,6 @@ const netReplServerPortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a Net repl-server maximum number of clients.
- *
  * @internal
  */
 const netReplServerMaxClientsSchema: JSONSchemaType<number> = {
@@ -38,8 +32,6 @@ const netReplServerMaxClientsSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a Net repl-server socket timeout.
- *
  * @internal
  */
 const netReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
@@ -50,8 +42,6 @@ const netReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a repl-server color usage.
- *
  * @internal
  */
 const replServerUseColorsSchema: JSONSchemaType<boolean> = {
@@ -60,8 +50,6 @@ const replServerUseColorsSchema: JSONSchemaType<boolean> = {
 } as const
 
 /**
- * JSON Schema for validating a complete CLI repl-server configuration.
- *
  * @internal
  */
 export const cliReplServerConfigSchema: JSONSchemaType<CliReplServerConfig> = {
@@ -74,8 +62,6 @@ export const cliReplServerConfigSchema: JSONSchemaType<CliReplServerConfig> = {
 } as const
 
 /**
- * JSON Schema for validating a complete Net repl-server configuration.
- *
  * @internal
  */
 export const netReplServerConfigSchema: JSONSchemaType<NetReplServerConfig> = {

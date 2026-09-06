@@ -5,9 +5,9 @@ import {
   customIdentSchema,
   randomIdentSchema,
   timestampSchema,
-} from '@famir/validator'
+} from '@famir/common'
+import { UpgradeSessionParams } from '@famir/domain'
 import { RawSession } from './session.functions.js'
-import { UpgradeSessionParams } from './session.models.js'
 
 /**
  * JSON Schema for validating session upgrade parameters.

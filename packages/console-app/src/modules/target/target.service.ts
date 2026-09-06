@@ -1,12 +1,12 @@
 import { DIContainer } from '@famir/common'
 import {
   FullTargetModel,
+  ReplServerError,
   TARGET_REPOSITORY,
   TargetHosts,
   TargetModel,
   TargetRepository,
-} from '@famir/database'
-import { ReplServerError } from '@famir/repl-server'
+} from '@famir/domain'
 
 /**
  * DI token for the target service.

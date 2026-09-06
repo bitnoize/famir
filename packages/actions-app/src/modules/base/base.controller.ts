@@ -1,7 +1,5 @@
-import { ConsumerAssets, ConsumerRouter } from '@famir/consumer'
-import { Logger } from '@famir/logger'
-import { Templater } from '@famir/templater'
-import { Validator } from '@famir/validator'
+import type { ConsumerAssets, ConsumerRouter } from '@famir/consumer'
+import { Logger, Templater, Validator } from '@famir/domain'
 
 /**
  * Abstract base class for all application controllers.
@@ -10,7 +8,6 @@ import { Validator } from '@famir/validator'
  * consistent behavior and reduce code duplication.
  *
  * @category none
- * @internal
  */
 export abstract class BaseController {
   /**

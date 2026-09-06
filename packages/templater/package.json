@@ -2,7 +2,7 @@
   "name": "@famir/templater",
   "type": "module",
   "version": "0.0.5",
-  "description": "Templater service",
+  "description": "Template engine",
   "keywords": [
     "famir",
     "fake-mirrors",
@@ -37,6 +37,7 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
     "eta": "^4.6.0"
   }

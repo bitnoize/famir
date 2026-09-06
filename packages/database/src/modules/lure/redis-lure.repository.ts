@@ -1,13 +1,20 @@
 import { DIContainer } from '@famir/common'
-import { CONFIG, Config } from '@famir/config'
-import { LOGGER, Logger } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
-import { DatabaseError } from '../../database.error.js'
+import {
+  CONFIG,
+  Config,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  DatabaseError,
+  LOGGER,
+  Logger,
+  LURE_REPOSITORY,
+  LureModel,
+  LureRepository,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawLure } from './lure.functions.js'
-import { LURE_REPOSITORY, LureRepository } from './lure.js'
-import { LureModel } from './lure.models.js'
 import { rawLureSchema } from './lure.schemas.js'
 
 /**
@@ -22,18 +29,29 @@ import { rawLureSchema } from './lure.schemas.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { LURE_REPOSITORY, LureRepository, RedisLureRepository } from '@famir/database'
+ * import { RedisLureRepository } from '@famir/database'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisLureRepository.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { LURE_REPOSITORY, LureRepository } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const lureRepository = container.resolve<LureRepository>(LURE_REPOSITORY)
  *
- * // TODO more examples
+ * // Read 'test' lure from 'httpbin' campaign
+ * const lure = await lureRepository.read('httpbin', 'test')
+ * console.log(lure)
  * ```
  *
  * @category Lure

@@ -1,14 +1,21 @@
 import { DIContainer } from '@famir/common'
-import { LureModel, RedirectorParams, redirectorParamsSchema } from '@famir/database'
-import { Logger, LOGGER } from '@famir/logger'
+import { redirectorParamsSchema } from '@famir/database'
+import {
+  Logger,
+  LOGGER,
+  LureModel,
+  RedirectorParams,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   REPL_SERVER_ASSETS,
   REPL_SERVER_ROUTER,
-  ReplServerAssets,
-  ReplServerRouter,
+  type ReplServerAssets,
+  type ReplServerRouter,
 } from '@famir/repl-server'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import {
   CreateLureArgs,
@@ -26,7 +33,7 @@ import {
   readLureArgsSchema,
   toggleLureArgsSchema,
 } from './lure.schemas.js'
-import { type LureService, LURE_SERVICE } from './lure.service.js'
+import { LURE_SERVICE, type LureService } from './lure.service.js'
 
 /**
  * DI token for the lure controller.

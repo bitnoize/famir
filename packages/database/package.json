@@ -40,11 +40,9 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/config": "*",
-    "@famir/http-proto": "*",
-    "@famir/logger": "*",
-    "@famir/validator": "*",
+    "@famir/http-tools": "*",
     "redis": "^6.2.1"
   }
 }

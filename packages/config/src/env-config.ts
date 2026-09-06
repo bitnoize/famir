@@ -1,6 +1,5 @@
 import { DIContainer, LifecycleError } from '@famir/common'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { Config, CONFIG, ConfigData } from './config.js'
+import { Config, CONFIG, ConfigData, Validator, VALIDATOR } from '@famir/domain'
 
 /**
  * Env-based config implementation.
@@ -13,15 +12,24 @@ import { Config, CONFIG, ConfigData } from './config.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { VALIDATOR, Validator, AjvValidator, JSONSchemaType } from '@famir/validator'
- * import { CONFIG, Config, EnvConfig, ConfigData } from '@famir/config'
+ * import { AjvValidator } from '@famir/validator'
+ * import { EnvConfig } from '@famir/config'
  *
- * // Get container singleton.
+ * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependencies in container
  * AjvValidator.register(container)
  * EnvConfig.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer, JSONSchemaType } from '@famir/common'
+ * import { VALIDATOR, Validator, CONFIG, Config, ConfigData } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependencies from container
  * const validator = container.resolve<Validator>(VALIDATOR)

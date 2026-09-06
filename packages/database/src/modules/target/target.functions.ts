@@ -1,3 +1,4 @@
+import { TargetAccessLevel } from '@famir/domain'
 import { CommandParser } from '@redis/client'
 import {
   campaignKey,
@@ -9,7 +10,6 @@ import {
   targetLabelsKey,
   targetMirrorsKey,
 } from '../../database.keys.js'
-import { TargetAccessLevel } from './target.models.js'
 
 /**
  * Raw target data structure.

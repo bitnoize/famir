@@ -1,27 +1,36 @@
 import { DIContainer } from '@famir/common'
-import { EnabledFullTargetModel, EnabledProxyModel } from '@famir/database'
-import { HttpType } from '@famir/http-proto'
+import {
+  EnabledFullTargetModel,
+  EnabledProxyModel,
+  HttpType,
+  Logger,
+  LOGGER,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
-  HttpServerAssets,
-  HttpServerContext,
   HttpServerNextFunction,
-  HttpServerRouter,
+  type HttpServerAssets,
+  type HttpServerContext,
+  type HttpServerRouter,
 } from '@famir/http-server'
 import { LimiterTransform, type HttpMessage } from '@famir/http-tools'
-import { Logger, LOGGER } from '@famir/logger'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { PassThrough, pipeline as pipelineSync } from 'node:stream'
 import { pipeline as pipelineAsync } from 'node:stream/promises'
 import { BaseController } from '../base/index.js'
 import { FORWARD_SERVICE, type ForwardService } from './forward.service.js'
 
 /**
+ * DI token for the forward controller.
+ *
  * @category Forward
- * @internal
  */
+export const FORWARD_CONTROLLER = Symbol('ForwardController')
+
 type ForwardHandler = (
   ctx: HttpServerContext,
   proxy: EnabledProxyModel,
@@ -30,18 +39,7 @@ type ForwardHandler = (
   next: HttpServerNextFunction
 ) => Promise<void>
 
-/**
- * @category Forward
- * @internal
- */
 type ForwardDispatchHttpType = Record<HttpType, ForwardHandler>
-
-/**
- * DI token for the forward controller.
- *
- * @category Forward
- */
-export const FORWARD_CONTROLLER = Symbol('ForwardController')
 
 /**
  * Represents the forward controller.

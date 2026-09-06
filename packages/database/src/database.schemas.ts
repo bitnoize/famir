@@ -1,10 +1,6 @@
-import { JSONSchemaType } from '@famir/validator'
+import { JSONSchemaType } from '@famir/common'
 import { RedisDatabaseConfig } from './database.js'
 
-/**
- * @category none
- * @internal
- */
 const redisDatabaseConnectionUrlSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
@@ -12,10 +8,6 @@ const redisDatabaseConnectionUrlSchema: JSONSchemaType<string> = {
   default: 'redis://localhost:6379/0',
 } as const
 
-/**
- * @category none
- * @internal
- */
 const redisDatabasePrefixSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,

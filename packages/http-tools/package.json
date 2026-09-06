@@ -38,8 +38,8 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/http-proto": "*",
     "cheerio": "^1.2.0",
     "content-type": "^3.0.0",
     "iconv-lite": "^0.7.3",

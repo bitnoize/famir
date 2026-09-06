@@ -1,12 +1,20 @@
 import { DIContainer } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { WEBHOOK_QUEUE_NAME } from '@famir/producer'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { CONSUMER_CONNECTOR, ConsumerConnector } from '../../consumer-connector.js'
-import { CONSUMER_ROUTER, ConsumerRouter } from '../../consumer-router.js'
-import { BullBaseWorker, ConsumerWorkerSettings } from '../base/index.js'
-import { WEBHOOK_WORKER, WebhookWorker } from './webhook.js'
+import {
+  Config,
+  CONFIG,
+  CONSUMER_CONNECTOR,
+  ConsumerConnector,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR,
+  WEBHOOK_QUEUE_NAME,
+  WEBHOOK_WORKER,
+  WebhookWorker,
+} from '@famir/domain'
+import { CONSUMER_ROUTER, type ConsumerRouter } from '../../consumer-router.js'
+import { ConsumerWorkerSettings } from '../../consumer.js'
+import { BullBaseWorker } from '../base/index.js'
 
 /**
  * Bull-based webhook worker implementation.
@@ -21,13 +29,22 @@ import { WEBHOOK_WORKER, WebhookWorker } from './webhook.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { WEBHOOK_WORKER, WebhookWorker, BullWebhookWorker } from '@famir/consumer'
+ * import { BullWebhookWorker } from '@famir/consumer'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * BullWebhookWorker.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { WEBHOOK_WORKER, WebhookWorker } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const webhookWorker = container.resolve<WebhookWorker>(WEBHOOK_WORKER)

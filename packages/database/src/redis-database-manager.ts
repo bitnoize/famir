@@ -1,8 +1,13 @@
 import { DIContainer } from '@famir/common'
-import { Logger, LOGGER } from '@famir/logger'
-import { DATABASE_CONNECTOR, DatabaseConnector } from './database-connector.js'
-import { DATABASE_MANAGER, DatabaseManager } from './database-manager.js'
-import { DatabaseError } from './database.error.js'
+import {
+  DATABASE_CONNECTOR,
+  DATABASE_MANAGER,
+  DatabaseConnector,
+  DatabaseError,
+  DatabaseManager,
+  Logger,
+  LOGGER,
+} from '@famir/domain'
 import { RedisDatabaseConnection } from './database.js'
 import { redisFunctions } from './redis-functions.js'
 
@@ -16,22 +21,31 @@ import { redisFunctions } from './redis-functions.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { DATABASE_MANAGER, DatabaseManager, RedisDatabaseManager } from '@famir/database'
+ * import { RedisDatabaseManager } from '@famir/database'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisDatabaseManager.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { DATABASE_MANAGER, DatabaseManager } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const manager = container.resolve<DatabaseManager>(DATABASE_MANAGER)
  *
- * // Load Redis functions
- * await manager.loadFunctions()
- *
  * const info = await manager.getInfo()
  * console.log(info)
+ *
+ * // Load Redis functions
+ * await manager.loadFunctions()
  * ```
  *
  * @category none

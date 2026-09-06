@@ -1,13 +1,11 @@
 import { DIContainer } from '@famir/common'
+import { Logger, LOGGER, TEMPLATER, Templater, Validator, VALIDATOR } from '@famir/domain'
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
-  HttpServerAssets,
-  HttpServerRouter,
+  type HttpServerAssets,
+  type HttpServerRouter,
 } from '@famir/http-server'
-import { Logger, LOGGER } from '@famir/logger'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 
 /**

@@ -1,30 +1,32 @@
-import { decrypt, DIContainer, encrypt, randomName } from '@famir/common'
+import { decrypt, DIContainer, encrypt, randomIdentSchema, randomName } from '@famir/common'
+import { redirectorParamsSchema, upgradeSessionParamsSchema } from '@famir/database'
 import {
   EnabledFullTargetModel,
   FullCampaignModel,
   FullRedirectorModel,
+  HttpCookie,
+  Logger,
+  LOGGER,
   RedirectorParams,
-  redirectorParamsSchema,
   SessionModel,
   TargetAccessLevel,
+  TEMPLATER,
+  Templater,
   UpgradeSessionParams,
-  upgradeSessionParamsSchema,
-} from '@famir/database'
-import { HttpCookie } from '@famir/http-proto'
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
-  HttpServerAssets,
-  HttpServerContext,
+  type HttpServerAssets,
+  type HttpServerContext,
   HttpServerContextType,
   HttpServerNextFunction,
-  HttpServerRouter,
+  type HttpServerRouter,
 } from '@famir/http-server'
-import { Logger, LOGGER } from '@famir/logger'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { randomIdentSchema, Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
-import { type AuthorizeService, AUTHORIZE_SERVICE } from './authorize.service.js'
+import { AUTHORIZE_SERVICE, type AuthorizeService } from './authorize.service.js'
 
 /**
  * DI token for the authorize controller.
@@ -33,10 +35,6 @@ import { type AuthorizeService, AUTHORIZE_SERVICE } from './authorize.service.js
  */
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
 
-/**
- * @category Authorize
- * @internal
- */
 type AuthorizeHandler = (
   ctx: HttpServerContext,
   campaign: FullCampaignModel,
@@ -44,16 +42,8 @@ type AuthorizeHandler = (
   next: HttpServerNextFunction
 ) => Promise<void>
 
-/**
- * @category Authorize
- * @internal
- */
 type AuthorizeDispatchContextType = Record<HttpServerContextType, AuthorizeHandler>
 
-/**
- * @category Authorize
- * @internal
- */
 type AuthorizeDispatchAccessLevel = Record<TargetAccessLevel, AuthorizeHandler>
 
 /**

@@ -6,8 +6,8 @@ import {
   PROXY_REPOSITORY,
   ProxyModel,
   ProxyRepository,
-} from '@famir/database'
-import { ReplServerError } from '@famir/repl-server'
+  ReplServerError,
+} from '@famir/domain'
 
 /**
  * DI token for the proxy service.

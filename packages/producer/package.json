@@ -2,7 +2,7 @@
   "name": "@famir/producer",
   "type": "module",
   "version": "0.0.5",
-  "description": "Producer service",
+  "description": "Background job queues",
   "keywords": [
     "famir",
     "fake-mirrors",
@@ -37,10 +37,8 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/config": "*",
-    "@famir/logger": "*",
-    "@famir/validator": "*",
     "bullmq": "^5.81.4"
   },
   "peerDependencies": {

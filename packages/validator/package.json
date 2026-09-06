@@ -2,7 +2,7 @@
   "name": "@famir/validator",
   "type": "module",
   "version": "0.0.6",
-  "description": "Validator service",
+  "description": "Validation service",
   "keywords": [
     "famir",
     "fake-mirrors",
@@ -37,6 +37,7 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
+    "@famir/domain": "*",
     "@famir/common": "*",
     "ajv": "^8.18.0"
   }

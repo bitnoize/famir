@@ -1,6 +1,6 @@
-import { JSONSchemaType, counterSchema, customIdentSchema, timestampSchema } from '@famir/validator'
+import { JSONSchemaType, counterSchema, customIdentSchema, timestampSchema } from '@famir/common'
+import { RedirectorParams } from '@famir/domain'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
-import { RedirectorParams } from './redirector.models.js'
 
 /**
  * JSON Schema for validating a redirector page template.

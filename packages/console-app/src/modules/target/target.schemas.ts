@@ -1,4 +1,4 @@
-import { JSONSchemaType, customIdentSchema } from '@famir/validator'
+import { JSONSchemaType, customIdentSchema } from '@famir/common'
 import { ListTargetsArgs, ReadTargetArgs, ReadTargetHostsArgs } from './target.js'
 
 /**

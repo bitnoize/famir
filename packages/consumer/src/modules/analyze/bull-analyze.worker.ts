@@ -1,12 +1,20 @@
 import { DIContainer } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { ANALYZE_QUEUE_NAME } from '@famir/producer'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { CONSUMER_CONNECTOR, ConsumerConnector } from '../../consumer-connector.js'
-import { CONSUMER_ROUTER, ConsumerRouter } from '../../consumer-router.js'
-import { BullBaseWorker, ConsumerWorkerSettings } from '../base/index.js'
-import { ANALYZE_WORKER, AnalyzeWorker } from './analyze.js'
+import {
+  ANALYZE_QUEUE_NAME,
+  ANALYZE_WORKER,
+  AnalyzeWorker,
+  Config,
+  CONFIG,
+  CONSUMER_CONNECTOR,
+  ConsumerConnector,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
+import { CONSUMER_ROUTER, type ConsumerRouter } from '../../consumer-router.js'
+import { ConsumerWorkerSettings } from '../../consumer.js'
+import { BullBaseWorker } from '../base/index.js'
 
 /**
  * Bull-based analyze worker implementation.
@@ -21,13 +29,22 @@ import { ANALYZE_WORKER, AnalyzeWorker } from './analyze.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { ANALYZE_WORKER, AnalyzeWorker, BullAnalyzeWorker } from '@famir/consumer'
+ * import { BullAnalyzeWorker } from '@famir/consumer'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * BullAnalyzeWorker.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { ANALYZE_WORKER, AnalyzeWorker } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const analyzeWorker = container.resolve<AnalyzeWorker>(ANALYZE_WORKER)

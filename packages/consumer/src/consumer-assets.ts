@@ -2,6 +2,8 @@ import { DIContainer } from '@famir/common'
 
 /**
  * DI token for the consumer assets.
+ *
+ * @category none
  */
 export const CONSUMER_ASSETS = Symbol('ConsumerAssets')
 
@@ -11,7 +13,7 @@ export const CONSUMER_ASSETS = Symbol('ConsumerAssets')
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { CONSUMER_ASSETS, ConsumerAssets } from '@famir/consumer'
+ * import { ConsumerAssets } from '@famir/consumer'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
@@ -20,19 +22,31 @@ export const CONSUMER_ASSETS = Symbol('ConsumerAssets')
  * const assets: [string, string][] = [
  *   [
  *     'hello.txt',
- *     'Hi, there!'
+ *     `Hi, there!`
  *   ]
  * ]
  *
  * // Register in DI container
  * ConsumerAssets.register(container, assets)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { CONSUMER_ASSETS, type ConsumerAssets } from '@famir/consumer'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve from DI container
  * const assets = container.resolve<ConsumerAssets>(CONSUMER_ASSETS)
  *
  * // Retrieve asset by name
- * console.log(assets['hello.txt'])
+ * const asset = assets.get('hello.txt')
+ * console.log(asset)
  * ```
+ *
+ * @category none
  */
 export class ConsumerAssets extends Map<string, string> {
   /**

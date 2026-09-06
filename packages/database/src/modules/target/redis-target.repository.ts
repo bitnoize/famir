@@ -1,19 +1,24 @@
 import { DIContainer } from '@famir/common'
-import { CONFIG, Config } from '@famir/config'
-import { LOGGER, Logger } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
-import { DatabaseError } from '../../database.error.js'
-import { RedisBaseRepository } from '../base/index.js'
-import { RawFullTarget, RawTarget } from './target.functions.js'
-import { TARGET_REPOSITORY, TargetRepository } from './target.js'
 import {
+  CONFIG,
+  Config,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  DatabaseError,
   FullTargetModel,
+  LOGGER,
+  Logger,
+  TARGET_REPOSITORY,
   TargetAccessLevel,
   TargetHosts,
   TargetLink,
   TargetModel,
-} from './target.models.js'
+  TargetRepository,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
+import { RedisBaseRepository } from '../base/index.js'
+import { RawFullTarget, RawTarget } from './target.functions.js'
 import {
   rawFullTargetSchema,
   rawTargetSchema,
@@ -33,7 +38,19 @@ import {
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { TARGET_REPOSITORY, TargetRepository, RedisTargetRepository } from '@famir/database'
+ * import { RedisTargetRepository } from '@famir/database'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
+ *
+ * // Register dependency in container
+ * RedisTargetRepository.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { TARGET_REPOSITORY, TargetRepository } from '@famir/domain'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
@@ -44,7 +61,9 @@ import {
  * // Resolve dependency from container
  * const targetRepository = container.resolve<TargetRepository>(TARGET_REPOSITORY)
  *
- * // TODO more examples
+ * // Read 'apex' target from 'httpbin' campaign
+ * const target = await targetRepository.read('httpbin', 'apex')
+ * console.log(target)
  * ```
  *
  * @category Target

@@ -5,7 +5,7 @@ import {
   customIdentSchema,
   secretSchema,
   timestampSchema,
-} from '@famir/validator'
+} from '@famir/common'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 
 /**

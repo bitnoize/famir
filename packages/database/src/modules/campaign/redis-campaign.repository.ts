@@ -1,13 +1,22 @@
 import { DIContainer, randomIdent } from '@famir/common'
-import { CONFIG, Config } from '@famir/config'
-import { LOGGER, Logger } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { DATABASE_CONNECTOR, DatabaseConnector } from '../../database-connector.js'
-import { DatabaseError } from '../../database.error.js'
+import {
+  CAMPAIGN_LOCK_TIMEOUT,
+  CAMPAIGN_REPOSITORY,
+  CampaignModel,
+  CampaignRepository,
+  CONFIG,
+  Config,
+  DATABASE_CONNECTOR,
+  DatabaseConnector,
+  DatabaseError,
+  FullCampaignModel,
+  LOGGER,
+  Logger,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { RedisBaseRepository } from '../base/index.js'
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
-import { CAMPAIGN_LOCK_TIMEOUT, CAMPAIGN_REPOSITORY, CampaignRepository } from './campaign.js'
-import { CampaignModel, FullCampaignModel } from './campaign.models.js'
 import { rawCampaignSchema, rawFullCampaignSchema } from './campaign.schemas.js'
 
 /**
@@ -22,18 +31,29 @@ import { rawCampaignSchema, rawFullCampaignSchema } from './campaign.schemas.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { CAMPAIGN_REPOSITORY, CampaignRepository, RedisCampaignRepository } from '@famir/database'
+ * import { RedisCampaignRepository } from '@famir/database'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisCampaignRepository.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { CAMPAIGN_REPOSITORY, CampaignRepository } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const campaignRepository = container.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY)
  *
- * // TODO more examples
+ * // Read 'httpbin' campaign
+ * const campaign = await campaignRepository.read('httpbin')
+ * console.log(campaign)
  * ```
  *
  * @category Campaign

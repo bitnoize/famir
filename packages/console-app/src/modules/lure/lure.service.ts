@@ -9,10 +9,10 @@ import {
   REDIRECTOR_REPOSITORY,
   RedirectorParams,
   RedirectorRepository,
+  ReplServerError,
   TARGET_REPOSITORY,
   TargetRepository,
-} from '@famir/database'
-import { ReplServerError } from '@famir/repl-server'
+} from '@famir/domain'
 
 /**
  * DI token for the lure service.

@@ -1,8 +1,18 @@
 import { DIContainer, LifecycleError, serializeError } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  Config,
+  CONFIG,
+  HTTP_SERVER,
+  HTTP_SERVER_DEFAULT_ERROR_PAGE,
+  HttpServer,
+  HttpServerError,
+  Logger,
+  LOGGER,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import http from 'node:http'
 import WebSocket, { WebSocketServer } from 'ws'
 import {
@@ -11,14 +21,7 @@ import {
 } from './http-server-context-factory.js'
 import { HttpServerContext } from './http-server-context.js'
 import { HTTP_SERVER_ROUTER, HttpServerRouter } from './http-server-router.js'
-import { HttpServerError } from './http-server.error.js'
-import {
-  HTTP_SERVER,
-  HTTP_SERVER_DEFAULT_ERROR_PAGE,
-  HttpServer,
-  HttpServerSettings,
-  NativeHttpServerConfig,
-} from './http-server.js'
+import { HttpServerSettings, NativeHttpServerConfig } from './http-server.js'
 import { nativeHttpServerConfigSchema } from './http-server.schemas.js'
 
 /**
@@ -47,13 +50,22 @@ interface NativeHttpServerOptions extends HttpServerSettings {
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { HTTP_SERVER, HttpServer, NativeHttpServer } from '@famir/http-server'
+ * import { NativeHttpServer } from '@famir/http-server'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register in DI container
  * NativeHttpServer.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { HTTP_SERVER, HttpServer } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve from DI container
  * const httpServer = container.resolve<HttpServer>(HTTP_SERVER)

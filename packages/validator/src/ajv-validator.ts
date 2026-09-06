@@ -1,32 +1,34 @@
 import { DIContainer } from '@famir/common'
+import { VALIDATOR, Validator, ValidatorError } from '@famir/domain'
 import { Ajv, ValidateFunction } from 'ajv'
-import { ValidatorError } from './validator.error.js'
-import { VALIDATOR, Validator } from './validator.js'
 
 /**
  * Ajv-based validator implementation.
  *
  * Provides thread-safe JSON Schema validation with comprehensive error reporting.
- * Uses the Ajv library as the underlying validation engine.
+ * Uses the **Ajv** library as the underlying validation engine.
  *
  * @see https://ajv.js.org/ - Ajv documentation
  *
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import {
- *   VALIDATOR,
- *   Validator,
- *   AjvValidator,
- *   ValidatorError,
- *   JSONSchemaType,
- * } from '@famir/validator'
+ * import { AjvValidator } from '@famir/validator'
  *
- * // Get the container singleton.
+ * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * AjvValidator.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer, JSONSchemaType } from '@famir/common'
+ * import { VALIDATOR, Validator, ValidatorError } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const validator = container.resolve<Validator>(VALIDATOR)

@@ -3,15 +3,21 @@ import {
   analyzeJobDataSchema,
   CONSUMER_ASSETS,
   CONSUMER_ROUTER,
-  ConsumerAssets,
-  ConsumerRouter,
+  type ConsumerAssets,
+  type ConsumerRouter,
 } from '@famir/consumer'
-import { Logger, LOGGER } from '@famir/logger'
-import { ANALYZE_QUEUE_NAME, AnalyzeJobData } from '@famir/producer'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  ANALYZE_QUEUE_NAME,
+  AnalyzeJobData,
+  Logger,
+  LOGGER,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { BaseController } from '../base/index.js'
-import { type AnalyzeService, ANALYZE_SERVICE } from './analyze.service.js'
+import { ANALYZE_SERVICE, type AnalyzeService } from './analyze.service.js'
 
 /**
  * DI token for the analyze controller.

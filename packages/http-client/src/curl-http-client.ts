@@ -1,19 +1,27 @@
 import { DIContainer } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { HttpBody, HttpConnection, HttpHeaders, HttpMethod } from '@famir/http-proto'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  Config,
+  CONFIG,
+  HTTP_CLIENT,
+  HttpBody,
+  HttpClient,
+  HttpClientError,
+  HttpClientSimpleResult,
+  HttpClientStreamResult,
+  HttpConnection,
+  HttpHeaders,
+  HttpMethod,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { Curl, CurlCode, CurlFeature } from 'node-libcurl'
 import { PassThrough, pipeline, Readable } from 'node:stream'
-import { HttpClientError } from './http-client.error.js'
 import {
-  HTTP_CLIENT,
-  HttpClient,
-  HttpClientSimpleResult,
   HttpClientSimpleState,
   HttpClientStreamRequestState,
   HttpClientStreamResponseState,
-  HttpClientStreamResult,
 } from './http-client.js'
 
 /**
@@ -32,13 +40,22 @@ import {
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { HTTP_CLIENT, HttpClient, CurlHttpClient } from '@famir/http-client'
+ * import { CurlHttpClient } from '@famir/http-client'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * CurlHttpClient.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { HTTP_CLIENT, HttpClient } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const httpClient = container.resolve<HttpClient>(HTTP_CLIENT)

@@ -1,22 +1,25 @@
 import { DIContainer, LifecycleError, serializeError } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  Config,
+  CONFIG,
+  Logger,
+  LOGGER,
+  REPL_SERVER,
+  REPL_SERVER_DEFAULT_BANNER_GREET,
+  REPL_SERVER_DEFAULT_BANNER_LEAVE,
+  REPL_SERVER_DEFAULT_PROMPT,
+  ReplServer,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
+
 import { Console } from 'node:console'
 import net from 'node:net'
 import repl from 'node:repl'
 import type { Readable, Writable } from 'node:stream'
 import { BaseReplServer } from './base-repl-server.js'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
-import {
-  NetReplServerConfig,
-  REPL_SERVER,
-  REPL_SERVER_DEFAULT_BANNER_GREET,
-  REPL_SERVER_DEFAULT_BANNER_LEAVE,
-  REPL_SERVER_DEFAULT_PROMPT,
-  ReplServer,
-  ReplServerSettings,
-} from './repl-server.js'
+import { NetReplServerConfig, ReplServerSettings } from './repl-server.js'
 import { netReplServerConfigSchema } from './repl-server.schemas.js'
 
 /**
@@ -45,13 +48,22 @@ interface NetReplServerOptions extends ReplServerSettings {
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { REPL_SERVER, ReplServer, NetReplServer } from '@famir/repl-server'
+ * import { NetReplServer } from '@famir/repl-server'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register in DI container
  * NetReplServer.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { REPL_SERVER, ReplServer } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve from DI container
  * const replServer = container.resolve<ReplServer>(REPL_SERVER)

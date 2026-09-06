@@ -1,12 +1,20 @@
 import { DIContainer } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
-import { PRODUCER_CONNECTOR, ProducerConnector } from '../../producer-connector.js'
-import { ProducerError } from '../../producer.error.js'
+import {
+  ANALYZE_QUEUE,
+  ANALYZE_QUEUE_NAME,
+  AnalyzeJobData,
+  AnalyzeQueue,
+  Config,
+  CONFIG,
+  Logger,
+  LOGGER,
+  PRODUCER_CONNECTOR,
+  ProducerConnector,
+  ProducerError,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { BullBaseQueue } from '../base/index.js'
-import { AnalyzeJobData } from './analyze.job.js'
-import { ANALYZE_QUEUE, ANALYZE_QUEUE_NAME, AnalyzeQueue } from './analyze.js'
 
 /**
  * Bull-based analyze queue implementation.
@@ -20,13 +28,22 @@ import { ANALYZE_QUEUE, ANALYZE_QUEUE_NAME, AnalyzeQueue } from './analyze.js'
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { ANALYZE_QUEUE, AnalyzeQueue, BullAnalyzeQueue } from '@famir/producer'
+ * import { BullAnalyzeQueue } from '@famir/producer'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * BullAnalyzeQueue.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { ANALYZE_QUEUE, AnalyzeQueue } from '@famir/domain'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const analyzeQueue = container.resolve<AnalyzeQueue>(ANALYZE_QUEUE)

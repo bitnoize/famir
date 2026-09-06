@@ -1,18 +1,23 @@
 import { DIContainer } from '@famir/common'
-import { FullMessageModel } from '@famir/database'
-import { Logger, LOGGER } from '@famir/logger'
+import {
+  FullMessageModel,
+  Logger,
+  LOGGER,
+  TEMPLATER,
+  Templater,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import {
   REPL_SERVER_ASSETS,
   REPL_SERVER_ROUTER,
-  ReplServerAssets,
-  ReplServerRouter,
+  type ReplServerAssets,
+  type ReplServerRouter,
 } from '@famir/repl-server'
-import { TEMPLATER, Templater } from '@famir/templater'
-import { Validator, VALIDATOR } from '@famir/validator'
 import { BaseController } from '../base/index.js'
 import { ReadMessageArgs } from './message.js'
 import { readMessageArgsSchema } from './message.schemas.js'
-import { type MessageService, MESSAGE_SERVICE } from './message.service.js'
+import { MESSAGE_SERVICE, type MessageService } from './message.service.js'
 
 /**
  * DI token for the message controller.

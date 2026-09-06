@@ -1,6 +1,5 @@
-import { Validator } from '@famir/validator'
+import { ReplServerError, Validator } from '@famir/domain'
 import yargsParser from 'yargs-parser'
-import { ReplServerError } from './repl-server.error.js'
 
 /**
  * Represents the repl-server command option.

@@ -3,12 +3,4 @@
 [![npm version](https://img.shields.io/npm/v/@famir/validator.svg)](https://www.npmjs.com/package/@famir/validator)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-JSON-Schema validation service.
-
-## Features
-
-- Fast, thread-safe and immutable **Ajv** backend.
-- Simple API for manage, guard and assert JSON-Schemas.
-- Predefined simple validation schemas.
-- Throws a `ValidatorError` with detailed validation reporting.
-- Integration with other packages of the ecosystem.
+JSON-Schema validation service based on fast, thread-safe and immutable **Ajv** library.

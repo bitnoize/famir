@@ -1,9 +1,15 @@
 import { DIContainer, LifecycleError, serializeError } from '@famir/common'
-import { Config, CONFIG } from '@famir/config'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
+import {
+  Config,
+  CONFIG,
+  CONSUMER_CONNECTOR,
+  ConsumerConnector,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR,
+} from '@famir/domain'
 import { Redis } from 'ioredis'
-import { CONSUMER_CONNECTOR, ConsumerConnector } from './consumer-connector.js'
 import { BullConsumerConfig, RedisConsumerConnection } from './consumer.js'
 import { bullConsumerConfigSchema } from './consumer.schemas.js'
 
@@ -31,18 +37,23 @@ interface BullConsumerConnectorOptions {
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import {
- *   CONSUMER_CONNECTOR,
- *   ConsumerConnector,
- *   RedisConsumerConnector,
- *   RedisConsumerConnection,
- * } from '@famir/consumer'
+ * import { RedisConsumerConnector } from '@famir/consumer'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register dependency in container
  * RedisConsumerConnector.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { CONSUMER_CONNECTOR, ConsumerConnector } from '@famir/domain'
+ * import { RedisConsumerConnection } from '@famir/consumer'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve dependency from container
  * const connector = container.resolve<ConsumerConnector>(CONSUMER_CONNECTOR)

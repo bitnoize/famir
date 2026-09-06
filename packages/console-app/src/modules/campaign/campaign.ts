@@ -1,4 +1,4 @@
-import { TargetAccessLevel } from '@famir/database'
+import { TargetAccessLevel } from '@famir/domain'
 
 /**
  * @category Campaign

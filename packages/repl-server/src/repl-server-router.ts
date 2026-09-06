@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
-import { Logger, LOGGER } from '@famir/logger'
-import { Validator, VALIDATOR } from '@famir/validator'
+import { Logger, LOGGER, Validator, VALIDATOR } from '@famir/domain'
 import {
   ReplServerCommand,
   ReplServerCommandAction,
@@ -24,13 +23,22 @@ export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
  * @example
  * ```ts
  * import { DIContainer } from '@famir/common'
- * import { REPL_SERVER_ROUTER, ReplServerRouter } from '@famir/repl-server'
+ * import { ReplServerRouter } from '@famir/repl-server'
  *
  * // Get container singleton
  * const container = DIContainer.getInstance()
  *
  * // Register in DI container
  * ReplServerRouter.register(container)
+ * ```
+ *
+ * @example
+ * ```ts
+ * import { DIContainer } from '@famir/common'
+ * import { REPL_SERVER_ROUTER, type ReplServerRouter } from '@famir/repl-server'
+ *
+ * // Get container singleton
+ * const container = DIContainer.getInstance()
  *
  * // Resolve from DI container
  * const router = container.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)

@@ -13,10 +13,10 @@ import {
   ProxyRepository,
   REDIRECTOR_REPOSITORY,
   RedirectorRepository,
+  ReplServerError,
   TARGET_REPOSITORY,
   TargetRepository,
-} from '@famir/database'
-import { ReplServerError } from '@famir/repl-server'
+} from '@famir/domain'
 import {
   CampaignPreset,
   CampaignPresetLure,
