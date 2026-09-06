@@ -160,7 +160,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create target`, {
-        database: {
+        data: {
           target: {
             campaignId,
             targetId,
@@ -334,7 +334,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database update target`, {
-        database: {
+        data: {
           target: {
             campaignId,
             targetId,
@@ -365,7 +365,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database enable target`, {
-        database: {
+        data: {
           target: {
             campaignId,
             targetId,
@@ -396,7 +396,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database disable target`, {
-        database: {
+        data: {
           target: {
             campaignId,
             targetId,
@@ -441,7 +441,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       this.checkStatusReplies(statusReplies)
 
       this.logger.info(`Database append target labels`, {
-        database: {
+        data: {
           target: {
             campaignId,
             targetId,
@@ -474,7 +474,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database remove target labels`, {
-        database: {
+        data: {
           target: {
             campaignId,
             targetId,
@@ -505,7 +505,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete target`, {
-        database: {
+        data: {
           target: {
             campaignId,
             targetId,

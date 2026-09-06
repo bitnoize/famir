@@ -12,11 +12,11 @@ import {
   TemplaterData,
   Validator,
 } from '@famir/domain'
-import type {
-  HttpServerAssets,
-  HttpServerContext,
+import {
+  type HttpServerAssets,
+  type HttpServerContext,
   HttpServerContextState,
-  HttpServerRouter,
+  type HttpServerRouter,
 } from '@famir/http-server'
 import { HttpMessage } from '@famir/http-tools'
 

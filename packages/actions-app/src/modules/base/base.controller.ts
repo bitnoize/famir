@@ -1,4 +1,4 @@
-import type { ConsumerAssets, ConsumerRouter } from '@famir/consumer'
+import { type ConsumerAssets, type ConsumerRouter } from '@famir/consumer'
 import { Logger, Templater, Validator } from '@famir/domain'
 
 /**

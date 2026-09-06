@@ -1,5 +1,5 @@
 import { Logger, ReplServerError, Templater, Validator } from '@famir/domain'
-import type { ReplServerAssets, ReplServerRouter } from '@famir/repl-server'
+import { type ReplServerAssets, type ReplServerRouter } from '@famir/repl-server'
 import { Console } from 'node:console'
 import { parse as yamlParse } from 'yaml'
 

@@ -108,7 +108,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create session`, {
-        database: {
+        data: {
           session: {
             campaignId,
             sessionId,
@@ -166,7 +166,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database auth session`, {
-        database: {
+        data: {
           session: {
             campaignId,
             sessionId,
@@ -205,7 +205,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database upgrade session`, {
-        database: {
+        data: {
           session: {
             campaignId,
             lureId,

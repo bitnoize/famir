@@ -122,7 +122,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create campaign`, {
-        database: {
+        data: {
           campaign: {
             campaignId,
             mirrorDomain,
@@ -190,7 +190,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database lock campaign`, {
-        database: {
+        data: {
           campaign: {
             campaignId,
           },
@@ -220,7 +220,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database unlock campaign`, {
-        database: {
+        data: {
           campaign: {
             campaignId,
           },
@@ -259,7 +259,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database update campaign`, {
-        database: {
+        data: {
           campaign: {
             campaignId,
           },
@@ -287,7 +287,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete campaign`, {
-        database: {
+        data: {
           campaign: {
             campaignId,
           },

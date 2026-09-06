@@ -110,7 +110,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create lure`, {
-        database: {
+        data: {
           lure: {
             campaignId,
             lureId,
@@ -187,7 +187,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database enable lure`, {
-        database: {
+        data: {
           lure: {
             campaignId,
             lureId,
@@ -218,7 +218,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database disable lure`, {
-        database: {
+        data: {
           lure: {
             campaignId,
             lureId,
@@ -255,7 +255,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete lure`, {
-        database: {
+        data: {
           lure: {
             campaignId,
             lureId,

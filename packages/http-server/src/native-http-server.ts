@@ -332,16 +332,7 @@ export class NativeHttpServer implements HttpServer {
 
       await this.executeMiddlewareChain(ctx)
 
-      if (ctx.isComplete) {
-        if (ctx.state.verbose) {
-          this.logger.debug(`HttpServer complete normal request`, {
-            httpServer: {
-              req: this.dumpRequest(req),
-              ctx: ctx.dump(),
-            },
-          })
-        }
-      } else {
+      if (!ctx.isComplete) {
         throw HttpServerError.internalError(`Internal error`, {
           reason: `Incomplete server request`,
           ctx: ctx.dump(),
@@ -371,16 +362,7 @@ export class NativeHttpServer implements HttpServer {
 
       await this.executeMiddlewareChain(ctx)
 
-      if (ctx.isComplete) {
-        if (ctx.state.verbose) {
-          this.logger.debug(`HttpServer complete websocket connection`, {
-            httpServer: {
-              req: this.dumpRequest(req),
-              ctx: ctx.dump(),
-            },
-          })
-        }
-      } else {
+      if (!ctx.isComplete) {
         throw HttpServerError.internalError(`Internal error`, {
           reason: `Incomplete websocket connection`,
           ctx: ctx.dump(),
@@ -400,35 +382,29 @@ export class NativeHttpServer implements HttpServer {
    * @throws HttpServerError If middleware processing fails.
    */
   protected async executeMiddlewareChain(ctx: HttpServerContext): Promise<void> {
-    try {
-      let index = -1
+    let index = -1
 
-      const dispatch = async (idx: number): Promise<void> => {
-        if (idx <= index) {
-          throw new Error('Middleware next() called multiple times')
-        }
-
-        index = idx
-
-        const middleware = this.router.getMiddleware(idx)
-
-        if (middleware) {
-          const [name, handler] = middleware
-
-          ctx.trace.push(name)
-
-          await handler(ctx, async () => {
-            await dispatch(idx + 1)
-          })
-        }
+    const dispatch = async (idx: number): Promise<void> => {
+      if (idx <= index) {
+        throw new Error('Middleware next() called multiple times')
       }
 
-      await dispatch(0)
-    } catch (error) {
-      throw HttpServerError.wrap(error, {
-        ctx: ctx.dump(),
-      })
+      index = idx
+
+      const middleware = this.router.getMiddleware(idx)
+
+      if (middleware) {
+        const [name, handler] = middleware
+
+        ctx.trace.push(name)
+
+        await handler(ctx, async () => {
+          await dispatch(idx + 1)
+        })
+      }
     }
+
+    await dispatch(0)
   }
 
   /**

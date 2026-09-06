@@ -111,7 +111,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create redirector`, {
-        database: {
+        data: {
           redirector: {
             campaignId,
             redirectorId,
@@ -190,7 +190,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database update redirector`, {
-        database: {
+        data: {
           redirector: {
             campaignId,
             redirectorId,
@@ -235,7 +235,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       this.checkStatusReplies(statusReplies)
 
       this.logger.info(`Database append redirector fields`, {
-        database: {
+        data: {
           redirector: {
             campaignId,
             redirectorId,
@@ -268,7 +268,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database remove redirector fields`, {
-        database: {
+        data: {
           redirector: {
             campaignId,
             redirectorId,
@@ -299,7 +299,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete redirector`, {
-        database: {
+        data: {
           redirector: {
             campaignId,
             redirectorId,

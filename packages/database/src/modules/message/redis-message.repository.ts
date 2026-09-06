@@ -158,7 +158,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create message`, {
-        database: {
+        data: {
           message: {
             campaignId,
             messageId,
@@ -203,7 +203,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create dummy message`, {
-        database: {
+        data: {
           message: {
             campaignId,
             messageId,

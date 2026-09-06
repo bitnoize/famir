@@ -114,6 +114,31 @@ export class CompleteController extends BaseController {
           startTime: ctx.startTime,
           finishTime: ctx.finishTime,
         })
+
+        this.logger.debug(`ReverseApp complete message`, {
+          data: {
+            message: {
+              campaignId: campaign.campaignId,
+              messageId: message.id,
+              proxyId: proxy.proxyId,
+              targetId: target.targetId,
+              sessionId: session.sessionId,
+              type: message.type,
+              method: message.method.get(),
+              url: message.url.toRelative(),
+              requestHeaders: message.requestHeaders.toObject(),
+              requestBody: message.requestBody.length,
+              status: message.status.get(),
+              responseHeaders: message.responseHeaders.toObject(),
+              responseBody: message.responseBody.length,
+              connection: message.connection,
+              payload: message.payload,
+              errors: message.errors,
+              analyze: message.analyze,
+              totalTime: ctx.totalTime,
+            }
+          },
+        })
       } else {
         await this.completeService.createDummyMessage({
           campaignId: campaign.campaignId,

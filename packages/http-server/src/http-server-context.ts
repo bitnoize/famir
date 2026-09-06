@@ -117,6 +117,9 @@ export interface HttpServerContext {
   /** Timestamp when processing finished. */
   readonly finishTime: number
 
+  /** Total processing time. */
+  readonly totalTime: number
+
   /**
    * Dumps a serializable representation of a context for logging.
    *
@@ -240,10 +243,13 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
 
   finishTime: number = 0
 
+  get totalTime(): number {
+    return this.finishTime > this.startTime ? this.finishTime - this.startTime : 0
+  }
+
   dump(): object {
     return {
       type: this.type,
-      trace: this.trace,
       method: this.method.get(),
       url: this.url.toRelative(),
       requestHeaders: this.requestHeaders.toObject(),
@@ -253,7 +259,8 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
       responseBody: this.responseBody.length,
       isComplete: this.isComplete,
       isBot: this.isBot,
-      totalTime: this.finishTime > this.startTime ? this.finishTime - this.startTime : 0,
+      totalTime: this.totalTime,
+      trace: this.trace,
     }
   }
 

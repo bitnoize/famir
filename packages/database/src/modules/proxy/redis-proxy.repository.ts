@@ -108,7 +108,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database create proxy`, {
-        database: {
+        data: {
           proxy: {
             campaignId,
             proxyId,
@@ -162,7 +162,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database enable proxy`, {
-        database: {
+        data: {
           proxy: {
             campaignId,
             proxyId,
@@ -193,7 +193,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database disable proxy`, {
-        database: {
+        data: {
           proxy: {
             campaignId,
             proxyId,
@@ -224,7 +224,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
       this.checkStatusReply(statusReply)
 
       this.logger.info(`Database delete proxy`, {
-        database: {
+        data: {
           proxy: {
             campaignId,
             proxyId,
