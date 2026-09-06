@@ -136,7 +136,7 @@ export class CompleteController extends BaseController {
               errors: message.errors,
               analyze: message.analyze,
               totalTime: ctx.totalTime,
-            }
+            },
           },
         })
       } else {

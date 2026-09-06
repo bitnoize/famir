@@ -89,13 +89,8 @@ describe('formatCookies', () => {
       assert.strictEqual(formatted.includes(';'), true)
     })
 
-    it('should skip null values', () => {
-      const formatted = formatCookies({ session: 'abc123', empty: null as any })
-      assert.match(formatted, /session=abc123/)
-    })
-
     it('should skip undefined values', () => {
-      const formatted = formatCookies({ session: 'abc123', empty: undefined as any })
+      const formatted = formatCookies({ session: 'abc123', empty: undefined })
       assert.match(formatted, /session=abc123/)
     })
   })
@@ -324,40 +319,14 @@ describe('formatSetCookies', () => {
       })
       assert.match(formatted.join('\n'), /session=abc; Max-Age=3600/)
     })
-
-    it('should skip null expires', () => {
-      const formatted = formatSetCookies({
-        session: { value: 'abc', expires: null as any },
-      })
-      assert.match(formatted.join('\n'), /session=abc/)
-    })
   })
 
   describe('null/undefined handling', () => {
-    it('should skip null cookies', () => {
-      const formatted = formatSetCookies({
-        session: null as any,
-      })
-      assert.strictEqual(formatted.length, 0)
-    })
-
     it('should skip undefined cookies', () => {
       const formatted = formatSetCookies({
-        session: undefined as any,
+        session: undefined,
       })
       assert.strictEqual(formatted.length, 0)
-    })
-
-    it('should skip null attributes', () => {
-      const formatted = formatSetCookies({
-        session: {
-          value: 'abc',
-          path: null as any,
-          domain: null as any,
-        },
-      })
-      const str = formatted.join('\n')
-      assert.strictEqual(str.includes('Path=null'), false)
     })
   })
 

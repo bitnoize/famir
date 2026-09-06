@@ -93,7 +93,7 @@ describe('HttpMessage', () => {
 
     it('should skip null values in merge', () => {
       const msg = HttpMessage.create('normal')
-      msg.mergeConnection({ clientIp: '127.0.0.1', serverIp: null as any })
+      msg.mergeConnection({ clientIp: '127.0.0.1', serverIp: null })
       assert.strictEqual(msg.connection['clientIp'], '127.0.0.1')
       assert.strictEqual(msg.connection['serverIp'], undefined)
     })
