@@ -12,11 +12,10 @@ import {
   Validator,
   VALIDATOR,
 } from '@famir/domain'
-
 import { Console } from 'node:console'
 import net from 'node:net'
-import repl from 'node:repl'
 import type { Readable, Writable } from 'node:stream'
+import * as readline from 'readline'
 import { BaseReplServer } from './base-repl-server.js'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
 import { NetReplServerConfig, ReplServerSettings } from './repl-server.js'
@@ -223,17 +222,17 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
     try {
       const console = this.initConsole(socket, socket)
 
-      const rs = this.initReplServer(socket, socket)
+      const rl = this.initReadline(socket, socket)
 
-      rs.on('exit', () => {
+      rl.on('close', () => {
         console.log(this.options.bannerLeave)
       })
 
-      this.defineCommands(console, rs)
+      this.setupReadline(console, rl)
 
       console.log(this.options.bannerGreet)
 
-      rs.displayPrompt()
+      rl.prompt()
     } catch (error) {
       this.logger.error(`ReplServer handle connection error`, {
         error: serializeError(error),
@@ -252,20 +251,17 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
       colorMode: this.options.useColors,
       inspectOptions: {
         showHidden: false,
-        depth: 8,
+        depth: null,
       },
     })
   }
 
-  protected initReplServer(input: Readable, output: Writable): repl.REPLServer {
-    return repl.start({
+  protected initReadline(input: Readable, output: Writable): readline.Interface {
+    return readline.createInterface({
       input,
       output,
       terminal: false,
-      useGlobal: false,
       prompt: this.options.prompt,
-      ignoreUndefined: true,
-      preview: false,
     })
   }
 

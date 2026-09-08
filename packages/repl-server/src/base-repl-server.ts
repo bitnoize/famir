@@ -1,9 +1,8 @@
 import { serializeError } from '@famir/common'
 import { Config, Logger, ReplServer, ReplServerError, Validator } from '@famir/domain'
 import { Console } from 'node:console'
-import repl from 'node:repl'
 import type { Readable, Writable } from 'node:stream'
-import { ReplServerCommand, ReplServerCommandArgs } from './repl-server-command.js'
+import { Interface as ReadlineInterface } from 'readline'
 import { ReplServerRouter } from './repl-server-router.js'
 
 /**
@@ -11,8 +10,6 @@ import { ReplServerRouter } from './repl-server-router.js'
  *
  * All specific repl-server implementations should extend this class to ensure
  * consistent behavior and reduce code duplication.
- *
- * @internal
  */
 export abstract class BaseReplServer implements ReplServer {
   /**
@@ -44,89 +41,93 @@ export abstract class BaseReplServer implements ReplServer {
   protected abstract initConsole(stdout: Writable, stderr: Writable): Console
 
   /**
-   * Initializes and starts the REPL server.
+   * Initializes and starts the Readline.
    *
    * @param input - The input readable stream.
    * @param output - The output writable stream.
-   * @returns The initialized REPL server instance.
+   * @returns The initialized Readline instance.
    */
-  protected abstract initReplServer(input: Readable, output: Writable): repl.REPLServer
+  protected abstract initReadline(input: Readable, output: Writable): ReadlineInterface
 
   /**
-   * Defines the REPL server commands.
+   * Setup readline to parse and execute commands.
    *
    * @param console - The underlying Console instance.
-   * @param rs - The underlying REPL server instance.
-   * @returns The initialized REPL server instance.
+   * @param rl - The readline instance.
    */
-  protected defineCommands(console: Console, rs: repl.REPLServer) {
-    this.router.eachCommand((command) => {
-      rs.defineCommand(command.spec.name, {
-        help: command.spec.description,
-        action: (args: string) => {
-          rs.clearBufferedCommand()
+  protected setupReadline(console: Console, rl: ReadlineInterface) {
+    rl.on('line', (line: string) => {
+      const trimmedLine = line.trim()
 
-          const parsedArgs = command.parseArgs(args)
+      if (!trimmedLine) {
+        rl.prompt()
 
-          if (!parsedArgs) {
-            rs.displayPrompt()
+        return
+      }
 
-            return
-          }
+      const match = trimmedLine.match(/^(\S+)\s+(.*)$/)
 
-          if (command.checkHelp(parsedArgs)) {
-            command.showHelp(console)
+      const [commandName, args] = match ? [match[1], match[2] ?? ''] : [trimmedLine, '']
 
-            rs.displayPrompt()
+      if (!commandName) {
+        rl.prompt()
 
-            return
-          }
+        return
+      }
 
-          this.executeCommand(console, command, parsedArgs, () => {
-            rs.displayPrompt()
-          })
-        },
-      })
-    })
-  }
+      const command = this.router.getCommand(commandName)
 
-  /**
-   * Executes command with arguments.
-   *
-   * @param console - The underlying Console instance.
-   * @param command - The command instance.
-   * @param args - The parsed command args.
-   */
-  protected executeCommand(
-    console: Console,
-    command: ReplServerCommand<ReplServerCommandArgs>,
-    args: ReplServerCommandArgs,
-    finallyFun: () => void
-  ) {
-    command
-      .execute(console, args)
-      .catch((error: unknown) => {
-        if (error instanceof ReplServerError) {
-          console.error(`Command error: ${error.code} ${error.message}`)
-          console.error(error.context)
+      if (!command) {
+        console.error(`Command '${commandName}' not exists.`)
 
-          if (error.cause) {
-            console.error(error.cause)
-          }
+        rl.prompt()
 
-          if (error.isInternalError) {
-            this.logger.error(`ReplServer execute command internal error`, {
+        return
+      }
+
+      const parsedArgs = command.parseArgs(args)
+
+      if (!parsedArgs) {
+        rl.prompt()
+
+        return
+      }
+
+      if (command.checkHelp(parsedArgs)) {
+        command.showHelp(console)
+
+        rl.prompt()
+
+        return
+      }
+
+      command
+        .execute(console, parsedArgs)
+        .catch((error: unknown) => {
+          if (error instanceof ReplServerError) {
+            console.error(`Command error: ${error.code} ${error.message}`)
+            console.error(error.context)
+
+            if (error.cause) {
+              console.error({ ...error.cause })
+            }
+
+            if (error.isInternalError) {
+              this.logger.error(`ReplServer execute command internal error`, {
+                error: serializeError(error),
+              })
+            }
+          } else {
+            console.error(`Command unknown error`)
+
+            this.logger.error(`ReplServer execute command unknown error`, {
               error: serializeError(error),
             })
           }
-        } else {
-          console.error(`Command unknown error`)
-
-          this.logger.error(`ReplServer execute command unknown error`, {
-            error: serializeError(error),
-          })
-        }
-      })
-      .finally(finallyFun)
+        })
+        .finally(() => {
+          rl.prompt()
+        })
+    })
   }
 }

@@ -1,6 +1,5 @@
 import { JSONSchemaType, booleanSchema } from '@famir/common'
 import {
-  AssetsArgs,
   CleanupDatabaseArgs,
   DeleteEdgeServerConfigArgs,
   GetDatabaseInfoArgs,
@@ -8,14 +7,36 @@ import {
   LoadDatabaseFunctionsArgs,
   ReadEdgeServerConfigArgs,
   ReadEdgeServerUpstreamsArgs,
+  SystemAssetsArgs,
+  SystemHelpArgs,
   UpsertEdgeServerConfigArgs,
 } from './system.js'
 
 /**
- * @category Database
+ * @category System
  * @internal
  */
-export const assetsArgsSchema: JSONSchemaType<AssetsArgs> = {
+export const systemHelpArgsSchema: JSONSchemaType<SystemHelpArgs> = {
+  type: 'object',
+  required: ['_'],
+  properties: {
+    _: {
+      type: 'array',
+      items: {
+        type: 'string',
+      },
+      minItems: 0,
+      maxItems: 0,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category System
+ * @internal
+ */
+export const systemAssetsArgsSchema: JSONSchemaType<SystemAssetsArgs> = {
   type: 'object',
   required: ['_', 'assetName'],
   properties: {
@@ -35,7 +56,7 @@ export const assetsArgsSchema: JSONSchemaType<AssetsArgs> = {
 } as const
 
 /**
- * @category Database
+ * @category System
  * @internal
  */
 export const getDatabaseInfoArgsSchema: JSONSchemaType<GetDatabaseInfoArgs> = {
@@ -55,7 +76,7 @@ export const getDatabaseInfoArgsSchema: JSONSchemaType<GetDatabaseInfoArgs> = {
 } as const
 
 /**
- * @category Database
+ * @category System
  * @internal
  */
 export const loadDatabaseFunctionsArgsSchema: JSONSchemaType<LoadDatabaseFunctionsArgs> = {
@@ -76,7 +97,7 @@ export const loadDatabaseFunctionsArgsSchema: JSONSchemaType<LoadDatabaseFunctio
 } as const
 
 /**
- * @category Database
+ * @category System
  * @internal
  */
 export const cleanupDatabaseArgsSchema: JSONSchemaType<CleanupDatabaseArgs> = {
@@ -97,7 +118,7 @@ export const cleanupDatabaseArgsSchema: JSONSchemaType<CleanupDatabaseArgs> = {
 } as const
 
 /**
- * @category Producer
+ * @category System
  * @internal
  */
 export const getProducerInfoArgsSchema: JSONSchemaType<GetProducerInfoArgs> = {

@@ -16,7 +16,6 @@ import {
 } from '@famir/repl-server'
 import { BaseController } from '../base/index.js'
 import {
-  AssetsArgs,
   CleanupDatabaseArgs,
   DeleteEdgeServerConfigArgs,
   GetDatabaseInfoArgs,
@@ -24,10 +23,11 @@ import {
   LoadDatabaseFunctionsArgs,
   ReadEdgeServerConfigArgs,
   ReadEdgeServerUpstreamsArgs,
+  SystemAssetsArgs,
+  SystemHelpArgs,
   UpsertEdgeServerConfigArgs,
 } from './system.js'
 import {
-  assetsArgsSchema,
   cleanupDatabaseArgsSchema,
   deleteEdgeServerConfigArgsSchema,
   getDatabaseInfoArgsSchema,
@@ -35,6 +35,8 @@ import {
   loadDatabaseFunctionsArgsSchema,
   readEdgeServerConfigArgsSchema,
   readEdgeServerUpstreamsArgsSchema,
+  systemAssetsArgsSchema,
+  systemHelpArgsSchema,
   upsertEdgeServerConfigArgsSchema,
 } from './system.schemas.js'
 import { SYSTEM_SERVICE, type SystemService } from './system.service.js'
@@ -103,7 +105,8 @@ export class SystemController extends BaseController {
     super(validator, logger, templater, assets, router)
 
     this.validator
-      .addSchema('console-assets-args', assetsArgsSchema)
+      .addSchema('console-system-help-args', systemHelpArgsSchema)
+      .addSchema('console-system-assets-args', systemAssetsArgsSchema)
       .addSchema('console-get-database-info-args', getDatabaseInfoArgsSchema)
       .addSchema('console-load-database-functions-args', loadDatabaseFunctionsArgsSchema)
       .addSchema('console-cleanup-database-args', cleanupDatabaseArgsSchema)
@@ -118,11 +121,26 @@ export class SystemController extends BaseController {
    * Registers used commands in the router.
    */
   use() {
-    this.router.addCommand<AssetsArgs>(
+    this.router.addCommand<SystemHelpArgs>(
+      {
+        name: 'help',
+        description: `Show help screen with list of all commands.`,
+        schemaName: 'console-system-help-args',
+      },
+      null,
+      // eslint-disable-next-line @typescript-eslint/require-await
+      async (console) => {
+        console.log(`Fake Mirrors Console`)
+
+        console.table(this.router.getCommandsOverview())
+      }
+    )
+
+    this.router.addCommand<SystemAssetsArgs>(
       {
         name: 'assets',
         description: `Show assets list or specified asset content.`,
-        schemaName: 'console-assets-args',
+        schemaName: 'console-system-assets-args',
         options: [
           {
             name: 'asset-name',
@@ -133,13 +151,14 @@ export class SystemController extends BaseController {
           },
         ],
       },
-      (console, spec) => {
-        console.log(`// Show assets list:`)
-        console.log(`.${spec.name}`)
+      (spec) => `Assets are text files that are hardcoded directly into the application.
 
-        console.log(`// Show specific asset content:`)
-        console.log(`.${spec.name} -a hello.txt`)
-      },
+Show assets list:
+> ${spec.name}
+
+Show specific asset content:
+> ${spec.name} -a hello.txt
+`,
       // eslint-disable-next-line @typescript-eslint/require-await
       async (console, spec, args) => {
         if (args.assetName) {
@@ -151,7 +170,7 @@ export class SystemController extends BaseController {
 
           console.log(asset)
         } else {
-          console.log(Array.from(this.assets.keys()))
+          console.table(Array.from(this.assets.keys()))
         }
       }
     )
@@ -163,10 +182,7 @@ export class SystemController extends BaseController {
         schemaName: 'console-get-database-info-args',
         options: [],
       },
-      (console, spec) => {
-        console.log(`// Show database info:`)
-        console.log(`.${spec.name}`)
-      },
+      null,
       async (console) => {
         const info = await this.systemService.getDatabaseInfo()
 
@@ -188,10 +204,7 @@ export class SystemController extends BaseController {
           },
         ],
       },
-      (console, spec) => {
-        console.log(`// Load database functions:`)
-        console.log(`.${spec.name} --force`)
-      },
+      null,
       async (console, spec, args) => {
         if (args.force) {
           await this.systemService.loadDatabaseFunctions()
@@ -217,10 +230,7 @@ export class SystemController extends BaseController {
           },
         ],
       },
-      (console, spec) => {
-        console.log(`// Cleanup database:`)
-        console.log(`.${spec.name} --force`)
-      },
+      null,
       async (console, spec, args) => {
         if (args.force) {
           await this.systemService.cleanupDatabase()
@@ -239,10 +249,7 @@ export class SystemController extends BaseController {
         schemaName: 'console-get-producer-info-args',
         options: [],
       },
-      (console, spec) => {
-        console.log(`// Show producer info:`)
-        console.log(`.${spec.name}`)
-      },
+      null,
       async (console) => {
         const info = await this.systemService.getProducerInfo()
 
@@ -271,10 +278,7 @@ export class SystemController extends BaseController {
           },
         ],
       },
-      (console, spec) => {
-        console.log(`// Upsert edge-server config:`)
-        console.log(`.${spec.name} -a deploy/Caddyfile-local --force`)
-      },
+      null,
       async (console, spec, args) => {
         if (args.force) {
           const config = this.parseEdgeServerConfig(args.assetName)
@@ -294,10 +298,7 @@ export class SystemController extends BaseController {
         schemaName: 'console-read-edge-server-config-args',
         options: [],
       },
-      (console, spec) => {
-        console.log(`// Read edge-server config:`)
-        console.log(`.${spec.name}`)
-      },
+      null,
       async (console) => {
         const config = await this.systemService.readEdgeServerConfig()
 
@@ -319,10 +320,7 @@ export class SystemController extends BaseController {
           },
         ],
       },
-      (console, spec) => {
-        console.log(`// Delete edge-server config:`)
-        console.log(`.${spec.name} --force`)
-      },
+      null,
       async (console, spec, args) => {
         if (args.force) {
           await this.systemService.deleteEdgeServerConfig()
@@ -341,10 +339,7 @@ export class SystemController extends BaseController {
         schemaName: 'console-read-edge-server-upstreams-args',
         options: [],
       },
-      (console, spec) => {
-        console.log(`// Read edge-server upstreams:`)
-        console.log(`.${spec.name}`)
-      },
+      null,
       async (console) => {
         const config = await this.systemService.readEdgeServerUpstreams()
 

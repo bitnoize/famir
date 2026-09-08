@@ -13,8 +13,8 @@ import {
   VALIDATOR,
 } from '@famir/domain'
 import { Console } from 'node:console'
-import repl from 'node:repl'
 import type { Readable, Writable } from 'node:stream'
+import * as readline from 'readline'
 import { BaseReplServer } from './base-repl-server.js'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
 import { CliReplServerConfig, ReplServerSettings } from './repl-server.js'
@@ -93,8 +93,8 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
   /** Built repl-server options. */
   protected readonly options: CliReplServerOptions
 
-  /** Underlying REPL server instance. */
-  protected rs: repl.REPLServer | null = null
+  /** Underlying redline instance. */
+  protected rl: readline.Interface | null = null
 
   /**
    * Creates a new repl-server instance.
@@ -131,22 +131,22 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
         return
       }
 
-      if (!this.rs) {
+      if (!this.rl) {
         const console = this.initConsole(process.stdout, process.stderr)
 
-        this.rs = this.initReplServer(process.stdin, process.stdout)
+        const rl = this.initReadline(process.stdin, process.stdout)
 
-        this.rs.on('exit', () => {
+        rl.on('close', () => {
           console.log(this.options.bannerLeave)
-
-          process.kill(process.pid, 'SIGINT')
         })
 
-        this.defineCommands(console, this.rs)
+        this.setupReadline(console, rl)
+
+        this.rl = rl
 
         console.log(this.options.bannerGreet)
 
-        this.rs.displayPrompt()
+        this.rl.prompt()
 
         this.logger.info(`ReplServer started`)
       } else {
@@ -165,10 +165,10 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
     try {
       this.#isShutdown = true
 
-      if (this.rs) {
-        this.rs.close()
+      if (this.rl) {
+        this.rl.close()
 
-        this.rs = null
+        this.rl = null
 
         this.logger.info(`ReplServer stopped`)
       } else {
@@ -189,21 +189,34 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
       colorMode: this.options.useColors,
       inspectOptions: {
         showHidden: false,
-        depth: 8,
+        depth: null,
       },
     })
   }
 
-  protected initReplServer(input: Readable, output: Writable): repl.REPLServer {
-    return repl.start({
+  protected initReadline(input: Readable, output: Writable): readline.Interface {
+    const completer = (line: string) => {
+      const completions = this.router.getCommandsNames()
+      const hits = completions.filter((c) => c.startsWith(line))
+
+      return [hits.length ? hits : completions, line]
+    }
+
+    const rl = readline.createInterface({
       input,
       output,
       terminal: true,
-      useGlobal: false,
       prompt: this.options.prompt,
-      ignoreUndefined: true,
-      preview: false,
+      historySize: 1000,
+      removeHistoryDuplicates: true,
+      completer,
     })
+
+    rl.on('close', () => {
+      process.kill(process.pid, 'SIGINT')
+    })
+
+    return rl
   }
 
   /**

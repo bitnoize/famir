@@ -100,10 +100,7 @@ export class RedirectorController extends BaseController {
         options: [],
         params: ['campaign-id', 'redirector-id'],
       },
-      (console, spec) => {
-        console.log(`// Reads the 'simple' redirector in 'hackernews' campaign:`)
-        console.log(`.${spec.name} hackernews simple\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId, redirectorId] = args._
 
@@ -124,12 +121,7 @@ export class RedirectorController extends BaseController {
         options: [],
         params: ['campaign-id'],
       },
-      (console, spec) => {
-        console.log(`The redirectors are ordered by creation time (oldest first).\n`)
-
-        console.log(`// Lists redirectors of the 'hackernews' campaign:`)
-        console.log(`.${spec.name} hackernews\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 

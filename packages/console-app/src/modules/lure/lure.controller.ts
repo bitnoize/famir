@@ -120,23 +120,18 @@ export class LureController extends BaseController {
         options: [
           {
             name: 'path',
-            description: `The URL path for the lure.`,
+            description: `The relative URL path for the lure.`,
             type: 'string',
           },
         ],
         params: ['campaign-id', 'lure-id', 'redirector-id'],
       },
-      (console, spec) => {
-        console.log(
-          `The lure will be created in a disabled state (isEnabled = false).\n` +
-            `Use '.lure-enable' command to activate it for traffic routing.\n`
-        )
+      (spec) => `The lure will be created in a disabled state (isEnabled = false).
+Use 'lure-enable' command to activate it for traffic routing.
 
-        console.log(
-          `// Creates a 'test' lure in the 'hackernews' campaign with 'simple' redirector:`
-        )
-        console.log(`.${spec.name} hackernews test simple --path /some/secret/test.html\n`)
-      },
+Create a 'test' lure in the 'hackernews' campaign with 'simple' redirector:
+> ${spec.name} hackernews test simple --path /some/secret/test.html
+`,
       async (console, spec, args) => {
         const [campaignId, lureId, redirectorId] = args._
 
@@ -159,10 +154,7 @@ export class LureController extends BaseController {
         options: [],
         params: ['campaign-id', 'lure-id'],
       },
-      (console, spec) => {
-        console.log(`// Reads the 'test' lure in the 'hackernews' campaign:`)
-        console.log(`.${spec.name} hackernews test\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId, lureId] = args._
 
@@ -183,15 +175,12 @@ export class LureController extends BaseController {
         options: [],
         params: ['campaign-id', 'lure-id'],
       },
-      (console, spec) => {
-        console.log(
-          `When enabled, the URL path becomes active and can be used to serve ` +
-            `the associated redirector content.\n`
-        )
+      (spec) => `When enabled, the URL path becomes active and can be used to serve
+the associated redirector content.
 
-        console.log(`// Enables the 'test' lure in the 'hackernews' campaign:`)
-        console.log(`.${spec.name} hackernews test\n`)
-      },
+Enable the 'test' lure in the 'hackernews' campaign:
+> ${spec.name} hackernews test
+`,
       async (console, spec, args) => {
         const [campaignId, lureId] = args._
 
@@ -212,12 +201,11 @@ export class LureController extends BaseController {
         options: [],
         params: ['campaign-id', 'lure-id'],
       },
-      (console, spec) => {
-        console.log(`When disabled, requests to the URL path will not be routed.\n`)
+      (spec) => `When disabled, requests to the URL path will not be routed.
 
-        console.log(`// Disables the 'test' lure in the 'hackernews' campaign:`)
-        console.log(`.${spec.name} hackernews test\n`)
-      },
+Disables the 'test' lure in the 'hackernews' campaign:
+> ${spec.name} hackernews test
+`,
       async (console, spec, args) => {
         const [campaignId, lureId] = args._
 
@@ -238,12 +226,11 @@ export class LureController extends BaseController {
         options: [],
         params: ['campaign-id', 'lure-id', 'redirector-id'],
       },
-      (console, spec) => {
-        console.log(`A lure must be disabled before it can be deleted.\n`)
+      (spec) => `A lure must be disabled before it can be deleted.
 
-        console.log(`// Deletes the 'test' lure in the 'hackernews' campaign:`)
-        console.log(`.${spec.name} hackernews test\n`)
-      },
+Deletes the 'test' lure in the 'hackernews' campaign:
+> ${spec.name} hackernews test
+`,
       async (console, spec, args) => {
         const [campaignId, lureId, redirectorId] = args._
 
@@ -265,12 +252,7 @@ export class LureController extends BaseController {
         options: [],
         params: ['campaign-id'],
       },
-      (console, spec) => {
-        console.log(`The lures are ordered by creation time (oldest first).\n`)
-
-        console.log(`// Lists all lures in the 'hackernews' campaign:`)
-        console.log(`.${spec.name} hackernews\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -297,14 +279,11 @@ export class LureController extends BaseController {
         ],
         params: ['campaign-id', 'lure-id', 'target-id'],
       },
-      (console, spec) => {
-        console.log(
-          `// Makes a URL for the 'test' lure in the 'hackernews' campaign via 'root' target:`
-        )
-        console.log(
-          `.${spec.name} hackernews test root -p '{"og_title":"Boom!", "og_description":"BOOM!"}'`
-        )
-      },
+      (spec) => `Examples:
+
+Makes a URL for the 'test' lure in the 'hackernews' campaign via 'root' target:
+> ${spec.name} hackernews test root -p '{"og_title":"Boom!", "og_description":"BOOM!"}'
+`,
       async (console, spec, args) => {
         const [campaignId, lureId, targetId] = args._
 

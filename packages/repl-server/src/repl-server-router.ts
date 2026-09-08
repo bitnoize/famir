@@ -4,7 +4,7 @@ import {
   ReplServerCommand,
   ReplServerCommandAction,
   ReplServerCommandArgs,
-  ReplServerCommandHelp,
+  ReplServerCommandManual,
   ReplServerCommandSpec,
 } from './repl-server-command.js'
 
@@ -43,19 +43,24 @@ export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
  * // Resolve from DI container
  * const router = container.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
  *
+ * interface SimpleArgs {
+ *   _: string[]
+ * }
+ *
  * // Add custom command
- * router.addCommand(
- *   'echo',
- *   'Simple echo command',
- *   [],
- *   (console, spec) => {
- *     console.log(`Example: .%s %s\n`, spec.name, `bla bla bla`)
+ * router.addCommand<EchoArgs>(
+ *   {
+ *     name: 'echo',
+ *     description: `Simple echo command`,
+ *     schemaName: 'echo-args',
+ *     options: [],
+ *     params: [],
  *   },
+ *   (spec) => `Some manual`,
  *   async (console, spec, args) => {
- *     console.log(spec)
  *     console.log(args)
  *   }
- * })
+ * )
  *
  * // Activate router
  * router.activate()
@@ -117,7 +122,7 @@ export class ReplServerRouter {
    * Commands can only be added before the router is activated.
    *
    * @param spec - The command spec object.
-   * @param help - The command help function.
+   * @param manual - The command manual function.
    * @param action - The command action function.
    * @returns This router for method chaining.
    * @throws Error If the router is already active.
@@ -125,7 +130,7 @@ export class ReplServerRouter {
    */
   addCommand<T extends ReplServerCommandArgs>(
     spec: ReplServerCommandSpec,
-    help: ReplServerCommandHelp,
+    manual: ReplServerCommandManual | null,
     action: ReplServerCommandAction<T>
   ): this {
     if (this.#isActive) {
@@ -136,7 +141,7 @@ export class ReplServerRouter {
       throw new Error(`Command already exists: ${spec.name}`)
     }
 
-    const command = new ReplServerCommand<T>(this.validator, spec, help, action)
+    const command = new ReplServerCommand<T>(this.validator, spec, manual, action)
 
     this.commands.set(spec.name, command as ReplServerCommand<ReplServerCommandArgs>)
 
@@ -146,20 +151,33 @@ export class ReplServerRouter {
   }
 
   /**
-   * Loop over all registered commands.
+   * Retrieves a command for a specific name.
    *
    * Commands can only be retrieved after the router is activated.
    *
-   * @param cb - The callback function to call for each command.
+   * @param commandName - The name of the command.
+   * @returns The command object, or `undefined` if not found.
    * @throws Error If the router is not active.
    */
-  eachCommand(cb: (command: ReplServerCommand<ReplServerCommandArgs>) => void) {
+  getCommand(commandName: string): ReplServerCommand<ReplServerCommandArgs> | undefined {
     if (!this.#isActive) {
       throw new Error(`Router not active`)
     }
 
+    return this.commands.get(commandName)
+  }
+
+  getCommandsOverview(): Record<string, string> {
+    const result: Record<string, string> = {}
+
     this.commands.forEach((command) => {
-      cb(command)
+      result[command.spec.name] = command.spec.description
     })
+
+    return result
+  }
+
+  getCommandsNames(): string[] {
+    return Array.from(this.commands.keys())
   }
 }

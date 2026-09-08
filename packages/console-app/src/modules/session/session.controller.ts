@@ -97,10 +97,7 @@ export class SessionController extends BaseController {
         options: [],
         params: ['campaign-id', 'session-id'],
       },
-      (console, spec) => {
-        console.log(`// Reads some session in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin 10db93aeb3ae4a3887a839997bf8840e\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId, sessionId] = args._
 

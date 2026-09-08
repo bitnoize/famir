@@ -105,10 +105,7 @@ export class TargetController extends BaseController {
         options: [],
         params: ['campaign-id', 'target-id'],
       },
-      (console, spec) => {
-        console.log(`// Reads the 'root' target in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin root\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId, targetId] = args._
 
@@ -128,10 +125,7 @@ export class TargetController extends BaseController {
         schemaName: 'console-read-target-hosts-args',
         options: [],
       },
-      (console, spec) => {
-        console.log(`// Reads targets hosts:`)
-        console.log(`.${spec.name}\n`)
-      },
+      null,
       async (console) => {
         const targetHosts = await this.targetService.readHosts()
 
@@ -147,12 +141,7 @@ export class TargetController extends BaseController {
         options: [],
         params: ['campaign-id'],
       },
-      (console, spec) => {
-        console.log(`The targets are ordered by creation time (oldest first).\n`)
-
-        console.log(`// Lists all targets in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 

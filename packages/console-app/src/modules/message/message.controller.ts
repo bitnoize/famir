@@ -119,10 +119,7 @@ export class MessageController extends BaseController {
         ],
         params: ['campaign-id', 'message-id'],
       },
-      (console, spec) => {
-        console.log(`// Reads some message in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin 5ad44dbcf927457eadc57d8de23eb7c1\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId, messageId] = args._
 

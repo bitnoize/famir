@@ -166,16 +166,15 @@ export class CampaignController extends BaseController {
         ],
         params: ['campaign-id'],
       },
-      (console, spec) => {
-        console.log(`// Creates the 'httpbin' campaign from the 'httpbin-local.yaml' preset:`)
-        console.log(`.${spec.name} -a presets/httpbin-local.yaml httpbin\n`)
+      (spec) => `The campaign is created from a preset with all associated entities.
 
-        console.log(`// Creates the 'hackernews' campaign from the 'hackernews-local.yaml' preset:`)
-        console.log(`// with overrides for mirror domain and crypt secret:`)
-        console.log(
-          `.${spec.name} hackernews -a presets/hackernews-local.yaml hackernews -m my-hacker-news.fake -s "super-secret"\n`
-        )
-      },
+Create the 'httpbin' campaign from the 'httpbin-local.yaml' preset:
+> ${spec.name} -a presets/httpbin-local.yaml httpbin
+
+Create the 'hackernews' campaign from the 'hackernews-local.yaml' preset with overrides
+for mirror domain and crypt secret:
+> ${spec.name} hackernews -a presets/hackernews-local.yaml hackernews -m my-hacker-news.fake -s "super-secret"
+`,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -202,10 +201,7 @@ export class CampaignController extends BaseController {
         options: [],
         params: ['campaign-id'],
       },
-      (console, spec) => {
-        console.log(`// Reads the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -232,10 +228,11 @@ export class CampaignController extends BaseController {
         ],
         params: ['campaign-id'],
       },
-      (console, spec) => {
-        console.log(`// Updates the 'httpbin' campaign from the 'httpbin-local.yaml' preset:`)
-        console.log(`.${spec.name} -a presets/httpbin-local.yaml httpbin\n`)
-      },
+      (spec) => `The campaign is updated from a preset with all associated entities.
+
+Update the 'httpbin' campaign from the 'httpbin-local.yaml' preset:
+> ${spec.name} -a presets/httpbin-local.yaml httpbin
+`,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -262,10 +259,11 @@ export class CampaignController extends BaseController {
         ],
         params: ['campaign-id'],
       },
-      (console, spec) => {
-        console.log(`// Deletes the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin --force\n`)
-      },
+      (spec) => `The campaign is deleted along with all associated entities.
+
+Delete the 'httpbin' campaign:
+> ${spec.name} httpbin --force
+`,
       async (console, spec, args) => {
         if (!args.force) {
           this.confirmAlert(console)
@@ -290,12 +288,7 @@ export class CampaignController extends BaseController {
         schemaName: 'console-list-campaigns-args',
         options: [],
       },
-      (console, spec) => {
-        console.log(`The campaigns are ordered by creation time (oldest first).\n`)
-
-        console.log(`// Lists all campaigns:`)
-        console.log(`.${spec.name}\n`)
-      },
+      null,
       async (console) => {
         const campaigns = await this.campaignService.list()
 

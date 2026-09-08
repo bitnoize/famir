@@ -2,7 +2,15 @@
  * @category System
  * @internal
  */
-export interface AssetsArgs {
+export interface SystemHelpArgs {
+  _: string[]
+}
+
+/**
+ * @category System
+ * @internal
+ */
+export interface SystemAssetsArgs {
   _: string[]
   assetName: string
 }

@@ -19,14 +19,14 @@ export interface ReplServerCommandSpec {
   readonly name: string
   readonly description: string
   readonly schemaName: string
-  readonly options: ReplServerCommandOption[]
+  readonly options?: ReplServerCommandOption[]
   readonly params?: string[]
 }
 
 /**
- * Represents the repl-server command help function.
+ * Represents the repl-server command manual function.
  */
-export type ReplServerCommandHelp = (console: Console, spec: ReplServerCommandSpec) => void
+export type ReplServerCommandManual = (spec: ReplServerCommandSpec) => string
 
 /**
  * Represents the repl-server command args.
@@ -67,24 +67,26 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    *
    * @param validator - The validator instance.
    * @param spec - The spec object.
-   * @param help - The help function.
+   * @param manual - The manual function.
    * @param action - The action function.
    */
   constructor(
     protected readonly validator: Validator,
     public readonly spec: ReplServerCommandSpec,
-    protected readonly help: ReplServerCommandHelp,
+    protected readonly manual: ReplServerCommandManual | null,
     protected readonly action: ReplServerCommandAction<T>
   ) {
-    const hasHelpOption = spec.options.some((option) => option.name === 'help')
+    if (spec.options) {
+      const hasHelpOption = spec.options.some((option) => option.name === 'help')
 
-    if (!hasHelpOption) {
-      spec.options.push({
-        name: 'help',
-        description: `Show help screen with command usage`,
-        type: 'boolean',
-        alias: 'h',
-      })
+      if (!hasHelpOption) {
+        spec.options.push({
+          name: 'help',
+          description: `Show help screen with command usage`,
+          type: 'boolean',
+          alias: 'h',
+        })
+      }
     }
   }
 
@@ -104,32 +106,34 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
         default: {},
       }
 
-      this.spec.options.forEach((option) => {
-        switch (option.type) {
-          case 'boolean':
-            state.boolean.push(option.name)
-            break
+      if (this.spec.options) {
+        this.spec.options.forEach((option) => {
+          switch (option.type) {
+            case 'boolean':
+              state.boolean.push(option.name)
+              break
 
-          case 'number':
-            state.number.push(option.name)
-            break
+            case 'number':
+              state.number.push(option.name)
+              break
 
-          case 'string':
-            state.string.push(option.name)
-            break
+            case 'string':
+              state.string.push(option.name)
+              break
 
-          default:
-            throw new Error(`Unknown command option type`)
-        }
+            default:
+              throw new Error(`Unknown command option type`)
+          }
 
-        if (option.alias) {
-          state.alias[option.name] = option.alias
-        }
+          if (option.alias) {
+            state.alias[option.name] = option.alias
+          }
 
-        if (option.default !== undefined) {
-          state.default[option.name] = option.default
-        }
-      })
+          if (option.default !== undefined) {
+            state.default[option.name] = option.default
+          }
+        })
+      }
 
       const parsedArgs = yargsParser(args, {
         configuration: {
@@ -166,14 +170,14 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
     console.log()
 
     const usage: string = [
-      `.${this.spec.name}`,
+      this.spec.name,
       this.spec.params ? this.spec.params.map((param) => `<${param}>`).join(' ') : '',
-      this.spec.options.length > 0 ? `[OPTION]... ` : ``,
+      this.spec.options ? `[OPTION]... ` : ``,
     ].join(' ')
 
     console.log(`Usage: ${usage}\n\n${this.spec.description}\n`)
 
-    if (this.spec.options.length > 0) {
+    if (this.spec.options) {
       console.log(`Options:`)
 
       this.spec.options.forEach((option) => {
@@ -191,7 +195,9 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
     }
 
     try {
-      this.help(console, this.spec)
+      if (this.manual) {
+        console.log(this.manual(this.spec))
+      }
     } catch (error) {
       console.error(error)
     }
@@ -204,9 +210,15 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    * @returns `true` if help need to show, `false` otherwise.
    */
   checkHelp(args: ReplServerCommandArgs): boolean {
-    const params = this.spec.params ?? []
+    if (this.spec.options && args.help) {
+      return true
+    }
 
-    return !!args.help || args._.length !== params.length
+    if (this.spec.params && args._.length !== this.spec.params.length) {
+      return true
+    }
+
+    return false
   }
 
   /**
@@ -223,6 +235,7 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
       await this.action(console, this.spec, args)
     } catch (error) {
       throw ReplServerError.wrap(error, {
+        commandName: this.spec.name,
         args,
       })
     }

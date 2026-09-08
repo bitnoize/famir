@@ -121,13 +121,12 @@ export class ProxyController extends BaseController {
         ],
         params: ['campaign-id', 'proxy-id'],
       },
-      (console, spec) => {
-        console.log(`The proxy will be created in a disabled state (isEnabled = false).`)
-        console.log(`Use '.proxy-enable' command to activate it for traffic routing.\n`)
+      (spec) => `The proxy will be created in a disabled state (isEnabled = false).
+Use 'proxy-enable' command to activate it for traffic routing.
 
-        console.log(`// Creates a 'tor' proxy in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin tor -u "socks5://127.0.0.1:9050"\n`)
-      },
+Creates a 'default' proxy in the 'httpbin' campaign:
+> ${spec.name} httpbin default -u "http://127.0.0.1:8080"
+`,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -149,10 +148,7 @@ export class ProxyController extends BaseController {
         options: [],
         params: ['campaign-id', 'proxy-id'],
       },
-      (console, spec) => {
-        console.log(`// Reads the 'tor' proxy in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin tor\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -173,15 +169,12 @@ export class ProxyController extends BaseController {
         options: [],
         params: ['campaign-id', 'proxy-id'],
       },
-      (console, spec) => {
-        console.log(
-          `Enabled proxies are automatically selected by the session creation logic ` +
-            `using random load balancing.\n`
-        )
+      (spec) => `Enabled proxies are automatically selected by the session creation logic
+using random load balancing.
 
-        console.log(`// Enables the 'tor' proxy in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin tor\n`)
-      },
+Enable the 'default' proxy in the 'httpbin' campaign:
+> ${spec.name} httpbin default
+`,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -202,15 +195,12 @@ export class ProxyController extends BaseController {
         options: [],
         params: ['campaign-id', 'proxy-id'],
       },
-      (console, spec) => {
-        console.log(
-          `Existing sessions using this proxy will be automatically re-assigned ` +
-            `to another enabled proxy upon their next authorization.\n`
-        )
+      (spec) => `Existing sessions using this proxy will be automatically re-assigned
+to another enabled proxy upon their next authorization.
 
-        console.log(`// Disables the 'tor' proxy in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin tor\n`)
-      },
+Disable the 'default' proxy in the 'httpbin' campaign:
+${spec.name} httpbin default
+`,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -231,12 +221,11 @@ export class ProxyController extends BaseController {
         options: [],
         params: ['campaign-id', 'proxy-id'],
       },
-      (console, spec) => {
-        console.log(`A proxy must be disabled before it can be deleted.\n`)
+      (spec) => `A proxy must be disabled before it can be deleted.
 
-        console.log(`// Deletes the 'tor' proxy in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin tor\n`)
-      },
+Delete the 'default' proxy in the 'httpbin' campaign:
+> ${spec.name} httpbin default
+`,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -257,12 +246,7 @@ export class ProxyController extends BaseController {
         options: [],
         params: ['campaign-id'],
       },
-      (console, spec) => {
-        console.log(`The proxies are ordered by creation time (oldest first).\n`)
-
-        console.log(`// Lists all proxies in the 'httpbin' campaign:`)
-        console.log(`.${spec.name} httpbin\n`)
-      },
+      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 
