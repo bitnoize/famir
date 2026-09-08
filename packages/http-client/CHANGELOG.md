@@ -1,5 +1,14 @@
 # @famir/http-client
 
+## 0.0.8
+
+### Patch Changes
+
+- Moved domain layer to separate package.
+- Updated dependencies:
+  - @famir/common@0.0.7
+  - @famir/domain@0.0.1
+
 ## 0.0.7
 
 ### Patch Changes

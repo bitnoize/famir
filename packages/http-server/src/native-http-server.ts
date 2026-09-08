@@ -21,9 +21,9 @@ import {
 import { HttpServerContext } from './http-server-context.js'
 import { HTTP_SERVER_ROUTER, HttpServerRouter } from './http-server-router.js'
 import {
+  HTTP_SERVER_DEFAULT_ERROR_PAGE,
   HttpServerSettings,
   NativeHttpServerConfig,
-  HTTP_SERVER_DEFAULT_ERROR_PAGE,
 } from './http-server.js'
 import { nativeHttpServerConfigSchema } from './http-server.schemas.js'
 

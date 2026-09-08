@@ -1,5 +1,15 @@
 # @famir/validator
 
+## 0.0.7
+
+### Patch Changes
+
+- Moved simple validation schemas and re-export JSONSchemaType.
+- Moved domain layer to separate package.
+- Updated dependencies:
+  - @famir/common@0.0.7
+  - @famir/domain@0.0.1
+
 ## 0.0.6
 
 ### Patch Changes

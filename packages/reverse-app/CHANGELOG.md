@@ -1,5 +1,25 @@
 # @famir/reverse-app
 
+## 0.0.7
+
+### Patch Changes
+
+- Improve logging complete messages.
+- Improve command manuals
+- Moved domain layer to separate package.
+- Updated dependencies:
+  - @famir/http-tools@0.0.8
+  - @famir/http-server@0.0.6
+  - @famir/validator@0.0.7
+  - @famir/common@0.0.7
+  - @famir/http-client@0.0.8
+  - @famir/templater@0.0.6
+  - @famir/database@0.0.7
+  - @famir/producer@0.0.6
+  - @famir/config@0.0.6
+  - @famir/logger@0.0.6
+  - @famir/domain@0.0.1
+
 ## 0.0.6
 
 ### Patch Changes
