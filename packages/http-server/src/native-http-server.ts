@@ -3,7 +3,6 @@ import {
   Config,
   CONFIG,
   HTTP_SERVER,
-  HTTP_SERVER_DEFAULT_ERROR_PAGE,
   HttpServer,
   HttpServerError,
   Logger,
@@ -21,7 +20,11 @@ import {
 } from './http-server-context-factory.js'
 import { HttpServerContext } from './http-server-context.js'
 import { HTTP_SERVER_ROUTER, HttpServerRouter } from './http-server-router.js'
-import { HttpServerSettings, NativeHttpServerConfig } from './http-server.js'
+import {
+  HttpServerSettings,
+  NativeHttpServerConfig,
+  HTTP_SERVER_DEFAULT_ERROR_PAGE,
+} from './http-server.js'
 import { nativeHttpServerConfigSchema } from './http-server.schemas.js'
 
 /**

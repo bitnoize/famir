@@ -5,9 +5,6 @@ import {
   Logger,
   LOGGER,
   REPL_SERVER,
-  REPL_SERVER_DEFAULT_BANNER_GREET,
-  REPL_SERVER_DEFAULT_BANNER_LEAVE,
-  REPL_SERVER_DEFAULT_PROMPT,
   ReplServer,
   Validator,
   VALIDATOR,
@@ -18,7 +15,13 @@ import type { Readable, Writable } from 'node:stream'
 import * as readline from 'readline'
 import { BaseReplServer } from './base-repl-server.js'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
-import { NetReplServerConfig, ReplServerSettings } from './repl-server.js'
+import {
+  NetReplServerConfig,
+  REPL_SERVER_DEFAULT_BANNER_GREET,
+  REPL_SERVER_DEFAULT_BANNER_LEAVE,
+  REPL_SERVER_DEFAULT_PROMPT,
+  ReplServerSettings,
+} from './repl-server.js'
 import { netReplServerConfigSchema } from './repl-server.schemas.js'
 
 /**

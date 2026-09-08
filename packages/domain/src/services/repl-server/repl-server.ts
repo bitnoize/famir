@@ -28,27 +28,3 @@ export interface ReplServer {
    */
   stop(): Promise<void>
 }
-
-/**
- * Default prompt.
- *
- * @category ReplServer Service
- * @internal
- */
-export const REPL_SERVER_DEFAULT_PROMPT = 'famir > '
-
-/**
- * Default greet banner content.
- *
- * @category ReplServer Service
- * @internal
- */
-export const REPL_SERVER_DEFAULT_BANNER_GREET = `Welcome to Fake-Mirrors!`
-
-/**
- * Default leave banner content.
- *
- * @category ReplServer Service
- * @internal
- */
-export const REPL_SERVER_DEFAULT_BANNER_LEAVE = `So long!`
