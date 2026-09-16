@@ -148,7 +148,7 @@ redis.register_function({
   Read full campaign
 --]]
 local function read_full_campaign(keys, args)
-  if #keys ~= 7 or #args ~= 0 then
+  if #keys ~= 9 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -159,6 +159,8 @@ local function read_full_campaign(keys, args)
   local target_index_key = keys[5]
   local redirector_index_key = keys[6]
   local lure_index_key = keys[7]
+  local session_history_key = keys[8]
+  local message_history_key = keys[9]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
@@ -197,12 +199,14 @@ local function read_full_campaign(keys, args)
     new_session_expire = tonumber(values[8]),
     message_expire = tonumber(values[9]),
     is_locked = redis.call('EXISTS', campaign_lock_key),
-    proxy_count = redis.call('ZCARD', proxy_index_key),
-    target_count = redis.call('ZCARD', target_index_key),
-    redirector_count = redis.call('ZCARD', redirector_index_key),
-    lure_count = redis.call('ZCARD', lure_index_key),
+    proxy_index = redis.call('ZCARD', proxy_index_key),
+    target_index = redis.call('ZCARD', target_index_key),
+    redirector_index = redis.call('ZCARD', redirector_index_key),
+    lure_index = redis.call('ZCARD', lure_index_key),
     session_count = tonumber(values[10]),
+    session_history = redis.call('ZCARD', session_history_key),
     message_count = tonumber(values[11]),
+    message_history = redis.call('ZCARD', message_history_key),
     created_at = tonumber(values[12]),
   }
 

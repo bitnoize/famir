@@ -4,7 +4,7 @@
   Create message
 --]]
 local function create_message(keys, args)
-  if #keys ~= 5 or #args ~= 20 then
+  if #keys ~= 6 or #args ~= 20 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -13,6 +13,7 @@ local function create_message(keys, args)
   local proxy_key = keys[3]
   local target_key = keys[4]
   local session_key = keys[5]
+  local message_history_key = keys[6]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
@@ -92,6 +93,12 @@ local function create_message(keys, args)
     end
   end
 
+  local history_threshold = model.created_at - stash.message_expire
+
+  if history_threshold <= 0 then
+    return redis.error_reply('ERR Wrong history_threshold')
+  end
+
   -- Point of no return
 
   local store = {}
@@ -109,6 +116,12 @@ local function create_message(keys, args)
   redis.call('HINCRBY', session_key, 'message_count', 1)
 
   redis.call('PEXPIRE', message_key, stash.message_expire)
+
+  redis.call('ZREMRANGEBYSCORE', message_history_key, '-inf', '(' .. history_threshold)
+
+  redis.call('ZADD', message_history_key, model.created_at, model.message_id)
+
+  redis.call('PEXPIRE', message_history_key, stash.message_expire)
 
   return redis.status_reply('OK Message created')
 end
@@ -327,4 +340,84 @@ redis.register_function({
   callback = read_full_message,
   flags = { 'no-writes' },
   description = 'Read full message',
+})
+
+--[[
+  Read message history
+--]]
+local function read_message_history(keys, args)
+  if #keys ~= 2 or #args ~= 1 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local message_history_key = keys[2]
+
+  local limit = tonumber(args[1])
+
+  if not (limit and limit > 0) then
+    return redis.error_reply('ERR Wrong limimt')
+  end
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return nil
+  end
+
+  return redis.call('ZRANGE', message_history_key, 0, limit - 1, 'REV')
+end
+
+redis.register_function({
+  function_name = 'read_message_history',
+  callback = read_message_history,
+  flags = { 'no-writes' },
+  description = 'Read message history',
+})
+
+--[[
+  Delete message
+--]]
+local function delete_message(keys, args)
+  if #keys ~= 3 or #args ~= 0 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local message_key = keys[2]
+  local message_history_key = keys[3]
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', message_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Message not exists')
+  end
+
+  local stash = {
+    message_id = redis.call('HGET', message_key, 'message_id'),
+  }
+
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+
+    if k == 'message_id' and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+  end
+
+  -- Point of no return
+
+  redis.call('DEL', message_key)
+
+  redis.call('ZREM', message_history_key, stash.message_id)
+
+  return redis.status_reply('OK message deleted')
+end
+
+redis.register_function({
+  function_name = 'delete_message',
+  callback = delete_message,
+  description = 'Delete message',
 })

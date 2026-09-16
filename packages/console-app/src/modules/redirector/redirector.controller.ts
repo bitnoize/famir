@@ -150,7 +150,7 @@ export class RedirectorController extends BaseController {
     console.table(
       redirectors.map((redirector) => {
         return {
-          campaignId: redirector.campaignId,
+          //campaignId: redirector.campaignId,
           redirectorId: redirector.redirectorId,
           lureCount: redirector.lureCount,
           createdAt: redirector.createdAt.toISOString(),

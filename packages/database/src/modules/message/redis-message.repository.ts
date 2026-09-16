@@ -270,6 +270,68 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
+  async delete(campaignId: string, messageId: string): Promise<void> {
+    try {
+      const statusReply = await this.connection.message.delete_message(
+        this.options.prefix,
+        campaignId,
+        messageId
+      )
+
+      this.checkStatusReply(statusReply)
+
+      this.logger.info(`Database delete message`, {
+        data: {
+          message: {
+            campaignId,
+            messageId,
+          },
+        },
+      })
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'delete',
+        params: {
+          campaignId,
+          messageId,
+        },
+      })
+    }
+  }
+
+  async list(campaignId: string, limit: number): Promise<MessageModel[] | null> {
+    try {
+      const index = await this.connection.message.read_message_history(
+        this.options.prefix,
+        campaignId,
+        limit
+      )
+
+      if (index === null) {
+        return null
+      }
+
+      this.validateArrayStringsReply(index)
+
+      const rawCollection = await Promise.all(
+        index.map((messageId) =>
+          this.connection.message.read_message(this.options.prefix, campaignId, messageId)
+        )
+      )
+
+      return this.buildCollection(rawCollection)
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+        params: {
+          campaignId,
+        },
+      })
+    }
+  }
+
   /**
    * Converts raw Redis data to a message model.
    *
@@ -337,6 +399,19 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
       rawModel.finish_time,
       new Date(rawModel.created_at)
     )
+  }
+
+  /**
+   * Converts a list of raw Redis data to a list of message models.
+   *
+   * @param rawCollection - The array of raw data from Redis.
+   * @returns The array of message models.
+   * @throws DatabaseError If the array of raw data fails validation.
+   */
+  protected buildCollection(rawCollection: unknown): MessageModel[] {
+    this.validateArrayReply(rawCollection)
+
+    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(MessageModel.isNotNull)
   }
 
   /**

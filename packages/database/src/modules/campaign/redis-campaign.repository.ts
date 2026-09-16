@@ -396,12 +396,14 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       rawModel.new_session_expire,
       rawModel.message_expire,
       rawModel.is_locked,
-      rawModel.proxy_count,
-      rawModel.target_count,
-      rawModel.redirector_count,
-      rawModel.lure_count,
+      rawModel.proxy_index,
+      rawModel.target_index,
+      rawModel.redirector_index,
+      rawModel.lure_index,
       rawModel.session_count,
+      rawModel.session_history,
       rawModel.message_count,
+      rawModel.message_history,
       new Date(rawModel.created_at)
     )
   }

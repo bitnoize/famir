@@ -1,7 +1,9 @@
 import { DIContainer } from '@famir/common'
 import {
+  DatabaseError,
   FullMessageModel,
   MESSAGE_REPOSITORY,
+  MessageModel,
   MessageRepository,
   ReplServerError,
 } from '@famir/domain'
@@ -49,5 +51,37 @@ export class MessageService {
     }
 
     return message
+  }
+
+  /**
+   * Deletes the message by its ID.
+   */
+  async delete(data: { campaignId: string; messageId: string }): Promise<void> {
+    try {
+      await this.messageRepository.delete(data.campaignId, data.messageId)
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
+        }
+
+        throw ReplServerError.internalError(`Delete message failed`, null, error)
+      }
+
+      throw error
+    }
+  }
+
+  /**
+   * Lists campaign message history.
+   */
+  async list(data: { campaignId: string; limit: number }): Promise<MessageModel[]> {
+    const messages = await this.messageRepository.list(data.campaignId, data.limit)
+
+    if (!messages) {
+      throw ReplServerError.notFound(`Campaign not found`)
+    }
+
+    return messages
   }
 }

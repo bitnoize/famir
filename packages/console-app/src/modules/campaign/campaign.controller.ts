@@ -428,12 +428,14 @@ Delete the 'httpbin' campaign:
       newSessionExpire: campaign.newSessionExpire,
       messageExpire: campaign.messageExpire,
       isLocked: campaign.isLocked,
-      proxyCount: campaign.proxyCount,
-      targetCount: campaign.targetCount,
-      redirectorCount: campaign.redirectorCount,
-      lureCount: campaign.lureCount,
+      proxyIndex: campaign.proxyIndex,
+      targetIndex: campaign.targetIndex,
+      redirectorIndex: campaign.redirectorIndex,
+      lureIndex: campaign.lureIndex,
       sessionCount: campaign.sessionCount,
+      sessionHistory: campaign.sessionHistory,
       messageCount: campaign.messageCount,
+      messageHistory: campaign.messageHistory,
       createdAt: campaign.createdAt.toISOString(),
     })
 

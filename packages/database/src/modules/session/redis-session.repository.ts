@@ -226,6 +226,68 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
   }
 
+  async revoke(campaignId: string, sessionId: string): Promise<void> {
+    try {
+      const statusReply = await this.connection.session.revoke_session(
+        this.options.prefix,
+        campaignId,
+        sessionId
+      )
+
+      this.checkStatusReply(statusReply)
+
+      this.logger.info(`Database revoke session`, {
+        data: {
+          session: {
+            campaignId,
+            sessionId,
+          },
+        },
+      })
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'revoke',
+        params: {
+          campaignId,
+          sessionId,
+        },
+      })
+    }
+  }
+
+  async list(campaignId: string, limit: number): Promise<SessionModel[] | null> {
+    try {
+      const index = await this.connection.session.read_session_history(
+        this.options.prefix,
+        campaignId,
+        limit
+      )
+
+      if (index === null) {
+        return null
+      }
+
+      this.validateArrayStringsReply(index)
+
+      const rawCollection = await Promise.all(
+        index.map((sessionId) =>
+          this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
+        )
+      )
+
+      return this.buildCollection(rawCollection)
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'list',
+        params: {
+          campaignId,
+        },
+      })
+    }
+  }
+
   /**
    * Converts raw Redis data to a session model.
    *
@@ -246,6 +308,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       rawModel.proxy_id,
       rawModel.secret,
       rawModel.is_upgraded,
+      rawModel.is_revoked,
       rawModel.message_count,
       new Date(rawModel.created_at),
       new Date(rawModel.authorized_at)
@@ -270,5 +333,18 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     }
 
     return model
+  }
+
+  /**
+   * Converts a list of raw Redis data to a list of session models.
+   *
+   * @param rawCollection - The array of raw data from Redis.
+   * @returns The array of session models.
+   * @throws DatabaseError If the array of raw data fails validation.
+   */
+  protected buildCollection(rawCollection: unknown): SessionModel[] {
+    this.validateArrayReply(rawCollection)
+
+    return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(SessionModel.isNotNull)
   }
 }

@@ -115,7 +115,7 @@ export class CompleteController extends BaseController {
           finishTime: ctx.finishTime,
         })
 
-        this.logger.debug(`ReverseApp complete message`, {
+        this.logger.info(`ReverseApp complete message`, {
           data: {
             message: {
               campaignId: campaign.campaignId,
@@ -126,14 +126,7 @@ export class CompleteController extends BaseController {
               type: message.type,
               method: message.method.get(),
               url: message.url.toRelative(),
-              requestHeaders: message.requestHeaders.toObject(),
-              requestBody: message.requestBody.length,
               status: message.status.get(),
-              responseHeaders: message.responseHeaders.toObject(),
-              responseBody: message.responseBody.length,
-              connection: message.connection,
-              payload: message.payload,
-              errors: message.errors,
               analyze: message.analyze,
               totalTime: ctx.totalTime,
             },

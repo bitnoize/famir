@@ -51,7 +51,6 @@ export class MessageModel {
     readonly method: HttpMethod,
     readonly url: string,
     readonly status: number,
-    //readonly errors: boolean,
     readonly analyze: string,
     readonly startTime: number,
     readonly finishTime: number,

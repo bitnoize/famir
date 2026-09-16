@@ -183,7 +183,7 @@ export class TargetController extends BaseController {
     console.table(
       targets.map((target) => {
         return {
-          campaignId: target.campaignId,
+          //campaignId: target.campaignId,
           targetId: target.targetId,
           accessLevel: target.accessLevel,
           //donor: target.donorUrl,

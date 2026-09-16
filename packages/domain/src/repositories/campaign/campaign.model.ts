@@ -54,12 +54,14 @@ export class FullCampaignModel extends CampaignModel {
    * @param newSessionExpire - The TTL for a not-yet-authorized session in milliseconds.
    * @param messageExpire - The TTL for a message in milliseconds.
    * @param isLocked - The flag indicating if the campaign is blocked.
-   * @param proxyCount - The total number of proxies related to this campaign.
-   * @param targetCount - The total number of targets related to this campaign.
-   * @param redirectorCount - The total number of redirectors related to this campaign.
-   * @param lureCount - The total number of lures related to this campaign.
+   * @param proxyIndex - The cardinality of proxy index related to this campaign.
+   * @param targetIndex - The cardinality of target index related to this campaign.
+   * @param redirectorIndex - The cardinality of redirector index related to this campaign.
+   * @param lureIndex - The cardinality of lure index related to this campaign.
    * @param sessionCount - The total number of sessions processed through this campaign.
+   * @param sessionHistory - The cardinality of session history related to this campaign.
    * @param messageCount - The total number of messages processed through this campaign.
+   * @param messageHistory - The cardinality of message history related to this campaign.
    * @param createdAt - The date and time when the campaign was created.
    */
   constructor(
@@ -74,12 +76,14 @@ export class FullCampaignModel extends CampaignModel {
     readonly newSessionExpire: number,
     readonly messageExpire: number,
     isLocked: boolean,
-    readonly proxyCount: number,
-    readonly targetCount: number,
-    readonly redirectorCount: number,
-    readonly lureCount: number,
+    readonly proxyIndex: number,
+    readonly targetIndex: number,
+    readonly redirectorIndex: number,
+    readonly lureIndex: number,
     sessionCount: number,
+    readonly sessionHistory: number,
     messageCount: number,
+    readonly messageHistory: number,
     createdAt: Date
   ) {
     super(campaignId, mirrorDomain, isLocked, sessionCount, messageCount, createdAt)

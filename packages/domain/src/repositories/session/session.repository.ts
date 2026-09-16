@@ -49,6 +49,7 @@ export interface SessionRepository {
    * @returns The authorized session model.
    * @throws DatabaseError If the campaign does not exist.
    * @throws DatabaseError If the session does not exist.
+   * @throws DatabaseError If the session is revoked.
    * @throws DatabaseError If no enabled proxies are available.
    * @throws DatabaseError If the data validation fails.
    */
@@ -65,7 +66,31 @@ export interface SessionRepository {
    * @throws DatabaseError If the lure does not exist.
    * @throws DatabaseError If the session does not exist.
    * @throws DatabaseError If the secret does not match.
+   * @throws DatabaseError If the session is revoked.
    * @throws DatabaseError If the data validation fails.
    */
   upgrade(campaignId: string, lureId: string, sessionId: string, secret: string): Promise<void>
+
+  /**
+   * Revoking a session and stopping authorization.
+   *
+   * @param campaignId - The ID of the campaign containing the session.
+   * @param sessionId - The session ID to revoke.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the session does not exist.
+   * @throws DatabaseError If the data validation fails.
+   */
+  revoke(campaignId: string, sessionId: string): Promise<void>
+
+  /**
+   * Lists campaign session history.
+   *
+   * Sessions are ordered by auth time (newest first).
+   *
+   * @param campaignId - The ID of the campaign to list sessions for.
+   * @param limit - Limit on the number of records.
+   * @returns The array of session models, or `null` if the campaign does not exist.
+   * @throws DatabaseError If the data validation fails.
+   */
+  list(campaignId: string, limit: number): Promise<SessionModel[] | null>
 }

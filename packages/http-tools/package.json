@@ -39,10 +39,10 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
-    "@famir/domain": "*",
     "@famir/common": "*",
+    "@famir/domain": "*",
     "cheerio": "^1.2.0",
-    "content-type": "^3.0.0",
+    "content-type": "^3.1.0",
     "iconv-lite": "^0.7.3",
     "isbot": "^5.2.2",
     "qs": "^6.16.0",

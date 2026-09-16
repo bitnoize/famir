@@ -43,7 +43,9 @@ export const rawMessageSchema: JSONSchemaType<RawMessage> = {
     method: httpMethodSchema,
     url: httpRelativeUrlSchema,
     status: httpStatusSchema,
-    analyze: customIdentSchema,
+    analyze: {
+      type: 'string',
+    },
     start_time: timestampSchema,
     finish_time: timestampSchema,
     created_at: timestampSchema,

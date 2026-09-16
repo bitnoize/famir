@@ -1,5 +1,11 @@
 import { CommandParser } from '@redis/client'
-import { campaignKey, enabledProxyIndexKey, lureKey, sessionKey } from '../../database.keys.js'
+import {
+  campaignKey,
+  enabledProxyIndexKey,
+  lureKey,
+  sessionHistoryKey,
+  sessionKey,
+} from '../../database.keys.js'
 
 /**
  * Raw session data structure.
@@ -13,6 +19,7 @@ export interface RawSession {
   proxy_id: string
   secret: string
   is_upgraded: boolean
+  is_revoked: boolean
   message_count: number
   created_at: number
   authorized_at: number
@@ -61,8 +68,21 @@ export const sessionFunctions = {
       transformReply: undefined as unknown as () => unknown,
     },
 
+    read_session_history: {
+      NUMBER_OF_KEYS: 2,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, limit: number) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(sessionHistoryKey(prefix, campaignId))
+
+        parser.push(limit.toString())
+      },
+
+      transformReply: undefined as unknown as () => unknown,
+    },
+
     auth_session: {
-      NUMBER_OF_KEYS: 3,
+      NUMBER_OF_KEYS: 4,
 
       parseCommand(
         parser: CommandParser,
@@ -73,9 +93,21 @@ export const sessionFunctions = {
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(sessionKey(prefix, campaignId, sessionId))
+        parser.pushKey(sessionHistoryKey(prefix, campaignId))
         parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
         parser.push(authorizedAt.toString())
+      },
+
+      transformReply: undefined as unknown as () => unknown,
+    },
+
+    revoke_session: {
+      NUMBER_OF_KEYS: 2,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, sessionId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
       },
 
       transformReply: undefined as unknown as () => unknown,

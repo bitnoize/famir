@@ -121,4 +121,26 @@ export interface MessageRepository {
    * @throws DatabaseError If the data validation fails.
    */
   readFull(campaignId: string, messageId: string): Promise<FullMessageModel | null>
+
+  /**
+   * Deletes the message by its ID.
+   *
+   * @param campaignId - The ID of the campaign containing the message.
+   * @param messageId - The message ID to delete.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the data validation fails.
+   */
+  delete(campaignId: string, messageId: string): Promise<void>
+
+  /**
+   * Lists campaign message history.
+   *
+   * Messages are ordered by creation time (newest first).
+   *
+   * @param campaignId - The ID of the campaign to list messages for.
+   * @param limit - Limit on the number of records.
+   * @returns The array of message models, or `null` if the campaign does not exist.
+   * @throws DatabaseError If the data validation fails.
+   */
+  list(campaignId: string, limit: number): Promise<MessageModel[] | null>
 }

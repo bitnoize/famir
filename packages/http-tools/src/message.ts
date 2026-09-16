@@ -5,11 +5,15 @@ import {
   HttpConnection,
   HttpContentType,
   HttpError,
+  HttpJson,
   HttpPayload,
+  HttpQueryString,
+  HttpText,
   HttpType,
 } from '@famir/domain'
 import { Transform } from 'node:stream'
 import { HttpBodyWrap } from './body.js'
+import { CheerioAPI, cheerioLoad } from './cheerio.js'
 import { HttpContentTypeName, HttpContentTypes } from './content-type.js'
 import { HttpHeadersWrap } from './headers.js'
 import { HttpMethodWrap } from './method.js'
@@ -206,14 +210,31 @@ export class HttpMessage {
   }
 
   /**
-   * Checks if a content-type belongs to a category.
+   * Checks if a request content-type belongs to a category.
    *
    * @param name - The content-type category name.
    * @param contentType - The parsed content-type to check.
    * @returns `true` if the content-type matches the category, `false` otherwise.
    */
-  isContentType(name: HttpContentTypeName, contentType: HttpContentType): boolean {
-    return this.#contentTypes[name].includes(contentType.type)
+  isRequestContentType(name: HttpContentTypeName): boolean {
+    const contentType = this.requestHeaders.getContentType()
+    return this.isContentType(contentType, name)
+  }
+
+  /**
+   * Checks if a response content-type belongs to a category.
+   *
+   * @param name - The content-type category name.
+   * @param contentType - The parsed content-type to check.
+   * @returns `true` if the content-type matches the category, `false` otherwise.
+   */
+  isResponseContentType(name: HttpContentTypeName): boolean {
+    const contentType = this.responseHeaders.getContentType()
+    return this.isContentType(contentType, name)
+  }
+
+  protected isContentType(contentType: HttpContentType | null, name: HttpContentTypeName): boolean {
+    return contentType ? this.#contentTypes[name].includes(contentType.type) : false
   }
 
   #rewriteUrlContentTypes: string[] = []
@@ -462,6 +483,312 @@ export class HttpMessage {
    */
   getResponseTransforms(): Transform[] {
     return this.#responseTransforms
+  }
+
+  /**
+   * Retrieves request body as plain text.
+   */
+  retrieveRequestBodyText(): HttpText | null {
+    return this.retrieveBodyText(this.requestHeaders, this.requestBody)
+  }
+
+  /**
+   * Retrieves response body as plain text.
+   */
+  retrieveResponseBodyText(): HttpText | null {
+    return this.retrieveBodyText(this.responseHeaders, this.responseBody)
+  }
+
+  private retrieveBodyText(headers: HttpHeadersWrap, body: HttpBodyWrap): HttpText | null {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      return body.getText(charset)
+    } catch (error) {
+      this.addError(error, ['retrieve-body-text'])
+      return null
+    }
+  }
+
+  /**
+   * Decorates request body as plain text.
+   */
+  decorateRequestBodyText(cb: (text: HttpText) => HttpText) {
+    this.decorateBodyText(this.requestHeaders, this.requestBody, cb)
+  }
+
+  /**
+   * Decorates response body as plain text.
+   */
+  decorateResponseBodyText(cb: (text: HttpText) => HttpText) {
+    this.decorateBodyText(this.responseHeaders, this.responseBody, cb)
+  }
+
+  private decorateBodyText(
+    headers: HttpHeadersWrap,
+    body: HttpBodyWrap,
+    cb: (text: HttpText) => HttpText
+  ) {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      const oldText = body.getText(charset)
+
+      const newText = cb(oldText)
+
+      body.setText(newText)
+    } catch (error) {
+      this.addError(error, ['decorate-body-text'])
+    }
+  }
+
+  /**
+   * Retrieves request body as JSON.
+   */
+  retrieveRequestBodyJson(): HttpJson | null {
+    return this.retrieveBodyJson(this.requestHeaders, this.requestBody)
+  }
+
+  /**
+   * Retrieves response body as JSON.
+   */
+  retrieveResponseBodyJson(): HttpJson | null {
+    return this.retrieveBodyJson(this.responseHeaders, this.responseBody)
+  }
+
+  private retrieveBodyJson(headers: HttpHeadersWrap, body: HttpBodyWrap): HttpJson | null {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      return body.getJson(charset)
+    } catch (error) {
+      this.addError(error, ['retrieve-body-json'])
+      return null
+    }
+  }
+
+  /**
+   * Decorates request body as JSON.
+   */
+  decorateRequestBodyJson(cb: (json: HttpJson) => void) {
+    this.decorateBodyJson(this.requestHeaders, this.requestBody, cb)
+  }
+
+  /**
+   * Decorates response body as JSON.
+   */
+  decorateResponseBodyJson(cb: (json: HttpJson) => void) {
+    this.decorateBodyJson(this.responseHeaders, this.responseBody, cb)
+  }
+
+  private decorateBodyJson(
+    headers: HttpHeadersWrap,
+    body: HttpBodyWrap,
+    cb: (json: HttpJson) => void
+  ) {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      const json = body.getJson(charset)
+
+      cb(json)
+
+      body.setJson(json)
+    } catch (error) {
+      this.addError(error, ['decorate-body-json'])
+    }
+  }
+
+  /**
+   * Retrieves request body as Query String.
+   */
+  retrieveRequestBodyQueryString(): HttpQueryString | null {
+    return this.retrieveBodyQueryString(this.requestHeaders, this.requestBody)
+  }
+
+  /**
+   * Retrieves response body as Query String.
+   */
+  retrieveResponseBodyQueryString(): HttpQueryString | null {
+    return this.retrieveBodyQueryString(this.responseHeaders, this.responseBody)
+  }
+
+  private retrieveBodyQueryString(
+    headers: HttpHeadersWrap,
+    body: HttpBodyWrap
+  ): HttpQueryString | null {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      return body.getQueryString(charset)
+    } catch (error) {
+      this.addError(error, ['retrieve-body-query-string'])
+      return null
+    }
+  }
+
+  /**
+   * Decorates request body as Query String.
+   */
+  decorateRequestBodyQueryString(cb: (queryString: HttpQueryString) => void) {
+    this.decorateBodyQueryString(this.requestHeaders, this.requestBody, cb)
+  }
+
+  /**
+   * Decorates response body as Query String.
+   */
+  decorateResponseBodyQueryString(cb: (queryString: HttpQueryString) => void) {
+    this.decorateBodyQueryString(this.responseHeaders, this.responseBody, cb)
+  }
+
+  private decorateBodyQueryString(
+    headers: HttpHeadersWrap,
+    body: HttpBodyWrap,
+    cb: (queryString: HttpQueryString) => void
+  ) {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      const queryString = body.getQueryString(charset)
+
+      cb(queryString)
+
+      body.setQueryString(queryString)
+    } catch (error) {
+      this.addError(error, ['decorate-body-query-string'])
+    }
+  }
+
+  /**
+   * Retrieves request body as HTML.
+   */
+  retrieveRequestBodyHtml(): CheerioAPI | null {
+    return this.retrieveBodyHtml(this.requestHeaders, this.requestBody)
+  }
+
+  /**
+   * Retrieves response body as HTML.
+   */
+  retrieveResponseBodyHtml(): CheerioAPI | null {
+    return this.retrieveBodyHtml(this.responseHeaders, this.responseBody)
+  }
+
+  private retrieveBodyHtml(headers: HttpHeadersWrap, body: HttpBodyWrap): CheerioAPI | null {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      const text = body.getText(charset)
+
+      return cheerioLoad(text)
+    } catch (error) {
+      this.addError(error, ['retrieve-body-html'])
+      return null
+    }
+  }
+
+  /**
+   * Deocrates request body as HTML.
+   */
+  decorateRequestBodyHtml(cb: ($: CheerioAPI) => void) {
+    this.decorateBodyHtml(this.requestHeaders, this.requestBody, cb)
+  }
+
+  /**
+   * Deocrates response body as HTML.
+   */
+  decorateResponseBodyHtml(cb: ($: CheerioAPI) => void) {
+    this.decorateBodyHtml(this.responseHeaders, this.responseBody, cb)
+  }
+
+  private decorateBodyHtml(
+    headers: HttpHeadersWrap,
+    body: HttpBodyWrap,
+    cb: ($: CheerioAPI) => void
+  ) {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      const text = body.getText(charset)
+
+      const $ = cheerioLoad(text)
+
+      cb($)
+
+      body.setText($.html())
+    } catch (error) {
+      this.addError(error, ['decorate-body-html'])
+    }
+  }
+
+  /**
+   * Retrieves request body as XML.
+   */
+  retrieveRequestBodyXml(): CheerioAPI | null {
+    return this.retrieveBodyXml(this.requestHeaders, this.requestBody)
+  }
+
+  /**
+   * Retrieves response body as XML.
+   */
+  retrieveResponseBodyXml(): CheerioAPI | null {
+    return this.retrieveBodyXml(this.responseHeaders, this.responseBody)
+  }
+
+  private retrieveBodyXml(headers: HttpHeadersWrap, body: HttpBodyWrap): CheerioAPI | null {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      const text = body.getText(charset)
+
+      return cheerioLoad(text, { xml: true })
+    } catch (error) {
+      this.addError(error, ['retrieve-body-xml'])
+      return null
+    }
+  }
+
+  /**
+   * Decorate request body as XML.
+   */
+  decorateRequestBodyXml(cb: ($: CheerioAPI) => void) {
+    this.decorateBodyXml(this.requestHeaders, this.requestBody, cb)
+  }
+
+  /**
+   * Decorate response body as XML.
+   */
+  decorateResponseBodyXml(cb: ($: CheerioAPI) => void) {
+    this.decorateBodyXml(this.responseHeaders, this.responseBody, cb)
+  }
+
+  private decorateBodyXml(
+    headers: HttpHeadersWrap,
+    body: HttpBodyWrap,
+    cb: ($: CheerioAPI) => void
+  ) {
+    try {
+      const contentType = headers.getContentType()
+      const charset = contentType ? contentType.parameters['charset'] : undefined
+
+      const text = body.getText(charset)
+
+      const $ = cheerioLoad(text, { xml: true })
+
+      cb($)
+
+      body.setText($.xml())
+    } catch (error) {
+      this.addError(error, ['decorate-body-xml'])
+    }
   }
 
   /**

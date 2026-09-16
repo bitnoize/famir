@@ -3,6 +3,7 @@ import {
   FullMessageModel,
   Logger,
   LOGGER,
+  MessageModel,
   TEMPLATER,
   Templater,
   Validator,
@@ -15,8 +16,12 @@ import {
   type ReplServerRouter,
 } from '@famir/repl-server'
 import { BaseController } from '../base/index.js'
-import { ReadMessageArgs } from './message.js'
-import { readMessageArgsSchema } from './message.schemas.js'
+import { DeleteMessageArgs, ListMessagesArgs, ReadMessageArgs } from './message.js'
+import {
+  deleteMessageArgsSchema,
+  listMessagesArgsSchema,
+  readMessageArgsSchema,
+} from './message.schemas.js'
 import { MESSAGE_SERVICE, type MessageService } from './message.service.js'
 
 /**
@@ -82,7 +87,10 @@ export class MessageController extends BaseController {
   ) {
     super(validator, logger, templater, assets, router)
 
-    this.validator.addSchema('console-read-message-args', readMessageArgsSchema)
+    this.validator
+      .addSchema('console-read-message-args', readMessageArgsSchema)
+      .addSchema('console-delete-message-args', deleteMessageArgsSchema)
+      .addSchema('console-list-messages-args', listMessagesArgsSchema)
   }
 
   /**
@@ -137,6 +145,56 @@ export class MessageController extends BaseController {
         )
       }
     )
+
+    this.router.addCommand<DeleteMessageArgs>(
+      {
+        name: 'message-delete',
+        description: `Deletes the message by its ID.`,
+        schemaName: 'console-delete-message-args',
+        options: [],
+        params: ['campaign-id', 'message-id'],
+      },
+      null,
+      async (console, spec, args) => {
+        const [campaignId, messageId] = args._
+
+        await this.messageService.delete({
+          campaignId,
+          messageId,
+        })
+
+        console.log(`Message deleted!`)
+      }
+    )
+
+    this.router.addCommand<ListMessagesArgs>(
+      {
+        name: 'message-list',
+        description: `Lists campaign message history.`,
+        schemaName: 'console-list-messages-args',
+        options: [
+          {
+            name: 'limit',
+            description: `Limit on the number of records.`,
+            type: 'number',
+            alias: 'l',
+            default: 100,
+          },
+        ],
+        params: ['campaign-id'],
+      },
+      null,
+      async (console, spec, args) => {
+        const [campaignId] = args._
+
+        const messages = await this.messageService.list({
+          campaignId,
+          limit: args.limit,
+        })
+
+        this.showMessageCollection(console, messages)
+      }
+    )
   }
 
   private showMessageModel(
@@ -161,8 +219,6 @@ export class MessageController extends BaseController {
       responseHeaders: Object.keys(message.responseHeaders).length,
       responseBody: message.responseBody.length,
       analyze: message.analyze,
-      //startTime: message.startTime,
-      //finishTime: message.finishTime,
       totalTime: message.totalTime,
       createdAt: message.createdAt.toISOString(),
     })
@@ -183,5 +239,26 @@ export class MessageController extends BaseController {
     if (showPayload) {
       console.log(`Payload:`, message.payload)
     }
+  }
+
+  private showMessageCollection(console: Console, messages: MessageModel[]) {
+    console.table(
+      messages.map((message) => {
+        return {
+          //campaignId: message.campaignId,
+          messageId: message.messageId,
+          proxyId: message.proxyId,
+          targetId: message.targetId,
+          sessionId: message.sessionId,
+          type: message.type,
+          //method: message.method,
+          //url: message.url,
+          //status: message.status,
+          //analyze: message.analyze,
+          //totalTime: message.totalTime,
+          createdAt: message.createdAt.toISOString(),
+        }
+      })
+    )
   }
 }

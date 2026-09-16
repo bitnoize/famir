@@ -22,6 +22,7 @@ export class SessionModel {
    * @param proxyId - The ID of the proxy assigned to this session.
    * @param secret - The session secret for secure operations.
    * @param isUpgraded - The flag indicating if the session has been upgraded.
+   * @param isRevoked - The flag indicating if the session has been revoked.
    * @param messageCount - The total number of messages processed through this session.
    * @param createdAt - The date and time when the session was created.
    * @param authorizedAt - The date and time when the session was last authorized.
@@ -32,6 +33,7 @@ export class SessionModel {
     readonly proxyId: string,
     readonly secret: string,
     readonly isUpgraded: boolean,
+    readonly isRevoked: boolean,
     readonly messageCount: number,
     readonly createdAt: Date,
     readonly authorizedAt: Date

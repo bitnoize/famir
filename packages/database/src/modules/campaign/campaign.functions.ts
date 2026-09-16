@@ -6,8 +6,10 @@ import {
   campaignMirrorDomainsKey,
   campaignSessionCookieNamesKey,
   lureIndexKey,
+  messageHistoryKey,
   proxyIndexKey,
   redirectorIndexKey,
+  sessionHistoryKey,
   targetIndexKey,
 } from '../../database.keys.js'
 
@@ -41,10 +43,12 @@ export interface RawFullCampaign extends RawCampaign {
   session_expire: number
   new_session_expire: number
   message_expire: number
-  proxy_count: number
-  target_count: number
-  redirector_count: number
-  lure_count: number
+  proxy_index: number
+  target_index: number
+  redirector_index: number
+  lure_index: number
+  session_history: number
+  message_history: number
 }
 
 /**
@@ -104,7 +108,7 @@ export const campaignFunctions = {
     },
 
     read_full_campaign: {
-      NUMBER_OF_KEYS: 7,
+      NUMBER_OF_KEYS: 9,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -114,6 +118,8 @@ export const campaignFunctions = {
         parser.pushKey(targetIndexKey(prefix, campaignId))
         parser.pushKey(redirectorIndexKey(prefix, campaignId))
         parser.pushKey(lureIndexKey(prefix, campaignId))
+        parser.pushKey(sessionHistoryKey(prefix, campaignId))
+        parser.pushKey(messageHistoryKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => unknown,

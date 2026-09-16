@@ -8,3 +8,20 @@ export interface ReadMessageArgs {
   showConnection: boolean
   showPayload: boolean
 }
+
+/**
+ * @category Message
+ * @internal
+ */
+export interface DeleteMessageArgs {
+  _: [string, string]
+}
+
+/**
+ * @category Message
+ * @internal
+ */
+export interface ListMessagesArgs {
+  _: [string]
+  limit: number
+}

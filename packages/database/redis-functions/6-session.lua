@@ -44,6 +44,7 @@ local function create_session(keys, args)
     proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key),
     secret = args[3],
     is_upgraded = 0,
+    is_revoked = 0,
     message_count = 0,
     created_at = tonumber(args[4]),
     authorized_at = tonumber(args[4]),
@@ -113,12 +114,13 @@ local function read_session(keys, args)
     'proxy_id',
     'secret',
     'is_upgraded',
+    'is_revoked',
     'message_count',
     'created_at',
     'authorized_at'
   )
 
-  if #values ~= 8 then
+  if #values ~= 9 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -128,9 +130,10 @@ local function read_session(keys, args)
     proxy_id = values[3],
     secret = values[4],
     is_upgraded = tonumber(values[5]),
-    message_count = tonumber(values[6]),
-    created_at = tonumber(values[7]),
-    authorized_at = tonumber(values[8]),
+    is_revoked = tonumber(values[6]),
+    message_count = tonumber(values[7]),
+    created_at = tonumber(values[8]),
+    authorized_at = tonumber(values[9]),
   }
 
   for k, v in pairs(model) do
@@ -140,6 +143,7 @@ local function read_session(keys, args)
   end
 
   model['is_upgraded'] = (model['is_upgraded'] ~= 0)
+  model['is_revoked'] = (model['is_revoked'] ~= 0)
 
   return { map = model }
 end
@@ -152,16 +156,48 @@ redis.register_function({
 })
 
 --[[
+  Read session history
+--]]
+local function read_session_history(keys, args)
+  if #keys ~= 2 or #args ~= 1 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local session_history_key = keys[2]
+
+  local limit = tonumber(args[1])
+
+  if not (limit and limit > 0) then
+    return redis.error_reply('ERR Wrong limimt')
+  end
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return nil
+  end
+
+  return redis.call('ZRANGE', session_history_key, 0, limit - 1, 'REV')
+end
+
+redis.register_function({
+  function_name = 'read_session_history',
+  callback = read_session_history,
+  flags = { 'no-writes' },
+  description = 'Read session history',
+})
+
+--[[
   Auth session
 --]]
 local function auth_session(keys, args)
-  if #keys ~= 3 or #args ~= 1 then
+  if #keys ~= 4 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local session_key = keys[2]
-  local enabled_proxy_index_key = keys[3]
+  local session_history_key = keys[3]
+  local enabled_proxy_index_key = keys[4]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
@@ -173,7 +209,9 @@ local function auth_session(keys, args)
 
   local stash = {
     authorized_at = tonumber(args[1]),
+    session_id = redis.call('HGET', session_key, 'session_id'),
     proxy_id = redis.call('HGET', session_key, 'proxy_id'),
+    is_revoked = tonumber(redis.call('HGET', session_key, 'is_revoked')),
     session_expire = tonumber(redis.call('HGET', campaign_key, 'session_expire')),
   }
 
@@ -182,13 +220,23 @@ local function auth_session(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if k == 'proxy_id' and v == '' then
+    if (k == 'session_id' or k == 'proxy_id') and v == '' then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
     if k == 'session_expire' and v <= 0 then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
+  end
+
+  local history_threshold = stash.authorized_at - stash.session_expire
+
+  if history_threshold <= 0 then
+    return redis.error_reply('ERR Wrong history_threshold')
+  end
+
+  if stash.is_revoked ~= 0 then
+    return redis.status_reply('FORBIDDEN Session is revoked')
   end
 
   if redis.call('SCARD', enabled_proxy_index_key) == 0 then
@@ -215,6 +263,12 @@ local function auth_session(keys, args)
   end
 
   redis.call('PEXPIRE', session_key, stash.session_expire)
+
+  redis.call('ZREMRANGEBYSCORE', session_history_key, '-inf', '(' .. history_threshold)
+
+  redis.call('ZADD', session_history_key, stash.authorized_at, stash.session_id)
+
+  redis.call('PEXPIRE', session_history_key, stash.session_expire)
 
   return redis.status_reply('OK Session authorized')
 end
@@ -252,6 +306,7 @@ local function upgrade_session(keys, args)
   local stash = {
     secret = args[1],
     orig_secret = redis.call('HGET', session_key, 'secret'),
+    is_revoked = tonumber(redis.call('HGET', session_key, 'is_revoked')),
     is_upgraded = tonumber(redis.call('HGET', session_key, 'is_upgraded')),
   }
 
@@ -267,6 +322,10 @@ local function upgrade_session(keys, args)
 
   if stash.orig_secret ~= stash.secret then
     return redis.status_reply('FORBIDDEN Session secret not match')
+  end
+
+  if stash.is_revoked ~= 0 then
+    return redis.status_reply('FORBIDDEN Session is revoked')
   end
 
   if stash.is_upgraded ~= 0 then
@@ -286,4 +345,50 @@ redis.register_function({
   function_name = 'upgrade_session',
   callback = upgrade_session,
   description = 'Upgrade session',
+})
+
+--[[
+  Revoke session
+--]]
+local function revoke_session(keys, args)
+  if #keys ~= 2 or #args ~= 0 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local session_key = keys[2]
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  if redis.call('EXISTS', session_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Session not exists')
+  end
+
+  local stash = {
+    is_revoked = tonumber(redis.call('HGET', session_key, 'is_revoked')),
+  }
+
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+  end
+
+  if stash.is_revoked ~= 0 then
+    return redis.status_reply('OK Session already revoked')
+  end
+
+  -- Point of no return
+
+  redis.call('HSET', session_key, 'is_revoked', 1)
+
+  return redis.status_reply('OK Session revoked')
+end
+
+redis.register_function({
+  function_name = 'revoke_session',
+  callback = revoke_session,
+  description = 'Revoke session',
 })

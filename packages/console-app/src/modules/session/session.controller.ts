@@ -15,8 +15,12 @@ import {
   type ReplServerRouter,
 } from '@famir/repl-server'
 import { BaseController } from '../base/index.js'
-import { ReadSessionArgs } from './session.js'
-import { readSessionArgsSchema } from './session.schemas.js'
+import { ListSessionsArgs, ReadSessionArgs, RevokeSessionArgs } from './session.js'
+import {
+  listSessionsArgsSchema,
+  readSessionArgsSchema,
+  revokeSessionArgsSchema,
+} from './session.schemas.js'
 import { SESSION_SERVICE, type SessionService } from './session.service.js'
 
 /**
@@ -82,7 +86,10 @@ export class SessionController extends BaseController {
   ) {
     super(validator, logger, templater, assets, router)
 
-    this.validator.addSchema('console-read-session-args', readSessionArgsSchema)
+    this.validator
+      .addSchema('console-read-session-args', readSessionArgsSchema)
+      .addSchema('console-revoke-session-args', revokeSessionArgsSchema)
+      .addSchema('console-list-sessions-args', listSessionsArgsSchema)
   }
 
   /**
@@ -109,6 +116,56 @@ export class SessionController extends BaseController {
         this.showSessionModel(console, session)
       }
     )
+
+    this.router.addCommand<RevokeSessionArgs>(
+      {
+        name: 'session-revoke',
+        description: `Revoking a session and stopping authorization.`,
+        schemaName: 'console-revoke-session-args',
+        options: [],
+        params: ['campaign-id', 'session-id'],
+      },
+      null,
+      async (console, spec, args) => {
+        const [campaignId, sessionId] = args._
+
+        await this.sessionService.revoke({
+          campaignId,
+          sessionId,
+        })
+
+        console.log(`Session revoked!`)
+      }
+    )
+
+    this.router.addCommand<ListSessionsArgs>(
+      {
+        name: 'session-list',
+        description: `Lists campaign session history.`,
+        schemaName: 'console-list-sessions-args',
+        options: [
+          {
+            name: 'limit',
+            description: `Limit on the number of records.`,
+            type: 'number',
+            alias: 'l',
+            default: 25,
+          },
+        ],
+        params: ['campaign-id'],
+      },
+      null,
+      async (console, spec, args) => {
+        const [campaignId] = args._
+
+        const sessions = await this.sessionService.list({
+          campaignId,
+          limit: args.limit,
+        })
+
+        this.showSessionCollection(console, sessions)
+      }
+    )
   }
 
   private showSessionModel(console: Console, session: SessionModel) {
@@ -118,8 +175,26 @@ export class SessionController extends BaseController {
       proxyId: session.proxyId,
       //secret: session.secret,
       isUpgraded: session.isUpgraded,
+      isRevoked: session.isRevoked,
       messageCount: session.messageCount,
       createdAt: session.createdAt.toISOString(),
     })
+  }
+
+  private showSessionCollection(console: Console, sessions: SessionModel[]) {
+    console.table(
+      sessions.map((session) => {
+        return {
+          //campaignId: session.campaignId,
+          sessionId: session.sessionId,
+          proxyId: session.proxyId,
+          //secret: session.secret,
+          isUpgraded: session.isUpgraded,
+          isRevoked: session.isRevoked,
+          messageCount: session.messageCount,
+          createdAt: session.createdAt.toISOString(),
+        }
+      })
+    )
   }
 }

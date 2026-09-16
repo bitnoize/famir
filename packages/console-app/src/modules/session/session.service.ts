@@ -1,5 +1,11 @@
 import { DIContainer } from '@famir/common'
-import { ReplServerError, SESSION_REPOSITORY, SessionModel, SessionRepository } from '@famir/domain'
+import {
+  DatabaseError,
+  ReplServerError,
+  SESSION_REPOSITORY,
+  SessionModel,
+  SessionRepository,
+} from '@famir/domain'
 
 /**
  * DI token for the session service.
@@ -44,5 +50,37 @@ export class SessionService {
     }
 
     return session
+  }
+
+  /**
+   * Revoking a session and stopping authorization.
+   */
+  async revoke(data: { campaignId: string; sessionId: string }): Promise<void> {
+    try {
+      await this.sessionRepository.revoke(data.campaignId, data.sessionId)
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
+        }
+
+        throw ReplServerError.internalError(`Revoke session failed`, null, error)
+      }
+
+      throw error
+    }
+  }
+
+  /**
+   * Lists campaign session history.
+   */
+  async list(data: { campaignId: string; limit: number }): Promise<SessionModel[]> {
+    const sessions = await this.sessionRepository.list(data.campaignId, data.limit)
+
+    if (!sessions) {
+      throw ReplServerError.notFound(`Campaign not found`)
+    }
+
+    return sessions
   }
 }

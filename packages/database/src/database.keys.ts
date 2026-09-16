@@ -333,6 +333,20 @@ export const sessionKey = (prefix: string, campaignId: string, sessionId: string
   return buildKey(prefix, 'session', campaignId, sessionId)
 }
 
+/**
+ * Key for campaign session history by their auth time.
+ *
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Sorted set` key, like 'famir:session-history:httpbin'.
+ *
+ * @category Session
+ * @internal
+ */
+export const sessionHistoryKey = (prefix: string, campaignId: string) => {
+  return buildKey(prefix, 'session-history', campaignId)
+}
+
 // --- Message Keys ---
 
 /**
@@ -348,4 +362,18 @@ export const sessionKey = (prefix: string, campaignId: string, sessionId: string
  */
 export const messageKey = (prefix: string, campaignId: string, messageId: string) => {
   return buildKey(prefix, 'message', campaignId, messageId)
+}
+
+/**
+ * Key for campaign message history by their creation time.
+ *
+ * @param prefix - The global prefix for all keys.
+ * @param campaignId - The unique campaign ID.
+ * @returns The Redis `Sorted set` key, like 'famir:message-history:httpbin'.
+ *
+ * @category Message
+ * @internal
+ */
+export const messageHistoryKey = (prefix: string, campaignId: string) => {
+  return buildKey(prefix, 'message-history', campaignId)
 }

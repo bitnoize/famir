@@ -38,17 +38,17 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
-    "@famir/domain": "*",
     "@famir/common": "*",
-    "@famir/validator": "*",
     "@famir/config": "*",
-    "@famir/logger": "*",
-    "@famir/templater": "*",
     "@famir/database": "*",
-    "@famir/storage": "*",
-    "@famir/producer": "*",
+    "@famir/domain": "*",
     "@famir/edge-server": "*",
+    "@famir/logger": "*",
+    "@famir/producer": "*",
     "@famir/repl-server": "*",
-    "yaml": "^2.9.0"
+    "@famir/storage": "*",
+    "@famir/templater": "*",
+    "@famir/validator": "*",
+    "yaml": "^2.9.1"
   }
 }

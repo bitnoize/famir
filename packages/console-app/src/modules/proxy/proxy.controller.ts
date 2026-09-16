@@ -274,7 +274,7 @@ Delete the 'default' proxy in the 'httpbin' campaign:
     console.table(
       proxies.map((proxy) => {
         return {
-          campaignId: proxy.campaignId,
+          //campaignId: proxy.campaignId,
           proxyId: proxy.proxyId,
           url: proxy.url,
           isEnabled: proxy.isEnabled,

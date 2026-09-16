@@ -325,7 +325,7 @@ Makes a URL for the 'test' lure in the 'hackernews' campaign via 'root' target:
     console.table(
       lures.map((lure) => {
         return {
-          campaignId: lure.campaignId,
+          //campaignId: lure.campaignId,
           lureId: lure.lureId,
           path: lure.path,
           redirectorId: lure.redirectorId,

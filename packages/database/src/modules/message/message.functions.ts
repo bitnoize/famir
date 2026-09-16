@@ -1,6 +1,13 @@
 import { HttpMethod, HttpType } from '@famir/domain'
 import { CommandParser } from '@redis/client'
-import { campaignKey, messageKey, proxyKey, sessionKey, targetKey } from '../../database.keys.js'
+import {
+  campaignKey,
+  messageHistoryKey,
+  messageKey,
+  proxyKey,
+  sessionKey,
+  targetKey,
+} from '../../database.keys.js'
 
 /**
  * Raw message data structure.
@@ -49,7 +56,7 @@ export interface RawFullMessage extends RawMessage {
 export const messageFunctions = {
   message: {
     create_message: {
-      NUMBER_OF_KEYS: 5,
+      NUMBER_OF_KEYS: 6,
 
       parseCommand(
         parser: CommandParser,
@@ -80,6 +87,7 @@ export const messageFunctions = {
         parser.pushKey(proxyKey(prefix, campaignId, proxyId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
         parser.pushKey(sessionKey(prefix, campaignId, sessionId))
+        parser.pushKey(messageHistoryKey(prefix, campaignId))
 
         parser.push(campaignId)
         parser.push(messageId)
@@ -145,6 +153,31 @@ export const messageFunctions = {
       parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(messageKey(prefix, campaignId, messageId))
+      },
+
+      transformReply: undefined as unknown as () => unknown,
+    },
+
+    read_message_history: {
+      NUMBER_OF_KEYS: 2,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, limit: number) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(messageHistoryKey(prefix, campaignId))
+
+        parser.push(limit.toString())
+      },
+
+      transformReply: undefined as unknown as () => unknown,
+    },
+
+    delete_message: {
+      NUMBER_OF_KEYS: 3,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(messageKey(prefix, campaignId, messageId))
+        parser.pushKey(messageHistoryKey(prefix, campaignId))
       },
 
       transformReply: undefined as unknown as () => unknown,
