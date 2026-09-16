@@ -1,5 +1,14 @@
 # @famir/http-tools
 
+## 0.0.9
+
+### Patch Changes
+
+- Update content-type dep.
+- Added message retrieve/decorate body methods.
+- Updated dependencies:
+  - @famir/domain@0.0.2
+
 ## 0.0.8
 
 ### Patch Changes

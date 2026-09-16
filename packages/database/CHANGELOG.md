@@ -1,5 +1,15 @@
 # @famir/database
 
+## 0.0.8
+
+### Patch Changes
+
+- Added history for sessions and messages.
+- Session revocation logic added.
+- Updated dependencies:
+  - @famir/http-tools@0.0.9
+  - @famir/domain@0.0.2
+
 ## 0.0.7
 
 ### Patch Changes

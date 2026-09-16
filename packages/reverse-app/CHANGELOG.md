@@ -1,5 +1,15 @@
 # @famir/reverse-app
 
+## 0.0.8
+
+### Patch Changes
+
+- Fix log interest message
+- Updated dependencies:
+  - @famir/http-tools@0.0.9
+  - @famir/database@0.0.8
+  - @famir/domain@0.0.2
+
 ## 0.0.7
 
 ### Patch Changes

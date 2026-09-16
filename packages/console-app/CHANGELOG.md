@@ -1,5 +1,15 @@
 # @famir/console-app
 
+## 0.0.8
+
+### Patch Changes
+
+- Added history for sessions and messages.
+- Session revocation logic added.
+- Updated dependencies:
+  - @famir/database@0.0.8
+  - @famir/domain@0.0.2
+
 ## 0.0.7
 
 ### Patch Changes
