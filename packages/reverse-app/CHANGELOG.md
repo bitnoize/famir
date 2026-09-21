@@ -1,5 +1,13 @@
 # @famir/reverse-app
 
+## 0.0.9
+
+### Patch Changes
+
+- Added controller flags.
+- Updated dependencies:
+  - @famir/http-tools@0.0.10
+
 ## 0.0.8
 
 ### Patch Changes

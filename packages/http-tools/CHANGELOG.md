@@ -1,5 +1,11 @@
 # @famir/http-tools
 
+## 0.0.10
+
+### Patch Changes
+
+- Improve isPath method for url wrapper.
+
 ## 0.0.9
 
 ### Patch Changes
