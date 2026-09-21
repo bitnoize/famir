@@ -25,7 +25,7 @@ import {
   HttpServerNextFunction,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { BaseController } from '../base/index.js'
+import { BaseController, ControllerFlags } from '../base/index.js'
 import { AUTHORIZE_SERVICE, type AuthorizeService } from './authorize.service.js'
 
 /**
@@ -37,6 +37,7 @@ export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
 
 type AuthorizeHandler = (
   ctx: HttpServerContext,
+  flags: ControllerFlags,
   campaign: FullCampaignModel,
   target: EnabledFullTargetModel,
   next: HttpServerNextFunction
@@ -113,26 +114,27 @@ export class AuthorizeController extends BaseController {
    */
   use() {
     this.router.addMiddleware('authorize', async (ctx, next) => {
+      const flags = this.getState(ctx, 'flags')
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
 
-      await this.dispatchRoot[ctx.type](ctx, campaign, target, next)
+      await this.dispatchRoot[ctx.type](ctx, flags, campaign, target, next)
     })
   }
 
   private dispatchRoot: AuthorizeDispatchContextType = {
-    normal: async (ctx, campaign, target, next) => {
-      await this.dispatchNormal[target.accessLevel](ctx, campaign, target, next)
+    normal: async (ctx, flags, campaign, target, next) => {
+      await this.dispatchNormal[target.accessLevel](ctx, flags, campaign, target, next)
     },
 
-    websocket: async (ctx, campaign, target, next) => {
-      await this.dispatchWebSocket[target.accessLevel](ctx, campaign, target, next)
+    websocket: async (ctx, flags, campaign, target, next) => {
+      await this.dispatchWebSocket[target.accessLevel](ctx, flags, campaign, target, next)
     },
   }
 
   private dispatchNormal: AuthorizeDispatchAccessLevel = {
-    transparent: async (ctx, campaign, target, next) => {
-      if (ctx.isBot) {
+    transparent: async (ctx, flags, campaign, target, next) => {
+      if (ctx.isBot && !flags.authorizeAllowBots) {
         await this.sendCloakingSite(ctx, target)
 
         return
@@ -174,7 +176,7 @@ export class AuthorizeController extends BaseController {
       await next()
     },
 
-    landing: async (ctx, campaign, target, next) => {
+    landing: async (ctx, flags, campaign, target, next) => {
       if (ctx.url.isPath(campaign.upgradeSessionPath)) {
         if (!ctx.method.is('GET')) {
           await this.sendNotFoundPage(ctx, target)
@@ -305,7 +307,7 @@ export class AuthorizeController extends BaseController {
         return
       }
 
-      if (ctx.isBot) {
+      if (ctx.isBot && !flags.authorizeAllowBots) {
         await this.sendCloakingSite(ctx, target)
 
         return
@@ -367,8 +369,8 @@ export class AuthorizeController extends BaseController {
   }
 
   private dispatchWebSocket: AuthorizeDispatchAccessLevel = {
-    transparent: async (ctx, campaign, target, next) => {
-      if (ctx.isBot) {
+    transparent: async (ctx, flags, campaign, target, next) => {
+      if (ctx.isBot && !flags.authorizeAllowBots) {
         ctx.close()
 
         return
@@ -398,11 +400,18 @@ export class AuthorizeController extends BaseController {
       this.setState(ctx, 'proxy', proxy)
       this.setState(ctx, 'session', session)
 
+      if (ctx.state.verbose) {
+        ctx.responseHeaders.merge({
+          'X-Famir-Session-Id': session.sessionId,
+          'X-Famir-Proxy-Id': proxy.proxyId,
+        })
+      }
+
       await next()
     },
 
-    landing: async (ctx, campaign, target, next) => {
-      if (ctx.isBot) {
+    landing: async (ctx, flags, campaign, target, next) => {
+      if (ctx.isBot && !flags.authorizeAllowBots) {
         ctx.close()
 
         return
@@ -433,6 +442,13 @@ export class AuthorizeController extends BaseController {
 
       this.setState(ctx, 'proxy', proxy)
       this.setState(ctx, 'session', session)
+
+      if (ctx.state.verbose) {
+        ctx.responseHeaders.merge({
+          'X-Famir-Session-Id': session.sessionId,
+          'X-Famir-Proxy-Id': proxy.proxyId,
+        })
+      }
 
       await next()
     },

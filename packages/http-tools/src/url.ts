@@ -245,17 +245,21 @@ export class HttpUrlWrap {
   /**
    * Checks if the URL pathname matches a string or regular expression.
    *
-   * @param value - The string path or RegExp pattern to match.
+   * @param value - The string path or RegExp pattern to match or array of both.
    * @returns `true` if the pathname matches, `false` otherwise.
    */
-  isPath(value: string | RegExp): boolean {
-    if (typeof value === 'string') {
-      return value === this.#url.pathname
-    } else if (value instanceof RegExp) {
-      return value.test(this.#url.pathname)
-    } else {
-      throw new Error(`Test path unknown value`)
-    }
+  isPath(arg: string | RegExp | (string | RegExp)[]): boolean {
+    const values = Array.isArray(arg) ? arg : [arg]
+
+    return values.some((value) => {
+      if (typeof value === 'string') {
+        return value === this.#url.pathname
+      } else if (value instanceof RegExp) {
+        return value.test(this.#url.pathname)
+      } else {
+        throw new Error(`Test path unknown value`)
+      }
+    })
   }
 
   /**

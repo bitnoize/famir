@@ -102,6 +102,10 @@ export class SetupMirrorController extends BaseController {
    */
   use() {
     this.router.addMiddleware('setup-mirror', async (ctx, next) => {
+      this.setState(ctx, 'flags', {
+        authorizeAllowBots: false,
+      })
+
       const mirrorHost = this.parseMirrorHost(ctx)
 
       const target = await this.setupMirrorService.findTarget({

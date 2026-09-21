@@ -20,12 +20,17 @@ import {
 } from '@famir/http-server'
 import { HttpMessage } from '@famir/http-tools'
 
+export interface ControllerFlags {
+  authorizeAllowBots: boolean
+}
+
 /**
  * Represents the controller context state.
  *
  * @category none
  */
 export interface ControllerContextState extends HttpServerContextState {
+  flags?: ControllerFlags
   campaign?: FullCampaignModel
   proxy?: EnabledProxyModel
   target?: EnabledFullTargetModel
@@ -59,6 +64,15 @@ export abstract class BaseController {
     protected readonly assets: HttpServerAssets,
     protected readonly router: HttpServerRouter
   ) {}
+
+  protected getAsset(assetName: string): string {
+    const asset = this.assets.get(assetName)
+    if (!asset) {
+      throw new Error(`Asset '${assetName}' not exists`)
+    }
+
+    return asset
+  }
 
   protected getState<T extends ControllerContextState, K extends keyof T>(
     ctx: HttpServerContext,
