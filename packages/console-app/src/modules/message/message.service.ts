@@ -84,4 +84,23 @@ export class MessageService {
 
     return messages
   }
+
+  /**
+   * Clears campaign message history.
+   */
+  async clear(data: { campaignId: string }): Promise<void> {
+    try {
+      await this.messageRepository.clear(data.campaignId)
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
+        }
+
+        throw ReplServerError.internalError(`Clear messages failed`, null, error)
+      }
+
+      throw error
+    }
+  }
 }

@@ -1,5 +1,10 @@
 import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/common'
-import { DeleteMessageArgs, ListMessagesArgs, ReadMessageArgs } from './message.js'
+import {
+  ClearMessagesArgs,
+  DeleteMessageArgs,
+  ListMessagesArgs,
+  ReadMessageArgs,
+} from './message.js'
 
 /**
  * @category Message
@@ -64,6 +69,24 @@ export const listMessagesArgsSchema: JSONSchemaType<ListMessagesArgs> = {
       type: 'integer',
       minimum: 1,
       maximum: 1000_000,
+    },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Message
+ * @internal
+ */
+export const clearMessagesArgsSchema: JSONSchemaType<ClearMessagesArgs> = {
+  type: 'object',
+  required: ['_'],
+  properties: {
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
     },
   },
   additionalProperties: false,

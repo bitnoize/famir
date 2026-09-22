@@ -143,4 +143,13 @@ export interface MessageRepository {
    * @throws DatabaseError If the data validation fails.
    */
   list(campaignId: string, limit: number): Promise<MessageModel[] | null>
+
+  /**
+   * Clears campaign message history.
+   *
+   * @param campaignId - The ID of the campaign to clear message history.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the data validation fails.
+   */
+  clear(campaignId: string): Promise<void>
 }

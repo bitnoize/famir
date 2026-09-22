@@ -16,8 +16,14 @@ import {
   type ReplServerRouter,
 } from '@famir/repl-server'
 import { BaseController } from '../base/index.js'
-import { DeleteMessageArgs, ListMessagesArgs, ReadMessageArgs } from './message.js'
 import {
+  ClearMessagesArgs,
+  DeleteMessageArgs,
+  ListMessagesArgs,
+  ReadMessageArgs,
+} from './message.js'
+import {
+  clearMessagesArgsSchema,
   deleteMessageArgsSchema,
   listMessagesArgsSchema,
   readMessageArgsSchema,
@@ -91,6 +97,7 @@ export class MessageController extends BaseController {
       .addSchema('console-read-message-args', readMessageArgsSchema)
       .addSchema('console-delete-message-args', deleteMessageArgsSchema)
       .addSchema('console-list-messages-args', listMessagesArgsSchema)
+      .addSchema('console-clear-messages-args', clearMessagesArgsSchema)
   }
 
   /**
@@ -193,6 +200,26 @@ export class MessageController extends BaseController {
         })
 
         this.showMessageCollection(console, messages)
+      }
+    )
+
+    this.router.addCommand<ClearMessagesArgs>(
+      {
+        name: 'message-clear',
+        description: `Clears campaign message history.`,
+        schemaName: 'console-clear-messages-args',
+        options: [],
+        params: ['campaign-id'],
+      },
+      null,
+      async (console, spec, args) => {
+        const [campaignId] = args._
+
+        await this.messageService.clear({
+          campaignId,
+        })
+
+        console.log(`Message history cleared!`)
       }
     )
   }

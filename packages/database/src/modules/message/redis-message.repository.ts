@@ -332,6 +332,50 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     }
   }
 
+  async clear(campaignId: string): Promise<void> {
+    try {
+      const index = await this.connection.message.read_message_history(
+        this.options.prefix,
+        campaignId,
+        -1
+      )
+
+      if (index === null) {
+        throw DatabaseError.notFound(`Campaign not exists`)
+      }
+
+      this.validateArrayStringsReply(index)
+
+      if (index.length === 0) {
+        return
+      }
+
+      const statusReplies = await Promise.all(
+        index.map((messageId) =>
+          this.connection.message.delete_message(this.options.prefix, campaignId, messageId)
+        )
+      )
+
+      this.checkStatusReplies(statusReplies)
+
+      this.logger.info(`Database delete all messages`, {
+        data: {
+          campaign: {
+            campaignId,
+          },
+        },
+      })
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'deleteAll',
+        params: {
+          campaignId,
+        },
+      })
+    }
+  }
+
   /**
    * Converts raw Redis data to a message model.
    *

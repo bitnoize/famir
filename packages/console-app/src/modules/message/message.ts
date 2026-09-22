@@ -25,3 +25,11 @@ export interface ListMessagesArgs {
   _: [string]
   limit: number
 }
+
+/**
+ * @category Message
+ * @internal
+ */
+export interface ClearMessagesArgs {
+  _: [string]
+}
