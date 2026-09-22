@@ -317,7 +317,12 @@ export abstract class BaseController {
     if (ctx.method.is(['GET', 'HEAD']) && target.sitemapXml) {
       ctx.status.set(200)
 
-      ctx.responseBody.setText(target.sitemapXml)
+      const sitemapXml = this.templater.render(target.sitemapXml, {
+        baseloc: target.mirrorUrl,
+        lastmod: target.createdAt.toISOString().slice(0, 10),
+      })
+
+      ctx.responseBody.setText(sitemapXml)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'application/xml',
