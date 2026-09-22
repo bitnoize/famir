@@ -1,5 +1,14 @@
 # @famir/console-app
 
+## 0.0.9
+
+### Patch Changes
+
+- Clear campaign message history.
+- Updated dependencies:
+  - @famir/database@0.0.9
+  - @famir/domain@0.0.3
+
 ## 0.0.8
 
 ### Patch Changes

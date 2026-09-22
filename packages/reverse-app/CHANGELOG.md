@@ -1,5 +1,14 @@
 # @famir/reverse-app
 
+## 0.0.10
+
+### Patch Changes
+
+- Render sitemap.xml as template.
+- Updated dependencies:
+  - @famir/database@0.0.9
+  - @famir/domain@0.0.3
+
 ## 0.0.9
 
 ### Patch Changes

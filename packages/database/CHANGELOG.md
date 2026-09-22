@@ -1,5 +1,13 @@
 # @famir/database
 
+## 0.0.9
+
+### Patch Changes
+
+- Clear campaign message history.
+- Updated dependencies:
+  - @famir/domain@0.0.3
+
 ## 0.0.8
 
 ### Patch Changes
