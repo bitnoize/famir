@@ -245,7 +245,7 @@ export class HttpUrlWrap {
   /**
    * Checks if the URL pathname matches a string or regular expression.
    *
-   * @param value - The string path or RegExp pattern to match or array of both.
+   * @param arg - The string path, RegExp pattern to match or array of both.
    * @returns `true` if the pathname matches, `false` otherwise.
    */
   isPath(arg: string | RegExp | (string | RegExp)[]): boolean {

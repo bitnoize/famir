@@ -213,7 +213,6 @@ export class HttpMessage {
    * Checks if a request content-type belongs to a category.
    *
    * @param name - The content-type category name.
-   * @param contentType - The parsed content-type to check.
    * @returns `true` if the content-type matches the category, `false` otherwise.
    */
   isRequestContentType(name: HttpContentTypeName): boolean {
@@ -225,7 +224,6 @@ export class HttpMessage {
    * Checks if a response content-type belongs to a category.
    *
    * @param name - The content-type category name.
-   * @param contentType - The parsed content-type to check.
    * @returns `true` if the content-type matches the category, `false` otherwise.
    */
   isResponseContentType(name: HttpContentTypeName): boolean {
