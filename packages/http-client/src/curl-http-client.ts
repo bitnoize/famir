@@ -246,13 +246,35 @@ export class CurlHttpClient implements HttpClient {
 
     curl.setOpt(Curl.option.DNS_USE_GLOBAL_CACHE, 1)
 
+    curl.setOpt(Curl.option.SSL_VERIFYPEER, false)
+
     curl.setOpt(Curl.option.PROXY, state.proxy)
 
     curl.setOpt(Curl.option.CUSTOMREQUEST, state.method)
     curl.setOpt(Curl.option.URL, state.url)
 
+    if (process.env['CURL_IMPERSONATE']) {
+      Object.keys(state.requestHeaders)
+        .filter((headerName) =>
+          this.cleanRequestHeaders.some((cleanName) => {
+            if (typeof cleanName === 'string') {
+              return cleanName === headerName
+            } else if (cleanName instanceof RegExp) {
+              return cleanName.test(headerName)
+            } else {
+              throw new Error(`Clean header unknown value`)
+            }
+          })
+        )
+        .forEach((headerName) => {
+          state.requestHeaders[headerName] = undefined
+        })
+    }
+
     curl.setOpt(Curl.option.HTTPHEADER, this.formatRawHeaders(state.requestHeaders))
-    curl.setOpt(Curl.option.ACCEPT_ENCODING, '') // Means all encodings!
+
+    curl.setOpt(Curl.option.USERAGENT, null) // No default user-agent
+    curl.setOpt(Curl.option.ACCEPT_ENCODING, '') // Means all encodings
 
     if (state.connectTimeout > 0) {
       curl.setOpt(Curl.option.CONNECTTIMEOUT_MS, state.connectTimeout)
@@ -819,6 +841,15 @@ export class CurlHttpClient implements HttpClient {
       }
     }
   }
+
+  /** Browser-specific headers. */
+  private cleanRequestHeaders: (string | RegExp)[] = [
+    'user-agent',
+    'upgrade-insecure-requests',
+    'priority',
+    'sec-gpc',
+    /^sec-ch-/,
+  ]
 
   /**
    * Parses raw header buffers into a key-value object.
