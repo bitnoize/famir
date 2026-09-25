@@ -31,8 +31,6 @@ export type HttpMessageInterceptor = (message: HttpMessage) => void
 
 /**
  * Array of interceptor functions with their names.
- *
- * @internal
  */
 type HttpMessageInterceptors = Array<[string, HttpMessageInterceptor]>
 
@@ -117,9 +115,13 @@ export class HttpMessage {
    * Marks the message as ready for processing.
    *
    * After this call, the message structure or content cannot be modified.
+   *
+   * @returns This message for method chaining.
    */
-  ready() {
+  ready(): this {
     this.#isReady = true
+
+    return this
   }
 
   /**
@@ -137,10 +139,11 @@ export class HttpMessage {
    * The type can only be changed to a compatible type based on the current type.
    *
    * @param type - The new message type.
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    * @throws Error If the type transition is invalid.
    */
-  setType(type: HttpType) {
+  setType(type: HttpType): this {
     this.sureNotReady('setType')
 
     if (!arrayIncludes(this.typesSwitch[this.type], type)) {
@@ -149,6 +152,8 @@ export class HttpMessage {
     }
 
     this.#type = type
+
+    return this
   }
 
   /** Connection details for this message. */
@@ -158,13 +163,16 @@ export class HttpMessage {
    * Merges connection details into the message.
    *
    * @param connection - The connection details to merge.
+   * @returns This message for method chaining.
    */
-  mergeConnection(connection: HttpConnection) {
+  mergeConnection(connection: HttpConnection): this {
     Object.entries(connection).forEach(([name, value]) => {
       if (value != null) {
         this.connection[name] = value
       }
     })
+
+    return this
   }
 
   /** Payload data for this message. */
@@ -178,9 +186,12 @@ export class HttpMessage {
    *
    * @param error - The error object or unknown value.
    * @param path - The path segments indicating where the error occurred.
+   * @returns This message for method chaining.
    */
-  addError(error: unknown, path: string[]) {
+  addError(error: unknown, path: string[]): this {
     this.errors.push([serializeError(error), path])
+
+    return this
   }
 
   /** Name of the analyze queue job. */
@@ -201,12 +212,21 @@ export class HttpMessage {
    *
    * @param name - The content-type category name.
    * @param types - The array of MIME types to register.
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    */
-  addContentTypes(name: HttpContentTypeName, types: string[]) {
+  addContentTypes(name: HttpContentTypeName, types: string[]): this {
     this.sureNotReady('addContentTypes')
 
+    types.forEach((type) => {
+      if (!this.#contentTypes[name].includes(type)) {
+        this.#contentTypes[name].push(type)
+      }
+    })
+
     this.#contentTypes[name].push(...types)
+
+    return this
   }
 
   /**
@@ -241,12 +261,15 @@ export class HttpMessage {
    * Adds content-types eligible for URL rewriting.
    *
    * @param types - The array of MIME types to add.
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    */
-  addRewriteUrlContentTypes(types: string[]) {
+  addRewriteUrlContentTypes(types: string[]): this {
     this.sureNotReady('addRewriteUrlContentTypes')
 
     this.#rewriteUrlContentTypes.push(...types)
+
+    return this
   }
 
   /**
@@ -267,9 +290,10 @@ export class HttpMessage {
   /**
    * Adds extra URL rewriting schemes for percent and unicode encoded URLs.
    *
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    */
-  addRewriteUrlExtraSchemes() {
+  addRewriteUrlExtraSchemes(): this {
     this.sureNotReady('addRewriteUrlExtraSchemes')
 
     this.#rewriteUrlSchemes.push(
@@ -278,6 +302,8 @@ export class HttpMessage {
       [':\\u002F\\u002F', true],
       ['\\u002F\\u002F', false]
     )
+
+    return this
   }
 
   #requestHeadInterceptors: HttpMessageInterceptors = []
@@ -290,12 +316,15 @@ export class HttpMessage {
    *
    * @param name - The interceptor identifier.
    * @param interceptor - The interceptor function.
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    */
-  addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
+  addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
     this.sureNotReady('addRequestHeadInterceptor')
 
     this.#requestHeadInterceptors.push([name, interceptor])
+
+    return this
   }
 
   /**
@@ -305,12 +334,15 @@ export class HttpMessage {
    *
    * @param name - The interceptor identifier.
    * @param interceptor - The interceptor function.
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    */
-  addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
+  addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
     this.sureNotReady('addRequestBodyInterceptor')
 
     this.#requestBodyInterceptors.push([name, interceptor])
+
+    return this
   }
 
   /**
@@ -318,9 +350,10 @@ export class HttpMessage {
    *
    * This method freezes the method and URL after execution.
    *
+   * @returns This message for method chaining.
    * @throws Error If the message is not ready.
    */
-  runRequestHeadInterceptors() {
+  runRequestHeadInterceptors(): this {
     this.sureIsReady('runRequestHeadInterceptors')
 
     for (const [name, interceptor] of this.#requestHeadInterceptors) {
@@ -333,6 +366,8 @@ export class HttpMessage {
 
     this.method.freeze()
     this.url.freeze()
+
+    return this
   }
 
   /**
@@ -340,9 +375,10 @@ export class HttpMessage {
    *
    * This method freezes the request headers and body after execution.
    *
+   * @returns This message for method chaining.
    * @throws Error If the message is not ready.
    */
-  runRequestBodyInterceptors() {
+  runRequestBodyInterceptors(): this {
     this.sureIsReady('runRequestBodyInterceptors')
 
     for (const [name, interceptor] of this.#requestBodyInterceptors) {
@@ -357,6 +393,8 @@ export class HttpMessage {
 
     this.requestHeaders.freeze()
     this.requestBody.freeze()
+
+    return this
   }
 
   #requestTransforms: Transform[] = []
@@ -365,12 +403,15 @@ export class HttpMessage {
    * Adds a stream transform for the request body.
    *
    * @param transform - The transform stream to add.
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    */
-  addRequestTransform(transform: Transform) {
+  addRequestTransform(transform: Transform): this {
     this.sureNotReady('addRequestTransform')
 
     this.#requestTransforms.push(transform)
+
+    return this
   }
 
   /**
@@ -392,12 +433,15 @@ export class HttpMessage {
    *
    * @param name - The interceptor identifier.
    * @param interceptor - The interceptor function.
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    */
-  addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor) {
+  addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
     this.sureNotReady('addResponseHeadInterceptor')
 
     this.#responseHeadInterceptors.push([name, interceptor])
+
+    return this
   }
 
   /**
@@ -407,12 +451,15 @@ export class HttpMessage {
    *
    * @param name - The interceptor identifier.
    * @param interceptor - The interceptor function.
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    */
-  addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor) {
+  addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
     this.sureNotReady('addResponseBodyInterceptor')
 
     this.#responseBodyInterceptors.push([name, interceptor])
+
+    return this
   }
 
   /**
@@ -420,9 +467,10 @@ export class HttpMessage {
    *
    * This method freezes the status after execution.
    *
+   * @returns This message for method chaining.
    * @throws Error If the message is not ready.
    */
-  runResponseHeadInterceptors() {
+  runResponseHeadInterceptors(): this {
     this.sureIsReady('runResponseHeadInterceptors')
 
     for (const [name, interceptor] of this.#responseHeadInterceptors) {
@@ -434,6 +482,8 @@ export class HttpMessage {
     }
 
     this.status.freeze()
+
+    return this
   }
 
   /**
@@ -441,9 +491,10 @@ export class HttpMessage {
    *
    * This method freezes the response headers and body after execution.
    *
+   * @returns This message for method chaining.
    * @throws Error If the message is not ready.
    */
-  runResponseBodyInterceptors() {
+  runResponseBodyInterceptors(): this {
     this.sureIsReady('runResponseBodyInterceptors')
 
     for (const [name, interceptor] of this.#responseBodyInterceptors) {
@@ -458,6 +509,8 @@ export class HttpMessage {
 
     this.responseHeaders.freeze()
     this.responseBody.freeze()
+
+    return this
   }
 
   #responseTransforms: Transform[] = []
@@ -466,12 +519,15 @@ export class HttpMessage {
    * Adds a stream transform for the response body.
    *
    * @param transform - The transform stream to add.
+   * @returns This message for method chaining.
    * @throws Error If the message is already ready.
    */
-  addResponseTransform(transform: Transform) {
+  addResponseTransform(transform: Transform): this {
     this.sureNotReady('addResponseTransform')
 
     this.#responseTransforms.push(transform)
+
+    return this
   }
 
   /**
@@ -505,6 +561,7 @@ export class HttpMessage {
       return body.getText(charset)
     } catch (error) {
       this.addError(error, ['retrieve-body-text'])
+
       return null
     }
   }
@@ -564,6 +621,7 @@ export class HttpMessage {
       return body.getJson(charset)
     } catch (error) {
       this.addError(error, ['retrieve-body-json'])
+
       return null
     }
   }
@@ -626,6 +684,7 @@ export class HttpMessage {
       return body.getQueryString(charset)
     } catch (error) {
       this.addError(error, ['retrieve-body-query-string'])
+
       return null
     }
   }
@@ -687,6 +746,7 @@ export class HttpMessage {
       return cheerioLoad(text)
     } catch (error) {
       this.addError(error, ['retrieve-body-html'])
+
       return null
     }
   }
@@ -750,6 +810,7 @@ export class HttpMessage {
       return cheerioLoad(text, { xml: true })
     } catch (error) {
       this.addError(error, ['retrieve-body-xml'])
+
       return null
     }
   }
