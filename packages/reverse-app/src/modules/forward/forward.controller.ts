@@ -123,8 +123,7 @@ export class ForwardController extends BaseController {
       message.requestBody.set(ctx.requestBody.get())
       message.mergeConnection(ctx.connection)
 
-      message.runRequestHeadInterceptors()
-      message.runRequestBodyInterceptors()
+      message.runRequestHeadInterceptors().runRequestBodyInterceptors()
 
       const result = await this.forwardService.simple({
         proxy: proxy.url,
@@ -148,8 +147,7 @@ export class ForwardController extends BaseController {
 
         await this.sendErrorPage(ctx, result.error, true)
       } else {
-        message.runResponseHeadInterceptors()
-        message.runResponseBodyInterceptors()
+        message.runResponseHeadInterceptors().runResponseBodyInterceptors()
 
         ctx.status.set(message.status.get())
         ctx.responseHeaders.merge(message.responseHeaders.toObject())
@@ -210,8 +208,7 @@ export class ForwardController extends BaseController {
 
         await this.sendErrorPage(ctx, result.error, false)
       } else {
-        message.runResponseHeadInterceptors()
-        message.runResponseBodyInterceptors()
+        message.runResponseHeadInterceptors().runResponseBodyInterceptors()
 
         ctx.status.set(message.status.get())
         ctx.responseHeaders.merge(message.responseHeaders.toObject())
@@ -232,8 +229,7 @@ export class ForwardController extends BaseController {
       message.requestBody.set(ctx.requestBody.get())
       message.mergeConnection(ctx.connection)
 
-      message.runRequestHeadInterceptors()
-      message.runRequestBodyInterceptors()
+      message.runRequestHeadInterceptors().runRequestBodyInterceptors()
 
       const result = await this.forwardService.streamResponse({
         proxy: proxy.url,
@@ -292,8 +288,7 @@ export class ForwardController extends BaseController {
       message.requestBody.set(ctx.requestBody.get())
       message.mergeConnection(ctx.connection)
 
-      message.runRequestHeadInterceptors()
-      message.runRequestBodyInterceptors()
+      message.runRequestHeadInterceptors().runRequestBodyInterceptors()
 
       ctx.close()
 

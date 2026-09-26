@@ -134,7 +134,7 @@ export class AuthorizeController extends BaseController {
 
   private dispatchNormal: AuthorizeDispatchAccessLevel = {
     transparent: async (ctx, flags, campaign, target, next) => {
-      if (ctx.isBot && !flags.authorizeAllowBots) {
+      if (!flags.authorizeAllowBots && ctx.isBot) {
         await this.sendCloakingSite(ctx, target)
 
         return
@@ -307,7 +307,7 @@ export class AuthorizeController extends BaseController {
         return
       }
 
-      if (ctx.isBot && !flags.authorizeAllowBots) {
+      if (!flags.authorizeAllowBots && ctx.isBot) {
         await this.sendCloakingSite(ctx, target)
 
         return
@@ -370,7 +370,7 @@ export class AuthorizeController extends BaseController {
 
   private dispatchWebSocket: AuthorizeDispatchAccessLevel = {
     transparent: async (ctx, flags, campaign, target, next) => {
-      if (ctx.isBot && !flags.authorizeAllowBots) {
+      if (!flags.authorizeAllowBots && ctx.isBot) {
         ctx.close()
 
         return
@@ -411,7 +411,7 @@ export class AuthorizeController extends BaseController {
     },
 
     landing: async (ctx, flags, campaign, target, next) => {
-      if (ctx.isBot && !flags.authorizeAllowBots) {
+      if (!flags.authorizeAllowBots && ctx.isBot) {
         ctx.close()
 
         return
@@ -472,9 +472,7 @@ export class AuthorizeController extends BaseController {
     campaign: FullCampaignModel,
     session: SessionModel
   ) {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
 
@@ -490,9 +488,7 @@ export class AuthorizeController extends BaseController {
   }
 
   private removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
+    this.checkContextTypeNormal(ctx)
 
     const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
 

@@ -278,8 +278,8 @@ export class HttpMessage {
    * @param contentType - The parsed content-type to check.
    * @returns `true` if rewriting is applicable, `false` otherwise.
    */
-  isRewriteUrlContentType(contentType: HttpContentType): boolean {
-    return this.#rewriteUrlContentTypes.includes(contentType.type)
+  isRewriteUrlContentType(contentType: HttpContentType | null): boolean {
+    return contentType ? this.#rewriteUrlContentTypes.includes(contentType.type) : false
   }
 
   #rewriteUrlSchemes: RewriteUrlScheme[] = [
@@ -556,7 +556,7 @@ export class HttpMessage {
   private retrieveBodyText(headers: HttpHeadersWrap, body: HttpBodyWrap): HttpText | null {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       return body.getText(charset)
     } catch (error) {
@@ -587,7 +587,7 @@ export class HttpMessage {
   ) {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       const oldText = body.getText(charset)
 
@@ -616,7 +616,7 @@ export class HttpMessage {
   private retrieveBodyJson(headers: HttpHeadersWrap, body: HttpBodyWrap): HttpJson | null {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       return body.getJson(charset)
     } catch (error) {
@@ -647,7 +647,7 @@ export class HttpMessage {
   ) {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       const json = body.getJson(charset)
 
@@ -679,7 +679,7 @@ export class HttpMessage {
   ): HttpQueryString | null {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       return body.getQueryString(charset)
     } catch (error) {
@@ -710,7 +710,7 @@ export class HttpMessage {
   ) {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       const queryString = body.getQueryString(charset)
 
@@ -739,7 +739,7 @@ export class HttpMessage {
   private retrieveBodyHtml(headers: HttpHeadersWrap, body: HttpBodyWrap): CheerioAPI | null {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       const text = body.getText(charset)
 
@@ -772,7 +772,7 @@ export class HttpMessage {
   ) {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       const text = body.getText(charset)
 
@@ -803,7 +803,7 @@ export class HttpMessage {
   private retrieveBodyXml(headers: HttpHeadersWrap, body: HttpBodyWrap): CheerioAPI | null {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       const text = body.getText(charset)
 
@@ -836,7 +836,7 @@ export class HttpMessage {
   ) {
     try {
       const contentType = headers.getContentType()
-      const charset = contentType ? contentType.parameters['charset'] : undefined
+      const charset = contentType?.parameters['charset']
 
       const text = body.getText(charset)
 
