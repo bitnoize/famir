@@ -1,7 +1,6 @@
 import { decrypt, DIContainer, encrypt, randomIdentSchema, randomName } from '@famir/common'
 import { redirectorParamsSchema, upgradeSessionParamsSchema } from '@famir/database'
 import {
-  EnabledFullTargetModel,
   FullCampaignModel,
   FullRedirectorModel,
   HttpCookie,
@@ -19,13 +18,13 @@ import {
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
+  HttpServerContextType,
+  HttpServerMiddleware,
   type HttpServerAssets,
   type HttpServerContext,
-  HttpServerContextType,
-  HttpServerNextFunction,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { BaseController, ControllerFlags } from '../base/index.js'
+import { BaseController } from '../base/index.js'
 import { AUTHORIZE_SERVICE, type AuthorizeService } from './authorize.service.js'
 
 /**
@@ -34,18 +33,6 @@ import { AUTHORIZE_SERVICE, type AuthorizeService } from './authorize.service.js
  * @category Authorize
  */
 export const AUTHORIZE_CONTROLLER = Symbol('AuthorizeController')
-
-type AuthorizeHandler = (
-  ctx: HttpServerContext,
-  flags: ControllerFlags,
-  campaign: FullCampaignModel,
-  target: EnabledFullTargetModel,
-  next: HttpServerNextFunction
-) => Promise<void>
-
-type AuthorizeDispatchContextType = Record<HttpServerContextType, AuthorizeHandler>
-
-type AuthorizeDispatchAccessLevel = Record<TargetAccessLevel, AuthorizeHandler>
 
 /**
  * Represents the authorize controller.
@@ -114,26 +101,30 @@ export class AuthorizeController extends BaseController {
    */
   use() {
     this.router.addMiddleware('authorize', async (ctx, next) => {
+      await this.dispatchRoot[ctx.type](ctx, next)
+    })
+  }
+
+  private dispatchRoot: Record<HttpServerContextType, HttpServerMiddleware> = {
+    normal: async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
+      await this.dispatchNormal[target.accessLevel](ctx, next)
+    },
+
+    websocket: async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
+      await this.dispatchWebSocket[target.accessLevel](ctx, next)
+    },
+  }
+
+  private dispatchNormal: Record<TargetAccessLevel, HttpServerMiddleware> = {
+    transparent: async (ctx, next) => {
       const flags = this.getState(ctx, 'flags')
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
 
-      await this.dispatchRoot[ctx.type](ctx, flags, campaign, target, next)
-    })
-  }
-
-  private dispatchRoot: AuthorizeDispatchContextType = {
-    normal: async (ctx, flags, campaign, target, next) => {
-      await this.dispatchNormal[target.accessLevel](ctx, flags, campaign, target, next)
-    },
-
-    websocket: async (ctx, flags, campaign, target, next) => {
-      await this.dispatchWebSocket[target.accessLevel](ctx, flags, campaign, target, next)
-    },
-  }
-
-  private dispatchNormal: AuthorizeDispatchAccessLevel = {
-    transparent: async (ctx, flags, campaign, target, next) => {
       if (!flags.authorizeAllowBots && ctx.isBot) {
         await this.sendCloakingSite(ctx, target)
 
@@ -176,7 +167,11 @@ export class AuthorizeController extends BaseController {
       await next()
     },
 
-    landing: async (ctx, flags, campaign, target, next) => {
+    landing: async (ctx, next) => {
+      const flags = this.getState(ctx, 'flags')
+      const campaign = this.getState(ctx, 'campaign')
+      const target = this.getState(ctx, 'target')
+
       if (ctx.url.isPath(campaign.upgradeSessionPath)) {
         if (!ctx.method.is('GET')) {
           await this.sendNotFoundPage(ctx, target)
@@ -368,8 +363,11 @@ export class AuthorizeController extends BaseController {
     },
   }
 
-  private dispatchWebSocket: AuthorizeDispatchAccessLevel = {
-    transparent: async (ctx, flags, campaign, target, next) => {
+  private dispatchWebSocket: Record<TargetAccessLevel, HttpServerMiddleware> = {
+    transparent: async (ctx, next) => {
+      const flags = this.getState(ctx, 'flags')
+      const campaign = this.getState(ctx, 'campaign')
+
       if (!flags.authorizeAllowBots && ctx.isBot) {
         ctx.close()
 
@@ -410,7 +408,10 @@ export class AuthorizeController extends BaseController {
       await next()
     },
 
-    landing: async (ctx, flags, campaign, target, next) => {
+    landing: async (ctx, next) => {
+      const flags = this.getState(ctx, 'flags')
+      const campaign = this.getState(ctx, 'campaign')
+
       if (!flags.authorizeAllowBots && ctx.isBot) {
         ctx.close()
 

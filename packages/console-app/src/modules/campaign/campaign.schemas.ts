@@ -17,7 +17,7 @@ import {
   targetContentSchema,
   targetDomainSchema,
   targetHeadersSizeLimitSchema,
-  targetLabelsSchema,
+  targetLabelSchema,
   targetPortSchema,
   targetSimpleTimeoutSchema,
   targetStreamTimeoutSchema,
@@ -238,8 +238,8 @@ const rawCampaignPresetTargetSchema: JSONSchemaType<RawCampaignPresetTarget> = {
     mirrorSecure: booleanSchema,
     mirrorSub: targetSubSchema,
     mirrorPort: targetPortSchema,
-    labels: {
-      ...targetLabelsSchema,
+    label: {
+      ...targetLabelSchema,
       nullable: true,
     },
     connectTimeout: {

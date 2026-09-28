@@ -376,7 +376,7 @@ Delete the 'httpbin' campaign:
         mirrorSecure: rawTarget.mirrorSecure,
         mirrorSub: rawTarget.mirrorSub,
         mirrorPort: rawTarget.mirrorPort,
-        labels: rawTarget.labels ?? [],
+        label: rawTarget.label ?? 'none',
         connectTimeout: rawTarget.connectTimeout ?? 10 * 1000,
         simpleTimeout: rawTarget.simpleTimeout ?? 60 * 1000,
         streamTimeout: rawTarget.streamTimeout ?? 300 * 1000,

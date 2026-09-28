@@ -7,7 +7,6 @@ import {
   targetHostsKey,
   targetIndexKey,
   targetKey,
-  targetLabelsKey,
   targetMirrorsKey,
 } from '../../database.keys.js'
 
@@ -29,6 +28,7 @@ export interface RawTarget {
   mirror_sub: string
   mirror_domain: string
   mirror_port: number
+  label: string
   is_enabled: boolean
   message_count: number
   created_at: number
@@ -41,7 +41,6 @@ export interface RawTarget {
  * @internal
  */
 export interface RawFullTarget extends RawTarget {
-  labels: string[]
   connect_timeout: number
   simple_timeout: number
   stream_timeout: number
@@ -79,6 +78,7 @@ export const targetFunctions = {
         mirrorSecure: boolean,
         mirrorSub: string,
         mirrorPort: number,
+        label: string,
         connectTimeout: number,
         simpleTimeout: number,
         streamTimeout: number,
@@ -111,6 +111,7 @@ export const targetFunctions = {
         parser.push(mirrorSecure ? '1' : '0')
         parser.push(mirrorSub)
         parser.push(mirrorPort.toString())
+        parser.push(label)
         parser.push(connectTimeout.toString())
         parser.push(simpleTimeout.toString())
         parser.push(streamTimeout.toString())
@@ -141,12 +142,11 @@ export const targetFunctions = {
     },
 
     read_full_target: {
-      NUMBER_OF_KEYS: 3,
+      NUMBER_OF_KEYS: 2,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
-        parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
       },
 
       transformReply: undefined as unknown as () => unknown,
@@ -267,52 +267,8 @@ export const targetFunctions = {
       transformReply: undefined as unknown as () => unknown,
     },
 
-    append_target_label: {
-      NUMBER_OF_KEYS: 4,
-
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        targetId: string,
-        label: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
-        parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
-
-        parser.push(label)
-        parser.push(lockSecret)
-      },
-
-      transformReply: undefined as unknown as () => unknown,
-    },
-
-    remove_target_labels: {
-      NUMBER_OF_KEYS: 4,
-
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        targetId: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
-        parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
-
-        parser.push(lockSecret)
-      },
-
-      transformReply: undefined as unknown as () => unknown,
-    },
-
     delete_target: {
-      NUMBER_OF_KEYS: 8,
+      NUMBER_OF_KEYS: 7,
 
       parseCommand(
         parser: CommandParser,
@@ -324,7 +280,6 @@ export const targetFunctions = {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
         parser.pushKey(targetKey(prefix, campaignId, targetId))
-        parser.pushKey(targetLabelsKey(prefix, campaignId, targetId))
         parser.pushKey(targetDonorsKey(prefix, campaignId))
         parser.pushKey(targetMirrorsKey(prefix, campaignId))
         parser.pushKey(targetHostsKey(prefix))

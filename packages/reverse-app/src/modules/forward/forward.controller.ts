@@ -1,24 +1,13 @@
 import { DIContainer } from '@famir/common'
-import {
-  EnabledFullTargetModel,
-  EnabledProxyModel,
-  HttpType,
-  Logger,
-  LOGGER,
-  TEMPLATER,
-  Templater,
-  Validator,
-  VALIDATOR,
-} from '@famir/domain'
+import { HttpType, Logger, LOGGER, TEMPLATER, Templater, Validator, VALIDATOR } from '@famir/domain'
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
-  HttpServerNextFunction,
+  HttpServerMiddleware,
   type HttpServerAssets,
-  type HttpServerContext,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { LimiterTransform, type HttpMessage } from '@famir/http-tools'
+import { LimiterTransform } from '@famir/http-tools'
 import { PassThrough, pipeline as pipelineSync } from 'node:stream'
 import { pipeline as pipelineAsync } from 'node:stream/promises'
 import { BaseController } from '../base/index.js'
@@ -30,16 +19,6 @@ import { FORWARD_SERVICE, type ForwardService } from './forward.service.js'
  * @category Forward
  */
 export const FORWARD_CONTROLLER = Symbol('ForwardController')
-
-type ForwardHandler = (
-  ctx: HttpServerContext,
-  proxy: EnabledProxyModel,
-  target: EnabledFullTargetModel,
-  message: HttpMessage,
-  next: HttpServerNextFunction
-) => Promise<void>
-
-type ForwardDispatchHttpType = Record<HttpType, ForwardHandler>
 
 /**
  * Represents the forward controller.
@@ -103,18 +82,20 @@ export class ForwardController extends BaseController {
    */
   use() {
     this.router.addMiddleware('round-trip', async (ctx, next) => {
-      const proxy = this.getState(ctx, 'proxy')
-      const target = this.getState(ctx, 'target')
       const message = this.getState(ctx, 'message')
 
       message.ready()
 
-      await this.dispatchRoot[message.type](ctx, proxy, target, message, next)
+      await this.dispatchRoot[message.type](ctx, next)
     })
   }
 
-  private dispatchRoot: ForwardDispatchHttpType = {
-    'normal-simple': async (ctx, proxy, target, message, next) => {
+  private dispatchRoot: Record<HttpType, HttpServerMiddleware> = {
+    'normal-simple': async (ctx, next) => {
+      const proxy = this.getState(ctx, 'proxy')
+      const target = this.getState(ctx, 'target')
+      const message = this.getState(ctx, 'message')
+
       await ctx.loadRequest(target.bodySizeLimit)
 
       message.method.set(ctx.method.get())
@@ -159,7 +140,11 @@ export class ForwardController extends BaseController {
       await next()
     },
 
-    'normal-stream-request': async (ctx, proxy, target, message, next) => {
+    'normal-stream-request': async (ctx, next) => {
+      const proxy = this.getState(ctx, 'proxy')
+      const target = this.getState(ctx, 'target')
+      const message = this.getState(ctx, 'message')
+
       message.method.set(ctx.method.get())
       message.url.merge(ctx.url.toObject())
       message.requestHeaders.merge(ctx.requestHeaders.toObject())
@@ -220,7 +205,11 @@ export class ForwardController extends BaseController {
       await next()
     },
 
-    'normal-stream-response': async (ctx, proxy, target, message, next) => {
+    'normal-stream-response': async (ctx, next) => {
+      const proxy = this.getState(ctx, 'proxy')
+      const target = this.getState(ctx, 'target')
+      const message = this.getState(ctx, 'message')
+
       await ctx.loadRequest(target.bodySizeLimit)
 
       message.method.set(ctx.method.get())
@@ -279,7 +268,10 @@ export class ForwardController extends BaseController {
       await next()
     },
 
-    'websocket': async (ctx, proxy, target, message, next) => {
+    'websocket': async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+      const message = this.getState(ctx, 'message')
+
       await ctx.loadRequest(target.bodySizeLimit)
 
       message.method.set(ctx.method.get())

@@ -1,20 +1,11 @@
 import { DIContainer } from '@famir/common'
-import {
-  type EnabledFullTargetModel,
-  Logger,
-  LOGGER,
-  TEMPLATER,
-  Templater,
-  Validator,
-  VALIDATOR,
-} from '@famir/domain'
+import { Logger, LOGGER, TEMPLATER, Templater, Validator, VALIDATOR } from '@famir/domain'
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
   type HttpServerAssets,
-  type HttpServerContext,
   HttpServerContextType,
-  HttpServerNextFunction,
+  HttpServerMiddleware,
   type HttpServerRouter,
 } from '@famir/http-server'
 import { BaseController } from '../base/index.js'
@@ -25,14 +16,6 @@ import { BaseController } from '../base/index.js'
  * @category WellKnownUrls
  */
 export const WELL_KNOWN_URLS_CONTROLLER = Symbol('WellKnownUrlsController')
-
-type WellKnownUrlsHandler = (
-  ctx: HttpServerContext,
-  target: EnabledFullTargetModel,
-  next: HttpServerNextFunction
-) => Promise<void>
-
-type WellKnownUrlsDispatchContextType = Record<HttpServerContextType, WellKnownUrlsHandler>
 
 /**
  * Represents the well-known-urls controller.
@@ -74,14 +57,14 @@ export class WellKnownUrlsController extends BaseController {
    */
   use() {
     this.router.addMiddleware('well-known-urls', async (ctx, next) => {
-      const target = this.getState(ctx, 'target')
-
-      await this.dispatchRoot[ctx.type](ctx, target, next)
+      await this.dispatchRoot[ctx.type](ctx, next)
     })
   }
 
-  private dispatchRoot: WellKnownUrlsDispatchContextType = {
-    normal: async (ctx, target, next) => {
+  private dispatchRoot: Record<HttpServerContextType, HttpServerMiddleware> = {
+    normal: async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
       if (ctx.method.is('OPTIONS')) {
         await this.sendPreflightCors(ctx)
       } else if (ctx.url.isPath('/favicon.ico')) {
@@ -95,7 +78,7 @@ export class WellKnownUrlsController extends BaseController {
       }
     },
 
-    websocket: async (ctx, target, next) => {
+    websocket: async (ctx, next) => {
       await next()
     },
   }

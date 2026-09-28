@@ -161,7 +161,7 @@ export class TargetController extends BaseController {
       accessLevel: target.accessLevel,
       donor: target.donorUrl,
       mirror: target.mirrorUrl,
-      labels: target.labels.join(', '),
+      label: target.label,
       connectTimeout: target.connectTimeout,
       simpleTimeout: target.simpleTimeout,
       streamTimeout: target.streamTimeout,

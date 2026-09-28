@@ -56,21 +56,7 @@ export const targetPortSchema: JSONSchemaType<number> = {
  *
  * @category Target
  */
-export const targetLabelSchema: JSONSchemaType<string> = {
-  type: 'string',
-  minLength: 2,
-  maxLength: 64,
-}
-
-/**
- * JSON Schema for validating a list of target labels.
- *
- * @category Target
- */
-export const targetLabelsSchema: JSONSchemaType<string[]> = {
-  type: 'array',
-  items: targetLabelSchema,
-} as const
+export const targetLabelSchema = customIdentSchema
 
 /**
  * JSON Schema for validating a target connection timeout.
@@ -156,6 +142,7 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
     'mirror_sub',
     'mirror_domain',
     'mirror_port',
+    'label',
     'is_enabled',
     'message_count',
     'created_at',
@@ -172,6 +159,7 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
     mirror_sub: targetSubSchema,
     mirror_domain: targetDomainSchema,
     mirror_port: targetPortSchema,
+    label: targetLabelSchema,
     is_enabled: booleanSchema,
     message_count: counterSchema,
     created_at: timestampSchema,
@@ -197,7 +185,7 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     'mirror_sub',
     'mirror_domain',
     'mirror_port',
-    'labels',
+    'label',
     'connect_timeout',
     'simple_timeout',
     'stream_timeout',
@@ -225,7 +213,7 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     mirror_sub: targetSubSchema,
     mirror_domain: targetDomainSchema,
     mirror_port: targetPortSchema,
-    labels: targetLabelsSchema,
+    label: targetLabelSchema,
     connect_timeout: targetConnectTimeoutSchema,
     simple_timeout: targetSimpleTimeoutSchema,
     stream_timeout: targetStreamTimeoutSchema,

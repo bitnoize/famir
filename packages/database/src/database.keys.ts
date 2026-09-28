@@ -156,21 +156,6 @@ export const targetKey = (prefix: string, campaignId: string, targetId: string) 
 }
 
 /**
- * Key for labels attached to a specific target.
- *
- * @param prefix - The global prefix for all keys.
- * @param campaignId - The unique campaign ID.
- * @param targetId - The unique target ID.
- * @returns The Redis `Set` key, like 'famir:target-labels:httpbin:www'.
- *
- * @category Target
- * @internal
- */
-export const targetLabelsKey = (prefix: string, campaignId: string, targetId: string) => {
-  return buildKey(prefix, 'target-labels', campaignId, targetId)
-}
-
-/**
  * Key for all target donors (sub/domain/port) in campaign to ensure uniqueness.
  *
  * @param prefix - The global prefix for all keys.

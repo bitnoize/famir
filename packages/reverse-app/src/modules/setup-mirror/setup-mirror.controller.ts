@@ -1,7 +1,5 @@
 import { DIContainer } from '@famir/common'
 import {
-  type EnabledFullTargetModel,
-  type FullCampaignModel,
   HttpServerError,
   Logger,
   LOGGER,
@@ -16,7 +14,7 @@ import {
   type HttpServerAssets,
   type HttpServerContext,
   HttpServerContextType,
-  HttpServerNextFunction,
+  HttpServerMiddleware,
   type HttpServerRouter,
 } from '@famir/http-server'
 import { HttpMessage } from '@famir/http-tools'
@@ -29,16 +27,6 @@ import { SETUP_MIRROR_SERVICE, type SetupMirrorService } from './setup-mirror.se
  * @category SetupMirror
  */
 export const SETUP_MIRROR_CONTROLLER = Symbol('SetupMirrorController')
-
-type SetupMirrorHandler = (
-  ctx: HttpServerContext,
-  campaign: FullCampaignModel,
-  target: EnabledFullTargetModel,
-  message: HttpMessage,
-  next: HttpServerNextFunction
-) => Promise<void>
-
-type SetupMirrorDispatchContextType = Record<HttpServerContextType, SetupMirrorHandler>
 
 /**
  * Represents the setup-mirror controller.
@@ -127,12 +115,15 @@ export class SetupMirrorController extends BaseController {
       this.setState(ctx, 'targets', targets)
       this.setState(ctx, 'message', message)
 
-      await this.dispatchRoot[ctx.type](ctx, campaign, target, message, next)
+      await this.dispatchRoot[ctx.type](ctx, next)
     })
   }
 
-  private dispatchRoot: SetupMirrorDispatchContextType = {
-    normal: async (ctx, campaign, target, message, next) => {
+  private dispatchRoot: Record<HttpServerContextType, HttpServerMiddleware> = {
+    normal: async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+      const message = this.getState(ctx, 'message')
+
       if (ctx.state.verbose) {
         ctx.responseHeaders.merge({
           'X-Famir-Campaign-Id': target.campaignId,
@@ -144,7 +135,9 @@ export class SetupMirrorController extends BaseController {
       await next()
     },
 
-    websocket: async (ctx, campaign, target, message, next) => {
+    websocket: async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
       if (!target.allowWebSockets) {
         ctx.close()
 

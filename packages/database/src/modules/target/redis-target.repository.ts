@@ -116,6 +116,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     mirrorSecure: boolean,
     mirrorSub: string,
     mirrorPort: number,
+    label: string,
     connectTimeout: number,
     simpleTimeout: number,
     streamTimeout: number,
@@ -142,6 +143,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         mirrorSecure,
         mirrorSub,
         mirrorPort,
+        label,
         connectTimeout,
         simpleTimeout,
         streamTimeout,
@@ -415,84 +417,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async appendLabels(
-    campaignId: string,
-    targetId: string,
-    labels: string[],
-    lockSecret: string
-  ): Promise<void> {
-    try {
-      if (labels.length === 0) {
-        return
-      }
-
-      const statusReplies = await Promise.all(
-        labels.map((label) =>
-          this.connection.target.append_target_label(
-            this.options.prefix,
-            campaignId,
-            targetId,
-            label.toLowerCase(),
-            lockSecret
-          )
-        )
-      )
-
-      this.checkStatusReplies(statusReplies)
-
-      this.logger.info(`Database append target labels`, {
-        data: {
-          target: {
-            campaignId,
-            targetId,
-            labels,
-          },
-        },
-      })
-    } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'appendLabels',
-        params: {
-          campaignId,
-          targetId,
-          labels,
-        },
-      })
-    }
-  }
-
-  async removeLabels(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
-    try {
-      const statusReply = await this.connection.target.remove_target_labels(
-        this.options.prefix,
-        campaignId,
-        targetId,
-        lockSecret
-      )
-
-      this.checkStatusReply(statusReply)
-
-      this.logger.info(`Database remove target labels`, {
-        data: {
-          target: {
-            campaignId,
-            targetId,
-          },
-        },
-      })
-    } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'removeLabels',
-        params: {
-          campaignId,
-          targetId,
-        },
-      })
-    }
-  }
-
   async delete(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.target.delete_target(
@@ -606,6 +530,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       rawModel.mirror_sub,
       rawModel.mirror_domain,
       rawModel.mirror_port,
+      rawModel.label,
       rawModel.is_enabled,
       rawModel.message_count,
       new Date(rawModel.created_at)
@@ -638,7 +563,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       rawModel.mirror_sub,
       rawModel.mirror_domain,
       rawModel.mirror_port,
-      rawModel.labels,
+      rawModel.label,
       rawModel.connect_timeout,
       rawModel.simple_timeout,
       rawModel.stream_timeout,

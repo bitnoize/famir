@@ -125,6 +125,7 @@ export class CampaignService {
           target.mirrorSecure,
           target.mirrorSub,
           target.mirrorPort,
+          target.label,
           target.connectTimeout,
           target.simpleTimeout,
           target.streamTimeout,
@@ -136,13 +137,6 @@ export class CampaignService {
           target.robotsTxt,
           target.sitemapXml,
           target.allowWebSockets,
-          lockSecret
-        )
-
-        await this.targetRepository.appendLabels(
-          campaign.campaignId,
-          target.targetId,
-          target.labels,
           lockSecret
         )
 
@@ -282,6 +276,7 @@ export class CampaignService {
           target.mirrorSecure,
           target.mirrorSub,
           target.mirrorPort,
+          target.label,
           target.connectTimeout,
           target.simpleTimeout,
           target.streamTimeout,
@@ -293,13 +288,6 @@ export class CampaignService {
           target.robotsTxt,
           target.sitemapXml,
           target.allowWebSockets,
-          lockSecret
-        )
-
-        await this.targetRepository.appendLabels(
-          campaign.campaignId,
-          target.targetId,
-          target.labels,
           lockSecret
         )
 
@@ -323,15 +311,6 @@ export class CampaignService {
           target.robotsTxt,
           target.sitemapXml,
           target.allowWebSockets,
-          lockSecret
-        )
-
-        await this.targetRepository.removeLabels(campaign.campaignId, target.targetId, lockSecret)
-
-        await this.targetRepository.appendLabels(
-          campaign.campaignId,
-          target.targetId,
-          target.labels,
           lockSecret
         )
 

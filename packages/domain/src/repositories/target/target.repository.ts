@@ -32,6 +32,7 @@ export interface TargetRepository {
    * @param mirrorSecure - The flag indicating if the mirror server uses HTTPS.
    * @param mirrorSub - The mirror subdomain.
    * @param mirrorPort - The mirror server port.
+   * @param label - The label for categorization.
    * @param connectTimeout - The connection timeout in milliseconds.
    * @param simpleTimeout - The simple request timeout in milliseconds.
    * @param streamTimeout - The streaming request timeout in milliseconds.
@@ -63,6 +64,7 @@ export interface TargetRepository {
     mirrorSecure: boolean,
     mirrorSub: string,
     mirrorPort: number,
+    label: string,
     connectTimeout: number,
     simpleTimeout: number,
     streamTimeout: number,
@@ -203,43 +205,6 @@ export interface TargetRepository {
    * @throws DatabaseError If the data validation fails.
    */
   disable(campaignId: string, targetId: string, lockSecret: string): Promise<void>
-
-  /**
-   * Appends multiple labels to the target.
-   *
-   * Labels are used for categorization and filtering of targets.
-   * The label is automatically converted to lowercase.
-   *
-   * @param campaignId - The ID of the campaign containing the target.
-   * @param targetId - The target ID to append label to.
-   * @param labels - The labels to append to the target.
-   * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws DatabaseError If the campaign does not exist.
-   * @throws DatabaseError If the campaign is not locked.
-   * @throws DatabaseError If the campaign lock secret does not match.
-   * @throws DatabaseError If the target does not exist.
-   * @throws DatabaseError If the data validation fails.
-   */
-  appendLabels(
-    campaignId: string,
-    targetId: string,
-    labels: string[],
-    lockSecret: string
-  ): Promise<void>
-
-  /**
-   * Removes all labels from the target.
-   *
-   * @param campaignId - The ID of the campaign containing the target.
-   * @param targetId - The target ID to remove labels from.
-   * @param lockSecret - The campaign lock secret obtained from {@link CampaignRepository.lock}.
-   * @throws DatabaseError If the campaign does not exist.
-   * @throws DatabaseError If the campaign is not locked.
-   * @throws DatabaseError If the campaign lock secret does not match.
-   * @throws DatabaseError If the target does not exist.
-   * @throws DatabaseError If the data validation fails.
-   */
-  removeLabels(campaignId: string, targetId: string, lockSecret: string): Promise<void>
 
   /**
    * Deletes the target by its ID.

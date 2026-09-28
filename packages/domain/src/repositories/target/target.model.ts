@@ -40,6 +40,7 @@ export class TargetModel {
    * @param mirrorSub - The mirror subdomain.
    * @param mirrorDomain - The mirror domain.
    * @param mirrorPort - The mirror server port.
+   * @param label - The label for categorization.
    * @param isEnabled - The flag indicating if the target is currently active for traffic routing.
    * @param messageCount - The total number of messages processed for this target.
    * @param createdAt - The date and time when the target was created.
@@ -56,6 +57,7 @@ export class TargetModel {
     readonly mirrorSub: string,
     readonly mirrorDomain: string,
     readonly mirrorPort: number,
+    readonly label: string,
     readonly isEnabled: boolean,
     readonly messageCount: number,
     readonly createdAt: Date
@@ -182,7 +184,7 @@ export class FullTargetModel extends TargetModel {
    * @param mirrorSub - The mirror subdomain.
    * @param mirrorDomain - The mirror domain.
    * @param mirrorPort - The mirror server port.
-   * @param labels - The list of labels for categorization.
+   * @param label - The label for categorization.
    * @param connectTimeout - The connection timeout in milliseconds.
    * @param simpleTimeout - The simple request timeout in milliseconds.
    * @param streamTimeout - The streaming request timeout in milliseconds.
@@ -210,7 +212,7 @@ export class FullTargetModel extends TargetModel {
     mirrorSub: string,
     mirrorDomain: string,
     mirrorPort: number,
-    readonly labels: string[],
+    label: string,
     readonly connectTimeout: number,
     readonly simpleTimeout: number,
     readonly streamTimeout: number,
@@ -238,20 +240,11 @@ export class FullTargetModel extends TargetModel {
       mirrorSub,
       mirrorDomain,
       mirrorPort,
+      label,
       isEnabled,
       messageCount,
       createdAt
     )
-  }
-
-  /**
-   * Checks if the target has a specific label.
-   *
-   * @param value - The label to check.
-   * @returns `true` if the label exists, `false` otherwise.
-   */
-  hasLabel(value: string): boolean {
-    return this.labels.includes(value)
   }
 }
 

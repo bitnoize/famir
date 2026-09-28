@@ -4,7 +4,7 @@
   Create target
 --]]
 local function create_target(keys, args)
-  if #keys ~= 7 or #args ~= 23 then
+  if #keys ~= 7 or #args ~= 24 then
     return redis.error_reply('ERR Wrong function use')
   end
 
@@ -29,7 +29,7 @@ local function create_target(keys, args)
   end
 
   local stash = {
-    lock_secret = args[23],
+    lock_secret = args[24],
     orig_lock_secret = redis.call('GET', campaign_lock_key),
     mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
   }
@@ -55,20 +55,21 @@ local function create_target(keys, args)
     mirror_secure = tonumber(args[8]),
     mirror_sub = args[9],
     mirror_port = args[10],
-    connect_timeout = tonumber(args[11]),
-    simple_timeout = tonumber(args[12]),
-    stream_timeout = tonumber(args[13]),
-    headers_size_limit = tonumber(args[14]),
-    body_size_limit = tonumber(args[15]),
-    main_page = args[16],
-    not_found_page = args[17],
-    favicon_ico = args[18],
-    robots_txt = args[19],
-    sitemap_xml = args[20],
-    allow_websockets = tonumber(args[21]),
+    label = args[11],
+    connect_timeout = tonumber(args[12]),
+    simple_timeout = tonumber(args[13]),
+    stream_timeout = tonumber(args[14]),
+    headers_size_limit = tonumber(args[15]),
+    body_size_limit = tonumber(args[16]),
+    main_page = args[17],
+    not_found_page = args[18],
+    favicon_ico = args[19],
+    robots_txt = args[20],
+    sitemap_xml = args[21],
+    allow_websockets = tonumber(args[22]),
     is_enabled = 0,
     message_count = 0,
-    created_at = tonumber(args[22]),
+    created_at = tonumber(args[23]),
   }
 
   for k, v in pairs(model) do
@@ -86,6 +87,7 @@ local function create_target(keys, args)
         or k == 'donor_port'
         or k == 'mirror_sub'
         or k == 'mirror_port'
+        or k == 'label'
       ) and v == ''
     then
       return redis.error_reply('ERR Wrong model.' .. k)
@@ -184,12 +186,13 @@ local function read_target(keys, args)
     'mirror_secure',
     'mirror_sub',
     'mirror_port',
+    'label',
     'is_enabled',
     'message_count',
     'created_at'
   )
 
-  if #values ~= 13 then
+  if #values ~= 14 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -205,9 +208,10 @@ local function read_target(keys, args)
     mirror_sub = values[9],
     mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
     mirror_port = values[10],
-    is_enabled = tonumber(values[11]),
-    message_count = tonumber(values[12]),
-    created_at = tonumber(values[13]),
+    label = values[11],
+    is_enabled = tonumber(values[12]),
+    message_count = tonumber(values[13]),
+    created_at = tonumber(values[14]),
   }
 
   for k, v in pairs(model) do
@@ -234,13 +238,12 @@ redis.register_function({
   Read full target
 --]]
 local function read_full_target(keys, args)
-  if #keys ~= 3 or #args ~= 0 then
+  if #keys ~= 2 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local target_key = keys[2]
-  local target_labels_key = keys[3]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
@@ -263,6 +266,7 @@ local function read_full_target(keys, args)
     'mirror_secure',
     'mirror_sub',
     'mirror_port',
+    'label',
     'connect_timeout',
     'simple_timeout',
     'stream_timeout',
@@ -279,7 +283,7 @@ local function read_full_target(keys, args)
     'created_at'
   )
 
-  if #values ~= 24 then
+  if #values ~= 25 then
     return redis.error_reply('ERR Malform values')
   end
 
@@ -295,21 +299,21 @@ local function read_full_target(keys, args)
     mirror_sub = values[9],
     mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
     mirror_port = values[10],
-    labels = redis.call('SMEMBERS', target_labels_key),
-    connect_timeout = tonumber(values[11]),
-    simple_timeout = tonumber(values[12]),
-    stream_timeout = tonumber(values[13]),
-    headers_size_limit = tonumber(values[14]),
-    body_size_limit = tonumber(values[15]),
-    main_page = values[16],
-    not_found_page = values[17],
-    favicon_ico = values[18],
-    robots_txt = values[19],
-    sitemap_xml = values[20],
-    allow_websockets = tonumber(values[21]),
-    is_enabled = tonumber(values[22]),
-    message_count = tonumber(values[23]),
-    created_at = tonumber(values[24]),
+    label = values[11],
+    connect_timeout = tonumber(values[12]),
+    simple_timeout = tonumber(values[13]),
+    stream_timeout = tonumber(values[14]),
+    headers_size_limit = tonumber(values[15]),
+    body_size_limit = tonumber(values[16]),
+    main_page = values[17],
+    not_found_page = values[18],
+    favicon_ico = values[19],
+    robots_txt = values[20],
+    sitemap_xml = values[21],
+    allow_websockets = tonumber(values[22]),
+    is_enabled = tonumber(values[23]),
+    message_count = tonumber(values[24]),
+    created_at = tonumber(values[25]),
   }
 
   for k, v in pairs(model) do
@@ -635,144 +639,20 @@ redis.register_function({
 })
 
 --[[
-  Append target label
---]]
-local function append_target_label(keys, args)
-  if #keys ~= 4 or #args ~= 2 then
-    return redis.error_reply('ERR Wrong function use')
-  end
-
-  local campaign_key = keys[1]
-  local campaign_lock_key = keys[2]
-  local target_key = keys[3]
-  local target_labels_key = keys[4]
-
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
-  end
-
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if redis.call('EXISTS', target_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Target not exists')
-  end
-
-  local stash = {
-    label = args[1],
-    lock_secret = args[2],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-  }
-
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'label' or k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-  end
-
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
-  end
-
-  if redis.call('SISMEMBER', target_labels_key, stash.label) ~= 0 then
-    return redis.status_reply('OK Target label already exists')
-  end
-
-  -- Point of no return
-
-  redis.call('SADD', target_labels_key, stash.label)
-
-  return redis.status_reply('OK Target label appended')
-end
-
-redis.register_function({
-  function_name = 'append_target_label',
-  callback = append_target_label,
-  description = 'Append target label',
-})
-
---[[
-  Remove all target labels
---]]
-local function remove_target_labels(keys, args)
-  if #keys ~= 4 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
-  end
-
-  local campaign_key = keys[1]
-  local campaign_lock_key = keys[2]
-  local target_key = keys[3]
-  local target_labels_key = keys[4]
-
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
-  end
-
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
-  end
-
-  if redis.call('EXISTS', target_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Target not exists')
-  end
-
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-  }
-
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-  end
-
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
-  end
-
-  if redis.call('EXISTS', target_labels_key) ~= 1 then
-    return redis.status_reply('OK Target labels is empty')
-  end
-
-  -- Point of no return
-
-  redis.call('DEL', target_labels_key)
-
-  return redis.status_reply('OK Target labels removed')
-end
-
-redis.register_function({
-  function_name = 'remove_target_labels',
-  callback = remove_target_labels,
-  description = 'Remove target labels',
-})
-
---[[
   Delete target
 --]]
 local function delete_target(keys, args)
-  if #keys ~= 8 or #args ~= 1 then
+  if #keys ~= 7 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local target_key = keys[3]
-  local target_labels_key = keys[4]
-  local target_donors_key = keys[5]
-  local target_mirrors_key = keys[6]
-  local target_hosts_key = keys[7]
-  local target_index_key = keys[8]
+  local target_donors_key = keys[4]
+  local target_mirrors_key = keys[5]
+  local target_hosts_key = keys[6]
+  local target_index_key = keys[7]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
@@ -850,7 +730,6 @@ local function delete_target(keys, args)
   -- Point of no return
 
   redis.call('DEL', target_key)
-  redis.call('DEL', target_labels_key)
 
   redis.call('SREM', target_donors_key, donor_str)
   redis.call('SREM', target_mirrors_key, mirror_str)

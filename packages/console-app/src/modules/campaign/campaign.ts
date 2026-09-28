@@ -112,7 +112,7 @@ export interface CampaignPresetTarget {
   mirrorSecure: boolean
   mirrorSub: string
   mirrorPort: number
-  labels: string[]
+  label: string
   connectTimeout: number
   simpleTimeout: number
   streamTimeout: number
@@ -141,7 +141,7 @@ export interface RawCampaignPresetTarget {
   mirrorSecure: boolean
   mirrorSub: string
   mirrorPort: number
-  labels?: string[] | null | undefined
+  label?: string | null | undefined
   connectTimeout?: number | null | undefined
   simpleTimeout?: number | null | undefined
   streamTimeout?: number | null | undefined
