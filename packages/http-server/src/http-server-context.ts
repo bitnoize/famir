@@ -21,7 +21,6 @@ import WebSocket, { createWebSocketStream } from 'ws'
  */
 export interface HttpServerContextState {
   [key: string]: unknown
-  verbose: boolean
   errorPage: string
 }
 

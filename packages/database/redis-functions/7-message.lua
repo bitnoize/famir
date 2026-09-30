@@ -402,7 +402,7 @@ local function delete_message(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if k == 'message_id' and v == '' then
+    if (k == 'message_id') and v == '' then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end

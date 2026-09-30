@@ -1,5 +1,6 @@
 import { CommandParser } from '@redis/client'
 import {
+  campaignFlagsKey,
   campaignIndexKey,
   campaignKey,
   campaignLockKey,
@@ -43,6 +44,7 @@ export interface RawFullCampaign extends RawCampaign {
   session_expire: number
   new_session_expire: number
   message_expire: number
+  flags: string[]
   proxy_index: number
   target_index: number
   redirector_index: number
@@ -108,12 +110,13 @@ export const campaignFunctions = {
     },
 
     read_full_campaign: {
-      NUMBER_OF_KEYS: 9,
+      NUMBER_OF_KEYS: 10,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignSessionCookieNamesKey(prefix))
         parser.pushKey(campaignLockKey(prefix, campaignId))
+        parser.pushKey(campaignFlagsKey(prefix, campaignId))
+        parser.pushKey(campaignSessionCookieNamesKey(prefix))
         parser.pushKey(proxyIndexKey(prefix, campaignId))
         parser.pushKey(targetIndexKey(prefix, campaignId))
         parser.pushKey(redirectorIndexKey(prefix, campaignId))
@@ -194,12 +197,39 @@ export const campaignFunctions = {
       transformReply: undefined as unknown as () => unknown,
     },
 
+    append_campaign_flag: {
+      NUMBER_OF_KEYS: 2,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, flag: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignFlagsKey(prefix, campaignId))
+
+        parser.push(flag)
+      },
+
+      transformReply: undefined as unknown as () => unknown,
+    },
+
+    remove_campaign_flag: {
+      NUMBER_OF_KEYS: 2,
+
+      parseCommand(parser: CommandParser, prefix: string, campaignId: string, flag: string) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignFlagsKey(prefix, campaignId))
+
+        parser.push(flag)
+      },
+
+      transformReply: undefined as unknown as () => unknown,
+    },
+
     delete_campaign: {
-      NUMBER_OF_KEYS: 9,
+      NUMBER_OF_KEYS: 10,
 
       parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockSecret: string) {
         parser.pushKey(campaignKey(prefix, campaignId))
         parser.pushKey(campaignLockKey(prefix, campaignId))
+        parser.pushKey(campaignFlagsKey(prefix, campaignId))
         parser.pushKey(campaignMirrorDomainsKey(prefix))
         parser.pushKey(campaignSessionCookieNamesKey(prefix))
         parser.pushKey(campaignIndexKey(prefix))

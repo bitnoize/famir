@@ -55,7 +55,6 @@ export class TransformController extends BaseController {
    */
   use() {
     this.router.addMiddleware('transform', async (ctx, next) => {
-      //const flags = this.getState(ctx, 'flags')
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const targets = this.getState(ctx, 'targets')
@@ -71,22 +70,25 @@ export class TransformController extends BaseController {
 
           message.requestHeaders.set('Host', target.donorHost)
 
-          const oldOrigin = message.requestHeaders.getString('Origin')
-          if (oldOrigin) {
-            const newOrigin = message.rewriteUrl(oldOrigin, true, targets)
-            message.requestHeaders.set('Origin', newOrigin)
+          if (!target.hasFlag('no-rewrite-cors')) {
+            const oldOrigin = message.requestHeaders.getString('Origin')
+            if (oldOrigin) {
+              const newOrigin = message.rewriteUrl(oldOrigin, true, targets)
+              message.requestHeaders.set('Origin', newOrigin)
+            }
           }
 
-          const oldReferer = message.requestHeaders.getString('Referer')
-          if (oldReferer) {
-            const newReferer = message.rewriteUrl(oldReferer, true, targets)
-            message.requestHeaders.set('Referer', newReferer)
+          if (!target.hasFlag('no-rewrite-referer')) {
+            const oldReferer = message.requestHeaders.getString('Referer')
+            if (oldReferer) {
+              const newReferer = message.rewriteUrl(oldReferer, true, targets)
+              message.requestHeaders.set('Referer', newReferer)
+            }
           }
 
           message.requestHeaders.delete([
             'Via',
             'X-Real-Ip',
-            'X-Client-Ip',
             'X-Forwarded-For',
             'X-Forwarded-Host',
             'X-Forwarded-Proto',
@@ -103,30 +105,21 @@ export class TransformController extends BaseController {
             message.requestHeaders.setCookies(cookies)
           }
         })
-        .addRequestBodyInterceptor('transform', () => {
-          const contentType = message.requestHeaders.getContentType()
-
-          if (message.isRewriteUrlContentType(contentType)) {
-            const charset = contentType?.parameters['charset']
-
-            const oldText = message.requestBody.getText(charset)
-            if (oldText) {
-              const newText = message.rewriteUrl(oldText, true, targets)
-              message.requestBody.setText(newText)
+        .addResponseHeadInterceptor('transform', () => {
+          if (!target.hasFlag('no-rewrite-cors')) {
+            const oldAcao = message.responseHeaders.getString('Access-Control-Allow-Origin')
+            if (oldAcao) {
+              const newAcao = message.rewriteUrl(oldAcao, false, targets)
+              message.responseHeaders.set('Access-Control-Allow-Origin', newAcao)
             }
           }
-        })
-        .addResponseHeadInterceptor('transform', () => {
-          const oldLocation = message.responseHeaders.getString('Location')
-          if (oldLocation && message.isAbsoluteUrl(oldLocation)) {
-            const newLocation = message.rewriteUrl(oldLocation, false, targets)
-            message.responseHeaders.set('Location', newLocation)
-          }
 
-          const oldAcao = message.responseHeaders.getString('Access-Control-Allow-Origin')
-          if (oldAcao) {
-            const newAcao = message.rewriteUrl(oldAcao, false, targets)
-            message.responseHeaders.set('Access-Control-Allow-Origin', newAcao)
+          if (!target.hasFlag('no-rewrite-location')) {
+            const oldLocation = message.responseHeaders.getString('Location')
+            if (oldLocation && message.isAbsoluteUrl(oldLocation)) {
+              const newLocation = message.rewriteUrl(oldLocation, false, targets)
+              message.responseHeaders.set('Location', newLocation)
+            }
           }
 
           message.responseHeaders.delete([
@@ -159,7 +152,25 @@ export class TransformController extends BaseController {
             message.responseHeaders.setSetCookies(setCookies)
           }
         })
-        .addResponseBodyInterceptor('transform', () => {
+
+      if (!target.hasFlag('no-rewrite-request-body')) {
+        message.addRequestBodyInterceptor('transform', () => {
+          const contentType = message.requestHeaders.getContentType()
+
+          if (message.isRewriteUrlContentType(contentType)) {
+            const charset = contentType?.parameters['charset']
+
+            const oldText = message.requestBody.getText(charset)
+            if (oldText) {
+              const newText = message.rewriteUrl(oldText, true, targets)
+              message.requestBody.setText(newText)
+            }
+          }
+        })
+      }
+
+      if (!target.hasFlag('no-rewrite-response-body')) {
+        message.addResponseBodyInterceptor('transform', () => {
           const contentType = message.responseHeaders.getContentType()
 
           if (message.isRewriteUrlContentType(contentType)) {
@@ -172,6 +183,7 @@ export class TransformController extends BaseController {
             }
           }
         })
+      }
 
       await next()
     })

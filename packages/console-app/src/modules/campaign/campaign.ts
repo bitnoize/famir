@@ -34,6 +34,24 @@ export interface UpdateCampaignArgs {
  * @category Campaign
  * @internal
  */
+export interface AppendCampaignFlagArgs {
+  _: [string]
+  flag: string
+}
+
+/**
+ * @category Campaign
+ * @internal
+ */
+export interface RemoveCampaignFlagArgs {
+  _: [string]
+  flag: string
+}
+
+/**
+ * @category Campaign
+ * @internal
+ */
 export interface DeleteCampaignArgs {
   _: [string]
   force: boolean

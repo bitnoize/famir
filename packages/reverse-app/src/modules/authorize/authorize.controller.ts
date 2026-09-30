@@ -101,31 +101,30 @@ export class AuthorizeController extends BaseController {
    */
   use() {
     this.router.addMiddleware('authorize', async (ctx, next) => {
-      await this.dispatchRoot[ctx.type](ctx, next)
+      await this.dispatchUse[ctx.type](ctx, next)
     })
   }
 
-  private dispatchRoot: Record<HttpServerContextType, HttpServerMiddleware> = {
+  private dispatchUse: Record<HttpServerContextType, HttpServerMiddleware> = {
     normal: async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      await this.dispatchNormal[target.accessLevel](ctx, next)
+      await this.dispatchUseNormal[target.accessLevel](ctx, next)
     },
 
     websocket: async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      await this.dispatchWebSocket[target.accessLevel](ctx, next)
+      await this.dispatchUseWebSocket[target.accessLevel](ctx, next)
     },
   }
 
-  private dispatchNormal: Record<TargetAccessLevel, HttpServerMiddleware> = {
+  private dispatchUseNormal: Record<TargetAccessLevel, HttpServerMiddleware> = {
     transparent: async (ctx, next) => {
-      const flags = this.getState(ctx, 'flags')
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
 
-      if (!flags.authorizeAllowBots && ctx.isBot) {
+      if (!target.hasFlag('no-cloaking-bots') && ctx.isBot) {
         await this.sendCloakingSite(ctx, target)
 
         return
@@ -134,7 +133,7 @@ export class AuthorizeController extends BaseController {
       let session: SessionModel | null = null
 
       const sessionCookie = this.getSessionCookie(ctx, campaign)
-      if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
+      if (this.checkSessionCookie(sessionCookie)) {
         session = await this.authorizeService.authSession({
           campaignId: campaign.campaignId,
           sessionId: sessionCookie,
@@ -157,7 +156,7 @@ export class AuthorizeController extends BaseController {
       this.setState(ctx, 'proxy', proxy)
       this.setState(ctx, 'session', session)
 
-      if (ctx.state.verbose) {
+      if (campaign.hasFlag('verbose')) {
         ctx.responseHeaders.merge({
           'X-Famir-Session-Id': session.sessionId,
           'X-Famir-Proxy-Id': proxy.proxyId,
@@ -168,7 +167,6 @@ export class AuthorizeController extends BaseController {
     },
 
     landing: async (ctx, next) => {
-      const flags = this.getState(ctx, 'flags')
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
 
@@ -302,7 +300,7 @@ export class AuthorizeController extends BaseController {
         return
       }
 
-      if (!flags.authorizeAllowBots && ctx.isBot) {
+      if (!target.hasFlag('no-cloaking-bots') && ctx.isBot) {
         await this.sendCloakingSite(ctx, target)
 
         return
@@ -352,7 +350,7 @@ export class AuthorizeController extends BaseController {
       this.setState(ctx, 'proxy', proxy)
       this.setState(ctx, 'session', session)
 
-      if (ctx.state.verbose) {
+      if (campaign.hasFlag('verbose')) {
         ctx.responseHeaders.merge({
           'X-Famir-Session-Id': session.sessionId,
           'X-Famir-Proxy-Id': proxy.proxyId,
@@ -363,12 +361,12 @@ export class AuthorizeController extends BaseController {
     },
   }
 
-  private dispatchWebSocket: Record<TargetAccessLevel, HttpServerMiddleware> = {
+  private dispatchUseWebSocket: Record<TargetAccessLevel, HttpServerMiddleware> = {
     transparent: async (ctx, next) => {
-      const flags = this.getState(ctx, 'flags')
       const campaign = this.getState(ctx, 'campaign')
+      const target = this.getState(ctx, 'target')
 
-      if (!flags.authorizeAllowBots && ctx.isBot) {
+      if (!target.hasFlag('no-cloaking-bots') && ctx.isBot) {
         ctx.close()
 
         return
@@ -377,7 +375,7 @@ export class AuthorizeController extends BaseController {
       let session: SessionModel | null = null
 
       const sessionCookie = this.getSessionCookie(ctx, campaign)
-      if (sessionCookie && this.checkSessionCookie(sessionCookie)) {
+      if (this.checkSessionCookie(sessionCookie)) {
         session = await this.authorizeService.authSession({
           campaignId: campaign.campaignId,
           sessionId: sessionCookie,
@@ -398,7 +396,7 @@ export class AuthorizeController extends BaseController {
       this.setState(ctx, 'proxy', proxy)
       this.setState(ctx, 'session', session)
 
-      if (ctx.state.verbose) {
+      if (campaign.hasFlag('verbose')) {
         ctx.responseHeaders.merge({
           'X-Famir-Session-Id': session.sessionId,
           'X-Famir-Proxy-Id': proxy.proxyId,
@@ -409,17 +407,17 @@ export class AuthorizeController extends BaseController {
     },
 
     landing: async (ctx, next) => {
-      const flags = this.getState(ctx, 'flags')
       const campaign = this.getState(ctx, 'campaign')
+      const target = this.getState(ctx, 'target')
 
-      if (!flags.authorizeAllowBots && ctx.isBot) {
+      if (!target.hasFlag('no-cloaking-bots') && ctx.isBot) {
         ctx.close()
 
         return
       }
 
       const sessionCookie = this.getSessionCookie(ctx, campaign)
-      if (!sessionCookie || !this.checkSessionCookie(sessionCookie)) {
+      if (!this.checkSessionCookie(sessionCookie)) {
         ctx.close()
 
         return
@@ -444,7 +442,7 @@ export class AuthorizeController extends BaseController {
       this.setState(ctx, 'proxy', proxy)
       this.setState(ctx, 'session', session)
 
-      if (ctx.state.verbose) {
+      if (campaign.hasFlag('verbose')) {
         ctx.responseHeaders.merge({
           'X-Famir-Session-Id': session.sessionId,
           'X-Famir-Proxy-Id': proxy.proxyId,

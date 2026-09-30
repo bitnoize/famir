@@ -195,7 +195,7 @@ export class HttpMessage {
   }
 
   /** Name of the analyze queue job. */
-  analyze: string = ''
+  analyze: string = 'default'
 
   #contentTypes: HttpContentTypes = {
     text: [],

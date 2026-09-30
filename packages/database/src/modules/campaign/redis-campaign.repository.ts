@@ -276,6 +276,66 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  async appendFlag(campaignId: string, flag: string): Promise<void> {
+    try {
+      const statusReply = await this.connection.campaign.append_campaign_flag(
+        this.options.prefix,
+        campaignId,
+        flag
+      )
+
+      this.checkStatusReply(statusReply)
+
+      this.logger.info(`Database append campaign flag`, {
+        data: {
+          campaign: {
+            campaignId,
+            flag,
+          },
+        },
+      })
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'appendFlag',
+        params: {
+          campaignId,
+          flag,
+        },
+      })
+    }
+  }
+
+  async removeFlag(campaignId: string, flag: string): Promise<void> {
+    try {
+      const statusReply = await this.connection.campaign.remove_campaign_flag(
+        this.options.prefix,
+        campaignId,
+        flag
+      )
+
+      this.checkStatusReply(statusReply)
+
+      this.logger.info(`Database remove campaign flag`, {
+        data: {
+          campaign: {
+            campaignId,
+            flag,
+          },
+        },
+      })
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'removeFlag',
+        params: {
+          campaignId,
+          flag,
+        },
+      })
+    }
+  }
+
   async delete(campaignId: string, lockSecret: string): Promise<void> {
     try {
       const statusReply = await this.connection.campaign.delete_campaign(
@@ -396,6 +456,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       rawModel.new_session_expire,
       rawModel.message_expire,
       rawModel.is_locked,
+      rawModel.flags,
       rawModel.proxy_index,
       rawModel.target_index,
       rawModel.redirector_index,

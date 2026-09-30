@@ -54,6 +54,7 @@ export class FullCampaignModel extends CampaignModel {
    * @param newSessionExpire - The TTL for a not-yet-authorized session in milliseconds.
    * @param messageExpire - The TTL for a message in milliseconds.
    * @param isLocked - The flag indicating if the campaign is blocked.
+   * @param flags - The list of flags associated to the campaign.
    * @param proxyIndex - The cardinality of proxy index related to this campaign.
    * @param targetIndex - The cardinality of target index related to this campaign.
    * @param redirectorIndex - The cardinality of redirector index related to this campaign.
@@ -76,6 +77,7 @@ export class FullCampaignModel extends CampaignModel {
     readonly newSessionExpire: number,
     readonly messageExpire: number,
     isLocked: boolean,
+    readonly flags: string[],
     readonly proxyIndex: number,
     readonly targetIndex: number,
     readonly redirectorIndex: number,
@@ -87,5 +89,15 @@ export class FullCampaignModel extends CampaignModel {
     createdAt: Date
   ) {
     super(campaignId, mirrorDomain, isLocked, sessionCount, messageCount, createdAt)
+  }
+
+  /**
+   * Checks if the campaign has a specific flag.
+   *
+   * @param flag - The flag to check.
+   * @returns `true` if the flag exists, `false` otherwise.
+   */
+  hasFlag(flag: string): boolean {
+    return this.flags.includes(flag.toLowerCase())
   }
 }

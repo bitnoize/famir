@@ -33,7 +33,6 @@ import { nativeHttpServerConfigSchema } from './http-server.schemas.js'
 interface NativeHttpServerOptions extends HttpServerSettings {
   address: string
   port: number
-  verbose: boolean
 }
 
 /**
@@ -329,7 +328,6 @@ export class NativeHttpServer implements HttpServer {
   ): Promise<void> {
     try {
       const ctx = this.contextFactory.createNormal(req, res, {
-        verbose: this.options.verbose,
         errorPage: this.options.errorPage,
       })
 
@@ -359,7 +357,6 @@ export class NativeHttpServer implements HttpServer {
   protected async processWebSocketContext(ws: WebSocket, req: http.IncomingMessage): Promise<void> {
     try {
       const ctx = this.contextFactory.createWebSocket(ws, req, {
-        verbose: this.options.verbose,
         errorPage: this.options.errorPage,
       })
 
@@ -568,7 +565,6 @@ export class NativeHttpServer implements HttpServer {
     return {
       address: conf.HTTP_SERVER_ADDRESS,
       port: conf.HTTP_SERVER_PORT,
-      verbose: conf.HTTP_SERVER_VERBOSE,
       errorPage: settings.errorPage ?? HTTP_SERVER_DEFAULT_ERROR_PAGE,
     }
   }

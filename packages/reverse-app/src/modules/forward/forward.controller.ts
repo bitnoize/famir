@@ -86,11 +86,11 @@ export class ForwardController extends BaseController {
 
       message.ready()
 
-      await this.dispatchRoot[message.type](ctx, next)
+      await this.dispatchUse[message.type](ctx, next)
     })
   }
 
-  private dispatchRoot: Record<HttpType, HttpServerMiddleware> = {
+  private dispatchUse: Record<HttpType, HttpServerMiddleware> = {
     'normal-simple': async (ctx, next) => {
       const proxy = this.getState(ctx, 'proxy')
       const target = this.getState(ctx, 'target')

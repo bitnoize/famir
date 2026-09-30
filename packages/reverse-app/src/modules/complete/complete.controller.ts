@@ -92,7 +92,7 @@ export class CompleteController extends BaseController {
       message.payload['response-cookies'] = message.responseHeaders.getSetCookies()
       message.payload['response-content-type'] = message.responseHeaders.getContentType()
 
-      if (ctx.state.verbose || message.analyze) {
+      if (target.hasFlag('analyze')) {
         await this.completeService.createMessage({
           campaignId: campaign.campaignId,
           messageId: message.id,
@@ -114,24 +114,6 @@ export class CompleteController extends BaseController {
           startTime: ctx.startTime,
           finishTime: ctx.finishTime,
         })
-
-        this.logger.info(`ReverseApp complete message`, {
-          data: {
-            message: {
-              campaignId: campaign.campaignId,
-              messageId: message.id,
-              proxyId: proxy.proxyId,
-              targetId: target.targetId,
-              sessionId: session.sessionId,
-              type: message.type,
-              method: message.method.get(),
-              url: message.url.toRelative(),
-              status: message.status.get(),
-              analyze: message.analyze,
-              totalTime: ctx.totalTime,
-            },
-          },
-        })
       } else {
         await this.completeService.createDummyMessage({
           campaignId: campaign.campaignId,
@@ -141,6 +123,25 @@ export class CompleteController extends BaseController {
           sessionId: session.sessionId,
         })
       }
+
+      this.logger.info(`ReverseApp complete message`, {
+        data: {
+          message: {
+            campaignId: campaign.campaignId,
+            messageId: message.id,
+            proxyId: proxy.proxyId,
+            targetId: target.targetId,
+            sessionId: session.sessionId,
+            type: message.type,
+            method: message.method.get(),
+            url: message.url.toRelative(),
+            status: message.status.get(),
+            analyze: message.analyze,
+            totalTime: ctx.totalTime,
+            errors: message.errors.length > 0 ? message.errors : undefined,
+          },
+        },
+      })
 
       await next()
     })

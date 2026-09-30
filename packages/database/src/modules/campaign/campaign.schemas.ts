@@ -96,6 +96,23 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
 } as const
 
 /**
+ * JSON Schema for validating a campaign flag.
+ *
+ * @category Campaign
+ */
+export const campaignFlagSchema = customIdentSchema
+
+/**
+ * JSON Schema for validating a list of campaign flags.
+ *
+ * @category Campaign
+ */
+export const campaignFlagsSchema: JSONSchemaType<string[]> = {
+  type: 'array',
+  items: campaignFlagSchema,
+} as const
+
+/**
  * @category Campaign
  * @internal
  */
@@ -138,6 +155,7 @@ export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'new_session_expire',
     'message_expire',
     'is_locked',
+    'flags',
     'proxy_index',
     'target_index',
     'redirector_index',
@@ -160,6 +178,7 @@ export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     new_session_expire: campaignNewSessionExpireSchema,
     message_expire: campaignMessageExpireSchema,
     is_locked: booleanSchema,
+    flags: campaignFlagsSchema,
     proxy_index: counterSchema,
     target_index: counterSchema,
     redirector_index: counterSchema,

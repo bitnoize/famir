@@ -436,6 +436,44 @@ export class CampaignService {
   }
 
   /**
+   * Appends a flag to the campaign.
+   */
+  async appendFlag(data: { campaignId: string; flag: string }): Promise<void> {
+    try {
+      await this.campaignRepository.appendFlag(data.campaignId, data.flag)
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
+        }
+
+        throw ReplServerError.internalError(`Append flag failed`, null, error)
+      }
+
+      throw error
+    }
+  }
+
+  /**
+   * Removes a flag from the campaign.
+   */
+  async removeFlag(data: { campaignId: string; flag: string }): Promise<void> {
+    try {
+      await this.campaignRepository.removeFlag(data.campaignId, data.flag)
+    } catch (error) {
+      if (error instanceof DatabaseError) {
+        if (error.isNotFound) {
+          throw ReplServerError.notFound(error.message)
+        }
+
+        throw ReplServerError.internalError(`Remove flag failed`, null, error)
+      }
+
+      throw error
+    }
+  }
+
+  /**
    * Deletes the campaign by its ID.
    */
   async delete(data: { campaignId: string }): Promise<void> {

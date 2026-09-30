@@ -113,6 +113,26 @@ export interface CampaignRepository {
   ): Promise<void>
 
   /**
+   * Appends named flag to the campaign.
+   *
+   * @param campaignId - The ID of the campaign.
+   * @param flag - The flag to append to the campaign.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the data validation fails.
+   */
+  appendFlag(campaignId: string, flag: string): Promise<void>
+
+  /**
+   * Removes named flag from the campaign.
+   *
+   * @param campaignId - The ID of the campaign.
+   * @param flag - The flag to remove to the campaign.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the data validation fails.
+   */
+  removeFlag(campaignId: string, flag: string): Promise<void>
+
+  /**
    * Deletes the campaign by its ID.
    *
    * @param campaignId - The campaign ID to delete.

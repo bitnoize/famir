@@ -19,6 +19,7 @@ import {
 import { Console } from 'node:console'
 import { BaseController } from '../base/index.js'
 import {
+  AppendCampaignFlagArgs,
   CampaignPreset,
   CampaignPresetCampaign,
   CampaignPresetLure,
@@ -35,14 +36,17 @@ import {
   RawCampaignPresetRedirector,
   RawCampaignPresetTarget,
   ReadCampaignArgs,
+  RemoveCampaignFlagArgs,
   UpdateCampaignArgs,
 } from './campaign.js'
 import {
+  appendCampaignFlagArgsSchema,
   createCampaignArgsSchema,
   deleteCampaignArgsSchema,
   listCampaignsArgsSchema,
   rawCampaignPresetSchema,
   readCampaignArgsSchema,
+  removeCampaignFlagArgsSchema,
   updateCampaignArgsSchema,
 } from './campaign.schemas.js'
 import { CAMPAIGN_SERVICE, type CampaignService } from './campaign.service.js'
@@ -114,6 +118,8 @@ export class CampaignController extends BaseController {
       .addSchema('console-create-campaign-args', createCampaignArgsSchema)
       .addSchema('console-read-campaign-args', readCampaignArgsSchema)
       .addSchema('console-update-campaign-args', updateCampaignArgsSchema)
+      .addSchema('console-append-campaign-flag-args', appendCampaignFlagArgsSchema)
+      .addSchema('console-remove-campaign-flag-args', removeCampaignFlagArgsSchema)
       .addSchema('console-delete-campaign-args', deleteCampaignArgsSchema)
       .addSchema('console-list-campaigns-args', listCampaignsArgsSchema)
       .addSchema('console-raw-campaign-preset', rawCampaignPresetSchema)
@@ -241,6 +247,70 @@ Update the 'httpbin' campaign from the 'httpbin-local.yaml' preset:
         await this.campaignService.update(preset)
 
         console.log(`Campaign updated!`)
+      }
+    )
+
+    this.router.addCommand<AppendCampaignFlagArgs>(
+      {
+        name: 'campaign-append-flag',
+        description: `Appends a flag to the campaign.`,
+        schemaName: 'console-append-campaign-flag-args',
+        options: [
+          {
+            name: 'flag',
+            description: `The flag to append.`,
+            type: 'string',
+            alias: 'f',
+          },
+        ],
+        params: ['campaign-id'],
+      },
+      (spec) => `Examples:
+
+Append 'verbose' flag to the 'httpbin' campaign:
+> ${spec.name} httpbin -f verbose
+`,
+      async (console, spec, args) => {
+        const [campaignId] = args._
+
+        await this.campaignService.appendFlag({
+          campaignId,
+          flag: args.flag,
+        })
+
+        console.log(`Campaign flag appended!`)
+      }
+    )
+
+    this.router.addCommand<RemoveCampaignFlagArgs>(
+      {
+        name: 'campaign-remove-flag',
+        description: `Removes a flag to the campaign.`,
+        schemaName: 'console-remove-campaign-flag-args',
+        options: [
+          {
+            name: 'flag',
+            description: `The flag to remove.`,
+            type: 'string',
+            alias: 'f',
+          },
+        ],
+        params: ['campaign-id'],
+      },
+      (spec) => `Examples:
+
+Remove 'verbose' flag from the 'httpbin' campaign:
+> ${spec.name} httpbin -f verbose
+`,
+      async (console, spec, args) => {
+        const [campaignId] = args._
+
+        await this.campaignService.removeFlag({
+          campaignId,
+          flag: args.flag,
+        })
+
+        console.log(`Campaign flag removed!`)
       }
     )
 
@@ -428,6 +498,7 @@ Delete the 'httpbin' campaign:
       newSessionExpire: campaign.newSessionExpire,
       messageExpire: campaign.messageExpire,
       isLocked: campaign.isLocked,
+      flags: campaign.flags.join(', '),
       proxyIndex: campaign.proxyIndex,
       targetIndex: campaign.targetIndex,
       redirectorIndex: campaign.redirectorIndex,

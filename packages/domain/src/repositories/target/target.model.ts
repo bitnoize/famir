@@ -246,6 +246,45 @@ export class FullTargetModel extends TargetModel {
       createdAt
     )
   }
+
+  #flags: Set<string> = new Set()
+
+  /**
+   * The flags associated to the target.
+   *
+   * An ephemeral field; in reality, the data is not stored in the database.
+   */
+  get flags(): string[] {
+    return Array.from(this.#flags)
+  }
+
+  /**
+   * Checks if the target has a specific flag.
+   *
+   * @param flag - The flag to check.
+   * @returns `true` if the flag exists, `false` otherwise.
+   */
+  hasFlag(flag: string): boolean {
+    return this.#flags.has(flag)
+  }
+
+  /**
+   * Appends a specific flag to the target.
+   *
+   * @param flag - The flag to append.
+   */
+  appendFlag(flag: string) {
+    this.#flags.add(flag)
+  }
+
+  /**
+   * Removes a specific flag from the target.
+   *
+   * @param flag - The flag to remove.
+   */
+  removeFlag(flag: string) {
+    this.#flags.delete(flag)
+  }
 }
 
 /**

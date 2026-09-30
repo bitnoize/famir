@@ -1,13 +1,9 @@
 import {
   EnabledFullTargetModel,
-  EnabledProxyModel,
-  FullCampaignModel,
   FullRedirectorModel,
   HttpClientError,
   HttpServerError,
   Logger,
-  SessionModel,
-  TargetModel,
   Templater,
   TemplaterData,
   Validator,
@@ -15,29 +11,9 @@ import {
 import {
   type HttpServerAssets,
   type HttpServerContext,
-  HttpServerContextState,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { HttpMessage } from '@famir/http-tools'
-
-export interface ControllerFlags {
-  authorizeAllowBots: boolean
-}
-
-/**
- * Represents the controller context state.
- *
- * @category none
- */
-export interface ControllerContextState extends HttpServerContextState {
-  flags?: ControllerFlags
-  campaign?: FullCampaignModel
-  proxy?: EnabledProxyModel
-  target?: EnabledFullTargetModel
-  targets?: TargetModel[]
-  session?: SessionModel
-  message?: HttpMessage
-}
+import { ReverseContextState } from './base.js'
 
 /**
  * Abstract base class for all application controllers.
@@ -74,7 +50,7 @@ export abstract class BaseController {
     return asset
   }
 
-  protected getState<T extends ControllerContextState, K extends keyof T>(
+  protected getState<T extends ReverseContextState, K extends keyof T>(
     ctx: HttpServerContext,
     key: K
   ): NonNullable<T[K]> {
@@ -87,7 +63,7 @@ export abstract class BaseController {
     return state[key]
   }
 
-  protected setState<T extends ControllerContextState, K extends keyof T>(
+  protected setState<T extends ReverseContextState, K extends keyof T>(
     ctx: HttpServerContext,
     key: K,
     value: T[K]

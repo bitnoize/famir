@@ -57,21 +57,21 @@ export class WellKnownUrlsController extends BaseController {
    */
   use() {
     this.router.addMiddleware('well-known-urls', async (ctx, next) => {
-      await this.dispatchRoot[ctx.type](ctx, next)
+      await this.dispatchUse[ctx.type](ctx, next)
     })
   }
 
-  private dispatchRoot: Record<HttpServerContextType, HttpServerMiddleware> = {
+  private dispatchUse: Record<HttpServerContextType, HttpServerMiddleware> = {
     normal: async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (ctx.method.is('OPTIONS')) {
+      if (!target.hasFlag('no-preflight-cors') && ctx.method.is('OPTIONS')) {
         await this.sendPreflightCors(ctx)
-      } else if (ctx.url.isPath('/favicon.ico')) {
+      } else if (!target.hasFlag('no-favicon-ico') && ctx.url.isPath('/favicon.ico')) {
         await this.sendFaviconIco(ctx, target)
-      } else if (ctx.url.isPath('/robots.txt')) {
+      } else if (!target.hasFlag('no-robots-txt') && ctx.url.isPath('/robots.txt')) {
         await this.sendRobotsTxt(ctx, target)
-      } else if (ctx.url.isPath('/sitemap.xml')) {
+      } else if (!target.hasFlag('no-sitemap-xml') && ctx.url.isPath('/sitemap.xml')) {
         await this.sendSitemapXml(ctx, target)
       } else {
         await next()

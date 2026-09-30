@@ -1,6 +1,7 @@
 import { JSONSchemaType, booleanSchema, customIdentSchema, secretSchema } from '@famir/common'
 import {
   campaignDescriptionSchema,
+  campaignFlagSchema,
   campaignMessageExpireSchema,
   campaignMirrorDomainSchema,
   campaignNewSessionExpireSchema,
@@ -24,6 +25,7 @@ import {
   targetSubSchema,
 } from '@famir/database'
 import {
+  AppendCampaignFlagArgs,
   CreateCampaignArgs,
   DeleteCampaignArgs,
   ListCampaignsArgs,
@@ -34,6 +36,7 @@ import {
   RawCampaignPresetRedirector,
   RawCampaignPresetTarget,
   ReadCampaignArgs,
+  RemoveCampaignFlagArgs,
   UpdateCampaignArgs,
 } from './campaign.js'
 
@@ -109,6 +112,44 @@ export const updateCampaignArgsSchema: JSONSchemaType<UpdateCampaignArgs> = {
     assetName: {
       type: 'string',
     },
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Campaign
+ * @internal
+ */
+export const appendCampaignFlagArgsSchema: JSONSchemaType<AppendCampaignFlagArgs> = {
+  type: 'object',
+  required: ['_', 'flag'],
+  properties: {
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
+    flag: campaignFlagSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Campaign
+ * @internal
+ */
+export const removeCampaignFlagArgsSchema: JSONSchemaType<RemoveCampaignFlagArgs> = {
+  type: 'object',
+  required: ['_', 'flag'],
+  properties: {
+    _: {
+      type: 'array',
+      items: [customIdentSchema],
+      minItems: 1,
+      maxItems: 1,
+    },
+    flag: campaignFlagSchema,
   },
   additionalProperties: false,
 } as const

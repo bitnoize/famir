@@ -90,10 +90,6 @@ export class SetupMirrorController extends BaseController {
    */
   use() {
     this.router.addMiddleware('setup-mirror', async (ctx, next) => {
-      this.setState(ctx, 'flags', {
-        authorizeAllowBots: false,
-      })
-
       const mirrorHost = this.parseMirrorHost(ctx)
 
       const target = await this.setupMirrorService.findTarget({
@@ -108,23 +104,25 @@ export class SetupMirrorController extends BaseController {
         campaignId: target.campaignId,
       })
 
-      const message = HttpMessage.create(ctx.type)
-
       this.setState(ctx, 'campaign', campaign)
       this.setState(ctx, 'target', target)
       this.setState(ctx, 'targets', targets)
+
+      const message = HttpMessage.create(ctx.type)
+
       this.setState(ctx, 'message', message)
 
-      await this.dispatchRoot[ctx.type](ctx, next)
+      await this.dispatchUse[ctx.type](ctx, next)
     })
   }
 
-  private dispatchRoot: Record<HttpServerContextType, HttpServerMiddleware> = {
+  private dispatchUse: Record<HttpServerContextType, HttpServerMiddleware> = {
     normal: async (ctx, next) => {
+      const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const message = this.getState(ctx, 'message')
 
-      if (ctx.state.verbose) {
+      if (campaign.hasFlag('verbose')) {
         ctx.responseHeaders.merge({
           'X-Famir-Campaign-Id': target.campaignId,
           'X-Famir-Target-Id': target.targetId,
@@ -150,10 +148,23 @@ export class SetupMirrorController extends BaseController {
 
   private parseMirrorHost(ctx: HttpServerContext): string {
     try {
-      const mirrorHost = ctx.requestHeaders.getString('Host')
+      const rawProto = ctx.requestHeaders.getString('X-Forwarded-Proto')
+      if (!rawProto) {
+        throw new Error(`Missing 'X-Forwarded-Proto' header`)
+      }
 
-      if (!(mirrorHost && /[^:]+:\d+$/.test(mirrorHost))) {
-        throw new Error(`Host header malform`)
+      const rawHost = ctx.requestHeaders.getString('X-Forwarded-Host')
+      if (!rawHost) {
+        throw new Error(`Missing 'X-Forwarded-Host' header`)
+      }
+
+      const url = new URL(`${rawProto}://${rawHost}`)
+
+      const defaultPort = url.protocol === 'https:' ? '443' : '80'
+      const mirrorHost = `${url.hostname}:${url.port || defaultPort}`
+
+      if (!/^[^:]+:\d+$/.test(mirrorHost)) {
+        throw new Error(`Malform mirror-host string`)
       }
 
       return mirrorHost
