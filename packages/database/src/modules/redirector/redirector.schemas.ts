@@ -9,8 +9,8 @@ import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
  */
 export const redirectorPageSchema: JSONSchemaType<string> = {
   type: 'string',
-  minLength: 0,
-  maxLength: 10 * 1024 * 1024,
+  minLength: 1,
+  maxLength: 256,
 } as const
 
 /**

@@ -121,12 +121,6 @@ export class ProxyController extends BaseController {
         ],
         params: ['campaign-id', 'proxy-id'],
       },
-      (spec) => `The proxy will be created in a disabled state (isEnabled = false).
-Use 'proxy-enable' command to activate it for traffic routing.
-
-Creates a 'default' proxy in the 'httpbin' campaign:
-> ${spec.name} httpbin default -u "http://127.0.0.1:8080"
-`,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -148,7 +142,6 @@ Creates a 'default' proxy in the 'httpbin' campaign:
         options: [],
         params: ['campaign-id', 'proxy-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -169,12 +162,6 @@ Creates a 'default' proxy in the 'httpbin' campaign:
         options: [],
         params: ['campaign-id', 'proxy-id'],
       },
-      (spec) => `Enabled proxies are automatically selected by the session creation logic
-using random load balancing.
-
-Enable the 'default' proxy in the 'httpbin' campaign:
-> ${spec.name} httpbin default
-`,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -195,12 +182,6 @@ Enable the 'default' proxy in the 'httpbin' campaign:
         options: [],
         params: ['campaign-id', 'proxy-id'],
       },
-      (spec) => `Existing sessions using this proxy will be automatically re-assigned
-to another enabled proxy upon their next authorization.
-
-Disable the 'default' proxy in the 'httpbin' campaign:
-${spec.name} httpbin default
-`,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -221,11 +202,6 @@ ${spec.name} httpbin default
         options: [],
         params: ['campaign-id', 'proxy-id'],
       },
-      (spec) => `A proxy must be disabled before it can be deleted.
-
-Delete the 'default' proxy in the 'httpbin' campaign:
-> ${spec.name} httpbin default
-`,
       async (console, spec, args) => {
         const [campaignId, proxyId] = args._
 
@@ -246,7 +222,6 @@ Delete the 'default' proxy in the 'httpbin' campaign:
         options: [],
         params: ['campaign-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 

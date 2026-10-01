@@ -121,7 +121,7 @@ export const targetBodySizeLimitSchema: JSONSchemaType<number> = {
 export const targetContentSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 0,
-  maxLength: 10 * 1024 * 1024,
+  maxLength: 256,
 } as const
 
 /**

@@ -42,6 +42,10 @@ export abstract class BaseController {
   ) {}
 
   protected getAsset(assetName: string): string {
+    if (!assetName) {
+      throw new Error(`Wrong asset name`)
+    }
+
     const asset = this.assets.get(assetName)
     if (!asset) {
       throw new Error(`Asset '${assetName}' not exists`)
@@ -80,6 +84,12 @@ export abstract class BaseController {
   protected checkContextTypeNormal(ctx: HttpServerContext) {
     if (ctx.type !== 'normal') {
       throw new Error(`Only 'normal' context type allowed`)
+    }
+  }
+
+  protected checkContextTypeWebsocket(ctx: HttpServerContext) {
+    if (ctx.type !== 'websocket') {
+      throw new Error(`Only 'websocket' context type allowed`)
     }
   }
 
@@ -152,10 +162,12 @@ export abstract class BaseController {
   ): Promise<void> {
     this.checkContextTypeNormal(ctx)
 
-    if (ctx.method.is(['GET', 'HEAD']) && target.mainPage) {
+    if (target.mainPage && ctx.method.is(['GET', 'HEAD'])) {
+      const asset = this.getAsset(target.mainPage)
+
       ctx.status.set(200)
 
-      ctx.responseBody.setText(target.mainPage)
+      ctx.responseBody.setText(asset)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/html',
@@ -183,7 +195,9 @@ export abstract class BaseController {
     ctx.status.set(404)
 
     if (target.notFoundPage) {
-      ctx.responseBody.setText(target.notFoundPage)
+      const asset = this.getAsset(target.notFoundPage)
+
+      ctx.responseBody.setText(asset)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/html',
@@ -234,10 +248,12 @@ export abstract class BaseController {
   ): Promise<void> {
     this.checkContextTypeNormal(ctx)
 
-    if (ctx.method.is(['GET', 'HEAD']) && target.faviconIco) {
+    if (target.faviconIco && ctx.method.is(['GET', 'HEAD'])) {
+      const asset = this.getAsset(target.faviconIco)
+
       ctx.status.set(200)
 
-      ctx.responseBody.setBase64(target.faviconIco)
+      ctx.responseBody.setBase64(asset)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'image/x-icon',
@@ -262,10 +278,12 @@ export abstract class BaseController {
   ): Promise<void> {
     this.checkContextTypeNormal(ctx)
 
-    if (ctx.method.is(['GET', 'HEAD']) && target.robotsTxt) {
+    if (target.robotsTxt && ctx.method.is(['GET', 'HEAD'])) {
+      const asset = this.getAsset(target.robotsTxt)
+
       ctx.status.set(200)
 
-      ctx.responseBody.setText(target.robotsTxt)
+      ctx.responseBody.setText(asset)
 
       ctx.responseHeaders.merge({
         'Content-Type': 'text/plain',
@@ -290,14 +308,15 @@ export abstract class BaseController {
   ): Promise<void> {
     this.checkContextTypeNormal(ctx)
 
-    if (ctx.method.is(['GET', 'HEAD']) && target.sitemapXml) {
+    if (target.sitemapXml && ctx.method.is(['GET', 'HEAD'])) {
+      const asset = this.getAsset(target.sitemapXml)
+
       ctx.status.set(200)
 
-      const sitemapXml = this.templater.render(target.sitemapXml, {
+      const sitemapXml = this.templater.render(asset, {
         baseloc: target.mirrorUrl,
         lastmod: target.createdAt.toISOString().slice(0, 10),
       })
-
       ctx.responseBody.setText(sitemapXml)
 
       ctx.responseHeaders.merge({
@@ -326,9 +345,11 @@ export abstract class BaseController {
     this.checkContextTypeNormal(ctx)
 
     if (ctx.method.is(['GET', 'HEAD'])) {
+      const asset = this.getAsset(redirector.page)
+
       ctx.status.set(200)
 
-      const redirectorPage = this.templater.render(redirector.page, data)
+      const redirectorPage = this.templater.render(asset, data)
       ctx.responseBody.setText(redirectorPage)
 
       ctx.responseHeaders.merge({

@@ -124,7 +124,7 @@ export class AuthorizeController extends BaseController {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
 
-      if (!target.hasFlag('no-cloaking-bots') && ctx.isBot) {
+      if (!target.hasFlag('no-cloaking-site') && ctx.isBot) {
         await this.sendCloakingSite(ctx, target)
 
         return
@@ -300,7 +300,7 @@ export class AuthorizeController extends BaseController {
         return
       }
 
-      if (!target.hasFlag('no-cloaking-bots') && ctx.isBot) {
+      if (!target.hasFlag('no-cloaking-site') && ctx.isBot) {
         await this.sendCloakingSite(ctx, target)
 
         return
@@ -366,7 +366,7 @@ export class AuthorizeController extends BaseController {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
 
-      if (!target.hasFlag('no-cloaking-bots') && ctx.isBot) {
+      if (!target.hasFlag('no-cloaking-site') && ctx.isBot) {
         ctx.close()
 
         return
@@ -410,7 +410,7 @@ export class AuthorizeController extends BaseController {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
 
-      if (!target.hasFlag('no-cloaking-bots') && ctx.isBot) {
+      if (!target.hasFlag('no-cloaking-site') && ctx.isBot) {
         ctx.close()
 
         return

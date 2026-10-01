@@ -341,13 +341,10 @@ const rawCampaignPresetTargetSchema: JSONSchemaType<RawCampaignPresetTarget> = {
  */
 const rawCampaignPresetRedirectorSchema: JSONSchemaType<RawCampaignPresetRedirector> = {
   type: 'object',
-  required: ['redirectorId'],
+  required: ['redirectorId', 'page'],
   properties: {
     redirectorId: customIdentSchema,
-    page: {
-      ...redirectorPageSchema,
-      nullable: true,
-    },
+    page: redirectorPageSchema,
     fields: {
       ...redirectorFieldsSchema,
       nullable: true,

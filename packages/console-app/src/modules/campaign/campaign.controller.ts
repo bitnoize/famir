@@ -172,15 +172,6 @@ export class CampaignController extends BaseController {
         ],
         params: ['campaign-id'],
       },
-      (spec) => `The campaign is created from a preset with all associated entities.
-
-Create the 'httpbin' campaign from the 'httpbin-local.yaml' preset:
-> ${spec.name} -a presets/httpbin-local.yaml httpbin
-
-Create the 'hackernews' campaign from the 'hackernews-local.yaml' preset with overrides
-for mirror domain and crypt secret:
-> ${spec.name} hackernews -a presets/hackernews-local.yaml hackernews -m my-hacker-news.fake -s "super-secret"
-`,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -207,7 +198,6 @@ for mirror domain and crypt secret:
         options: [],
         params: ['campaign-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -234,11 +224,6 @@ for mirror domain and crypt secret:
         ],
         params: ['campaign-id'],
       },
-      (spec) => `The campaign is updated from a preset with all associated entities.
-
-Update the 'httpbin' campaign from the 'httpbin-local.yaml' preset:
-> ${spec.name} -a presets/httpbin-local.yaml httpbin
-`,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -265,11 +250,6 @@ Update the 'httpbin' campaign from the 'httpbin-local.yaml' preset:
         ],
         params: ['campaign-id'],
       },
-      (spec) => `Examples:
-
-Append 'verbose' flag to the 'httpbin' campaign:
-> ${spec.name} httpbin -f verbose
-`,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -297,11 +277,6 @@ Append 'verbose' flag to the 'httpbin' campaign:
         ],
         params: ['campaign-id'],
       },
-      (spec) => `Examples:
-
-Remove 'verbose' flag from the 'httpbin' campaign:
-> ${spec.name} httpbin -f verbose
-`,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -329,11 +304,6 @@ Remove 'verbose' flag from the 'httpbin' campaign:
         ],
         params: ['campaign-id'],
       },
-      (spec) => `The campaign is deleted along with all associated entities.
-
-Delete the 'httpbin' campaign:
-> ${spec.name} httpbin --force
-`,
       async (console, spec, args) => {
         if (!args.force) {
           this.confirmAlert(console)
@@ -358,7 +328,6 @@ Delete the 'httpbin' campaign:
         schemaName: 'console-list-campaigns-args',
         options: [],
       },
-      null,
       async (console) => {
         const campaigns = await this.campaignService.list()
 
@@ -469,7 +438,7 @@ Delete the 'httpbin' campaign:
     return rawRedirectors.map((rawRedirector) => {
       return {
         redirectorId: rawRedirector.redirectorId,
-        page: rawRedirector.page ?? '',
+        page: rawRedirector.page,
         fields: rawRedirector.fields ?? [],
       }
     })
@@ -490,7 +459,7 @@ Delete the 'httpbin' campaign:
     console.table({
       campaignId: campaign.campaignId,
       mirrorDomain: campaign.mirrorDomain,
-      //cryptSecret: campaign.cryptSecret,
+      cryptSecret: campaign.cryptSecret,
       upgradeSessionPath: campaign.upgradeSessionPath,
       sessionCookieName: campaign.sessionCookieName,
       //sessionCookieNames: campaign.sessionCookieNames.length,
@@ -498,7 +467,7 @@ Delete the 'httpbin' campaign:
       newSessionExpire: campaign.newSessionExpire,
       messageExpire: campaign.messageExpire,
       isLocked: campaign.isLocked,
-      flags: campaign.flags.join(', '),
+      flags: campaign.flags.length > 0 ? campaign.flags.join(', ') : null,
       proxyIndex: campaign.proxyIndex,
       targetIndex: campaign.targetIndex,
       redirectorIndex: campaign.redirectorIndex,

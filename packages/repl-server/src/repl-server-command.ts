@@ -24,11 +24,6 @@ export interface ReplServerCommandSpec {
 }
 
 /**
- * Represents the repl-server command manual function.
- */
-export type ReplServerCommandManual = (spec: ReplServerCommandSpec) => string
-
-/**
  * Represents the repl-server command args.
  */
 export interface ReplServerCommandArgs {
@@ -67,13 +62,11 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
    *
    * @param validator - The validator instance.
    * @param spec - The spec object.
-   * @param manual - The manual function.
    * @param action - The action function.
    */
   constructor(
     protected readonly validator: Validator,
     public readonly spec: ReplServerCommandSpec,
-    protected readonly manual: ReplServerCommandManual | null,
     protected readonly action: ReplServerCommandAction<T>
   ) {
     if (spec.options) {
@@ -192,14 +185,6 @@ export class ReplServerCommand<T extends ReplServerCommandArgs> {
 
         console.log(`  ${line}\n    ${option.description}\n`)
       })
-    }
-
-    try {
-      if (this.manual) {
-        console.log(this.manual(this.spec))
-      }
-    } catch (error) {
-      console.error(error)
     }
   }
 

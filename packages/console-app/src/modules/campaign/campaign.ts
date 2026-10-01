@@ -190,7 +190,7 @@ export interface CampaignPresetRedirector {
  */
 export interface RawCampaignPresetRedirector {
   redirectorId: string
-  page?: string | null | undefined
+  page: string
   fields?: string[] | null | undefined
 }
 

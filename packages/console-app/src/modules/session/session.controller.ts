@@ -104,7 +104,6 @@ export class SessionController extends BaseController {
         options: [],
         params: ['campaign-id', 'session-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId, sessionId] = args._
 
@@ -125,7 +124,6 @@ export class SessionController extends BaseController {
         options: [],
         params: ['campaign-id', 'session-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId, sessionId] = args._
 
@@ -154,7 +152,6 @@ export class SessionController extends BaseController {
         ],
         params: ['campaign-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 

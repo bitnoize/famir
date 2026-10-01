@@ -100,7 +100,6 @@ export class RedirectorController extends BaseController {
         options: [],
         params: ['campaign-id', 'redirector-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId, redirectorId] = args._
 
@@ -121,7 +120,6 @@ export class RedirectorController extends BaseController {
         options: [],
         params: ['campaign-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 

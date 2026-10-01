@@ -126,12 +126,6 @@ export class LureController extends BaseController {
         ],
         params: ['campaign-id', 'lure-id', 'redirector-id'],
       },
-      (spec) => `The lure will be created in a disabled state (isEnabled = false).
-Use 'lure-enable' command to activate it for traffic routing.
-
-Create a 'test' lure in the 'hackernews' campaign with 'simple' redirector:
-> ${spec.name} hackernews test simple --path /some/secret/test.html
-`,
       async (console, spec, args) => {
         const [campaignId, lureId, redirectorId] = args._
 
@@ -154,7 +148,6 @@ Create a 'test' lure in the 'hackernews' campaign with 'simple' redirector:
         options: [],
         params: ['campaign-id', 'lure-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId, lureId] = args._
 
@@ -175,12 +168,6 @@ Create a 'test' lure in the 'hackernews' campaign with 'simple' redirector:
         options: [],
         params: ['campaign-id', 'lure-id'],
       },
-      (spec) => `When enabled, the URL path becomes active and can be used to serve
-the associated redirector content.
-
-Enable the 'test' lure in the 'hackernews' campaign:
-> ${spec.name} hackernews test
-`,
       async (console, spec, args) => {
         const [campaignId, lureId] = args._
 
@@ -201,11 +188,6 @@ Enable the 'test' lure in the 'hackernews' campaign:
         options: [],
         params: ['campaign-id', 'lure-id'],
       },
-      (spec) => `When disabled, requests to the URL path will not be routed.
-
-Disables the 'test' lure in the 'hackernews' campaign:
-> ${spec.name} hackernews test
-`,
       async (console, spec, args) => {
         const [campaignId, lureId] = args._
 
@@ -226,11 +208,6 @@ Disables the 'test' lure in the 'hackernews' campaign:
         options: [],
         params: ['campaign-id', 'lure-id', 'redirector-id'],
       },
-      (spec) => `A lure must be disabled before it can be deleted.
-
-Deletes the 'test' lure in the 'hackernews' campaign:
-> ${spec.name} hackernews test
-`,
       async (console, spec, args) => {
         const [campaignId, lureId, redirectorId] = args._
 
@@ -252,7 +229,6 @@ Deletes the 'test' lure in the 'hackernews' campaign:
         options: [],
         params: ['campaign-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -279,11 +255,6 @@ Deletes the 'test' lure in the 'hackernews' campaign:
         ],
         params: ['campaign-id', 'lure-id', 'target-id'],
       },
-      (spec) => `Examples:
-
-Makes a URL for the 'test' lure in the 'hackernews' campaign via 'root' target:
-> ${spec.name} hackernews test root -p '{"og_title":"Boom!", "og_description":"BOOM!"}'
-`,
       async (console, spec, args) => {
         const [campaignId, lureId, targetId] = args._
 

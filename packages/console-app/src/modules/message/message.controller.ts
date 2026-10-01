@@ -134,7 +134,6 @@ export class MessageController extends BaseController {
         ],
         params: ['campaign-id', 'message-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId, messageId] = args._
 
@@ -161,7 +160,6 @@ export class MessageController extends BaseController {
         options: [],
         params: ['campaign-id', 'message-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId, messageId] = args._
 
@@ -190,7 +188,6 @@ export class MessageController extends BaseController {
         ],
         params: ['campaign-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -211,7 +208,6 @@ export class MessageController extends BaseController {
         options: [],
         params: ['campaign-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 

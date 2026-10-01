@@ -105,7 +105,6 @@ export class TargetController extends BaseController {
         options: [],
         params: ['campaign-id', 'target-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId, targetId] = args._
 
@@ -125,7 +124,6 @@ export class TargetController extends BaseController {
         schemaName: 'console-read-target-hosts-args',
         options: [],
       },
-      null,
       async (console) => {
         const targetHosts = await this.targetService.readHosts()
 
@@ -141,7 +139,6 @@ export class TargetController extends BaseController {
         options: [],
         params: ['campaign-id'],
       },
-      null,
       async (console, spec, args) => {
         const [campaignId] = args._
 
@@ -167,11 +164,11 @@ export class TargetController extends BaseController {
       streamTimeout: target.streamTimeout,
       headersSizeLimit: target.headersSizeLimit,
       bodySizeLimit: target.bodySizeLimit,
-      mainPage: target.mainPage.length,
-      notFoundPage: target.notFoundPage.length,
-      faviconIco: target.faviconIco.length,
-      robotsTxt: target.robotsTxt.length,
-      sitemapXml: target.sitemapXml.length,
+      mainPage: target.mainPage,
+      notFoundPage: target.notFoundPage,
+      faviconIco: target.faviconIco,
+      robotsTxt: target.robotsTxt,
+      sitemapXml: target.sitemapXml,
       allowWebSockets: target.allowWebSockets,
       isEnabled: target.isEnabled,
       messageCount: target.messageCount,

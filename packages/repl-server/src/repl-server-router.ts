@@ -4,7 +4,6 @@ import {
   ReplServerCommand,
   ReplServerCommandAction,
   ReplServerCommandArgs,
-  ReplServerCommandManual,
   ReplServerCommandSpec,
 } from './repl-server-command.js'
 
@@ -56,7 +55,6 @@ export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
  *     options: [],
  *     params: [],
  *   },
- *   (spec) => `Some manual`,
  *   async (console, spec, args) => {
  *     console.log(args)
  *   }
@@ -122,7 +120,6 @@ export class ReplServerRouter {
    * Commands can only be added before the router is activated.
    *
    * @param spec - The command spec object.
-   * @param manual - The command manual function.
    * @param action - The command action function.
    * @returns This router for method chaining.
    * @throws Error If the router is already active.
@@ -130,7 +127,6 @@ export class ReplServerRouter {
    */
   addCommand<T extends ReplServerCommandArgs>(
     spec: ReplServerCommandSpec,
-    manual: ReplServerCommandManual | null,
     action: ReplServerCommandAction<T>
   ): this {
     if (this.#isActive) {
@@ -141,7 +137,7 @@ export class ReplServerRouter {
       throw new Error(`Command already exists: ${spec.name}`)
     }
 
-    const command = new ReplServerCommand<T>(this.validator, spec, manual, action)
+    const command = new ReplServerCommand<T>(this.validator, spec, action)
 
     this.commands.set(spec.name, command as ReplServerCommand<ReplServerCommandArgs>)
 

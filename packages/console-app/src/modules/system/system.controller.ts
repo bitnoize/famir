@@ -127,7 +127,6 @@ export class SystemController extends BaseController {
         description: `Show help screen with list of all commands.`,
         schemaName: 'console-system-help-args',
       },
-      null,
       // eslint-disable-next-line @typescript-eslint/require-await
       async (console) => {
         console.log(`Fake Mirrors Console`)
@@ -151,14 +150,6 @@ export class SystemController extends BaseController {
           },
         ],
       },
-      (spec) => `Assets are text files that are hardcoded directly into the application.
-
-Show assets list:
-> ${spec.name}
-
-Show specific asset content:
-> ${spec.name} -a hello.txt
-`,
       // eslint-disable-next-line @typescript-eslint/require-await
       async (console, spec, args) => {
         if (args.assetName) {
@@ -182,7 +173,6 @@ Show specific asset content:
         schemaName: 'console-get-database-info-args',
         options: [],
       },
-      null,
       async (console) => {
         const info = await this.systemService.getDatabaseInfo()
 
@@ -204,7 +194,6 @@ Show specific asset content:
           },
         ],
       },
-      null,
       async (console, spec, args) => {
         if (args.force) {
           await this.systemService.loadDatabaseFunctions()
@@ -230,7 +219,6 @@ Show specific asset content:
           },
         ],
       },
-      null,
       async (console, spec, args) => {
         if (args.force) {
           await this.systemService.cleanupDatabase()
@@ -249,7 +237,6 @@ Show specific asset content:
         schemaName: 'console-get-producer-info-args',
         options: [],
       },
-      null,
       async (console) => {
         const info = await this.systemService.getProducerInfo()
 
@@ -278,7 +265,6 @@ Show specific asset content:
           },
         ],
       },
-      null,
       async (console, spec, args) => {
         if (args.force) {
           const config = this.parseEdgeServerConfig(args.assetName)
@@ -298,7 +284,6 @@ Show specific asset content:
         schemaName: 'console-read-edge-server-config-args',
         options: [],
       },
-      null,
       async (console) => {
         const config = await this.systemService.readEdgeServerConfig()
 
@@ -320,7 +305,6 @@ Show specific asset content:
           },
         ],
       },
-      null,
       async (console, spec, args) => {
         if (args.force) {
           await this.systemService.deleteEdgeServerConfig()
@@ -339,7 +323,6 @@ Show specific asset content:
         schemaName: 'console-read-edge-server-upstreams-args',
         options: [],
       },
-      null,
       async (console) => {
         const config = await this.systemService.readEdgeServerUpstreams()
 
