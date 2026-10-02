@@ -42,7 +42,6 @@
     "@famir/config": "*",
     "@famir/database": "*",
     "@famir/domain": "*",
-    "@famir/edge-server": "*",
     "@famir/logger": "*",
     "@famir/producer": "*",
     "@famir/repl-server": "*",

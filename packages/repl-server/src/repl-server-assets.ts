@@ -67,4 +67,39 @@ export class ReplServerAssets extends Map<string, string> {
   static resolve(container: DIContainer) {
     return container.resolve<ReplServerAssets>(REPL_SERVER_ASSETS)
   }
+
+  constructor(assets: [string, string][]) {
+    super(assets)
+
+    Object.entries(this.defaults).forEach(([name, value]) => {
+      if (!this.has(name)) {
+        this.set(name, value)
+      }
+    })
+  }
+
+  /**
+   * Map default values.
+   */
+  protected defaults: Record<string, string> = {
+    'banner-greet.txt': `Welcome to Fake-Mirrors!\n`,
+    'banner-leave.txt': `So long!\n`,
+  }
+
+  getOrThrow(assetName: string): string {
+    const asset = this.get(assetName)
+    if (asset == null) {
+      throw new Error(`Asset '${assetName}' not exists`)
+    }
+
+    return asset
+  }
+
+  get bannerGreet(): string {
+    return this.getOrThrow('banner-greet.txt')
+  }
+
+  get bannerLeave(): string {
+    return this.getOrThrow('banner-leave.txt')
+  }
 }

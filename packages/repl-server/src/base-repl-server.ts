@@ -3,7 +3,8 @@ import { Config, Logger, ReplServer, ReplServerError, Validator } from '@famir/d
 import { Console } from 'node:console'
 import type { Readable, Writable } from 'node:stream'
 import { Interface as ReadlineInterface } from 'readline'
-import { ReplServerRouter } from './repl-server-router.js'
+import { type ReplServerAssets } from './repl-server-assets.js'
+import { type ReplServerRouter } from './repl-server-router.js'
 
 /**
  * Abstract base class for all repl-servers.
@@ -18,12 +19,14 @@ export abstract class BaseReplServer implements ReplServer {
    * @param validator - The validator instance.
    * @param config - The config instance.
    * @param logger - The logger instance.
+   * @param assets - The assets instance.
    * @param router - The router instance.
    */
   constructor(
     protected readonly validator: Validator,
     protected readonly config: Config,
     protected readonly logger: Logger,
+    protected readonly assets: ReplServerAssets,
     protected readonly router: ReplServerRouter
   ) {}
 
@@ -129,5 +132,11 @@ export abstract class BaseReplServer implements ReplServer {
           rl.prompt()
         })
     })
+
+    rl.on('close', () => {
+      console.log(this.assets.bannerLeave)
+    })
+
+    console.log(this.assets.bannerGreet)
   }
 }

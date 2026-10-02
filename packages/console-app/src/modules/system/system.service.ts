@@ -4,8 +4,6 @@ import {
   AnalyzeQueue,
   DATABASE_MANAGER,
   DatabaseManager,
-  EDGE_SERVER,
-  EdgeServer,
   WEBHOOK_QUEUE,
   WebhookQueue,
 } from '@famir/domain'
@@ -36,7 +34,6 @@ export class SystemService {
           c.resolve<DatabaseManager>(DATABASE_MANAGER),
           c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
           c.resolve<WebhookQueue>(WEBHOOK_QUEUE),
-          c.resolve<EdgeServer>(EDGE_SERVER)
         )
     )
   }
@@ -47,13 +44,11 @@ export class SystemService {
    * @param databaseManager - The database manager instance.
    * @param analyzeQueue - The analyze queue instance.
    * @param webhookQueue - The webhook queue instance.
-   * @param edgeServer - The edge server instance.
    */
   constructor(
     protected readonly databaseManager: DatabaseManager,
     protected readonly analyzeQueue: AnalyzeQueue,
     protected readonly webhookQueue: WebhookQueue,
-    protected readonly edgeServer: EdgeServer
   ) {}
 
   /**
@@ -91,33 +86,5 @@ export class SystemService {
         jobCount: await this.webhookQueue.getJobCount(),
       },
     }
-  }
-
-  /**
-   * Upsert edge server config.
-   */
-  async upsertEdgeServerConfig(caddyfile: string): Promise<void> {
-    await this.edgeServer.upsertConfig(caddyfile)
-  }
-
-  /**
-   * Read edge server config.
-   */
-  async readEdgeServerConfig(): Promise<unknown> {
-    return await this.edgeServer.readConfig()
-  }
-
-  /**
-   * Delete edge server config.
-   */
-  async deleteEdgeServerConfig(): Promise<void> {
-    await this.edgeServer.deleteConfig()
-  }
-
-  /**
-   * Read edge server upstreams.
-   */
-  async readEdgeServerUpstreams(): Promise<unknown> {
-    return await this.edgeServer.readUpstreams()
   }
 }

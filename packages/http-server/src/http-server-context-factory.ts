@@ -3,7 +3,6 @@ import http from 'node:http'
 import type WebSocket from 'ws'
 import {
   HttpServerContext,
-  HttpServerContextState,
   HttpServerNormalContext,
   HttpServerWebSocketContext,
 } from './http-server-context.js'
@@ -41,14 +40,11 @@ export const HTTP_SERVER_CONTEXT_FACTORY = Symbol('HttpServerContextFactory')
  * // Resolve from DI container
  * const contextFactory = container.resolve<HttpServerContextFactory>(HTTP_SERVER_CONTEXT_FACTORY)
  *
- * const verbose = false
- * const errorPage = `...`
- *
  * // create Normal context
- * const ctx = contextFactory.createNormal(req, res, { verbose, errorPage })
+ * const ctx = contextFactory.createNormal(req, res)
  *
  * // create WebSocket context
- * const ctx = contextFactory.createWebSocket(ws, req, { verbose, errorPage })
+ * const ctx = contextFactory.createWebSocket(ws, req)
  *
  * ```
  */
@@ -70,15 +66,10 @@ export class HttpServerContextFactory {
    *
    * @param req - The server request object.
    * @param res - The server response object.
-   * @param state - The context shared state.
    * @returns The created HTTP context.
    */
-  createNormal(
-    req: http.IncomingMessage,
-    res: http.ServerResponse,
-    state: HttpServerContextState
-  ): HttpServerContext {
-    return new HttpServerNormalContext(req, res, state)
+  createNormal(req: http.IncomingMessage, res: http.ServerResponse): HttpServerContext {
+    return new HttpServerNormalContext(req, res)
   }
 
   /**
@@ -86,14 +77,9 @@ export class HttpServerContextFactory {
    *
    * @param ws - The WebSocket connection.
    * @param req - The server request object.
-   * @param state - The context shared state.
    * @returns The created HTTP context.
    */
-  createWebSocket(
-    ws: WebSocket,
-    req: http.IncomingMessage,
-    state: HttpServerContextState
-  ): HttpServerContext {
-    return new HttpServerWebSocketContext(ws, req, state)
+  createWebSocket(ws: WebSocket, req: http.IncomingMessage): HttpServerContext {
+    return new HttpServerWebSocketContext(ws, req)
   }
 }

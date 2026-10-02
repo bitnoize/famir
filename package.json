@@ -22,7 +22,6 @@
     "packages/storage",
     "packages/producer",
     "packages/consumer",
-    "packages/edge-server",
     "packages/http-client",
     "packages/http-server",
     "packages/http-tools",

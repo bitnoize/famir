@@ -48,38 +48,3 @@ export interface CleanupDatabaseArgs {
 export interface GetProducerInfoArgs {
   _: string[]
 }
-
-/**
- * @category System
- * @internal
- */
-export interface UpsertEdgeServerConfigArgs {
-  _: string[]
-  assetName: string
-  force: boolean
-}
-
-/**
- * @category System
- * @internal
- */
-export interface ReadEdgeServerConfigArgs {
-  _: string[]
-}
-
-/**
- * @category System
- * @internal
- */
-export interface DeleteEdgeServerConfigArgs {
-  _: string[]
-  force: boolean
-}
-
-/**
- * @category System
- * @internal
- */
-export interface ReadEdgeServerUpstreamsArgs {
-  _: string[]
-}

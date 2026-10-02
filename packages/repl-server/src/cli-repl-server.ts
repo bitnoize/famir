@@ -13,20 +13,15 @@ import { Console } from 'node:console'
 import type { Readable, Writable } from 'node:stream'
 import * as readline from 'readline'
 import { BaseReplServer } from './base-repl-server.js'
+import { REPL_SERVER_ASSETS, ReplServerAssets } from './repl-server-assets.js'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
-import {
-  CliReplServerConfig,
-  REPL_SERVER_DEFAULT_BANNER_GREET,
-  REPL_SERVER_DEFAULT_BANNER_LEAVE,
-  REPL_SERVER_DEFAULT_PROMPT,
-  ReplServerSettings,
-} from './repl-server.js'
+import { CliReplServerConfig, REPL_SERVER_PROMPT } from './repl-server.js'
 import { cliReplServerConfigSchema } from './repl-server.schemas.js'
 
 /**
  * Options for a Cli repl-server.
  */
-interface CliReplServerOptions extends ReplServerSettings {
+interface CliReplServerOptions {
   useColors: boolean
 }
 
@@ -41,6 +36,7 @@ interface CliReplServerOptions extends ReplServerSettings {
  * - {@link Validator} via {@link VALIDATOR} token
  * - {@link Config} via {@link CONFIG} token
  * - {@link Logger} via {@link LOGGER} token
+ * - {@link ReplServerAssets} via {@link REPL_SERVER_ASSETS} token
  * - {@link ReplServerRouter} via {@link REPL_SERVER_ROUTER} token
  *
  * @example
@@ -79,7 +75,7 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
    *
    * @param container - The DI container to register in.
    */
-  static register(container: DIContainer, settings?: Partial<ReplServerSettings>) {
+  static register(container: DIContainer) {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
       (c) =>
@@ -87,8 +83,8 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),
-          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER),
-          settings
+          c.resolve<ReplServerAssets>(REPL_SERVER_ASSETS),
+          c.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
         )
     )
   }
@@ -105,22 +101,22 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
    * @param validator - The validator instance.
    * @param config - The config instance.
    * @param logger - The logger instance.
+   * @param assets - The assets instance.
    * @param router - The router instance.
-   * @param settings - The optional settings object.
    */
   constructor(
     validator: Validator,
     config: Config,
     logger: Logger,
-    router: ReplServerRouter,
-    settings: Partial<ReplServerSettings> = {}
+    assets: ReplServerAssets,
+    router: ReplServerRouter
   ) {
-    super(validator, config, logger, router)
+    super(validator, config, logger, assets, router)
 
     this.validator.addSchema('repl-server-config', cliReplServerConfigSchema)
 
     const conf = this.config.get<CliReplServerConfig>('repl-server-config')
-    this.options = this.buildOptions(conf, settings)
+    this.options = this.buildOptions(conf)
   }
 
   #isShutdown: boolean = false
@@ -139,15 +135,9 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
 
         const rl = this.initReadline(process.stdin, process.stdout)
 
-        rl.on('close', () => {
-          console.log(this.options.bannerLeave)
-        })
-
         this.setupReadline(console, rl)
 
         this.rl = rl
-
-        console.log(this.options.bannerGreet)
 
         this.rl.prompt()
 
@@ -209,7 +199,7 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
       input,
       output,
       terminal: true,
-      prompt: this.options.prompt,
+      prompt: REPL_SERVER_PROMPT,
       historySize: 1000,
       removeHistoryDuplicates: true,
       completer,
@@ -223,17 +213,11 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
   }
 
   /**
-   * Converts validated configuration and settings to a repl-server options.
+   * Converts validated configuration to a repl-server options.
    */
-  private buildOptions(
-    conf: CliReplServerConfig,
-    settings: Partial<ReplServerSettings>
-  ): CliReplServerOptions {
+  private buildOptions(conf: CliReplServerConfig): CliReplServerOptions {
     return {
       useColors: conf.REPL_SERVER_USE_COLORS,
-      prompt: settings.prompt ?? REPL_SERVER_DEFAULT_PROMPT,
-      bannerGreet: settings.bannerGreet ?? REPL_SERVER_DEFAULT_BANNER_GREET,
-      bannerLeave: settings.bannerLeave ?? REPL_SERVER_DEFAULT_BANNER_LEAVE,
     }
   }
 }

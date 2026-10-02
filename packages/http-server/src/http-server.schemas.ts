@@ -26,27 +26,16 @@ const nativeHttpServerPortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a Native http-server verbose flag.
- *
- * @internal
- */
-const nativeHttpServerVerboseSchema: JSONSchemaType<boolean> = {
-  type: 'boolean',
-  default: false,
-} as const
-
-/**
  * JSON Schema for validating a complete Native http-server configuration.
  *
  * @internal
  */
 export const nativeHttpServerConfigSchema: JSONSchemaType<NativeHttpServerConfig> = {
   type: 'object',
-  required: ['HTTP_SERVER_ADDRESS', 'HTTP_SERVER_PORT', 'HTTP_SERVER_VERBOSE'],
+  required: ['HTTP_SERVER_ADDRESS', 'HTTP_SERVER_PORT'],
   properties: {
     HTTP_SERVER_ADDRESS: nativeHttpServerAddressSchema,
     HTTP_SERVER_PORT: nativeHttpServerPortSchema,
-    HTTP_SERVER_VERBOSE: nativeHttpServerVerboseSchema,
   },
   additionalProperties: false,
 } as const

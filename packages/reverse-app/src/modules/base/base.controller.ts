@@ -225,7 +225,7 @@ export abstract class BaseController {
     ctx.status.set(error.status)
 
     if (isHtml) {
-      const errorPage = this.templater.render(ctx.state.errorPage, {
+      const errorPage = this.templater.render(this.assets.errorPage, {
         status: error.status,
         message: error.message,
       })

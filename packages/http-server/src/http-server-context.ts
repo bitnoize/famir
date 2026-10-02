@@ -19,10 +19,7 @@ import WebSocket, { createWebSocketStream } from 'ws'
  * This state is passed to all middleware and can be used to share data
  * across the request/connection lifecycle.
  */
-export interface HttpServerContextState {
-  [key: string]: unknown
-  errorPage: string
-}
+export type HttpServerContextState = Record<string, unknown>
 
 /**
  * Variants of http-server context type.
@@ -136,6 +133,8 @@ export interface HttpServerContext {
  * @internal
  */
 export abstract class HttpServerBaseContext implements HttpServerContext {
+  readonly state: HttpServerContextState = {}
+
   readonly trace: string[] = []
 
   readonly method: HttpMethodWrap
@@ -157,12 +156,10 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
    *
    * @param type - The variant of context type.
    * @param req - The server request object.
-   * @param state - The context shared state.
    */
   constructor(
     readonly type: HttpServerContextType,
-    protected readonly req: http.IncomingMessage,
-    readonly state: HttpServerContextState
+    protected readonly req: http.IncomingMessage
   ) {
     try {
       this.method = HttpMethodWrap.fromReq(req)
@@ -368,14 +365,12 @@ export class HttpServerNormalContext extends HttpServerBaseContext {
    *
    * @param req - The server request object.
    * @param res - The server response object.
-   * @param state - The context shared state.
    */
   constructor(
     req: http.IncomingMessage,
-    protected readonly res: http.ServerResponse,
-    state: HttpServerContextState
+    protected readonly res: http.ServerResponse
   ) {
-    super('normal', req, state)
+    super('normal', req)
 
     this.method.freeze()
     this.url.freeze()
@@ -450,14 +445,12 @@ export class HttpServerWebSocketContext extends HttpServerBaseContext {
    *
    * @param ws - The WebSocket connection.
    * @param req - The server request object.
-   * @param state - The context shared state.
    */
   constructor(
     protected readonly ws: WebSocket,
-    req: http.IncomingMessage,
-    state: HttpServerContextState
+    req: http.IncomingMessage
   ) {
-    super('websocket', req, state)
+    super('websocket', req)
 
     this.method.freeze()
     this.url.freeze()

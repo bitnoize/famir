@@ -14,23 +14,20 @@ import {
 } from '@famir/domain'
 import http from 'node:http'
 import WebSocket, { WebSocketServer } from 'ws'
+import { HTTP_SERVER_ASSETS, HttpServerAssets } from './http-server-assets.js'
 import {
   HTTP_SERVER_CONTEXT_FACTORY,
   HttpServerContextFactory,
 } from './http-server-context-factory.js'
 import { HttpServerContext } from './http-server-context.js'
 import { HTTP_SERVER_ROUTER, HttpServerRouter } from './http-server-router.js'
-import {
-  HTTP_SERVER_DEFAULT_ERROR_PAGE,
-  HttpServerSettings,
-  NativeHttpServerConfig,
-} from './http-server.js'
+import { NativeHttpServerConfig } from './http-server.js'
 import { nativeHttpServerConfigSchema } from './http-server.schemas.js'
 
 /**
  * Options for a Native http-server.
  */
-interface NativeHttpServerOptions extends HttpServerSettings {
+interface NativeHttpServerOptions {
   address: string
   port: number
 }
@@ -46,6 +43,7 @@ interface NativeHttpServerOptions extends HttpServerSettings {
  * - {@link Config} via {@link CONFIG} token
  * - {@link Logger} via {@link LOGGER} token
  * - {@link Templater} via {@link TEMPLATER} token
+ * - {@link HttpServerAssets} via {@link HTTP_SERVER_ASSETS} token
  * - {@link HttpServerRouter} via {@link HTTP_SERVER_ROUTER} token
  * - {@link HttpServerContextFactory} via {@link HTTP_SERVER_CONTEXT_FACTORY} token
  *
@@ -85,7 +83,7 @@ export class NativeHttpServer implements HttpServer {
    *
    * @param container - The DI container to register in.
    */
-  static register(container: DIContainer, settings?: Partial<HttpServerSettings>) {
+  static register(container: DIContainer) {
     container.registerSingleton<HttpServer>(
       HTTP_SERVER,
       (c) =>
@@ -94,9 +92,9 @@ export class NativeHttpServer implements HttpServer {
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
+          c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
-          c.resolve<HttpServerContextFactory>(HTTP_SERVER_CONTEXT_FACTORY),
-          settings
+          c.resolve<HttpServerContextFactory>(HTTP_SERVER_CONTEXT_FACTORY)
         )
     )
   }
@@ -120,23 +118,23 @@ export class NativeHttpServer implements HttpServer {
    * @param config - The config instance.
    * @param logger - The logger instance.
    * @param templater - The templater instance.
+   * @param assets - The assets instance.
    * @param router - The router instance.
    * @param contextFactory - The context factory instance.
-   * @param settings - The settings object.
    */
   constructor(
     protected readonly validator: Validator,
     protected readonly config: Config,
     protected readonly logger: Logger,
     protected readonly templater: Templater,
+    protected readonly assets: HttpServerAssets,
     protected readonly router: HttpServerRouter,
-    protected readonly contextFactory: HttpServerContextFactory,
-    settings: Partial<HttpServerSettings> = {}
+    protected readonly contextFactory: HttpServerContextFactory
   ) {
     this.validator.addSchema('http-server-config', nativeHttpServerConfigSchema)
 
     const conf = this.config.get<NativeHttpServerConfig>('http-server-config')
-    this.options = this.buildOptions(conf, settings)
+    this.options = this.buildOptions(conf)
 
     this.server = http.createServer()
 
@@ -278,7 +276,7 @@ export class NativeHttpServer implements HttpServer {
       const [status, message] =
         error instanceof HttpServerError ? [error.status, error.message] : [500, 'Internal error']
 
-      const body = this.templater.render(this.options.errorPage, { status, message })
+      const body = this.templater.render(this.assets.errorPage, { status, message })
 
       if (!res.writableEnded) {
         if (!res.headersSent) {
@@ -327,9 +325,7 @@ export class NativeHttpServer implements HttpServer {
     res: http.ServerResponse
   ): Promise<void> {
     try {
-      const ctx = this.contextFactory.createNormal(req, res, {
-        errorPage: this.options.errorPage,
-      })
+      const ctx = this.contextFactory.createNormal(req, res)
 
       await this.executeMiddlewareChain(ctx)
 
@@ -356,9 +352,7 @@ export class NativeHttpServer implements HttpServer {
    */
   protected async processWebSocketContext(ws: WebSocket, req: http.IncomingMessage): Promise<void> {
     try {
-      const ctx = this.contextFactory.createWebSocket(ws, req, {
-        errorPage: this.options.errorPage,
-      })
+      const ctx = this.contextFactory.createWebSocket(ws, req)
 
       await this.executeMiddlewareChain(ctx)
 
@@ -556,16 +550,12 @@ export class NativeHttpServer implements HttpServer {
   }
 
   /**
-   * Converts validated configuration and settings to an http-server options.
+   * Converts validated configuration to an http-server options.
    */
-  private buildOptions(
-    conf: NativeHttpServerConfig,
-    settings: Partial<HttpServerSettings>
-  ): NativeHttpServerOptions {
+  private buildOptions(conf: NativeHttpServerConfig): NativeHttpServerOptions {
     return {
       address: conf.HTTP_SERVER_ADDRESS,
       port: conf.HTTP_SERVER_PORT,
-      errorPage: settings.errorPage ?? HTTP_SERVER_DEFAULT_ERROR_PAGE,
     }
   }
 

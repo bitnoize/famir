@@ -17,27 +17,19 @@ import {
 import { BaseController } from '../base/index.js'
 import {
   CleanupDatabaseArgs,
-  DeleteEdgeServerConfigArgs,
   GetDatabaseInfoArgs,
   GetProducerInfoArgs,
   LoadDatabaseFunctionsArgs,
-  ReadEdgeServerConfigArgs,
-  ReadEdgeServerUpstreamsArgs,
   SystemAssetsArgs,
   SystemHelpArgs,
-  UpsertEdgeServerConfigArgs,
 } from './system.js'
 import {
   cleanupDatabaseArgsSchema,
-  deleteEdgeServerConfigArgsSchema,
   getDatabaseInfoArgsSchema,
   getProducerInfoArgsSchema,
   loadDatabaseFunctionsArgsSchema,
-  readEdgeServerConfigArgsSchema,
-  readEdgeServerUpstreamsArgsSchema,
   systemAssetsArgsSchema,
   systemHelpArgsSchema,
-  upsertEdgeServerConfigArgsSchema,
 } from './system.schemas.js'
 import { SYSTEM_SERVICE, type SystemService } from './system.service.js'
 
@@ -111,10 +103,6 @@ export class SystemController extends BaseController {
       .addSchema('console-load-database-functions-args', loadDatabaseFunctionsArgsSchema)
       .addSchema('console-cleanup-database-args', cleanupDatabaseArgsSchema)
       .addSchema('console-get-producer-info-args', getProducerInfoArgsSchema)
-      .addSchema('console-upsert-edge-server-config-args', upsertEdgeServerConfigArgsSchema)
-      .addSchema('console-read-edge-server-config-args', readEdgeServerConfigArgsSchema)
-      .addSchema('console-delete-edge-server-config-args', deleteEdgeServerConfigArgsSchema)
-      .addSchema('console-read-edge-server-upstreams-args', readEdgeServerUpstreamsArgsSchema)
   }
 
   /**
@@ -243,101 +231,5 @@ export class SystemController extends BaseController {
         console.log(info)
       }
     )
-
-    this.router.addCommand<UpsertEdgeServerConfigArgs>(
-      {
-        name: 'edge-server-upsert-config',
-        description: `Upsert edge-server configuration.`,
-        schemaName: 'console-upsert-edge-server-config-args',
-        options: [
-          {
-            name: 'asset-name',
-            description: `The name of the asset contains config.`,
-            type: 'string',
-            alias: 'a',
-            default: '',
-          },
-          {
-            name: 'force',
-            description: `The confirmation flag.`,
-            type: 'boolean',
-            default: false,
-          },
-        ],
-      },
-      async (console, spec, args) => {
-        if (args.force) {
-          const config = this.parseEdgeServerConfig(args.assetName)
-
-          await this.systemService.upsertEdgeServerConfig(config)
-          console.log(`Edge server config upserted!`)
-        } else {
-          this.confirmAlert(console)
-        }
-      }
-    )
-
-    this.router.addCommand<ReadEdgeServerConfigArgs>(
-      {
-        name: 'edge-server-read-config',
-        description: `Read edge-server configuration.`,
-        schemaName: 'console-read-edge-server-config-args',
-        options: [],
-      },
-      async (console) => {
-        const config = await this.systemService.readEdgeServerConfig()
-
-        console.log(config)
-      }
-    )
-
-    this.router.addCommand<DeleteEdgeServerConfigArgs>(
-      {
-        name: 'edge-server-delete-config',
-        description: `Delete edge-server configuration.`,
-        schemaName: 'console-delete-edge-server-config-args',
-        options: [
-          {
-            name: 'force',
-            description: `The confirmation flag.`,
-            type: 'boolean',
-            default: false,
-          },
-        ],
-      },
-      async (console, spec, args) => {
-        if (args.force) {
-          await this.systemService.deleteEdgeServerConfig()
-
-          console.log(`Edge server config deleted!`)
-        } else {
-          this.confirmAlert(console)
-        }
-      }
-    )
-
-    this.router.addCommand<ReadEdgeServerUpstreamsArgs>(
-      {
-        name: 'edge-server-read-upstreams',
-        description: `Read edge-server upstreams.`,
-        schemaName: 'console-read-edge-server-upstreams-args',
-        options: [],
-      },
-      async (console) => {
-        const config = await this.systemService.readEdgeServerUpstreams()
-
-        console.log(config)
-      }
-    )
-  }
-
-  private parseEdgeServerConfig(assetName: string): string {
-    const asset = this.assets.get(assetName)
-
-    if (!asset) {
-      throw ReplServerError.badRequest(`Config asset not found`)
-    }
-
-    return asset
   }
 }
