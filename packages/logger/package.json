@@ -38,11 +38,11 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
-    "@famir/domain": "*",
     "@famir/common": "*",
-    "pino": "^10.3.1"
+    "@famir/domain": "*",
+    "pino": "^10.4.0"
   },
   "peerDependencies": {
-    "thread-stream": "^4"
+    "thread-stream": "^4.2.0"
   }
 }

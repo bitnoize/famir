@@ -38,10 +38,10 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
-    "@famir/domain": "*",
     "@famir/common": "*",
+    "@famir/domain": "*",
     "@famir/http-tools": "*",
-    "ws": "^8.21.3"
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@types/ws": "^8.18.1"

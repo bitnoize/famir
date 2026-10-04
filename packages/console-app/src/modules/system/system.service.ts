@@ -33,7 +33,7 @@ export class SystemService {
         new SystemService(
           c.resolve<DatabaseManager>(DATABASE_MANAGER),
           c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
-          c.resolve<WebhookQueue>(WEBHOOK_QUEUE),
+          c.resolve<WebhookQueue>(WEBHOOK_QUEUE)
         )
     )
   }
@@ -48,7 +48,7 @@ export class SystemService {
   constructor(
     protected readonly databaseManager: DatabaseManager,
     protected readonly analyzeQueue: AnalyzeQueue,
-    protected readonly webhookQueue: WebhookQueue,
+    protected readonly webhookQueue: WebhookQueue
   ) {}
 
   /**

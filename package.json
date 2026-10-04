@@ -9,7 +9,8 @@
     "build": "npm --ws run build",
     "test": "npm --ws run test",
     "clean": "npm --ws run clean",
-    "docs": "typedoc --cleanOutputDir"
+    "docs": "typedoc --cleanOutputDir",
+    "prepare": "husky"
   },
   "workspaces": [
     "packages/domain",
@@ -37,6 +38,8 @@
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-tsdoc": "^0.5.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "rimraf": "^6.1.3",

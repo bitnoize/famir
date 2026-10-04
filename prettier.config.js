@@ -19,27 +19,14 @@ export default {
       files: ['*.md'],
       options: {
         parser: 'markdown',
-        printWidth: 150,
+        proseWrap: 'always',
       },
     },
     {
-      files: ['*.json', '*.jsonc', '*.json5'],
+      files: ['*.json'],
       options: {
         parser: 'json',
         trailingComma: 'none',
-      },
-    },
-    {
-      files: ['*.css', '*.scss', '*.sass'],
-      options: {
-        parser: 'css',
-        singleQuote: false,
-      },
-    },
-    {
-      files: ['*.yaml', '*.yml'],
-      options: {
-        parser: 'yaml',
       },
     },
   ],

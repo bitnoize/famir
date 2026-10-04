@@ -38,9 +38,9 @@
   },
   "homepage": "https://docs.fake-mirrors.net",
   "dependencies": {
-    "@famir/domain": "*",
     "@famir/common": "*",
-    "bullmq": "^5.81.4"
+    "@famir/domain": "*",
+    "bullmq": "^5.81.5"
   },
   "peerDependencies": {
     "ioredis": "^5.11.1"
