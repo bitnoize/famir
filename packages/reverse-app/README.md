@@ -5,5 +5,5 @@
 
 Multi-target reverse proxy with dynamic configuration.
 
-Serve hundreds of website mirrors from a single scalable backend, with per-target rules,
-private access modes, and full traffic interception.
+Serve hundreds of website mirrors from a single scalable backend, with per-target rules, private
+access modes, and full traffic interception.

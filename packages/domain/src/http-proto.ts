@@ -108,7 +108,7 @@ export type HttpText = string
  *
  * @category HttpProto
  */
-export type HttpJson = NonNullable<object | unknown[]>
+export type HttpJson = string | number | boolean | null | HttpJson[] | { [key: string]: HttpJson }
 
 /**
  * HTTP connection details.

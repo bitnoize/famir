@@ -235,7 +235,7 @@ export class HttpHeadersWrap {
     return this
   }
 
-  #cacheContentType: HttpContentType | null = null
+  #cacheContentType: HttpContentType | null | undefined = undefined
 
   /**
    * Gets the Content-Type header as a parsed object (cached).
@@ -244,16 +244,13 @@ export class HttpHeadersWrap {
    * @throws Error If Content-Type parsing fails.
    */
   getContentType(): HttpContentType | null {
-    if (this.#cacheContentType != null) {
+    if (this.#cacheContentType !== undefined) {
       return this.#cacheContentType
     }
 
     const value = this.getString('Content-Type')
-    if (value == null) {
-      return null
-    }
 
-    this.#cacheContentType = parseContentType(value)
+    this.#cacheContentType = value ? parseContentType(value) : null
 
     return this.#cacheContentType
   }
@@ -277,7 +274,7 @@ export class HttpHeadersWrap {
     return this
   }
 
-  #cacheCookies: HttpCookies | null = null
+  #cacheCookies: HttpCookies | null | undefined = undefined
 
   /**
    * Gets the Cookie header as a parsed object (cached).
@@ -285,16 +282,13 @@ export class HttpHeadersWrap {
    * @returns The parsed cookies object, or `null` if the header is not present.
    */
   getCookies(): HttpCookies | null {
-    if (this.#cacheCookies != null) {
+    if (this.#cacheCookies !== undefined) {
       return this.#cacheCookies
     }
 
     const values = this.getArray('Cookie')
-    if (values == null) {
-      return null
-    }
 
-    this.#cacheCookies = parseCookies(values)
+    this.#cacheCookies = values ? parseCookies(values) : null
 
     return this.#cacheCookies
   }
@@ -317,7 +311,7 @@ export class HttpHeadersWrap {
     return this
   }
 
-  #cacheSetCookies: HttpSetCookies | null = null
+  #cacheSetCookies: HttpSetCookies | null | undefined = undefined
 
   /**
    * Gets the Set-Cookie header as a parsed object (cached).
@@ -325,16 +319,13 @@ export class HttpHeadersWrap {
    * @returns The parsed Set-Cookie object, or `null` if the header is not present.
    */
   getSetCookies(): HttpSetCookies | null {
-    if (this.#cacheSetCookies != null) {
+    if (this.#cacheSetCookies !== undefined) {
       return this.#cacheSetCookies
     }
 
     const values = this.getArray('Set-Cookie')
-    if (values == null) {
-      return null
-    }
 
-    this.#cacheSetCookies = parseSetCookies(values)
+    this.#cacheSetCookies = values ? parseSetCookies(values) : null
 
     return this.#cacheSetCookies
   }

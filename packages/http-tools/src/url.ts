@@ -194,7 +194,7 @@ export class HttpUrlWrap {
   /** Custom options for formatting query strings. */
   readonly formatQueryStringOptions: FormatQueryStringOptions = {}
 
-  #cacheQueryString: HttpQueryString | null = null
+  #cacheQueryString: HttpQueryString | undefined = undefined
 
   /**
    * Gets the URL query string as a parsed object (cached).
@@ -203,20 +203,19 @@ export class HttpUrlWrap {
    * @throws Error If parsing the query string fails.
    */
   getQueryString(): HttpQueryString {
-    if (this.#cacheQueryString != null) {
+    if (this.#cacheQueryString !== undefined) {
       return this.#cacheQueryString
     }
 
     const value = this.get('search')
-    const queryString = parseQueryString(value, {
+
+    this.#cacheQueryString = parseQueryString(value, {
       ...this.parseQueryStringOptions,
       ignoreQueryPrefix: true,
       // ...
     })
 
-    this.#cacheQueryString = queryString
-
-    return queryString
+    return this.#cacheQueryString
   }
 
   /**
@@ -327,11 +326,11 @@ export class HttpUrlWrap {
 
   private invalidateCacheFor(name: keyof HttpUrl) {
     if (name === 'search') {
-      this.#cacheQueryString = null
+      this.#cacheQueryString = undefined
     }
   }
 
   private invalidateCacheAll() {
-    this.#cacheQueryString = null
+    this.#cacheQueryString = undefined
   }
 }

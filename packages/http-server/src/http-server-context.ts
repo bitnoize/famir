@@ -1,14 +1,15 @@
 import { HttpBody, HttpConnection, HttpServerError } from '@famir/domain'
 import {
+  bowserParse,
+  BowserResult,
   HttpBodyWrap,
   HttpHeadersWrap,
   HttpMethodWrap,
   HttpStatusWrap,
   HttpUrlWrap,
-  UAParser,
-  UAResult,
   isbot,
 } from '@famir/http-tools'
+import forwarded from 'forwarded'
 import http from 'node:http'
 import type { Duplex, Readable, Writable } from 'node:stream'
 import WebSocket, { createWebSocketStream } from 'ws'
@@ -99,10 +100,10 @@ export interface HttpServerContext {
   readonly isBot: boolean
 
   /** Parsed User-Agent data. */
-  readonly userAgent: UAResult
+  readonly userAgent: BowserResult | null
 
   /** Parsed client IP address. */
-  readonly clientIp: string | undefined
+  readonly clientIp: string | null
 
   /** Parsed connection details. */
   readonly connection: HttpConnection
@@ -194,10 +195,10 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
 
   abstract get isComplete(): boolean
 
-  #isBot: boolean | null = null
+  #isBot: boolean | undefined = undefined
 
   get isBot(): boolean {
-    if (this.#isBot != null) {
+    if (this.#isBot !== undefined) {
       return this.#isBot
     }
 
@@ -208,30 +209,42 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
     return this.#isBot
   }
 
-  #userAgent: UAResult | null = null
+  #userAgent: BowserResult | null | undefined = undefined
 
-  get userAgent(): UAResult {
-    if (this.#userAgent != null) {
+  get userAgent(): BowserResult | null {
+    if (this.#userAgent !== undefined) {
       return this.#userAgent
     }
 
-    const value = this.requestHeaders.getString('User-Agent') ?? ''
+    const value = this.requestHeaders.getString('User-Agent')
 
-    this.#userAgent = UAParser(value)
+    this.#userAgent = value ? bowserParse(value) : null
 
     return this.#userAgent
   }
 
-  get clientIp(): string | undefined {
-    return this.requestHeaders.getString('X-Real-Ip')
+  #clientIp: string | null | undefined = undefined
+
+  get clientIp(): string | null {
+    if (this.#clientIp !== undefined) {
+      return this.#clientIp
+    }
+
+    this.#clientIp = forwarded(this.req).at(-1) ?? null
+
+    return this.#clientIp
   }
 
   get connection(): HttpConnection {
+    const rawForwardedFor = this.requestHeaders.getArray('X-Forwarded-For')
+    const forwardedFor = rawForwardedFor ? rawForwardedFor.join(',') : null
+    const forwardedHost = this.requestHeaders.getString('X-Forwarded-Host') ?? null
+    const forwardedProto = this.requestHeaders.getString('X-Forwarded-Proto') ?? null
+
     return {
-      server_client_ip: this.clientIp ?? null,
-      server_forwarded_for: this.requestHeaders.getString('X-Forwarded-For') ?? null,
-      server_forwarded_host: this.requestHeaders.getString('X-Forwarded-Host') ?? null,
-      server_forwarded_proto: this.requestHeaders.getString('X-Forwarded-Proto') ?? null,
+      server_forwarded_for: forwardedFor,
+      server_forwarded_host: forwardedHost,
+      server_forwarded_proto: forwardedProto,
     }
   }
 

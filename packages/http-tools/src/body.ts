@@ -97,7 +97,7 @@ export class HttpBodyWrap {
     return this
   }
 
-  #cacheBase64: string | null = null
+  #cacheBase64: string | undefined = undefined
 
   /**
    * Gets the body as a Base64 string (cached).
@@ -106,15 +106,13 @@ export class HttpBodyWrap {
    * @throws Error If Base64 encoding fails.
    */
   getBase64(): string {
-    if (this.#cacheBase64 != null) {
+    if (this.#cacheBase64 !== undefined) {
       return this.#cacheBase64
     }
 
-    const base64 = this.get().toString('base64')
+    this.#cacheBase64 = this.get().toString('base64')
 
-    this.#cacheBase64 = base64
-
-    return base64
+    return this.#cacheBase64
   }
 
   /**
@@ -135,7 +133,7 @@ export class HttpBodyWrap {
     return this
   }
 
-  #cacheText: string | null = null
+  #cacheText: string | undefined = undefined
 
   /**
    * Gets the body as a text string (cached).
@@ -145,15 +143,13 @@ export class HttpBodyWrap {
    * @throws Error If decoding fails.
    */
   getText(charset: string = 'utf8'): HttpText {
-    if (this.#cacheText != null) {
+    if (this.#cacheText !== undefined) {
       return this.#cacheText
     }
 
-    const text = iconv.decode(this.get(), charset)
+    this.#cacheText = iconv.decode(this.get(), charset)
 
-    this.#cacheText = text
-
-    return text
+    return this.#cacheText
   }
 
   /**
@@ -175,7 +171,7 @@ export class HttpBodyWrap {
     return this
   }
 
-  #cacheJson: HttpJson | null = null
+  #cacheJson: HttpJson | undefined = undefined
 
   /**
    * Gets the body as a JSON object (cached).
@@ -185,20 +181,15 @@ export class HttpBodyWrap {
    * @throws Error If decoding or JSON parsing fails.
    */
   getJson(charset?: string): HttpJson {
-    if (this.#cacheJson != null) {
+    if (this.#cacheJson !== undefined) {
       return this.#cacheJson
     }
 
     const text = this.getText(charset)
-    const json: unknown = JSON.parse(text)
 
-    if (!(typeof json === 'object' && json != null)) {
-      throw new Error(`Invalid JSON in body`)
-    }
+    this.#cacheJson = JSON.parse(text) as HttpJson
 
-    this.#cacheJson = json
-
-    return json
+    return this.#cacheJson
   }
 
   /**
@@ -227,7 +218,7 @@ export class HttpBodyWrap {
   /** Custom options for formatting query strings. */
   readonly formatQueryStringOptions: FormatQueryStringOptions = {}
 
-  #cacheQueryString: HttpQueryString | null = null
+  #cacheQueryString: HttpQueryString | undefined = undefined
 
   /**
    * Gets the body as a query string object (cached).
@@ -237,19 +228,18 @@ export class HttpBodyWrap {
    * @throws Error If parsing fails.
    */
   getQueryString(charset?: string): HttpQueryString {
-    if (this.#cacheQueryString != null) {
+    if (this.#cacheQueryString !== undefined) {
       return this.#cacheQueryString
     }
 
     const text = this.getText(charset)
-    const queryString = parseQueryString(text, {
+
+    this.#cacheQueryString = parseQueryString(text, {
       ...this.parseQueryStringOptions,
       ignoreQueryPrefix: true,
     })
 
-    this.#cacheQueryString = queryString
-
-    return queryString
+    return this.#cacheQueryString
   }
 
   /**
@@ -298,9 +288,9 @@ export class HttpBodyWrap {
   }
 
   private invalidateCacheAll() {
-    this.#cacheBase64 = null
-    this.#cacheText = null
-    this.#cacheJson = null
-    this.#cacheQueryString = null
+    this.#cacheBase64 = undefined
+    this.#cacheText = undefined
+    this.#cacheJson = undefined
+    this.#cacheQueryString = undefined
   }
 }
