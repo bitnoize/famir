@@ -1,5 +1,11 @@
 # @famir/common
 
+## 0.0.8
+
+### Patch Changes
+
+- Update serialize-error dep.
+
 ## 0.0.7
 
 ### Patch Changes

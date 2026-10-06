@@ -1,5 +1,17 @@
 # @famir/http-server
 
+## 0.0.7
+
+### Patch Changes
+
+- Implement persistent campaign flags.
+- Store error-page in assets.
+- Improve context caching and parsing client IP.
+- Updated dependencies:
+  - @famir/http-tools@0.0.11
+  - @famir/domain@0.0.4
+  - @famir/common@0.0.8
+
 ## 0.0.6
 
 ### Patch Changes

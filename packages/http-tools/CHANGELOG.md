@@ -1,5 +1,18 @@
 # @famir/http-tools
 
+## 0.0.11
+
+### Patch Changes
+
+- Move from ua-parser-js (AGPL) to bowser (MIT).
+- Add chaining for some methods.
+- Improve wrappers caching.
+- Simpler message analyze trigger logic.
+- Added HTML sanitazer.
+- Updated dependencies:
+  - @famir/domain@0.0.4
+  - @famir/common@0.0.8
+
 ## 0.0.10
 
 ### Patch Changes

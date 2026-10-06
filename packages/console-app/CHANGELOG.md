@@ -1,5 +1,23 @@
 # @famir/console-app
 
+## 0.0.10
+
+### Patch Changes
+
+- Remove edge-server dependency.
+- Target and redirector content via assets.
+- Implement persistent campaign flags.
+- Store banners in assets.
+- Moved to single target label.
+- Remove command manual.
+- Updated dependencies:
+  - @famir/database@0.0.10
+  - @famir/domain@0.0.4
+  - @famir/producer@0.0.7
+  - @famir/repl-server@0.0.7
+  - @famir/logger@0.0.7
+  - @famir/common@0.0.8
+
 ## 0.0.9
 
 ### Patch Changes

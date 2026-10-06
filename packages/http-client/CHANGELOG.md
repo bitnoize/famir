@@ -1,5 +1,15 @@
 # @famir/http-client
 
+## 0.0.9
+
+### Patch Changes
+
+- Improve request headers handling with curl-impersonate.
+- Allow insecure connections.
+- Updated dependencies:
+  - @famir/domain@0.0.4
+  - @famir/common@0.0.8
+
 ## 0.0.8
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @famir/logger
 
+## 0.0.7
+
+### Patch Changes
+
+- Update pino and thread-stream deps.
+- Updated dependencies:
+  - @famir/domain@0.0.4
+  - @famir/common@0.0.8
+
 ## 0.0.6
 
 ### Patch Changes

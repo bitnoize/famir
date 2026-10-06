@@ -1,5 +1,26 @@
 # @famir/reverse-app
 
+## 0.0.11
+
+### Patch Changes
+
+- Target and redirector content via assets.
+- Implement persistent campaign flags.
+- Store error-page in assets.
+- Moved to single target label.
+- Better message interceptors.
+- Implement ephemeral target flags.
+- Simpler message analyze trigger logic.
+- Updated dependencies:
+  - @famir/http-tools@0.0.11
+  - @famir/database@0.0.10
+  - @famir/domain@0.0.4
+  - @famir/producer@0.0.7
+  - @famir/http-server@0.0.7
+  - @famir/http-client@0.0.9
+  - @famir/logger@0.0.7
+  - @famir/common@0.0.8
+
 ## 0.0.10
 
 ### Patch Changes

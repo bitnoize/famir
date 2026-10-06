@@ -1,5 +1,19 @@
 # @famir/database
 
+## 0.0.10
+
+### Patch Changes
+
+- Target and redirector content via assets.
+- Implement persistent campaign flags.
+- Update redis dep.
+- Moved to single target label.
+- Implement ephemeral target flags.
+- Updated dependencies:
+  - @famir/http-tools@0.0.11
+  - @famir/domain@0.0.4
+  - @famir/common@0.0.8
+
 ## 0.0.9
 
 ### Patch Changes

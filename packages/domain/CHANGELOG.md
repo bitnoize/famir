@@ -1,5 +1,14 @@
 # @famir/domain
 
+## 0.0.4
+
+### Patch Changes
+
+- Improve HttpJson type.
+- Implement persistent campaign flags.
+- Moved to single target label.
+- Implement ephemeral target flags.
+
 ## 0.0.3
 
 ### Patch Changes

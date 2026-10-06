@@ -1,5 +1,15 @@
 # @famir/repl-server
 
+## 0.0.7
+
+### Patch Changes
+
+- Store banners in assets.
+- Remove command manual.
+- Updated dependencies:
+  - @famir/domain@0.0.4
+  - @famir/common@0.0.8
+
 ## 0.0.6
 
 ### Patch Changes
