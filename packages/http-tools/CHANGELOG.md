@@ -1,5 +1,11 @@
 # @famir/http-tools
 
+## 0.0.12
+
+### Patch Changes
+
+- Fix headers invalidate cache.
+
 ## 0.0.11
 
 ### Patch Changes

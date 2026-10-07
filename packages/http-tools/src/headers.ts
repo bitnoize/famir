@@ -412,17 +412,17 @@ export class HttpHeadersWrap {
 
   private invalidateCacheFor(name: string) {
     if (name === 'content-type') {
-      this.#cacheContentType = null
+      this.#cacheContentType = undefined
     } else if (name === 'cookie') {
-      this.#cacheCookies = null
+      this.#cacheCookies = undefined
     } else if (name === 'set-cookie') {
-      this.#cacheSetCookies = null
+      this.#cacheSetCookies = undefined
     }
   }
 
   private invalidateCacheAll() {
-    this.#cacheContentType = null
-    this.#cacheCookies = null
-    this.#cacheSetCookies = null
+    this.#cacheContentType = undefined
+    this.#cacheCookies = undefined
+    this.#cacheSetCookies = undefined
   }
 }

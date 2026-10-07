@@ -224,8 +224,6 @@ export class HttpMessage {
       }
     })
 
-    this.#contentTypes[name].push(...types)
-
     return this
   }
 
@@ -752,14 +750,14 @@ export class HttpMessage {
   }
 
   /**
-   * Deocrates request body as HTML.
+   * Decocrates request body as HTML.
    */
   decorateRequestBodyHtml(cb: ($: CheerioAPI) => void) {
     this.decorateBodyHtml(this.requestHeaders, this.requestBody, cb)
   }
 
   /**
-   * Deocrates response body as HTML.
+   * Decocrates response body as HTML.
    */
   decorateResponseBodyHtml(cb: ($: CheerioAPI) => void) {
     this.decorateBodyHtml(this.responseHeaders, this.responseBody, cb)
