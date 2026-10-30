@@ -1,5 +1,15 @@
 # @famir/http-server
 
+## 0.0.8
+
+### Patch Changes
+
+- Rewrite package docs.
+- Updated dependencies:
+  - @famir/http-tools@0.0.13
+  - @famir/common@0.0.9
+  - @famir/domain@0.0.5
+
 ## 0.0.7
 
 ### Patch Changes

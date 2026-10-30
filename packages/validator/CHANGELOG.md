@@ -1,5 +1,14 @@
 # @famir/validator
 
+## 0.0.8
+
+### Patch Changes
+
+- Rewrite package docs.
+- Updated dependencies:
+  - @famir/common@0.0.9
+  - @famir/domain@0.0.5
+
 ## 0.0.7
 
 ### Patch Changes

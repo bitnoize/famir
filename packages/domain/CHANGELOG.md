@@ -1,5 +1,11 @@
 # @famir/domain
 
+## 0.0.5
+
+### Patch Changes
+
+- Rewrite package docs.
+
 ## 0.0.4
 
 ### Patch Changes

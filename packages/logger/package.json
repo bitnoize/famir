@@ -1,7 +1,7 @@
 {
   "name": "@famir/logger",
   "type": "module",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Shared logging layer",
   "keywords": [
     "famir",

@@ -1,5 +1,22 @@
 # @famir/console-app
 
+## 0.0.11
+
+### Patch Changes
+
+- Rewrite package docs.
+- Updated dependencies:
+  - @famir/repl-server@0.0.8
+  - @famir/templater@0.0.7
+  - @famir/validator@0.0.8
+  - @famir/database@0.0.11
+  - @famir/producer@0.0.8
+  - @famir/storage@0.0.7
+  - @famir/common@0.0.9
+  - @famir/config@0.0.7
+  - @famir/domain@0.0.5
+  - @famir/logger@0.0.8
+
 ## 0.0.10
 
 ### Patch Changes

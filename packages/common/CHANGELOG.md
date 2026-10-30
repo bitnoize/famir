@@ -1,5 +1,11 @@
 # @famir/common
 
+## 0.0.9
+
+### Patch Changes
+
+- Rewrite package docs.
+
 ## 0.0.8
 
 ### Patch Changes

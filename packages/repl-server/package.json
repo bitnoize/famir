@@ -1,7 +1,7 @@
 {
   "name": "@famir/repl-server",
   "type": "module",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Shared command-driven REPL layer",
   "keywords": [
     "famir",
