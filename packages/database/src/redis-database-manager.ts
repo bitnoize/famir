@@ -14,40 +14,6 @@ import { redisFunctions } from './redis-functions.js'
 /**
  * Redis-based database manager implementation.
  *
- * Depends:
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisDatabaseManager } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisDatabaseManager.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { DATABASE_MANAGER, DatabaseManager } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const manager = container.resolve<DatabaseManager>(DATABASE_MANAGER)
- *
- * const info = await manager.getInfo()
- * console.log(info)
- *
- * // Load Redis functions
- * await manager.loadFunctions()
- * ```
- *
  * @category none
  */
 export class RedisDatabaseManager implements DatabaseManager {

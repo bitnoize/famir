@@ -8,34 +8,6 @@ import { Eta } from 'eta'
  * Uses the lightweight and fast Eta template engine as the backend.
  *
  * @see https://eta.js.org - Eta template engine documentation
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { EtaTemplater } from '@famir/templater'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * EtaTemplater.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { TEMPLATER, Templater } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const templater = container.resolve<Templater>(TEMPLATER)
- *
- * // Render simple template
- * const str = templater.render(`Hello <%= data.name %>!`, { name: 'World' })
- * console.log(str) // 'Hello World!'
- * ```
  */
 export class EtaTemplater implements Templater {
   /**

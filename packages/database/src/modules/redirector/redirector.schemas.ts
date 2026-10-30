@@ -3,7 +3,7 @@ import { RedirectorParams } from '@famir/domain'
 import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
 
 /**
- * JSON Schema for validating a redirector page template.
+ * Validate a redirector page template.
  *
  * @category Redirector
  */
@@ -14,7 +14,7 @@ export const redirectorPageSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a redirector field name.
+ * Validate a redirector field name.
  *
  * @category Redirector
  */
@@ -25,7 +25,7 @@ export const redirectorFieldSchema: JSONSchemaType<string> = {
 }
 
 /**
- * JSON Schema for validating a list of redirector field names.
+ * Validate a list of redirector field names.
  *
  * @category Redirector
  */
@@ -35,7 +35,7 @@ export const redirectorFieldsSchema: JSONSchemaType<string[]> = {
 } as const
 
 /**
- * JSON Schema for validating redirector parameters.
+ * Validate redirector parameters.
  *
  * @category Redirector
  */

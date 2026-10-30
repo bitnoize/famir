@@ -8,41 +8,8 @@ export const REPL_SERVER_ASSETS = Symbol('ReplServerAssets')
 /**
  * Represents the repl-server assets.
  *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { ReplServerAssets } from '@famir/repl-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Define your assets
- * const assets: [string, string][] = [
- *   [
- *     'hello.txt',
- *     `Hi, there!`
- *   ]
- * ]
- *
- * // Register in DI container
- * ReplServerAssets.register(container, assets)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { REPL_SERVER_ASSETS, type ReplServerAssets } from '@famir/repl-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve from DI container
- * const assets = container.resolve<ReplServerAssets>(REPL_SERVER_ASSETS)
- *
- * // Retrieve asset by name
- * const asset = assets.get('hello.txt')
- * console.log(asset)
- * ```
+ * The assets is a collection of static text files that are added during the
+ * application build process.
  */
 export class ReplServerAssets extends Map<string, string> {
   /**

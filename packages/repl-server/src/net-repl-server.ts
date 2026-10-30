@@ -1,7 +1,8 @@
-import { DIContainer, LifecycleError, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
+  LifecycleError,
   Logger,
   LOGGER,
   REPL_SERVER,
@@ -35,43 +36,6 @@ interface NetReplServerOptions {
  *
  * This server runs a REPL (Read-Eval-Print-Loop) over TCP network connections.
  * It allows remote administration and debugging via telnet or netcat clients.
- *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link ReplServerAssets} via {@link REPL_SERVER_ASSETS} token
- * - {@link ReplServerRouter} via {@link REPL_SERVER_ROUTER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { NetReplServer } from '@famir/repl-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register in DI container
- * NetReplServer.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { REPL_SERVER, ReplServer } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve from DI container
- * const replServer = container.resolve<ReplServer>(REPL_SERVER)
- *
- * // Start REPL server
- * await replServer.start()
- *
- * //  Stop server
- * await replServer.stop()
- * ```
  */
 export class NetReplServer extends BaseReplServer implements ReplServer {
   /**

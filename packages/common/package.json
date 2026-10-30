@@ -2,7 +2,7 @@
   "name": "@famir/common",
   "type": "module",
   "version": "0.0.8",
-  "description": "Common utilities",
+  "description": "Shared utility layer",
   "keywords": [
     "famir",
     "fake-mirrors",
@@ -19,6 +19,7 @@
   "scripts": {
     "format": "prettier -w \"src/**/*.ts\" README.md",
     "lint": "eslint \"src/**/*.ts\"",
+    "pretest": "npm run build",
     "test": "node --test dist/**/*.test.js",
     "build": "tsc -b",
     "clean": "rimraf dist *.tsbuildinfo"

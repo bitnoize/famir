@@ -2,7 +2,7 @@
   "name": "@famir/logger",
   "type": "module",
   "version": "0.0.7",
-  "description": "Logging service",
+  "description": "Shared logging layer",
   "keywords": [
     "famir",
     "fake-mirrors",

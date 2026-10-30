@@ -35,6 +35,7 @@ export interface Validator {
    * @param name - The name of the schema to validate against.
    * @param data - The data to be validated.
    * @returns `true` if the data is valid, `false` otherwise.
+   * @throws Error If a schema with the given name is not found.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   guardSchema<T>(name: string, data: unknown): data is T
@@ -47,6 +48,7 @@ export interface Validator {
    * @typeParam T - The expected type after validation.
    * @param name - The name of the schema to validate against.
    * @param data - The data to be validated.
+   * @throws Error If a schema with the given name is not found.
    * @throws ValidatorError If validation fails, containing detailed error information.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters

@@ -30,6 +30,6 @@ export interface ConsumerWorkerSettings {
 export interface BullConsumerConfig extends ConfigData {
   /** Redis connection string. */
   CONSUMER_CONNECTION_URL: string
-  /** Global prefix for all Redis keys to avoid collisions. */
+  /** Global prefix for all Redis keys. */
   CONSUMER_PREFIX: string
 }

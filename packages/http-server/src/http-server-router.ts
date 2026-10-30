@@ -10,47 +10,8 @@ export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
 /**
  * Represents the http-server router.
  *
- * Depends:
- * - {@link Logger} via {@link LOGGER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { HttpServerRouter } from '@famir/http-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register in DI container
- * HttpServerRouter.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { HTTP_SERVER_ROUTER, type HttpServerRouter } from '@famir/http-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve from DI container
- * const router = container.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
- *
- * // Add middleware
- * router.addMiddleware('test', async (ctx, next) => {
- *   // Send simple response
- *   ctx.status(200)
- *   ctx.responseBody.setText('Hello')
- *
- *   await ctx.sendResponse()
- *
- *   // Goto next middleware
- *   await next()
- * })
- *
- * // Activate router
- * router.activate()
- * ```
+ * The router acts as root of HTTP server and handles the routing of requests
+ * through a middleware chain.
  */
 export class HttpServerRouter {
   /**
@@ -105,10 +66,11 @@ export class HttpServerRouter {
    *
    * @param name - The unique name for the middleware.
    * @param handler - The middleware handler function.
+   * @returns This router for method chaining.
    * @throws Error If the router is already active.
    * @throws Error If a middleware with the same name already exists.
    */
-  addMiddleware(name: string, handler: HttpServerMiddleware) {
+  addMiddleware(name: string, handler: HttpServerMiddleware): this {
     if (this.#isActive) {
       throw new Error(`Router is active`)
     }

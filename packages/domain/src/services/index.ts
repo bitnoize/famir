@@ -1,7 +1,6 @@
 export * from './config/index.js'
 export * from './consumer/index.js'
 export * from './database/index.js'
-export * from './edge-server/index.js'
 export * from './http-client/index.js'
 export * from './http-server/index.js'
 export * from './logger/index.js'

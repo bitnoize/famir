@@ -8,7 +8,7 @@ import {
 import { RawLure } from './lure.functions.js'
 
 /**
- * JSON Schema for validating a lure URL path.
+ * Validate a lure URL path.
  *
  * @category Lure
  */

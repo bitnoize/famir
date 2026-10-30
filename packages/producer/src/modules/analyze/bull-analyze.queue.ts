@@ -19,38 +19,6 @@ import { BullBaseQueue } from '../base/index.js'
 /**
  * Bull-based analyze queue implementation.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link ProducerConnector} via {@link PRODUCER_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { BullAnalyzeQueue } from '@famir/producer'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * BullAnalyzeQueue.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { ANALYZE_QUEUE, AnalyzeQueue } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const analyzeQueue = container.resolve<AnalyzeQueue>(ANALYZE_QUEUE)
- *
- * // TODO more examples
- * ```
- *
  * @category Analyze
  */
 export class BullAnalyzeQueue extends BullBaseQueue implements AnalyzeQueue {

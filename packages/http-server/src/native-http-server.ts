@@ -1,10 +1,11 @@
-import { DIContainer, LifecycleError, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
   HTTP_SERVER,
   HttpServer,
   HttpServerError,
+  LifecycleError,
   Logger,
   LOGGER,
   TEMPLATER,
@@ -37,45 +38,6 @@ interface NativeHttpServerOptions {
  *
  * This server uses native Node.js `http` and WebSocket `ws` modules to handle
  * HTTP requests and WebSocket connections.
- *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link Templater} via {@link TEMPLATER} token
- * - {@link HttpServerAssets} via {@link HTTP_SERVER_ASSETS} token
- * - {@link HttpServerRouter} via {@link HTTP_SERVER_ROUTER} token
- * - {@link HttpServerContextFactory} via {@link HTTP_SERVER_CONTEXT_FACTORY} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { NativeHttpServer } from '@famir/http-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register in DI container
- * NativeHttpServer.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { HTTP_SERVER, HttpServer } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve from DI container
- * const httpServer = container.resolve<HttpServer>(HTTP_SERVER)
- *
- * // Start HTTP and WebSocket server
- * await httpServer.start()
- *
- * //  Stop server
- * await httpServer.stop()
- * ```
  */
 export class NativeHttpServer implements HttpServer {
   /**

@@ -513,7 +513,7 @@ local function remove_campaign_flag(keys, args)
 
   redis.call('SREM', campaign_flags_key, stash.flag)
 
-  return redis.status_reply('OK campaign flag removed')
+  return redis.status_reply('OK Campaign flag removed')
 end
 
 redis.register_function({

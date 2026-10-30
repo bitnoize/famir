@@ -21,15 +21,7 @@ import { HTTP_SERVER_ROUTER, type HttpServerRouter } from '@famir/http-server'
 export const REVERSE_APP = Symbol('ReverseApp')
 
 /**
- * Represents the reverse application.
- *
- * Depends:
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- * - {@link ProducerConnector} via {@link PRODUCER_CONNECTOR} token
- * - {@link AnalyzeQueue} via {@link ANALYZE_QUEUE} token
- * - {@link HttpServerRouter} via {@link HTTP_SERVER_ROUTER} token
- * - {@link HttpServer} via {@link HTTP_SERVER} token
+ * Top-level runtime orchestrator for the reverse proxy application.
  *
  * @category none
  */

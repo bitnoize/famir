@@ -1,9 +1,6 @@
 import { JSONSchemaType } from '@famir/common'
 import { CliReplServerConfig, NetReplServerConfig } from './repl-server.js'
 
-/**
- * @internal
- */
 const netReplServerAddressSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
@@ -11,9 +8,6 @@ const netReplServerAddressSchema: JSONSchemaType<string> = {
   default: '127.0.0.1',
 } as const
 
-/**
- * @internal
- */
 const netReplServerPortSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 1,
@@ -21,9 +15,6 @@ const netReplServerPortSchema: JSONSchemaType<number> = {
   default: 5000,
 } as const
 
-/**
- * @internal
- */
 const netReplServerMaxClientsSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 1,
@@ -31,9 +22,6 @@ const netReplServerMaxClientsSchema: JSONSchemaType<number> = {
   default: 10,
 } as const
 
-/**
- * @internal
- */
 const netReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 1000,
@@ -41,9 +29,6 @@ const netReplServerSocketTimeoutSchema: JSONSchemaType<number> = {
   default: 15 * 60 * 1000,
 } as const
 
-/**
- * @internal
- */
 const replServerUseColorsSchema: JSONSchemaType<boolean> = {
   type: 'boolean',
   default: true,

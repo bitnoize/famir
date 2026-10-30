@@ -1,9 +1,10 @@
-import { LifecycleError, serializeError } from '@famir/common'
+import { serializeError } from '@famir/common'
 import {
   BaseWorker,
   Config,
   ConsumerConnector,
   ConsumerError,
+  LifecycleError,
   Logger,
   Validator,
 } from '@famir/domain'

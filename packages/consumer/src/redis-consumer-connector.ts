@@ -1,9 +1,10 @@
-import { DIContainer, LifecycleError, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
   CONSUMER_CONNECTOR,
   ConsumerConnector,
+  LifecycleError,
   Logger,
   LOGGER,
   Validator,
@@ -28,42 +29,6 @@ interface BullConsumerConnectorOptions {
  * Uses the ioredis client to manage connections for the Bull queue consumer.
  *
  * @see https://github.com/redis/ioredis - ioredis documentation
- *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisConsumerConnector } from '@famir/consumer'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisConsumerConnector.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { CONSUMER_CONNECTOR, ConsumerConnector } from '@famir/domain'
- * import { RedisConsumerConnection } from '@famir/consumer'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const connector = container.resolve<ConsumerConnector>(CONSUMER_CONNECTOR)
- *
- * // Get underlying Redis connection
- * const connection = connector.getConnection<RedisConsumerConnection>()
- *
- * //  Close connection
- * await connector.close()
- * ```
  *
  * @category none
  */

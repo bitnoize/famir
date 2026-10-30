@@ -1,7 +1,8 @@
-import { DIContainer, LifecycleError, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
+  LifecycleError,
   Logger,
   LOGGER,
   PRODUCER_CONNECTOR,
@@ -28,42 +29,6 @@ interface BullProducerConnectorOptions {
  * Uses the ioredis client to manage connections for the Bull queue producer.
  *
  * @see https://github.com/redis/ioredis - ioredis documentation
- *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisProducerConnector } from '@famir/producer'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisProducerConnector.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { PRODUCER_CONNECTOR, ProducerConnector } from '@famir/domain'
- * import { RedisProducerConnection } from '@famir/producer'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const connector = container.resolve<ProducerConnector>(PRODUCER_CONNECTOR)
- *
- * // Get underlying Redis connection
- * const connection = connector.getConnection<RedisProducerConnection>()
- *
- * //  Close connection
- * await connector.close()
- * ```
  *
  * @category none
  */

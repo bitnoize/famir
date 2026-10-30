@@ -15,54 +15,8 @@ export const REPL_SERVER_ROUTER = Symbol('ReplServerRouter')
 /**
  * Represents the repl-server router.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Logger} via {@link LOGGER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { ReplServerRouter } from '@famir/repl-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register in DI container
- * ReplServerRouter.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { REPL_SERVER_ROUTER, type ReplServerRouter } from '@famir/repl-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve from DI container
- * const router = container.resolve<ReplServerRouter>(REPL_SERVER_ROUTER)
- *
- * interface SimpleArgs {
- *   _: string[]
- * }
- *
- * // Add custom command
- * router.addCommand<EchoArgs>(
- *   {
- *     name: 'echo',
- *     description: `Simple echo command`,
- *     schemaName: 'echo-args',
- *     options: [],
- *     params: [],
- *   },
- *   async (console, spec, args) => {
- *     console.log(args)
- *   }
- * )
- *
- * // Activate router
- * router.activate()
- * ```
+ * The router acts as root of a REPL server and handles the routing commants
+ * to their respective handlers.
  */
 export class ReplServerRouter {
   /**

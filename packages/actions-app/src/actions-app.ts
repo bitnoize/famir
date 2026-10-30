@@ -23,16 +23,7 @@ import {
 export const ACTIONS_APP = Symbol('ActionsApp')
 
 /**
- * Represents the actions application.
- *
- * Depends:
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- * - {@link Storage} via {@link STORAGE} token
- * - {@link ProducerConnector} via {@link PRODUCER_CONNECTOR} token
- * - {@link ConsumerConnector} via {@link CONSUMER_CONNECTOR} token
- * - {@link ConsumerRouter} via {@link CONSUMER_ROUTER} token
- * - {@link AnalyzeWorker} via {@link ANALYZE_WORKER} token
+ * Top-level runtime orchestrator for the actions application.
  *
  * @category none
  */

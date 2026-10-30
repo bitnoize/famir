@@ -4,11 +4,45 @@
 
 An extensible platform for creating and manage website mirrors using reverse proxying.
 
+## Stack
+
+- **Runtime:** Node.js (TypeScript)
+- **Database:** Redis
+- **Storage:** S3‑compatible storage
+- **Edge server:** Caddy, Nginx
+
+## Packages
+
+This monorepo contains the following packages:
+
+- `@famir/domain`
+- `@famir/common`
+- `@famir/validator`
+- `@famir/config`
+- `@famir/logger`
+- `@famir/templater`
+- `@famir/database`
+- `@famir/storage`
+- `@famir/producer`
+- `@famir/consumer`
+- `@famir/http-client`
+- `@famir/http-server`
+- `@famir/http-tools`
+- `@famir/repl-server`
+- `@famir/console-app`
+- `@famir/reverse-app`
+- `@famir/actions-app`
+
+## Example
+
+A fully functional demonstration project:
+[famir-demo](https://github.com/bitnoize/famir-demo#readme)
+
 ## Links
 
 - [Website](https://fake-mirrors.net/)
 - [API Docs](https://docs.fake-mirrors.net/)
-- [Demo project](https://github.com/bitnoize/famir-demo#readme)
+- [NPM Org](https://www.npmjs.com/org/famir)
 
 ## Disclaimer
 

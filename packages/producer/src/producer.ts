@@ -16,6 +16,6 @@ export type RedisProducerConnection = Redis
 export interface BullProducerConfig extends ConfigData {
   /** Redis connection string. */
   PRODUCER_CONNECTION_URL: string
-  /** Global prefix for all Redis keys to avoid collisions. */
+  /** Global prefix for all Redis keys. */
   PRODUCER_PREFIX: string
 }

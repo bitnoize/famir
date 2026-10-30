@@ -8,7 +8,7 @@ import {
 import { RawProxy } from './proxy.functions.js'
 
 /**
- * JSON Schema for validating a proxy URL.
+ * Validate a proxy URL.
  *
  * @category Proxy
  */

@@ -2,7 +2,7 @@
   "name": "@famir/http-tools",
   "type": "module",
   "version": "0.0.12",
-  "description": "HTTP protocol tools",
+  "description": "Reusable HTTP primitives and wrappers",
   "keywords": [
     "famir",
     "fake-mirrors",

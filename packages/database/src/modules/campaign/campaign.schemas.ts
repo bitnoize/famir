@@ -9,7 +9,7 @@ import {
 import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
 
 /**
- * JSON Schema for validating a campaign mirror domain.
+ * Validate a campaign mirror domain.
  *
  * @category Campaign
  */
@@ -20,7 +20,7 @@ export const campaignMirrorDomainSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a campaign description.
+ * Validate a campaign description.
  *
  * @category Campaign
  */
@@ -31,7 +31,7 @@ export const campaignDescriptionSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a campaign upgrade session path.
+ * Validate a campaign upgrade session path.
  *
  * @category Campaign
  */
@@ -42,7 +42,7 @@ export const campaignUpgradeSessionPathSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a campaign session cookie name.
+ * Validate a campaign session cookie name.
  *
  * @category Campaign
  */
@@ -53,7 +53,7 @@ export const campaignSessionCookieNameSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating campaign session cookie names.
+ * Validate campaign session cookie names.
  *
  * @category Campaign
  */
@@ -63,7 +63,7 @@ export const campaignSessionCookieNamesSchema: JSONSchemaType<string[]> = {
 } as const
 
 /**
- * JSON Schema for validating a campaign session expire TTL.
+ * Validate a campaign session expire TTL.
  *
  * @category Campaign
  */
@@ -74,7 +74,7 @@ export const campaignSessionExpireSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a campaign new session expire TTL.
+ * Validate a campaign new session expire TTL.
  *
  * @category Campaign
  */
@@ -85,7 +85,7 @@ export const campaignNewSessionExpireSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a campaign message expire TTL.
+ * Validate a campaign message expire TTL.
  *
  * @category Campaign
  */
@@ -96,14 +96,14 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a campaign flag.
+ * Validate a campaign flag.
  *
  * @category Campaign
  */
 export const campaignFlagSchema = customIdentSchema
 
 /**
- * JSON Schema for validating a list of campaign flags.
+ * Validate a list of campaign flags.
  *
  * @category Campaign
  */

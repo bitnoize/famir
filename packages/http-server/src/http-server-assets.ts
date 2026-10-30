@@ -8,41 +8,8 @@ export const HTTP_SERVER_ASSETS = Symbol('HttpServerAssets')
 /**
  * Represents the http-server assets.
  *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { HttpServerAssets } from '@famir/http-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Define your assets
- * const assets: [string, string][] = [
- *   [
- *     'hello.txt',
- *     `Hi, there!`
- *   ]
- * ]
- *
- * // Register in DI container
- * HttpServerAssets.register(container, assets)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { HTTP_SERVER_ASSETS, type HttpServerAssets } from '@famir/http-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve from DI container
- * const assets = container.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS)
- *
- * // Retrieve asset by name
- * const asset = assets.get('hello.txt')
- * console.log(asset)
- * ```
+ * The assets is a collection of static text files that are added during the
+ * application build process.
  */
 export class HttpServerAssets extends Map<string, string> {
   /**

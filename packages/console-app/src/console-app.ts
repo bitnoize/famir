@@ -23,16 +23,7 @@ import { REPL_SERVER_ROUTER, type ReplServerRouter } from '@famir/repl-server'
 export const CONSOLE_APP = Symbol('ConsoleApp')
 
 /**
- * Represents the console application.
- *
- * Depends:
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- * - {@link Storage} via {@link STORAGE} token
- * - {@link ProducerConnector} via {@link PRODUCER_CONNECTOR} token
- * - {@link AnalyzeQueue} via {@link ANALYZE_QUEUE} token
- * - {@link ReplServerRouter} via {@link REPL_SERVER_ROUTER} token
- * - {@link ReplServer} via {@link REPL_SERVER} token
+ * Top-level runtime orchestrator for the console application.
  *
  * @category none
  */

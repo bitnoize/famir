@@ -2,7 +2,7 @@
   "name": "@famir/http-server",
   "type": "module",
   "version": "0.0.7",
-  "description": "HTTP server",
+  "description": "Shared HTTP server abstraction",
   "keywords": [
     "famir",
     "fake-mirrors",

@@ -20,40 +20,6 @@ import { rawSessionSchema } from './session.schemas.js'
 /**
  * Redis-based session repository implementation.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisSessionRepository } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisSessionRepository.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { SESSION_REPOSITORY, SessionRepository } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const sessionRepository = container.resolve<SessionRepository>(SESSION_REPOSITORY)
- *
- * // Read '7da1...' session from 'httpbin' campaign
- * const session = await sessionRepository.read('httpbin', '7da1...')
- * console.log(session)
- * ```
- *
  * @category Session
  */
 export class RedisSessionRepository extends RedisBaseRepository implements SessionRepository {

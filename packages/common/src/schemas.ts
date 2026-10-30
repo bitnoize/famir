@@ -6,22 +6,22 @@ import { JSONSchemaType } from 'ajv'
 export { JSONSchemaType }
 
 /**
- * JSON Schema for validating a boolean value.
+ * Validate a boolean value.
  */
 export const booleanSchema: JSONSchemaType<boolean> = {
   type: 'boolean',
 } as const
 
 /**
- * JSON Schema for validating custom identifiers.
+ * Validate custom identifiers.
  */
 export const customIdentSchema: JSONSchemaType<string> = {
   type: 'string',
-  pattern: '^[0-9a-zA-Z-_]{2,64}$',
+  pattern: '^[0-9a-zA-Z\\-_]{2,64}$',
 } as const
 
 /**
- * JSON Schema for validating random identifiers.
+ * Validate random identifiers.
  */
 export const randomIdentSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -29,7 +29,7 @@ export const randomIdentSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a secret value.
+ * Validate a secret value.
  */
 export const secretSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -38,7 +38,7 @@ export const secretSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a counter number.
+ * Validate a counter number.
  */
 export const counterSchema: JSONSchemaType<number> = {
   type: 'integer',
@@ -47,7 +47,7 @@ export const counterSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a timestamp.
+ * Validate a timestamp.
  */
 export const timestampSchema: JSONSchemaType<number> = {
   type: 'integer',

@@ -12,6 +12,13 @@ import type ThreadStream from 'thread-stream'
 export { ThreadStream as LoggerTransport }
 
 /**
+ * Options for a Pino logger custom transport.
+ */
+import { TransportMultiOptions, TransportPipelineOptions, TransportSingleOptions } from 'pino'
+export type LoggerTransportOptions =
+  TransportSingleOptions | TransportMultiOptions | TransportPipelineOptions
+
+/**
  * Settings for a logger.
  */
 export interface LoggerSettings {

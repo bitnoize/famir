@@ -36,6 +36,6 @@ export type DatabaseStatusCode = (typeof DATABASE_STATUS_CODES)[number]
 export interface RedisDatabaseConfig extends ConfigData {
   /** Redis connection string. */
   DATABASE_CONNECTION_URL: string
-  /** Global prefix for all Redis keys to avoid collisions. */
+  /** Global prefix for all Redis keys. */
   DATABASE_PREFIX: string
 }

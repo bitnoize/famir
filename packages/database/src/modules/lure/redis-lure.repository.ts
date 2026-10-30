@@ -20,40 +20,6 @@ import { rawLureSchema } from './lure.schemas.js'
 /**
  * Redis-based lure repository implementation.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisLureRepository } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisLureRepository.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { LURE_REPOSITORY, LureRepository } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const lureRepository = container.resolve<LureRepository>(LURE_REPOSITORY)
- *
- * // Read 'test' lure from 'httpbin' campaign
- * const lure = await lureRepository.read('httpbin', 'test')
- * console.log(lure)
- * ```
- *
  * @category Lure
  */
 export class RedisLureRepository extends RedisBaseRepository implements LureRepository {

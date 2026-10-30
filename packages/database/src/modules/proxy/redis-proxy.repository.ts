@@ -20,40 +20,6 @@ import { rawProxySchema } from './proxy.schemas.js'
 /**
  * Redis-based proxy repository implementation.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisProxyRepository } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisProxyRepository.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { PROXY_REPOSITORY, ProxyRepository } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const proxyRepository = container.resolve<ProxyRepository>(PROXY_REPOSITORY)
- *
- * // Read 'default' proxy from 'httpbin' campaign
- * const proxy = await proxyRepository.read('httpbin', 'default')
- * console.log(proxy)
- * ```
- *
  * @category Proxy
  */
 export class RedisProxyRepository extends RedisBaseRepository implements ProxyRepository {

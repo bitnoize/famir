@@ -21,40 +21,6 @@ import { rawFullRedirectorSchema, rawRedirectorSchema } from './redirector.schem
 /**
  * Redis-based redirector repository implementation.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisRedirectorRepository } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisRedirectorRepository.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { REDIRECTOR_REPOSITORY, RedirectorRepository } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const redirectorRepository = container.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY)
- *
- * // Read 'simple' redirector from 'hackernews' campaign
- * const redirector = await redirectorRepository.read('hackernews', 'simple')
- * console.log(redirector)
- * ```
- *
  * @category Redirector
  */
 export class RedisRedirectorRepository extends RedisBaseRepository implements RedirectorRepository {

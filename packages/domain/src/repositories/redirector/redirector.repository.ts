@@ -57,8 +57,6 @@ export interface RedirectorRepository {
   /**
    * Updates the redirector specific fields.
    *
-   * All update parameters are optional. Only provided fields will be updated.
-   *
    * @param campaignId - The ID of the campaign containing the redirector.
    * @param redirectorId - The redirector ID to update.
    * @param page - The page template.
@@ -69,12 +67,7 @@ export interface RedirectorRepository {
    * @throws DatabaseError If the redirector does not exist.
    * @throws DatabaseError If the data validation fails.
    */
-  update(
-    campaignId: string,
-    redirectorId: string,
-    page: string | null | undefined,
-    lockSecret: string
-  ): Promise<void>
+  update(campaignId: string, redirectorId: string, page: string, lockSecret: string): Promise<void>
 
   /**
    * Appends multiple required fields to the redirector.

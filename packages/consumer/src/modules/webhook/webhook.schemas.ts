@@ -2,7 +2,7 @@ import { JSONSchemaType } from '@famir/common'
 import { WebhookJobData } from '@famir/domain'
 
 /**
- * JSON Schema for validating webhook job data.
+ * Validate webhook job data.
  *
  * @category Webhook
  */

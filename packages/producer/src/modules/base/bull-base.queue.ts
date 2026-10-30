@@ -1,7 +1,8 @@
-import { LifecycleError, serializeError } from '@famir/common'
+import { serializeError } from '@famir/common'
 import {
   BaseQueue,
   Config,
+  LifecycleError,
   Logger,
   ProducerConnector,
   ProducerError,

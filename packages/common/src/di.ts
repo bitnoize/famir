@@ -30,24 +30,6 @@ interface DIRegistration<T = unknown> {
  *
  * Supports registering dependencies as singletons or transients and includes
  * built-in detection for circular dependencies.
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- *
- * // Get the global container instance.
- * const container = DIContainer.getInstance()
- *
- * // Register a singleton dependency.
- * container.registerSingleton('config', () => ({ level: 'warn' }))
- *
- * // Register a transient dependency.
- * container.registerTransient('logger', (c) => new Logger(c.resolve('config')))
- *
- * // Resolve dependencies.
- * const config = container.resolve('config')
- * const logger = container.resolve('logger')
- * ```
  */
 export class DIContainer {
   /**
@@ -226,10 +208,35 @@ export type DIComposer = (container: DIContainer) => void
 export type DIComposerAsync = (container: DIContainer) => Promise<void>
 
 /**
- * Represents a composition root object.
+ * Application composition root used by the runtime bootstrap.
+ *
+ * This contract defines the methods needed to assemble the DI container and
+ * manage the runtime lifecycle.
+ *
+ * @remarks
+ * The composition root is intentionally small. It exists to keep runtime
+ * startup, infrastructure registration, and graceful shutdown in a single,
+ * explicit dependency contract.
  */
 export interface CompositionRoot {
+  /**
+   * Registers all infrastructure and runtime dependencies in the DI container.
+   *
+   * @param container - Shared dependency injection container.
+   */
   infra: DIComposer
+
+  /**
+   * Starts the application after the full dependency graph has been created.
+   *
+   * @param container - Shared dependency injection container.
+   */
   start: DIComposerAsync
+
+  /**
+   * Stops the application gracefully and releases runtime dependencies.
+   *
+   * @param container - Shared dependency injection container.
+   */
   stop: DIComposerAsync
 }

@@ -16,37 +16,6 @@ export const HTTP_SERVER_CONTEXT_FACTORY = Symbol('HttpServerContextFactory')
  * Represents the http-server context factory.
  *
  * Separates context creation logic from the main server implementation.
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { HttpServerContextFactory } from '@famir/http-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register in DI container
- * HttpServerContextFactory.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { HTTP_SERVER_CONTEXT_FACTORY, type HttpServerContextFactory } from '@famir/http-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve from DI container
- * const contextFactory = container.resolve<HttpServerContextFactory>(HTTP_SERVER_CONTEXT_FACTORY)
- *
- * // create Normal context
- * const ctx = contextFactory.createNormal(req, res)
- *
- * // create WebSocket context
- * const ctx = contextFactory.createWebSocket(ws, req)
- *
- * ```
  */
 export class HttpServerContextFactory {
   /**

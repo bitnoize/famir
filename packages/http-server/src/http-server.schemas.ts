@@ -1,11 +1,6 @@
 import { JSONSchemaType } from '@famir/common'
 import { NativeHttpServerConfig } from './http-server.js'
 
-/**
- * JSON Schema for validating a Native http-server address.
- *
- * @internal
- */
 const nativeHttpServerAddressSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 1,
@@ -13,11 +8,6 @@ const nativeHttpServerAddressSchema: JSONSchemaType<string> = {
   default: '127.0.0.1',
 } as const
 
-/**
- * JSON Schema for validating a Native http-server port.
- *
- * @internal
- */
 const nativeHttpServerPortSchema: JSONSchemaType<number> = {
   type: 'number',
   minimum: 1,
@@ -26,8 +16,6 @@ const nativeHttpServerPortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a complete Native http-server configuration.
- *
  * @internal
  */
 export const nativeHttpServerConfigSchema: JSONSchemaType<NativeHttpServerConfig> = {

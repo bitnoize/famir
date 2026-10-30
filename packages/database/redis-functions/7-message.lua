@@ -356,7 +356,7 @@ local function read_message_history(keys, args)
   local limit = tonumber(args[1])
 
   if not (limit and limit > 0) then
-    return redis.error_reply('ERR Wrong limimt')
+    return redis.error_reply('ERR Wrong limit')
   end
 
   if redis.call('EXISTS', campaign_key) ~= 1 then

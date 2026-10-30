@@ -10,7 +10,7 @@ import { UpgradeSessionParams } from '@famir/domain'
 import { RawSession } from './session.functions.js'
 
 /**
- * JSON Schema for validating session upgrade parameters.
+ * Validate session upgrade parameters.
  *
  * @category Session
  */

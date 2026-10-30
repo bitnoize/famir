@@ -1,7 +1,8 @@
-import { DIContainer, LifecycleError } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
+  LifecycleError,
   Logger,
   LOGGER,
   Storage,
@@ -35,50 +36,6 @@ interface MinioStorageOptions {
  *
  * @see https://github.com/minio/minio-js - Official MinIO JavaScript client
  * @see https://docs.min.io/aistor/developers/sdk/javascript/api/ - API Reference
- *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { MinioStorage } from '@famir/storage'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * MinioStorage.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { STORAGE, Storage } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const storage = container.resolve<Storage>(STORAGE)
- *
- * // Checking the existence of the bucket
- * await storage.ensureBucketExists()
- *
- * // Store object in storage
- * await storage.putObject('test.txt', Buffer.from('Hello'), {
- *   'Content-Type': 'text/plain'
- * })
- *
- * // Retrieve object from storage
- * const data = await storage.getObject('test.txt')
- * console.log(data.toString()) // 'Hello'
- *
- * // Delete object from storage
- * await storage.deleteObject('test.txt')
- * ```
  */
 export class MinioStorage implements Storage {
   /**

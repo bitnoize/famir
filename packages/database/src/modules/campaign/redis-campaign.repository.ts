@@ -22,40 +22,6 @@ import { rawCampaignSchema, rawFullCampaignSchema } from './campaign.schemas.js'
 /**
  * Redis-based campaign repository implementation.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisCampaignRepository } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisCampaignRepository.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { CAMPAIGN_REPOSITORY, CampaignRepository } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const campaignRepository = container.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY)
- *
- * // Read 'httpbin' campaign
- * const campaign = await campaignRepository.read('httpbin')
- * console.log(campaign)
- * ```
- *
  * @category Campaign
  */
 export class RedisCampaignRepository extends RedisBaseRepository implements CampaignRepository {

@@ -1,3 +1,8 @@
+/**
+ * Public exports for the reverse-app modules.
+ *
+ * @category none
+ */
 export * from './authorize/index.js'
 export * from './base/index.js'
 export * from './complete/index.js'

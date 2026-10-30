@@ -19,38 +19,6 @@ import { BullBaseQueue } from '../base/index.js'
 /**
  * Bull-based webhook queue implementation.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link ProducerConnector} via {@link PRODUCER_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { BullWebhookQueue } from '@famir/producer'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * BullWebhookQueue.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { WEBHOOK_QUEUE, WebhookQueue } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const webhookQueue = container.resolve<BullWebhookQueue>(WEBHOOK_QUEUE)
- *
- * // TODO more examples
- * ```
- *
  * @category Webhook
  */
 export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {

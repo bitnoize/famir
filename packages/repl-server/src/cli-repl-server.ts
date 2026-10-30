@@ -1,7 +1,8 @@
-import { DIContainer, LifecycleError } from '@famir/common'
+import { DIContainer } from '@famir/common'
 import {
   Config,
   CONFIG,
+  LifecycleError,
   Logger,
   LOGGER,
   REPL_SERVER,
@@ -31,43 +32,6 @@ interface CliReplServerOptions {
  * This server runs a REPL (Read-Eval-Print-Loop) directly in the terminal
  * where the application is running. It provides an interactive environment
  * for system administration and debugging.
- *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link ReplServerAssets} via {@link REPL_SERVER_ASSETS} token
- * - {@link ReplServerRouter} via {@link REPL_SERVER_ROUTER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { CliReplServer } from '@famir/repl-server'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register in DI container
- * CliReplServer.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { REPL_SERVER, ReplServer } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve from DI container
- * const replServer = container.resolve<ReplServer>(REPL_SERVER)
- *
- * // Start REPL server
- * await replServer.start()
- *
- * //  Stop server
- * await replServer.stop()
- * ```
  */
 export class CliReplServer extends BaseReplServer implements ReplServer {
   /**

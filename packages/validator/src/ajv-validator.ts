@@ -5,78 +5,10 @@ import { Ajv, ValidateFunction } from 'ajv'
 /**
  * Ajv-based validator implementation.
  *
- * Provides thread-safe JSON Schema validation with comprehensive error reporting.
+ * Provides fast and secure JSON Schema validation with comprehensive error reporting.
  * Uses the **Ajv** library as the underlying validation engine.
  *
  * @see https://ajv.js.org/ - Ajv documentation
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { AjvValidator } from '@famir/validator'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * AjvValidator.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer, JSONSchemaType } from '@famir/common'
- * import { VALIDATOR, Validator, ValidatorError } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const validator = container.resolve<Validator>(VALIDATOR)
- *
- * // Define your user interface
- * interface User {
- *   name: string
- *   age: number
- * }
- *
- * // Define your user schema
- * const userSchema: JSONSchemaType<User> = {
- *   type: 'object',
- *   required: ['name', 'age'],
- *   properties: {
- *     name: { type: 'string' },
- *     age: { type: 'number', minimum: 0 }
- *   },
- *   additionalProperties: false,
- * } as const
- *
- * // Add schema to validator
- * validator.addSchema('user', userSchema)
- *
- * // Any data to validate
- * const data: unknown = { name: 'John', age: 30 }
- *
- * // Type-safe guard validation
- * if (validator.guardSchema<User>('user', data)) {
- *   // TypeScript knows this is User
- *   console.log(data.name)
- * } else {
- *   console.warn('Invalid user data')
- * }
- *
- * // Type-safe assert validation with exception filter
- * try {
- *   validator.assertSchema<User>('user', data)
- *   // TypeScript knows this is User
- *   console.log(data.age)
- * } catch (error) {
- *   if (error instanceof ValidatorError) {
- *     console.warn(error.validateErrors)
- *   } else {
- *     console.error(error)
- *   }
- * }
- * ```
  */
 export class AjvValidator implements Validator {
   /**

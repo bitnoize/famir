@@ -30,38 +30,7 @@ import {
  * Uses the high-performance libcurl library via the node-libcurl bindings.
  *
  * @see https://github.com/JCMais/node-libcurl - node-libcurl bindings
- * @see https://curl.se/libcurl/c/ - libcurl documentation
- *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { CurlHttpClient } from '@famir/http-client'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * CurlHttpClient.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { HTTP_CLIENT, HttpClient } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const httpClient = container.resolve<HttpClient>(HTTP_CLIENT)
- *
- * // TODO more examples
- * ```
+ * @see https://github.com/lexiforest/curl-impersonate - curl-impersonate
  */
 export class CurlHttpClient implements HttpClient {
   /**

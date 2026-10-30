@@ -132,9 +132,7 @@ export interface TargetRepository {
   findFull(mirrorHost: string): Promise<FullTargetModel | null>
 
   /**
-   * Updates the target specific fields.
-   *
-   * All update parameters are optional. Only provided fields will be updated.
+   * Updates the target fields.
    *
    * @param campaignId - The ID of the campaign containing the target.
    * @param targetId - The target ID to update.
@@ -159,17 +157,17 @@ export interface TargetRepository {
   update(
     campaignId: string,
     targetId: string,
-    connectTimeout: number | null | undefined,
-    simpleTimeout: number | null | undefined,
-    streamTimeout: number | null | undefined,
-    headersSizeLimit: number | null | undefined,
-    bodySizeLimit: number | null | undefined,
-    mainPage: string | null | undefined,
-    notFoundPage: string | null | undefined,
-    faviconIco: string | null | undefined,
-    robotsTxt: string | null | undefined,
-    sitemapXml: string | null | undefined,
-    allowWebSockets: boolean | null | undefined,
+    connectTimeout: number,
+    simpleTimeout: number,
+    streamTimeout: number,
+    headersSizeLimit: number,
+    bodySizeLimit: number,
+    mainPage: string,
+    notFoundPage: string,
+    faviconIco: string,
+    robotsTxt: string,
+    sitemapXml: string,
+    allowWebSockets: boolean,
     lockSecret: string
   ): Promise<void>
 

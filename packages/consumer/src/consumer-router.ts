@@ -16,45 +16,8 @@ export const CONSUMER_ROUTER = Symbol('ConsumerRouter')
 /**
  * Represents the consumer router.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Logger} via {@link LOGGER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { ConsumerRouter } from '@famir/consumer'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register in DI container
- * ConsumerRouter.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { CONSUMER_ROUTER, type ConsumerRouter } from '@famir/consumer'
- * import { ANALYZE_QUEUE_NAME } from '@famir/producer'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve from DI container
- * const router = container.resolve<ConsumerRouter>(CONSUMER_ROUTER)
- *
- * // Add queue
- * router.addQueue(ANALYZE_QUEUE_NAME)
- *
- * // Add custom processor
- * router.addProcessor(ANALYZE_QUEUE_NAME, async (data) => {
- *   console.log(data)
- * })
- *
- * // Activate router
- * router.activate()
- * ```
+ * The router acts as root of a consumer and handles the routing jobs
+ * to their respective processors.
  *
  * @category none
  */
@@ -146,7 +109,7 @@ export class ConsumerRouter {
    * @throws Error If the queue does not exist.
    * @throws Error If a processor for this job already exists.
    */
-  addProcessor<T>(spec: ConsumerProcessorSpec, action: ConsumerProcessorAction<T>) {
+  addProcessor<T>(spec: ConsumerProcessorSpec, action: ConsumerProcessorAction<T>): this {
     if (this.#isActive) {
       throw new Error(`Router is active`)
     }

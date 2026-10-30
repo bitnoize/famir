@@ -2,7 +2,7 @@
   "name": "@famir/database",
   "type": "module",
   "version": "0.0.10",
-  "description": "Database service",
+  "description": "Shared persistence layer",
   "keywords": [
     "famir",
     "fake-mirrors",

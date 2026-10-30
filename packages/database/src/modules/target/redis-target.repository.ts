@@ -29,43 +29,6 @@ import {
 /**
  * Redis-based target repository implementation.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisTargetRepository } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisTargetRepository.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { TARGET_REPOSITORY, TargetRepository } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisTargetRepository.register(container)
- *
- * // Resolve dependency from container
- * const targetRepository = container.resolve<TargetRepository>(TARGET_REPOSITORY)
- *
- * // Read 'apex' target from 'httpbin' campaign
- * const target = await targetRepository.read('httpbin', 'apex')
- * console.log(target)
- * ```
- *
  * @category Target
  */
 export class RedisTargetRepository extends RedisBaseRepository implements TargetRepository {

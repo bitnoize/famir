@@ -35,4 +35,9 @@ export interface Config {
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   get<T extends ConfigData>(schemaName: string): T
+
+  /**
+   * Clears all cached values.
+   */
+  reset(): void
 }

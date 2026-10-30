@@ -1,3 +1,6 @@
+/**
+ * Package public exports.
+ */
 export * from './domain.error.js'
 export * from './http-proto.js'
 export * from './queues/index.js'

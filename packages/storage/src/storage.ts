@@ -4,16 +4,16 @@ import { ConfigData } from '@famir/domain'
  * Configuration for a MinIO storage.
  */
 export interface MinioStorageConfig extends ConfigData {
-  /** MinIO server endpoint. */
+  /** Server endpoint. */
   STORAGE_ENDPOINT: string
-  /** MinIO server port. */
+  /** Server port. */
   STORAGE_PORT: number
-  /** Whether to use SSL/TLS for the connection. */
+  /** Whether to use SSL for the connection. */
   STORAGE_USE_SSL: boolean
-  /** MinIO access key (username). */
+  /** Access key (username). */
   STORAGE_ACCESS_KEY: string
-  /** MinIO secret key (password). */
+  /** Secret key (password). */
   STORAGE_SECRET_KEY: string
-  /** Name of the bucket to use for storage operations. */
+  /** Name of the bucket to use. */
   STORAGE_BUCKET_NAME: string
 }

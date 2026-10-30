@@ -2,7 +2,7 @@ import { JSONSchemaType, customIdentSchema, randomIdentSchema } from '@famir/com
 import { AnalyzeJobData } from '@famir/domain'
 
 /**
- * JSON Schema for validating analyze job data.
+ * Validate analyze job data.
  *
  * @category Analyze
  */

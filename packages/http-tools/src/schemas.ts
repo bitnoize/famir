@@ -12,7 +12,7 @@ import {
 } from '@famir/domain'
 
 /**
- * JSON Schema for validating an HTTP type.
+ * Validate an HTTP type.
  */
 export const httpTypeSchema: JSONSchemaType<HttpType> = {
   type: 'string',
@@ -20,7 +20,7 @@ export const httpTypeSchema: JSONSchemaType<HttpType> = {
 } as const
 
 /**
- * JSON Schema for validating an HTTP method.
+ * Validate an HTTP method.
  */
 export const httpMethodSchema: JSONSchemaType<HttpMethod> = {
   type: 'string',
@@ -28,7 +28,7 @@ export const httpMethodSchema: JSONSchemaType<HttpMethod> = {
 } as const
 
 /**
- * JSON Schema for validating a relative URL.
+ * Validate a relative URL.
  */
 export const httpRelativeUrlSchema: JSONSchemaType<string> = {
   type: 'string',
@@ -36,14 +36,14 @@ export const httpRelativeUrlSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating an HTTP response status.
+ * Validate an HTTP response status.
  */
 export const httpStatusSchema: JSONSchemaType<number> = {
   type: 'integer',
 } as const
 
 /**
- * JSON Schema for validating a single HTTP header.
+ * Validate a single HTTP header.
  */
 export const httpHeaderSchema: JSONSchemaType<HttpHeader> = {
   type: ['string', 'array'],
@@ -61,7 +61,7 @@ export const httpHeaderSchema: JSONSchemaType<HttpHeader> = {
 } as const
 
 /**
- * JSON Schema for validating an HTTP headers object.
+ * Validate an HTTP headers object.
  */
 export const httpHeadersSchema: JSONSchemaType<HttpHeaders> = {
   type: 'object',
@@ -73,7 +73,7 @@ export const httpHeadersSchema: JSONSchemaType<HttpHeaders> = {
 } as const
 
 /**
- * JSON Schema for validating connection details.
+ * Validate connection details.
  */
 export const httpConnectionSchema: JSONSchemaType<HttpConnection> = {
   type: 'object',
@@ -92,7 +92,7 @@ export const httpConnectionSchema: JSONSchemaType<HttpConnection> = {
 } as const
 
 /**
- * JSON Schema for validating payload data.
+ * Validate payload data.
  */
 export const httpPayloadSchema: JSONSchemaType<HttpPayload> = {
   type: 'object',
@@ -100,7 +100,7 @@ export const httpPayloadSchema: JSONSchemaType<HttpPayload> = {
 } as const
 
 /**
- * JSON Schema for validating a single processing error.
+ * Validate a single processing error.
  */
 export const httpErrorSchema: JSONSchemaType<HttpError> = {
   type: 'array',
@@ -120,7 +120,7 @@ export const httpErrorSchema: JSONSchemaType<HttpError> = {
 } as const
 
 /**
- * JSON Schema for validating a list of processing errors.
+ * Validate a list of processing errors.
  */
 export const httpErrorsSchema: JSONSchemaType<HttpError[]> = {
   type: 'array',

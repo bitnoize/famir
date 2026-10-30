@@ -9,7 +9,7 @@ import { TARGET_ACCESS_LEVELS, TargetAccessLevel, TargetHosts, TargetLink } from
 import { RawFullTarget, RawTarget } from './target.functions.js'
 
 /**
- * JSON Schema for validating a target access level.
+ * Validate a target access level.
  *
  * @category Target
  */
@@ -19,7 +19,7 @@ export const targetAccessLevelSchema: JSONSchemaType<TargetAccessLevel> = {
 } as const
 
 /**
- * JSON Schema for validating a target subdomain.
+ * Validate a target subdomain.
  *
  * @category Target
  */
@@ -30,7 +30,7 @@ export const targetSubSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a target domain.
+ * Validate a target domain.
  *
  * @category Target
  */
@@ -41,7 +41,7 @@ export const targetDomainSchema: JSONSchemaType<string> = {
 } as const
 
 /**
- * JSON Schema for validating a target port.
+ * Validate a target port.
  *
  * @category Target
  */
@@ -52,14 +52,14 @@ export const targetPortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a target label.
+ * Validate a target label.
  *
  * @category Target
  */
 export const targetLabelSchema = customIdentSchema
 
 /**
- * JSON Schema for validating a target connection timeout.
+ * Validate a target connection timeout.
  *
  * @category Target
  */
@@ -70,7 +70,7 @@ export const targetConnectTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a target simple request timeout.
+ * Validate a target simple request timeout.
  *
  * @category Target
  */
@@ -81,7 +81,7 @@ export const targetSimpleTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a target streaming request timeout.
+ * Validate a target streaming request timeout.
  *
  * @category Target
  */
@@ -92,7 +92,7 @@ export const targetStreamTimeoutSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a target headers size limit.
+ * Validate a target headers size limit.
  *
  * @category Target
  */
@@ -103,7 +103,7 @@ export const targetHeadersSizeLimitSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating a target body size limit.
+ * Validate a target body size limit.
  *
  * @category Target
  */
@@ -114,7 +114,7 @@ export const targetBodySizeLimitSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * JSON Schema for validating target content.
+ * Validate target content.
  *
  * @category Target
  */

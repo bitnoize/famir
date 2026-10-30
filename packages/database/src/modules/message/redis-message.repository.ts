@@ -34,40 +34,6 @@ import { rawFullMessageSchema, rawMessageSchema } from './message.schemas.js'
 /**
  * Redis-based message repository implementation.
  *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- * - {@link DatabaseConnector} via {@link DATABASE_CONNECTOR} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisMessageRepository } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisMessageRepository.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { MESSAGE_REPOSITORY, MessageRepository } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const messageRepository = container.resolve<MessageRepository>(MESSAGE_REPOSITORY)
- *
- * // Read '36a6...' message from 'httpbin' campaign
- * const message = await messageRepository.read('httpbin', '36a6...')
- * console.log(message)
- * ```
- *
  * @category Message
  */
 export class RedisMessageRepository extends RedisBaseRepository implements MessageRepository {

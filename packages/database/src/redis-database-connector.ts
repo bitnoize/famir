@@ -1,9 +1,10 @@
-import { DIContainer, LifecycleError, serializeError } from '@famir/common'
+import { DIContainer, serializeError } from '@famir/common'
 import {
   Config,
   CONFIG,
   DATABASE_CONNECTOR,
   DatabaseConnector,
+  LifecycleError,
   Logger,
   LOGGER,
   Validator,
@@ -34,49 +35,6 @@ interface RedisDatabaseConnectorOptions {
  * Uses the official **node-redis** client with custom Redis Functions.
  *
  * @see https://github.com/redis/node-redis - Node Redis client
- *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - {@link Logger} via {@link LOGGER} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { RedisDatabaseConnector } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * RedisDatabaseConnector.register(container)
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { DATABASE_CONNECTOR, DatabaseConnector } from '@famir/domain'
- * import { RedisDatabaseConnection } from '@famir/database'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const connector = container.resolve<DatabaseConnector>(DATABASE_CONNECTOR)
- *
- * // Connect to Redis
- * await connector.connect()
- *
- * // Get underlying Redis connection
- * const connection = connector.getConnection<RedisDatabaseConnection>()
- *
- * // Execute ping command
- * const result = await connection.PING()
- * console.log(result) // 'PONG'
- *
- * //  Close connection
- * await connector.close()
- * ```
  *
  * @category none
  */

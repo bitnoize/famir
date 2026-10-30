@@ -10,7 +10,13 @@ import {
   VALIDATOR,
 } from '@famir/domain'
 import pino from 'pino'
-import { LOGGER_TRANSPORT, LoggerSettings, LoggerTransport, PinoLoggerConfig } from './logger.js'
+import {
+  LOGGER_TRANSPORT,
+  LoggerSettings,
+  LoggerTransport,
+  LoggerTransportOptions,
+  PinoLoggerConfig,
+} from './logger.js'
 import { pinoLoggerConfigSchema } from './logger.schemas.js'
 
 /**
@@ -26,39 +32,6 @@ interface PinoLoggerOptions extends LoggerSettings {
  * Uses the high-performance **Pino** library as the backend.
  *
  * @see https://getpino.io - Pino logger documentation
- *
- * Depends:
- * - {@link Validator} via {@link VALIDATOR} token
- * - {@link Config} via {@link CONFIG} token
- * - Optional {@link LoggerTransport} via {@link LOGGER_TRANSPORT} token
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { PinoLogger } from '@famir/logger'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Register dependency in container
- * PinoLogger.register(container, { appName: 'test' })
- * ```
- *
- * @example
- * ```ts
- * import { DIContainer } from '@famir/common'
- * import { LOGGER, Logger } from '@famir/domain'
- *
- * // Get container singleton
- * const container = DIContainer.getInstance()
- *
- * // Resolve dependency from container
- * const logger = container.resolve<Logger>(LOGGER)
- *
- * // Log some messages
- * logger.debug(`Simple debug log message`)
- * logger.info(`Log message with data`, { foo: 'bar' })
- * ```
  */
 export class PinoLogger implements Logger {
   /**
@@ -77,6 +50,16 @@ export class PinoLogger implements Logger {
           settings
         )
     )
+  }
+
+  /**
+   * Creates custom logger transport.
+   *
+   * @param options - The logger transport options.
+   * @returns The logger transport object.
+   */
+  static createTransport(options: LoggerTransportOptions): LoggerTransport {
+    return pino.transport(options)
   }
 
   /** Built logger options. */

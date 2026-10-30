@@ -90,7 +90,7 @@ export interface CampaignRepository {
   unlock(campaignId: string, lockSecret: string): Promise<void>
 
   /**
-   * Updates the campaign specific fields.
+   * Updates the campaign fields.
    *
    * @param campaignId - The campaign ID to update.
    * @param description - The new human-readable description for the campaign.

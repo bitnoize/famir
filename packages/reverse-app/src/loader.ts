@@ -1,7 +1,7 @@
 import { CompositionRoot, DIContainer } from '@famir/common'
 
 /**
- * Loads all infrastructure modules and starts/stops the application.
+ * Bootstrap all infrastructure modules and starts/stops the application.
  *
  * @param root - The composition root object.
  *
@@ -36,7 +36,7 @@ process.on('uncaughtException', (error: Error) => {
   console.error(`Uncaught exception`)
   console.dir(error, { depth: 4 })
 
-  process.exit(2)
+  process.exit(20)
 })
 
 // Unhandled rejection handler.
@@ -44,5 +44,5 @@ process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) =>
   console.error(`Unhandled rejection`)
   console.dir({ reason, promise }, { depth: 4 })
 
-  process.exit(2)
+  process.exit(30)
 })
