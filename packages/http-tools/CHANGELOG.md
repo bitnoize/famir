@@ -1,5 +1,13 @@
 # @famir/http-tools
 
+## 0.0.14
+
+### Patch Changes
+
+- Update bowser, qs, sanitize-html deps.
+- Updated dependencies:
+  - @famir/common@0.0.10
+
 ## 0.0.13
 
 ### Patch Changes

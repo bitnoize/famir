@@ -1,5 +1,14 @@
 # @famir/database
 
+## 0.0.12
+
+### Patch Changes
+
+- Update redis dep.
+- Updated dependencies:
+  - @famir/http-tools@0.0.14
+  - @famir/common@0.0.10
+
 ## 0.0.11
 
 ### Patch Changes

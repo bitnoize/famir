@@ -1,5 +1,13 @@
 # @famir/logger
 
+## 0.0.9
+
+### Patch Changes
+
+- Update thread-stream dep.
+- Updated dependencies:
+  - @famir/common@0.0.10
+
 ## 0.0.8
 
 ### Patch Changes

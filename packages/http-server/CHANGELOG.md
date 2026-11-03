@@ -1,5 +1,14 @@
 # @famir/http-server
 
+## 0.0.9
+
+### Patch Changes
+
+- Update ws dep.
+- Updated dependencies:
+  - @famir/http-tools@0.0.14
+  - @famir/common@0.0.10
+
 ## 0.0.8
 
 ### Patch Changes
