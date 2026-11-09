@@ -1,14 +1,5 @@
 import { DIContainer } from '@famir/common'
-import {
-  Config,
-  CONFIG,
-  Logger,
-  LOGGER,
-  LoggerData,
-  LoggerLogLevel,
-  Validator,
-  VALIDATOR,
-} from '@famir/domain'
+import { Config, CONFIG, Logger, LOGGER, LoggerData, Validator, VALIDATOR } from '@famir/domain'
 import pino from 'pino'
 import {
   LOGGER_TRANSPORT,
@@ -16,15 +7,9 @@ import {
   LoggerTransport,
   LoggerTransportOptions,
   PinoLoggerConfig,
+  PinoLoggerOptions,
 } from './logger.js'
 import { pinoLoggerConfigSchema } from './logger.schemas.js'
-
-/**
- * Options for a Pino logger.
- */
-interface PinoLoggerOptions extends LoggerSettings {
-  logLevel: LoggerLogLevel
-}
 
 /**
  * Pino-based logger implementation.
@@ -43,7 +28,7 @@ export class PinoLogger implements Logger {
     container.registerSingleton<Logger>(
       LOGGER,
       (c) =>
-        new PinoLogger(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolveOptional<LoggerTransport>(LOGGER_TRANSPORT),

@@ -12,6 +12,8 @@ export function loader(root: CompositionRoot) {
 
   root.infra(container)
 
+  root.main(container)
+
   root.start(container).catch((error: unknown) => {
     console.dir(error, { depth: 4 })
 

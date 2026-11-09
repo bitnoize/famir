@@ -9,16 +9,11 @@ import {
   Validator,
 } from '@famir/domain'
 import { Queue } from 'bullmq'
-import { BullProducerConfig, RedisProducerConnection } from '../../producer.js'
-
-/**
- * Options for a Bull producer queue.
- *
- * @category none
- */
-interface BullProducerQueueOptions {
-  prefix: string
-}
+import {
+  BullProducerConfig,
+  BullProducerQueueOptions,
+  RedisProducerConnection,
+} from '../../producer.js'
 
 /**
  * Abstract base class for all Bull-based producer queues.

@@ -29,6 +29,24 @@ export const DATABASE_STATUS_CODES = ['OK', 'NOT_FOUND', 'CONFLICT', 'FORBIDDEN'
 export type DatabaseStatusCode = (typeof DATABASE_STATUS_CODES)[number]
 
 /**
+ * Options for a Redis database connector.
+ *
+ * @category none
+ */
+export interface RedisDatabaseConnectorOptions {
+  connectionUrl: string
+}
+
+/**
+ * Options for a Redis database repository.
+ *
+ * @category none
+ */
+export interface RedisDatabaseRepositoryOptions {
+  prefix: string
+}
+
+/**
  * Configuration for a Redis database.
  *
  * @category none

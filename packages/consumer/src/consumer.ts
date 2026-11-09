@@ -1,4 +1,4 @@
-import { ConfigData } from '@famir/domain'
+import { AnalyzeQueueName, ConfigData, WebhookQueueName } from '@famir/domain'
 import type { Redis } from 'ioredis'
 
 /**
@@ -7,6 +7,11 @@ import type { Redis } from 'ioredis'
  * @category none
  */
 export type RedisConsumerConnection = Redis
+
+/**
+ * All consumer queue names type.
+ */
+export type ConsumerQueueNames = AnalyzeQueueName | WebhookQueueName
 
 /**
  * Settings for a consumer worker.
@@ -20,6 +25,24 @@ export interface ConsumerWorkerSettings {
   limiterMax: number
   /** Time window in milliseconds for the rate limiter. */
   limiterDuration: number
+}
+
+/**
+ * Options for a Bull consumer connector.
+ *
+ * @category none
+ */
+export interface RedisConsumerConnectorOptions {
+  connectionUrl: string
+}
+
+/**
+ * Options for a Bull consumer worker.
+ *
+ * @category none
+ */
+export interface BullConsumerWorkerOptions extends ConsumerWorkerSettings {
+  prefix: string
 }
 
 /**

@@ -2,7 +2,8 @@
 
 [![Build and Deploy](https://github.com/bitnoize/famir/actions/workflows/main.yml/badge.svg)](https://github.com/bitnoize/famir/actions/workflows/main.yml)
 
-An extensible platform for creating and manage website mirrors using reverse proxying.
+Fake Mirrors (Famir) is an open-source platform for managing mirrors of any websites, built on a
+dynamic reverse proxy that is extensible via a chain of middleware.
 
 ## Stack
 
@@ -41,7 +42,7 @@ A fully functional demonstration project:
 ## Links
 
 - [Website](https://fake-mirrors.net/)
-- [API Docs](https://docs.fake-mirrors.net/)
+- [TypeDoc](https://docs.fake-mirrors.net/)
 - [NPM Org](https://www.npmjs.com/org/famir)
 
 ## Disclaimer

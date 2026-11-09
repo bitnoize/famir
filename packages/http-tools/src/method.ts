@@ -83,7 +83,9 @@ export class HttpMethodWrap {
    * @returns This wrapper for method chaining.
    */
   freeze(): this {
-    this.#isFrozen = true
+    if (!this.#isFrozen) {
+      this.#isFrozen = true
+    }
 
     return this
   }
@@ -105,7 +107,7 @@ export class HttpMethodWrap {
    * @throws Error If the wrapper is frozen.
    */
   set(method: HttpMethod): this {
-    this.sureNotFrozen('set')
+    this.sureNotFrozen()
 
     this.#method = method
 
@@ -124,9 +126,9 @@ export class HttpMethodWrap {
     return methods.includes(this.#method)
   }
 
-  private sureNotFrozen(name: string) {
+  protected sureNotFrozen() {
     if (this.isFrozen) {
-      throw new Error(`Method frozen on ${name}`)
+      throw new Error(`Method is frozen`)
     }
   }
 }

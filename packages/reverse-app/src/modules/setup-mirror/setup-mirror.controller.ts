@@ -13,12 +13,14 @@ import {
   HTTP_SERVER_ROUTER,
   type HttpServerAssets,
   type HttpServerContext,
-  HttpServerContextType,
-  HttpServerMiddleware,
   type HttpServerRouter,
 } from '@famir/http-server'
 import { HttpMessage } from '@famir/http-tools'
-import { BaseController } from '../base/index.js'
+import {
+  BaseController,
+  ReverseDispatchContextType,
+  ReverseDispatchTargetLabel,
+} from '../base/index.js'
 import { SETUP_MIRROR_SERVICE, type SetupMirrorService } from './setup-mirror.service.js'
 
 /**
@@ -43,7 +45,7 @@ export class SetupMirrorController extends BaseController {
     container.registerSingleton<SetupMirrorController>(
       SETUP_MIRROR_CONTROLLER,
       (c) =>
-        new SetupMirrorController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -85,11 +87,12 @@ export class SetupMirrorController extends BaseController {
     super(validator, logger, templater, assets, router)
   }
 
-  /**
-   * Registers used middleware in the router.
-   */
-  use() {
-    this.router.addMiddleware('setup-mirror', async (ctx, next) => {
+  init(): this {
+    return this
+  }
+
+  main(): this {
+    this.router.add('setup-mirror-main', async (ctx, next) => {
       const mirrorHost = this.parseMirrorHost(ctx)
 
       const target = await this.setupMirrorService.findTarget({
@@ -112,11 +115,40 @@ export class SetupMirrorController extends BaseController {
 
       this.setState(ctx, 'message', message)
 
-      await this.dispatchUse[ctx.type](ctx, next)
+      await this.dispatchMain[ctx.type](ctx, next)
     })
+
+    return this
   }
 
-  private dispatchUse: Record<HttpServerContextType, HttpServerMiddleware> = {
+  hook(): this {
+    this.router.add('setup-mirror-hook', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
+      if (!target.label) {
+        await next()
+
+        return
+      }
+
+      const hook = this.dispatchHook[target.label]
+
+      if (hook) {
+        await hook(ctx, next)
+      } else {
+        this.logger.warn(`Controller dispatch hook not found`, {
+          controller: 'setup-mirror',
+          targetLabel: target.label,
+        })
+
+        await next()
+      }
+    })
+
+    return this
+  }
+
+  protected dispatchMain: ReverseDispatchContextType = {
     normal: async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
@@ -146,7 +178,9 @@ export class SetupMirrorController extends BaseController {
     },
   }
 
-  private parseMirrorHost(ctx: HttpServerContext): string {
+  protected dispatchHook: ReverseDispatchTargetLabel = {}
+
+  protected parseMirrorHost(ctx: HttpServerContext): string {
     try {
       const rawProto = ctx.requestHeaders.getString('X-Forwarded-Proto')
       if (!rawProto) {

@@ -1,10 +1,18 @@
 import { DIContainer } from '@famir/common'
-import { Logger, LOGGER, Validator, VALIDATOR } from '@famir/domain'
+import {
+  ANALYZE_QUEUE_NAME,
+  Logger,
+  LOGGER,
+  Validator,
+  VALIDATOR,
+  WEBHOOK_QUEUE_NAME,
+} from '@famir/domain'
 import {
   ConsumerProcessor,
   ConsumerProcessorAction,
   ConsumerProcessorSpec,
 } from './consumer-processor.js'
+import { ConsumerQueueNames } from './consumer.js'
 
 /**
  * DI token for the consumer router.
@@ -12,6 +20,8 @@ import {
  * @category none
  */
 export const CONSUMER_ROUTER = Symbol('ConsumerRouter')
+
+type ConsumerRouterQueues = Map<ConsumerQueueNames, Map<string, ConsumerProcessor<unknown>>>
 
 /**
  * Represents the consumer router.
@@ -30,7 +40,7 @@ export class ConsumerRouter {
   static register(container: DIContainer) {
     container.registerSingleton<ConsumerRouter>(
       CONSUMER_ROUTER,
-      (c) => new ConsumerRouter(c.resolve<Validator>(VALIDATOR), c.resolve<Logger>(LOGGER))
+      (c) => new this(c.resolve<Validator>(VALIDATOR), c.resolve<Logger>(LOGGER))
     )
   }
 
@@ -45,7 +55,10 @@ export class ConsumerRouter {
   }
 
   /** Mapping of queue names to job processors. */
-  protected readonly queues: Map<string, Map<string, ConsumerProcessor<unknown>>> = new Map()
+  protected readonly queues: ConsumerRouterQueues = new Map([
+    [ANALYZE_QUEUE_NAME, new Map<string, ConsumerProcessor<unknown>>()],
+    [WEBHOOK_QUEUE_NAME, new Map<string, ConsumerProcessor<unknown>>()],
+  ])
 
   /**
    * Creates a new router instance.
@@ -61,38 +74,25 @@ export class ConsumerRouter {
   #isActive: boolean = false
 
   /**
-   * Activates the router.
+   * Checks if the router is active.
    *
-   * Once activated, processors can be retrieved but not added.
+   * @returns `true` if the router is active, `false` otherwise.
    */
-  activate() {
-    if (!this.#isActive) {
-      this.#isActive = true
-    }
+  get isActive(): boolean {
+    return this.#isActive
   }
 
   /**
-   * Adds a queue in the router.
+   * Activates the router.
    *
-   * Queues can only be added before the router is activated.
+   * Once activated, processors can be retrieved but not added.
    *
-   * @param queueName - The name of the queue.
    * @returns This router for method chaining.
-   * @throws Error If the router is already active.
-   * @throws Error If the queue is already exist.
    */
-  addQueue(queueName: string): this {
-    if (this.#isActive) {
-      throw new Error(`Router is active`)
+  activate(): this {
+    if (!this.#isActive) {
+      this.#isActive = true
     }
-
-    if (this.queues.has(queueName)) {
-      throw new Error(`Queue already exists: ${queueName}`)
-    }
-
-    this.queues.set(queueName, new Map())
-
-    this.logger.debug(`ConsumerRouter add queue: ${queueName}`)
 
     return this
   }
@@ -109,26 +109,24 @@ export class ConsumerRouter {
    * @throws Error If the queue does not exist.
    * @throws Error If a processor for this job already exists.
    */
-  addProcessor<T>(spec: ConsumerProcessorSpec, action: ConsumerProcessorAction<T>): this {
-    if (this.#isActive) {
-      throw new Error(`Router is active`)
-    }
+  add<T>(spec: ConsumerProcessorSpec, action: ConsumerProcessorAction<T>): this {
+    this.sureNotActive()
 
     const queue = this.queues.get(spec.queueName)
 
     if (!queue) {
-      throw new Error(`Queue not exists: ${spec.queueName}`)
+      throw new Error(`Queue not found: ${spec.queueName}`)
     }
 
     if (queue.has(spec.jobName)) {
-      throw new Error(`Processor already exists: ${spec.queueName} => ${spec.jobName}`)
+      throw new Error(`Processor already exists: ${spec.queueName}->${spec.jobName}`)
     }
 
     const processor = new ConsumerProcessor<T>(this.validator, spec, action)
 
     queue.set(spec.jobName, processor as ConsumerProcessor<unknown>)
 
-    this.logger.debug(`ConsumerRouter add processor: ${spec.queueName} => ${spec.jobName}`)
+    this.logger.debug(`ConsumerRouter add processor: ${spec.queueName}->${spec.jobName}`)
 
     return this
   }
@@ -140,20 +138,30 @@ export class ConsumerRouter {
    *
    * @param queueName - The name of the queue.
    * @param jobName - The name of the job.
-   * @returns The processor function, or `undefined` if not found.
+   * @returns The processor function, or `null` if not found.
    * @throws Error If the router is not active.
    */
-  getProcessor(queueName: string, jobName: string): ConsumerProcessor<unknown> | undefined {
-    if (!this.#isActive) {
-      throw new Error(`Router not active`)
-    }
+  getProcessor(queueName: ConsumerQueueNames, jobName: string): ConsumerProcessor<unknown> | null {
+    this.sureIsActive()
 
     const queue = this.queues.get(queueName)
 
     if (!queue) {
-      return undefined
+      return null
     }
 
-    return queue.get(jobName)
+    return queue.get(jobName) ?? null
+  }
+
+  protected sureNotActive() {
+    if (this.#isActive) {
+      throw new Error(`Router is active`)
+    }
+  }
+
+  protected sureIsActive() {
+    if (!this.#isActive) {
+      throw new Error(`Router not active`)
+    }
   }
 }

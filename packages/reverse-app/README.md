@@ -19,7 +19,7 @@ And exposes the following dependencies:
 - `ReverseApp` via `REVERSE_APP` token
 - `SetupMirrorController` via `SETUP_MIRROR_CONTROLLER` token
 - `SetupMirrorService` via `SETUP_MIRROR_SERVICE` token
-- `WellKnownUrlsController` via `WELL_KNOWN_URLS_CONTROLLER` token
+- `WellKnownController` via `WELL_KNOWN_CONTROLLER` token
 - `AuthorizeController` via `AUTHORIZE_CONTROLLER` token
 - `AuthorizeService` via `AUTHORIZE_SERVICE` token
 - `TransformController` via `TRANSFORM_CONTROLLER` token

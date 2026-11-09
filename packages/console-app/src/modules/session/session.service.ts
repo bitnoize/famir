@@ -28,7 +28,7 @@ export class SessionService {
   static register(container: DIContainer) {
     container.registerSingleton<SessionService>(
       SESSION_SERVICE,
-      (c) => new SessionService(c.resolve<SessionRepository>(SESSION_REPOSITORY))
+      (c) => new this(c.resolve<SessionRepository>(SESSION_REPOSITORY))
     )
   }
 

@@ -6,7 +6,7 @@ import {
   type HttpServerAssets,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { BaseController } from '../base/index.js'
+import { BaseController, ReverseDispatchTargetLabel } from '../base/index.js'
 import { COMPLETE_SERVICE, type CompleteService } from './complete.service.js'
 
 /**
@@ -31,7 +31,7 @@ export class CompleteController extends BaseController {
     container.registerSingleton<CompleteController>(
       COMPLETE_CONTROLLER,
       (c) =>
-        new CompleteController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -73,11 +73,12 @@ export class CompleteController extends BaseController {
     super(validator, logger, templater, assets, router)
   }
 
-  /**
-   * Registers used middleware in the router.
-   */
-  use() {
-    this.router.addMiddleware('complete', async (ctx, next) => {
+  init(): this {
+    return this
+  }
+
+  main(): this {
+    this.router.add('complete-main', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const proxy = this.getState(ctx, 'proxy')
       const target = this.getState(ctx, 'target')
@@ -145,5 +146,36 @@ export class CompleteController extends BaseController {
 
       await next()
     })
+
+    return this
   }
+
+  hook(): this {
+    this.router.add('complete-hook', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
+      if (!target.label) {
+        await next()
+
+        return
+      }
+
+      const hook = this.dispatchHook[target.label]
+
+      if (hook) {
+        await hook(ctx, next)
+      } else {
+        this.logger.warn(`Controller dispatch hook not found`, {
+          controller: 'complete',
+          targetLabel: target.label,
+        })
+
+        await next()
+      }
+    })
+
+    return this
+  }
+
+  protected dispatchHook: ReverseDispatchTargetLabel = {}
 }

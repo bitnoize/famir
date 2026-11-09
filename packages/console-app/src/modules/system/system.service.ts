@@ -30,7 +30,7 @@ export class SystemService {
     container.registerSingleton<SystemService>(
       SYSTEM_SERVICE,
       (c) =>
-        new SystemService(
+        new this(
           c.resolve<DatabaseManager>(DATABASE_MANAGER),
           c.resolve<AnalyzeQueue>(ANALYZE_QUEUE),
           c.resolve<WebhookQueue>(WEBHOOK_QUEUE)

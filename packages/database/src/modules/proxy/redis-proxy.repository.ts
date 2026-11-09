@@ -32,7 +32,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     container.registerSingleton<ProxyRepository>(
       PROXY_REPOSITORY,
       (c) =>
-        new RedisProxyRepository(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

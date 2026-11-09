@@ -119,7 +119,9 @@ export class HttpMessage {
    * @returns This message for method chaining.
    */
   ready(): this {
-    this.#isReady = true
+    if (!this.#isReady) {
+      this.#isReady = true
+    }
 
     return this
   }
@@ -138,22 +140,16 @@ export class HttpMessage {
    *
    * The type can only be changed to a compatible type based on the current type.
    *
-   * @param type - The new message type.
-   * @returns This message for method chaining.
-   * @throws Error If the message is already ready.
+   * @param value - The new message type.
    * @throws Error If the type transition is invalid.
    */
-  setType(type: HttpType): this {
-    this.sureNotReady('setType')
-
-    if (!arrayIncludes(this.typesSwitch[this.type], type)) {
+  set type(value: HttpType) {
+    if (!arrayIncludes(this.typesSwitch[this.type], value)) {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      throw new Error(`Wrong message type switch: ${this.type} => ${type}`)
+      throw new Error(`Wrong message type switch: ${this.type} => ${value}`)
     }
 
-    this.#type = type
-
-    return this
+    this.#type = value
   }
 
   /** Connection details for this message. */
@@ -216,7 +212,7 @@ export class HttpMessage {
    * @throws Error If the message is already ready.
    */
   addContentTypes(name: HttpContentTypeName, types: string[]): this {
-    this.sureNotReady('addContentTypes')
+    this.sureNotReady()
 
     types.forEach((type) => {
       if (!this.#contentTypes[name].includes(type)) {
@@ -263,7 +259,7 @@ export class HttpMessage {
    * @throws Error If the message is already ready.
    */
   addRewriteUrlContentTypes(types: string[]): this {
-    this.sureNotReady('addRewriteUrlContentTypes')
+    this.sureNotReady()
 
     this.#rewriteUrlContentTypes.push(...types)
 
@@ -292,7 +288,7 @@ export class HttpMessage {
    * @throws Error If the message is already ready.
    */
   addRewriteUrlExtraSchemes(): this {
-    this.sureNotReady('addRewriteUrlExtraSchemes')
+    this.sureNotReady()
 
     this.#rewriteUrlSchemes.push(
       ['%3A%2F%2F', true],
@@ -318,7 +314,7 @@ export class HttpMessage {
    * @throws Error If the message is already ready.
    */
   addRequestHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
-    this.sureNotReady('addRequestHeadInterceptor')
+    this.sureNotReady()
 
     this.#requestHeadInterceptors.push([name, interceptor])
 
@@ -336,7 +332,7 @@ export class HttpMessage {
    * @throws Error If the message is already ready.
    */
   addRequestBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
-    this.sureNotReady('addRequestBodyInterceptor')
+    this.sureNotReady()
 
     this.#requestBodyInterceptors.push([name, interceptor])
 
@@ -352,7 +348,7 @@ export class HttpMessage {
    * @throws Error If the message is not ready.
    */
   runRequestHeadInterceptors(): this {
-    this.sureIsReady('runRequestHeadInterceptors')
+    this.sureIsReady()
 
     for (const [name, interceptor] of this.#requestHeadInterceptors) {
       try {
@@ -377,7 +373,7 @@ export class HttpMessage {
    * @throws Error If the message is not ready.
    */
   runRequestBodyInterceptors(): this {
-    this.sureIsReady('runRequestBodyInterceptors')
+    this.sureIsReady()
 
     for (const [name, interceptor] of this.#requestBodyInterceptors) {
       try {
@@ -405,7 +401,7 @@ export class HttpMessage {
    * @throws Error If the message is already ready.
    */
   addRequestTransform(transform: Transform): this {
-    this.sureNotReady('addRequestTransform')
+    this.sureNotReady()
 
     this.#requestTransforms.push(transform)
 
@@ -435,7 +431,7 @@ export class HttpMessage {
    * @throws Error If the message is already ready.
    */
   addResponseHeadInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
-    this.sureNotReady('addResponseHeadInterceptor')
+    this.sureNotReady()
 
     this.#responseHeadInterceptors.push([name, interceptor])
 
@@ -453,7 +449,7 @@ export class HttpMessage {
    * @throws Error If the message is already ready.
    */
   addResponseBodyInterceptor(name: string, interceptor: HttpMessageInterceptor): this {
-    this.sureNotReady('addResponseBodyInterceptor')
+    this.sureNotReady()
 
     this.#responseBodyInterceptors.push([name, interceptor])
 
@@ -469,7 +465,7 @@ export class HttpMessage {
    * @throws Error If the message is not ready.
    */
   runResponseHeadInterceptors(): this {
-    this.sureIsReady('runResponseHeadInterceptors')
+    this.sureIsReady()
 
     for (const [name, interceptor] of this.#responseHeadInterceptors) {
       try {
@@ -493,7 +489,7 @@ export class HttpMessage {
    * @throws Error If the message is not ready.
    */
   runResponseBodyInterceptors(): this {
-    this.sureIsReady('runResponseBodyInterceptors')
+    this.sureIsReady()
 
     for (const [name, interceptor] of this.#responseBodyInterceptors) {
       try {
@@ -521,7 +517,7 @@ export class HttpMessage {
    * @throws Error If the message is already ready.
    */
   addResponseTransform(transform: Transform): this {
-    this.sureNotReady('addResponseTransform')
+    this.sureNotReady()
 
     this.#responseTransforms.push(transform)
 
@@ -871,19 +867,19 @@ export class HttpMessage {
     return rewriteUrl(text, rev, targets, this.#rewriteUrlSchemes)
   }
 
-  private sureNotReady(name: string) {
+  protected sureNotReady() {
     if (this.isReady) {
-      throw new Error(`HttpMessage is ready on: ${name}`)
+      throw new Error(`Message is ready`)
     }
   }
 
-  private sureIsReady(name: string) {
+  protected sureIsReady() {
     if (!this.isReady) {
-      throw new Error(`HttpMessage not ready on: ${name}`)
+      throw new Error(`Message not ready`)
     }
   }
 
-  private typesSwitch: Record<HttpType, HttpType[]> = {
+  protected typesSwitch: Record<HttpType, HttpType[]> = {
     'normal-simple': [...HTTP_TYPES_NORMAL],
     'normal-stream-request': [...HTTP_TYPES_NORMAL],
     'normal-stream-response': [...HTTP_TYPES_NORMAL],

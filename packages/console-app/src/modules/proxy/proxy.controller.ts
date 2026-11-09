@@ -53,7 +53,7 @@ export class ProxyController extends BaseController {
     container.registerSingleton<ProxyController>(
       PROXY_CONTROLLER,
       (c) =>
-        new ProxyController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -93,20 +93,21 @@ export class ProxyController extends BaseController {
     protected readonly proxyService: ProxyService
   ) {
     super(validator, logger, templater, assets, router)
+  }
 
+  init(): this {
     this.validator
       .addSchema('console-create-proxy-args', createProxyArgsSchema)
       .addSchema('console-read-proxy-args', readProxyArgsSchema)
       .addSchema('console-toggle-proxy-args', toggleProxyArgsSchema)
       .addSchema('console-delete-proxy-args', deleteProxyArgsSchema)
       .addSchema('console-list-proxies-args', listProxiesArgsSchema)
+
+    return this
   }
 
-  /**
-   * Registers used commands in the router.
-   */
-  use() {
-    this.router.addCommand<CreateProxyArgs>(
+  main(): this {
+    this.router.add<CreateProxyArgs>(
       {
         name: 'proxy-create',
         description: `Creates a new proxy.`,
@@ -134,7 +135,7 @@ export class ProxyController extends BaseController {
       }
     )
 
-    this.router.addCommand<ReadProxyArgs>(
+    this.router.add<ReadProxyArgs>(
       {
         name: 'proxy-read',
         description: `Reads the proxy by its ID.`,
@@ -154,7 +155,7 @@ export class ProxyController extends BaseController {
       }
     )
 
-    this.router.addCommand<ToggleProxyArgs>(
+    this.router.add<ToggleProxyArgs>(
       {
         name: 'proxy-enable',
         description: `Enables the proxy, making it available for traffic routing.`,
@@ -174,7 +175,7 @@ export class ProxyController extends BaseController {
       }
     )
 
-    this.router.addCommand<ToggleProxyArgs>(
+    this.router.add<ToggleProxyArgs>(
       {
         name: 'proxy-disable',
         description: `Disables the proxy, stopping traffic routing.`,
@@ -194,7 +195,7 @@ export class ProxyController extends BaseController {
       }
     )
 
-    this.router.addCommand<DeleteProxyArgs>(
+    this.router.add<DeleteProxyArgs>(
       {
         name: 'proxy-delete',
         description: `Deletes the proxy by its ID.`,
@@ -214,7 +215,7 @@ export class ProxyController extends BaseController {
       }
     )
 
-    this.router.addCommand<ListProxiesArgs>(
+    this.router.add<ListProxiesArgs>(
       {
         name: 'proxy-list',
         description: `Lists all proxies for the campaign.`,
@@ -232,6 +233,8 @@ export class ProxyController extends BaseController {
         this.showProxyCollection(console, proxies)
       }
     )
+
+    return this
   }
 
   private showProxyModel(console: Console, proxy: ProxyModel) {

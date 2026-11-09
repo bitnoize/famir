@@ -9,11 +9,18 @@ import { AnalyzeJobData } from './analyze.job.js'
 export const ANALYZE_QUEUE = Symbol('AnalyzeQueue')
 
 /**
- * Name of the analyze queue.
+ * Analyze queue name.
  *
  * @category Analyze Queue
  */
 export const ANALYZE_QUEUE_NAME = 'analyze'
+
+/**
+ * Analyze queue name type.
+ *
+ * @category Analyze Queue
+ */
+export type AnalyzeQueueName = typeof ANALYZE_QUEUE_NAME
 
 /**
  * Defines the public contract for an analyze queue.

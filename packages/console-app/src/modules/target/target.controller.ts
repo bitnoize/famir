@@ -46,7 +46,7 @@ export class TargetController extends BaseController {
     container.registerSingleton<TargetController>(
       TARGET_CONTROLLER,
       (c) =>
-        new TargetController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -86,18 +86,19 @@ export class TargetController extends BaseController {
     protected readonly targetService: TargetService
   ) {
     super(validator, logger, templater, assets, router)
+  }
 
+  init(): this {
     this.validator
       .addSchema('console-read-target-args', readTargetArgsSchema)
       .addSchema('console-read-target-hosts-args', readTargetHostsArgsSchema)
       .addSchema('console-list-targets-args', listTargetsArgsSchema)
+
+    return this
   }
 
-  /**
-   * Registers used commands in the router.
-   */
-  use() {
-    this.router.addCommand<ReadTargetArgs>(
+  main(): this {
+    this.router.add<ReadTargetArgs>(
       {
         name: 'target-read',
         description: `Reads the target by its ID.`,
@@ -117,7 +118,7 @@ export class TargetController extends BaseController {
       }
     )
 
-    this.router.addCommand<ReadTargetHostsArgs>(
+    this.router.add<ReadTargetHostsArgs>(
       {
         name: 'target-read-hosts',
         description: `Reads all target hosts across all campaigns.`,
@@ -131,7 +132,7 @@ export class TargetController extends BaseController {
       }
     )
 
-    this.router.addCommand<ListTargetsArgs>(
+    this.router.add<ListTargetsArgs>(
       {
         name: 'target-list',
         description: `Lists all targets for the campaign.`,
@@ -149,6 +150,8 @@ export class TargetController extends BaseController {
         this.showTargetCollection(console, targets)
       }
     )
+
+    return this
   }
 
   private showTargetModel(console: Console, target: FullTargetModel) {

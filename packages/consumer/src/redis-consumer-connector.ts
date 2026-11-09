@@ -11,17 +11,12 @@ import {
   VALIDATOR,
 } from '@famir/domain'
 import { Redis } from 'ioredis'
-import { BullConsumerConfig, RedisConsumerConnection } from './consumer.js'
+import {
+  BullConsumerConfig,
+  RedisConsumerConnection,
+  RedisConsumerConnectorOptions,
+} from './consumer.js'
 import { bullConsumerConfigSchema } from './consumer.schemas.js'
-
-/**
- * Options for a Bull consumer connector.
- *
- * @category none
- */
-interface BullConsumerConnectorOptions {
-  connectionUrl: string
-}
 
 /**
  * Redis-based consumer connector implementation.
@@ -42,7 +37,7 @@ export class RedisConsumerConnector implements ConsumerConnector {
     container.registerSingleton<ConsumerConnector>(
       CONSUMER_CONNECTOR,
       (c) =>
-        new RedisConsumerConnector(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER)
@@ -51,10 +46,10 @@ export class RedisConsumerConnector implements ConsumerConnector {
   }
 
   /** Built connector options. */
-  protected readonly options: BullConsumerConnectorOptions
+  protected readonly options: RedisConsumerConnectorOptions
 
   /** Underlying Redis connection instance. */
-  private readonly connection: RedisConsumerConnection
+  protected readonly connection: RedisConsumerConnection
 
   /**
    * Creates a new connector instance.
@@ -127,7 +122,7 @@ export class RedisConsumerConnector implements ConsumerConnector {
   /**
    * Converts validated configuration to a connector options.
    */
-  private buildOptions(conf: BullConsumerConfig): BullConsumerConnectorOptions {
+  private buildOptions(conf: BullConsumerConfig): RedisConsumerConnectorOptions {
     return {
       connectionUrl: conf.CONSUMER_CONNECTION_URL,
     }

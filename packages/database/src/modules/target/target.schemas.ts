@@ -56,7 +56,10 @@ export const targetPortSchema: JSONSchemaType<number> = {
  *
  * @category Target
  */
-export const targetLabelSchema = customIdentSchema
+export const targetLabelSchema: JSONSchemaType<string> = {
+  type: 'string',
+  anyOf: [{ const: '' }, { pattern: '^[a-z\\-_]{2,64}$' }],
+} as const
 
 /**
  * Validate a target connection timeout.

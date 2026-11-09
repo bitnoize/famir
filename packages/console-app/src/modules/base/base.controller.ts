@@ -29,6 +29,16 @@ export abstract class BaseController {
     protected readonly router: ReplServerRouter
   ) {}
 
+  /**
+   * Initialize controller.
+   */
+  abstract init(): this
+
+  /**
+   * Define main commands.
+   */
+  abstract main(): this
+
   protected confirmAlert(console: Console) {
     console.error(`Confirmation required, use --force flag if you are sure`)
   }

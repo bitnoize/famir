@@ -55,7 +55,7 @@ export class SystemController extends BaseController {
     container.registerSingleton<SystemController>(
       SYSTEM_CONTROLLER,
       (c) =>
-        new SystemController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -95,7 +95,9 @@ export class SystemController extends BaseController {
     protected readonly systemService: SystemService
   ) {
     super(validator, logger, templater, assets, router)
+  }
 
+  init(): this {
     this.validator
       .addSchema('console-system-help-args', systemHelpArgsSchema)
       .addSchema('console-system-assets-args', systemAssetsArgsSchema)
@@ -103,13 +105,12 @@ export class SystemController extends BaseController {
       .addSchema('console-load-database-functions-args', loadDatabaseFunctionsArgsSchema)
       .addSchema('console-cleanup-database-args', cleanupDatabaseArgsSchema)
       .addSchema('console-get-producer-info-args', getProducerInfoArgsSchema)
+
+    return this
   }
 
-  /**
-   * Registers used commands in the router.
-   */
-  use() {
-    this.router.addCommand<SystemHelpArgs>(
+  main(): this {
+    this.router.add<SystemHelpArgs>(
       {
         name: 'help',
         description: `Show help screen with list of all commands.`,
@@ -119,11 +120,11 @@ export class SystemController extends BaseController {
       async (console) => {
         console.log(`Fake Mirrors Console`)
 
-        console.table(this.router.getCommandsOverview())
+        console.table(this.router.overview())
       }
     )
 
-    this.router.addCommand<SystemAssetsArgs>(
+    this.router.add<SystemAssetsArgs>(
       {
         name: 'assets',
         description: `Show assets list or specified asset content.`,
@@ -154,7 +155,7 @@ export class SystemController extends BaseController {
       }
     )
 
-    this.router.addCommand<GetDatabaseInfoArgs>(
+    this.router.add<GetDatabaseInfoArgs>(
       {
         name: 'database-info',
         description: 'Get database information.',
@@ -168,7 +169,7 @@ export class SystemController extends BaseController {
       }
     )
 
-    this.router.addCommand<LoadDatabaseFunctionsArgs>(
+    this.router.add<LoadDatabaseFunctionsArgs>(
       {
         name: 'database-functions',
         description: `Loads all custom functions into the database.`,
@@ -193,7 +194,7 @@ export class SystemController extends BaseController {
       }
     )
 
-    this.router.addCommand<CleanupDatabaseArgs>(
+    this.router.add<CleanupDatabaseArgs>(
       {
         name: 'database-cleanup',
         description: `Cleanup entire the database.`,
@@ -218,7 +219,7 @@ export class SystemController extends BaseController {
       }
     )
 
-    this.router.addCommand<GetProducerInfoArgs>(
+    this.router.add<GetProducerInfoArgs>(
       {
         name: 'producer-info',
         description: `Show producer information.`,
@@ -231,5 +232,7 @@ export class SystemController extends BaseController {
         console.log(info)
       }
     )
+
+    return this
   }
 }

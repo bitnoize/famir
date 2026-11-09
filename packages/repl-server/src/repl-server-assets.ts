@@ -19,10 +19,7 @@ export class ReplServerAssets extends Map<string, string> {
    * @param assets - The list of key-value pairs.
    */
   static register(container: DIContainer, assets: [string, string][]) {
-    container.registerSingleton<ReplServerAssets>(
-      REPL_SERVER_ASSETS,
-      () => new ReplServerAssets(assets)
-    )
+    container.registerSingleton<ReplServerAssets>(REPL_SERVER_ASSETS, () => new this(assets))
   }
 
   /**
@@ -45,9 +42,6 @@ export class ReplServerAssets extends Map<string, string> {
     })
   }
 
-  /**
-   * Map default values.
-   */
   protected defaults: Record<string, string> = {
     'banner-greet.txt': `Welcome to Fake-Mirrors!\n`,
     'banner-leave.txt': `So long!\n`,
@@ -56,7 +50,7 @@ export class ReplServerAssets extends Map<string, string> {
   getOrThrow(assetName: string): string {
     const asset = this.get(assetName)
     if (asset == null) {
-      throw new Error(`Asset '${assetName}' not exists`)
+      throw new Error(`Asset '${assetName}' not found`)
     }
 
     return asset

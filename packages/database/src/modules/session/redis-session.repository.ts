@@ -32,7 +32,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     container.registerSingleton<SessionRepository>(
       SESSION_REPOSITORY,
       (c) =>
-        new RedisSessionRepository(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

@@ -35,7 +35,7 @@ export class ReverseApp {
     container.registerSingleton<ReverseApp>(
       REVERSE_APP,
       (c) =>
-        new ReverseApp(
+        new this(
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<ProducerConnector>(PRODUCER_CONNECTOR),

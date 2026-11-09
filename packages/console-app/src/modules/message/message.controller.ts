@@ -52,7 +52,7 @@ export class MessageController extends BaseController {
     container.registerSingleton<MessageController>(
       MESSAGE_CONTROLLER,
       (c) =>
-        new MessageController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -92,19 +92,20 @@ export class MessageController extends BaseController {
     protected readonly messageService: MessageService
   ) {
     super(validator, logger, templater, assets, router)
+  }
 
+  init(): this {
     this.validator
       .addSchema('console-read-message-args', readMessageArgsSchema)
       .addSchema('console-delete-message-args', deleteMessageArgsSchema)
       .addSchema('console-list-messages-args', listMessagesArgsSchema)
       .addSchema('console-clear-messages-args', clearMessagesArgsSchema)
+
+    return this
   }
 
-  /**
-   * Registers used commands in the router.
-   */
-  use() {
-    this.router.addCommand<ReadMessageArgs>(
+  main(): this {
+    this.router.add<ReadMessageArgs>(
       {
         name: 'message-read',
         description: `Reads the message by its ID.`,
@@ -152,7 +153,7 @@ export class MessageController extends BaseController {
       }
     )
 
-    this.router.addCommand<DeleteMessageArgs>(
+    this.router.add<DeleteMessageArgs>(
       {
         name: 'message-delete',
         description: `Deletes the message by its ID.`,
@@ -172,7 +173,7 @@ export class MessageController extends BaseController {
       }
     )
 
-    this.router.addCommand<ListMessagesArgs>(
+    this.router.add<ListMessagesArgs>(
       {
         name: 'message-list',
         description: `Lists campaign message history.`,
@@ -200,7 +201,7 @@ export class MessageController extends BaseController {
       }
     )
 
-    this.router.addCommand<ClearMessagesArgs>(
+    this.router.add<ClearMessagesArgs>(
       {
         name: 'message-clear',
         description: `Clears campaign message history.`,
@@ -218,6 +219,8 @@ export class MessageController extends BaseController {
         console.log(`Message history cleared!`)
       }
     )
+
+    return this
   }
 
   private showMessageModel(

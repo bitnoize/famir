@@ -16,15 +16,8 @@ import * as readline from 'readline'
 import { BaseReplServer } from './base-repl-server.js'
 import { REPL_SERVER_ASSETS, ReplServerAssets } from './repl-server-assets.js'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
-import { CliReplServerConfig, REPL_SERVER_PROMPT } from './repl-server.js'
+import { CliReplServerConfig, CliReplServerOptions, REPL_SERVER_PROMPT } from './repl-server.js'
 import { cliReplServerConfigSchema } from './repl-server.schemas.js'
-
-/**
- * Options for a Cli repl-server.
- */
-interface CliReplServerOptions {
-  useColors: boolean
-}
 
 /**
  * Cli-based repl-server implementation.
@@ -43,7 +36,7 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
       (c) =>
-        new CliReplServer(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),
@@ -153,7 +146,7 @@ export class CliReplServer extends BaseReplServer implements ReplServer {
 
   protected initReadline(input: Readable, output: Writable): readline.Interface {
     const completer = (line: string) => {
-      const completions = this.router.getCommandsNames()
+      const completions = this.router.names()
       const hits = completions.filter((c) => c.startsWith(line))
 
       return [hits.length ? hits : completions, line]

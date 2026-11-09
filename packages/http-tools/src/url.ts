@@ -119,7 +119,9 @@ export class HttpUrlWrap {
    * @returns This wrapper for method chaining.
    */
   freeze(): this {
-    this.#isFrozen = true
+    if (!this.#isFrozen) {
+      this.#isFrozen = true
+    }
 
     return this
   }
@@ -143,7 +145,7 @@ export class HttpUrlWrap {
    * @throws Error If the wrapper is frozen.
    */
   set<K extends keyof HttpUrl>(name: K, value: HttpUrl[K]): this {
-    this.sureNotFrozen('set')
+    this.sureNotFrozen()
 
     this.invalidateCacheFor(name)
 
@@ -160,7 +162,7 @@ export class HttpUrlWrap {
    * @throws Error If the wrapper is frozen.
    */
   merge(url: Partial<HttpUrl>): this {
-    this.sureNotFrozen('merge')
+    this.sureNotFrozen()
 
     Object.entries(url).forEach(([name, value]) => {
       this.set(name as keyof HttpUrl, value)
@@ -227,7 +229,7 @@ export class HttpUrlWrap {
    * @throws Error If formatting the query string fails.
    */
   setQueryString(queryString: HttpQueryString): this {
-    this.sureNotFrozen('setQueryString')
+    this.sureNotFrozen()
 
     const value = formatQueryString(queryString, {
       ...this.formatQueryStringOptions,
@@ -302,7 +304,7 @@ export class HttpUrlWrap {
    * @throws Error If the wrapper is frozen.
    */
   reset(): this {
-    this.sureNotFrozen('reset')
+    this.sureNotFrozen()
 
     this.invalidateCacheAll()
 
@@ -318,19 +320,19 @@ export class HttpUrlWrap {
     return this
   }
 
-  private sureNotFrozen(name: string) {
+  protected sureNotFrozen() {
     if (this.isFrozen) {
-      throw new Error(`Url frozen on ${name}`)
+      throw new Error(`Url is frozen`)
     }
   }
 
-  private invalidateCacheFor(name: keyof HttpUrl) {
+  protected invalidateCacheFor(name: keyof HttpUrl) {
     if (name === 'search') {
       this.#cacheQueryString = undefined
     }
   }
 
-  private invalidateCacheAll() {
+  protected invalidateCacheAll() {
     this.#cacheQueryString = undefined
   }
 }

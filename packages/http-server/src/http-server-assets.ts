@@ -19,10 +19,7 @@ export class HttpServerAssets extends Map<string, string> {
    * @param assets - The list of key-value pairs.
    */
   static register(container: DIContainer, assets: [string, string][]) {
-    container.registerSingleton<HttpServerAssets>(
-      HTTP_SERVER_ASSETS,
-      () => new HttpServerAssets(assets)
-    )
+    container.registerSingleton<HttpServerAssets>(HTTP_SERVER_ASSETS, () => new this(assets))
   }
 
   /**
@@ -45,9 +42,6 @@ export class HttpServerAssets extends Map<string, string> {
     })
   }
 
-  /**
-   * Map default values.
-   */
   protected defaults: Record<string, string> = {
     'error-page.html': DEFAULT_ERROR_PAGE,
   }
@@ -55,7 +49,7 @@ export class HttpServerAssets extends Map<string, string> {
   getOrThrow(assetName: string): string {
     const asset = this.get(assetName)
     if (asset == null) {
-      throw new Error(`Asset '${assetName}' not exists`)
+      throw new Error(`Asset '${assetName}' not found`)
     }
 
     return asset

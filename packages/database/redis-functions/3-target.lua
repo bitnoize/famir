@@ -87,7 +87,6 @@ local function create_target(keys, args)
         or k == 'donor_port'
         or k == 'mirror_sub'
         or k == 'mirror_port'
-        or k == 'label'
       ) and v == ''
     then
       return redis.error_reply('ERR Wrong model.' .. k)

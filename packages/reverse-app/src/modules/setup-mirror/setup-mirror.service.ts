@@ -32,7 +32,7 @@ export class SetupMirrorService {
     container.registerSingleton<SetupMirrorService>(
       SETUP_MIRROR_SERVICE,
       (c) =>
-        new SetupMirrorService(
+        new this(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY)
         )

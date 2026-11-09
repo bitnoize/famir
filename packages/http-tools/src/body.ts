@@ -57,7 +57,9 @@ export class HttpBodyWrap {
    * @returns This wrapper for method chaining.
    */
   freeze(): this {
-    this.#isFrozen = true
+    if (!this.#isFrozen) {
+      this.#isFrozen = true
+    }
 
     return this
   }
@@ -88,7 +90,7 @@ export class HttpBodyWrap {
    * @throws Error If the wrapper is frozen.
    */
   set(body: HttpBody): this {
-    this.sureNotFrozen('set')
+    this.sureNotFrozen()
 
     this.invalidateCacheAll()
 
@@ -124,7 +126,7 @@ export class HttpBodyWrap {
    * @throws Error If Base64 decoding fails.
    */
   setBase64(base64: string): this {
-    this.sureNotFrozen('setBase64')
+    this.sureNotFrozen()
 
     this.set(Buffer.from(base64, 'base64'))
 
@@ -162,7 +164,7 @@ export class HttpBodyWrap {
    * @throws Error If encoding fails.
    */
   setText(text: HttpText, charset: string = 'utf8'): this {
-    this.sureNotFrozen('setText')
+    this.sureNotFrozen()
 
     this.set(iconv.encode(text, charset))
 
@@ -202,7 +204,7 @@ export class HttpBodyWrap {
    * @throws Error If JSON stringification or encoding fails.
    */
   setJson(json: HttpJson, charset?: string): this {
-    this.sureNotFrozen('setJson')
+    this.sureNotFrozen()
 
     const text = JSON.stringify(json)
     this.setText(text, charset)
@@ -252,7 +254,7 @@ export class HttpBodyWrap {
    * @throws Error If formatting fails.
    */
   setQueryString(queryString: HttpQueryString, charset?: string): this {
-    this.sureNotFrozen('setQueryString')
+    this.sureNotFrozen()
 
     const text = formatQueryString(queryString, {
       ...this.formatQueryStringOptions,
@@ -272,7 +274,7 @@ export class HttpBodyWrap {
    * @throws Error If the wrapper is frozen.
    */
   reset(): this {
-    this.sureNotFrozen('reset')
+    this.sureNotFrozen()
 
     this.invalidateCacheAll()
 
@@ -281,13 +283,13 @@ export class HttpBodyWrap {
     return this
   }
 
-  private sureNotFrozen(name: string) {
+  protected sureNotFrozen() {
     if (this.isFrozen) {
-      throw new Error(`Body frozen on ${name}`)
+      throw new Error(`Body is frozen`)
     }
   }
 
-  private invalidateCacheAll() {
+  protected invalidateCacheAll() {
     this.#cacheBase64 = undefined
     this.#cacheText = undefined
     this.#cacheJson = undefined

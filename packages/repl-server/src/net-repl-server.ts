@@ -17,19 +17,8 @@ import * as readline from 'readline'
 import { BaseReplServer } from './base-repl-server.js'
 import { REPL_SERVER_ASSETS, ReplServerAssets } from './repl-server-assets.js'
 import { REPL_SERVER_ROUTER, ReplServerRouter } from './repl-server-router.js'
-import { NetReplServerConfig, REPL_SERVER_PROMPT } from './repl-server.js'
+import { NetReplServerConfig, NetReplServerOptions, REPL_SERVER_PROMPT } from './repl-server.js'
 import { netReplServerConfigSchema } from './repl-server.schemas.js'
-
-/**
- * Options for a Net repl-server.
- */
-interface NetReplServerOptions {
-  address: string
-  port: number
-  maxClients: number
-  socketTimeout: number
-  useColors: boolean
-}
 
 /**
  * Net-based repl-server implementation.
@@ -47,7 +36,7 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
     container.registerSingleton<ReplServer>(
       REPL_SERVER,
       (c) =>
-        new NetReplServer(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),
@@ -65,9 +54,6 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
 
   /** Set of active client socket connections. */
   protected readonly clients: Set<net.Socket> = new Set()
-
-  /** Start in-flight promise. */
-  private startPromise: Promise<void> | null = null
 
   /**
    * Creates a new repl-server instance.
@@ -124,6 +110,9 @@ export class NetReplServer extends BaseReplServer implements ReplServer {
 
     this.server.maxConnections = this.options.maxClients
   }
+
+  /** Start in-flight promise. */
+  private startPromise: Promise<void> | null = null
 
   #isShutdown: boolean = false
 

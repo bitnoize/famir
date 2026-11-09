@@ -23,7 +23,7 @@ export class ConsumerAssets extends Map<string, string> {
    * @param assets - The list of key-value pairs.
    */
   static register(container: DIContainer, assets: [string, string][]) {
-    container.registerSingleton<ConsumerAssets>(CONSUMER_ASSETS, () => new ConsumerAssets(assets))
+    container.registerSingleton<ConsumerAssets>(CONSUMER_ASSETS, () => new this(assets))
   }
 
   /**
@@ -34,5 +34,14 @@ export class ConsumerAssets extends Map<string, string> {
    */
   static resolve(container: DIContainer) {
     return container.resolve<ConsumerAssets>(CONSUMER_ASSETS)
+  }
+
+  getOrThrow(assetName: string): string {
+    const asset = this.get(assetName)
+    if (asset == null) {
+      throw new Error(`Asset '${assetName}' not found`)
+    }
+
+    return asset
   }
 }

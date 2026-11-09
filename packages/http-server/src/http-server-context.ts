@@ -71,6 +71,20 @@ export interface HttpServerContext {
   readonly responseStream: Writable
 
   /**
+   * Checks if context type is 'normal'.
+   *
+   * @throws Error If context type is not 'normal'.
+   */
+  sureNormal(): void
+
+  /**
+   * Checks if context type is 'websocket'.
+   *
+   * @throws Error If context type is not 'websocket'.
+   */
+  sureWebsocket(): void
+
+  /**
    * Loads the request body into memory.
    *
    * @param bodySizeLimit - The maximum body size in bytes.
@@ -184,6 +198,18 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
   abstract get requestStream(): Readable
 
   abstract get responseStream(): Writable
+
+  sureNormal() {
+    if (this.type !== 'normal') {
+      throw new Error(`Only 'normal' context type allowed`)
+    }
+  }
+
+  sureWebsocket() {
+    if (this.type !== 'websocket') {
+      throw new Error(`Only 'websocket' context type allowed`)
+    }
+  }
 
   abstract loadRequest(bodySizeLimit: number): Promise<void>
 
@@ -358,7 +384,7 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
   /**
    * Concatenates buffer chunks into a single Buffer.
    */
-  private parseRawBody(chunks: Buffer[]): HttpBody {
+  protected parseRawBody(chunks: Buffer[]): HttpBody {
     try {
       return Buffer.concat(chunks)
     } catch {

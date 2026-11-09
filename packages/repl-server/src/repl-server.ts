@@ -1,11 +1,29 @@
 import { ConfigData } from '@famir/domain'
 
 /**
+ * Options for a Cli repl-server.
+ */
+export interface CliReplServerOptions {
+  useColors: boolean
+}
+
+/**
  * Configuration for a Cli repl-server.
  */
 export interface CliReplServerConfig extends ConfigData {
   /** Whether to use ANSI colors. */
   REPL_SERVER_USE_COLORS: boolean
+}
+
+/**
+ * Options for a Net repl-server.
+ */
+export interface NetReplServerOptions {
+  address: string
+  port: number
+  maxClients: number
+  socketTimeout: number
+  useColors: boolean
 }
 
 /**

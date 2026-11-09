@@ -7,6 +7,8 @@ import { HttpServerMiddleware } from './http-server-middleware.js'
  */
 export const HTTP_SERVER_ROUTER = Symbol('HttpServerRouter')
 
+type ReplServerRouterMiddlewareChain = [string, HttpServerMiddleware][]
+
 /**
  * Represents the http-server router.
  *
@@ -22,7 +24,7 @@ export class HttpServerRouter {
   static register(container: DIContainer) {
     container.registerSingleton<HttpServerRouter>(
       HTTP_SERVER_ROUTER,
-      (c) => new HttpServerRouter(c.resolve<Logger>(LOGGER))
+      (c) => new this(c.resolve<Logger>(LOGGER))
     )
   }
 
@@ -37,7 +39,7 @@ export class HttpServerRouter {
   }
 
   /** Underlying middleware chain. */
-  protected readonly middlewareChain: [string, HttpServerMiddleware][] = []
+  protected readonly middlewareChain: ReplServerRouterMiddlewareChain = []
 
   /**
    * Creates a new router instance.
@@ -49,14 +51,27 @@ export class HttpServerRouter {
   #isActive: boolean = false
 
   /**
+   * Checks if the router is active.
+   *
+   * @returns `true` if the router is active, `false` otherwise.
+   */
+  get isActive(): boolean {
+    return this.#isActive
+  }
+
+  /**
    * Activates the router, enabling middleware processing.
    *
    * Once activated, middleware can be retrieved but not added.
+   *
+   * @returns This router for method chaining.
    */
-  activate() {
+  activate(): this {
     if (!this.#isActive) {
       this.#isActive = true
     }
+
+    return this
   }
 
   /**
@@ -70,10 +85,8 @@ export class HttpServerRouter {
    * @throws Error If the router is already active.
    * @throws Error If a middleware with the same name already exists.
    */
-  addMiddleware(name: string, handler: HttpServerMiddleware): this {
-    if (this.#isActive) {
-      throw new Error(`Router is active`)
-    }
+  add(name: string, handler: HttpServerMiddleware): this {
+    this.sureNotActive()
 
     if (this.middlewareChain.find(([existName]) => existName === name)) {
       throw new Error(`Middleware already exists: ${name}`)
@@ -92,14 +105,24 @@ export class HttpServerRouter {
    * Middleware can only be retrieved after the router is activated.
    *
    * @param idx - The index position of the middleware.
-   * @returns The middleware tuple with name and handler, or `undefined` if not found.
+   * @returns The middleware tuple with name and handler, or `null` if not found.
    * @throws Error If the router is not active.
    */
-  getMiddleware(idx: number): [string, HttpServerMiddleware] | undefined {
+  get(idx: number): [string, HttpServerMiddleware] | null {
+    this.sureIsActive()
+
+    return this.middlewareChain[idx] ?? null
+  }
+
+  protected sureNotActive() {
+    if (this.#isActive) {
+      throw new Error(`Router is active`)
+    }
+  }
+
+  protected sureIsActive() {
     if (!this.#isActive) {
       throw new Error(`Router not active`)
     }
-
-    return this.middlewareChain[idx]
   }
 }

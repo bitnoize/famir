@@ -6,7 +6,7 @@ import {
   type HttpServerAssets,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { BaseController } from '../base/index.js'
+import { BaseController, ReverseDispatchTargetLabel } from '../base/index.js'
 
 /**
  * DI token for the transform controller.
@@ -30,7 +30,7 @@ export class TransformController extends BaseController {
     container.registerSingleton<TransformController>(
       TRANSFORM_CONTROLLER,
       (c) =>
-        new TransformController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -50,11 +50,12 @@ export class TransformController extends BaseController {
     return container.resolve<TransformController>(TRANSFORM_CONTROLLER)
   }
 
-  /**
-   * Registers used middleware in the router.
-   */
-  use() {
-    this.router.addMiddleware('transform', async (ctx, next) => {
+  init(): this {
+    return this
+  }
+
+  main(): this {
+    this.router.add('transform-main', async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
       const targets = this.getState(ctx, 'targets')
@@ -187,5 +188,36 @@ export class TransformController extends BaseController {
 
       await next()
     })
+
+    return this
   }
+
+  hook(): this {
+    this.router.add('transform-hook', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
+      if (!target.label) {
+        await next()
+
+        return
+      }
+
+      const hook = this.dispatchHook[target.label]
+
+      if (hook) {
+        await hook(ctx, next)
+      } else {
+        this.logger.warn(`Controller dispatch hook not found`, {
+          controller: 'transform',
+          targetLabel: target.label,
+        })
+
+        await next()
+      }
+    })
+
+    return this
+  }
+
+  protected dispatchHook: ReverseDispatchTargetLabel = {}
 }

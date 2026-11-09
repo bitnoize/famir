@@ -13,10 +13,7 @@ export class EnvConfig implements Config {
    * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
-    container.registerSingleton<Config>(
-      CONFIG,
-      (c) => new EnvConfig(c.resolve<Validator>(VALIDATOR))
-    )
+    container.registerSingleton<Config>(CONFIG, (c) => new this(c.resolve<Validator>(VALIDATOR)))
   }
 
   /**

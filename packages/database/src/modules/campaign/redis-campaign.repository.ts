@@ -34,7 +34,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     container.registerSingleton<CampaignRepository>(
       CAMPAIGN_REPOSITORY,
       (c) =>
-        new RedisCampaignRepository(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

@@ -11,17 +11,12 @@ import {
   VALIDATOR,
 } from '@famir/domain'
 import { Redis } from 'ioredis'
-import { BullProducerConfig, RedisProducerConnection } from './producer.js'
+import {
+  BullProducerConfig,
+  RedisProducerConnection,
+  RedisProducerConnectorOptions,
+} from './producer.js'
 import { bullProducerConfigSchema } from './producer.schemas.js'
-
-/**
- * Options for a Bull producer connector.
- *
- * @category none
- */
-interface BullProducerConnectorOptions {
-  connectionUrl: string
-}
 
 /**
  * Redis-based producer connector implementation.
@@ -42,7 +37,7 @@ export class RedisProducerConnector implements ProducerConnector {
     container.registerSingleton<ProducerConnector>(
       PRODUCER_CONNECTOR,
       (c) =>
-        new RedisProducerConnector(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER)
@@ -51,7 +46,7 @@ export class RedisProducerConnector implements ProducerConnector {
   }
 
   /** Built connector options. */
-  protected readonly options: BullProducerConnectorOptions
+  protected readonly options: RedisProducerConnectorOptions
 
   /** Underlying Redis connection instance. */
   protected readonly connection: RedisProducerConnection
@@ -127,7 +122,7 @@ export class RedisProducerConnector implements ProducerConnector {
   /**
    * Converts validated configuration to a connector options.
    */
-  private buildOptions(conf: BullProducerConfig): BullProducerConnectorOptions {
+  private buildOptions(conf: BullProducerConfig): RedisProducerConnectorOptions {
     return {
       connectionUrl: conf.PRODUCER_CONNECTION_URL,
     }

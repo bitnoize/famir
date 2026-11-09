@@ -42,7 +42,7 @@ export class RedirectorController extends BaseController {
     container.registerSingleton<RedirectorController>(
       REDIRECTOR_CONTROLLER,
       (c) =>
-        new RedirectorController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -82,17 +82,18 @@ export class RedirectorController extends BaseController {
     protected readonly redirectorService: RedirectorService
   ) {
     super(validator, logger, templater, assets, router)
+  }
 
+  init(): this {
     this.validator
       .addSchema('console-read-redirector-args', readRedirectorArgsSchema)
       .addSchema('console-list-redirectors-args', listRedirectorsArgsSchema)
+
+    return this
   }
 
-  /**
-   * Registers used commands in the router.
-   */
-  use() {
-    this.router.addCommand<ReadRedirectorArgs>(
+  main(): this {
+    this.router.add<ReadRedirectorArgs>(
       {
         name: 'redirector-read',
         description: `Reads the redirector by its ID.`,
@@ -112,7 +113,7 @@ export class RedirectorController extends BaseController {
       }
     )
 
-    this.router.addCommand<ListRedirectorsArgs>(
+    this.router.add<ListRedirectorsArgs>(
       {
         name: 'redirector-list',
         description: `Lists all redirectors for the campaign.`,
@@ -130,6 +131,8 @@ export class RedirectorController extends BaseController {
         this.showRedirectorCollection(console, redirectors)
       }
     )
+
+    return this
   }
 
   private showRedirectorModel(console: Console, redirector: FullRedirectorModel) {

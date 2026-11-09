@@ -1,6 +1,14 @@
 import { ConfigData } from '@famir/domain'
 
 /**
+ * Options for a Native http-server.
+ */
+export interface NativeHttpServerOptions {
+  address: string
+  port: number
+}
+
+/**
  * Configuration for a Native http-server.
  */
 export interface NativeHttpServerConfig extends ConfigData {

@@ -1,16 +1,19 @@
 import { DIContainer } from '@famir/common'
-import { HttpType, Logger, LOGGER, TEMPLATER, Templater, Validator, VALIDATOR } from '@famir/domain'
+import { Logger, LOGGER, TEMPLATER, Templater, Validator, VALIDATOR } from '@famir/domain'
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
-  HttpServerMiddleware,
   type HttpServerAssets,
   type HttpServerRouter,
 } from '@famir/http-server'
 import { LimiterTransform } from '@famir/http-tools'
 import { PassThrough, pipeline as pipelineSync } from 'node:stream'
 import { pipeline as pipelineAsync } from 'node:stream/promises'
-import { BaseController } from '../base/index.js'
+import {
+  BaseController,
+  ReverseDispatchHttpType,
+  ReverseDispatchTargetLabel,
+} from '../base/index.js'
 import { FORWARD_SERVICE, type ForwardService } from './forward.service.js'
 
 /**
@@ -35,7 +38,7 @@ export class ForwardController extends BaseController {
     container.registerSingleton<ForwardController>(
       FORWARD_CONTROLLER,
       (c) =>
-        new ForwardController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -77,20 +80,50 @@ export class ForwardController extends BaseController {
     super(validator, logger, templater, assets, router)
   }
 
-  /**
-   * Registers used middleware in the router.
-   */
-  use() {
-    this.router.addMiddleware('round-trip', async (ctx, next) => {
+  init(): this {
+    return this
+  }
+
+  main(): this {
+    this.router.add('forward-main', async (ctx, next) => {
       const message = this.getState(ctx, 'message')
 
       message.ready()
 
-      await this.dispatchUse[message.type](ctx, next)
+      await this.dispatchMain[message.type](ctx, next)
     })
+
+    return this
   }
 
-  private dispatchUse: Record<HttpType, HttpServerMiddleware> = {
+  hook(): this {
+    this.router.add('forward-hook', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
+      if (!target.label) {
+        await next()
+
+        return
+      }
+
+      const hook = this.dispatchHook[target.label]
+
+      if (hook) {
+        await hook(ctx, next)
+      } else {
+        this.logger.warn(`Controller dispatch hook not found`, {
+          controller: 'forward',
+          targetLabel: target.label,
+        })
+
+        await next()
+      }
+    })
+
+    return this
+  }
+
+  protected dispatchMain: ReverseDispatchHttpType = {
     'normal-simple': async (ctx, next) => {
       const proxy = this.getState(ctx, 'proxy')
       const target = this.getState(ctx, 'target')
@@ -287,4 +320,6 @@ export class ForwardController extends BaseController {
       await next()
     },
   }
+
+  protected dispatchHook: ReverseDispatchTargetLabel = {}
 }

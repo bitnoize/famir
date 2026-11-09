@@ -16,7 +16,7 @@ export class EtaTemplater implements Templater {
    * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
-    container.registerSingleton<Templater>(TEMPLATER, () => new EtaTemplater())
+    container.registerSingleton<Templater>(TEMPLATER, () => new this())
   }
 
   /** Underlying Eta instance. */

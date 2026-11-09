@@ -31,7 +31,7 @@ export class ProxyService {
     container.registerSingleton<ProxyService>(
       PROXY_SERVICE,
       (c) =>
-        new ProxyService(
+        new this(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<ProxyRepository>(PROXY_REPOSITORY)
         )

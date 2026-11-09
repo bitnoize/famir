@@ -42,7 +42,7 @@ export class CurlHttpClient implements HttpClient {
     container.registerSingleton<HttpClient>(
       HTTP_CLIENT,
       (c) =>
-        new CurlHttpClient(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER)
@@ -200,7 +200,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Configures common curl options for all request types.
    */
-  private setupCurlOptions(
+  protected setupCurlOptions(
     curl: Curl,
     state: {
       proxy: string
@@ -257,7 +257,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Sets up the read function for uploading a request body from a buffer.
    */
-  private setupCurlReadfunction(
+  protected setupCurlReadfunction(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -303,7 +303,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Sets up the upload stream for streaming request bodies.
    */
-  private setupCurlUploadStream(
+  protected setupCurlUploadStream(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -338,7 +338,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Sets up the header function for capturing response headers.
    */
-  private setupCurlHeaderfunction(
+  protected setupCurlHeaderfunction(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -391,7 +391,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Sets up the write function for downloading response bodies to buffer.
    */
-  private setupCurlWritefunction(
+  protected setupCurlWritefunction(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -443,7 +443,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Sets up the end event handler for simple requests.
    */
-  private setupCurlSimpleEndEvent(
+  protected setupCurlSimpleEndEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -497,7 +497,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Sets up the error event handler for simple requests.
    */
-  private setupCurlSimpleErrorEvent(
+  protected setupCurlSimpleErrorEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -574,7 +574,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Sets up the stream event handler for streaming responses.
    */
-  private setupCurlStreamEvent(
+  protected setupCurlStreamEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -645,7 +645,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Sets up the end event handler for streaming responses.
    */
-  private setupCurlStreamEndEvent(
+  protected setupCurlStreamEndEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -714,7 +714,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Sets up the error event handler for streaming responses.
    */
-  private setupCurlStreamErrorEvent(
+  protected setupCurlStreamErrorEvent(
     curl: Curl,
     state: {
       error: HttpClientError | null
@@ -788,7 +788,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Parses connection information from a curl instance.
    */
-  private parseConnection(curl: Curl): HttpConnection {
+  protected parseConnection(curl: Curl): HttpConnection {
     try {
       const totalTime = curl.getInfo('TOTAL_TIME_T')
       const connectTime = curl.getInfo('CONNECT_TIME_T')
@@ -812,7 +812,7 @@ export class CurlHttpClient implements HttpClient {
   }
 
   /** Browser-specific headers. */
-  private cleanRequestHeaders: (string | RegExp)[] = [
+  protected cleanRequestHeaders: (string | RegExp)[] = [
     'user-agent',
     'upgrade-insecure-requests',
     'priority',
@@ -823,7 +823,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Parses raw header buffers into a key-value object.
    */
-  private parseRawHeaders(curlHeaders: Buffer[]): HttpHeaders {
+  protected parseRawHeaders(curlHeaders: Buffer[]): HttpHeaders {
     const headers: HttpHeaders = {}
 
     curlHeaders.forEach((curlHeader) => {
@@ -858,7 +858,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Formats headers into a string array for curl.
    */
-  private formatRawHeaders(headers: HttpHeaders): string[] {
+  protected formatRawHeaders(headers: HttpHeaders): string[] {
     const curlHeaders: string[] = []
 
     Object.entries(headers).forEach(([name, value]) => {
@@ -881,7 +881,7 @@ export class CurlHttpClient implements HttpClient {
   /**
    * Concatenates buffer chunks into a single Buffer.
    */
-  private parseRawBody(chunks: Buffer[]): HttpBody {
+  protected parseRawBody(chunks: Buffer[]): HttpBody {
     try {
       return Buffer.concat(chunks)
     } catch {

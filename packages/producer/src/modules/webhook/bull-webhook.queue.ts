@@ -31,7 +31,7 @@ export class BullWebhookQueue extends BullBaseQueue implements WebhookQueue {
     container.registerSingleton<WebhookQueue>(
       WEBHOOK_QUEUE,
       (c) =>
-        new BullWebhookQueue(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

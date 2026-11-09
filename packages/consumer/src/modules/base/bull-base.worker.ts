@@ -12,18 +12,11 @@ import { Job, MetricsTime, Processor, Worker } from 'bullmq'
 import { type ConsumerRouter } from '../../consumer-router.js'
 import {
   BullConsumerConfig,
+  BullConsumerWorkerOptions,
+  ConsumerQueueNames,
   ConsumerWorkerSettings,
   RedisConsumerConnection,
 } from '../../consumer.js'
-
-/**
- * Options for a Bull consumer worker.
- *
- * @category none
- */
-interface BullConsumerWorkerOptions extends ConsumerWorkerSettings {
-  prefix: string
-}
 
 /**
  * Abstract base class for all Bull-based consumer workers.
@@ -39,9 +32,6 @@ export abstract class BullBaseWorker implements BaseWorker {
 
   /** Underlying BullMQ worker instance. */
   protected readonly worker: Worker<unknown, unknown>
-
-  /** Run promise. */
-  private runPromise: Promise<void> | null = null
 
   /**
    * Creates a new worker instance.
@@ -60,7 +50,7 @@ export abstract class BullBaseWorker implements BaseWorker {
     protected readonly logger: Logger,
     protected readonly connector: ConsumerConnector,
     protected readonly router: ConsumerRouter,
-    protected readonly queueName: string,
+    protected readonly queueName: ConsumerQueueNames,
     settings: Partial<ConsumerWorkerSettings>
   ) {
     const conf = this.config.get<BullConsumerConfig>('consumer-config')
@@ -112,6 +102,9 @@ export abstract class BullBaseWorker implements BaseWorker {
       })
     })
   }
+
+  /** Run promise. */
+  private runPromise: Promise<void> | null = null
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async run(): Promise<void> {
@@ -180,6 +173,21 @@ export abstract class BullBaseWorker implements BaseWorker {
   }
 
   /**
+   * Dumps a serializable representation of a job for logging.
+   */
+  protected dumpJob(job: Job<unknown, unknown> | null | undefined): object | null {
+    if (!job) {
+      return null
+    }
+
+    return {
+      id: job.id,
+      name: job.name,
+      data: job.data,
+    }
+  }
+
+  /**
    * Converts validated configuration and settings to a worker options.
    */
   private buildOptions(
@@ -191,21 +199,6 @@ export abstract class BullBaseWorker implements BaseWorker {
       concurrency: settings.concurrency ?? 2,
       limiterMax: settings.limiterMax ?? 1,
       limiterDuration: settings.limiterDuration ?? 1000,
-    }
-  }
-
-  /**
-   * Dumps a serializable representation of a job for logging.
-   */
-  private dumpJob(job: Job<unknown, unknown> | null | undefined): object | null {
-    if (!job) {
-      return null
-    }
-
-    return {
-      id: job.id,
-      name: job.name,
-      data: job.data,
     }
   }
 }

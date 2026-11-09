@@ -1,4 +1,5 @@
 import { ConsumerError, Validator } from '@famir/domain'
+import { ConsumerQueueNames } from './consumer.js'
 
 /**
  * Represents the consumer processor spec.
@@ -6,7 +7,7 @@ import { ConsumerError, Validator } from '@famir/domain'
  * @category none
  */
 export interface ConsumerProcessorSpec {
-  readonly queueName: string
+  readonly queueName: ConsumerQueueNames
   readonly jobName: string
   readonly schemaName: string
 }

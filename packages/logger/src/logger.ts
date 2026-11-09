@@ -27,6 +27,13 @@ export interface LoggerSettings {
 }
 
 /**
+ * Options for a Pino logger.
+ */
+export interface PinoLoggerOptions extends LoggerSettings {
+  logLevel: LoggerLogLevel
+}
+
+/**
  * Configuration for a Pino logger.
  */
 export interface PinoLoggerConfig extends ConfigData {

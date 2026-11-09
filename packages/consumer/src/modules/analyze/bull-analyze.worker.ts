@@ -68,7 +68,7 @@ export class BullAnalyzeWorker extends BullBaseWorker implements AnalyzeWorker {
     container.registerSingleton<AnalyzeWorker>(
       ANALYZE_WORKER,
       (c) =>
-        new BullAnalyzeWorker(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

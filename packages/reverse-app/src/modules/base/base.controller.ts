@@ -41,18 +41,20 @@ export abstract class BaseController {
     protected readonly router: HttpServerRouter
   ) {}
 
-  protected getAsset(assetName: string): string {
-    if (!assetName) {
-      throw new Error(`Wrong asset name`)
-    }
+  /**
+   * Initialize controller.
+   */
+  abstract init(): this
 
-    const asset = this.assets.get(assetName)
-    if (!asset) {
-      throw new Error(`Asset '${assetName}' not exists`)
-    }
+  /**
+   * Define main middleware.
+   */
+  abstract main(): this
 
-    return asset
-  }
+  /**
+   * Define hook middleware.
+   */
+  abstract hook(): this
 
   protected getState<T extends ReverseContextState, K extends keyof T>(
     ctx: HttpServerContext,
@@ -81,20 +83,8 @@ export abstract class BaseController {
     state[key] = value
   }
 
-  protected checkContextTypeNormal(ctx: HttpServerContext) {
-    if (ctx.type !== 'normal') {
-      throw new Error(`Only 'normal' context type allowed`)
-    }
-  }
-
-  protected checkContextTypeWebsocket(ctx: HttpServerContext) {
-    if (ctx.type !== 'websocket') {
-      throw new Error(`Only 'websocket' context type allowed`)
-    }
-  }
-
   protected async sendNoContent(ctx: HttpServerContext, status = 204): Promise<void> {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     ctx.status.set(status)
 
@@ -115,7 +105,7 @@ export abstract class BaseController {
   }
 
   protected async sendPreflightCors(ctx: HttpServerContext, status = 204): Promise<void> {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     ctx.status.set(status)
 
@@ -136,7 +126,7 @@ export abstract class BaseController {
   }
 
   protected async sendRedirectTo(ctx: HttpServerContext, url: string, status = 302): Promise<void> {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     ctx.status.set(status)
 
@@ -160,10 +150,10 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     if (target.mainPage && ctx.method.is(['GET', 'HEAD'])) {
-      const asset = this.getAsset(target.mainPage)
+      const asset = this.assets.getOrThrow(target.mainPage)
 
       ctx.status.set(200)
 
@@ -190,12 +180,12 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     ctx.status.set(404)
 
     if (target.notFoundPage) {
-      const asset = this.getAsset(target.notFoundPage)
+      const asset = this.assets.getOrThrow(target.notFoundPage)
 
       ctx.responseBody.setText(asset)
 
@@ -220,7 +210,7 @@ export abstract class BaseController {
     error: HttpServerError | HttpClientError,
     isHtml: boolean
   ) {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     ctx.status.set(error.status)
 
@@ -246,10 +236,10 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     if (target.faviconIco && ctx.method.is(['GET', 'HEAD'])) {
-      const asset = this.getAsset(target.faviconIco)
+      const asset = this.assets.getOrThrow(target.faviconIco)
 
       ctx.status.set(200)
 
@@ -276,10 +266,10 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     if (target.robotsTxt && ctx.method.is(['GET', 'HEAD'])) {
-      const asset = this.getAsset(target.robotsTxt)
+      const asset = this.assets.getOrThrow(target.robotsTxt)
 
       ctx.status.set(200)
 
@@ -306,10 +296,10 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     if (target.sitemapXml && ctx.method.is(['GET', 'HEAD'])) {
-      const asset = this.getAsset(target.sitemapXml)
+      const asset = this.assets.getOrThrow(target.sitemapXml)
 
       ctx.status.set(200)
 
@@ -342,10 +332,10 @@ export abstract class BaseController {
     redirector: FullRedirectorModel,
     data: TemplaterData
   ): Promise<void> {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     if (ctx.method.is(['GET', 'HEAD'])) {
-      const asset = this.getAsset(redirector.page)
+      const asset = this.assets.getOrThrow(redirector.page)
 
       ctx.status.set(200)
 
@@ -373,8 +363,6 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     target: EnabledFullTargetModel
   ): Promise<void> {
-    this.checkContextTypeNormal(ctx)
-
     if (ctx.url.isPath('/')) {
       await this.sendMainPage(ctx, target)
     } else {

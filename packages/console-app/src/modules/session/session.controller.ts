@@ -45,7 +45,7 @@ export class SessionController extends BaseController {
     container.registerSingleton<SessionController>(
       SESSION_CONTROLLER,
       (c) =>
-        new SessionController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -85,18 +85,19 @@ export class SessionController extends BaseController {
     protected readonly sessionService: SessionService
   ) {
     super(validator, logger, templater, assets, router)
+  }
 
+  init(): this {
     this.validator
       .addSchema('console-read-session-args', readSessionArgsSchema)
       .addSchema('console-revoke-session-args', revokeSessionArgsSchema)
       .addSchema('console-list-sessions-args', listSessionsArgsSchema)
+
+    return this
   }
 
-  /**
-   * Registers used commands in the router.
-   */
-  use() {
-    this.router.addCommand<ReadSessionArgs>(
+  main(): this {
+    this.router.add<ReadSessionArgs>(
       {
         name: 'session-read',
         description: `Reads the session by its ID.`,
@@ -116,7 +117,7 @@ export class SessionController extends BaseController {
       }
     )
 
-    this.router.addCommand<RevokeSessionArgs>(
+    this.router.add<RevokeSessionArgs>(
       {
         name: 'session-revoke',
         description: `Revoking a session and stopping authorization.`,
@@ -136,7 +137,7 @@ export class SessionController extends BaseController {
       }
     )
 
-    this.router.addCommand<ListSessionsArgs>(
+    this.router.add<ListSessionsArgs>(
       {
         name: 'session-list',
         description: `Lists campaign session history.`,
@@ -163,6 +164,8 @@ export class SessionController extends BaseController {
         this.showSessionCollection(console, sessions)
       }
     )
+
+    return this
   }
 
   private showSessionModel(console: Console, session: SessionModel) {

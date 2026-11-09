@@ -36,7 +36,7 @@ export class LureService {
     container.registerSingleton<LureService>(
       LURE_SERVICE,
       (c) =>
-        new LureService(
+        new this(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY),
           c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),

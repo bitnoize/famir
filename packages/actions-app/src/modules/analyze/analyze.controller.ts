@@ -41,7 +41,7 @@ export class AnalyzeController extends BaseController {
     container.registerSingleton<AnalyzeController>(
       ANALYZE_CONTROLLER,
       (c) =>
-        new AnalyzeController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -81,15 +81,16 @@ export class AnalyzeController extends BaseController {
     protected readonly analyzeService: AnalyzeService
   ) {
     super(validator, logger, templater, assets, router)
-
-    this.validator.addSchema('actions-analyze-job-data', analyzeJobDataSchema)
   }
 
-  /**
-   * Registers used processors in the router.
-   */
-  use() {
-    this.router.addQueue(ANALYZE_QUEUE_NAME).addProcessor<AnalyzeJobData>(
+  init(): this {
+    this.validator.addSchema('actions-analyze-job-data', analyzeJobDataSchema)
+
+    return this
+  }
+
+  main(): this {
+    this.router.add<AnalyzeJobData>(
       {
         queueName: ANALYZE_QUEUE_NAME,
         jobName: 'default',
@@ -106,5 +107,7 @@ export class AnalyzeController extends BaseController {
         await this.analyzeService.saveMessage(message)
       }
     )
+
+    return this
   }
 }

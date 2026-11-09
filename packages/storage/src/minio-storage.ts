@@ -13,20 +13,8 @@ import {
 } from '@famir/domain'
 import { Client as MinioClient } from 'minio'
 import consumers from 'node:stream/consumers'
-import { MinioStorageConfig } from './storage.js'
+import { MinioStorageConfig, MinioStorageOptions } from './storage.js'
 import { minioStorageConfigSchema } from './storage.schemas.js'
-
-/**
- * Options for a MinIO storage.
- */
-interface MinioStorageOptions {
-  endPoint: string
-  port: number
-  useSSL: boolean
-  accessKey: string
-  secretKey: string
-  bucketName: string
-}
 
 /**
  * MinIO-based storage implementation.
@@ -47,7 +35,7 @@ export class MinioStorage implements Storage {
     container.registerSingleton<Storage>(
       STORAGE,
       (c) =>
-        new MinioStorage(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER)

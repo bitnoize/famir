@@ -37,7 +37,7 @@ export class CompleteService {
     container.registerSingleton<CompleteService>(
       COMPLETE_SERVICE,
       (c) =>
-        new CompleteService(
+        new this(
           c.resolve<MessageRepository>(MESSAGE_REPOSITORY),
           c.resolve<AnalyzeQueue>(ANALYZE_QUEUE)
         )

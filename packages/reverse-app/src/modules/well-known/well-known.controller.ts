@@ -4,35 +4,37 @@ import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
   type HttpServerAssets,
-  HttpServerContextType,
-  HttpServerMiddleware,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { BaseController } from '../base/index.js'
+import {
+  BaseController,
+  ReverseDispatchContextType,
+  ReverseDispatchTargetLabel,
+} from '../base/index.js'
 
 /**
- * DI token for the well-known-urls controller.
+ * DI token for the well-known controller.
  *
- * @category WellKnownUrls
+ * @category WellKnown
  */
-export const WELL_KNOWN_URLS_CONTROLLER = Symbol('WellKnownUrlsController')
+export const WELL_KNOWN_CONTROLLER = Symbol('WellKnownController')
 
 /**
- * Represents the well-known-urls controller.
+ * Represents the well-known controller.
  *
- * @category WellKnownUrls
+ * @category WellKnown
  */
-export class WellKnownUrlsController extends BaseController {
+export class WellKnownController extends BaseController {
   /**
    * Registers the controller as a singleton in the DI container.
    *
    * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
-    container.registerSingleton<WellKnownUrlsController>(
-      WELL_KNOWN_URLS_CONTROLLER,
+    container.registerSingleton<WellKnownController>(
+      WELL_KNOWN_CONTROLLER,
       (c) =>
-        new WellKnownUrlsController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -49,19 +51,49 @@ export class WellKnownUrlsController extends BaseController {
    * @returns The controller instance.
    */
   static resolve(container: DIContainer) {
-    return container.resolve<WellKnownUrlsController>(WELL_KNOWN_URLS_CONTROLLER)
+    return container.resolve<WellKnownController>(WELL_KNOWN_CONTROLLER)
   }
 
-  /**
-   * Registers used middleware in the router.
-   */
-  use() {
-    this.router.addMiddleware('well-known-urls', async (ctx, next) => {
-      await this.dispatchUse[ctx.type](ctx, next)
+  init(): this {
+    return this
+  }
+
+  main(): this {
+    this.router.add('well-known-main', async (ctx, next) => {
+      await this.dispatchMain[ctx.type](ctx, next)
     })
+
+    return this
   }
 
-  private dispatchUse: Record<HttpServerContextType, HttpServerMiddleware> = {
+  hook(): this {
+    this.router.add('well-known-hook', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
+      if (!target.label) {
+        await next()
+
+        return
+      }
+
+      const hook = this.dispatchHook[target.label]
+
+      if (hook) {
+        await hook(ctx, next)
+      } else {
+        this.logger.warn(`Controller dispatch hook not found`, {
+          controller: 'well-known',
+          targetLabel: target.label,
+        })
+
+        await next()
+      }
+    })
+
+    return this
+  }
+
+  protected dispatchMain: ReverseDispatchContextType = {
     normal: async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
@@ -82,4 +114,6 @@ export class WellKnownUrlsController extends BaseController {
       await next()
     },
   }
+
+  protected dispatchHook: ReverseDispatchTargetLabel = {}
 }

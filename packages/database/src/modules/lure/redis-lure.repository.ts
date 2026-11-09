@@ -32,7 +32,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     container.registerSingleton<LureRepository>(
       LURE_REPOSITORY,
       (c) =>
-        new RedisLureRepository(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

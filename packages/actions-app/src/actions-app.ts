@@ -37,7 +37,7 @@ export class ActionsApp {
     container.registerSingleton<ActionsApp>(
       ACTIONS_APP,
       (c) =>
-        new ActionsApp(
+        new this(
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<Storage>(STORAGE),

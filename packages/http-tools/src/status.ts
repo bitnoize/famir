@@ -48,7 +48,9 @@ export class HttpStatusWrap {
    * @returns This wrapper for method chaining.
    */
   freeze(): this {
-    this.#isFrozen = true
+    if (!this.#isFrozen) {
+      this.#isFrozen = true
+    }
 
     return this
   }
@@ -70,7 +72,7 @@ export class HttpStatusWrap {
    * @throws Error If the wrapper is frozen.
    */
   set(status: number): this {
-    this.sureNotFrozen('set')
+    this.sureNotFrozen()
 
     this.#status = status
 
@@ -138,20 +140,20 @@ export class HttpStatusWrap {
    * @throws Error If the wrapper is frozen.
    */
   reset(): this {
-    this.sureNotFrozen('reset')
+    this.sureNotFrozen()
 
     this.#status = 0
 
     return this
   }
 
-  private sureNotFrozen(name: string) {
+  protected sureNotFrozen() {
     if (this.isFrozen) {
-      throw new Error(`Status frozen on ${name}`)
+      throw new Error(`Status is frozen`)
     }
   }
 
-  private between(min: number, max: number): boolean {
+  protected between(min: number, max: number): boolean {
     return this.#status >= min && this.#status < max
   }
 }

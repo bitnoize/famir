@@ -41,7 +41,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     container.registerSingleton<TargetRepository>(
       TARGET_REPOSITORY,
       (c) =>
-        new RedisTargetRepository(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

@@ -12,22 +12,17 @@ import {
 } from '@famir/domain'
 import { createClient } from 'redis'
 import { databaseFunctions } from './database.functions.js'
-import { RedisDatabaseConfig, RedisDatabaseConnection } from './database.js'
+import {
+  RedisDatabaseConfig,
+  RedisDatabaseConnection,
+  RedisDatabaseConnectorOptions,
+} from './database.js'
 import {
   redisDatabaseArrayReplySchema,
   redisDatabaseArrayStringsReplySchema,
   redisDatabaseConfigSchema,
   redisDatabaseStringReplySchema,
 } from './database.schemas.js'
-
-/**
- * Options for a Redis database connector.
- *
- * @category none
- */
-interface RedisDatabaseConnectorOptions {
-  connectionUrl: string
-}
 
 /**
  * Redis-based database connector implementation.
@@ -48,7 +43,7 @@ export class RedisDatabaseConnector implements DatabaseConnector {
     container.registerSingleton<DatabaseConnector>(
       DATABASE_CONNECTOR,
       (c) =>
-        new RedisDatabaseConnector(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER)
@@ -61,9 +56,6 @@ export class RedisDatabaseConnector implements DatabaseConnector {
 
   /** Underlying Redis connection instance. */
   protected readonly connection: RedisDatabaseConnection
-
-  /** Connect in-flight promise. */
-  private connectPromise: Promise<void> | null = null
 
   /**
    * Creates a new connector instance.
@@ -111,6 +103,9 @@ export class RedisDatabaseConnector implements DatabaseConnector {
   getConnection<T>(): T {
     return this.connection as T
   }
+
+  /** Connect in-flight promise. */
+  private connectPromise: Promise<void> | null = null
 
   #isShutdown: boolean = false
 

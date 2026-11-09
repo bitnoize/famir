@@ -17,7 +17,7 @@ export class AjvValidator implements Validator {
    * @param container - The DI container to register in.
    */
   static register(container: DIContainer) {
-    container.registerSingleton<Validator>(VALIDATOR, () => new AjvValidator())
+    container.registerSingleton<Validator>(VALIDATOR, () => new this())
   }
 
   /** Underlying Ajv instance. */

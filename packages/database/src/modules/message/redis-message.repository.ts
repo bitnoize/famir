@@ -46,7 +46,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     container.registerSingleton<MessageRepository>(
       MESSAGE_REPOSITORY,
       (c) =>
-        new RedisMessageRepository(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

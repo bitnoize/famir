@@ -28,7 +28,7 @@ export class RedirectorService {
   static register(container: DIContainer) {
     container.registerSingleton<RedirectorService>(
       REDIRECTOR_SERVICE,
-      (c) => new RedirectorService(c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY))
+      (c) => new this(c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY))
     )
   }
 

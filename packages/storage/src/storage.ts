@@ -1,6 +1,18 @@
 import { ConfigData } from '@famir/domain'
 
 /**
+ * Options for a MinIO storage.
+ */
+export interface MinioStorageOptions {
+  endPoint: string
+  port: number
+  useSSL: boolean
+  accessKey: string
+  secretKey: string
+  bucketName: string
+}
+
+/**
  * Configuration for a MinIO storage.
  */
 export interface MinioStorageConfig extends ConfigData {

@@ -33,7 +33,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     container.registerSingleton<RedirectorRepository>(
       REDIRECTOR_REPOSITORY,
       (c) =>
-        new RedisRedirectorRepository(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

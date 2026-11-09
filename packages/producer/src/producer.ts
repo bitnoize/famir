@@ -9,6 +9,24 @@ import type { Redis } from 'ioredis'
 export type RedisProducerConnection = Redis
 
 /**
+ * Options for a Redis producer connector.
+ *
+ * @category none
+ */
+export interface RedisProducerConnectorOptions {
+  connectionUrl: string
+}
+
+/**
+ * Options for a Bull producer queue.
+ *
+ * @category none
+ */
+export interface BullProducerQueueOptions {
+  prefix: string
+}
+
+/**
  * Configuration for a Bull producer.
  *
  * @category none

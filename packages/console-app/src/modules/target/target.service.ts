@@ -29,7 +29,7 @@ export class TargetService {
   static register(container: DIContainer) {
     container.registerSingleton<TargetService>(
       TARGET_SERVICE,
-      (c) => new TargetService(c.resolve<TargetRepository>(TARGET_REPOSITORY))
+      (c) => new this(c.resolve<TargetRepository>(TARGET_REPOSITORY))
     )
   }
 

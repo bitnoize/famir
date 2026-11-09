@@ -40,7 +40,7 @@ export class AuthorizeService {
     container.registerSingleton<AuthorizeService>(
       AUTHORIZE_SERVICE,
       (c) =>
-        new AuthorizeService(
+        new this(
           c.resolve<ProxyRepository>(PROXY_REPOSITORY),
           c.resolve<RedirectorRepository>(REDIRECTOR_REPOSITORY),
           c.resolve<LureRepository>(LURE_REPOSITORY),

@@ -227,6 +227,11 @@ export interface CompositionRoot {
   infra: DIComposer
 
   /**
+   * Registers all application controllers and services.
+   */
+  main: DIComposer
+
+  /**
    * Starts the application after the full dependency graph has been created.
    *
    * @param container - Shared dependency injection container.

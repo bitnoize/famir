@@ -9,11 +9,18 @@ import { WebhookJobData } from './webhook.job.js'
 export const WEBHOOK_QUEUE = Symbol('WebhookQueue')
 
 /**
- * Name of the webhook queue.
+ * Webhook queue name.
  *
  * @category Webhook Queue
  */
 export const WEBHOOK_QUEUE_NAME = 'webhook'
+
+/**
+ * Webhook queue name type.
+ *
+ * @category Webhook Queue
+ */
+export type WebhookQueueName = typeof WEBHOOK_QUEUE_NAME
 
 /**
  * Defines the public contract for a webhook queue.

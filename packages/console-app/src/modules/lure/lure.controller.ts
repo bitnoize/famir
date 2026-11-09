@@ -57,7 +57,7 @@ export class LureController extends BaseController {
     container.registerSingleton<LureController>(
       LURE_CONTROLLER,
       (c) =>
-        new LureController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -97,7 +97,9 @@ export class LureController extends BaseController {
     protected readonly lureService: LureService
   ) {
     super(validator, logger, templater, assets, router)
+  }
 
+  init(): this {
     this.validator
       .addSchema('console-create-lure-args', createLureArgsSchema)
       .addSchema('console-read-lure-args', readLureArgsSchema)
@@ -106,13 +108,12 @@ export class LureController extends BaseController {
       .addSchema('console-list-lures-args', listLuresArgsSchema)
       .addSchema('console-make-lure-url-args', makeLureUrlArgsSchema)
       .addSchema('console-lure-params', redirectorParamsSchema)
+
+    return this
   }
 
-  /**
-   * Registers used commands in the router.
-   */
-  use() {
-    this.router.addCommand<CreateLureArgs>(
+  main(): this {
+    this.router.add<CreateLureArgs>(
       {
         name: 'lure-create',
         description: `Creates a new lure.`,
@@ -140,7 +141,7 @@ export class LureController extends BaseController {
       }
     )
 
-    this.router.addCommand<ReadLureArgs>(
+    this.router.add<ReadLureArgs>(
       {
         name: 'lure-read',
         description: `Reads the lure by its ID.`,
@@ -160,7 +161,7 @@ export class LureController extends BaseController {
       }
     )
 
-    this.router.addCommand<ToggleLureArgs>(
+    this.router.add<ToggleLureArgs>(
       {
         name: 'lure-enable',
         description: `Enables the lure, making it available for request routing.`,
@@ -180,7 +181,7 @@ export class LureController extends BaseController {
       }
     )
 
-    this.router.addCommand<ToggleLureArgs>(
+    this.router.add<ToggleLureArgs>(
       {
         name: 'lure-disable',
         description: `Disables the lure, stopping request routing.`,
@@ -200,7 +201,7 @@ export class LureController extends BaseController {
       }
     )
 
-    this.router.addCommand<DeleteLureArgs>(
+    this.router.add<DeleteLureArgs>(
       {
         name: 'lure-delete',
         description: `Deletes the lure by its ID.`,
@@ -221,7 +222,7 @@ export class LureController extends BaseController {
       }
     )
 
-    this.router.addCommand<ListLuresArgs>(
+    this.router.add<ListLuresArgs>(
       {
         name: 'lure-list',
         description: `Lists all lures for the campaign.`,
@@ -240,7 +241,7 @@ export class LureController extends BaseController {
       }
     )
 
-    this.router.addCommand<MakeLureUrlArgs>(
+    this.router.add<MakeLureUrlArgs>(
       {
         name: 'lure-make-url',
         description: `Makes the lure URL with redirector params.`,
@@ -270,6 +271,8 @@ export class LureController extends BaseController {
         console.log(url)
       }
     )
+
+    return this
   }
 
   private parseParams(json: string): RedirectorParams {

@@ -26,7 +26,7 @@ export class HttpServerContextFactory {
   static register(container: DIContainer) {
     container.registerSingleton<HttpServerContextFactory>(
       HTTP_SERVER_CONTEXT_FACTORY,
-      () => new HttpServerContextFactory()
+      () => new this()
     )
   }
 

@@ -8,7 +8,6 @@ import {
   LOGGER,
   RedirectorParams,
   SessionModel,
-  TargetAccessLevel,
   TEMPLATER,
   Templater,
   UpgradeSessionParams,
@@ -18,13 +17,16 @@ import {
 import {
   HTTP_SERVER_ASSETS,
   HTTP_SERVER_ROUTER,
-  HttpServerContextType,
-  HttpServerMiddleware,
   type HttpServerAssets,
   type HttpServerContext,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { BaseController } from '../base/index.js'
+import {
+  BaseController,
+  ReverseDispatchContextType,
+  ReverseDispatchTargetAccessLevel,
+  ReverseDispatchTargetLabel,
+} from '../base/index.js'
 import { AUTHORIZE_SERVICE, type AuthorizeService } from './authorize.service.js'
 
 /**
@@ -49,7 +51,7 @@ export class AuthorizeController extends BaseController {
     container.registerSingleton<AuthorizeController>(
       AUTHORIZE_CONTROLLER,
       (c) =>
-        new AuthorizeController(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
@@ -89,37 +91,67 @@ export class AuthorizeController extends BaseController {
     protected readonly authorizeService: AuthorizeService
   ) {
     super(validator, logger, templater, assets, router)
+  }
 
+  init(): this {
     this.validator
       .addSchema('reverse-authorize-session-cookie', randomIdentSchema)
       .addSchema('reverse-authorize-upgrade-session-params', upgradeSessionParamsSchema)
       .addSchema('reverse-authorize-redirector-params', redirectorParamsSchema)
+
+    return this
   }
 
-  /**
-   * Registers used middleware in the router.
-   */
-  use() {
-    this.router.addMiddleware('authorize', async (ctx, next) => {
-      await this.dispatchUse[ctx.type](ctx, next)
+  main(): this {
+    this.router.add('authorize-main', async (ctx, next) => {
+      await this.dispatchMain[ctx.type](ctx, next)
     })
+
+    return this
   }
 
-  private dispatchUse: Record<HttpServerContextType, HttpServerMiddleware> = {
+  hook(): this {
+    this.router.add('authorize-hook', async (ctx, next) => {
+      const target = this.getState(ctx, 'target')
+
+      if (!target.label) {
+        await next()
+
+        return
+      }
+
+      const hook = this.dispatchHook[target.label]
+
+      if (hook) {
+        await hook(ctx, next)
+      } else {
+        this.logger.warn(`Controller dispatch hook not found`, {
+          controller: 'authorize',
+          targetLabel: target.label,
+        })
+
+        await next()
+      }
+    })
+
+    return this
+  }
+
+  protected dispatchMain: ReverseDispatchContextType = {
     normal: async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      await this.dispatchUseNormal[target.accessLevel](ctx, next)
+      await this.dispatchMainNormal[target.accessLevel](ctx, next)
     },
 
     websocket: async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      await this.dispatchUseWebSocket[target.accessLevel](ctx, next)
+      await this.dispatchMainWebSocket[target.accessLevel](ctx, next)
     },
   }
 
-  private dispatchUseNormal: Record<TargetAccessLevel, HttpServerMiddleware> = {
+  protected dispatchMainNormal: ReverseDispatchTargetAccessLevel = {
     transparent: async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
@@ -361,7 +393,7 @@ export class AuthorizeController extends BaseController {
     },
   }
 
-  private dispatchUseWebSocket: Record<TargetAccessLevel, HttpServerMiddleware> = {
+  protected dispatchMainWebSocket: ReverseDispatchTargetAccessLevel = {
     transparent: async (ctx, next) => {
       const campaign = this.getState(ctx, 'campaign')
       const target = this.getState(ctx, 'target')
@@ -453,7 +485,9 @@ export class AuthorizeController extends BaseController {
     },
   }
 
-  private getSessionCookie(
+  protected dispatchHook: ReverseDispatchTargetLabel = {}
+
+  protected getSessionCookie(
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): HttpCookie | undefined {
@@ -462,16 +496,16 @@ export class AuthorizeController extends BaseController {
     return cookies ? cookies[campaign.sessionCookieName] : undefined
   }
 
-  private checkSessionCookie(value: unknown): value is string {
+  protected checkSessionCookie(value: unknown): value is string {
     return this.validator.guardSchema<string>('reverse-authorize-session-cookie', value)
   }
 
-  private persistSessionCookie(
+  protected persistSessionCookie(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     session: SessionModel
   ) {
-    this.checkContextTypeNormal(ctx)
+    ctx.sureNormal()
 
     const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
 
@@ -486,8 +520,8 @@ export class AuthorizeController extends BaseController {
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  private removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
-    this.checkContextTypeNormal(ctx)
+  protected removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
+    ctx.sureNormal()
 
     const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
 
@@ -502,7 +536,7 @@ export class AuthorizeController extends BaseController {
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  private parseUpgradeSessionParams(
+  protected parseUpgradeSessionParams(
     ctx: HttpServerContext,
     campaign: FullCampaignModel
   ): UpgradeSessionParams | null {
@@ -527,7 +561,7 @@ export class AuthorizeController extends BaseController {
     }
   }
 
-  private parseRedirectorParams(
+  protected parseRedirectorParams(
     ctx: HttpServerContext,
     campaign: FullCampaignModel,
     redirector: FullRedirectorModel

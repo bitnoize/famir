@@ -68,7 +68,7 @@ export class BullWebhookWorker extends BullBaseWorker implements WebhookWorker {
     container.registerSingleton<WebhookWorker>(
       WEBHOOK_WORKER,
       (c) =>
-        new BullWebhookWorker(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),

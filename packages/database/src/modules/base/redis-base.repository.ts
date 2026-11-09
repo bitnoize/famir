@@ -12,16 +12,8 @@ import {
   DatabaseStatusCode,
   RedisDatabaseConfig,
   RedisDatabaseConnection,
+  RedisDatabaseRepositoryOptions,
 } from '../../database.js'
-
-/**
- * Options for a Redis database repository.
- *
- * @category none
- */
-interface RedisDatabaseRepositoryOptions {
-  prefix: string
-}
 
 /**
  * Abstract base class for all Redis-based database repositories.

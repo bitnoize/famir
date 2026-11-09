@@ -47,7 +47,7 @@ export class CampaignService {
     container.registerSingleton<CampaignService>(
       CAMPAIGN_SERVICE,
       (c) =>
-        new CampaignService(
+        new this(
           c.resolve<CampaignRepository>(CAMPAIGN_REPOSITORY),
           c.resolve<ProxyRepository>(PROXY_REPOSITORY),
           c.resolve<TargetRepository>(TARGET_REPOSITORY),

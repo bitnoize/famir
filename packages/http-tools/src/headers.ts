@@ -71,7 +71,9 @@ export class HttpHeadersWrap {
    * @returns This wrapper for method chaining.
    */
   freeze(): this {
-    this.#isFrozen = true
+    if (!this.#isFrozen) {
+      this.#isFrozen = true
+    }
 
     return this
   }
@@ -146,7 +148,7 @@ export class HttpHeadersWrap {
    * @throws Error If the wrapper is frozen.
    */
   set(name: string, value: HttpHeader): this {
-    this.sureNotFrozen('set')
+    this.sureNotFrozen()
 
     const normName = name.toLowerCase()
 
@@ -166,7 +168,7 @@ export class HttpHeadersWrap {
    * @throws Error If the wrapper is frozen.
    */
   add(name: string, value: string): this {
-    this.sureNotFrozen('add')
+    this.sureNotFrozen()
 
     const curValue = this.get(name)
 
@@ -201,7 +203,7 @@ export class HttpHeadersWrap {
    * @throws Error If the wrapper is frozen.
    */
   delete(arg: string | string[]): this {
-    this.sureNotFrozen('delete')
+    this.sureNotFrozen()
 
     const names = Array.isArray(arg) ? arg : [arg]
 
@@ -224,7 +226,7 @@ export class HttpHeadersWrap {
    * @throws Error If the wrapper is frozen.
    */
   merge(headers: HttpHeaders): this {
-    this.sureNotFrozen('merge')
+    this.sureNotFrozen()
 
     Object.entries(headers).forEach(([name, value]) => {
       if (value != null) {
@@ -264,7 +266,7 @@ export class HttpHeadersWrap {
    * @throws Error If Content-Type formatting fails.
    */
   setContentType(contentType: HttpContentType): this {
-    this.sureNotFrozen('setContentType')
+    this.sureNotFrozen()
 
     const value = formatContentType(contentType)
     this.set('Content-Type', value)
@@ -301,7 +303,7 @@ export class HttpHeadersWrap {
    * @throws Error If the wrapper is frozen.
    */
   setCookies(cookies: HttpCookies): this {
-    this.sureNotFrozen('setCookies')
+    this.sureNotFrozen()
 
     const value = formatCookies(cookies)
     this.set('Cookie', value)
@@ -338,7 +340,7 @@ export class HttpHeadersWrap {
    * @throws Error If the wrapper is frozen.
    */
   setSetCookies(setCookies: HttpSetCookies): this {
-    this.sureNotFrozen('setSetCookies')
+    this.sureNotFrozen()
 
     const values = formatSetCookies(setCookies)
     this.set('Set-Cookie', values)
@@ -395,7 +397,7 @@ export class HttpHeadersWrap {
    * @throws Error If the wrapper is frozen.
    */
   reset(): this {
-    this.sureNotFrozen('reset')
+    this.sureNotFrozen()
 
     this.invalidateCacheAll()
 
@@ -404,13 +406,13 @@ export class HttpHeadersWrap {
     return this
   }
 
-  private sureNotFrozen(name: string) {
+  protected sureNotFrozen() {
     if (this.isFrozen) {
-      throw new Error(`Headers frozen on ${name}`)
+      throw new Error(`Headers is frozen`)
     }
   }
 
-  private invalidateCacheFor(name: string) {
+  protected invalidateCacheFor(name: string) {
     if (name === 'content-type') {
       this.#cacheContentType = undefined
     } else if (name === 'cookie') {
@@ -420,7 +422,7 @@ export class HttpHeadersWrap {
     }
   }
 
-  private invalidateCacheAll() {
+  protected invalidateCacheAll() {
     this.#cacheContentType = undefined
     this.#cacheCookies = undefined
     this.#cacheSetCookies = undefined

@@ -22,16 +22,8 @@ import {
 } from './http-server-context-factory.js'
 import { HttpServerContext } from './http-server-context.js'
 import { HTTP_SERVER_ROUTER, HttpServerRouter } from './http-server-router.js'
-import { NativeHttpServerConfig } from './http-server.js'
+import { NativeHttpServerConfig, NativeHttpServerOptions } from './http-server.js'
 import { nativeHttpServerConfigSchema } from './http-server.schemas.js'
-
-/**
- * Options for a Native http-server.
- */
-interface NativeHttpServerOptions {
-  address: string
-  port: number
-}
 
 /**
  * Native-based http-server implementation.
@@ -49,7 +41,7 @@ export class NativeHttpServer implements HttpServer {
     container.registerSingleton<HttpServer>(
       HTTP_SERVER,
       (c) =>
-        new NativeHttpServer(
+        new this(
           c.resolve<Validator>(VALIDATOR),
           c.resolve<Config>(CONFIG),
           c.resolve<Logger>(LOGGER),
@@ -69,9 +61,6 @@ export class NativeHttpServer implements HttpServer {
 
   /** Underlying WebSocket server instance. */
   protected readonly wss: WebSocketServer
-
-  /** Start in-flight promise. */
-  private startPromise: Promise<void> | null = null
 
   /**
    * Creates a new http-server instance.
@@ -162,6 +151,9 @@ export class NativeHttpServer implements HttpServer {
       this.logger.debug(`HttpServer wss event: close`)
     })
   }
+
+  /** Start in-flight promise. */
+  private startPromise: Promise<void> | null = null
 
   #isShutdown: boolean = false
 
@@ -347,7 +339,7 @@ export class NativeHttpServer implements HttpServer {
 
       index = idx
 
-      const middleware = this.router.getMiddleware(idx)
+      const middleware = this.router.get(idx)
 
       if (middleware) {
         const [name, handler] = middleware
@@ -512,23 +504,23 @@ export class NativeHttpServer implements HttpServer {
   }
 
   /**
+   * Dumps a serializable representation of a request for logging.
+   */
+  protected dumpRequest(req: http.IncomingMessage): object {
+    return {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+    }
+  }
+
+  /**
    * Converts validated configuration to an http-server options.
    */
   private buildOptions(conf: NativeHttpServerConfig): NativeHttpServerOptions {
     return {
       address: conf.HTTP_SERVER_ADDRESS,
       port: conf.HTTP_SERVER_PORT,
-    }
-  }
-
-  /**
-   * Dumps a serializable representation of a request for logging.
-   */
-  private dumpRequest(req: http.IncomingMessage): object {
-    return {
-      method: req.method,
-      url: req.url,
-      headers: req.headers,
     }
   }
 }

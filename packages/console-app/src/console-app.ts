@@ -37,7 +37,7 @@ export class ConsoleApp {
     container.registerSingleton<ConsoleApp>(
       CONSOLE_APP,
       (c) =>
-        new ConsoleApp(
+        new this(
           c.resolve<Logger>(LOGGER),
           c.resolve<DatabaseConnector>(DATABASE_CONNECTOR),
           c.resolve<Storage>(STORAGE),
