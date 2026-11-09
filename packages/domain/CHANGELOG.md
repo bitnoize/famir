@@ -1,5 +1,11 @@
 # @famir/domain
 
+## 0.0.6
+
+### Patch Changes
+
+- Remove queue job result, add queue name type.
+
 ## 0.0.5
 
 ### Patch Changes

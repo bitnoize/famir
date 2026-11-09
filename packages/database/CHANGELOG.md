@@ -1,5 +1,15 @@
 # @famir/database
 
+## 0.0.13
+
+### Patch Changes
+
+- Correct handling of empty labels for the target.
+- Fabric methods inheritance fix.
+- Updated dependencies:
+  - @famir/http-tools@0.0.15
+  - @famir/common@0.0.11
+
 ## 0.0.12
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @famir/http-server
 
+## 0.0.10
+
+### Patch Changes
+
+- Fabric methods inheritance fix.
+- Simplify router API to add/get methods.
+- Update ws dep.
+- Updated dependencies:
+  - @famir/http-tools@0.0.15
+  - @famir/common@0.0.11
+
 ## 0.0.9
 
 ### Patch Changes

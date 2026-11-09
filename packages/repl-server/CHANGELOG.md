@@ -1,5 +1,14 @@
 # @famir/repl-server
 
+## 0.0.9
+
+### Patch Changes
+
+- Fabric methods inheritance fix.
+- Simplify router API to add/get/overview/names methods.
+- Updated dependencies:
+  - @famir/common@0.0.11
+
 ## 0.0.8
 
 ### Patch Changes

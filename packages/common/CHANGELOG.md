@@ -1,5 +1,11 @@
 # @famir/common
 
+## 0.0.11
+
+### Patch Changes
+
+- Refactor composition root interface.
+
 ## 0.0.10
 
 ### Patch Changes

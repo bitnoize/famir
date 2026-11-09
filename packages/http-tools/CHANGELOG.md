@@ -1,5 +1,15 @@
 # @famir/http-tools
 
+## 0.0.15
+
+### Patch Changes
+
+- Refactor ready logic for message.
+- Refactor frozen logic for wrappers.
+- Update tough-cookie, isbot deps.
+- Updated dependencies:
+  - @famir/common@0.0.11
+
 ## 0.0.14
 
 ### Patch Changes

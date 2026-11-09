@@ -1,5 +1,13 @@
 # @famir/http-client
 
+## 0.0.11
+
+### Patch Changes
+
+- Fabric methods inheritance fix.
+- Updated dependencies:
+  - @famir/common@0.0.11
+
 ## 0.0.10
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # @famir/consumer
 
+## 0.0.9
+
+### Patch Changes
+
+- Simplify router API to add/get methods.
+- Fabric methods inheritance fix.
+- Refactor consumer queue dispatcher.
+- Updated dependencies:
+  - @famir/common@0.0.11
+
 ## 0.0.8
 
 ### Patch Changes

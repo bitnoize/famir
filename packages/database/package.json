@@ -1,7 +1,7 @@
 {
   "name": "@famir/database",
   "type": "module",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Shared persistence layer",
   "keywords": [
     "famir",

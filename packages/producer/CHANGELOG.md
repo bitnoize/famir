@@ -1,5 +1,13 @@
 # @famir/producer
 
+## 0.0.9
+
+### Patch Changes
+
+- Fabric methods inheritance fix.
+- Updated dependencies:
+  - @famir/common@0.0.11
+
 ## 0.0.8
 
 ### Patch Changes

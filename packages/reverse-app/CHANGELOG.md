@@ -1,5 +1,24 @@
 # @famir/reverse-app
 
+## 0.0.13
+
+### Patch Changes
+
+- Fabric methods inheritance fix.
+- Rename well-known-urls controller to well-known.
+- Refactor controller structure: init, main.
+- Updated dependencies:
+  - @famir/database@0.0.13
+  - @famir/http-tools@0.0.15
+  - @famir/http-client@0.0.11
+  - @famir/http-server@0.0.10
+  - @famir/templater@0.0.8
+  - @famir/validator@0.0.9
+  - @famir/producer@0.0.9
+  - @famir/config@0.0.8
+  - @famir/logger@0.0.10
+  - @famir/common@0.0.11
+
 ## 0.0.12
 
 ### Patch Changes
