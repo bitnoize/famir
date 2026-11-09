@@ -42,7 +42,7 @@
     "@famir/domain": "*",
     "@famir/http-tools": "*",
     "forwarded": "^0.2.0",
-    "ws": "^8.22.0"
+    "ws": "^8.22.2"
   },
   "devDependencies": {
     "@types/forwarded": "^0.1.4",
