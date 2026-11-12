@@ -1,5 +1,11 @@
 # @famir/http-tools
 
+## 0.0.16
+
+### Patch Changes
+
+- Update sanitize-html dep.
+
 ## 0.0.15
 
 ### Patch Changes

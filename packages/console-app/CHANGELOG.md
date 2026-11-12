@@ -1,5 +1,13 @@
 # @famir/console-app
 
+## 0.0.13
+
+### Patch Changes
+
+- Cleanup controllers.
+- Updated dependencies:
+  - @famir/repl-server@0.0.10
+
 ## 0.0.12
 
 ### Patch Changes

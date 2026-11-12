@@ -1,5 +1,14 @@
 # @famir/http-server
 
+## 0.0.11
+
+### Patch Changes
+
+- Refactor router logic.
+- Update ws dep.
+- Updated dependencies:
+  - @famir/http-tools@0.0.16
+
 ## 0.0.10
 
 ### Patch Changes

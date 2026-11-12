@@ -1,5 +1,14 @@
 # @famir/reverse-app
 
+## 0.0.14
+
+### Patch Changes
+
+- Added reverse tenant and reverse tenant switch classes.
+- Updated dependencies:
+  - @famir/http-server@0.0.11
+  - @famir/http-tools@0.0.16
+
 ## 0.0.13
 
 ### Patch Changes

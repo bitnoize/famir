@@ -1,5 +1,11 @@
 # @famir/consumer
 
+## 0.0.10
+
+### Patch Changes
+
+- Refactor router logic.
+
 ## 0.0.9
 
 ### Patch Changes
