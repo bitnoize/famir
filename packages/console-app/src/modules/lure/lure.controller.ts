@@ -97,9 +97,7 @@ export class LureController extends BaseController {
     protected readonly lureService: LureService
   ) {
     super(validator, logger, templater, assets, router)
-  }
 
-  init(): this {
     this.validator
       .addSchema('console-create-lure-args', createLureArgsSchema)
       .addSchema('console-read-lure-args', readLureArgsSchema)
@@ -108,8 +106,6 @@ export class LureController extends BaseController {
       .addSchema('console-list-lures-args', listLuresArgsSchema)
       .addSchema('console-make-lure-url-args', makeLureUrlArgsSchema)
       .addSchema('console-lure-params', redirectorParamsSchema)
-
-    return this
   }
 
   main(): this {

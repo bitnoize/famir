@@ -3,7 +3,6 @@ import {
   BaseWorker,
   Config,
   ConsumerConnector,
-  ConsumerError,
   LifecycleError,
   Logger,
   Validator,
@@ -148,19 +147,10 @@ export abstract class BullBaseWorker implements BaseWorker {
    * appropriate processor from the router and executes it.
    *
    * @param job - The job from the queue.
-   * @throws ConsumerError If the processor is not found.
-   * @throws ConsumerError If processing fails.
    */
   protected processor: Processor<unknown, unknown> = async (job) => {
     try {
-      const processor = this.router.getProcessor(this.queueName, job.name)
-
-      if (!processor) {
-        throw ConsumerError.internalError(`Processor not found`, {
-          queue: this.queueName,
-          job: job.name,
-        })
-      }
+      const processor = this.router.find(this.queueName, job.name)
 
       await processor.execute(job.data)
     } catch (error) {

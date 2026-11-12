@@ -86,15 +86,11 @@ export class TargetController extends BaseController {
     protected readonly targetService: TargetService
   ) {
     super(validator, logger, templater, assets, router)
-  }
 
-  init(): this {
     this.validator
       .addSchema('console-read-target-args', readTargetArgsSchema)
       .addSchema('console-read-target-hosts-args', readTargetHostsArgsSchema)
       .addSchema('console-list-targets-args', listTargetsArgsSchema)
-
-    return this
   }
 
   main(): this {

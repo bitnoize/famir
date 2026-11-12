@@ -78,7 +78,7 @@ export abstract class BaseReplServer implements ReplServer {
         return
       }
 
-      const command = this.router.get(commandName)
+      const command = this.router.find(commandName)
 
       if (!command) {
         console.error(`Command '${commandName}' not exists.`)

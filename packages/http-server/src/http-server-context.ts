@@ -85,6 +85,16 @@ export interface HttpServerContext {
   sureWebsocket(): void
 
   /**
+   * Gets value by key from state.
+   */
+  getState<T extends HttpServerContextState, K extends keyof T>(key: K): NonNullable<T[K]>
+
+  /**
+   * Sets value by key to state.
+   */
+  setState<T extends HttpServerContextState, K extends keyof T>(key: K, value: T[K]): void
+
+  /**
    * Loads the request body into memory.
    *
    * @param bodySizeLimit - The maximum body size in bytes.
@@ -209,6 +219,26 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
     if (this.type !== 'websocket') {
       throw new Error(`Only 'websocket' context type allowed`)
     }
+  }
+
+  getState<T, K extends keyof T>(key: K): NonNullable<T[K]> {
+    const state = this.state as T
+
+    if (state[key] == null) {
+      throw new Error(`Context state missing: ${String(key)}`)
+    }
+
+    return state[key]
+  }
+
+  setState<T, K extends keyof T>(key: K, value: T[K]) {
+    const state = this.state as T
+
+    if (state[key]) {
+      throw new Error(`Context state exists: ${String(key)}`)
+    }
+
+    state[key] = value
   }
 
   abstract loadRequest(bodySizeLimit: number): Promise<void>

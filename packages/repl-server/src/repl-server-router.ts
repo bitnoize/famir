@@ -119,13 +119,13 @@ export class ReplServerRouter {
    * Commands can only be retrieved after the router is activated.
    *
    * @param commandName - The name of the command.
-   * @returns The command object, or `null` if not found.
+   * @returns The command object, or `undefined` if not found.
    * @throws Error If the router is not active.
    */
-  get(commandName: string): ReplServerCommand<ReplServerCommandArgs> | null {
+  find(commandName: string): ReplServerCommand<ReplServerCommandArgs> | undefined {
     this.sureIsActive()
 
-    return this.commands.get(commandName) ?? null
+    return this.commands.get(commandName)
   }
 
   /**

@@ -21,11 +21,11 @@ import {
   type HttpServerContext,
   type HttpServerRouter,
 } from '@famir/http-server'
+import { REVERSE_TENANT_SWITCH, ReverseTenantSwitch } from '../../reverse-tenant-switch.js'
 import {
   BaseController,
   ReverseDispatchContextType,
   ReverseDispatchTargetAccessLevel,
-  ReverseDispatchTargetLabel,
 } from '../base/index.js'
 import { AUTHORIZE_SERVICE, type AuthorizeService } from './authorize.service.js'
 
@@ -57,6 +57,7 @@ export class AuthorizeController extends BaseController {
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<ReverseTenantSwitch>(REVERSE_TENANT_SWITCH),
           c.resolve<AuthorizeService>(AUTHORIZE_SERVICE)
         )
     )
@@ -80,6 +81,7 @@ export class AuthorizeController extends BaseController {
    * @param templater - The templater instance.
    * @param assets - The assets instance.
    * @param router - The router instance.
+   * @param tenantSwitch - The tenant switch instance.
    * @param authorizeService - The authorize service instance.
    */
   constructor(
@@ -88,18 +90,15 @@ export class AuthorizeController extends BaseController {
     templater: Templater,
     assets: HttpServerAssets,
     router: HttpServerRouter,
+    tenantSwitch: ReverseTenantSwitch,
     protected readonly authorizeService: AuthorizeService
   ) {
-    super(validator, logger, templater, assets, router)
-  }
+    super(validator, logger, templater, assets, router, tenantSwitch)
 
-  init(): this {
     this.validator
       .addSchema('reverse-authorize-session-cookie', randomIdentSchema)
       .addSchema('reverse-authorize-upgrade-session-params', upgradeSessionParamsSchema)
       .addSchema('reverse-authorize-redirector-params', redirectorParamsSchema)
-
-    return this
   }
 
   main(): this {
@@ -114,22 +113,11 @@ export class AuthorizeController extends BaseController {
     this.router.add('authorize-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (!target.label) {
-        await next()
+      if (target.label) {
+        const hook = this.tenantSwitch.find('authorize', target.label)
 
-        return
-      }
-
-      const hook = this.dispatchHook[target.label]
-
-      if (hook) {
         await hook(ctx, next)
       } else {
-        this.logger.warn(`Controller dispatch hook not found`, {
-          controller: 'authorize',
-          targetLabel: target.label,
-        })
-
         await next()
       }
     })
@@ -484,8 +472,6 @@ export class AuthorizeController extends BaseController {
       await next()
     },
   }
-
-  protected dispatchHook: ReverseDispatchTargetLabel = {}
 
   protected getSessionCookie(
     ctx: HttpServerContext,

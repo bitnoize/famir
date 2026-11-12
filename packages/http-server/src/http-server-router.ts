@@ -105,13 +105,13 @@ export class HttpServerRouter {
    * Middleware can only be retrieved after the router is activated.
    *
    * @param idx - The index position of the middleware.
-   * @returns The middleware tuple with name and handler, or `null` if not found.
+   * @returns The middleware tuple with name and handler, or `undefined` if not found.
    * @throws Error If the router is not active.
    */
-  get(idx: number): [string, HttpServerMiddleware] | null {
+  find(idx: number): [string, HttpServerMiddleware] | undefined {
     this.sureIsActive()
 
-    return this.middlewareChain[idx] ?? null
+    return this.middlewareChain[idx]
   }
 
   protected sureNotActive() {

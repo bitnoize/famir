@@ -9,11 +9,8 @@ import {
 import { LimiterTransform } from '@famir/http-tools'
 import { PassThrough, pipeline as pipelineSync } from 'node:stream'
 import { pipeline as pipelineAsync } from 'node:stream/promises'
-import {
-  BaseController,
-  ReverseDispatchHttpType,
-  ReverseDispatchTargetLabel,
-} from '../base/index.js'
+import { REVERSE_TENANT_SWITCH, ReverseTenantSwitch } from '../../reverse-tenant-switch.js'
+import { BaseController, ReverseDispatchHttpType } from '../base/index.js'
 import { FORWARD_SERVICE, type ForwardService } from './forward.service.js'
 
 /**
@@ -44,6 +41,7 @@ export class ForwardController extends BaseController {
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<ReverseTenantSwitch>(REVERSE_TENANT_SWITCH),
           c.resolve<ForwardService>(FORWARD_SERVICE)
         )
     )
@@ -67,6 +65,7 @@ export class ForwardController extends BaseController {
    * @param templater - The templater instance.
    * @param assets - The assets instance.
    * @param router - The router instance.
+   * @param tenantSwitch - The tenant switch instance.
    * @param forwardService - The forward service instance.
    */
   constructor(
@@ -75,13 +74,10 @@ export class ForwardController extends BaseController {
     templater: Templater,
     assets: HttpServerAssets,
     router: HttpServerRouter,
+    tenantSwitch: ReverseTenantSwitch,
     protected readonly forwardService: ForwardService
   ) {
-    super(validator, logger, templater, assets, router)
-  }
-
-  init(): this {
-    return this
+    super(validator, logger, templater, assets, router, tenantSwitch)
   }
 
   main(): this {
@@ -100,22 +96,11 @@ export class ForwardController extends BaseController {
     this.router.add('forward-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (!target.label) {
-        await next()
+      if (target.label) {
+        const hook = this.tenantSwitch.find('forward', target.label)
 
-        return
-      }
-
-      const hook = this.dispatchHook[target.label]
-
-      if (hook) {
         await hook(ctx, next)
       } else {
-        this.logger.warn(`Controller dispatch hook not found`, {
-          controller: 'forward',
-          targetLabel: target.label,
-        })
-
         await next()
       }
     })
@@ -320,6 +305,4 @@ export class ForwardController extends BaseController {
       await next()
     },
   }
-
-  protected dispatchHook: ReverseDispatchTargetLabel = {}
 }

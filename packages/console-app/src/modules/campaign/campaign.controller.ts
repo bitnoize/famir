@@ -113,9 +113,7 @@ export class CampaignController extends BaseController {
     protected readonly campaignService: CampaignService
   ) {
     super(validator, logger, templater, assets, router)
-  }
 
-  init(): this {
     this.validator
       .addSchema('console-create-campaign-args', createCampaignArgsSchema)
       .addSchema('console-read-campaign-args', readCampaignArgsSchema)
@@ -125,8 +123,6 @@ export class CampaignController extends BaseController {
       .addSchema('console-delete-campaign-args', deleteCampaignArgsSchema)
       .addSchema('console-list-campaigns-args', listCampaignsArgsSchema)
       .addSchema('console-raw-campaign-preset', rawCampaignPresetSchema)
-
-    return this
   }
 
   main(): this {

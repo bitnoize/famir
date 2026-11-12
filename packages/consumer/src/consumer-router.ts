@@ -1,6 +1,7 @@
 import { DIContainer } from '@famir/common'
 import {
   ANALYZE_QUEUE_NAME,
+  ConsumerError,
   Logger,
   LOGGER,
   Validator,
@@ -21,7 +22,7 @@ import { ConsumerQueueNames } from './consumer.js'
  */
 export const CONSUMER_ROUTER = Symbol('ConsumerRouter')
 
-type ConsumerRouterQueues = Map<ConsumerQueueNames, Map<string, ConsumerProcessor<unknown>>>
+type ConsumerRouterQueues = Record<ConsumerQueueNames, Map<string, ConsumerProcessor<unknown>>>
 
 /**
  * Represents the consumer router.
@@ -55,10 +56,10 @@ export class ConsumerRouter {
   }
 
   /** Mapping of queue names to job processors. */
-  protected readonly queues: ConsumerRouterQueues = new Map([
-    [ANALYZE_QUEUE_NAME, new Map<string, ConsumerProcessor<unknown>>()],
-    [WEBHOOK_QUEUE_NAME, new Map<string, ConsumerProcessor<unknown>>()],
-  ])
+  protected readonly queues: ConsumerRouterQueues = {
+    [ANALYZE_QUEUE_NAME]: new Map<string, ConsumerProcessor<unknown>>(),
+    [WEBHOOK_QUEUE_NAME]: new Map<string, ConsumerProcessor<unknown>>(),
+  }
 
   /**
    * Creates a new router instance.
@@ -106,17 +107,12 @@ export class ConsumerRouter {
    * @param action - The processor action function.
    * @returns This router for method chaining.
    * @throws Error If the router is already active.
-   * @throws Error If the queue does not exist.
    * @throws Error If a processor for this job already exists.
    */
   add<T>(spec: ConsumerProcessorSpec, action: ConsumerProcessorAction<T>): this {
     this.sureNotActive()
 
-    const queue = this.queues.get(spec.queueName)
-
-    if (!queue) {
-      throw new Error(`Queue not found: ${spec.queueName}`)
-    }
+    const queue = this.queues[spec.queueName]
 
     if (queue.has(spec.jobName)) {
       throw new Error(`Processor already exists: ${spec.queueName}->${spec.jobName}`)
@@ -138,19 +134,25 @@ export class ConsumerRouter {
    *
    * @param queueName - The name of the queue.
    * @param jobName - The name of the job.
-   * @returns The processor function, or `null` if not found.
+   * @returns The processor function.
    * @throws Error If the router is not active.
+   * @throws ConsumerError If the processor is not found.
    */
-  getProcessor(queueName: ConsumerQueueNames, jobName: string): ConsumerProcessor<unknown> | null {
+  find(queueName: ConsumerQueueNames, jobName: string): ConsumerProcessor<unknown> {
     this.sureIsActive()
 
-    const queue = this.queues.get(queueName)
+    const queue = this.queues[queueName]
 
-    if (!queue) {
-      return null
+    const processor = queue.get(jobName)
+
+    if (!processor) {
+      throw ConsumerError.internalError(`Processor not found`, {
+        queueName,
+        jobName,
+      })
     }
 
-    return queue.get(jobName) ?? null
+    return processor
   }
 
   protected sureNotActive() {

@@ -6,7 +6,8 @@ import {
   type HttpServerAssets,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { BaseController, ReverseDispatchTargetLabel } from '../base/index.js'
+import { REVERSE_TENANT_SWITCH, ReverseTenantSwitch } from '../../reverse-tenant-switch.js'
+import { BaseController } from '../base/index.js'
 import { COMPLETE_SERVICE, type CompleteService } from './complete.service.js'
 
 /**
@@ -37,6 +38,7 @@ export class CompleteController extends BaseController {
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<ReverseTenantSwitch>(REVERSE_TENANT_SWITCH),
           c.resolve<CompleteService>(COMPLETE_SERVICE)
         )
     )
@@ -60,6 +62,7 @@ export class CompleteController extends BaseController {
    * @param templater - The templater instance.
    * @param assets - The assets instance.
    * @param router - The router instance.
+   * @param tenantSwitch - The tenant switch instance.
    * @param completeService - The complete service instance.
    */
   constructor(
@@ -68,13 +71,10 @@ export class CompleteController extends BaseController {
     templater: Templater,
     assets: HttpServerAssets,
     router: HttpServerRouter,
+    tenantSwitch: ReverseTenantSwitch,
     protected readonly completeService: CompleteService
   ) {
-    super(validator, logger, templater, assets, router)
-  }
-
-  init(): this {
-    return this
+    super(validator, logger, templater, assets, router, tenantSwitch)
   }
 
   main(): this {
@@ -154,28 +154,15 @@ export class CompleteController extends BaseController {
     this.router.add('complete-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (!target.label) {
-        await next()
+      if (target.label) {
+        const hook = this.tenantSwitch.find('complete', target.label)
 
-        return
-      }
-
-      const hook = this.dispatchHook[target.label]
-
-      if (hook) {
         await hook(ctx, next)
       } else {
-        this.logger.warn(`Controller dispatch hook not found`, {
-          controller: 'complete',
-          targetLabel: target.label,
-        })
-
         await next()
       }
     })
 
     return this
   }
-
-  protected dispatchHook: ReverseDispatchTargetLabel = {}
 }

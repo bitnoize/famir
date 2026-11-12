@@ -13,7 +13,8 @@ import {
   type HttpServerContext,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { ReverseContextState } from './base.js'
+import { ReverseContextState } from '../../reverse-context-state.js'
+import { ReverseTenantSwitch } from '../../reverse-tenant-switch.js'
 
 /**
  * Abstract base class for all application controllers.
@@ -32,27 +33,24 @@ export abstract class BaseController {
    * @param templater - The templater instance.
    * @param assets - The assets instance.
    * @param router - The router instance.
+   * @param tenantSwitch - The tenant switch instance.
    */
   constructor(
     protected readonly validator: Validator,
     protected readonly logger: Logger,
     protected readonly templater: Templater,
     protected readonly assets: HttpServerAssets,
-    protected readonly router: HttpServerRouter
+    protected readonly router: HttpServerRouter,
+    protected readonly tenantSwitch: ReverseTenantSwitch
   ) {}
 
   /**
-   * Initialize controller.
-   */
-  abstract init(): this
-
-  /**
-   * Define main middleware.
+   * Define main middleware chain.
    */
   abstract main(): this
 
   /**
-   * Define hook middleware.
+   * Define hook middleware chain.
    */
   abstract hook(): this
 
@@ -60,13 +58,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     key: K
   ): NonNullable<T[K]> {
-    const state = ctx.state as T
-
-    if (state[key] == null) {
-      throw new Error(`State '${String(key)}' missing`)
-    }
-
-    return state[key]
+    return ctx.getState(key)
   }
 
   protected setState<T extends ReverseContextState, K extends keyof T>(
@@ -74,13 +66,7 @@ export abstract class BaseController {
     key: K,
     value: T[K]
   ) {
-    const state = ctx.state as T
-
-    if (state[key]) {
-      throw new Error(`State '${String(key)}' exists`)
-    }
-
-    state[key] = value
+    ctx.setState(key, value)
   }
 
   protected async sendNoContent(ctx: HttpServerContext, status = 204): Promise<void> {

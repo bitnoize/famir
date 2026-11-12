@@ -92,16 +92,12 @@ export class MessageController extends BaseController {
     protected readonly messageService: MessageService
   ) {
     super(validator, logger, templater, assets, router)
-  }
 
-  init(): this {
     this.validator
       .addSchema('console-read-message-args', readMessageArgsSchema)
       .addSchema('console-delete-message-args', deleteMessageArgsSchema)
       .addSchema('console-list-messages-args', listMessagesArgsSchema)
       .addSchema('console-clear-messages-args', clearMessagesArgsSchema)
-
-    return this
   }
 
   main(): this {

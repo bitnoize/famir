@@ -16,11 +16,8 @@ import {
   type HttpServerRouter,
 } from '@famir/http-server'
 import { HttpMessage } from '@famir/http-tools'
-import {
-  BaseController,
-  ReverseDispatchContextType,
-  ReverseDispatchTargetLabel,
-} from '../base/index.js'
+import { REVERSE_TENANT_SWITCH, ReverseTenantSwitch } from '../../reverse-tenant-switch.js'
+import { BaseController, ReverseDispatchContextType } from '../base/index.js'
 import { SETUP_MIRROR_SERVICE, type SetupMirrorService } from './setup-mirror.service.js'
 
 /**
@@ -51,6 +48,7 @@ export class SetupMirrorController extends BaseController {
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
           c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<ReverseTenantSwitch>(REVERSE_TENANT_SWITCH),
           c.resolve<SetupMirrorService>(SETUP_MIRROR_SERVICE)
         )
     )
@@ -74,6 +72,7 @@ export class SetupMirrorController extends BaseController {
    * @param templater - The templater instance.
    * @param assets - The assets instance.
    * @param router - The router instance.
+   * @param tenantSwitch - The tenant switch instance.
    * @param setupMirrorService - The setup-mirror service instance.
    */
   constructor(
@@ -82,13 +81,10 @@ export class SetupMirrorController extends BaseController {
     templater: Templater,
     assets: HttpServerAssets,
     router: HttpServerRouter,
+    tenantSwitch: ReverseTenantSwitch,
     protected readonly setupMirrorService: SetupMirrorService
   ) {
-    super(validator, logger, templater, assets, router)
-  }
-
-  init(): this {
-    return this
+    super(validator, logger, templater, assets, router, tenantSwitch)
   }
 
   main(): this {
@@ -125,22 +121,11 @@ export class SetupMirrorController extends BaseController {
     this.router.add('setup-mirror-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (!target.label) {
-        await next()
+      if (target.label) {
+        const hook = this.tenantSwitch.find('setup-mirror', target.label)
 
-        return
-      }
-
-      const hook = this.dispatchHook[target.label]
-
-      if (hook) {
         await hook(ctx, next)
       } else {
-        this.logger.warn(`Controller dispatch hook not found`, {
-          controller: 'setup-mirror',
-          targetLabel: target.label,
-        })
-
         await next()
       }
     })
@@ -177,8 +162,6 @@ export class SetupMirrorController extends BaseController {
       await next()
     },
   }
-
-  protected dispatchHook: ReverseDispatchTargetLabel = {}
 
   protected parseMirrorHost(ctx: HttpServerContext): string {
     try {

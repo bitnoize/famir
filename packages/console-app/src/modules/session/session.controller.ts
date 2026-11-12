@@ -85,15 +85,11 @@ export class SessionController extends BaseController {
     protected readonly sessionService: SessionService
   ) {
     super(validator, logger, templater, assets, router)
-  }
 
-  init(): this {
     this.validator
       .addSchema('console-read-session-args', readSessionArgsSchema)
       .addSchema('console-revoke-session-args', revokeSessionArgsSchema)
       .addSchema('console-list-sessions-args', listSessionsArgsSchema)
-
-    return this
   }
 
   main(): this {

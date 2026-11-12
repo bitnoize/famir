@@ -82,14 +82,10 @@ export class RedirectorController extends BaseController {
     protected readonly redirectorService: RedirectorService
   ) {
     super(validator, logger, templater, assets, router)
-  }
 
-  init(): this {
     this.validator
       .addSchema('console-read-redirector-args', readRedirectorArgsSchema)
       .addSchema('console-list-redirectors-args', listRedirectorsArgsSchema)
-
-    return this
   }
 
   main(): this {

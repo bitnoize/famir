@@ -6,7 +6,8 @@ import {
   type HttpServerAssets,
   type HttpServerRouter,
 } from '@famir/http-server'
-import { BaseController, ReverseDispatchTargetLabel } from '../base/index.js'
+import { REVERSE_TENANT_SWITCH, ReverseTenantSwitch } from '../../reverse-tenant-switch.js'
+import { BaseController } from '../base/index.js'
 
 /**
  * DI token for the transform controller.
@@ -35,7 +36,8 @@ export class TransformController extends BaseController {
           c.resolve<Logger>(LOGGER),
           c.resolve<Templater>(TEMPLATER),
           c.resolve<HttpServerAssets>(HTTP_SERVER_ASSETS),
-          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER)
+          c.resolve<HttpServerRouter>(HTTP_SERVER_ROUTER),
+          c.resolve<ReverseTenantSwitch>(REVERSE_TENANT_SWITCH)
         )
     )
   }
@@ -48,10 +50,6 @@ export class TransformController extends BaseController {
    */
   static resolve(container: DIContainer) {
     return container.resolve<TransformController>(TRANSFORM_CONTROLLER)
-  }
-
-  init(): this {
-    return this
   }
 
   main(): this {
@@ -196,28 +194,15 @@ export class TransformController extends BaseController {
     this.router.add('transform-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (!target.label) {
-        await next()
+      if (target.label) {
+        const hook = this.tenantSwitch.find('forward', target.label)
 
-        return
-      }
-
-      const hook = this.dispatchHook[target.label]
-
-      if (hook) {
         await hook(ctx, next)
       } else {
-        this.logger.warn(`Controller dispatch hook not found`, {
-          controller: 'transform',
-          targetLabel: target.label,
-        })
-
         await next()
       }
     })
 
     return this
   }
-
-  protected dispatchHook: ReverseDispatchTargetLabel = {}
 }

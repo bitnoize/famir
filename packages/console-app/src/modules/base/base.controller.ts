@@ -30,11 +30,6 @@ export abstract class BaseController {
   ) {}
 
   /**
-   * Initialize controller.
-   */
-  abstract init(): this
-
-  /**
    * Define main commands.
    */
   abstract main(): this

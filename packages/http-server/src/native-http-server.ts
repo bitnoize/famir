@@ -339,7 +339,7 @@ export class NativeHttpServer implements HttpServer {
 
       index = idx
 
-      const middleware = this.router.get(idx)
+      const middleware = this.router.find(idx)
 
       if (middleware) {
         const [name, handler] = middleware

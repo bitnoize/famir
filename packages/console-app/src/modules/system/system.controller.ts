@@ -95,9 +95,7 @@ export class SystemController extends BaseController {
     protected readonly systemService: SystemService
   ) {
     super(validator, logger, templater, assets, router)
-  }
 
-  init(): this {
     this.validator
       .addSchema('console-system-help-args', systemHelpArgsSchema)
       .addSchema('console-system-assets-args', systemAssetsArgsSchema)
@@ -105,8 +103,6 @@ export class SystemController extends BaseController {
       .addSchema('console-load-database-functions-args', loadDatabaseFunctionsArgsSchema)
       .addSchema('console-cleanup-database-args', cleanupDatabaseArgsSchema)
       .addSchema('console-get-producer-info-args', getProducerInfoArgsSchema)
-
-    return this
   }
 
   main(): this {

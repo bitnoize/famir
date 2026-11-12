@@ -93,17 +93,13 @@ export class ProxyController extends BaseController {
     protected readonly proxyService: ProxyService
   ) {
     super(validator, logger, templater, assets, router)
-  }
 
-  init(): this {
     this.validator
       .addSchema('console-create-proxy-args', createProxyArgsSchema)
       .addSchema('console-read-proxy-args', readProxyArgsSchema)
       .addSchema('console-toggle-proxy-args', toggleProxyArgsSchema)
       .addSchema('console-delete-proxy-args', deleteProxyArgsSchema)
       .addSchema('console-list-proxies-args', listProxiesArgsSchema)
-
-    return this
   }
 
   main(): this {
