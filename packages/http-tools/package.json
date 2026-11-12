@@ -47,7 +47,7 @@
     "iconv-lite": "^0.7.3",
     "isbot": "^5.2.3",
     "qs": "^6.16.0",
-    "sanitize-html": "^2.18.0",
+    "sanitize-html": "^2.18.2",
     "tough-cookie": "^6.1.0"
   },
   "devDependencies": {
