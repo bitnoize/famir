@@ -1,7 +1,7 @@
 {
   "name": "@famir/http-tools",
   "type": "module",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Reusable HTTP primitives and wrappers",
   "keywords": [
     "famir",

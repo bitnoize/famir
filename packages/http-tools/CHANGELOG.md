@@ -1,5 +1,11 @@
 # @famir/http-tools
 
+## 0.0.17
+
+### Patch Changes
+
+- Added isRoute message helper.
+
 ## 0.0.16
 
 ### Patch Changes
