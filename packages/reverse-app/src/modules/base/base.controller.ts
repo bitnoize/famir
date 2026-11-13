@@ -58,7 +58,7 @@ export abstract class BaseController {
     ctx: HttpServerContext,
     key: K
   ): NonNullable<T[K]> {
-    return ctx.getState(key)
+    return ctx.getState<T, K>(key)
   }
 
   protected setState<T extends ReverseContextState, K extends keyof T>(
@@ -66,7 +66,7 @@ export abstract class BaseController {
     key: K,
     value: T[K]
   ) {
-    ctx.setState(key, value)
+    ctx.setState<T, K>(key, value)
   }
 
   protected async sendNoContent(ctx: HttpServerContext, status = 204): Promise<void> {

@@ -61,6 +61,6 @@ export abstract class BaseReverseTenant implements ReverseTenant {
     ctx: HttpServerContext,
     key: K
   ): NonNullable<T[K]> {
-    return ctx.getState(key)
+    return ctx.getState<T, K>(key)
   }
 }

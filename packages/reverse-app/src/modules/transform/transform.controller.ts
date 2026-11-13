@@ -195,7 +195,7 @@ export class TransformController extends BaseController {
       const target = this.getState(ctx, 'target')
 
       if (target.label) {
-        const hook = this.tenantSwitch.find('forward', target.label)
+        const hook = this.tenantSwitch.find('transform', target.label)
 
         await hook(ctx, next)
       } else {

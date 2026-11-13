@@ -20,7 +20,7 @@ import WebSocket, { createWebSocketStream } from 'ws'
  * This state is passed to all middleware and can be used to share data
  * across the request/connection lifecycle.
  */
-export type HttpServerContextState = Record<string, unknown>
+export type HttpServerContextState = object
 
 /**
  * Variants of http-server context type.
