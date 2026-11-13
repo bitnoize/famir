@@ -1,4 +1,4 @@
-import { HttpBody, HttpConnection, HttpServerError } from '@famir/domain'
+import { HttpBody, HttpConnection, HttpMethod, HttpServerError } from '@famir/domain'
 import {
   bowserParse,
   BowserResult,
@@ -93,6 +93,15 @@ export interface HttpServerContext {
    * Sets value by key to state.
    */
   setState<T extends HttpServerContextState, K extends keyof T>(key: K, value: T[K]): void
+
+  /**
+   * Checks HTTP method and URL pathname.
+   *
+   * @param method - The single method string or an array of methods to check.
+   * @param path - The string path, RegExp pattern to match or array of both.
+   * @returns `true` if the current method and pathname matches, `false` otherwise.
+   */
+  isRoute(method: HttpMethod | HttpMethod[], path: string | RegExp | (string | RegExp)[]): boolean
 
   /**
    * Loads the request body into memory.
@@ -239,6 +248,10 @@ export abstract class HttpServerBaseContext implements HttpServerContext {
     }
 
     state[key] = value
+  }
+
+  isRoute(method: HttpMethod | HttpMethod[], path: string | RegExp | (string | RegExp)[]): boolean {
+    return this.method.is(method) && this.url.isPath(path)
   }
 
   abstract loadRequest(bodySizeLimit: number): Promise<void>
