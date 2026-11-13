@@ -47,5 +47,9 @@
     "typedoc-theme-fresh": "^0.2.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.57.2"
+  },
+  "allowScripts": {
+    "msgpackr-extract": true,
+    "node-libcurl": true
   }
 }

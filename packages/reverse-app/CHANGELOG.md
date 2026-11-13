@@ -1,5 +1,13 @@
 # @famir/reverse-app
 
+## 0.0.15
+
+### Patch Changes
+
+- Fix reverse context state.
+- Updated dependencies:
+  - @famir/http-server@0.0.12
+
 ## 0.0.14
 
 ### Patch Changes

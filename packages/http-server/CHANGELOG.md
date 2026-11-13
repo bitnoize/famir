@@ -1,5 +1,11 @@
 # @famir/http-server
 
+## 0.0.12
+
+### Patch Changes
+
+- Remove index signature from context state.
+
 ## 0.0.11
 
 ### Patch Changes
