@@ -81,12 +81,8 @@ export class AnalyzeController extends BaseController {
     protected readonly analyzeService: AnalyzeService
   ) {
     super(validator, logger, templater, assets, router)
-  }
 
-  init(): this {
     this.validator.addSchema('actions-analyze-job-data', analyzeJobDataSchema)
-
-    return this
   }
 
   main(): this {

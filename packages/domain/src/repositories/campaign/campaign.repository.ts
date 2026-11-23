@@ -28,6 +28,8 @@ export interface CampaignRepository {
    * @param sessionExpire - The TTL for an authorized session in milliseconds.
    * @param newSessionExpire - The TTL for a not-yet-authorized session in milliseconds.
    * @param messageExpire - The TTL for a message in milliseconds.
+   * @param limiterBurst - The burst value for the limiter.
+   * @param limiterRate - The rate value for the limiter.
    * @throws DatabaseError If a campaign with the same ID already exists.
    * @throws DatabaseError If the mirror domain is already used by another campaign.
    * @throws DatabaseError If the session cookie name is already used by another campaign.
@@ -42,7 +44,9 @@ export interface CampaignRepository {
     sessionCookieName: string,
     sessionExpire: number,
     newSessionExpire: number,
-    messageExpire: number
+    messageExpire: number,
+    limiterBurst: number,
+    limiterRate: number
   ): Promise<void>
 
   /**
@@ -97,6 +101,8 @@ export interface CampaignRepository {
    * @param sessionExpire - The new TTL for an authorized session in milliseconds.
    * @param newSessionExpire - The new TTL for a not-yet-authorized session in milliseconds.
    * @param messageExpire - The new TTL for a message in milliseconds.
+   * @param limiterBurst - The burst value for the limiter.
+   * @param limiterRate - The rate value for the limiter.
    * @param lockSecret - The lock secret obtained from {@link lock}.
    * @throws DatabaseError If the campaign does not exist.
    * @throws DatabaseError If the campaign is not locked.
@@ -109,6 +115,8 @@ export interface CampaignRepository {
     sessionExpire: number,
     newSessionExpire: number,
     messageExpire: number,
+    limiterBurst: number,
+    limiterRate: number,
     lockSecret: string
   ): Promise<void>
 
@@ -164,4 +172,16 @@ export interface CampaignRepository {
    * @throws DatabaseError If the data validation fails.
    */
   listFull(): Promise<FullCampaignModel[]>
+
+  /**
+   * Checks the campaign limiter.
+   *
+   * @param campaignId - The campaign ID to update.
+   * @param identity - The new human-readable description for the campaign.
+   * @param limiterCost - The cost value for the limiter.
+   * @throws DatabaseError If the campaign does not exist.
+   * @throws DatabaseError If the request limiter exceeded.
+   * @throws DatabaseError If the data validation fails.
+   */
+  checkLimiter(campaignId: string, identity: string, limiterCost: number): Promise<void>
 }

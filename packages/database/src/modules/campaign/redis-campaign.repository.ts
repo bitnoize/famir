@@ -68,7 +68,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     sessionCookieName: string,
     sessionExpire: number,
     newSessionExpire: number,
-    messageExpire: number
+    messageExpire: number,
+    limiterBurst: number,
+    limiterRate: number
   ): Promise<void> {
     try {
       const statusReply = await this.connection.campaign.create_campaign(
@@ -82,6 +84,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         sessionExpire,
         newSessionExpire,
         messageExpire,
+        limiterBurst,
+        limiterRate,
         Date.now()
       )
 
@@ -209,6 +213,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     sessionExpire: number,
     newSessionExpire: number,
     messageExpire: number,
+    limiterBurst: number,
+    limiterRate: number,
     lockSecret: string
   ): Promise<void> {
     try {
@@ -219,6 +225,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         sessionExpire,
         newSessionExpire,
         messageExpire,
+        limiterBurst,
+        limiterRate,
         lockSecret
       )
 
@@ -372,6 +380,39 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
+  async checkLimiter(campaignId: string, identity: string, limiterCost: number): Promise<void> {
+    try {
+      const statusReply = await this.connection.campaign.check_campaign_limiter(
+        this.options.prefix,
+        campaignId,
+        identity,
+        limiterCost
+      )
+
+      this.checkStatusReply(statusReply)
+
+      this.logger.debug(`Database check campaign limiter`, {
+        data: {
+          campaign: {
+            campaignId,
+            identity,
+            limiterCost,
+          },
+        },
+      })
+    } catch (error) {
+      throw DatabaseError.wrap(error, {
+        repository: this.repositoryName,
+        method: 'checkLimiter',
+        params: {
+          campaignId,
+          identity,
+          limiterCost,
+        },
+      })
+    }
+  }
+
   /**
    * Converts raw Redis data to a campaign model.
    *
@@ -421,6 +462,8 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
       rawModel.session_expire,
       rawModel.new_session_expire,
       rawModel.message_expire,
+      rawModel.limiter_burst,
+      rawModel.limiter_rate,
       rawModel.is_locked,
       rawModel.flags,
       rawModel.proxy_index,

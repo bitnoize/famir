@@ -201,59 +201,24 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async find(mirrorHost: string): Promise<TargetModel | null> {
+  async find(mirrorHost: string): Promise<TargetLink | null> {
     try {
-      const link = await this.connection.target.find_target_link(this.options.prefix, mirrorHost)
+      const targetLink = await this.connection.target.find_target_link(
+        this.options.prefix,
+        mirrorHost
+      )
 
-      if (link === null) {
+      if (targetLink === null) {
         return null
       }
 
-      this.validateReply<TargetLink>('database-target-link', link)
+      this.validateReply<TargetLink>('database-target-link', targetLink)
 
-      const [campaignId, targetId] = link
-
-      const rawModel = await this.connection.target.read_target(
-        this.options.prefix,
-        campaignId,
-        targetId
-      )
-
-      return this.buildModel(rawModel)
+      return targetLink
     } catch (error) {
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'find',
-        params: {
-          mirrorHost,
-        },
-      })
-    }
-  }
-
-  async findFull(mirrorHost: string): Promise<FullTargetModel | null> {
-    try {
-      const link = await this.connection.target.find_target_link(this.options.prefix, mirrorHost)
-
-      if (link === null) {
-        return null
-      }
-
-      this.validateReply<TargetLink>('database-target-link', link)
-
-      const [campaignId, targetId] = link
-
-      const rawModel = await this.connection.target.read_full_target(
-        this.options.prefix,
-        campaignId,
-        targetId
-      )
-
-      return this.buildFullModel(rawModel)
-    } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'findFull',
         params: {
           mirrorHost,
         },

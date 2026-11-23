@@ -16,6 +16,7 @@ export type HttpServerErrorCode =
   | 'CONFLICT'
   | 'CONTENT_TOO_LARGE'
   | 'UNPROCESSABLE_CONTENT'
+  | 'TOO_MANY_REQUESTS'
   | 'INTERNAL_ERROR'
   | 'BAD_GATEWAY'
   | 'SERVICE_UNAVAILABLE'
@@ -41,6 +42,7 @@ const codeToStatus: Record<HttpServerErrorCode, number> = {
   CONFLICT: 409,
   CONTENT_TOO_LARGE: 413,
   UNPROCESSABLE_CONTENT: 422,
+  TOO_MANY_REQUESTS: 429,
   INTERNAL_ERROR: 500,
   BAD_GATEWAY: 502,
   SERVICE_UNAVAILABLE: 503,
@@ -170,6 +172,44 @@ export class HttpServerError extends DomainError {
   }
 
   /**
+   * Creates a new http-server error with `UNPROCESSABLE_CONTENT` code.
+   *
+   * @param message - The human-readable description of the error.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static unprocessableContent(
+    message: string,
+    context?: ErrorContext | null,
+    cause?: unknown
+  ): HttpServerError {
+    return new HttpServerError(message, {
+      cause,
+      context,
+      code: 'UNPROCESSABLE_CONTENT',
+    })
+  }
+
+  /**
+   * Creates a new http-server error with `TOO_MANY_REQUESTS` code.
+   *
+   * @param message - The human-readable description of the error.
+   * @param context - The optional error context.
+   * @param cause - The optional upstream error.
+   */
+  static tooManyRequests(
+    message: string,
+    context?: ErrorContext | null,
+    cause?: unknown
+  ): HttpServerError {
+    return new HttpServerError(message, {
+      cause,
+      context,
+      code: 'TOO_MANY_REQUESTS',
+    })
+  }
+
+  /**
    * Creates a new http-server error with `INTERNAL_ERROR` code.
    *
    * @param message - The human-readable description of the error.
@@ -288,6 +328,10 @@ export class HttpServerError extends DomainError {
 
   get isUnprocessableContent(): boolean {
     return this.code === 'UNPROCESSABLE_CONTENT'
+  }
+
+  get isTooManyRequests(): boolean {
+    return this.code === 'TOO_MANY_REQUESTS'
   }
 
   get isInternalError(): boolean {

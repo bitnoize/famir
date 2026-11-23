@@ -346,6 +346,8 @@ export class CampaignController extends BaseController {
       sessionExpire: campaign.sessionExpire,
       newSessionExpire: campaign.newSessionExpire,
       messageExpire: campaign.messageExpire,
+      limiterLimit: campaign.limiterLimit,
+      limiterExpire: campaign.limiterExpire,
       isLocked: campaign.isLocked,
       flags: campaign.flags.length > 0 ? campaign.flags.join(', ') : null,
       proxyIndex: campaign.proxyIndex,
@@ -433,6 +435,8 @@ export class CampaignController extends BaseController {
       sessionExpire: rawCampaign.sessionExpire ?? 24 * 3600 * 1000,
       newSessionExpire: rawCampaign.newSessionExpire ?? 300 * 1000,
       messageExpire: rawCampaign.messageExpire ?? 3600 * 1000,
+      limiterLimit: rawCampaign.limiterLimit ?? 100,
+      limiterExpire: rawCampaign.limiterExpire ?? 1000,
     }
   }
 

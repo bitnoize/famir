@@ -96,6 +96,28 @@ export const campaignMessageExpireSchema: JSONSchemaType<number> = {
 } as const
 
 /**
+ * Validate a campaign limiter burst.
+ *
+ * @category Campaign
+ */
+export const campaignLimiterBurstSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  minimum: 1,
+  maximum: 1000,
+} as const
+
+/**
+ * Validate a campaign limiter rate.
+ *
+ * @category Campaign
+ */
+export const campaignLimiterRateSchema: JSONSchemaType<number> = {
+  type: 'integer',
+  minimum: 1,
+  maximum: 1000,
+} as const
+
+/**
  * Validate a campaign flag.
  *
  * @category Campaign
@@ -154,6 +176,8 @@ export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     'session_expire',
     'new_session_expire',
     'message_expire',
+    'limiter_burst',
+    'limiter_rate',
     'is_locked',
     'flags',
     'proxy_index',
@@ -177,6 +201,8 @@ export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     session_expire: campaignSessionExpireSchema,
     new_session_expire: campaignNewSessionExpireSchema,
     message_expire: campaignMessageExpireSchema,
+    limiter_burst: campaignLimiterBurstSchema,
+    limiter_rate: campaignLimiterRateSchema,
     is_locked: booleanSchema,
     flags: campaignFlagsSchema,
     proxy_index: counterSchema,

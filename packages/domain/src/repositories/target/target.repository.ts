@@ -1,4 +1,4 @@
-import { TargetAccessLevel, TargetHosts } from './target.js'
+import { TargetAccessLevel, TargetHosts, TargetLink } from './target.js'
 import { FullTargetModel, TargetModel } from './target.model.js'
 
 /**
@@ -114,22 +114,13 @@ export interface TargetRepository {
    * Finds a target by its mirror hostname.
    *
    * This is the primary lookup method for routing incoming HTTP requests.
-   * Given a `Host` header from a request, it returns the corresponding target.
+   * Given a `Host` header from a request, it returns the corresponding target link.
    *
    * @param mirrorHost - The mirror hostname to look up.
-   * @returns The target model, or `null` if no target matches the hostname.
+   * @returns The target link, or `null` if no target matches the hostname.
    * @throws DatabaseError If the data validation fails.
    */
-  find(mirrorHost: string): Promise<TargetModel | null>
-
-  /**
-   * Finds a full target by its mirror hostname.
-   *
-   * @param mirrorHost - The mirror hostname to look up.
-   * @returns The full target model, or `null` if no target matches the hostname.
-   * @throws DatabaseError If the data validation fails.
-   */
-  findFull(mirrorHost: string): Promise<FullTargetModel | null>
+  find(mirrorHost: string): Promise<TargetLink | null>
 
   /**
    * Updates the target fields.

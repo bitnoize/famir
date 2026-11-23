@@ -91,16 +91,30 @@ export class SetupMirrorController extends BaseController {
     this.router.add('setup-mirror-main', async (ctx, next) => {
       const mirrorHost = this.parseMirrorHost(ctx)
 
-      const target = await this.setupMirrorService.findTarget({
+      const [campaignId, targetId] = await this.setupMirrorService.findTargetLink({
         mirrorHost,
       })
 
+      const limiter = await this.setupMirrorService.checkCampaignLimiter({ campaignId, identity: 'a-b-c-d' })
+
+      if (!limiter.isAllowed) {
+        throw HttpServerError.tooManyRequests(`Too many requests`, {
+          reason: `Limiter exceed requests`,
+          limiter,
+        })
+      }
+
       const campaign = await this.setupMirrorService.readCampaign({
-        campaignId: target.campaignId,
+        campaignId,
+      })
+
+      const target = await this.setupMirrorService.readTarget({
+        campaignId,
+        targetId,
       })
 
       const targets = await this.setupMirrorService.listTargets({
-        campaignId: target.campaignId,
+        campaignId,
       })
 
       this.setState(ctx, 'campaign', campaign)

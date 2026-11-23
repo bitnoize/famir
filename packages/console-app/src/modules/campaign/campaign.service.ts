@@ -88,7 +88,9 @@ export class CampaignService {
         campaign.sessionCookieName,
         campaign.sessionExpire,
         campaign.newSessionExpire,
-        campaign.messageExpire
+        campaign.messageExpire,
+        campaign.limiterLimit,
+        campaign.limiterExpire
       )
     } catch (error) {
       if (error instanceof DatabaseError) {
@@ -221,6 +223,8 @@ export class CampaignService {
         campaign.sessionExpire,
         campaign.newSessionExpire,
         campaign.messageExpire,
+        campaign.limiterLimit,
+        campaign.limiterExpire,
         lockSecret
       )
 

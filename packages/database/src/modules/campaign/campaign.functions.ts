@@ -3,6 +3,7 @@ import {
   campaignFlagsKey,
   campaignIndexKey,
   campaignKey,
+  campaignLimiterKey,
   campaignLockKey,
   campaignMirrorDomainsKey,
   campaignSessionCookieNamesKey,
@@ -44,6 +45,8 @@ export interface RawFullCampaign extends RawCampaign {
   session_expire: number
   new_session_expire: number
   message_expire: number
+  limiter_burst: number
+  limiter_rate: number
   flags: string[]
   proxy_index: number
   target_index: number
@@ -76,6 +79,8 @@ export const campaignFunctions = {
         sessionExpire: number,
         newSessionExpire: number,
         messageExpire: number,
+        limiterBurst: number,
+        limiterRate: number,
         createdAt: number
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -92,6 +97,8 @@ export const campaignFunctions = {
         parser.push(sessionExpire.toString())
         parser.push(newSessionExpire.toString())
         parser.push(messageExpire.toString())
+        parser.push(limiterBurst.toString())
+        parser.push(limiterRate.toString())
         parser.push(createdAt.toString())
       },
 
@@ -182,6 +189,8 @@ export const campaignFunctions = {
         sessionExpire: number,
         newSessionExpire: number,
         messageExpire: number,
+        limiterBurst: number,
+        limiterRate: number,
         lockSecret: string
       ) {
         parser.pushKey(campaignKey(prefix, campaignId))
@@ -191,6 +200,8 @@ export const campaignFunctions = {
         parser.push(sessionExpire.toString())
         parser.push(newSessionExpire.toString())
         parser.push(messageExpire.toString())
+        parser.push(limiterBurst.toString())
+        parser.push(limiterRate.toString())
         parser.push(lockSecret)
       },
 
@@ -243,5 +254,25 @@ export const campaignFunctions = {
 
       transformReply: undefined as unknown as () => unknown,
     },
+
+    check_campaign_limiter: {
+      NUMBER_OF_KEYS: 2,
+
+      parseCommand(
+        parser: CommandParser,
+        prefix: string,
+        campaignId: string,
+        identity: string,
+        limiterCost: number
+      ) {
+        parser.pushKey(campaignKey(prefix, campaignId))
+        parser.pushKey(campaignLimiterKey(prefix, campaignId, identity))
+
+        parser.push(limiterCost.toString())
+      },
+
+      transformReply: undefined as unknown as () => unknown,
+    },
+
   },
 } as const

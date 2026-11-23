@@ -23,6 +23,16 @@ export const campaignKey = (prefix: string, campaignId: string) => {
 }
 
 /**
+ * Key for a campaign request limiter.
+ *
+ * @category Campaign
+ * @internal
+ */
+export const campaignLimiterKey = (prefix: string, campaignId: string, identity: string) => {
+  return buildKey(prefix, 'campaign-limiter', campaignId, identity)
+}
+
+/**
  * Key for a campaign distributed lock.
  *
  * @category Campaign

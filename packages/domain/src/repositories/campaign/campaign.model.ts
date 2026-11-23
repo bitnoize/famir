@@ -53,6 +53,8 @@ export class FullCampaignModel extends CampaignModel {
    * @param sessionExpire - The TTL for an authorized session in milliseconds.
    * @param newSessionExpire - The TTL for a not-yet-authorized session in milliseconds.
    * @param messageExpire - The TTL for a message in milliseconds.
+   * @param limiterLimit - The limit for a limiter in milliseconds.
+   * @param limiterExpire - The TTL for a limiter in milliseconds.
    * @param isLocked - The flag indicating if the campaign is blocked.
    * @param flags - The list of flags associated to the campaign.
    * @param proxyIndex - The cardinality of proxy index related to this campaign.
@@ -76,6 +78,8 @@ export class FullCampaignModel extends CampaignModel {
     readonly sessionExpire: number,
     readonly newSessionExpire: number,
     readonly messageExpire: number,
+    readonly limiterLimit: number,
+    readonly limiterExpire: number,
     isLocked: boolean,
     readonly flags: string[],
     readonly proxyIndex: number,
