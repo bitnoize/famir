@@ -24,16 +24,32 @@ local function coerce(value, spec)
   elseif spec.kind == 'num' then
     local n = tonumber(value)
 
-    if not n then
+    if n == nil or n ~= n or n == math.huge or n == -math.huge then
       return nil, spec.name .. ' not a number'
+    end
+
+    if spec.min and n < spec.min then
+      return nil, spec.name .. ' below min'
+    end
+
+    if spec.max and n > spec.max then
+      return nil, spec.name .. ' above max'
     end
 
     return n
   elseif spec.kind == 'int' then
     local n = tonumber(value)
 
-    if not n or n ~= math.floor(n) then
+    if n == nil or n ~= math.floor(n) then
       return nil, spec.name .. ' not an integer'
+    end
+
+    if spec.min and n < spec.min then
+      return nil, spec.name .. ' below min'
+    end
+
+    if spec.max and n > spec.max then
+      return nil, spec.name .. ' above max'
     end
 
     return n
@@ -52,7 +68,7 @@ local function normalize(values, specs)
   for i, spec in ipairs(specs) do
     local value, err = coerce(values[i], spec)
 
-    if not value then
+    if value == nil then
       return nil, err
     end
 
@@ -82,14 +98,14 @@ local function create_campaign(keys, raw_args)
     { name = 'crypt_secret', kind = 'str' },
     { name = 'upgrade_session_path', kind = 'str' },
     { name = 'session_cookie_name', kind = 'str' },
-    { name = 'session_expire', kind = 'int' },
-    { name = 'new_session_expire', kind = 'int' },
-    { name = 'message_expire', kind = 'int' },
-    { name = 'limiter_burst', kind = 'int' },
-    { name = 'limiter_rate', kind = 'int' },
+    { name = 'session_expire', kind = 'int', min = 1 },
+    { name = 'new_session_expire', kind = 'int', min = 1 },
+    { name = 'message_expire', kind = 'int', min = 1 },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 1000 },
   })
 
-  if not args then
+  if args == nil then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -176,7 +192,7 @@ local function read_campaign(keys, args)
     { name = 'created_at', kind = 'int' },
   })
 
-  if not campaign then
+  if campaign == nil then
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
@@ -254,7 +270,7 @@ local function read_full_campaign(keys, args)
     { name = 'created_at', kind = 'int' },
   })
 
-  if not campaign then
+  if campaign == nil then
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
@@ -313,10 +329,10 @@ local function lock_campaign(keys, raw_args)
 
   local args, args_err = normalize(raw_args, {
     { name = 'lock_secret', kind = 'str' },
-    { name = 'lock_timeout', kind = 'int' },
+    { name = 'lock_timeout', kind = 'int', min = 1000, max = 3600 * 1000 },
   })
 
-  if not args then
+  if args == nil then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -326,10 +342,6 @@ local function lock_campaign(keys, raw_args)
 
   if redis.call('EXISTS', campaign_lock_key) ~= 0 then
     return redis.status_reply('FORBIDDEN campaign already locked')
-  end
-
-  if args.lock_timeout < 1000 then
-    return redis.error_reply('ERR wrong arg lock_timeout')
   end
 
   -- Point of no return
@@ -359,7 +371,7 @@ local function unlock_campaign(keys, raw_args)
     { name = 'lock_secret', kind = 'str' },
   })
 
-  if not args then
+  if args == nil then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -373,7 +385,7 @@ local function unlock_campaign(keys, raw_args)
 
   local lock_secret = redis.call('GET', campaign_lock_key)
 
-  if not lock_secret or lock_secret == '' then
+  if lock_secret == nil or lock_secret == '' then
     return redis.error_reply('ERR wrong campaign lock_secret')
   end
 
@@ -406,15 +418,15 @@ local function update_campaign(keys, raw_args)
 
   local args, args_err = normalize(raw_args, {
     { name = 'description', kind = 'any' },
-    { name = 'session_expire', kind = 'int' },
-    { name = 'new_session_expire', kind = 'int' },
-    { name = 'message_expire', kind = 'int' },
-    { name = 'limiter_burst', kind = 'int' },
-    { name = 'limiter_rate', kind = 'int' },
+    { name = 'session_expire', kind = 'int', min = 1 },
+    { name = 'new_session_expire', kind = 'int', min = 1 },
+    { name = 'message_expire', kind = 'int', min = 1 },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1000 },
     { name = 'lock_secret', kind = 'str' },
   })
 
-  if not args then
+  if args == nil then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -428,7 +440,7 @@ local function update_campaign(keys, raw_args)
 
   local lock_secret = redis.call('GET', campaign_lock_key)
 
-  if not lock_secret or lock_secret == '' then
+  if lock_secret == nil or lock_secret == '' then
     return redis.error_reply('ERR wrong campaign lock_secret')
   end
 
@@ -472,7 +484,7 @@ local function append_campaign_flag(keys, raw_args)
     { name = 'flag', kind = 'str' },
   })
 
-  if not args then
+  if args == nil then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -511,7 +523,7 @@ local function remove_campaign_flag(keys, raw_args)
     { name = 'flag', kind = 'str' },
   })
 
-  if not args then
+  if args == nil then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -558,7 +570,7 @@ local function delete_campaign(keys, raw_args)
     { name = 'lock_secret', kind = 'str' },
   })
 
-  if not args then
+  if args == nil then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -572,8 +584,12 @@ local function delete_campaign(keys, raw_args)
 
   local lock_secret = redis.call('GET', campaign_lock_key)
 
-  if not lock_secret or lock_secret == '' then
+  if lock_secret == nil or lock_secret == '' then
     return redis.error_reply('ERR wrong campaign lock_secret')
+  end
+
+  if lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret not match')
   end
 
   -- stylua: ignore
@@ -590,12 +606,8 @@ local function delete_campaign(keys, raw_args)
     { name = 'session_cookie_name', kind = 'str' },
   })
 
-  if not campaign then
+  if campaign == nil then
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
-  end
-
-  if lock_secret ~= args.lock_secret then
-    return redis.status_reply('FORBIDDEN campaign lock_secret not match')
   end
 
   if redis.call('ZCARD', proxy_index_key) > 0 then
@@ -641,15 +653,11 @@ local function check_campaign_limiter(keys, raw_args)
   local campaign_limiter_key = keys[2]
 
   local args, args_err = normalize(raw_args, {
-    { name = 'limiter_cost', kind = 'num' },
+    { name = 'limiter_cost', kind = 'num', min = 0.000001, max = 1000 },
   })
 
-  if not args then
+  if args == nil then
     return redis.error_reply('ERR normalize args: ' .. args_err)
-  end
-
-  if args.limiter_cost <= 0 then
-    return redis.error_reply('ERR wrong arg limiter_cost')
   end
 
   local now = current_time()
@@ -666,24 +674,25 @@ local function check_campaign_limiter(keys, raw_args)
   )
 
   local campaign, campaign_err = normalize(raw_campaign, {
-    { name = 'limiter_burst', kind = 'int' },
-    { name = 'limiter_rate', kind = 'int' },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 1000 },
   })
 
-  if not campaign then
+  if campaign == nil then
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
-  end
-
-  if campaign.limiter_burst <= 0 then
-    return redis.error_reply('ERR wrong campaign limiter_burst')
-  end
-
-  if campaign.limiter_rate <= 0 then
-    return redis.error_reply('ERR wrong campaign limiter_rate')
   end
 
   if args.limiter_cost > campaign.limiter_burst then
     return redis.error_reply('ERR arg limiter_cost exceeds campaign limiter_burst')
+  end
+
+  if redis.call('EXISTS', campaign_limiter_key) == 0 then
+    -- stylua: ignore
+    redis.call(
+      'HSET', campaign_limiter_key,
+      'tokens', campaign.limiter_burst,
+      'ts', now
+    )
   end
 
   -- stylua: ignore
@@ -694,20 +703,12 @@ local function check_campaign_limiter(keys, raw_args)
   )
 
   local limiter, limiter_err = normalize(raw_limiter, {
-    { name = 'tokens', kind = 'num' },
-    { name = 'ts', kind = 'int' },
+    { name = 'tokens', kind = 'num', min = 0 },
+    { name = 'ts', kind = 'int', min = 0 },
   })
 
-  if not limiter then
+  if limiter == nil then
     return redis.error_reply('ERR normalize limiter: ' .. limiter_err)
-  end
-
-  if limiter.tokens < 0 then
-    return redis.error_reply('ERR wrong campaign limiter tokens')
-  end
-
-  if limiter.ts <= 0 then
-    return redis.error_reply('ERR wrong campaign limiter ts')
   end
 
   limiter.tokens = math.min(campaign.limiter_burst, limiter.tokens)
@@ -743,11 +744,13 @@ local function check_campaign_limiter(keys, raw_args)
 
   redis.call('PEXPIRE', campaign_limiter_key, limiter_expire)
 
-  if is_allowed then
-    return redis.status_reply('OK campaign limiter allowed')
-  else
-    return redis.status_reply('FORBIDDEN campaign limiter denied')
-  end
+  return {
+    map = {
+      is_allowed = is_allowed,
+      tokens = limiter.tokens,
+      ts = limiter.ts,
+    },
+  }
 end
 
 redis.register_function({
