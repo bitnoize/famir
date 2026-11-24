@@ -68,7 +68,7 @@ local function normalize(values, specs)
   for i, spec in ipairs(specs) do
     local value, err = coerce(values[i], spec)
 
-    if value == nil then
+    if err then
       return nil, err
     end
 
@@ -77,6 +77,20 @@ local function normalize(values, specs)
 
   return out
 end
+
+local PAGER_OFFSET_MIN, PAGER_OFFSET_MAX = 0, 1000000
+local PAGER_LIMIT_MIN, PAGER_LIMIT_MAX = 1, 1000
+
+local LOCK_TIMEOUT_MIN, LOCK_TIMEOUT_MAX = 1000, 3600 * 1000
+
+local SESSION_EXPIRE_MIN, SESSION_EXPIRE_MAX = 1000, 365 * 86400 * 1000
+local NEW_SESSION_EXPIRE_MIN, NEW_SESSION_EXPIRE_MAX = 1000, 3600 * 1000
+
+local MESSAGE_EXPIRE_MIN, MESSAGE_EXPIRE_MAX = 1000, 86400 * 1000
+
+local LIMITER_BURST_MIN, LIMITER_BURST_MAX = 1, 1000
+local LIMITER_RATE_MIN, LIMITER_RATE_MAX = 1, 100
+local LIMITER_COST_MIN, LIMITER_COST_MAX = 0.001, 1000
 
 --[[
   Create campaign
@@ -98,14 +112,39 @@ local function create_campaign(keys, raw_args)
     { name = 'crypt_secret', kind = 'str' },
     { name = 'upgrade_session_path', kind = 'str' },
     { name = 'session_cookie_name', kind = 'str' },
-    { name = 'session_expire', kind = 'int', min = 1000, max = 365 * 86400 * 1000 },
-    { name = 'new_session_expire', kind = 'int', min = 1000, max = 3600 * 1000 },
-    { name = 'message_expire', kind = 'int', min = 1000, max = 86400 * 1000 },
-    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
-    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
+    {
+      name = 'session_expire',
+      kind = 'int',
+      min = SESSION_EXPIRE_MIN,
+      max = SESSION_EXPIRE_MAX,
+    },
+    {
+      name = 'new_session_expire',
+      kind = 'int',
+      min = NEW_SESSION_EXPIRE_MIN,
+      max = NEW_SESSION_EXPIRE_MAX,
+    },
+    {
+      name = 'message_expire',
+      kind = 'int',
+      min = MESSAGE_EXPIRE_MIN,
+      max = MESSAGE_EXPIRE_MAX,
+    },
+    {
+      name = 'limiter_burst',
+      kind = 'int',
+      min = LIMITER_BURST_MIN,
+      max = LIMITER_BURST_MAX,
+    },
+    {
+      name = 'limiter_rate',
+      kind = 'int',
+      min = LIMITER_RATE_MIN,
+      max = LIMITER_RATE_MAX,
+    },
   })
 
-  if args == nil then
+  if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -192,7 +231,7 @@ local function read_campaign(keys, args)
     { name = 'created_at', kind = 'int' },
   })
 
-  if campaign == nil then
+  if campaign_err then
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
@@ -270,7 +309,7 @@ local function read_full_campaign(keys, args)
     { name = 'created_at', kind = 'int' },
   })
 
-  if campaign == nil then
+  if campaign_err then
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
@@ -304,11 +343,21 @@ local function read_campaign_index(keys, raw_args)
   local campaign_index_key = keys[1]
 
   local args, args_err = normalize(raw_args, {
-    { name = 'offset', kind = 'int', min = 0, max = 1000000 },
-    { name = 'limit', kind = 'int', min = 1, max = 1000 },
+    {
+      name = 'offset',
+      kind = 'int',
+      min = PAGER_OFFSET_MIN,
+      max = PAGER_OFFSET_MAX,
+    },
+    {
+      name = 'limit',
+      kind = 'int',
+      min = PAGER_LIMIT_MIN,
+      max = PAGER_LIMIT_MAX,
+    },
   })
 
-  if args == nil then
+  if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -334,10 +383,15 @@ local function lock_campaign(keys, raw_args)
 
   local args, args_err = normalize(raw_args, {
     { name = 'lock_secret', kind = 'str' },
-    { name = 'lock_timeout', kind = 'int', min = 1000, max = 3600 * 1000 },
+    {
+      name = 'lock_timeout',
+      kind = 'int',
+      min = LOCK_TIMEOUT_MIN,
+      max = LOCK_TIMEOUT_MAX,
+    },
   })
 
-  if args == nil then
+  if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -376,7 +430,7 @@ local function unlock_campaign(keys, raw_args)
     { name = 'lock_secret', kind = 'str' },
   })
 
-  if args == nil then
+  if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -419,15 +473,40 @@ local function update_campaign(keys, raw_args)
 
   local args, args_err = normalize(raw_args, {
     { name = 'description', kind = 'any' },
-    { name = 'session_expire', kind = 'int', min = 1000, max = 365 * 86400 * 1000 },
-    { name = 'new_session_expire', kind = 'int', min = 1000, max = 3600 * 1000 },
-    { name = 'message_expire', kind = 'int', min = 1000, max = 86400 * 1000 },
-    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
-    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
+    {
+      name = 'session_expire',
+      kind = 'int',
+      min = SESSION_EXPIRE_MIN,
+      max = SESSION_EXPIRE_MAX,
+    },
+    {
+      name = 'new_session_expire',
+      kind = 'int',
+      min = NEW_SESSION_EXPIRE_MIN,
+      max = NEW_SESSION_EXPIRE_MAX,
+    },
+    {
+      name = 'message_expire',
+      kind = 'int',
+      min = MESSAGE_EXPIRE_MIN,
+      max = MESSAGE_EXPIRE_MAX,
+    },
+    {
+      name = 'limiter_burst',
+      kind = 'int',
+      min = LIMITER_BURST_MIN,
+      max = LIMITER_BURST_MAX,
+    },
+    {
+      name = 'limiter_rate',
+      kind = 'int',
+      min = LIMITER_RATE_MIN,
+      max = LIMITER_RATE_MAX,
+    },
     { name = 'lock_secret', kind = 'str' },
   })
 
-  if args == nil then
+  if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -481,7 +560,7 @@ local function append_campaign_flag(keys, raw_args)
     { name = 'flag', kind = 'str' },
   })
 
-  if args == nil then
+  if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -520,7 +599,7 @@ local function remove_campaign_flag(keys, raw_args)
     { name = 'flag', kind = 'str' },
   })
 
-  if args == nil then
+  if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -567,7 +646,7 @@ local function delete_campaign(keys, raw_args)
     { name = 'lock_secret', kind = 'str' },
   })
 
-  if args == nil then
+  if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
@@ -599,7 +678,7 @@ local function delete_campaign(keys, raw_args)
     { name = 'session_cookie_name', kind = 'str' },
   })
 
-  if campaign == nil then
+  if campaign_err then
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
@@ -646,17 +725,22 @@ local function check_campaign_limiter(keys, raw_args)
   local campaign_limiter_key = keys[2]
 
   local args, args_err = normalize(raw_args, {
-    { name = 'limiter_cost', kind = 'num', min = 0.001, max = 1000 },
+    {
+      name = 'limiter_cost',
+      kind = 'num',
+      min = LIMITER_COST_MIN,
+      max = LIMITER_COST_MAX,
+    },
   })
 
-  if args == nil then
+  if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
   local now = current_time()
 
   if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND campaign not exists')
+    return nil
   end
 
   -- stylua: ignore
@@ -667,16 +751,26 @@ local function check_campaign_limiter(keys, raw_args)
   )
 
   local campaign, campaign_err = normalize(raw_campaign, {
-    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
-    { name = 'limiter_rate', kind = 'int', min = 1, max = 1000 },
+    {
+      name = 'limiter_burst',
+      kind = 'int',
+      min = LIMITER_BURST_MIN,
+      max = LIMITER_BURST_MAX,
+    },
+    {
+      name = 'limiter_rate',
+      kind = 'int',
+      min = LIMITER_RATE_MIN,
+      max = LIMITER_RATE_MAX,
+    },
   })
 
-  if campaign == nil then
+  if campaign_err then
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
   if args.limiter_cost > campaign.limiter_burst then
-    return redis.error_reply('ERR arg limiter_cost exceeds campaign limiter_burst')
+    return nil
   end
 
   if redis.call('EXISTS', campaign_limiter_key) == 0 then
@@ -700,7 +794,7 @@ local function check_campaign_limiter(keys, raw_args)
     { name = 'ts', kind = 'int', min = 0 },
   })
 
-  if limiter == nil then
+  if limiter_err then
     return redis.error_reply('ERR normalize limiter: ' .. limiter_err)
   end
 
@@ -714,13 +808,19 @@ local function check_campaign_limiter(keys, raw_args)
 
   -- Point of no return
 
-  local is_allowed = false
+  local is_allowed, retry_after
 
   if limiter.tokens >= args.limiter_cost then
     limiter.tokens = limiter.tokens - args.limiter_cost
 
     is_allowed = true
+    retry_after = 0
+  else
+    is_allowed = false
+    retry_after = math.ceil((args.limiter_cost - limiter.tokens) / campaign.limiter_rate * 1000)
   end
+
+  limiter.tokens = math.max(0, limiter.tokens)
 
   local limiter_expire = math.ceil((campaign.limiter_burst / campaign.limiter_rate) * 1000) + 1000
 
@@ -738,6 +838,8 @@ local function check_campaign_limiter(keys, raw_args)
       is_allowed = is_allowed,
       tokens = limiter.tokens,
       ts = limiter.ts,
+      cost = args.limiter_cost,
+      retry_after = retry_after,
     },
   }
 end
