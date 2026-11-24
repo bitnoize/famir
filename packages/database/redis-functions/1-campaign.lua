@@ -5,7 +5,7 @@ local function current_time()
 end
 
 local function coerce(value, spec)
-  if value == nil then
+  if not value then
     return nil, spec.name .. ' missing'
   end
 
@@ -24,7 +24,7 @@ local function coerce(value, spec)
   elseif spec.kind == 'num' then
     local n = tonumber(value)
 
-    if n == nil or n ~= n or n == math.huge or n == -math.huge then
+    if not n or n ~= n or n == math.huge or n == -math.huge then
       return nil, spec.name .. ' not a number'
     end
 
@@ -40,7 +40,7 @@ local function coerce(value, spec)
   elseif spec.kind == 'int' then
     local n = tonumber(value)
 
-    if n == nil or n ~= math.floor(n) then
+    if not n or n ~= n or n == math.huge or n == -math.huge or n ~= math.floor(n) then
       return nil, spec.name .. ' not an integer'
     end
 
@@ -98,11 +98,11 @@ local function create_campaign(keys, raw_args)
     { name = 'crypt_secret', kind = 'str' },
     { name = 'upgrade_session_path', kind = 'str' },
     { name = 'session_cookie_name', kind = 'str' },
-    { name = 'session_expire', kind = 'int', min = 1 },
-    { name = 'new_session_expire', kind = 'int', min = 1 },
-    { name = 'message_expire', kind = 'int', min = 1 },
+    { name = 'session_expire', kind = 'int', min = 1000, max = 365 * 86400 * 1000 },
+    { name = 'new_session_expire', kind = 'int', min = 1000, max = 3600 * 1000 },
+    { name = 'message_expire', kind = 'int', min = 1000, max = 86400 * 1000 },
     { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
-    { name = 'limiter_rate', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
   })
 
   if args == nil then
@@ -296,18 +296,23 @@ redis.register_function({
 --[[
   Read campaign index
 --]]
-local function read_campaign_index(keys, args)
+local function read_campaign_index(keys, raw_args)
   if #keys ~= 1 then
     return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_index_key = keys[1]
 
-  if #args ~= 0 then
-    return redis.error_reply('ERR wrong number of args')
+  local args, args_err = normalize(raw_args, {
+    { name = 'offset', kind = 'int', min = 0, max = 1000000 },
+    { name = 'limit', kind = 'int', min = 1, max = 1000 },
+  })
+
+  if args == nil then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  return redis.call('ZRANGE', campaign_index_key, 0, -1)
+  return redis.call('ZRANGE', campaign_index_key, args.offset, args.offset + args.limit - 1)
 end
 
 redis.register_function({
@@ -385,11 +390,7 @@ local function unlock_campaign(keys, raw_args)
 
   local lock_secret = redis.call('GET', campaign_lock_key)
 
-  if lock_secret == nil or lock_secret == '' then
-    return redis.error_reply('ERR wrong campaign lock_secret')
-  end
-
-  if lock_secret ~= args.lock_secret then
+  if not lock_secret or lock_secret ~= args.lock_secret then
     return redis.status_reply('FORBIDDEN campaign lock_secret not match')
   end
 
@@ -418,11 +419,11 @@ local function update_campaign(keys, raw_args)
 
   local args, args_err = normalize(raw_args, {
     { name = 'description', kind = 'any' },
-    { name = 'session_expire', kind = 'int', min = 1 },
-    { name = 'new_session_expire', kind = 'int', min = 1 },
-    { name = 'message_expire', kind = 'int', min = 1 },
+    { name = 'session_expire', kind = 'int', min = 1000, max = 365 * 86400 * 1000 },
+    { name = 'new_session_expire', kind = 'int', min = 1000, max = 3600 * 1000 },
+    { name = 'message_expire', kind = 'int', min = 1000, max = 86400 * 1000 },
     { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
-    { name = 'limiter_rate', kind = 'int', min = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
     { name = 'lock_secret', kind = 'str' },
   })
 
@@ -440,11 +441,7 @@ local function update_campaign(keys, raw_args)
 
   local lock_secret = redis.call('GET', campaign_lock_key)
 
-  if lock_secret == nil or lock_secret == '' then
-    return redis.error_reply('ERR wrong campaign lock_secret')
-  end
-
-  if lock_secret ~= args.lock_secret then
+  if not lock_secret or lock_secret ~= args.lock_secret then
     return redis.status_reply('FORBIDDEN campaign lock_secret not match')
   end
 
@@ -584,11 +581,7 @@ local function delete_campaign(keys, raw_args)
 
   local lock_secret = redis.call('GET', campaign_lock_key)
 
-  if lock_secret == nil or lock_secret == '' then
-    return redis.error_reply('ERR wrong campaign lock_secret')
-  end
-
-  if lock_secret ~= args.lock_secret then
+  if not lock_secret or lock_secret ~= args.lock_secret then
     return redis.status_reply('FORBIDDEN campaign lock_secret not match')
   end
 
@@ -653,7 +646,7 @@ local function check_campaign_limiter(keys, raw_args)
   local campaign_limiter_key = keys[2]
 
   local args, args_err = normalize(raw_args, {
-    { name = 'limiter_cost', kind = 'num', min = 0.000001, max = 1000 },
+    { name = 'limiter_cost', kind = 'num', min = 0.001, max = 1000 },
   })
 
   if args == nil then
@@ -727,10 +720,6 @@ local function check_campaign_limiter(keys, raw_args)
     limiter.tokens = limiter.tokens - args.limiter_cost
 
     is_allowed = true
-  end
-
-  if limiter.tokens < 0 then
-    limiter.tokens = 0
   end
 
   local limiter_expire = math.ceil((campaign.limiter_burst / campaign.limiter_rate) * 1000) + 1000
