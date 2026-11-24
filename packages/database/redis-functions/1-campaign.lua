@@ -72,6 +72,10 @@ local function normalize(values, specs)
       return nil, err
     end
 
+    if value == nil then
+      return nil, 'coerce internal error'
+    end
+
     out[spec.name] = value
   end
 
@@ -682,19 +686,19 @@ local function delete_campaign(keys, raw_args)
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  if redis.call('ZCARD', proxy_index_key) > 0 then
+  if redis.call('ZCARD', proxy_index_key) ~= 0 then
     return redis.status_reply('FORBIDDEN campaign proxies exists')
   end
 
-  if redis.call('ZCARD', target_index_key) > 0 then
+  if redis.call('ZCARD', target_index_key) ~= 0 then
     return redis.status_reply('FORBIDDEN campaign targets exists')
   end
 
-  if redis.call('ZCARD', redirector_index_key) > 0 then
+  if redis.call('ZCARD', redirector_index_key) ~= 0 then
     return redis.status_reply('FORBIDDEN campaign redirectors exists')
   end
 
-  if redis.call('ZCARD', lure_index_key) > 0 then
+  if redis.call('ZCARD', lure_index_key) ~= 0 then
     return redis.status_reply('FORBIDDEN campaign lures exists')
   end
 
@@ -773,6 +777,8 @@ local function check_campaign_limiter(keys, raw_args)
     return nil
   end
 
+  -- Point of no return
+
   if redis.call('EXISTS', campaign_limiter_key) == 0 then
     -- stylua: ignore
     redis.call(
@@ -806,8 +812,6 @@ local function check_campaign_limiter(keys, raw_args)
 
   limiter.ts = now
 
-  -- Point of no return
-
   local is_allowed, retry_after
 
   if limiter.tokens >= args.limiter_cost then
@@ -822,7 +826,7 @@ local function check_campaign_limiter(keys, raw_args)
 
   limiter.tokens = math.max(0, limiter.tokens)
 
-  local limiter_expire = math.ceil((campaign.limiter_burst / campaign.limiter_rate) * 1000) + 1000
+  local limiter_ttl = math.ceil((campaign.limiter_burst / campaign.limiter_rate) * 1000) + 1000
 
   -- stylua: ignore
   redis.call(
@@ -831,7 +835,7 @@ local function check_campaign_limiter(keys, raw_args)
     'ts', limiter.ts
   )
 
-  redis.call('PEXPIRE', campaign_limiter_key, limiter_expire)
+  redis.call('PEXPIRE', campaign_limiter_key, limiter_ttl)
 
   return {
     map = {
