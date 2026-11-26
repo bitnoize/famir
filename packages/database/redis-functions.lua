@@ -89,23 +89,6 @@ local function normalize(values, specs)
 end
 
 --
--- Constants
---
-
-local LOCK_TIMEOUT_MIN, LOCK_TIMEOUT_MAX = 1000, 3600 * 1000
-
-local LIMITER_BURST_MIN, LIMITER_BURST_MAX = 1, 1000
-local LIMITER_RATE_MIN, LIMITER_RATE_MAX = 1, 100
-local LIMITER_COST_MIN, LIMITER_COST_MAX = 0.001, 1000
-
-local TARGET_SUB_APEX = '@'
-
-local SESSION_EXPIRE_MIN, SESSION_EXPIRE_MAX = 1000, 365 * 86400 * 1000
-local NEW_SESSION_EXPIRE_MIN, NEW_SESSION_EXPIRE_MAX = 1000, 3600 * 1000
-
-local MESSAGE_EXPIRE_MIN, MESSAGE_EXPIRE_MAX = 1000, 86400 * 1000
-
---
 -- Campaign methods
 --
 
@@ -126,36 +109,11 @@ local function create_campaign(keys, raw_args)
     { name = 'crypt_secret', kind = 'str' },
     { name = 'upgrade_session_path', kind = 'str' },
     { name = 'session_cookie_name', kind = 'str' },
-    {
-      name = 'session_expire',
-      kind = 'int',
-      min = SESSION_EXPIRE_MIN,
-      max = SESSION_EXPIRE_MAX,
-    },
-    {
-      name = 'new_session_expire',
-      kind = 'int',
-      min = NEW_SESSION_EXPIRE_MIN,
-      max = NEW_SESSION_EXPIRE_MAX,
-    },
-    {
-      name = 'message_expire',
-      kind = 'int',
-      min = MESSAGE_EXPIRE_MIN,
-      max = MESSAGE_EXPIRE_MAX,
-    },
-    {
-      name = 'limiter_burst',
-      kind = 'int',
-      min = LIMITER_BURST_MIN,
-      max = LIMITER_BURST_MAX,
-    },
-    {
-      name = 'limiter_rate',
-      kind = 'int',
-      min = LIMITER_RATE_MIN,
-      max = LIMITER_RATE_MAX,
-    },
+    { name = 'session_expire', kind = 'int', min = 1000 },
+    { name = 'new_session_expire', kind = 'int', min = 1000 },
+    { name = 'message_expire', kind = 'int', min = 1000 },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
   })
 
   if args_err then
@@ -238,9 +196,9 @@ local function read_campaign(keys, args)
   local campaign, campaign_err = normalize(raw_campaign, {
     { name = 'campaign_id', kind = 'str' },
     { name = 'mirror_domain', kind = 'str' },
-    { name = 'session_count', kind = 'int' },
-    { name = 'message_count', kind = 'int' },
-    { name = 'created_at', kind = 'int' },
+    { name = 'session_count', kind = 'int', min = 0 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
   })
 
   if campaign_err then
@@ -309,14 +267,14 @@ local function read_full_campaign(keys, args)
     { name = 'crypt_secret', kind = 'str' },
     { name = 'upgrade_session_path', kind = 'str' },
     { name = 'session_cookie_name', kind = 'str' },
-    { name = 'session_expire', kind = 'int' },
-    { name = 'new_session_expire', kind = 'int' },
-    { name = 'message_expire', kind = 'int' },
-    { name = 'limiter_burst', kind = 'int' },
-    { name = 'limiter_rate', kind = 'int' },
-    { name = 'session_count', kind = 'int' },
-    { name = 'message_count', kind = 'int' },
-    { name = 'created_at', kind = 'int' },
+    { name = 'session_expire', kind = 'int', min = 1000 },
+    { name = 'new_session_expire', kind = 'int', min = 1000 },
+    { name = 'message_expire', kind = 'int', min = 1000 },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
+    { name = 'session_count', kind = 'int', min = 0 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
   })
 
   if campaign_err then
@@ -374,12 +332,7 @@ local function lock_campaign(keys, raw_args)
 
   local args, args_err = normalize(raw_args, {
     { name = 'lock_secret', kind = 'str' },
-    {
-      name = 'lock_timeout',
-      kind = 'int',
-      min = LOCK_TIMEOUT_MIN,
-      max = LOCK_TIMEOUT_MAX,
-    },
+    { name = 'lock_timeout', kind = 'int', min = 1000 },
   })
 
   if args_err then
@@ -460,36 +413,11 @@ local function update_campaign(keys, raw_args)
 
   local args, args_err = normalize(raw_args, {
     { name = 'description', kind = 'any' },
-    {
-      name = 'session_expire',
-      kind = 'int',
-      min = SESSION_EXPIRE_MIN,
-      max = SESSION_EXPIRE_MAX,
-    },
-    {
-      name = 'new_session_expire',
-      kind = 'int',
-      min = NEW_SESSION_EXPIRE_MIN,
-      max = NEW_SESSION_EXPIRE_MAX,
-    },
-    {
-      name = 'message_expire',
-      kind = 'int',
-      min = MESSAGE_EXPIRE_MIN,
-      max = MESSAGE_EXPIRE_MAX,
-    },
-    {
-      name = 'limiter_burst',
-      kind = 'int',
-      min = LIMITER_BURST_MIN,
-      max = LIMITER_BURST_MAX,
-    },
-    {
-      name = 'limiter_rate',
-      kind = 'int',
-      min = LIMITER_RATE_MIN,
-      max = LIMITER_RATE_MAX,
-    },
+    { name = 'session_expire', kind = 'int', min = 1000 },
+    { name = 'new_session_expire', kind = 'int', min = 1000 },
+    { name = 'message_expire', kind = 'int', min = 1000 },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
     { name = 'lock_secret', kind = 'str' },
   })
 
@@ -713,12 +641,7 @@ local function check_campaign_limiter(keys, raw_args)
   local campaign_limiter_key = keys[2]
 
   local args, args_err = normalize(raw_args, {
-    {
-      name = 'limiter_cost',
-      kind = 'num',
-      min = LIMITER_COST_MIN,
-      max = LIMITER_COST_MAX,
-    },
+    { name = 'limiter_cost', kind = 'num', min = 0.001, max = 1000 },
   })
 
   if args_err then
@@ -739,18 +662,8 @@ local function check_campaign_limiter(keys, raw_args)
   )
 
   local campaign, campaign_err = normalize(raw_campaign, {
-    {
-      name = 'limiter_burst',
-      kind = 'int',
-      min = LIMITER_BURST_MIN,
-      max = LIMITER_BURST_MAX,
-    },
-    {
-      name = 'limiter_rate',
-      kind = 'int',
-      min = LIMITER_RATE_MIN,
-      max = LIMITER_RATE_MAX,
-    },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
   })
 
   if campaign_err then
@@ -1070,11 +983,13 @@ local function enable_proxy(keys, raw_args)
   -- stylua: ignore
   local raw_proxy = redis.call(
     'HMGET', proxy_key,
+    'campaign_id',
     'proxy_id',
     'is_enabled'
   )
 
   local proxy, proxy_err = normalize(raw_proxy, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'proxy_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
@@ -1158,11 +1073,13 @@ local function disable_proxy(keys, raw_args)
   -- stylua: ignore
   local raw_proxy = redis.call(
     'HMGET', proxy_key,
+    'campaign_id',
     'proxy_id',
     'is_enabled'
   )
 
   local proxy, proxy_err = normalize(raw_proxy, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'proxy_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
@@ -1305,6 +1222,8 @@ redis.register_function({
 -- Target methods
 --
 
+local TARGET_SUB_APEX = '@'
+
 local function create_target(keys, raw_args)
   if #keys ~= 7 then
     return redis.error_reply('ERR wrong number of keys')
@@ -1335,11 +1254,11 @@ local function create_target(keys, raw_args)
     { name = 'stream_timeout', kind = 'int', min = 1 },
     { name = 'headers_size_limit', kind = 'int', min = 1 },
     { name = 'body_size_limit', kind = 'int', min = 1 },
-    { name = 'main_page', kind = 'str' },
-    { name = 'not_found_page', kind = 'str' },
-    { name = 'favicon_ico', kind = 'str' },
-    { name = 'robots_txt', kind = 'str' },
-    { name = 'sitemap_xml', kind = 'str' },
+    { name = 'main_page', kind = 'any' },
+    { name = 'not_found_page', kind = 'any' },
+    { name = 'favicon_ico', kind = 'any' },
+    { name = 'robots_txt', kind = 'any' },
+    { name = 'sitemap_xml', kind = 'any' },
     { name = 'allow_websockets', kind = 'int', min = 0, max = 1 },
     { name = 'lock_secret', kind = 'str' },
   })
@@ -1390,9 +1309,9 @@ local function create_target(keys, raw_args)
 
   -- stylua: ignore
   local donor_stamp = args.campaign_id
-    .. '\t' .. args.donor_sub
-    .. '\t' .. args.donor_domain
-    .. '\t' .. args.donor_port
+    .. '\0' .. args.donor_sub
+    .. '\0' .. args.donor_domain
+    .. '\0' .. args.donor_port
 
   if redis.call('SISMEMBER', target_donors_key, donor_stamp) == 1 then
     return redis.status_reply('CONFLICT target donor already taken')
@@ -1400,8 +1319,8 @@ local function create_target(keys, raw_args)
 
   -- stylua: ignore
   local mirror_stamp = args.campaign_id
-    .. '\t' .. args.mirror_sub
-    .. '\t' .. args.mirror_port
+    .. '\0' .. args.mirror_sub
+    .. '\0' .. args.mirror_port
 
   if redis.call('SISMEMBER', target_mirrors_key, mirror_stamp) == 1 then
     return redis.status_reply('CONFLICT target mirror already taken')
@@ -1412,7 +1331,7 @@ local function create_target(keys, raw_args)
     or campaign.mirror_domain
 
   local mirror_host = mirror_hostname .. ':' .. args.mirror_port
-  local target_link = args.campaign_id .. '\t' .. args.target_id
+  local target_link = args.campaign_id .. '\0' .. args.target_id
 
   if redis.call('HEXISTS', target_hosts_key, mirror_host) == 1 then
     return redis.status_reply('CONFLICT target mirror host already taken')
@@ -1627,11 +1546,11 @@ local function read_full_target(keys, args)
     { name = 'stream_timeout', kind = 'int', min = 1 },
     { name = 'headers_size_limit', kind = 'int', min = 1 },
     { name = 'body_size_limit', kind = 'int', min = 1 },
-    { name = 'main_page', kind = 'str' },
-    { name = 'not_found_page', kind = 'str' },
-    { name = 'favicon_ico', kind = 'str' },
-    { name = 'robots_txt', kind = 'str' },
-    { name = 'sitemap_xml', kind = 'str' },
+    { name = 'main_page', kind = 'any' },
+    { name = 'not_found_page', kind = 'any' },
+    { name = 'favicon_ico', kind = 'any' },
+    { name = 'robots_txt', kind = 'any' },
+    { name = 'sitemap_xml', kind = 'any' },
     { name = 'allow_websockets', kind = 'int', min = 0, max = 1 },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
     { name = 'message_count', kind = 'int', min = 0 },
@@ -1699,7 +1618,7 @@ local function read_target_hosts(keys, args)
   end
 
   for i = 1, #values, 2 do
-    local campaign_id, target_id = string.match(values[i + 1], '^([^\t]+)\t([^\t]+)$')
+    local campaign_id, target_id = string.match(values[i + 1], '^([^%z]+)%z([^%z]+)$')
 
     if not campaign_id or campaign_id == '' or not target_id or target_id == '' then
       return redis.error_reply('ERR malform target_link')
@@ -1738,7 +1657,7 @@ local function find_target_link(keys, raw_args)
   end
 
   local target_link = redis.call('HGET', target_hosts_key, args.mirror_host)
-  local campaign_id, target_id = string.match(target_link, '^([^\t]+)\t([^\t]+)$')
+  local campaign_id, target_id = string.match(target_link, '^([^%z]+)%z([^%z]+)$')
 
   if not campaign_id or campaign_id == '' or not target_id or target_id == '' then
     return redis.error_reply('ERR malform target_link')
@@ -1795,11 +1714,11 @@ local function update_target(keys, raw_args)
     { name = 'stream_timeout', kind = 'int', min = 1 },
     { name = 'headers_size_limit', kind = 'int', min = 1 },
     { name = 'body_size_limit', kind = 'int', min = 1 },
-    { name = 'main_page', kind = 'str' },
-    { name = 'not_found_page', kind = 'str' },
-    { name = 'favicon_ico', kind = 'str' },
-    { name = 'robots_txt', kind = 'str' },
-    { name = 'sitemap_xml', kind = 'str' },
+    { name = 'main_page', kind = 'any' },
+    { name = 'not_found_page', kind = 'any' },
+    { name = 'favicon_ico', kind = 'any' },
+    { name = 'robots_txt', kind = 'any' },
+    { name = 'sitemap_xml', kind = 'any' },
     { name = 'allow_websockets', kind = 'int', min = 0, max = 1 },
     { name = 'lock_secret', kind = 'str' },
   })
@@ -1829,10 +1748,12 @@ local function update_target(keys, raw_args)
   -- stylua: ignore
   local raw_target = redis.call(
     'HMGET', target_key,
+    'campaign_id',
     'target_id'
   )
 
   local target, target_err = normalize(raw_target, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'target_id', kind = 'str' },
   })
 
@@ -1923,11 +1844,13 @@ local function enable_target(keys, raw_args)
   -- stylua: ignore
   local raw_target = redis.call(
     'HMGET', target_key,
+    'campaign_id',
     'target_id',
     'is_enabled'
   )
 
   local target, target_err = normalize(raw_target, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'target_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
@@ -2009,11 +1932,13 @@ local function disable_target(keys, raw_args)
   -- stylua: ignore
   local raw_target = redis.call(
     'HMGET', target_key,
+    'campaign_id',
     'target_id',
     'is_enabled'
   )
 
   local target, target_err = normalize(raw_target, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'target_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
@@ -2150,14 +2075,14 @@ local function delete_target(keys, raw_args)
 
   -- stylua: ignore
   local donor_stamp = target.campaign_id
-    .. '\t' .. target.donor_sub
-    .. '\t' .. target.donor_domain
-    .. '\t' .. target.donor_port
+    .. '\0' .. target.donor_sub
+    .. '\0' .. target.donor_domain
+    .. '\0' .. target.donor_port
 
   -- stylua: ignore
   local mirror_stamp = target.campaign_id
-    .. '\t' .. target.mirror_sub
-    .. '\t' .. target.mirror_port
+    .. '\0' .. target.mirror_sub
+    .. '\0' .. target.mirror_port
 
   local mirror_hostname = target.mirror_sub ~= TARGET_SUB_APEX
       and (target.mirror_sub .. '.' .. campaign.mirror_domain)
@@ -2406,10 +2331,12 @@ local function update_redirector(keys, raw_args)
   -- stylua: ignore
   local raw_redirector = redis.call(
     'HMGET', redirector_key,
+    'campaign_id',
     'redirector_id'
   )
 
   local redirector, redirector_err = normalize(raw_redirector, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'redirector_id', kind = 'str' },
   })
 
@@ -2492,10 +2419,12 @@ local function append_redirector_field(keys, raw_args)
   -- stylua: ignore
   local raw_redirector = redis.call(
     'HMGET', redirector_key,
+    'campaign_id',
     'redirector_id'
   )
 
   local redirector, redirector_err = normalize(raw_redirector, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'redirector_id', kind = 'str' },
   })
 
@@ -2577,10 +2506,12 @@ local function clear_redirector_fields(keys, raw_args)
   -- stylua: ignore
   local raw_redirector = redis.call(
     'HMGET', redirector_key,
+    'campaign_id',
     'redirector_id'
   )
 
   local redirector, redirector_err = normalize(raw_redirector, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'redirector_id', kind = 'str' },
   })
 
@@ -3017,11 +2948,13 @@ local function enable_lure(keys, raw_args)
   -- stylua: ignore
   local raw_lure = redis.call(
     'HMGET', lure_key,
+    'campaign_id',
     'lure_id',
     'is_enabled'
   )
 
   local lure, lure_err = normalize(raw_lure, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'lure_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
@@ -3103,11 +3036,13 @@ local function disable_lure(keys, raw_args)
   -- stylua: ignore
   local raw_lure = redis.call(
     'HMGET', lure_key,
+    'campaign_id',
     'lure_id',
     'is_enabled'
   )
 
   local lure, lure_err = normalize(raw_lure, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'lure_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
