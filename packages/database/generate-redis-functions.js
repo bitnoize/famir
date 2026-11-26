@@ -19,8 +19,11 @@ async function generateRedisFunctions(sourceDir, targetFile) {
 
     const fileBody = await readFile(filePath, 'utf8')
 
-    embedFiles.push([fileName, fileBody])
+    embedFiles.push(fileBody)
   }
+
+  const embedBase64 = Buffer.from(embedFiles.join('\n'), 'utf8').toString('base64')
+  const wrappedBase64 = base64.match(/.{1,76}/g)?.join("\r\n") ?? ''
 
   const targetBody = `// Auto-generated file. Do not edit manually!
 
@@ -28,7 +31,7 @@ async function generateRedisFunctions(sourceDir, targetFile) {
  * @category none
  * @internal
  */
-export const redisFunctions: Map<string, string> = new Map(${JSON.stringify(embedFiles, null, 2)})`
+export const redisFunctions = \`${wrappedBase64}\``
 
   await writeFile(targetFile, targetBody, 'utf8')
 }
