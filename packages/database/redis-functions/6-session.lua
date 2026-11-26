@@ -1,84 +1,86 @@
-#!lua name=session
+--
+-- Session methods
+--
 
---[[
-  Create session
---]]
-local function create_session(keys, args)
-  if #keys ~= 3 or #args ~= 4 then
-    return redis.error_reply('ERR Wrong function use')
+local function create_session(keys, raw_args)
+  if #keys ~= 3 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local session_key = keys[2]
   local enabled_proxy_index_key = keys[3]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'session_id', kind = 'str' },
+    { name = 'secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', session_key) ~= 0 then
-    return redis.status_reply('CONFLICT Session already exists')
+  local now = current_time()
+
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  local stash = {
-    new_session_expire = tonumber(redis.call('HGET', campaign_key, 'new_session_expire')),
-  }
+  if redis.call('EXISTS', session_key) == 1 then
+    return redis.status_reply('CONFLICT session already exists')
+  end
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id',
+    'new_session_expire'
+  )
 
-    if k == 'new_session_expire' and v <= 0 then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'new_session_expire', kind = 'int', min = 1000 },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= args.campaign_id then
+    return redis.status_reply('FORBIDDEN session campaign_id mismatch')
   end
 
   if redis.call('SCARD', enabled_proxy_index_key) == 0 then
-    return redis.status_reply('NOT_FOUND No enabled proxies found')
+    return redis.status_reply('NOT_FOUND no enabled proxies found')
   end
 
-  local model = {
-    campaign_id = args[1],
-    session_id = args[2],
-    proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key),
-    secret = args[3],
-    is_upgraded = 0,
-    is_revoked = 0,
-    message_count = 0,
-    created_at = tonumber(args[4]),
-    authorized_at = tonumber(args[4]),
-  }
+  local enabled_proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key)
 
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
-
-    if
-      (k == 'campaign_id' or k == 'session_id' or k == 'proxy_id' or k == 'secret')
-      and v == ''
-    then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
+  if not enabled_proxy_id or enabled_proxy_id == '' then
+    return redis.error_reply('ERR malform enabled_proxy_id')
   end
 
   -- Point of no return
 
-  local store = {}
-
-  for k, v in pairs(model) do
-    table.insert(store, k)
-    table.insert(store, v)
-  end
-
-  redis.call('HSET', session_key, unpack(store))
+  -- stylua: ignore
+  redis.call(
+    'HSET', session_key,
+    'campaign_id', args.campaign_id,
+    'session_id', args.session_id,
+    'proxy_id', enabled_proxy_id,
+    'secret', args.secret,
+    'is_upgraded', 0,
+    'is_revoked', 0,
+    'message_count', 0,
+    'created_at', now,
+    'authorized_at', 0
+  )
 
   redis.call('HINCRBY', campaign_key, 'session_count', 1)
+  redis.call('PEXPIRE', session_key, campaign.new_session_expire)
 
-  redis.call('PEXPIRE', session_key, stash.new_session_expire)
-
-  return redis.status_reply('OK Session created')
+  return redis.status_reply('OK session created')
 end
 
 redis.register_function({
@@ -87,27 +89,28 @@ redis.register_function({
   description = 'Create session',
 })
 
---[[
-  Read session
---]]
 local function read_session(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local session_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
-  if redis.call('EXISTS', session_key) ~= 1 then
+  if redis.call('EXISTS', session_key) == 0 then
     return nil
   end
 
   -- stylua: ignore
-  local values = redis.call(
+  local raw_session = redis.call(
     'HMGET', session_key,
     'campaign_id',
     'session_id',
@@ -120,32 +123,44 @@ local function read_session(keys, args)
     'authorized_at'
   )
 
-  if #values ~= 9 then
-    return redis.error_reply('ERR Malform values')
+  local session, session_err = normalize(raw_session, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'session_id', kind = 'str' },
+    { name = 'proxy_id', kind = 'str' },
+    { name = 'secret', kind = 'str' },
+    { name = 'is_upgraded', kind = 'int', min = 0, max = 1 },
+    { name = 'is_revoked', kind = 'int', min = 0, max = 1 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
+    { name = 'authorized_at', kind = 'int', min = 0 },
+  })
+
+  if session_err then
+    return redis.error_reply('ERR normalize session: ' .. session_err)
   end
 
-  local model = {
-    campaign_id = values[1],
-    session_id = values[2],
-    proxy_id = values[3],
-    secret = values[4],
-    is_upgraded = tonumber(values[5]),
-    is_revoked = tonumber(values[6]),
-    message_count = tonumber(values[7]),
-    created_at = tonumber(values[8]),
-    authorized_at = tonumber(values[9]),
-  }
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
 
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Malform model.' .. k)
-    end
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  model['is_upgraded'] = (model['is_upgraded'] ~= 0)
-  model['is_revoked'] = (model['is_revoked'] ~= 0)
+  if campaign.campaign_id ~= session.campaign_id then
+    return redis.error_reply('ERR session campaign_id mismatch')
+  end
 
-  return { map = model }
+  session.is_upgraded = session.is_upgraded == 1
+  session.is_revoked = session.is_revoked == 1
+
+  return { map = session }
 end
 
 redis.register_function({
@@ -155,28 +170,23 @@ redis.register_function({
   description = 'Read session',
 })
 
---[[
-  Read session history
---]]
 local function read_session_history(keys, args)
-  if #keys ~= 2 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local session_history_key = keys[2]
 
-  local limit = tonumber(args[1])
-
-  if not (limit and limit > 0) then
-    return redis.error_reply('ERR Wrong limit')
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
   end
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
-  return redis.call('ZRANGE', session_history_key, 0, limit - 1, 'REV')
+  return redis.call('ZRANGE', session_history_key, 0, -1, 'REV')
 end
 
 redis.register_function({
@@ -186,12 +196,9 @@ redis.register_function({
   description = 'Read session history',
 })
 
---[[
-  Auth session
---]]
 local function auth_session(keys, args)
-  if #keys ~= 4 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 4 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
@@ -199,78 +206,99 @@ local function auth_session(keys, args)
   local session_history_key = keys[3]
   local enabled_proxy_index_key = keys[4]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
   end
 
-  if redis.call('EXISTS', session_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Session not exists')
+  local now = current_time()
+
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  local stash = {
-    authorized_at = tonumber(args[1]),
-    session_id = redis.call('HGET', session_key, 'session_id'),
-    proxy_id = redis.call('HGET', session_key, 'proxy_id'),
-    is_revoked = tonumber(redis.call('HGET', session_key, 'is_revoked')),
-    session_expire = tonumber(redis.call('HGET', campaign_key, 'session_expire')),
-  }
-
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'session_id' or k == 'proxy_id') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if k == 'session_expire' and v <= 0 then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if redis.call('EXISTS', session_key) == 0 then
+    return redis.status_reply('FORBIDDEN session not exists')
   end
 
-  local history_threshold = stash.authorized_at - stash.session_expire
+  -- stylua: ignore
+  local raw_session = redis.call(
+    'HMGET', session_key,
+    'campaign_id',
+    'session_id',
+    'proxy_id',
+    'is_revoked'
+  )
 
-  if history_threshold <= 0 then
-    return redis.error_reply('ERR Wrong history_threshold')
+  local session, session_err = normalize(raw_session, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'session_id', kind = 'str' },
+    { name = 'proxy_id', kind = 'str' },
+    { name = 'is_revoked', kind = 'int', min = 0, max = 1 },
+  })
+
+  if session_err then
+    return redis.error_reply('ERR normalize session: ' .. session_err)
   end
 
-  if stash.is_revoked ~= 0 then
-    return redis.status_reply('FORBIDDEN Session is revoked')
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id',
+    'session_expire'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'session_expire', kind = 'int', min = 1000 },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= session.campaign_id then
+    return redis.status_reply('FORBIDDEN session campaign_id mismatch')
+  end
+
+  if session.is_revoked == 1 then
+    return redis.status_reply('FORBIDDEN session is revoked')
   end
 
   if redis.call('SCARD', enabled_proxy_index_key) == 0 then
-    return redis.status_reply('NOT_FOUND No enabled proxies found')
+    return redis.status_reply('NOT_FOUND no enabled proxies found')
   end
+
+  local history_threshold = math.max(0, now - campaign.session_expire)
 
   -- Point of no return
 
-  if redis.call('SISMEMBER', enabled_proxy_index_key, stash.proxy_id) == 0 then
+  if redis.call('SISMEMBER', enabled_proxy_index_key, session.proxy_id) == 0 then
     local enabled_proxy_id = redis.call('SRANDMEMBER', enabled_proxy_index_key)
 
     if not enabled_proxy_id or enabled_proxy_id == '' then
-      return redis.error_reply('ERR Wrong enabled_proxy_id')
+      return redis.error_reply('ERR malform enabled_proxy_id')
     end
 
     -- stylua: ignore
     redis.call(
       'HSET', session_key,
       'proxy_id', enabled_proxy_id,
-      'authorized_at', stash.authorized_at
+      'authorized_at', now
     )
   else
-    redis.call('HSET', session_key, 'authorized_at', stash.authorized_at)
+    -- stylua: ignore
+    redis.call(
+      'HSET', session_key,
+      'authorized_at', now
+    )
   end
 
-  redis.call('PEXPIRE', session_key, stash.session_expire)
-
+  redis.call('PEXPIRE', session_key, campaign.session_expire)
   redis.call('ZREMRANGEBYSCORE', session_history_key, '-inf', '(' .. history_threshold)
+  redis.call('ZADD', session_history_key, now, session.session_id)
+  redis.call('PEXPIRE', session_history_key, campaign.session_expire)
 
-  redis.call('ZADD', session_history_key, stash.authorized_at, stash.session_id)
-
-  redis.call('PEXPIRE', session_history_key, stash.session_expire)
-
-  return redis.status_reply('OK Session authorized')
+  return redis.status_reply('OK session authorized')
 end
 
 redis.register_function({
@@ -279,66 +307,111 @@ redis.register_function({
   description = 'Auth session',
 })
 
---[[
-  Upgrade session
---]]
-local function upgrade_session(keys, args)
-  if #keys ~= 3 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function upgrade_session(keys, raw_args)
+  if #keys ~= 3 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local lure_key = keys[2]
   local session_key = keys[3]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', lure_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Lure not exists')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', session_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Session not exists')
+  if redis.call('EXISTS', lure_key) == 0 then
+    return redis.status_reply('NOT_FOUND lure not exists')
   end
 
-  local stash = {
-    secret = args[1],
-    orig_secret = redis.call('HGET', session_key, 'secret'),
-    is_revoked = tonumber(redis.call('HGET', session_key, 'is_revoked')),
-    is_upgraded = tonumber(redis.call('HGET', session_key, 'is_upgraded')),
-  }
-
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'secret' or k == 'orig_secret') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if redis.call('EXISTS', session_key) == 0 then
+    return redis.status_reply('FORBIDDEN session not exists')
   end
 
-  if stash.orig_secret ~= stash.secret then
-    return redis.status_reply('FORBIDDEN Session secret not match')
+  -- stylua: ignore
+  local raw_session = redis.call(
+    'HMGET', session_key,
+    'campaign_id',
+    'session_id',
+    'secret',
+    'is_revoked',
+    'is_upgraded'
+  )
+
+  local session, session_err = normalize(raw_session, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'session_id', kind = 'str' },
+    { name = 'secret', kind = 'str' },
+    { name = 'is_revoked', kind = 'int', min = 0, max = 1 },
+    { name = 'is_upgraded', kind = 'int', min = 0, max = 1 },
+  })
+
+  if session_err then
+    return redis.error_reply('ERR normalize session: ' .. session_err)
   end
 
-  if stash.is_revoked ~= 0 then
-    return redis.status_reply('FORBIDDEN Session is revoked')
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  if stash.is_upgraded ~= 0 then
-    return redis.status_reply('OK Session already upgraded')
+  if campaign.campaign_id ~= session.campaign_id then
+    return redis.status_reply('FORBIDDEN session campaign_id mismatch')
+  end
+
+  -- stylua: ignore
+  local raw_lure = redis.call(
+    'HMGET', lure_key,
+    'campaign_id'
+  )
+
+  local lure, lure_err = normalize(raw_lure, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if lure_err then
+    return redis.error_reply('ERR normalize lure: ' .. lure_err)
+  end
+
+  if lure.campaign_id ~= session.campaign_id then
+    return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
+  end
+
+  if session.secret ~= args.secret then
+    return redis.status_reply('FORBIDDEN session secret mismatch')
+  end
+
+  if session.is_revoked == 1 then
+    return redis.status_reply('FORBIDDEN session is revoked')
+  end
+
+  if session.is_upgraded == 1 then
+    return redis.status_reply('OK session already upgraded')
   end
 
   -- Point of no return
 
   redis.call('HSET', session_key, 'is_upgraded', 1)
-
   redis.call('HINCRBY', lure_key, 'session_count', 1)
 
-  return redis.status_reply('OK Session upgraded')
+  return redis.status_reply('OK session upgraded')
 end
 
 redis.register_function({
@@ -347,44 +420,71 @@ redis.register_function({
   description = 'Upgrade session',
 })
 
---[[
-  Revoke session
---]]
 local function revoke_session(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local session_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
   end
 
-  if redis.call('EXISTS', session_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Session not exists')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  local stash = {
-    is_revoked = tonumber(redis.call('HGET', session_key, 'is_revoked')),
-  }
-
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if redis.call('EXISTS', session_key) == 0 then
+    return redis.status_reply('NOT_FOUND session not exists')
   end
 
-  if stash.is_revoked ~= 0 then
-    return redis.status_reply('OK Session already revoked')
+  -- stylua: ignore
+  local raw_session = redis.call(
+    'HMGET', session_key,
+    'campaign_id',
+    'session_id',
+    'is_revoked'
+  )
+
+  local session, session_err = normalize(raw_session, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'session_id', kind = 'str' },
+    { name = 'is_revoked', kind = 'int', min = 0, max = 1 },
+  })
+
+  if session_err then
+    return redis.error_reply('ERR normalize session: ' .. session_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= session.campaign_id then
+    return redis.status_reply('FORBIDDEN session campaign_id mismatch')
+  end
+
+  if session.is_revoked == 1 then
+    return redis.status_reply('OK session already revoked')
   end
 
   -- Point of no return
 
   redis.call('HSET', session_key, 'is_revoked', 1)
 
-  return redis.status_reply('OK Session revoked')
+  return redis.status_reply('OK session revoked')
 end
 
 redis.register_function({
@@ -392,3 +492,5 @@ redis.register_function({
   callback = revoke_session,
   description = 'Revoke session',
 })
+
+

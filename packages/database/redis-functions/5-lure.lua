@@ -1,11 +1,10 @@
-#!lua name=lure
+--
+-- Lure methods
+--
 
---[[
-  Create lure
---]]
-local function create_lure(keys, args)
-  if #keys ~= 6 or #args ~= 6 then
-    return redis.error_reply('ERR Wrong function use')
+local function create_lure(keys, raw_args)
+  if #keys ~= 6 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
@@ -15,93 +14,105 @@ local function create_lure(keys, args)
   local lure_index_key = keys[5]
   local redirector_key = keys[6]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'lure_id', kind = 'str' },
+    { name = 'path', kind = 'str' },
+    { name = 'redirector_id', kind = 'str' },
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  local now = current_time()
+
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', lure_key) ~= 0 then
-    return redis.status_reply('CONFLICT Lure already exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  if redis.call('EXISTS', redirector_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Redirector not exists')
+  local lock_secret = redis.call('GET', campaign_lock_key)
+
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  local stash = {
-    lock_secret = args[6],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    redirector_campaign_id = redis.call('HGET', redirector_key, 'campaign_id'),
-  }
-
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if
-      (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'redirector_campaign_id') and v == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if redis.call('EXISTS', lure_key) == 1 then
+    return redis.status_reply('CONFLICT lure already exists')
   end
 
-  local model = {
-    campaign_id = args[1],
-    lure_id = args[2],
-    path = args[3],
-    redirector_id = args[4],
-    is_enabled = 0,
-    session_count = 0,
-    created_at = tonumber(args[5]),
-  }
-
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
-
-    if
-      (k == 'campaign_id' or k == 'lure_id' or k == 'path' or k == 'redirector_id')
-      and v == ''
-    then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
+  if redis.call('EXISTS', redirector_key) == 0 then
+    return redis.status_reply('NOT_FOUND redirector not exists')
   end
 
-  if stash.redirector_campaign_id ~= model.campaign_id then
-    return redis.status_reply('FORBIDDEN Redirector not belong same campaign')
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  if campaign.campaign_id ~= args.campaign_id then
+    return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
   end
 
-  if redis.call('HEXISTS', lure_paths_key, model.path) ~= 0 then
-    return redis.status_reply('CONFLICT Lure path already taken')
+  if redis.call('HEXISTS', lure_paths_key, args.path) == 1 then
+    return redis.status_reply('CONFLICT lure path already taken')
+  end
+
+  -- stylua: ignore
+  local raw_redirector = redis.call(
+    'HMGET', redirector_key,
+    'campaign_id',
+    'redirector_id'
+  )
+
+  local redirector, redirector_err = normalize(raw_redirector, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'redirector_id', kind = 'str' },
+  })
+
+  if redirector_err then
+    return redis.error_reply('ERR normalize redirector: ' .. redirector_err)
+  end
+
+  if
+    redirector.campaign_id ~= args.campaign_id or redirector.redirector_id ~= args.redirector_id
+  then
+    return redis.status_reply('FORBIDDEN lure redirector_id mismatch')
   end
 
   -- Point of no return
 
-  local store = {}
+  -- stylua: ignore
+  redis.call(
+    'HSET', lure_key,
+    'campaign_id', args.campaign_id,
+    'lure_id', args.lure_id,
+    'path', args.path,
+    'redirector_id', args.redirector_id,
+    'is_enabled', 0,
+    'session_count', 0,
+    'created_at', now
+  )
 
-  for k, v in pairs(model) do
-    table.insert(store, k)
-    table.insert(store, v)
-  end
-
-  redis.call('HSET', lure_key, unpack(store))
-
-  redis.call('HSET', lure_paths_key, model.path, model.lure_id)
-
-  redis.call('ZADD', lure_index_key, model.created_at, model.lure_id)
-
+  redis.call('HSET', lure_paths_key, args.path, args.lure_id)
+  redis.call('ZADD', lure_index_key, now, args.lure_id)
   redis.call('HINCRBY', redirector_key, 'lure_count', 1)
 
-  return redis.status_reply('OK Lure created')
+  return redis.status_reply('OK lure created')
 end
 
 redis.register_function({
@@ -110,27 +121,28 @@ redis.register_function({
   description = 'Create lure',
 })
 
---[[
-  Read lure
---]]
 local function read_lure(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local lure_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
-  if redis.call('EXISTS', lure_key) ~= 1 then
+  if redis.call('EXISTS', lure_key) == 0 then
     return nil
   end
 
   -- stylua: ignore
-  local values =  redis.call(
+  local raw_lure = redis.call(
     'HMGET', lure_key,
     'campaign_id',
     'lure_id',
@@ -141,29 +153,41 @@ local function read_lure(keys, args)
     'created_at'
   )
 
-  if #values ~= 7 then
-    return redis.error_reply('ERR Malform values')
+  local lure, lure_err = normalize(raw_lure, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'lure_id', kind = 'str' },
+    { name = 'path', kind = 'str' },
+    { name = 'redirector_id', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+    { name = 'session_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
+  })
+
+  if lure_err then
+    return redis.error_reply('ERR normalize lure: ' .. lure_err)
   end
 
-  local model = {
-    campaign_id = values[1],
-    lure_id = values[2],
-    path = values[3],
-    redirector_id = values[4],
-    is_enabled = tonumber(values[5]),
-    session_count = tonumber(values[6]),
-    created_at = tonumber(values[7]),
-  }
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
 
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Malform model.' .. k)
-    end
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  model['is_enabled'] = (model['is_enabled'] ~= 0)
+  if campaign.campaign_id ~= lure.campaign_id then
+    return redis.error_reply('ERR lure campaign_id mismatch')
+  end
 
-  return { map = model }
+  lure.is_enabled = lure.is_enabled == 1
+
+  return { map = lure }
 end
 
 redis.register_function({
@@ -173,35 +197,34 @@ redis.register_function({
   description = 'Read lure',
 })
 
---[[
-  Find lure id
---]]
-local function find_lure_id(keys, args)
-  if #keys ~= 2 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function find_lure_id(keys, raw_args)
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local lure_paths_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  local args, args_err = normalize(raw_args, {
+    { name = 'path', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
-  local path = args[1]
-
-  if not (path and path ~= '') then
-    return redis.error_reply('ERR Wrong path')
-  end
-
-  if redis.call('HEXISTS', lure_paths_key, path) ~= 1 then
+  if redis.call('HEXISTS', lure_paths_key, args.path) == 0 then
     return nil
   end
 
-  local lure_id = redis.call('HGET', lure_paths_key, path)
+  local lure_id = redis.call('HGET', lure_paths_key, args.path)
 
-  if not (lure_id and lure_id ~= '') then
-    return redis.error_reply('ERR Malform lure_id')
+  if not lure_id or lure_id == '' then
+    return redis.error_reply('ERR malform lure_id')
   end
 
   return lure_id
@@ -214,18 +237,19 @@ redis.register_function({
   description = 'Find lure id',
 })
 
---[[
-  Read lure index
---]]
 local function read_lure_index(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local lure_index_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
@@ -239,59 +263,86 @@ redis.register_function({
   description = 'Read lure index',
 })
 
---[[
-  Enable lure
---]]
-local function enable_lure(keys, args)
-  if #keys ~= 3 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function enable_lure(keys, raw_args)
+  if #keys ~= 3 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local lure_key = keys[3]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', lure_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Lure not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  if redis.call('EXISTS', lure_key) == 0 then
+    return redis.status_reply('NOT_FOUND lure not exists')
   end
 
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('OK Lure already enabled')
+  -- stylua: ignore
+  local raw_lure = redis.call(
+    'HMGET', lure_key,
+    'campaign_id',
+    'lure_id',
+    'is_enabled'
+  )
+
+  local lure, lure_err = normalize(raw_lure, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'lure_id', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+  })
+
+  if lure_err then
+    return redis.error_reply('ERR normalize lure: ' .. lure_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= lure.campaign_id then
+    return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
+  end
+
+  if lure.is_enabled == 1 then
+    return redis.status_reply('OK lure already enabled')
   end
 
   -- Point of no return
 
   redis.call('HSET', lure_key, 'is_enabled', 1)
 
-  return redis.status_reply('OK Lure enabled')
+  return redis.status_reply('OK lure enabled')
 end
 
 redis.register_function({
@@ -300,59 +351,86 @@ redis.register_function({
   description = 'Enable lure',
 })
 
---[[
-  Disable lure
---]]
-local function disable_lure(keys, args)
-  if #keys ~= 3 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function disable_lure(keys, raw_args)
+  if #keys ~= 3 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local lure_key = keys[3]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', lure_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Lure not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  if redis.call('EXISTS', lure_key) == 0 then
+    return redis.status_reply('NOT_FOUND lure not exists')
   end
 
-  if stash.is_enabled == 0 then
-    return redis.status_reply('OK Lure already disabled')
+  -- stylua: ignore
+  local raw_lure = redis.call(
+    'HMGET', lure_key,
+    'campaign_id',
+    'lure_id',
+    'is_enabled'
+  )
+
+  local lure, lure_err = normalize(raw_lure, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'lure_id', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+  })
+
+  if lure_err then
+    return redis.error_reply('ERR normalize lure: ' .. lure_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= lure.campaign_id then
+    return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
+  end
+
+  if lure.is_enabled == 0 then
+    return redis.status_reply('OK lure already disabled')
   end
 
   -- Point of no return
 
   redis.call('HSET', lure_key, 'is_enabled', 0)
 
-  return redis.status_reply('OK Lure disabled')
+  return redis.status_reply('OK lure disabled')
 end
 
 redis.register_function({
@@ -361,12 +439,9 @@ redis.register_function({
   description = 'Disable lure',
 })
 
---[[
-  Delete lure
---]]
-local function delete_lure(keys, args)
-  if #keys ~= 6 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function delete_lure(keys, raw_args)
+  if #keys ~= 6 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
@@ -376,83 +451,110 @@ local function delete_lure(keys, args)
   local lure_index_key = keys[5]
   local redirector_key = keys[6]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', lure_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Lure not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  if redis.call('EXISTS', redirector_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Redirector not exists')
+  local lock_secret = redis.call('GET', campaign_lock_key)
+
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    lure_id = redis.call('HGET', lure_key, 'lure_id'),
-    path = redis.call('HGET', lure_key, 'path'),
-    lure_redirector_id = redis.call('HGET', lure_key, 'redirector_id'),
-    lure_campaign_id = redis.call('HGET', lure_key, 'campaign_id'),
-    redirector_id = redis.call('HGET', redirector_key, 'redirector_id'),
-    redirector_campaign_id = redis.call('HGET', redirector_key, 'campaign_id'),
-    is_enabled = tonumber(redis.call('HGET', lure_key, 'is_enabled')),
-  }
+  if redis.call('EXISTS', lure_key) == 0 then
+    return redis.status_reply('NOT_FOUND lure not exists')
+  end
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if redis.call('EXISTS', redirector_key) == 0 then
+    return redis.status_reply('NOT_FOUND redirector not exists')
+  end
 
-    if
-      (
-        k == 'lock_secret'
-        or k == 'orig_lock_secret'
-        or k == 'lure_id'
-        or k == 'path'
-        or k == 'lure_redirector_id'
-        or k == 'lure_campaign_id'
-        or k == 'redirector_id'
-        or k == 'redirector_campaign_id'
-      ) and v == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  -- stylua: ignore
+  local raw_lure = redis.call(
+    'HMGET', lure_key,
+    'campaign_id',
+    'lure_id',
+    'path',
+    'redirector_id',
+    'is_enabled'
+  )
+
+  local lure, lure_err = normalize(raw_lure, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'lure_id', kind = 'str' },
+    { name = 'path', kind = 'str' },
+    { name = 'redirector_id', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+  })
+
+  if lure_err then
+    return redis.error_reply('ERR normalize lure: ' .. lure_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= lure.campaign_id then
+    return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
+  end
+
+  -- stylua: ignore
+  local raw_redirector = redis.call(
+    'HMGET', redirector_key,
+    'campaign_id',
+    'redirector_id'
+  )
+
+  local redirector, redirector_err = normalize(raw_redirector, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'redirector_id', kind = 'str' },
+  })
+
+  if redirector_err then
+    return redis.error_reply('ERR normalize redirector: ' .. redirector_err)
   end
 
   if
-    not (
-      stash.lure_redirector_id == stash.redirector_id
-      and stash.lure_campaign_id == stash.redirector_campaign_id
-    )
+    lure.campaign_id ~= redirector.campaign_id or lure.redirector_id ~= redirector.redirector_id
   then
-    return redis.status_reply('FORBIDDEN Redirector not belong lure')
+    return redis.status_reply('FORBIDDEN lure redirector_id mismatch')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
-  end
-
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('FORBIDDEN Lure not disabled')
+  if lure.is_enabled == 1 then
+    return redis.status_reply('FORBIDDEN lure not disabled')
   end
 
   -- Point of no return
 
   redis.call('DEL', lure_key)
-
-  redis.call('HDEL', lure_paths_key, stash.path)
-
-  redis.call('ZREM', lure_index_key, stash.lure_id)
-
+  redis.call('HDEL', lure_paths_key, lure.path)
+  redis.call('ZREM', lure_index_key, lure.lure_id)
   redis.call('HINCRBY', redirector_key, 'lure_count', -1)
 
-  return redis.status_reply('OK Lure deleted')
+  return redis.status_reply('OK lure deleted')
 end
 
 redis.register_function({

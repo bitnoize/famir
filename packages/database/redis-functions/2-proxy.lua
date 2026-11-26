@@ -1,11 +1,10 @@
-#!lua name=proxy
+--
+-- Proxy methods
+--
 
---[[
-  Create proxy
---]]
-local function create_proxy(keys, args)
-  if #keys ~= 5 or #args ~= 5 then
-    return redis.error_reply('ERR Wrong function use')
+local function create_proxy(keys, raw_args)
+  if #keys ~= 5 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
@@ -14,76 +13,76 @@ local function create_proxy(keys, args)
   local proxy_urls_key = keys[4]
   local proxy_index_key = keys[5]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'proxy_id', kind = 'str' },
+    { name = 'url', kind = 'str' },
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  local now = current_time()
+
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', proxy_key) ~= 0 then
-    return redis.status_reply('CONFLICT Proxy already exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[5],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  local model = {
-    campaign_id = args[1],
-    proxy_id = args[2],
-    url = args[3],
-    is_enabled = 0,
-    message_count = 0,
-    created_at = tonumber(args[4]),
-  }
-
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
-
-    if (k == 'campaign_id' or k == 'proxy_id' or k == 'url') and v == '' then
-      return redis.error_reply('ERR Wrong model.' .. k)
-    end
+  if redis.call('EXISTS', proxy_key) == 1 then
+    return redis.status_reply('CONFLICT proxy already exists')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  if redis.call('SISMEMBER', proxy_urls_key, model.url) ~= 0 then
-    return redis.status_reply('CONFLICT Proxy url already taken')
+  if campaign.campaign_id ~= args.campaign_id then
+    return redis.status_reply('FORBIDDEN proxy campaign_id mismatch')
+  end
+
+  if redis.call('SISMEMBER', proxy_urls_key, args.url) == 1 then
+    return redis.status_reply('CONFLICT proxy url already taken')
   end
 
   -- Point of no return
 
-  local store = {}
+  -- stylua: ignore
+  redis.call(
+    'HSET', proxy_key,
+    'campaign_id', args.campaign_id,
+    'proxy_id', args.proxy_id,
+    'url', args.url,
+    'is_enabled', 0,
+    'message_count', 0,
+    'created_at', now
+  )
 
-  for k, v in pairs(model) do
-    table.insert(store, k)
-    table.insert(store, v)
-  end
+  redis.call('SADD', proxy_urls_key, args.url)
+  redis.call('ZADD', proxy_index_key, now, args.proxy_id)
 
-  redis.call('HSET', proxy_key, unpack(store))
-
-  redis.call('SADD', proxy_urls_key, model.url)
-
-  redis.call('ZADD', proxy_index_key, model.created_at, model.proxy_id)
-
-  return redis.status_reply('OK Proxy created')
+  return redis.status_reply('OK proxy created')
 end
 
 redis.register_function({
@@ -92,27 +91,28 @@ redis.register_function({
   description = 'Create proxy',
 })
 
---[[
-  Read proxy
---]]
 local function read_proxy(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local proxy_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
-  if redis.call('EXISTS', proxy_key) ~= 1 then
+  if redis.call('EXISTS', proxy_key) == 0 then
     return nil
   end
 
   -- stylua: ignore
-  local values = redis.call(
+  local raw_proxy = redis.call(
     'HMGET', proxy_key,
     'campaign_id',
     'proxy_id',
@@ -122,28 +122,40 @@ local function read_proxy(keys, args)
     'created_at'
   )
 
-  if #values ~= 6 then
-    return redis.error_reply('ERR Malform values')
+  local proxy, proxy_err = normalize(raw_proxy, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'proxy_id', kind = 'str' },
+    { name = 'url', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
+  })
+
+  if proxy_err then
+    return redis.error_reply('ERR normalize proxy: ' .. proxy_err)
   end
 
-  local model = {
-    campaign_id = values[1],
-    proxy_id = values[2],
-    url = values[3],
-    is_enabled = tonumber(values[4]),
-    message_count = tonumber(values[5]),
-    created_at = tonumber(values[6]),
-  }
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
 
-  for k, v in pairs(model) do
-    if not v then
-      return redis.error_reply('ERR Malform model.' .. k)
-    end
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  model['is_enabled'] = (model['is_enabled'] ~= 0)
+  if campaign.campaign_id ~= proxy.campaign_id then
+    return redis.error_reply('ERR proxy campaign_id mismatch')
+  end
 
-  return { map = model }
+  proxy.is_enabled = proxy.is_enabled == 1
+
+  return { map = proxy }
 end
 
 redis.register_function({
@@ -153,18 +165,19 @@ redis.register_function({
   description = 'Read proxy',
 })
 
---[[
-  Read proxy index
---]]
 local function read_proxy_index(keys, args)
-  if #keys ~= 2 or #args ~= 0 then
-    return redis.error_reply('ERR Wrong function use')
+  if #keys ~= 2 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local proxy_index_key = keys[2]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
+  if #args ~= 0 then
+    return redis.error_reply('ERR wrong number of args')
+  end
+
+  if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
@@ -178,12 +191,9 @@ redis.register_function({
   description = 'Read proxy index',
 })
 
---[[
-  Enable proxy
---]]
-local function enable_proxy(keys, args)
-  if #keys ~= 4 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function enable_proxy(keys, raw_args)
+  if #keys ~= 4 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
@@ -191,50 +201,78 @@ local function enable_proxy(keys, args)
   local proxy_key = keys[3]
   local enabled_proxy_index_key = keys[4]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', proxy_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Proxy not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
-    is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'proxy_id') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  if redis.call('EXISTS', proxy_key) == 0 then
+    return redis.status_reply('NOT_FOUND proxy not exists')
   end
 
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('OK Proxy already enabled')
+  -- stylua: ignore
+  local raw_proxy = redis.call(
+    'HMGET', proxy_key,
+    'campaign_id',
+    'proxy_id',
+    'is_enabled'
+  )
+
+  local proxy, proxy_err = normalize(raw_proxy, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'proxy_id', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+  })
+
+  if proxy_err then
+    return redis.error_reply('ERR normalize proxy: ' .. proxy_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= proxy.campaign_id then
+    return redis.status_reply('FORBIDDEN proxy campaign_id mismatch')
+  end
+
+  if proxy.is_enabled == 1 then
+    return redis.status_reply('OK proxy already enabled')
   end
 
   -- Point of no return
 
   redis.call('HSET', proxy_key, 'is_enabled', 1)
+  redis.call('SADD', enabled_proxy_index_key, proxy.proxy_id)
 
-  redis.call('SADD', enabled_proxy_index_key, stash.proxy_id)
-
-  return redis.status_reply('OK Proxy enabled')
+  return redis.status_reply('OK proxy enabled')
 end
 
 redis.register_function({
@@ -243,12 +281,9 @@ redis.register_function({
   description = 'Enable proxy',
 })
 
---[[
-  Disable proxy
---]]
-local function disable_proxy(keys, args)
-  if #keys ~= 4 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function disable_proxy(keys, raw_args)
+  if #keys ~= 4 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
@@ -256,50 +291,78 @@ local function disable_proxy(keys, args)
   local proxy_key = keys[3]
   local enabled_proxy_index_key = keys[4]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', proxy_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Proxy not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
-    is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'proxy_id') and v == '' then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  if redis.call('EXISTS', proxy_key) == 0 then
+    return redis.status_reply('NOT_FOUND proxy not exists')
   end
 
-  if stash.is_enabled == 0 then
-    return redis.status_reply('OK Proxy already disabled')
+  -- stylua: ignore
+  local raw_proxy = redis.call(
+    'HMGET', proxy_key,
+    'campaign_id',
+    'proxy_id',
+    'is_enabled'
+  )
+
+  local proxy, proxy_err = normalize(raw_proxy, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'proxy_id', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+  })
+
+  if proxy_err then
+    return redis.error_reply('ERR normalize proxy: ' .. proxy_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= proxy.campaign_id then
+    return redis.status_reply('FORBIDDEN proxy campaign_id mismatch')
+  end
+
+  if proxy.is_enabled == 0 then
+    return redis.status_reply('OK proxy already disabled')
   end
 
   -- Point of no return
 
   redis.call('HSET', proxy_key, 'is_enabled', 0)
+  redis.call('SREM', enabled_proxy_index_key, proxy.proxy_id)
 
-  redis.call('SREM', enabled_proxy_index_key, stash.proxy_id)
-
-  return redis.status_reply('OK Proxy disabled')
+  return redis.status_reply('OK proxy disabled')
 end
 
 redis.register_function({
@@ -308,12 +371,9 @@ redis.register_function({
   description = 'Disable proxy',
 })
 
---[[
-  Delete proxy
---]]
-local function delete_proxy(keys, args)
-  if #keys ~= 5 or #args ~= 1 then
-    return redis.error_reply('ERR Wrong function use')
+local function delete_proxy(keys, raw_args)
+  if #keys ~= 5 then
+    return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
@@ -322,55 +382,81 @@ local function delete_proxy(keys, args)
   local proxy_urls_key = keys[4]
   local proxy_index_key = keys[5]
 
-  if redis.call('EXISTS', campaign_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Campaign not exists')
+  local args, args_err = normalize(raw_args, {
+    { name = 'lock_secret', kind = 'str' },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 1 then
-    return redis.status_reply('FORBIDDEN Campaign not locked')
+  if redis.call('EXISTS', campaign_key) == 0 then
+    return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', proxy_key) ~= 1 then
-    return redis.status_reply('NOT_FOUND Proxy not exists')
+  if redis.call('EXISTS', campaign_lock_key) == 0 then
+    return redis.status_reply('FORBIDDEN campaign not locked')
   end
 
-  local stash = {
-    lock_secret = args[1],
-    orig_lock_secret = redis.call('GET', campaign_lock_key),
-    proxy_id = redis.call('HGET', proxy_key, 'proxy_id'),
-    url = redis.call('HGET', proxy_key, 'url'),
-    is_enabled = tonumber(redis.call('HGET', proxy_key, 'is_enabled')),
-  }
+  local lock_secret = redis.call('GET', campaign_lock_key)
 
-  for k, v in pairs(stash) do
-    if not v then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
-
-    if
-      (k == 'lock_secret' or k == 'orig_lock_secret' or k == 'proxy_id' or k == 'url') and v == ''
-    then
-      return redis.error_reply('ERR Wrong stash.' .. k)
-    end
+  if not lock_secret or lock_secret ~= args.lock_secret then
+    return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if stash.orig_lock_secret ~= stash.lock_secret then
-    return redis.status_reply('FORBIDDEN Campaign lock_secret not match')
+  if redis.call('EXISTS', proxy_key) == 0 then
+    return redis.status_reply('NOT_FOUND proxy not exists')
   end
 
-  if stash.is_enabled ~= 0 then
-    return redis.status_reply('FORBIDDEN Proxy not disabled')
+  -- stylua: ignore
+  local raw_proxy = redis.call(
+    'HMGET', proxy_key,
+    'campaign_id',
+    'proxy_id',
+    'url',
+    'is_enabled'
+  )
+
+  local proxy, proxy_err = normalize(raw_proxy, {
+    { name = 'campaign_id', kind = 'str' },
+    { name = 'proxy_id', kind = 'str' },
+    { name = 'url', kind = 'str' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+  })
+
+  if proxy_err then
+    return redis.error_reply('ERR normalize proxy: ' .. proxy_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= proxy.campaign_id then
+    return redis.status_reply('FORBIDDEN proxy campaign_id mismatch')
+  end
+
+  if proxy.is_enabled == 1 then
+    return redis.status_reply('FORBIDDEN proxy not disabled')
   end
 
   -- Point of no return
 
   redis.call('DEL', proxy_key)
+  redis.call('SREM', proxy_urls_key, proxy.url)
+  redis.call('ZREM', proxy_index_key, proxy.proxy_id)
 
-  redis.call('SREM', proxy_urls_key, stash.url)
-
-  redis.call('ZREM', proxy_index_key, stash.proxy_id)
-
-  return redis.status_reply('OK Proxy deleted')
+  return redis.status_reply('OK proxy deleted')
 end
 
 redis.register_function({

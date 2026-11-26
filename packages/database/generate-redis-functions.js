@@ -1,5 +1,6 @@
 import { readdir, readFile, stat, writeFile } from 'fs/promises'
 import { join } from 'path'
+import { gzipSync, gunzipSync } from "node:zlib"
 
 async function generateRedisFunctions(sourceDir, targetFile) {
   const sourceFiles = await readdir(sourceDir, { recursive: true })
@@ -22,16 +23,26 @@ async function generateRedisFunctions(sourceDir, targetFile) {
     embedFiles.push(fileBody)
   }
 
-  const embedBase64 = Buffer.from(embedFiles.join('\n'), 'utf8').toString('base64')
-  const wrappedBase64 = base64.match(/.{1,76}/g)?.join("\r\n") ?? ''
+  const embedFile = gzipSync(Buffer.from(embedFiles.join('\n'), 'utf8'), { level: 9 })
+    .toString('base64')
+    .match(/.{1,76}/g)?.join('\n') ?? ''
 
   const targetBody = `// Auto-generated file. Do not edit manually!
+
+import { gunzipSync } from 'noze:zlib'
+
+const REDIS_FUNCTIONS = \`
+${embedFile}
+\`
 
 /**
  * @category none
  * @internal
  */
-export const redisFunctions = \`${wrappedBase64}\``
+export function redisFunctions(): string {
+  return gunzipSync(Buffer.from(REDIS_FUNCTIONS, 'base64'))toString('utf-8')
+}
+`
 
   await writeFile(targetFile, targetBody, 'utf8')
 }
