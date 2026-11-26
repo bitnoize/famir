@@ -164,15 +164,15 @@ local function create_campaign(keys, raw_args)
 
   local now = current_time()
 
-  if redis.call('EXISTS', campaign_key) ~= 0 then
+  if redis.call('EXISTS', campaign_key) == 1 then
     return redis.status_reply('CONFLICT campaign already exists')
   end
 
-  if redis.call('SISMEMBER', campaign_mirror_domains_key, args.mirror_domain) ~= 0 then
+  if redis.call('SISMEMBER', campaign_mirror_domains_key, args.mirror_domain) == 1 then
     return redis.status_reply('CONFLICT campaign mirror_domain already taken')
   end
 
-  if redis.call('SISMEMBER', campaign_session_cookie_names_key, args.session_cookie_name) ~= 0 then
+  if redis.call('SISMEMBER', campaign_session_cookie_names_key, args.session_cookie_name) == 1 then
     return redis.status_reply('CONFLICT campaign session_cookie_name already taken')
   end
 
@@ -247,7 +247,7 @@ local function read_campaign(keys, args)
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  campaign.is_locked = redis.call('EXISTS', campaign_lock_key) ~= 0
+  campaign.is_locked = redis.call('EXISTS', campaign_lock_key) == 1
 
   return { map = campaign }
 end
@@ -324,7 +324,7 @@ local function read_full_campaign(keys, args)
   end
 
   campaign.session_cookie_names = redis.call('SMEMBERS', campaign_session_cookie_names_key)
-  campaign.is_locked = redis.call('EXISTS', campaign_lock_key) ~= 0
+  campaign.is_locked = redis.call('EXISTS', campaign_lock_key) == 1
   campaign.flags = redis.call('SMEMBERS', campaign_flags_key)
   campaign.proxy_index = redis.call('ZCARD', proxy_index_key)
   campaign.target_index = redis.call('ZCARD', target_index_key)
@@ -390,7 +390,7 @@ local function lock_campaign(keys, raw_args)
     return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('EXISTS', campaign_lock_key) ~= 0 then
+  if redis.call('EXISTS', campaign_lock_key) == 1 then
     return redis.status_reply('FORBIDDEN campaign already locked')
   end
 
@@ -553,7 +553,7 @@ local function append_campaign_flag(keys, raw_args)
     return redis.status_reply('NOT_FOUND campaign not exists')
   end
 
-  if redis.call('SISMEMBER', campaign_flags_key, args.flag) ~= 0 then
+  if redis.call('SISMEMBER', campaign_flags_key, args.flag) == 1 then
     return redis.status_reply('OK campaign flag already exists')
   end
 
@@ -608,7 +608,7 @@ redis.register_function({
 })
 
 local function delete_campaign(keys, raw_args)
-  if #keys ~= 10 then
+  if #keys ~= 12 then
     return redis.error_reply('ERR wrong number of keys')
   end
 
@@ -622,6 +622,8 @@ local function delete_campaign(keys, raw_args)
   local target_index_key = keys[8]
   local redirector_index_key = keys[9]
   local lure_index_key = keys[10]
+  local session_history_key = keys[11]
+  local message_history_key = keys[12]
 
   local args, args_err = normalize(raw_args, {
     { name = 'lock_secret', kind = 'str' },
@@ -681,7 +683,14 @@ local function delete_campaign(keys, raw_args)
 
   -- Point of no return
 
-  redis.call('DEL', campaign_key, campaign_lock_key, campaign_flags_key)
+  redis.call(
+    'DEL',
+    campaign_key,
+    campaign_lock_key,
+    campaign_flags_key,
+    session_history_key,
+    message_history_key
+  )
   redis.call('SREM', campaign_mirror_domains_key, campaign.mirror_domain)
   redis.call('SREM', campaign_session_cookie_names_key, campaign.session_cookie_name)
   redis.call('ZREM', campaign_index_key, campaign.campaign_id)
@@ -871,7 +880,7 @@ local function create_proxy(keys, raw_args)
     return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if redis.call('EXISTS', proxy_key) ~= 0 then
+  if redis.call('EXISTS', proxy_key) == 1 then
     return redis.status_reply('CONFLICT proxy already exists')
   end
 
@@ -893,7 +902,7 @@ local function create_proxy(keys, raw_args)
     return redis.status_reply('FORBIDDEN proxy campaign_id mismatch')
   end
 
-  if redis.call('SISMEMBER', proxy_urls_key, args.url) ~= 0 then
+  if redis.call('SISMEMBER', proxy_urls_key, args.url) == 1 then
     return redis.status_reply('CONFLICT proxy url already taken')
   end
 
@@ -957,16 +966,34 @@ local function read_proxy(keys, args)
     { name = 'campaign_id', kind = 'str' },
     { name = 'proxy_id', kind = 'str' },
     { name = 'url', kind = 'str' },
-    { name = 'is_enabled', kind = 'int' },
-    { name = 'message_count', kind = 'int' },
-    { name = 'created_at', kind = 'int' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
   })
 
   if proxy_err then
     return redis.error_reply('ERR normalize proxy: ' .. proxy_err)
   end
 
-  proxy.is_enabled = proxy.is_enabled ~= 0
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= proxy.campaign_id then
+    return redis.error_reply('ERR proxy campaign_id mismatch')
+  end
+
+  proxy.is_enabled = proxy.is_enabled == 1
 
   return { map = proxy }
 end
@@ -1056,7 +1083,25 @@ local function enable_proxy(keys, raw_args)
     return redis.error_reply('ERR normalize proxy: ' .. proxy_err)
   end
 
-  if proxy.is_enabled ~= 0 then
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= proxy.campaign_id then
+    return redis.status_reply('FORBIDDEN proxy campaign_id mismatch')
+  end
+
+  if proxy.is_enabled == 1 then
     return redis.status_reply('OK proxy already enabled')
   end
 
@@ -1126,6 +1171,24 @@ local function disable_proxy(keys, raw_args)
     return redis.error_reply('ERR normalize proxy: ' .. proxy_err)
   end
 
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= proxy.campaign_id then
+    return redis.status_reply('FORBIDDEN proxy campaign_id mismatch')
+  end
+
   if proxy.is_enabled == 0 then
     return redis.status_reply('OK proxy already disabled')
   end
@@ -1184,12 +1247,14 @@ local function delete_proxy(keys, raw_args)
   -- stylua: ignore
   local raw_proxy = redis.call(
     'HMGET', proxy_key,
+    'campaign_id',
     'proxy_id',
     'url',
     'is_enabled'
   )
 
   local proxy, proxy_err = normalize(raw_proxy, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'proxy_id', kind = 'str' },
     { name = 'url', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
@@ -1199,7 +1264,25 @@ local function delete_proxy(keys, raw_args)
     return redis.error_reply('ERR normalize proxy: ' .. proxy_err)
   end
 
-  if proxy.is_enabled ~= 0 then
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= proxy.campaign_id then
+    return redis.status_reply('FORBIDDEN proxy campaign_id mismatch')
+  end
+
+  if proxy.is_enabled == 1 then
     return redis.status_reply('FORBIDDEN proxy not disabled')
   end
 
@@ -1246,7 +1329,7 @@ local function create_target(keys, raw_args)
     { name = 'mirror_secure', kind = 'int', min = 0, max = 1 },
     { name = 'mirror_sub', kind = 'str' },
     { name = 'mirror_port', kind = 'str' },
-    { name = 'label', kind = 'str' },
+    { name = 'tenant', kind = 'any' },
     { name = 'connect_timeout', kind = 'int', min = 1 },
     { name = 'simple_timeout', kind = 'int', min = 1 },
     { name = 'stream_timeout', kind = 'int', min = 1 },
@@ -1281,7 +1364,7 @@ local function create_target(keys, raw_args)
     return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if redis.call('EXISTS', target_key) ~= 0 then
+  if redis.call('EXISTS', target_key) == 1 then
     return redis.status_reply('CONFLICT target already exists')
   end
 
@@ -1311,7 +1394,7 @@ local function create_target(keys, raw_args)
     .. '\t' .. args.donor_domain
     .. '\t' .. args.donor_port
 
-  if redis.call('SISMEMBER', target_donors_key, donor_stamp) ~= 0 then
+  if redis.call('SISMEMBER', target_donors_key, donor_stamp) == 1 then
     return redis.status_reply('CONFLICT target donor already taken')
   end
 
@@ -1320,7 +1403,7 @@ local function create_target(keys, raw_args)
     .. '\t' .. args.mirror_sub
     .. '\t' .. args.mirror_port
 
-  if redis.call('SISMEMBER', target_mirrors_key, mirror_stamp) ~= 0 then
+  if redis.call('SISMEMBER', target_mirrors_key, mirror_stamp) == 1 then
     return redis.status_reply('CONFLICT target mirror already taken')
   end
 
@@ -1331,8 +1414,8 @@ local function create_target(keys, raw_args)
   local mirror_host = mirror_hostname .. ':' .. args.mirror_port
   local target_link = args.campaign_id .. '\t' .. args.target_id
 
-  if redis.call('HEXISTS', target_hosts_key, mirror_host) ~= 0 then
-    return redis.error_reply('ERR target mirror host already taken')
+  if redis.call('HEXISTS', target_hosts_key, mirror_host) == 1 then
+    return redis.status_reply('CONFLICT target mirror host already taken')
   end
 
   -- Point of no return
@@ -1350,7 +1433,7 @@ local function create_target(keys, raw_args)
     'mirror_secure', args.mirror_secure,
     'mirror_sub', args.mirror_sub,
     'mirror_port', args.mirror_port,
-    'label', args.label,
+    'tenant', args.tenant,
     'connect_timeout', args.connect_timeout,
     'simple_timeout', args.simple_timeout,
     'stream_timeout', args.stream_timeout,
@@ -1414,7 +1497,7 @@ local function read_target(keys, args)
     'mirror_secure',
     'mirror_sub',
     'mirror_port',
-    'label',
+    'tenant',
     'is_enabled',
     'message_count',
     'created_at'
@@ -1424,17 +1507,17 @@ local function read_target(keys, args)
     { name = 'campaign_id', kind = 'str' },
     { name = 'target_id', kind = 'str' },
     { name = 'access_level', kind = 'str' },
-    { name = 'donor_secure', kind = 'int' },
+    { name = 'donor_secure', kind = 'int', min = 0, max = 1 },
     { name = 'donor_sub', kind = 'str' },
     { name = 'donor_domain', kind = 'str' },
     { name = 'donor_port', kind = 'str' },
-    { name = 'mirror_secure', kind = 'int' },
+    { name = 'mirror_secure', kind = 'int', min = 0, max = 1 },
     { name = 'mirror_sub', kind = 'str' },
     { name = 'mirror_port', kind = 'str' },
-    { name = 'label', kind = 'str' },
-    { name = 'is_enabled', kind = 'int' },
-    { name = 'message_count', kind = 'int' },
-    { name = 'created_at', kind = 'int' },
+    { name = 'tenant', kind = 'any' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
   })
 
   if target_err then
@@ -1444,10 +1527,12 @@ local function read_target(keys, args)
   -- stylua: ignore
   local raw_campaign = redis.call(
     'HMGET', campaign_key,
+    'campaign_id',
     'mirror_domain'
   )
 
   local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'mirror_domain', kind = 'str' },
   })
 
@@ -1455,9 +1540,13 @@ local function read_target(keys, args)
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  target.donor_secure = target.donor_secure ~= 0
-  target.mirror_secure = target.mirror_secure ~= 0
-  target.is_enabled = target.is_enabled ~= 0
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.error_reply('ERR target campaign_id mismatch')
+  end
+
+  target.donor_secure = target.donor_secure == 1
+  target.mirror_secure = target.mirror_secure == 1
+  target.is_enabled = target.is_enabled == 1
 
   target.mirror_domain = campaign.mirror_domain
 
@@ -1504,7 +1593,7 @@ local function read_full_target(keys, args)
     'mirror_secure',
     'mirror_sub',
     'mirror_port',
-    'label',
+    'tenant',
     'connect_timeout',
     'simple_timeout',
     'stream_timeout',
@@ -1525,28 +1614,28 @@ local function read_full_target(keys, args)
     { name = 'campaign_id', kind = 'str' },
     { name = 'target_id', kind = 'str' },
     { name = 'access_level', kind = 'str' },
-    { name = 'donor_secure', kind = 'int' },
+    { name = 'donor_secure', kind = 'int', min = 0, max = 1 },
     { name = 'donor_sub', kind = 'str' },
     { name = 'donor_domain', kind = 'str' },
     { name = 'donor_port', kind = 'str' },
-    { name = 'mirror_secure', kind = 'int' },
+    { name = 'mirror_secure', kind = 'int', min = 0, max = 1 },
     { name = 'mirror_sub', kind = 'str' },
     { name = 'mirror_port', kind = 'str' },
-    { name = 'label', kind = 'str' },
-    { name = 'connect_timeout', kind = 'int' },
-    { name = 'simple_timeout', kind = 'int' },
-    { name = 'stream_timeout', kind = 'int' },
-    { name = 'headers_size_limit', kind = 'int' },
-    { name = 'body_size_limit', kind = 'int' },
+    { name = 'tenant', kind = 'any' },
+    { name = 'connect_timeout', kind = 'int', min = 1 },
+    { name = 'simple_timeout', kind = 'int', min = 1 },
+    { name = 'stream_timeout', kind = 'int', min = 1 },
+    { name = 'headers_size_limit', kind = 'int', min = 1 },
+    { name = 'body_size_limit', kind = 'int', min = 1 },
     { name = 'main_page', kind = 'str' },
     { name = 'not_found_page', kind = 'str' },
     { name = 'favicon_ico', kind = 'str' },
     { name = 'robots_txt', kind = 'str' },
     { name = 'sitemap_xml', kind = 'str' },
-    { name = 'allow_websockets', kind = 'int' },
-    { name = 'is_enabled', kind = 'int' },
-    { name = 'message_count', kind = 'int' },
-    { name = 'created_at', kind = 'int' },
+    { name = 'allow_websockets', kind = 'int', min = 0, max = 1 },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+    { name = 'message_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
   })
 
   if target_err then
@@ -1556,10 +1645,12 @@ local function read_full_target(keys, args)
   -- stylua: ignore
   local raw_campaign = redis.call(
     'HMGET', campaign_key,
+    'campaign_id',
     'mirror_domain'
   )
 
   local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'mirror_domain', kind = 'str' },
   })
 
@@ -1567,10 +1658,14 @@ local function read_full_target(keys, args)
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  target.donor_secure = target.donor_secure ~= 0
-  target.mirror_secure = target.mirror_secure ~= 0
-  target.allow_websockets = target.allow_websockets ~= 0
-  target.is_enabled = target.is_enabled ~= 0
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.error_reply('ERR target campaign_id mismatch')
+  end
+
+  target.donor_secure = target.donor_secure == 1
+  target.mirror_secure = target.mirror_secure == 1
+  target.allow_websockets = target.allow_websockets == 1
+  target.is_enabled = target.is_enabled == 1
 
   target.mirror_domain = campaign.mirror_domain
 
@@ -1604,7 +1699,7 @@ local function read_target_hosts(keys, args)
   end
 
   for i = 1, #values, 2 do
-    local campaign_id, target_id = string.match(values[i + 1], '([^\t]+)\t([^\t]+)')
+    local campaign_id, target_id = string.match(values[i + 1], '^([^\t]+)\t([^\t]+)$')
 
     if not campaign_id or campaign_id == '' or not target_id or target_id == '' then
       return redis.error_reply('ERR malform target_link')
@@ -1643,7 +1738,7 @@ local function find_target_link(keys, raw_args)
   end
 
   local target_link = redis.call('HGET', target_hosts_key, args.mirror_host)
-  local campaign_id, target_id = string.match(target_link, '([^\t]+)\t([^\t]+)')
+  local campaign_id, target_id = string.match(target_link, '^([^\t]+)\t([^\t]+)$')
 
   if not campaign_id or campaign_id == '' or not target_id or target_id == '' then
     return redis.error_reply('ERR malform target_link')
@@ -1731,6 +1826,38 @@ local function update_target(keys, raw_args)
     return redis.status_reply('NOT_FOUND target not exists')
   end
 
+  -- stylua: ignore
+  local raw_target = redis.call(
+    'HMGET', target_key,
+    'target_id'
+  )
+
+  local target, target_err = normalize(raw_target, {
+    { name = 'target_id', kind = 'str' },
+  })
+
+  if target_err then
+    return redis.error_reply('ERR normalize target: ' .. target_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.status_reply('FORBIDDEN target campaign_id mismatch')
+  end
+
   -- Point of no return
 
   -- stylua: ignore
@@ -1796,10 +1923,12 @@ local function enable_target(keys, raw_args)
   -- stylua: ignore
   local raw_target = redis.call(
     'HMGET', target_key,
+    'target_id',
     'is_enabled'
   )
 
   local target, target_err = normalize(raw_target, {
+    { name = 'target_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
 
@@ -1807,7 +1936,25 @@ local function enable_target(keys, raw_args)
     return redis.error_reply('ERR normalize target: ' .. target_err)
   end
 
-  if target.is_enabled ~= 0 then
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.status_reply('FORBIDDEN target campaign_id mismatch')
+  end
+
+  if target.is_enabled == 1 then
     return redis.status_reply('OK target already enabled')
   end
 
@@ -1862,15 +2009,35 @@ local function disable_target(keys, raw_args)
   -- stylua: ignore
   local raw_target = redis.call(
     'HMGET', target_key,
+    'target_id',
     'is_enabled'
   )
 
   local target, target_err = normalize(raw_target, {
+    { name = 'target_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
 
   if target_err then
     return redis.error_reply('ERR normalize target: ' .. target_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.status_reply('FORBIDDEN target campaign_id mismatch')
   end
 
   if target.is_enabled == 0 then
@@ -1960,10 +2127,12 @@ local function delete_target(keys, raw_args)
   -- stylua: ignore
   local raw_campaign = redis.call(
     'HMGET', campaign_key,
+    'campaign_id',
     'mirror_domain'
   )
 
   local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'mirror_domain', kind = 'str' },
   })
 
@@ -1971,7 +2140,11 @@ local function delete_target(keys, raw_args)
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  if target.is_enabled ~= 0 then
+  if campaign.campaign_id ~= target.campaign_id then
+    return redis.status_reply('FORBIDDEN target campaign_id mismatch')
+  end
+
+  if target.is_enabled == 1 then
     return redis.status_reply('FORBIDDEN target not disabled')
   end
 
@@ -2050,7 +2223,7 @@ local function create_redirector(keys, raw_args)
     return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if redis.call('EXISTS', redirector_key) ~= 0 then
+  if redis.call('EXISTS', redirector_key) == 1 then
     return redis.status_reply('CONFLICT redirector already exists')
   end
 
@@ -2130,8 +2303,8 @@ local function read_redirector(keys, args)
     { name = 'campaign_id', kind = 'str' },
     { name = 'redirector_id', kind = 'str' },
     { name = 'page', kind = 'any' },
-    { name = 'lure_count', kind = 'int' },
-    { name = 'created_at', kind = 'int' },
+    { name = 'lure_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
   })
 
   if redirector_err then
@@ -2139,6 +2312,24 @@ local function read_redirector(keys, args)
   end
 
   redirector.fields = redis.call('SMEMBERS', redirector_fields_key)
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= redirector.campaign_id then
+    return redis.error_reply('ERR redirector campaign_id mismatch')
+  end
 
   return { map = redirector }
 end
@@ -2212,6 +2403,38 @@ local function update_redirector(keys, raw_args)
     return redis.status_reply('NOT_FOUND redirector not exists')
   end
 
+  -- stylua: ignore
+  local raw_redirector = redis.call(
+    'HMGET', redirector_key,
+    'redirector_id'
+  )
+
+  local redirector, redirector_err = normalize(raw_redirector, {
+    { name = 'redirector_id', kind = 'str' },
+  })
+
+  if redirector_err then
+    return redis.error_reply('ERR normalize redirector: ' .. redirector_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= redirector.campaign_id then
+    return redis.status_reply('FORBIDDEN redirector campaign_id mismatch')
+  end
+
   -- Point of no return
 
   -- stylua: ignore
@@ -2266,7 +2489,39 @@ local function append_redirector_field(keys, raw_args)
     return redis.status_reply('NOT_FOUND redirector not exists')
   end
 
-  if redis.call('SISMEMBER', redirector_fields_key, args.field) ~= 0 then
+  -- stylua: ignore
+  local raw_redirector = redis.call(
+    'HMGET', redirector_key,
+    'redirector_id'
+  )
+
+  local redirector, redirector_err = normalize(raw_redirector, {
+    { name = 'redirector_id', kind = 'str' },
+  })
+
+  if redirector_err then
+    return redis.error_reply('ERR normalize redirector: ' .. redirector_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= redirector.campaign_id then
+    return redis.status_reply('FORBIDDEN redirector campaign_id mismatch')
+  end
+
+  if redis.call('SISMEMBER', redirector_fields_key, args.field) == 1 then
     return redis.status_reply('OK redirector field already exists')
   end
 
@@ -2283,7 +2538,7 @@ redis.register_function({
   description = 'Append redirector field',
 })
 
-local function remove_redirector_fields(keys, raw_args)
+local function clear_redirector_fields(keys, raw_args)
   if #keys ~= 4 then
     return redis.error_reply('ERR wrong number of keys')
   end
@@ -2319,6 +2574,38 @@ local function remove_redirector_fields(keys, raw_args)
     return redis.status_reply('NOT_FOUND redirector not exists')
   end
 
+  -- stylua: ignore
+  local raw_redirector = redis.call(
+    'HMGET', redirector_key,
+    'redirector_id'
+  )
+
+  local redirector, redirector_err = normalize(raw_redirector, {
+    { name = 'redirector_id', kind = 'str' },
+  })
+
+  if redirector_err then
+    return redis.error_reply('ERR normalize redirector: ' .. redirector_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= redirector.campaign_id then
+    return redis.status_reply('FORBIDDEN redirector campaign_id mismatch')
+  end
+
   if redis.call('EXISTS', redirector_fields_key) == 0 then
     return redis.status_reply('OK redirector fields is empty')
   end
@@ -2331,9 +2618,9 @@ local function remove_redirector_fields(keys, raw_args)
 end
 
 redis.register_function({
-  function_name = 'remove_redirector_fields',
-  callback = remove_redirector_fields,
-  description = 'Remove redirector fields',
+  function_name = 'clear_redirector_fields',
+  callback = clear_redirector_fields,
+  description = 'Clear redirector fields',
 })
 
 local function delete_redirector(keys, raw_args)
@@ -2376,17 +2663,37 @@ local function delete_redirector(keys, raw_args)
   -- stylua: ignore
   local raw_redirector = redis.call(
     'HMGET', redirector_key,
+    'campaign_id',
     'redirector_id',
     'lure_count'
   )
 
   local redirector, redirector_err = normalize(raw_redirector, {
+    { name = 'campaign_id', kind = 'str' },
     { name = 'redirector_id', kind = 'str' },
     { name = 'lure_count', kind = 'int', min = 0 },
   })
 
   if redirector_err then
     return redis.error_reply('ERR normalize redirector: ' .. redirector_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= redirector.campaign_id then
+    return redis.status_reply('FORBIDDEN redirector campaign_id mismatch')
   end
 
   if redirector.lure_count > 0 then
@@ -2451,7 +2758,7 @@ local function create_lure(keys, raw_args)
     return redis.status_reply('FORBIDDEN campaign lock_secret mismatch')
   end
 
-  if redis.call('EXISTS', lure_key) ~= 0 then
+  if redis.call('EXISTS', lure_key) == 1 then
     return redis.status_reply('CONFLICT lure already exists')
   end
 
@@ -2477,7 +2784,7 @@ local function create_lure(keys, raw_args)
     return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
   end
 
-  if redis.call('HEXISTS', lure_paths_key, args.path) ~= 0 then
+  if redis.call('HEXISTS', lure_paths_key, args.path) == 1 then
     return redis.status_reply('CONFLICT lure path already taken')
   end
 
@@ -2551,7 +2858,7 @@ local function read_lure(keys, args)
   end
 
   -- stylua: ignore
-  local raw_lure =  redis.call(
+  local raw_lure = redis.call(
     'HMGET', lure_key,
     'campaign_id',
     'lure_id',
@@ -2567,16 +2874,34 @@ local function read_lure(keys, args)
     { name = 'lure_id', kind = 'str' },
     { name = 'path', kind = 'str' },
     { name = 'redirector_id', kind = 'str' },
-    { name = 'is_enabled', kind = 'int' },
-    { name = 'session_count', kind = 'int' },
-    { name = 'created_at', kind = 'int' },
+    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
+    { name = 'session_count', kind = 'int', min = 0 },
+    { name = 'created_at', kind = 'int', min = 0 },
   })
 
   if lure_err then
     return redis.error_reply('ERR normalize lure: ' .. lure_err)
   end
 
-  lure.is_enabled = lure.is_enabled ~= 0
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= lure.campaign_id then
+    return redis.error_reply('ERR lure campaign_id mismatch')
+  end
+
+  lure.is_enabled = lure.is_enabled == 1
 
   return { map = lure }
 end
@@ -2692,10 +3017,12 @@ local function enable_lure(keys, raw_args)
   -- stylua: ignore
   local raw_lure = redis.call(
     'HMGET', lure_key,
+    'lure_id',
     'is_enabled'
   )
 
   local lure, lure_err = normalize(raw_lure, {
+    { name = 'lure_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
 
@@ -2703,7 +3030,25 @@ local function enable_lure(keys, raw_args)
     return redis.error_reply('ERR normalize lure: ' .. lure_err)
   end
 
-  if lure.is_enabled ~= 0 then
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= lure.campaign_id then
+    return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
+  end
+
+  if lure.is_enabled == 1 then
     return redis.status_reply('OK lure already enabled')
   end
 
@@ -2758,15 +3103,35 @@ local function disable_lure(keys, raw_args)
   -- stylua: ignore
   local raw_lure = redis.call(
     'HMGET', lure_key,
+    'lure_id',
     'is_enabled'
   )
 
   local lure, lure_err = normalize(raw_lure, {
+    { name = 'lure_id', kind = 'str' },
     { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
   })
 
   if lure_err then
     return redis.error_reply('ERR normalize lure: ' .. lure_err)
+  end
+
+  -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= lure.campaign_id then
+    return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
   end
 
   if lure.is_enabled == 0 then
@@ -2851,6 +3216,24 @@ local function delete_lure(keys, raw_args)
   end
 
   -- stylua: ignore
+  local raw_campaign = redis.call(
+    'HMGET', campaign_key,
+    'campaign_id'
+  )
+
+  local campaign, campaign_err = normalize(raw_campaign, {
+    { name = 'campaign_id', kind = 'str' },
+  })
+
+  if campaign_err then
+    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
+  end
+
+  if campaign.campaign_id ~= lure.campaign_id then
+    return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
+  end
+
+  -- stylua: ignore
   local raw_redirector = redis.call(
     'HMGET', redirector_key,
     'campaign_id',
@@ -2872,7 +3255,7 @@ local function delete_lure(keys, raw_args)
     return redis.status_reply('FORBIDDEN lure redirector_id mismatch')
   end
 
-  if lure.is_enabled ~= 0 then
+  if lure.is_enabled == 1 then
     return redis.status_reply('FORBIDDEN lure not disabled')
   end
 
