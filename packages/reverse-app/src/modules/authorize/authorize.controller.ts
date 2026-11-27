@@ -1,8 +1,8 @@
 import { decrypt, DIContainer, encrypt, randomIdentSchema, randomName } from '@famir/common'
 import { redirectorParamsSchema, upgradeSessionParamsSchema } from '@famir/database'
 import {
-  FullCampaignModel,
-  FullRedirectorModel,
+  CampaignModel,
+  RedirectorModel,
   HttpCookie,
   Logger,
   LOGGER,
@@ -113,8 +113,8 @@ export class AuthorizeController extends BaseController {
     this.router.add('authorize-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (target.label) {
-        const hook = this.tenantSwitch.find('authorize', target.label)
+      if (target.tenant) {
+        const hook = this.tenantSwitch.find('authorize', target.tenant)
 
         await hook(ctx, next)
       } else {
@@ -475,7 +475,7 @@ export class AuthorizeController extends BaseController {
 
   protected getSessionCookie(
     ctx: HttpServerContext,
-    campaign: FullCampaignModel
+    campaign: CampaignModel
   ): HttpCookie | undefined {
     const cookies = ctx.requestHeaders.getCookies()
 
@@ -488,7 +488,7 @@ export class AuthorizeController extends BaseController {
 
   protected persistSessionCookie(
     ctx: HttpServerContext,
-    campaign: FullCampaignModel,
+    campaign: CampaignModel,
     session: SessionModel
   ) {
     ctx.sureNormal()
@@ -506,7 +506,7 @@ export class AuthorizeController extends BaseController {
     ctx.responseHeaders.setSetCookies(setCookies)
   }
 
-  protected removeSessionCookie(ctx: HttpServerContext, campaign: FullCampaignModel) {
+  protected removeSessionCookie(ctx: HttpServerContext, campaign: CampaignModel) {
     ctx.sureNormal()
 
     const setCookies = ctx.responseHeaders.getSetCookies() ?? {}
@@ -524,7 +524,7 @@ export class AuthorizeController extends BaseController {
 
   protected parseUpgradeSessionParams(
     ctx: HttpServerContext,
-    campaign: FullCampaignModel
+    campaign: CampaignModel
   ): UpgradeSessionParams | null {
     try {
       const urlParams = ctx.url.getQueryString()
@@ -549,8 +549,8 @@ export class AuthorizeController extends BaseController {
 
   protected parseRedirectorParams(
     ctx: HttpServerContext,
-    campaign: FullCampaignModel,
-    redirector: FullRedirectorModel
+    campaign: CampaignModel,
+    redirector: RedirectorModel
   ): RedirectorParams | null {
     try {
       const urlParams = ctx.url.getQueryString()

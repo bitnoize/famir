@@ -1,4 +1,4 @@
-import { FullRedirectorModel, RedirectorModel } from './redirector.model.js'
+import { RedirectorModel } from './redirector.model.js'
 
 /**
  * DI token for a redirector repository implementation.
@@ -43,16 +43,6 @@ export interface RedirectorRepository {
    * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string, redirectorId: string): Promise<RedirectorModel | null>
-
-  /**
-   * Reads the full redirector by its ID.
-   *
-   * @param campaignId - The ID of the campaign containing the redirector.
-   * @param redirectorId - The redirector ID to read.
-   * @returns The full redirector model, or `null` if the redirector is not found.
-   * @throws DatabaseError If the data validation fails.
-   */
-  readFull(campaignId: string, redirectorId: string): Promise<FullRedirectorModel | null>
 
   /**
    * Updates the redirector specific fields.
@@ -134,15 +124,4 @@ export interface RedirectorRepository {
    * @throws DatabaseError If the data validation fails.
    */
   list(campaignId: string): Promise<RedirectorModel[] | null>
-
-  /**
-   * Lists all full redirectors for the campaign.
-   *
-   * Redirectors are ordered by creation time (oldest first).
-   *
-   * @param campaignId - The ID of the campaign to list redirectors for.
-   * @returns The array of full redirector models, or `null` if the campaign does not exist.
-   * @throws DatabaseError If the data validation fails.
-   */
-  listFull(campaignId: string): Promise<FullRedirectorModel[] | null>
 }

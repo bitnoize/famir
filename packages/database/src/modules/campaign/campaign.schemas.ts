@@ -6,7 +6,7 @@ import {
   secretSchema,
   timestampSchema,
 } from '@famir/common'
-import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
+import { RawCampaign } from './campaign.functions.js'
 
 /**
  * Validate a campaign mirror domain.
@@ -50,16 +50,6 @@ export const campaignSessionCookieNameSchema: JSONSchemaType<string> = {
   type: 'string',
   minLength: 2,
   maxLength: 256,
-} as const
-
-/**
- * Validate campaign session cookie names.
- *
- * @category Campaign
- */
-export const campaignSessionCookieNamesSchema: JSONSchemaType<string[]> = {
-  type: 'array',
-  items: campaignSessionCookieNameSchema,
 } as const
 
 /**
@@ -143,36 +133,10 @@ export const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
   required: [
     'campaign_id',
     'mirror_domain',
-    'is_locked',
-    'session_count',
-    'message_count',
-    'created_at',
-  ],
-  properties: {
-    campaign_id: customIdentSchema,
-    mirror_domain: campaignMirrorDomainSchema,
-    is_locked: booleanSchema,
-    session_count: counterSchema,
-    message_count: counterSchema,
-    created_at: timestampSchema,
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * @category Campaign
- * @internal
- */
-export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
-  type: 'object',
-  required: [
-    'campaign_id',
-    'mirror_domain',
     'description',
     'crypt_secret',
     'upgrade_session_path',
     'session_cookie_name',
-    'session_cookie_names',
     'session_expire',
     'new_session_expire',
     'message_expire',
@@ -197,7 +161,6 @@ export const rawFullCampaignSchema: JSONSchemaType<RawFullCampaign> = {
     crypt_secret: secretSchema,
     upgrade_session_path: campaignUpgradeSessionPathSchema,
     session_cookie_name: campaignSessionCookieNameSchema,
-    session_cookie_names: campaignSessionCookieNamesSchema,
     session_expire: campaignSessionExpireSchema,
     new_session_expire: campaignNewSessionExpireSchema,
     message_expire: campaignMessageExpireSchema,

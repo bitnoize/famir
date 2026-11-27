@@ -206,18 +206,6 @@ Represents the campaign model:
 - `CampaignModel.isNotNull(model)` - Type guard to filter out null models from a list.
 - `campaignId` - The unique identifier for the campaign.
 - `mirrorDomain` - The public-facing mirror domain for the campaign.
-- `isLocked` - The flag indicating if the campaign is blocked.
-- `sessionCount` - The total number of sessions processed through this campaign.
-- `messageCount` - The total number of messages processed through this campaign.
-- `createdAt` - The date and time when the campaign was created.
-
-### FullCampaignModel
-
-Represents the full campaign model:
-
-- `CampaignModel.isNotNull(model)` - Type guard to filter out null models from a list.
-- `campaignId` - The unique identifier for the campaign.
-- `mirrorDomain` - The public-facing mirror domain for the campaign.
 - `description` - The human-readable description for the campaign.
 - `cryptSecret` - The secret used for encrypting session data.
 - `upgradeSessionPath` - The URL path that triggers a session upgrade.
@@ -264,10 +252,6 @@ await campaignRepository.create(
 const campaign = await campaignRepository.read(campaignId)
 console.log(campaign) // `CampaignModel` or `null` if not found
 
-// Reads the full campaign by its ID.
-const fullCampaign = await campaignRepository.readFull(campaignId)
-console.log(fullCampaign) // `FullCampaignModel` or `null` if not found
-
 // Acquires a distributed lock for the campaign.
 const lockSecret = await campaignRepository.lock(campaignId)
 console.log(lockSecret) // string like `fe09edcff8ba42fdba5b001cd844edf7`
@@ -299,10 +283,6 @@ campaignRepository.delete(campaignId, lockSecret)
 // Lists all campaigns.
 const campaigns = await campaignRepository.list()
 console.log(campaigns) // `CampaignModel[]`
-
-// Lists all full campaigns.
-const fullCampaigns = await campaignRepository.listFull()
-console.log(fullCampaigns) // `FullCampaignModel[]`
 ```
 
 ## Proxy module
@@ -392,36 +372,6 @@ Represents the target model:
 - `mirrorHost` - The mirror host.
 - `mirrorUrl` - The full mirror URL.
 - `label` - The label for categorization.
-- `isEnabled` - The flag indicating if the target is currently active for traffic routing.
-- `messageCount` - The total number of messages processed for this target.
-- `createdAt` - The date and time when the target was created.
-
-### FullTargetModel
-
-Represents the full target model:
-
-- `TargetModel.isNotNull(model)` - Type guard to filter out null models from a list.
-- `TargetModel.isEnabled(model)` - Type guard to check if a model is enabled.
-- `campaignId` - The ID of the campaign this target belongs to.
-- `targetId` - The unique identifier for the target.
-- `accessLevel` - The type of access level.
-- `donorSecure` - The flag indicating if the donor server uses HTTPS.
-- `donorSub` - The donor subdomain.
-- `donorDomain` - The donor domain name.
-- `donorPort` - The donor server port.
-- `donorProtocol` - The donor protocol.
-- `donorHostname` - The donor hostname.
-- `donorHost` - The donor host.
-- `donorUrl` - The full donor URL.
-- `mirrorSecure` - The flag indicating if the mirror server uses HTTPS.
-- `mirrorSub` - The mirror subdomain.
-- `mirrorDomain` - The mirror domain.
-- `mirrorPort` - The mirror server port.
-- `mirrorProtocol` - The mirror protocol.
-- `mirrorHostname` - The mirror hostname.
-- `mirrorHost` - The mirror host.
-- `mirrorUrl` - The full mirror URL.
-- `label` - The label for categorization.
 - `connectTimeout` - The connection timeout in milliseconds.
 - `simpleTimeout` - The simple request timeout in milliseconds.
 - `streamTimeout` - The streaming request timeout in milliseconds.
@@ -477,10 +427,6 @@ await targetRepository.create(
 const target = await targetRepository.read(campaignId, targetId)
 console.log(target) // `TargetModel` or `null` if not found
 
-// Reads the full target by its ID.
-const fullTarget = await targetRepository.readFull(campaignId, targetId)
-console.log(fullTarget) // `FullTargetModel` or `null` if not found
-
 // Reads all target hosts across all campaigns.
 const targetHosts = await targetRepository.readHosts()
 console.log(targetHosts) // `TargetHosts`
@@ -488,10 +434,6 @@ console.log(targetHosts) // `TargetHosts`
 // Finds a target by its mirror hostname.
 const target = await targetRepository.find('httpbin.org')
 console.log(target) // `TargetModel` or `null` if not found
-
-// Finds a full target by its mirror hostname.
-const fullTarget = await targetRepository.findFull('httpbin.org')
-console.log(fullTarget) // `FullTargetModel` or `null` if not found
 
 // Updates the target fields.
 await targetRepository.update(
@@ -523,10 +465,6 @@ await targetRepository.delete(campaignId, targetId, lockSecret)
 // Lists all targets for the campaign.
 const targets = await targetRepository.list(campaignId)
 console.log(targets) // `TargetModel[]` or `null` if not found
-
-// Lists all full targets for the campaign.
-const fullTargets = await targetRepository.listFull(campaignId)
-console.log(fullTargets) // `FullTargetModel[]` or `null` if not found
 ```
 
 ## Redirector module
@@ -536,16 +474,6 @@ A redirector contains a landing page template and a list of required field names
 ### RedirectorModel
 
 Represents the redirector model:
-
-- `RedirectorModel.isNotNull(model)` - Type guard to filter out null models from a list.
-- `campaignId` - The ID of the campaign this redirector belongs to.
-- `redirectorId` - The unique identifier for the redirector.
-- `lureCount` - The total number of lures pointing to this redirector.
-- `createdAt` - The date and time when the redirector was created.
-
-### FullRedirectorModel
-
-Represents the full redirector model:
 
 - `RedirectorModel.isNotNull(model)` - Type guard to filter out null models from a list.
 - `campaignId` - The ID of the campaign this redirector belongs to.
@@ -578,10 +506,6 @@ await redirectorRepository.create(
 const redirector = await redirectorRepository.read(campaignId, redirectorId)
 console.log(redirector) // `RedirectorModel` or `null` if not found
 
-// Reads the full redirector by its ID.
-const fullRedirector = await redirectorRepository.readFull(campaignId, redirectorId)
-console.log(fullRedirector) // `FullRedirectorModel` or `null` if not found
-
 // Updates the redirector fields.
 // NOTE: campaign must be locked
 await redirectorRepository.update(
@@ -598,10 +522,6 @@ await redirectorRepository.delete(campaignId, redirectorId, lockSecret)
 // Lists all redirectors for the campaign.
 const redirectors = await redirectorRepository.list(campaignId)
 console.log(redirectors) // `RedirectorModel[]` or `null` if not found
-
-// Lists all full redirectors for the campaign.
-const fullRedirectors = await redirectorRepository.list(campaignId)
-console.log(fullRedirectors) // `FullRedirectorModel[]` or `null` if not found
 ```
 
 ## Lure module

@@ -1,7 +1,7 @@
 import {
-  type EnabledFullTargetModel,
+  type EnabledTargetModel,
   type EnabledProxyModel,
-  type FullCampaignModel,
+  type CampaignModel,
   type SessionModel,
   type TargetModel,
 } from '@famir/domain'
@@ -14,9 +14,9 @@ import { type HttpMessage } from '@famir/http-tools'
  * @category none
  */
 export interface ReverseContextState extends HttpServerContextState {
-  campaign?: FullCampaignModel
+  campaign?: CampaignModel
   proxy?: EnabledProxyModel
-  target?: EnabledFullTargetModel
+  target?: EnabledTargetModel
   targets?: TargetModel[]
   session?: SessionModel
   message?: HttpMessage

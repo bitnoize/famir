@@ -97,7 +97,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     finishTime: number
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.message.create_message(
+      const statusReply = await this.connection.famir.create_message(
         this.options.prefix,
         campaignId,
         messageId,
@@ -157,7 +157,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     sessionId: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.message.create_dummy_message(
+      const statusReply = await this.connection.famir.create_dummy_message(
         this.options.prefix,
         campaignId,
         messageId,
@@ -196,7 +196,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
   async read(campaignId: string, messageId: string): Promise<MessageModel | null> {
     try {
-      const rawModel = await this.connection.message.read_message(
+      const rawModel = await this.connection.famir.read_message(
         this.options.prefix,
         campaignId,
         messageId
@@ -217,7 +217,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
   async readFull(campaignId: string, messageId: string): Promise<FullMessageModel | null> {
     try {
-      const rawModel = await this.connection.message.read_full_message(
+      const rawModel = await this.connection.famir.read_full_message(
         this.options.prefix,
         campaignId,
         messageId
@@ -238,7 +238,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
   async delete(campaignId: string, messageId: string): Promise<void> {
     try {
-      const statusReply = await this.connection.message.delete_message(
+      const statusReply = await this.connection.famir.delete_message(
         this.options.prefix,
         campaignId,
         messageId
@@ -268,7 +268,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
   async list(campaignId: string, limit: number): Promise<MessageModel[] | null> {
     try {
-      const index = await this.connection.message.read_message_history(
+      const index = await this.connection.famir.read_message_history(
         this.options.prefix,
         campaignId,
         limit
@@ -282,7 +282,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       const rawCollection = await Promise.all(
         index.map((messageId) =>
-          this.connection.message.read_message(this.options.prefix, campaignId, messageId)
+          this.connection.famir.read_message(this.options.prefix, campaignId, messageId)
         )
       )
 
@@ -300,7 +300,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
   async clear(campaignId: string): Promise<void> {
     try {
-      const index = await this.connection.message.read_message_history(
+      const index = await this.connection.famir.read_message_history(
         this.options.prefix,
         campaignId,
         -1
@@ -318,7 +318,7 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       const statusReplies = await Promise.all(
         index.map((messageId) =>
-          this.connection.message.delete_message(this.options.prefix, campaignId, messageId)
+          this.connection.famir.delete_message(this.options.prefix, campaignId, messageId)
         )
       )
 

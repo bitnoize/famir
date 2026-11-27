@@ -21,43 +21,19 @@ export class RedirectorModel {
    *
    * @param campaignId - The ID of the campaign this redirector belongs to.
    * @param redirectorId - The unique identifier for the redirector.
-   * @param lureCount - The total number of lures pointing to this redirector.
-   * @param createdAt - The date and time when the redirector was created.
-   */
-  constructor(
-    readonly campaignId: string,
-    readonly redirectorId: string,
-    readonly lureCount: number,
-    readonly createdAt: Date
-  ) {}
-}
-
-/**
- * Represents the full redirector model.
- *
- * @category Redirector Repository
- */
-export class FullRedirectorModel extends RedirectorModel {
-  /**
-   * Creates a new full redirector model instance.
-   *
-   * @param campaignId - The ID of the campaign this redirector belongs to.
-   * @param redirectorId - The unique identifier for the redirector.
    * @param page - The page template.
    * @param fields - The list of required field names for this redirector.
    * @param lureCount - The total number of lures pointing to this redirector.
    * @param createdAt - The date and time when the redirector was created.
    */
   constructor(
-    campaignId: string,
-    redirectorId: string,
+    readonly campaignId: string,
+    readonly redirectorId: string,
     readonly page: string,
     readonly fields: string[],
-    lureCount: number,
-    createdAt: Date
-  ) {
-    super(campaignId, redirectorId, lureCount, createdAt)
-  }
+    readonly lureCount: number,
+    readonly createdAt: Date
+  ) {}
 
   /**
    * Indicates whether this redirector is 'loose'.

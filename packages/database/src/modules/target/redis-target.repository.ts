@@ -5,7 +5,6 @@ import {
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  FullTargetModel,
   LOGGER,
   Logger,
   TARGET_REPOSITORY,
@@ -18,13 +17,8 @@ import {
   VALIDATOR,
 } from '@famir/domain'
 import { RedisBaseRepository } from '../base/index.js'
-import { RawFullTarget, RawTarget } from './target.functions.js'
-import {
-  rawFullTargetSchema,
-  rawTargetSchema,
-  targetHostsSchema,
-  targetLinkSchema,
-} from './target.schemas.js'
+import { RawTarget } from './target.functions.js'
+import { rawTargetSchema, targetHostsSchema, targetLinkSchema } from './target.schemas.js'
 
 /**
  * Redis-based target repository implementation.
@@ -63,7 +57,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
     this.validator
       .addSchema('database-raw-target', rawTargetSchema)
-      .addSchema('database-raw-full-target', rawFullTargetSchema)
       .addSchema('database-target-link', targetLinkSchema)
       .addSchema('database-target-hosts', targetHostsSchema)
   }
@@ -94,7 +87,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     lockSecret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.target.create_target(
+      const statusReply = await this.connection.famir.create_target(
         this.options.prefix,
         campaignId,
         targetId,
@@ -118,7 +111,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         robotsTxt,
         sitemapXml,
         allowWebSockets,
-        Date.now(),
         lockSecret
       )
 
@@ -146,7 +138,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async read(campaignId: string, targetId: string): Promise<TargetModel | null> {
     try {
-      const rawModel = await this.connection.target.read_target(
+      const rawModel = await this.connection.famir.read_target(
         this.options.prefix,
         campaignId,
         targetId
@@ -165,30 +157,9 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     }
   }
 
-  async readFull(campaignId: string, targetId: string): Promise<FullTargetModel | null> {
-    try {
-      const rawModel = await this.connection.target.read_full_target(
-        this.options.prefix,
-        campaignId,
-        targetId
-      )
-
-      return this.buildFullModel(rawModel)
-    } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'readFull',
-        params: {
-          campaignId,
-          targetId,
-        },
-      })
-    }
-  }
-
   async readHosts(): Promise<TargetHosts> {
     try {
-      const hosts = await this.connection.target.read_target_hosts(this.options.prefix)
+      const hosts = await this.connection.famir.read_target_hosts(this.options.prefix)
 
       this.validateReply<TargetHosts>('database-target-hosts', hosts)
 
@@ -203,7 +174,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async find(mirrorHost: string): Promise<TargetLink | null> {
     try {
-      const targetLink = await this.connection.target.find_target_link(
+      const targetLink = await this.connection.famir.find_target_link(
         this.options.prefix,
         mirrorHost
       )
@@ -243,7 +214,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     lockSecret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.target.update_target(
+      const statusReply = await this.connection.famir.update_target(
         this.options.prefix,
         campaignId,
         targetId,
@@ -285,7 +256,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async enable(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.target.enable_target(
+      const statusReply = await this.connection.famir.enable_target(
         this.options.prefix,
         campaignId,
         targetId,
@@ -316,7 +287,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async disable(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.target.disable_target(
+      const statusReply = await this.connection.famir.disable_target(
         this.options.prefix,
         campaignId,
         targetId,
@@ -347,7 +318,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async delete(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.target.delete_target(
+      const statusReply = await this.connection.famir.delete_target(
         this.options.prefix,
         campaignId,
         targetId,
@@ -378,7 +349,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
   async list(campaignId: string): Promise<TargetModel[] | null> {
     try {
-      const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
+      const index = await this.connection.famir.read_target_index(this.options.prefix, campaignId)
 
       if (index === null) {
         return null
@@ -388,7 +359,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       const rawCollection = await Promise.all(
         index.map((targetId) =>
-          this.connection.target.read_target(this.options.prefix, campaignId, targetId)
+          this.connection.famir.read_target(this.options.prefix, campaignId, targetId)
         )
       )
 
@@ -397,34 +368,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       throw DatabaseError.wrap(error, {
         repository: this.repositoryName,
         method: 'list',
-        params: {
-          campaignId,
-        },
-      })
-    }
-  }
-
-  async listFull(campaignId: string): Promise<FullTargetModel[] | null> {
-    try {
-      const index = await this.connection.target.read_target_index(this.options.prefix, campaignId)
-
-      if (index === null) {
-        return null
-      }
-
-      this.validateArrayStringsReply(index)
-
-      const rawCollection = await Promise.all(
-        index.map((targetId) =>
-          this.connection.target.read_full_target(this.options.prefix, campaignId, targetId)
-        )
-      )
-
-      return this.buildFullCollection(rawCollection)
-    } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'listFull',
         params: {
           campaignId,
         },
@@ -447,39 +390,6 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     this.validateReply<RawTarget>('database-raw-target', rawModel)
 
     return new TargetModel(
-      rawModel.campaign_id,
-      rawModel.target_id,
-      rawModel.access_level,
-      rawModel.donor_secure,
-      rawModel.donor_sub,
-      rawModel.donor_domain,
-      rawModel.donor_port,
-      rawModel.mirror_secure,
-      rawModel.mirror_sub,
-      rawModel.mirror_domain,
-      rawModel.mirror_port,
-      rawModel.tenant,
-      rawModel.is_enabled,
-      rawModel.message_count,
-      new Date(rawModel.created_at)
-    )
-  }
-
-  /**
-   * Converts raw Redis data to a full target model.
-   *
-   * @param rawModel - The raw data from Redis.
-   * @returns The full target model, or `null` if the raw data is `null`.
-   * @throws DatabaseError If the raw data fails validation.
-   */
-  protected buildFullModel(rawModel: unknown): FullTargetModel | null {
-    if (rawModel === null) {
-      return null
-    }
-
-    this.validateReply<RawFullTarget>('database-raw-full-target', rawModel)
-
-    return new FullTargetModel(
       rawModel.campaign_id,
       rawModel.target_id,
       rawModel.access_level,
@@ -520,20 +430,5 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     this.validateArrayReply(rawCollection)
 
     return rawCollection.map((rawModel) => this.buildModel(rawModel)).filter(TargetModel.isNotNull)
-  }
-
-  /**
-   * Converts a list of raw Redis data to a list of full target models.
-   *
-   * @param rawCollection - The array of raw data from Redis.
-   * @returns The array of full target models.
-   * @throws DatabaseError If the array of raw data fails validation.
-   */
-  protected buildFullCollection(rawCollection: unknown): FullTargetModel[] {
-    this.validateArrayReply(rawCollection)
-
-    return rawCollection
-      .map((rawModel) => this.buildFullModel(rawModel))
-      .filter(TargetModel.isNotNull)
   }
 }

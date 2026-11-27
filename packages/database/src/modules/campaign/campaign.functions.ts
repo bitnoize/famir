@@ -24,36 +24,26 @@ import {
 export interface RawCampaign {
   campaign_id: string
   mirror_domain: string
-  is_locked: boolean
-  session_count: number
-  message_count: number
-  created_at: number
-}
-
-/**
- * Raw full campaign data structure.
- *
- * @category Campaign
- * @internal
- */
-export interface RawFullCampaign extends RawCampaign {
   description: string
   crypt_secret: string
   upgrade_session_path: string
   session_cookie_name: string
-  session_cookie_names: string[]
   session_expire: number
   new_session_expire: number
   message_expire: number
   limiter_burst: number
   limiter_rate: number
+  is_locked: boolean
   flags: string[]
   proxy_index: number
   target_index: number
   redirector_index: number
   lure_index: number
+  session_count: number
   session_history: number
+  message_count: number
   message_history: number
+  created_at: number
 }
 
 /**
@@ -63,216 +53,200 @@ export interface RawFullCampaign extends RawCampaign {
  * @internal
  */
 export const campaignFunctions = {
-  campaign: {
-    create_campaign: {
-      NUMBER_OF_KEYS: 4,
+  create_campaign: {
+    NUMBER_OF_KEYS: 4,
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        mirrorDomain: string,
-        description: string,
-        cryptSecret: string,
-        upgradeSessionPath: string,
-        sessionCookieName: string,
-        sessionExpire: number,
-        newSessionExpire: number,
-        messageExpire: number,
-        limiterBurst: number,
-        limiterRate: number,
-        createdAt: number
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignMirrorDomainsKey(prefix))
-        parser.pushKey(campaignSessionCookieNamesKey(prefix))
-        parser.pushKey(campaignIndexKey(prefix))
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      mirrorDomain: string,
+      description: string,
+      cryptSecret: string,
+      upgradeSessionPath: string,
+      sessionCookieName: string,
+      sessionExpire: number,
+      newSessionExpire: number,
+      messageExpire: number,
+      limiterBurst: number,
+      limiterRate: number
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignMirrorDomainsKey(prefix))
+      parser.pushKey(campaignSessionCookieNamesKey(prefix))
+      parser.pushKey(campaignIndexKey(prefix))
 
-        parser.push(campaignId)
-        parser.push(mirrorDomain)
-        parser.push(description)
-        parser.push(cryptSecret)
-        parser.push(upgradeSessionPath)
-        parser.push(sessionCookieName)
-        parser.push(sessionExpire.toString())
-        parser.push(newSessionExpire.toString())
-        parser.push(messageExpire.toString())
-        parser.push(limiterBurst.toString())
-        parser.push(limiterRate.toString())
-        parser.push(createdAt.toString())
-      },
-
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(campaignId)
+      parser.push(mirrorDomain)
+      parser.push(description)
+      parser.push(cryptSecret)
+      parser.push(upgradeSessionPath)
+      parser.push(sessionCookieName)
+      parser.push(sessionExpire.toString())
+      parser.push(newSessionExpire.toString())
+      parser.push(messageExpire.toString())
+      parser.push(limiterBurst.toString())
+      parser.push(limiterRate.toString())
     },
 
-    read_campaign: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-      },
+  read_campaign: {
+    NUMBER_OF_KEYS: 10,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(campaignFlagsKey(prefix, campaignId))
+      parser.pushKey(campaignSessionCookieNamesKey(prefix))
+      parser.pushKey(proxyIndexKey(prefix, campaignId))
+      parser.pushKey(targetIndexKey(prefix, campaignId))
+      parser.pushKey(redirectorIndexKey(prefix, campaignId))
+      parser.pushKey(lureIndexKey(prefix, campaignId))
+      parser.pushKey(sessionHistoryKey(prefix, campaignId))
+      parser.pushKey(messageHistoryKey(prefix, campaignId))
     },
 
-    read_full_campaign: {
-      NUMBER_OF_KEYS: 10,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(campaignFlagsKey(prefix, campaignId))
-        parser.pushKey(campaignSessionCookieNamesKey(prefix))
-        parser.pushKey(proxyIndexKey(prefix, campaignId))
-        parser.pushKey(targetIndexKey(prefix, campaignId))
-        parser.pushKey(redirectorIndexKey(prefix, campaignId))
-        parser.pushKey(lureIndexKey(prefix, campaignId))
-        parser.pushKey(sessionHistoryKey(prefix, campaignId))
-        parser.pushKey(messageHistoryKey(prefix, campaignId))
-      },
+  read_campaign_index: {
+    NUMBER_OF_KEYS: 1,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string) {
+      parser.pushKey(campaignIndexKey(prefix))
     },
 
-    read_campaign_index: {
-      NUMBER_OF_KEYS: 1,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string) {
-        parser.pushKey(campaignIndexKey(prefix))
-      },
+  lock_campaign: {
+    NUMBER_OF_KEYS: 2,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      lockSecret: string,
+      lockTimeout: number
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+
+      parser.push(lockSecret)
+      parser.push(lockTimeout.toString())
     },
 
-    lock_campaign: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        lockSecret: string,
-        lockTimeout: number
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
+  unlock_campaign: {
+    NUMBER_OF_KEYS: 2,
 
-        parser.push(lockSecret)
-        parser.push(lockTimeout.toString())
-      },
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockSecret: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
 
-    unlock_campaign: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockSecret: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
+  update_campaign: {
+    NUMBER_OF_KEYS: 2,
 
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      description: string,
+      sessionExpire: number,
+      newSessionExpire: number,
+      messageExpire: number,
+      limiterBurst: number,
+      limiterRate: number,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(description)
+      parser.push(sessionExpire.toString())
+      parser.push(newSessionExpire.toString())
+      parser.push(messageExpire.toString())
+      parser.push(limiterBurst.toString())
+      parser.push(limiterRate.toString())
+      parser.push(lockSecret)
     },
 
-    update_campaign: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        description: string,
-        sessionExpire: number,
-        newSessionExpire: number,
-        messageExpire: number,
-        limiterBurst: number,
-        limiterRate: number,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
+  append_campaign_flag: {
+    NUMBER_OF_KEYS: 2,
 
-        parser.push(description)
-        parser.push(sessionExpire.toString())
-        parser.push(newSessionExpire.toString())
-        parser.push(messageExpire.toString())
-        parser.push(limiterBurst.toString())
-        parser.push(limiterRate.toString())
-        parser.push(lockSecret)
-      },
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, flag: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignFlagsKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(flag)
     },
 
-    append_campaign_flag: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, flag: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignFlagsKey(prefix, campaignId))
+  remove_campaign_flag: {
+    NUMBER_OF_KEYS: 2,
 
-        parser.push(flag)
-      },
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, flag: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignFlagsKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(flag)
     },
 
-    remove_campaign_flag: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, flag: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignFlagsKey(prefix, campaignId))
+  delete_campaign: {
+    NUMBER_OF_KEYS: 10,
 
-        parser.push(flag)
-      },
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockSecret: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(campaignFlagsKey(prefix, campaignId))
+      parser.pushKey(campaignMirrorDomainsKey(prefix))
+      parser.pushKey(campaignSessionCookieNamesKey(prefix))
+      parser.pushKey(campaignIndexKey(prefix))
+      parser.pushKey(proxyIndexKey(prefix, campaignId))
+      parser.pushKey(targetIndexKey(prefix, campaignId))
+      parser.pushKey(redirectorIndexKey(prefix, campaignId))
+      parser.pushKey(lureIndexKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
 
-    delete_campaign: {
-      NUMBER_OF_KEYS: 10,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockSecret: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(campaignFlagsKey(prefix, campaignId))
-        parser.pushKey(campaignMirrorDomainsKey(prefix))
-        parser.pushKey(campaignSessionCookieNamesKey(prefix))
-        parser.pushKey(campaignIndexKey(prefix))
-        parser.pushKey(proxyIndexKey(prefix, campaignId))
-        parser.pushKey(targetIndexKey(prefix, campaignId))
-        parser.pushKey(redirectorIndexKey(prefix, campaignId))
-        parser.pushKey(lureIndexKey(prefix, campaignId))
+  check_campaign_limiter: {
+    NUMBER_OF_KEYS: 2,
 
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      identity: string,
+      limiterCost: number
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLimiterKey(prefix, campaignId, identity))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(limiterCost.toString())
     },
 
-    check_campaign_limiter: {
-      NUMBER_OF_KEYS: 2,
-
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        identity: string,
-        limiterCost: number
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLimiterKey(prefix, campaignId, identity))
-
-        parser.push(limiterCost.toString())
-      },
-
-      transformReply: undefined as unknown as () => unknown,
-    },
-
+    transformReply: undefined as unknown as () => unknown,
   },
 } as const

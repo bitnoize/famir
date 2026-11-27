@@ -20,6 +20,7 @@ export class SessionModel {
    * @param campaignId - The ID of the campaign this session belongs to.
    * @param sessionId - The unique identifier for the session.
    * @param proxyId - The ID of the proxy assigned to this session.
+   * @param secret - The session secret for secure operations.
    * @param isUpgraded - The flag indicating if the session has been upgraded.
    * @param isRevoked - The flag indicating if the session has been revoked.
    * @param messageCount - The total number of messages processed through this session.
@@ -30,6 +31,7 @@ export class SessionModel {
     readonly campaignId: string,
     readonly sessionId: string,
     readonly proxyId: string,
+    readonly secret: string,
     readonly isUpgraded: boolean,
     readonly isRevoked: boolean,
     readonly messageCount: number,

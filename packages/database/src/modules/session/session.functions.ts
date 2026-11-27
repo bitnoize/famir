@@ -17,6 +17,7 @@ export interface RawSession {
   campaign_id: string
   session_id: string
   proxy_id: string
+  secret: string
   is_upgraded: boolean
   is_revoked: boolean
   message_count: number
@@ -31,106 +32,94 @@ export interface RawSession {
  * @internal
  */
 export const sessionFunctions = {
-  session: {
-    create_session: {
-      NUMBER_OF_KEYS: 3,
+  create_session: {
+    NUMBER_OF_KEYS: 3,
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        sessionId: string,
-        secret: string,
-        createdAt: number
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
-        parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      sessionId: string,
+      secret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(sessionKey(prefix, campaignId, sessionId))
+      parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
 
-        parser.push(campaignId)
-        parser.push(sessionId)
-        parser.push(secret)
-        parser.push(createdAt.toString())
-      },
-
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(campaignId)
+      parser.push(sessionId)
+      parser.push(secret)
     },
 
-    read_session: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, sessionId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
-      },
+  read_session: {
+    NUMBER_OF_KEYS: 2,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, sessionId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(sessionKey(prefix, campaignId, sessionId))
     },
 
-    read_session_history: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, limit: number) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(sessionHistoryKey(prefix, campaignId))
+  read_session_history: {
+    NUMBER_OF_KEYS: 2,
 
-        parser.push(limit.toString())
-      },
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, limit: number) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(sessionHistoryKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(limit.toString())
     },
 
-    auth_session: {
-      NUMBER_OF_KEYS: 4,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        sessionId: string,
-        authorizedAt: number
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
-        parser.pushKey(sessionHistoryKey(prefix, campaignId))
-        parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
+  auth_session: {
+    NUMBER_OF_KEYS: 4,
 
-        parser.push(authorizedAt.toString())
-      },
-
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, sessionId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(sessionKey(prefix, campaignId, sessionId))
+      parser.pushKey(sessionHistoryKey(prefix, campaignId))
+      parser.pushKey(enabledProxyIndexKey(prefix, campaignId))
     },
 
-    revoke_session: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, sessionId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
-      },
+  revoke_session: {
+    NUMBER_OF_KEYS: 2,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, sessionId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(sessionKey(prefix, campaignId, sessionId))
     },
 
-    upgrade_session: {
-      NUMBER_OF_KEYS: 3,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        lureId: string,
-        sessionId: string,
-        secret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, lureId))
-        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
+  upgrade_session: {
+    NUMBER_OF_KEYS: 3,
 
-        parser.push(secret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      lureId: string,
+      sessionId: string,
+      secret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(lureKey(prefix, campaignId, lureId))
+      parser.pushKey(sessionKey(prefix, campaignId, sessionId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(secret)
     },
+
+    transformReply: undefined as unknown as () => unknown,
   },
 } as const

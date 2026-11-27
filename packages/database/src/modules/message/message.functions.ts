@@ -54,133 +54,131 @@ export interface RawFullMessage extends RawMessage {
  * @internal
  */
 export const messageFunctions = {
-  message: {
-    create_message: {
-      NUMBER_OF_KEYS: 6,
+  create_message: {
+    NUMBER_OF_KEYS: 6,
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        messageId: string,
-        proxyId: string,
-        targetId: string,
-        sessionId: string,
-        type: string,
-        method: string,
-        url: string,
-        requestHeaders: string,
-        requestBody: string,
-        status: number,
-        responseHeaders: string,
-        responseBody: string,
-        connection: string,
-        payload: string,
-        errors: string,
-        analyze: string,
-        startTime: number,
-        finishTime: number,
-        createdAt: number
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(messageKey(prefix, campaignId, messageId))
-        parser.pushKey(proxyKey(prefix, campaignId, proxyId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
-        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
-        parser.pushKey(messageHistoryKey(prefix, campaignId))
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      messageId: string,
+      proxyId: string,
+      targetId: string,
+      sessionId: string,
+      type: string,
+      method: string,
+      url: string,
+      requestHeaders: string,
+      requestBody: string,
+      status: number,
+      responseHeaders: string,
+      responseBody: string,
+      connection: string,
+      payload: string,
+      errors: string,
+      analyze: string,
+      startTime: number,
+      finishTime: number,
+      createdAt: number
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(messageKey(prefix, campaignId, messageId))
+      parser.pushKey(proxyKey(prefix, campaignId, proxyId))
+      parser.pushKey(targetKey(prefix, campaignId, targetId))
+      parser.pushKey(sessionKey(prefix, campaignId, sessionId))
+      parser.pushKey(messageHistoryKey(prefix, campaignId))
 
-        parser.push(campaignId)
-        parser.push(messageId)
-        parser.push(proxyId)
-        parser.push(targetId)
-        parser.push(sessionId)
-        parser.push(type)
-        parser.push(method)
-        parser.push(url)
-        parser.push(requestHeaders)
-        parser.push(requestBody)
-        parser.push(status.toString())
-        parser.push(responseHeaders)
-        parser.push(responseBody)
-        parser.push(connection)
-        parser.push(payload)
-        parser.push(errors)
-        parser.push(analyze)
-        parser.push(startTime.toString())
-        parser.push(finishTime.toString())
-        parser.push(createdAt.toString())
-      },
-
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(campaignId)
+      parser.push(messageId)
+      parser.push(proxyId)
+      parser.push(targetId)
+      parser.push(sessionId)
+      parser.push(type)
+      parser.push(method)
+      parser.push(url)
+      parser.push(requestHeaders)
+      parser.push(requestBody)
+      parser.push(status.toString())
+      parser.push(responseHeaders)
+      parser.push(responseBody)
+      parser.push(connection)
+      parser.push(payload)
+      parser.push(errors)
+      parser.push(analyze)
+      parser.push(startTime.toString())
+      parser.push(finishTime.toString())
+      parser.push(createdAt.toString())
     },
 
-    create_dummy_message: {
-      NUMBER_OF_KEYS: 5,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        messageId: string,
-        proxyId: string,
-        targetId: string,
-        sessionId: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(messageKey(prefix, campaignId, messageId))
-        parser.pushKey(proxyKey(prefix, campaignId, proxyId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
-        parser.pushKey(sessionKey(prefix, campaignId, sessionId))
-      },
+  create_dummy_message: {
+    NUMBER_OF_KEYS: 5,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      messageId: string,
+      proxyId: string,
+      targetId: string,
+      sessionId: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(messageKey(prefix, campaignId, messageId))
+      parser.pushKey(proxyKey(prefix, campaignId, proxyId))
+      parser.pushKey(targetKey(prefix, campaignId, targetId))
+      parser.pushKey(sessionKey(prefix, campaignId, sessionId))
     },
 
-    read_message: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(messageKey(prefix, campaignId, messageId))
-      },
+  read_message: {
+    NUMBER_OF_KEYS: 2,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(messageKey(prefix, campaignId, messageId))
     },
 
-    read_full_message: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(messageKey(prefix, campaignId, messageId))
-      },
+  read_full_message: {
+    NUMBER_OF_KEYS: 2,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(messageKey(prefix, campaignId, messageId))
     },
 
-    read_message_history: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, limit: number) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(messageHistoryKey(prefix, campaignId))
+  read_message_history: {
+    NUMBER_OF_KEYS: 2,
 
-        parser.push(limit.toString())
-      },
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, limit: number) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(messageHistoryKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(limit.toString())
     },
 
-    delete_message: {
-      NUMBER_OF_KEYS: 3,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(messageKey(prefix, campaignId, messageId))
-        parser.pushKey(messageHistoryKey(prefix, campaignId))
-      },
+  delete_message: {
+    NUMBER_OF_KEYS: 3,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(messageKey(prefix, campaignId, messageId))
+      parser.pushKey(messageHistoryKey(prefix, campaignId))
     },
+
+    transformReply: undefined as unknown as () => unknown,
   },
 } as const

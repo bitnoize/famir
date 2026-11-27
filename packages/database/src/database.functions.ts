@@ -13,13 +13,15 @@ import { targetFunctions } from './modules/target/target.functions.js'
  * @internal
  */
 export const databaseFunctions = {
-  ...campaignFunctions,
-  ...proxyFunctions,
-  ...targetFunctions,
-  ...redirectorFunctions,
-  ...lureFunctions,
-  ...sessionFunctions,
-  ...messageFunctions,
+  famir: {
+    ...campaignFunctions,
+    ...proxyFunctions,
+    ...targetFunctions,
+    ...redirectorFunctions,
+    ...lureFunctions,
+    ...sessionFunctions,
+    ...messageFunctions,
+  },
 } as const
 
 /**

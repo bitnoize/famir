@@ -1,5 +1,5 @@
 import { TargetAccessLevel, TargetHosts, TargetLink } from './target.js'
-import { FullTargetModel, TargetModel } from './target.model.js'
+import { TargetModel } from './target.model.js'
 
 /**
  * DI token for a target repository implementation.
@@ -88,16 +88,6 @@ export interface TargetRepository {
    * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string, targetId: string): Promise<TargetModel | null>
-
-  /**
-   * Reads the full target by its ID.
-   *
-   * @param campaignId - The ID of the campaign containing the target.
-   * @param targetId - The target ID to read.
-   * @returns The full target model, or `null` if the target is not found.
-   * @throws DatabaseError If the data validation fails.
-   */
-  readFull(campaignId: string, targetId: string): Promise<FullTargetModel | null>
 
   /**
    * Reads all target hosts across all campaigns.
@@ -222,15 +212,4 @@ export interface TargetRepository {
    * @throws DatabaseError If the data validation fails.
    */
   list(campaignId: string): Promise<TargetModel[] | null>
-
-  /**
-   * Lists all full targets for the campaign.
-   *
-   * Targets are ordered by creation time (oldest first).
-   *
-   * @param campaignId - The ID of the campaign to list targets for.
-   * @returns The array of full target models, or `null` if the campaign does not exist.
-   * @throws DatabaseError If the data validation fails.
-   */
-  listFull(campaignId: string): Promise<FullTargetModel[] | null>
 }

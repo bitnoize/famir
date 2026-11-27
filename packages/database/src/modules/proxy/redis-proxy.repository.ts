@@ -62,7 +62,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     lockSecret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.proxy.create_proxy(
+      const statusReply = await this.connection.famir.create_proxy(
         this.options.prefix,
         campaignId,
         proxyId,
@@ -97,7 +97,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async read(campaignId: string, proxyId: string): Promise<ProxyModel | null> {
     try {
-      const rawModel = await this.connection.proxy.read_proxy(
+      const rawModel = await this.connection.famir.read_proxy(
         this.options.prefix,
         campaignId,
         proxyId
@@ -118,7 +118,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async enable(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.proxy.enable_proxy(
+      const statusReply = await this.connection.famir.enable_proxy(
         this.options.prefix,
         campaignId,
         proxyId,
@@ -149,7 +149,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async disable(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.proxy.disable_proxy(
+      const statusReply = await this.connection.famir.disable_proxy(
         this.options.prefix,
         campaignId,
         proxyId,
@@ -180,7 +180,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async delete(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.proxy.delete_proxy(
+      const statusReply = await this.connection.famir.delete_proxy(
         this.options.prefix,
         campaignId,
         proxyId,
@@ -211,7 +211,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
   async list(campaignId: string): Promise<ProxyModel[] | null> {
     try {
-      const index = await this.connection.proxy.read_proxy_index(this.options.prefix, campaignId)
+      const index = await this.connection.famir.read_proxy_index(this.options.prefix, campaignId)
 
       if (index === null) {
         return null
@@ -221,7 +221,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       const rawCollection = await Promise.all(
         index.map((proxyId) =>
-          this.connection.proxy.read_proxy(this.options.prefix, campaignId, proxyId)
+          this.connection.famir.read_proxy(this.options.prefix, campaignId, proxyId)
         )
       )
 

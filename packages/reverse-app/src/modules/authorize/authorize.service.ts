@@ -3,7 +3,7 @@ import {
   DatabaseError,
   EnabledLureModel,
   EnabledProxyModel,
-  FullRedirectorModel,
+  RedirectorModel,
   HttpServerError,
   LURE_REPOSITORY,
   LureModel,
@@ -77,8 +77,8 @@ export class AuthorizeService {
   async readRedirector(data: {
     campaignId: string
     redirectorId: string
-  }): Promise<FullRedirectorModel> {
-    const redirector = await this.redirectorRepository.readFull(data.campaignId, data.redirectorId)
+  }): Promise<RedirectorModel> {
+    const redirector = await this.redirectorRepository.read(data.campaignId, data.redirectorId)
 
     if (!redirector) {
       throw HttpServerError.serviceUnavailable(`Service unavailable`)

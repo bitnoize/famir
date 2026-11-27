@@ -95,11 +95,9 @@ export class TransformController extends BaseController {
 
           const cookies = message.requestHeaders.getCookies()
           if (cookies) {
-            campaign.sessionCookieNames.forEach((sessionCookieName) => {
-              if (cookies[sessionCookieName]) {
-                cookies[sessionCookieName] = undefined
-              }
-            })
+            if (cookies[campaign.sessionCookieName]) {
+              cookies[campaign.sessionCookieName] = undefined
+            }
 
             message.requestHeaders.setCookies(cookies)
           }
@@ -194,8 +192,8 @@ export class TransformController extends BaseController {
     this.router.add('transform-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (target.label) {
-        const hook = this.tenantSwitch.find('transform', target.label)
+      if (target.tenant) {
+        const hook = this.tenantSwitch.find('transform', target.tenant)
 
         await hook(ctx, next)
       } else {

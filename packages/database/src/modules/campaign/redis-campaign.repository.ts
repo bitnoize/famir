@@ -9,15 +9,14 @@ import {
   DATABASE_CONNECTOR,
   DatabaseConnector,
   DatabaseError,
-  FullCampaignModel,
   LOGGER,
   Logger,
   Validator,
   VALIDATOR,
 } from '@famir/domain'
 import { RedisBaseRepository } from '../base/index.js'
-import { RawCampaign, RawFullCampaign } from './campaign.functions.js'
-import { rawCampaignSchema, rawFullCampaignSchema } from './campaign.schemas.js'
+import { RawCampaign } from './campaign.functions.js'
+import { rawCampaignSchema } from './campaign.schemas.js'
 
 /**
  * Redis-based campaign repository implementation.
@@ -54,9 +53,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
   constructor(validator: Validator, config: Config, logger: Logger, connector: DatabaseConnector) {
     super(validator, config, logger, connector, 'campaign')
 
-    this.validator
-      .addSchema('database-raw-campaign', rawCampaignSchema)
-      .addSchema('database-raw-full-campaign', rawFullCampaignSchema)
+    this.validator.addSchema('database-raw-campaign', rawCampaignSchema)
   }
 
   async create(
@@ -73,7 +70,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     limiterRate: number
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.campaign.create_campaign(
+      const statusReply = await this.connection.famir.create_campaign(
         this.options.prefix,
         campaignId,
         mirrorDomain,
@@ -85,8 +82,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
         newSessionExpire,
         messageExpire,
         limiterBurst,
-        limiterRate,
-        Date.now()
+        limiterRate
       )
 
       this.checkStatusReply(statusReply)
@@ -113,7 +109,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async read(campaignId: string): Promise<CampaignModel | null> {
     try {
-      const rawModel = await this.connection.campaign.read_campaign(this.options.prefix, campaignId)
+      const rawModel = await this.connection.famir.read_campaign(this.options.prefix, campaignId)
 
       return this.buildModel(rawModel)
     } catch (error) {
@@ -127,30 +123,11 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  async readFull(campaignId: string): Promise<FullCampaignModel | null> {
-    try {
-      const rawModel = await this.connection.campaign.read_full_campaign(
-        this.options.prefix,
-        campaignId
-      )
-
-      return this.buildFullModel(rawModel)
-    } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'readFull',
-        params: {
-          campaignId,
-        },
-      })
-    }
-  }
-
   async lock(campaignId: string): Promise<string> {
     const lockSecret = randomIdent()
 
     try {
-      const statusReply = await this.connection.campaign.lock_campaign(
+      const statusReply = await this.connection.famir.lock_campaign(
         this.options.prefix,
         campaignId,
         lockSecret,
@@ -181,7 +158,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async unlock(campaignId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.campaign.unlock_campaign(
+      const statusReply = await this.connection.famir.unlock_campaign(
         this.options.prefix,
         campaignId,
         lockSecret
@@ -218,7 +195,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     lockSecret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.campaign.update_campaign(
+      const statusReply = await this.connection.famir.update_campaign(
         this.options.prefix,
         campaignId,
         description,
@@ -252,7 +229,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async appendFlag(campaignId: string, flag: string): Promise<void> {
     try {
-      const statusReply = await this.connection.campaign.append_campaign_flag(
+      const statusReply = await this.connection.famir.append_campaign_flag(
         this.options.prefix,
         campaignId,
         flag
@@ -282,7 +259,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async removeFlag(campaignId: string, flag: string): Promise<void> {
     try {
-      const statusReply = await this.connection.campaign.remove_campaign_flag(
+      const statusReply = await this.connection.famir.remove_campaign_flag(
         this.options.prefix,
         campaignId,
         flag
@@ -312,7 +289,7 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async delete(campaignId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.campaign.delete_campaign(
+      const statusReply = await this.connection.famir.delete_campaign(
         this.options.prefix,
         campaignId,
         lockSecret
@@ -340,13 +317,13 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
   async list(): Promise<CampaignModel[]> {
     try {
-      const index = await this.connection.campaign.read_campaign_index(this.options.prefix)
+      const index = await this.connection.famir.read_campaign_index(this.options.prefix)
 
       this.validateArrayStringsReply(index)
 
       const rawCollection = await Promise.all(
         index.map((campaignId) =>
-          this.connection.campaign.read_campaign(this.options.prefix, campaignId)
+          this.connection.famir.read_campaign(this.options.prefix, campaignId)
         )
       )
 
@@ -359,30 +336,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     }
   }
 
-  async listFull(): Promise<FullCampaignModel[]> {
-    try {
-      const index = await this.connection.campaign.read_campaign_index(this.options.prefix)
-
-      this.validateArrayStringsReply(index)
-
-      const rawCollection = await Promise.all(
-        index.map((campaignId) =>
-          this.connection.campaign.read_full_campaign(this.options.prefix, campaignId)
-        )
-      )
-
-      return this.buildFullCollection(rawCollection)
-    } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'listFull',
-      })
-    }
-  }
-
   async checkLimiter(campaignId: string, identity: string, limiterCost: number): Promise<void> {
     try {
-      const statusReply = await this.connection.campaign.check_campaign_limiter(
+      const statusReply = await this.connection.famir.check_campaign_limiter(
         this.options.prefix,
         campaignId,
         identity,
@@ -430,35 +386,10 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     return new CampaignModel(
       rawModel.campaign_id,
       rawModel.mirror_domain,
-      rawModel.is_locked,
-      rawModel.session_count,
-      rawModel.message_count,
-      new Date(rawModel.created_at)
-    )
-  }
-
-  /**
-   * Converts raw Redis data to a full campaign model.
-   *
-   * @param rawModel - The raw data from Redis.
-   * @returns The full campaign model, or `null` if the raw data is `null`.
-   * @throws DatabaseError If the raw data fails validation.
-   */
-  protected buildFullModel(rawModel: unknown): FullCampaignModel | null {
-    if (rawModel === null) {
-      return null
-    }
-
-    this.validateReply<RawFullCampaign>('database-raw-full-campaign', rawModel)
-
-    return new FullCampaignModel(
-      rawModel.campaign_id,
-      rawModel.mirror_domain,
       rawModel.description,
       rawModel.crypt_secret,
       rawModel.upgrade_session_path,
       rawModel.session_cookie_name,
-      rawModel.session_cookie_names,
       rawModel.session_expire,
       rawModel.new_session_expire,
       rawModel.message_expire,
@@ -490,21 +421,6 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
     return rawCollection
       .map((rawModel) => this.buildModel(rawModel))
-      .filter(CampaignModel.isNotNull)
-  }
-
-  /**
-   * Converts a list of raw Redis data to a list of full campaign models.
-   *
-   * @param rawCollection - The array of raw data from Redis.
-   * @returns The array of full campaign models.
-   * @throws DatabaseError If the array of raw data fails validation.
-   */
-  protected buildFullCollection(rawCollection: unknown): FullCampaignModel[] {
-    this.validateArrayReply(rawCollection)
-
-    return rawCollection
-      .map((rawModel) => this.buildFullModel(rawModel))
       .filter(CampaignModel.isNotNull)
   }
 }

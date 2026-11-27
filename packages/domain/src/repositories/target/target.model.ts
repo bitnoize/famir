@@ -41,6 +41,17 @@ export class TargetModel {
    * @param mirrorDomain - The mirror domain.
    * @param mirrorPort - The mirror server port.
    * @param tenant - The tenant for categorization.
+   * @param connectTimeout - The connection timeout in milliseconds.
+   * @param simpleTimeout - The simple request timeout in milliseconds.
+   * @param streamTimeout - The streaming request timeout in milliseconds.
+   * @param headersSizeLimit - The maximum headers size in bytes.
+   * @param bodySizeLimit - The maximum body size in bytes.
+   * @param mainPage - The custom main page content.
+   * @param notFoundPage - The custom not-found page content.
+   * @param faviconIco - The custom favicon.ico content.
+   * @param robotsTxt - The custom robots.txt content.
+   * @param sitemapXml - The custom sitemap.xml content.
+   * @param allowWebSockets - The flag indicating if WebSocket connections allowed.
    * @param isEnabled - The flag indicating if the target is currently active for traffic routing.
    * @param messageCount - The total number of messages processed for this target.
    * @param createdAt - The date and time when the target was created.
@@ -58,6 +69,17 @@ export class TargetModel {
     readonly mirrorDomain: string,
     readonly mirrorPort: number,
     readonly tenant: string,
+    readonly connectTimeout: number,
+    readonly simpleTimeout: number,
+    readonly streamTimeout: number,
+    readonly headersSizeLimit: number,
+    readonly bodySizeLimit: number,
+    readonly mainPage: string,
+    readonly notFoundPage: string,
+    readonly faviconIco: string,
+    readonly robotsTxt: string,
+    readonly sitemapXml: string,
+    readonly allowWebSockets: boolean,
     readonly isEnabled: boolean,
     readonly messageCount: number,
     readonly createdAt: Date
@@ -152,100 +174,6 @@ export class TargetModel {
   get mirrorUrl(): string {
     return [this.mirrorProtocol, '//', this.mirrorHost].join('')
   }
-}
-
-/**
- * Represents the enabled target model.
- *
- * @category Target Repository
- */
-export interface EnabledTargetModel extends TargetModel {
-  /** Guaranteed to be `true` for enabled targets. */
-  isEnabled: true
-}
-
-/**
- * Represents the full target model.
- *
- * @category Target Repository
- */
-export class FullTargetModel extends TargetModel {
-  /**
-   * Creates a new full target model instance.
-   *
-   * @param campaignId - The ID of the campaign this target belongs to.
-   * @param targetId - The unique identifier for the target.
-   * @param accessLevel - The type of access level.
-   * @param donorSecure - The flag indicating if the donor server uses HTTPS.
-   * @param donorSub - The donor subdomain.
-   * @param donorDomain - The donor domain name.
-   * @param donorPort - The donor server port.
-   * @param mirrorSecure - The flag indicating if the mirror server uses HTTPS.
-   * @param mirrorSub - The mirror subdomain.
-   * @param mirrorDomain - The mirror domain.
-   * @param mirrorPort - The mirror server port.
-   * @param tenant - The tenant for categorization.
-   * @param connectTimeout - The connection timeout in milliseconds.
-   * @param simpleTimeout - The simple request timeout in milliseconds.
-   * @param streamTimeout - The streaming request timeout in milliseconds.
-   * @param headersSizeLimit - The maximum headers size in bytes.
-   * @param bodySizeLimit - The maximum body size in bytes.
-   * @param mainPage - The custom main page content.
-   * @param notFoundPage - The custom not-found page content.
-   * @param faviconIco - The custom favicon.ico content.
-   * @param robotsTxt - The custom robots.txt content.
-   * @param sitemapXml - The custom sitemap.xml content.
-   * @param allowWebSockets - The flag indicating if WebSocket connections allowed.
-   * @param isEnabled - The flag indicating if the target is currently active for traffic routing.
-   * @param messageCount - The total number of messages processed for this target.
-   * @param createdAt - The date and time when the target was created.
-   */
-  constructor(
-    campaignId: string,
-    targetId: string,
-    accessLevel: TargetAccessLevel,
-    donorSecure: boolean,
-    donorSub: string,
-    donorDomain: string,
-    donorPort: number,
-    mirrorSecure: boolean,
-    mirrorSub: string,
-    mirrorDomain: string,
-    mirrorPort: number,
-    tenant: string,
-    readonly connectTimeout: number,
-    readonly simpleTimeout: number,
-    readonly streamTimeout: number,
-    readonly headersSizeLimit: number,
-    readonly bodySizeLimit: number,
-    readonly mainPage: string,
-    readonly notFoundPage: string,
-    readonly faviconIco: string,
-    readonly robotsTxt: string,
-    readonly sitemapXml: string,
-    readonly allowWebSockets: boolean,
-    isEnabled: boolean,
-    messageCount: number,
-    createdAt: Date
-  ) {
-    super(
-      campaignId,
-      targetId,
-      accessLevel,
-      donorSecure,
-      donorSub,
-      donorDomain,
-      donorPort,
-      mirrorSecure,
-      mirrorSub,
-      mirrorDomain,
-      mirrorPort,
-      tenant,
-      isEnabled,
-      messageCount,
-      createdAt
-    )
-  }
 
   #flags: Set<string> = new Set()
 
@@ -288,11 +216,11 @@ export class FullTargetModel extends TargetModel {
 }
 
 /**
- * Represents the enabled full target model.
+ * Represents the enabled target model.
  *
  * @category Target Repository
  */
-export interface EnabledFullTargetModel extends FullTargetModel {
+export interface EnabledTargetModel extends TargetModel {
   /** Guaranteed to be `true` for enabled targets. */
   isEnabled: true
 }

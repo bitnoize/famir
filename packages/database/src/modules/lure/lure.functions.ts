@@ -31,135 +31,131 @@ export interface RawLure {
  * @internal
  */
 export const lureFunctions = {
-  lure: {
-    create_lure: {
-      NUMBER_OF_KEYS: 6,
+  create_lure: {
+    NUMBER_OF_KEYS: 6,
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        lureId: string,
-        path: string,
-        redirectorId: string,
-        createdAt: number,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, lureId))
-        parser.pushKey(lurePathsKey(prefix, campaignId))
-        parser.pushKey(lureIndexKey(prefix, campaignId))
-        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      lureId: string,
+      path: string,
+      redirectorId: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(lureKey(prefix, campaignId, lureId))
+      parser.pushKey(lurePathsKey(prefix, campaignId))
+      parser.pushKey(lureIndexKey(prefix, campaignId))
+      parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
 
-        parser.push(campaignId)
-        parser.push(lureId)
-        parser.push(path)
-        parser.push(redirectorId)
-        parser.push(createdAt.toString())
-        parser.push(lockSecret)
-      },
-
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(campaignId)
+      parser.push(lureId)
+      parser.push(path)
+      parser.push(redirectorId)
+      parser.push(lockSecret)
     },
 
-    read_lure: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, lureId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, lureId))
-      },
+  read_lure: {
+    NUMBER_OF_KEYS: 2,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, lureId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(lureKey(prefix, campaignId, lureId))
     },
 
-    find_lure_id: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, path: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lurePathsKey(prefix, campaignId))
+  find_lure_id: {
+    NUMBER_OF_KEYS: 2,
 
-        parser.push(path)
-      },
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, path: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(lurePathsKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(path)
     },
 
-    read_lure_index: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(lureIndexKey(prefix, campaignId))
-      },
+  read_lure_index: {
+    NUMBER_OF_KEYS: 2,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(lureIndexKey(prefix, campaignId))
     },
 
-    enable_lure: {
-      NUMBER_OF_KEYS: 3,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        lureId: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, lureId))
+  enable_lure: {
+    NUMBER_OF_KEYS: 3,
 
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      lureId: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(lureKey(prefix, campaignId, lureId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
 
-    disable_lure: {
-      NUMBER_OF_KEYS: 3,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        lureId: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, lureId))
+  disable_lure: {
+    NUMBER_OF_KEYS: 3,
 
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      lureId: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(lureKey(prefix, campaignId, lureId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
 
-    delete_lure: {
-      NUMBER_OF_KEYS: 6,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        lureId: string,
-        redirectorId: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(lureKey(prefix, campaignId, lureId))
-        parser.pushKey(lurePathsKey(prefix, campaignId))
-        parser.pushKey(lureIndexKey(prefix, campaignId))
-        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+  delete_lure: {
+    NUMBER_OF_KEYS: 6,
 
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      lureId: string,
+      redirectorId: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(lureKey(prefix, campaignId, lureId))
+      parser.pushKey(lurePathsKey(prefix, campaignId))
+      parser.pushKey(lureIndexKey(prefix, campaignId))
+      parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
+
+    transformReply: undefined as unknown as () => unknown,
   },
 } as const

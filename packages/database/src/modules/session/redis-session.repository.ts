@@ -60,15 +60,9 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
     try {
       const [statusReply, rawModel] = await Promise.all([
-        this.connection.session.create_session(
-          this.options.prefix,
-          campaignId,
-          sessionId,
-          secret,
-          Date.now()
-        ),
+        this.connection.famir.create_session(this.options.prefix, campaignId, sessionId, secret),
 
-        this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
+        this.connection.famir.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
       this.checkStatusReply(statusReply)
@@ -97,7 +91,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
   async read(campaignId: string, sessionId: string): Promise<SessionModel | null> {
     try {
-      const rawModel = await this.connection.session.read_session(
+      const rawModel = await this.connection.famir.read_session(
         this.options.prefix,
         campaignId,
         sessionId
@@ -119,14 +113,9 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
   async auth(campaignId: string, sessionId: string): Promise<SessionModel> {
     try {
       const [statusReply, rawModel] = await Promise.all([
-        this.connection.session.auth_session(
-          this.options.prefix,
-          campaignId,
-          sessionId,
-          Date.now()
-        ),
+        this.connection.famir.auth_session(this.options.prefix, campaignId, sessionId),
 
-        this.connection.session.read_session(this.options.prefix, campaignId, sessionId),
+        this.connection.famir.read_session(this.options.prefix, campaignId, sessionId),
       ])
 
       this.checkStatusReply(statusReply)
@@ -160,7 +149,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     secret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.session.upgrade_session(
+      const statusReply = await this.connection.famir.upgrade_session(
         this.options.prefix,
         campaignId,
         lureId,
@@ -194,7 +183,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
   async revoke(campaignId: string, sessionId: string): Promise<void> {
     try {
-      const statusReply = await this.connection.session.revoke_session(
+      const statusReply = await this.connection.famir.revoke_session(
         this.options.prefix,
         campaignId,
         sessionId
@@ -224,7 +213,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
   async list(campaignId: string, limit: number): Promise<SessionModel[] | null> {
     try {
-      const index = await this.connection.session.read_session_history(
+      const index = await this.connection.famir.read_session_history(
         this.options.prefix,
         campaignId,
         limit
@@ -238,7 +227,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       const rawCollection = await Promise.all(
         index.map((sessionId) =>
-          this.connection.session.read_session(this.options.prefix, campaignId, sessionId)
+          this.connection.famir.read_session(this.options.prefix, campaignId, sessionId)
         )
       )
 
@@ -272,6 +261,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       rawModel.campaign_id,
       rawModel.session_id,
       rawModel.proxy_id,
+      rawModel.secret,
       rawModel.is_upgraded,
       rawModel.is_revoked,
       rawModel.message_count,

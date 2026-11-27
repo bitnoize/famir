@@ -82,56 +82,6 @@ redis.register_function({
 })
 
 local function read_campaign(keys, args)
-  if #keys ~= 2 then
-    return redis.error_reply('ERR wrong number of keys')
-  end
-
-  local campaign_key = keys[1]
-  local campaign_lock_key = keys[2]
-
-  if #args ~= 0 then
-    return redis.error_reply('ERR wrong number of args')
-  end
-
-  if redis.call('EXISTS', campaign_key) == 0 then
-    return nil
-  end
-
-  -- stylua: ignore
-  local raw_campaign = redis.call(
-    'HMGET', campaign_key,
-    'campaign_id',
-    'mirror_domain',
-    'session_count',
-    'message_count',
-    'created_at'
-  )
-
-  local campaign, campaign_err = normalize(raw_campaign, {
-    { name = 'campaign_id', kind = 'str' },
-    { name = 'mirror_domain', kind = 'str' },
-    { name = 'session_count', kind = 'int', min = 0 },
-    { name = 'message_count', kind = 'int', min = 0 },
-    { name = 'created_at', kind = 'int', min = 0 },
-  })
-
-  if campaign_err then
-    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
-  end
-
-  campaign.is_locked = redis.call('EXISTS', campaign_lock_key) == 1
-
-  return { map = campaign }
-end
-
-redis.register_function({
-  function_name = 'read_campaign',
-  callback = read_campaign,
-  flags = { 'no-writes' },
-  description = 'Read campaign',
-})
-
-local function read_full_campaign(keys, args)
   if #keys ~= 10 then
     return redis.error_reply('ERR wrong number of keys')
   end
@@ -209,10 +159,10 @@ local function read_full_campaign(keys, args)
 end
 
 redis.register_function({
-  function_name = 'read_full_campaign',
-  callback = read_full_campaign,
+  function_name = 'read_campaign',
+  callback = read_campaign,
   flags = { 'no-writes' },
-  description = 'Read full campaign',
+  description = 'Read campaign',
 })
 
 local function read_campaign_index(keys, args)

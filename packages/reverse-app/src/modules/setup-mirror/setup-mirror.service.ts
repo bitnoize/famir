@@ -3,8 +3,8 @@ import {
   CAMPAIGN_REPOSITORY,
   CampaignRepository,
   DatabaseError,
-  EnabledFullTargetModel,
-  FullCampaignModel,
+  EnabledTargetModel,
+  CampaignModel,
   HttpServerError,
   TARGET_REPOSITORY,
   TargetLink,
@@ -63,12 +63,6 @@ export class SetupMirrorService {
           })
         }
 
-        if (error.isTooManyRequests) {
-          throw HttpServerError.tooManyRequests(`Too many requests`, {
-            reason: `Campaign request limiter exceeded`,
-          })
-        }
-
         throw HttpServerError.internalError(`Check campaign limiter failed`, null, error)
       }
 
@@ -89,8 +83,8 @@ export class SetupMirrorService {
     return targetLink
   }
 
-  async readCampaign(data: { campaignId: string }): Promise<FullCampaignModel> {
-    const campaign = await this.campaignRepository.readFull(data.campaignId)
+  async readCampaign(data: { campaignId: string }): Promise<CampaignModel> {
+    const campaign = await this.campaignRepository.read(data.campaignId)
 
     if (!campaign) {
       throw HttpServerError.serviceUnavailable(`Service unavailable`)
@@ -102,8 +96,8 @@ export class SetupMirrorService {
   async readTarget(data: {
     campaignId: string
     targetId: string
-  }): Promise<EnabledFullTargetModel> {
-    const target = await this.targetRepository.readFull(data.campaignId, data.targetId)
+  }): Promise<EnabledTargetModel> {
+    const target = await this.targetRepository.read(data.campaignId, data.targetId)
 
     if (!(target && TargetModel.isEnabled(target))) {
       throw HttpServerError.serviceUnavailable(`Service unavailable`, {

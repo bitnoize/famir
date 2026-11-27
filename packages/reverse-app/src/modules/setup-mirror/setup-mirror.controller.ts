@@ -135,8 +135,8 @@ export class SetupMirrorController extends BaseController {
     this.router.add('setup-mirror-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (target.label) {
-        const hook = this.tenantSwitch.find('setup-mirror', target.label)
+      if (target.tenant) {
+        const hook = this.tenantSwitch.find('setup-mirror', target.tenant)
 
         await hook(ctx, next)
       } else {

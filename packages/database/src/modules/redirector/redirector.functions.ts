@@ -16,19 +16,10 @@ import {
 export interface RawRedirector {
   campaign_id: string
   redirector_id: string
-  lure_count: number
-  created_at: number
-}
-
-/**
- * Raw full redirector data structure.
- *
- * @category Redirector
- * @internal
- */
-export interface RawFullRedirector extends RawRedirector {
   page: string
   fields: string[]
+  lure_count: number
+  created_at: number
 }
 
 /**
@@ -38,164 +29,139 @@ export interface RawFullRedirector extends RawRedirector {
  * @internal
  */
 export const redirectorFunctions = {
-  redirector: {
-    create_redirector: {
-      NUMBER_OF_KEYS: 4,
+  create_redirector: {
+    NUMBER_OF_KEYS: 4,
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        redirectorId: string,
-        page: string,
-        createdAt: number,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
-        parser.pushKey(redirectorIndexKey(prefix, campaignId))
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      redirectorId: string,
+      page: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+      parser.pushKey(redirectorIndexKey(prefix, campaignId))
 
-        parser.push(campaignId)
-        parser.push(redirectorId)
-        parser.push(page)
-        parser.push(createdAt.toString())
-        parser.push(lockSecret)
-      },
-
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(campaignId)
+      parser.push(redirectorId)
+      parser.push(page)
+      parser.push(lockSecret)
     },
 
-    read_redirector: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        redirectorId: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
-      },
+  read_redirector: {
+    NUMBER_OF_KEYS: 3,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, redirectorId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+      parser.pushKey(redirectorFieldsKey(prefix, campaignId, redirectorId))
     },
 
-    read_full_redirector: {
-      NUMBER_OF_KEYS: 3,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        redirectorId: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
-        parser.pushKey(redirectorFieldsKey(prefix, campaignId, redirectorId))
-      },
+  read_redirector_index: {
+    NUMBER_OF_KEYS: 2,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(redirectorIndexKey(prefix, campaignId))
     },
 
-    read_redirector_index: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(redirectorIndexKey(prefix, campaignId))
-      },
+  update_redirector: {
+    NUMBER_OF_KEYS: 3,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      redirectorId: string,
+      page: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+
+      parser.push(page)
+      parser.push(lockSecret)
     },
 
-    update_redirector: {
-      NUMBER_OF_KEYS: 3,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        redirectorId: string,
-        page: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+  append_redirector_field: {
+    NUMBER_OF_KEYS: 4,
 
-        parser.push(page)
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      redirectorId: string,
+      field: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+      parser.pushKey(redirectorFieldsKey(prefix, campaignId, redirectorId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(field)
+      parser.push(lockSecret)
     },
 
-    append_redirector_field: {
-      NUMBER_OF_KEYS: 4,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        redirectorId: string,
-        field: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
-        parser.pushKey(redirectorFieldsKey(prefix, campaignId, redirectorId))
+  remove_redirector_fields: {
+    NUMBER_OF_KEYS: 4,
 
-        parser.push(field)
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      redirectorId: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+      parser.pushKey(redirectorFieldsKey(prefix, campaignId, redirectorId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
 
-    remove_redirector_fields: {
-      NUMBER_OF_KEYS: 4,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        redirectorId: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
-        parser.pushKey(redirectorFieldsKey(prefix, campaignId, redirectorId))
+  delete_redirector: {
+    NUMBER_OF_KEYS: 5,
 
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      redirectorId: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
+      parser.pushKey(redirectorFieldsKey(prefix, campaignId, redirectorId))
+      parser.pushKey(redirectorIndexKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
 
-    delete_redirector: {
-      NUMBER_OF_KEYS: 5,
-
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        redirectorId: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(redirectorKey(prefix, campaignId, redirectorId))
-        parser.pushKey(redirectorFieldsKey(prefix, campaignId, redirectorId))
-        parser.pushKey(redirectorIndexKey(prefix, campaignId))
-
-        parser.push(lockSecret)
-      },
-
-      transformReply: undefined as unknown as () => unknown,
-    },
+    transformReply: undefined as unknown as () => unknown,
   },
 } as const

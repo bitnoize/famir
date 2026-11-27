@@ -1,6 +1,6 @@
 import {
-  EnabledFullTargetModel,
-  FullRedirectorModel,
+  EnabledTargetModel,
+  RedirectorModel,
   HttpClientError,
   HttpServerError,
   Logger,
@@ -134,7 +134,7 @@ export abstract class BaseController {
 
   protected async sendMainPage(
     ctx: HttpServerContext,
-    target: EnabledFullTargetModel
+    target: EnabledTargetModel
   ): Promise<void> {
     ctx.sureNormal()
 
@@ -164,7 +164,7 @@ export abstract class BaseController {
 
   protected async sendNotFoundPage(
     ctx: HttpServerContext,
-    target: EnabledFullTargetModel
+    target: EnabledTargetModel
   ): Promise<void> {
     ctx.sureNormal()
 
@@ -220,7 +220,7 @@ export abstract class BaseController {
 
   protected async sendFaviconIco(
     ctx: HttpServerContext,
-    target: EnabledFullTargetModel
+    target: EnabledTargetModel
   ): Promise<void> {
     ctx.sureNormal()
 
@@ -250,7 +250,7 @@ export abstract class BaseController {
 
   protected async sendRobotsTxt(
     ctx: HttpServerContext,
-    target: EnabledFullTargetModel
+    target: EnabledTargetModel
   ): Promise<void> {
     ctx.sureNormal()
 
@@ -280,7 +280,7 @@ export abstract class BaseController {
 
   protected async sendSitemapXml(
     ctx: HttpServerContext,
-    target: EnabledFullTargetModel
+    target: EnabledTargetModel
   ): Promise<void> {
     ctx.sureNormal()
 
@@ -314,8 +314,8 @@ export abstract class BaseController {
 
   protected async sendRedirectorPage(
     ctx: HttpServerContext,
-    target: EnabledFullTargetModel,
-    redirector: FullRedirectorModel,
+    target: EnabledTargetModel,
+    redirector: RedirectorModel,
     data: TemplaterData
   ): Promise<void> {
     ctx.sureNormal()
@@ -347,7 +347,7 @@ export abstract class BaseController {
 
   protected async sendCloakingSite(
     ctx: HttpServerContext,
-    target: EnabledFullTargetModel
+    target: EnabledTargetModel
   ): Promise<void> {
     if (ctx.url.isPath('/')) {
       await this.sendMainPage(ctx, target)

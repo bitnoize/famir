@@ -1,4 +1,4 @@
-import { CampaignModel, FullCampaignModel } from './campaign.model.js'
+import { CampaignModel } from './campaign.model.js'
 
 /**
  * DI token for a campaign repository implementation.
@@ -57,15 +57,6 @@ export interface CampaignRepository {
    * @throws DatabaseError If the data validation fails.
    */
   read(campaignId: string): Promise<CampaignModel | null>
-
-  /**
-   * Reads the full campaign by its ID.
-   *
-   * @param campaignId - The campaign ID to read.
-   * @returns The full campaign model, or `null` if the campaign is not found.
-   * @throws DatabaseError If the data validation fails.
-   */
-  readFull(campaignId: string): Promise<FullCampaignModel | null>
 
   /**
    * Acquires a distributed lock for the campaign.
@@ -162,16 +153,6 @@ export interface CampaignRepository {
    * @throws DatabaseError If the data validation fails.
    */
   list(): Promise<CampaignModel[]>
-
-  /**
-   * Lists all full campaigns.
-   *
-   * The campaigns are ordered by creation time (oldest first).
-   *
-   * @returns The array of full campaign models.
-   * @throws DatabaseError If the data validation fails.
-   */
-  listFull(): Promise<FullCampaignModel[]>
 
   /**
    * Checks the campaign limiter.

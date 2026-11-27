@@ -197,102 +197,6 @@ local function read_target(keys, args)
     'mirror_sub',
     'mirror_port',
     'tenant',
-    'is_enabled',
-    'message_count',
-    'created_at'
-  )
-
-  local target, target_err = normalize(raw_target, {
-    { name = 'campaign_id', kind = 'str' },
-    { name = 'target_id', kind = 'str' },
-    { name = 'access_level', kind = 'str' },
-    { name = 'donor_secure', kind = 'int', min = 0, max = 1 },
-    { name = 'donor_sub', kind = 'str' },
-    { name = 'donor_domain', kind = 'str' },
-    { name = 'donor_port', kind = 'str' },
-    { name = 'mirror_secure', kind = 'int', min = 0, max = 1 },
-    { name = 'mirror_sub', kind = 'str' },
-    { name = 'mirror_port', kind = 'str' },
-    { name = 'tenant', kind = 'any' },
-    { name = 'is_enabled', kind = 'int', min = 0, max = 1 },
-    { name = 'message_count', kind = 'int', min = 0 },
-    { name = 'created_at', kind = 'int', min = 0 },
-  })
-
-  if target_err then
-    return redis.error_reply('ERR normalize target: ' .. target_err)
-  end
-
-  -- stylua: ignore
-  local raw_campaign = redis.call(
-    'HMGET', campaign_key,
-    'campaign_id',
-    'mirror_domain'
-  )
-
-  local campaign, campaign_err = normalize(raw_campaign, {
-    { name = 'campaign_id', kind = 'str' },
-    { name = 'mirror_domain', kind = 'str' },
-  })
-
-  if campaign_err then
-    return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
-  end
-
-  if campaign.campaign_id ~= target.campaign_id then
-    return redis.error_reply('ERR target campaign_id mismatch')
-  end
-
-  target.donor_secure = target.donor_secure == 1
-  target.mirror_secure = target.mirror_secure == 1
-  target.is_enabled = target.is_enabled == 1
-
-  target.mirror_domain = campaign.mirror_domain
-
-  return { map = target }
-end
-
-redis.register_function({
-  function_name = 'read_target',
-  callback = read_target,
-  flags = { 'no-writes' },
-  description = 'Read target',
-})
-
-local function read_full_target(keys, args)
-  if #keys ~= 2 then
-    return redis.error_reply('ERR wrong number of keys')
-  end
-
-  local campaign_key = keys[1]
-  local target_key = keys[2]
-
-  if #args ~= 0 then
-    return redis.error_reply('ERR wrong number of args')
-  end
-
-  if redis.call('EXISTS', campaign_key) == 0 then
-    return nil
-  end
-
-  if redis.call('EXISTS', target_key) == 0 then
-    return nil
-  end
-
-  -- stylua: ignore
-  local raw_target = redis.call(
-    'HMGET', target_key,
-    'campaign_id',
-    'target_id',
-    'access_level',
-    'donor_secure',
-    'donor_sub',
-    'donor_domain',
-    'donor_port',
-    'mirror_secure',
-    'mirror_sub',
-    'mirror_port',
-    'tenant',
     'connect_timeout',
     'simple_timeout',
     'stream_timeout',
@@ -372,10 +276,10 @@ local function read_full_target(keys, args)
 end
 
 redis.register_function({
-  function_name = 'read_full_target',
-  callback = read_full_target,
+  function_name = 'read_target',
+  callback = read_target,
   flags = { 'no-writes' },
-  description = 'Read full target',
+  description = 'Read target',
 })
 
 local function read_target_hosts(keys, args)

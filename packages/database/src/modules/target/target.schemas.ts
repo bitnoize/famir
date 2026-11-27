@@ -6,7 +6,7 @@ import {
   timestampSchema,
 } from '@famir/common'
 import { TARGET_ACCESS_LEVELS, TargetAccessLevel, TargetHosts, TargetLink } from '@famir/domain'
-import { RawFullTarget, RawTarget } from './target.functions.js'
+import { RawTarget } from './target.functions.js'
 
 /**
  * Validate a target access level.
@@ -132,49 +132,6 @@ export const targetContentSchema: JSONSchemaType<string> = {
  * @internal
  */
 export const rawTargetSchema: JSONSchemaType<RawTarget> = {
-  type: 'object',
-  required: [
-    'campaign_id',
-    'target_id',
-    'access_level',
-    'donor_secure',
-    'donor_sub',
-    'donor_domain',
-    'donor_port',
-    'mirror_secure',
-    'mirror_sub',
-    'mirror_domain',
-    'mirror_port',
-    'tenant',
-    'is_enabled',
-    'message_count',
-    'created_at',
-  ],
-  properties: {
-    campaign_id: customIdentSchema,
-    target_id: customIdentSchema,
-    access_level: targetAccessLevelSchema,
-    donor_secure: booleanSchema,
-    donor_sub: targetSubSchema,
-    donor_domain: targetDomainSchema,
-    donor_port: targetPortSchema,
-    mirror_secure: booleanSchema,
-    mirror_sub: targetSubSchema,
-    mirror_domain: targetDomainSchema,
-    mirror_port: targetPortSchema,
-    tenant: targetTenantSchema,
-    is_enabled: booleanSchema,
-    message_count: counterSchema,
-    created_at: timestampSchema,
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * @category Target
- * @internal
- */
-export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
   type: 'object',
   required: [
     'campaign_id',

@@ -63,13 +63,12 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     lockSecret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.lure.create_lure(
+      const statusReply = await this.connection.famir.create_lure(
         this.options.prefix,
         campaignId,
         lureId,
         path,
         redirectorId,
-        Date.now(),
         lockSecret
       )
 
@@ -101,7 +100,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
   async read(campaignId: string, lureId: string): Promise<LureModel | null> {
     try {
-      const rawModel = await this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
+      const rawModel = await this.connection.famir.read_lure(
+        this.options.prefix,
+        campaignId,
+        lureId
+      )
 
       return this.buildModel(rawModel)
     } catch (error) {
@@ -118,7 +121,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
   async find(campaignId: string, path: string): Promise<LureModel | null> {
     try {
-      const lureId = await this.connection.lure.find_lure_id(this.options.prefix, campaignId, path)
+      const lureId = await this.connection.famir.find_lure_id(this.options.prefix, campaignId, path)
 
       if (lureId === null) {
         return null
@@ -126,7 +129,11 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       this.validateStringReply(lureId)
 
-      const rawModel = await this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
+      const rawModel = await this.connection.famir.read_lure(
+        this.options.prefix,
+        campaignId,
+        lureId
+      )
 
       return this.buildModel(rawModel)
     } catch (error) {
@@ -143,7 +150,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
   async enable(campaignId: string, lureId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.lure.enable_lure(
+      const statusReply = await this.connection.famir.enable_lure(
         this.options.prefix,
         campaignId,
         lureId,
@@ -174,7 +181,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
   async disable(campaignId: string, lureId: string, lockSecret: string): Promise<void> {
     try {
-      const statusReply = await this.connection.lure.disable_lure(
+      const statusReply = await this.connection.famir.disable_lure(
         this.options.prefix,
         campaignId,
         lureId,
@@ -210,7 +217,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     lockSecret: string
   ): Promise<void> {
     try {
-      const statusReply = await this.connection.lure.delete_lure(
+      const statusReply = await this.connection.famir.delete_lure(
         this.options.prefix,
         campaignId,
         lureId,
@@ -244,7 +251,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
   async list(campaignId: string): Promise<LureModel[] | null> {
     try {
-      const index = await this.connection.lure.read_lure_index(this.options.prefix, campaignId)
+      const index = await this.connection.famir.read_lure_index(this.options.prefix, campaignId)
 
       if (index === null) {
         return null
@@ -254,7 +261,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       const rawCollection = await Promise.all(
         index.map((lureId) =>
-          this.connection.lure.read_lure(this.options.prefix, campaignId, lureId)
+          this.connection.famir.read_lure(this.options.prefix, campaignId, lureId)
         )
       )
 

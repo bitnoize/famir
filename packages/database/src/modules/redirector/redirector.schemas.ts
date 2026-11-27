@@ -1,6 +1,6 @@
 import { JSONSchemaType, counterSchema, customIdentSchema, timestampSchema } from '@famir/common'
 import { RedirectorParams } from '@famir/domain'
-import { RawFullRedirector, RawRedirector } from './redirector.functions.js'
+import { RawRedirector } from './redirector.functions.js'
 
 /**
  * Validate a redirector page template.
@@ -53,22 +53,6 @@ export const redirectorParamsSchema: JSONSchemaType<RedirectorParams> = {
  * @internal
  */
 export const rawRedirectorSchema: JSONSchemaType<RawRedirector> = {
-  type: 'object',
-  required: ['campaign_id', 'redirector_id', 'lure_count', 'created_at'],
-  properties: {
-    campaign_id: customIdentSchema,
-    redirector_id: customIdentSchema,
-    lure_count: counterSchema,
-    created_at: timestampSchema,
-  },
-  additionalProperties: false,
-} as const
-
-/**
- * @category Redirector
- * @internal
- */
-export const rawFullRedirectorSchema: JSONSchemaType<RawFullRedirector> = {
   type: 'object',
   required: ['campaign_id', 'redirector_id', 'page', 'fields', 'lure_count', 'created_at'],
   properties: {

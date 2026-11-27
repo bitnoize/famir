@@ -115,6 +115,7 @@ local function read_session(keys, args)
     'campaign_id',
     'session_id',
     'proxy_id',
+    'secret',
     'is_upgraded',
     'is_revoked',
     'message_count',
@@ -126,6 +127,7 @@ local function read_session(keys, args)
     { name = 'campaign_id', kind = 'str' },
     { name = 'session_id', kind = 'str' },
     { name = 'proxy_id', kind = 'str' },
+    { name = 'secret', kind = 'str' },
     { name = 'is_upgraded', kind = 'int', min = 0, max = 1 },
     { name = 'is_revoked', kind = 'int', min = 0, max = 1 },
     { name = 'message_count', kind = 'int', min = 0 },
@@ -168,7 +170,7 @@ redis.register_function({
   description = 'Read session',
 })
 
-local function read_session_history(keys, args)
+local function read_session_history(keys, raw_args)
   if #keys ~= 2 then
     return redis.error_reply('ERR wrong number of keys')
   end
@@ -176,15 +178,23 @@ local function read_session_history(keys, args)
   local campaign_key = keys[1]
   local session_history_key = keys[2]
 
-  if #args ~= 0 then
-    return redis.error_reply('ERR wrong number of args')
+  local args, args_err = normalize(raw_args, {
+    { name = 'offset', kind = 'int', min = 0, max = 1000000 },
+    { name = 'limit', kind = 'int', min = 1, max = 1000 },
+  })
+
+  if args_err then
+    return redis.error_reply('ERR normalize args: ' .. args_err)
   end
 
   if redis.call('EXISTS', campaign_key) == 0 then
     return nil
   end
 
-  return redis.call('ZRANGE', session_history_key, 0, -1, 'REV')
+  local start = args.offset
+  local stop = args.offset + args.limit - 1
+
+  return redis.call('ZRANGE', session_history_key, start, stop, 'REV')
 end
 
 redis.register_function({

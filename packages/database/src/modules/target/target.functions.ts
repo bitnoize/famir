@@ -29,18 +29,6 @@ export interface RawTarget {
   mirror_domain: string
   mirror_port: number
   tenant: string
-  is_enabled: boolean
-  message_count: number
-  created_at: number
-}
-
-/**
- * Raw full target data structure.
- *
- * @category Target
- * @internal
- */
-export interface RawFullTarget extends RawTarget {
   connect_timeout: number
   simple_timeout: number
   stream_timeout: number
@@ -52,6 +40,9 @@ export interface RawFullTarget extends RawTarget {
   robots_txt: string
   sitemap_xml: string
   allow_websockets: boolean
+  is_enabled: boolean
+  message_count: number
+  created_at: number
 }
 
 /**
@@ -61,234 +52,219 @@ export interface RawFullTarget extends RawTarget {
  * @internal
  */
 export const targetFunctions = {
-  target: {
-    create_target: {
-      NUMBER_OF_KEYS: 7,
+  create_target: {
+    NUMBER_OF_KEYS: 7,
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        targetId: string,
-        accessLevel: string,
-        donorSecure: boolean,
-        donorSub: string,
-        donorDomain: string,
-        donorPort: number,
-        mirrorSecure: boolean,
-        mirrorSub: string,
-        mirrorPort: number,
-        tenant: string,
-        connectTimeout: number,
-        simpleTimeout: number,
-        streamTimeout: number,
-        headersSizeLimit: number,
-        bodySizeLimit: number,
-        mainPage: string,
-        notFoundPage: string,
-        faviconIco: string,
-        robotsTxt: string,
-        sitemapXml: string,
-        allowWebSockets: boolean,
-        createdAt: number,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
-        parser.pushKey(targetDonorsKey(prefix, campaignId))
-        parser.pushKey(targetMirrorsKey(prefix, campaignId))
-        parser.pushKey(targetHostsKey(prefix))
-        parser.pushKey(targetIndexKey(prefix, campaignId))
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      targetId: string,
+      accessLevel: string,
+      donorSecure: boolean,
+      donorSub: string,
+      donorDomain: string,
+      donorPort: number,
+      mirrorSecure: boolean,
+      mirrorSub: string,
+      mirrorPort: number,
+      tenant: string,
+      connectTimeout: number,
+      simpleTimeout: number,
+      streamTimeout: number,
+      headersSizeLimit: number,
+      bodySizeLimit: number,
+      mainPage: string,
+      notFoundPage: string,
+      faviconIco: string,
+      robotsTxt: string,
+      sitemapXml: string,
+      allowWebSockets: boolean,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(targetKey(prefix, campaignId, targetId))
+      parser.pushKey(targetDonorsKey(prefix, campaignId))
+      parser.pushKey(targetMirrorsKey(prefix, campaignId))
+      parser.pushKey(targetHostsKey(prefix))
+      parser.pushKey(targetIndexKey(prefix, campaignId))
 
-        parser.push(campaignId)
-        parser.push(targetId)
-        parser.push(accessLevel)
-        parser.push(donorSecure ? '1' : '0')
-        parser.push(donorSub)
-        parser.push(donorDomain)
-        parser.push(donorPort.toString())
-        parser.push(mirrorSecure ? '1' : '0')
-        parser.push(mirrorSub)
-        parser.push(mirrorPort.toString())
-        parser.push(tenant)
-        parser.push(connectTimeout.toString())
-        parser.push(simpleTimeout.toString())
-        parser.push(streamTimeout.toString())
-        parser.push(headersSizeLimit.toString())
-        parser.push(bodySizeLimit.toString())
-        parser.push(mainPage)
-        parser.push(notFoundPage)
-        parser.push(faviconIco)
-        parser.push(robotsTxt)
-        parser.push(sitemapXml)
-        parser.push(allowWebSockets ? '1' : '0')
-        parser.push(createdAt.toString())
-        parser.push(lockSecret)
-      },
-
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(campaignId)
+      parser.push(targetId)
+      parser.push(accessLevel)
+      parser.push(donorSecure ? '1' : '0')
+      parser.push(donorSub)
+      parser.push(donorDomain)
+      parser.push(donorPort.toString())
+      parser.push(mirrorSecure ? '1' : '0')
+      parser.push(mirrorSub)
+      parser.push(mirrorPort.toString())
+      parser.push(tenant)
+      parser.push(connectTimeout.toString())
+      parser.push(simpleTimeout.toString())
+      parser.push(streamTimeout.toString())
+      parser.push(headersSizeLimit.toString())
+      parser.push(bodySizeLimit.toString())
+      parser.push(mainPage)
+      parser.push(notFoundPage)
+      parser.push(faviconIco)
+      parser.push(robotsTxt)
+      parser.push(sitemapXml)
+      parser.push(allowWebSockets ? '1' : '0')
+      parser.push(lockSecret)
     },
 
-    read_target: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
-      },
+  read_target: {
+    NUMBER_OF_KEYS: 2,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(targetKey(prefix, campaignId, targetId))
     },
 
-    read_full_target: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string, targetId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
-      },
+  read_target_hosts: {
+    NUMBER_OF_KEYS: 1,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string) {
+      parser.pushKey(targetHostsKey(prefix))
     },
 
-    read_target_hosts: {
-      NUMBER_OF_KEYS: 1,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string) {
-        parser.pushKey(targetHostsKey(prefix))
-      },
+  find_target_link: {
+    NUMBER_OF_KEYS: 1,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, mirrorHost: string) {
+      parser.pushKey(targetHostsKey(prefix))
+
+      parser.push(mirrorHost)
     },
 
-    find_target_link: {
-      NUMBER_OF_KEYS: 1,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, mirrorHost: string) {
-        parser.pushKey(targetHostsKey(prefix))
+  read_target_index: {
+    NUMBER_OF_KEYS: 2,
 
-        parser.push(mirrorHost)
-      },
-
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(targetIndexKey(prefix, campaignId))
     },
 
-    read_target_index: {
-      NUMBER_OF_KEYS: 2,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(targetIndexKey(prefix, campaignId))
-      },
+  update_target: {
+    NUMBER_OF_KEYS: 3,
 
-      transformReply: undefined as unknown as () => unknown,
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      targetId: string,
+      connectTimeout: number,
+      simpleTimeout: number,
+      streamTimeout: number,
+      headersSizeLimit: number,
+      bodySizeLimit: number,
+      mainPage: string,
+      notFoundPage: string,
+      faviconIco: string,
+      robotsTxt: string,
+      sitemapXml: string,
+      allowWebSockets: boolean,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(targetKey(prefix, campaignId, targetId))
+
+      parser.push(connectTimeout.toString())
+      parser.push(simpleTimeout.toString())
+      parser.push(streamTimeout.toString())
+      parser.push(headersSizeLimit.toString())
+      parser.push(bodySizeLimit.toString())
+      parser.push(mainPage)
+      parser.push(notFoundPage)
+      parser.push(faviconIco)
+      parser.push(robotsTxt)
+      parser.push(sitemapXml)
+      parser.push(allowWebSockets ? '1' : '0')
+      parser.push(lockSecret)
     },
 
-    update_target: {
-      NUMBER_OF_KEYS: 3,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        targetId: string,
-        connectTimeout: number,
-        simpleTimeout: number,
-        streamTimeout: number,
-        headersSizeLimit: number,
-        bodySizeLimit: number,
-        mainPage: string,
-        notFoundPage: string,
-        faviconIco: string,
-        robotsTxt: string,
-        sitemapXml: string,
-        allowWebSockets: boolean,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
+  enable_target: {
+    NUMBER_OF_KEYS: 3,
 
-        parser.push(connectTimeout.toString())
-        parser.push(simpleTimeout.toString())
-        parser.push(streamTimeout.toString())
-        parser.push(headersSizeLimit.toString())
-        parser.push(bodySizeLimit.toString())
-        parser.push(mainPage)
-        parser.push(notFoundPage)
-        parser.push(faviconIco)
-        parser.push(robotsTxt)
-        parser.push(sitemapXml)
-        parser.push(allowWebSockets ? '1' : '0')
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      targetId: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(targetKey(prefix, campaignId, targetId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
 
-    enable_target: {
-      NUMBER_OF_KEYS: 3,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        targetId: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
+  disable_target: {
+    NUMBER_OF_KEYS: 3,
 
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      targetId: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(targetKey(prefix, campaignId, targetId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
 
-    disable_target: {
-      NUMBER_OF_KEYS: 3,
+    transformReply: undefined as unknown as () => unknown,
+  },
 
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        targetId: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
+  delete_target: {
+    NUMBER_OF_KEYS: 7,
 
-        parser.push(lockSecret)
-      },
+    parseCommand(
+      parser: CommandParser,
+      prefix: string,
+      campaignId: string,
+      targetId: string,
+      lockSecret: string
+    ) {
+      parser.pushKey(campaignKey(prefix, campaignId))
+      parser.pushKey(campaignLockKey(prefix, campaignId))
+      parser.pushKey(targetKey(prefix, campaignId, targetId))
+      parser.pushKey(targetDonorsKey(prefix, campaignId))
+      parser.pushKey(targetMirrorsKey(prefix, campaignId))
+      parser.pushKey(targetHostsKey(prefix))
+      parser.pushKey(targetIndexKey(prefix, campaignId))
 
-      transformReply: undefined as unknown as () => unknown,
+      parser.push(lockSecret)
     },
 
-    delete_target: {
-      NUMBER_OF_KEYS: 7,
-
-      parseCommand(
-        parser: CommandParser,
-        prefix: string,
-        campaignId: string,
-        targetId: string,
-        lockSecret: string
-      ) {
-        parser.pushKey(campaignKey(prefix, campaignId))
-        parser.pushKey(campaignLockKey(prefix, campaignId))
-        parser.pushKey(targetKey(prefix, campaignId, targetId))
-        parser.pushKey(targetDonorsKey(prefix, campaignId))
-        parser.pushKey(targetMirrorsKey(prefix, campaignId))
-        parser.pushKey(targetHostsKey(prefix))
-        parser.pushKey(targetIndexKey(prefix, campaignId))
-
-        parser.push(lockSecret)
-      },
-
-      transformReply: undefined as unknown as () => unknown,
-    },
+    transformReply: undefined as unknown as () => unknown,
   },
 } as const
