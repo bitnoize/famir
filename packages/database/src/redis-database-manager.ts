@@ -61,27 +61,9 @@ export class RedisDatabaseManager implements DatabaseManager {
 
   async loadFunctions(): Promise<void> {
     try {
-      await this.connection.FUNCTION_FLUSH()
+      await this.connection.FUNCTION_LOAD(redisFunctions())
 
-      const errors: [string, unknown][] = []
-
-      for (const [name, data] of redisFunctions) {
-        try {
-          this.logger.debug(`Loading Redis functions: ${name}`)
-
-          await this.connection.FUNCTION_LOAD(data)
-        } catch (error) {
-          errors.push([name, error])
-        }
-      }
-
-      if (errors.length > 0) {
-        await this.connection.FUNCTION_FLUSH()
-
-        throw DatabaseError.internalError(`Loading Redis functions failed`, null, errors)
-      } else {
-        this.logger.info(`All Redis functions successfully loaded`)
-      }
+      this.logger.info(`Redis functions loaded`)
     } catch (error) {
       throw DatabaseError.wrap(error, {
         method: 'loadFunctions',

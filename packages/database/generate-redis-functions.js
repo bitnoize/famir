@@ -29,7 +29,7 @@ async function generateRedisFunctions(sourceDir, targetFile) {
 
   const targetBody = `// Auto-generated file. Do not edit manually!
 
-import { gunzipSync } from 'noze:zlib'
+import { gunzipSync } from 'node:zlib'
 
 const REDIS_FUNCTIONS = \`
 ${embedFile}
@@ -40,7 +40,7 @@ ${embedFile}
  * @internal
  */
 export function redisFunctions(): string {
-  return gunzipSync(Buffer.from(REDIS_FUNCTIONS, 'base64'))toString('utf-8')
+  return gunzipSync(Buffer.from(REDIS_FUNCTIONS, 'base64')).toString('utf-8')
 }
 `
 

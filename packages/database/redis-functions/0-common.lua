@@ -1,3 +1,5 @@
+#!lua name=famir
+
 --
 -- Helpers
 --

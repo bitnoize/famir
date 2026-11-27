@@ -272,7 +272,6 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
       rawModel.campaign_id,
       rawModel.session_id,
       rawModel.proxy_id,
-      rawModel.secret,
       rawModel.is_upgraded,
       rawModel.is_revoked,
       rawModel.message_count,

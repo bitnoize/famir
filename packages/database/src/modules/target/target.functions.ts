@@ -28,7 +28,7 @@ export interface RawTarget {
   mirror_sub: string
   mirror_domain: string
   mirror_port: number
-  label: string
+  tenant: string
   is_enabled: boolean
   message_count: number
   created_at: number
@@ -78,7 +78,7 @@ export const targetFunctions = {
         mirrorSecure: boolean,
         mirrorSub: string,
         mirrorPort: number,
-        label: string,
+        tenant: string,
         connectTimeout: number,
         simpleTimeout: number,
         streamTimeout: number,
@@ -111,7 +111,7 @@ export const targetFunctions = {
         parser.push(mirrorSecure ? '1' : '0')
         parser.push(mirrorSub)
         parser.push(mirrorPort.toString())
-        parser.push(label)
+        parser.push(tenant)
         parser.push(connectTimeout.toString())
         parser.push(simpleTimeout.toString())
         parser.push(streamTimeout.toString())

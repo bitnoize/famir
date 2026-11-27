@@ -32,7 +32,7 @@ export interface TargetRepository {
    * @param mirrorSecure - The flag indicating if the mirror server uses HTTPS.
    * @param mirrorSub - The mirror subdomain.
    * @param mirrorPort - The mirror server port.
-   * @param label - The label for categorization.
+   * @param tenant - The tenant for categorization.
    * @param connectTimeout - The connection timeout in milliseconds.
    * @param simpleTimeout - The simple request timeout in milliseconds.
    * @param streamTimeout - The streaming request timeout in milliseconds.
@@ -64,7 +64,7 @@ export interface TargetRepository {
     mirrorSecure: boolean,
     mirrorSub: string,
     mirrorPort: number,
-    label: string,
+    tenant: string,
     connectTimeout: number,
     simpleTimeout: number,
     streamTimeout: number,

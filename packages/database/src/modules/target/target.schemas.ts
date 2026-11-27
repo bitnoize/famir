@@ -52,11 +52,11 @@ export const targetPortSchema: JSONSchemaType<number> = {
 } as const
 
 /**
- * Validate a target label.
+ * Validate a target tenant.
  *
  * @category Target
  */
-export const targetLabelSchema: JSONSchemaType<string> = {
+export const targetTenantSchema: JSONSchemaType<string> = {
   type: 'string',
   anyOf: [{ const: '' }, { pattern: '^[a-z\\-_]{2,64}$' }],
 } as const
@@ -145,7 +145,7 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
     'mirror_sub',
     'mirror_domain',
     'mirror_port',
-    'label',
+    'tenant',
     'is_enabled',
     'message_count',
     'created_at',
@@ -162,7 +162,7 @@ export const rawTargetSchema: JSONSchemaType<RawTarget> = {
     mirror_sub: targetSubSchema,
     mirror_domain: targetDomainSchema,
     mirror_port: targetPortSchema,
-    label: targetLabelSchema,
+    tenant: targetTenantSchema,
     is_enabled: booleanSchema,
     message_count: counterSchema,
     created_at: timestampSchema,
@@ -188,7 +188,7 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     'mirror_sub',
     'mirror_domain',
     'mirror_port',
-    'label',
+    'tenant',
     'connect_timeout',
     'simple_timeout',
     'stream_timeout',
@@ -216,7 +216,7 @@ export const rawFullTargetSchema: JSONSchemaType<RawFullTarget> = {
     mirror_sub: targetSubSchema,
     mirror_domain: targetDomainSchema,
     mirror_port: targetPortSchema,
-    label: targetLabelSchema,
+    tenant: targetTenantSchema,
     connect_timeout: targetConnectTimeoutSchema,
     simple_timeout: targetSimpleTimeoutSchema,
     stream_timeout: targetStreamTimeoutSchema,

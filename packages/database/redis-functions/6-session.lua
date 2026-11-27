@@ -115,7 +115,6 @@ local function read_session(keys, args)
     'campaign_id',
     'session_id',
     'proxy_id',
-    'secret',
     'is_upgraded',
     'is_revoked',
     'message_count',
@@ -127,7 +126,6 @@ local function read_session(keys, args)
     { name = 'campaign_id', kind = 'str' },
     { name = 'session_id', kind = 'str' },
     { name = 'proxy_id', kind = 'str' },
-    { name = 'secret', kind = 'str' },
     { name = 'is_upgraded', kind = 'int', min = 0, max = 1 },
     { name = 'is_revoked', kind = 'int', min = 0, max = 1 },
     { name = 'message_count', kind = 'int', min = 0 },
@@ -268,7 +266,7 @@ local function auth_session(keys, args)
     return redis.status_reply('NOT_FOUND no enabled proxies found')
   end
 
-  local history_threshold = math.max(0, now - campaign.session_expire)
+  local history_threshold = math.max(0, now - campaign.session_expire * 2)
 
   -- Point of no return
 
@@ -296,7 +294,7 @@ local function auth_session(keys, args)
   redis.call('PEXPIRE', session_key, campaign.session_expire)
   redis.call('ZREMRANGEBYSCORE', session_history_key, '-inf', '(' .. history_threshold)
   redis.call('ZADD', session_history_key, now, session.session_id)
-  redis.call('PEXPIRE', session_history_key, campaign.session_expire)
+  redis.call('PEXPIRE', session_history_key, campaign.session_expire * 2)
 
   return redis.status_reply('OK session authorized')
 end
@@ -392,6 +390,10 @@ local function upgrade_session(keys, raw_args)
 
   if lure.campaign_id ~= session.campaign_id then
     return redis.status_reply('FORBIDDEN lure campaign_id mismatch')
+  end
+
+  if lure.is_enabled == 0 then
+    return redis.status_reply('FORBIDDEN lure is disabled')
   end
 
   if session.secret ~= args.secret then

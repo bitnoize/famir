@@ -17,7 +17,6 @@ export interface RawSession {
   campaign_id: string
   session_id: string
   proxy_id: string
-  secret: string
   is_upgraded: boolean
   is_revoked: boolean
   message_count: number
