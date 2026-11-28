@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
 import {
-  FullTargetModel,
   ReplServerError,
   TARGET_REPOSITORY,
   TargetHosts,
@@ -43,8 +42,8 @@ export class TargetService {
   /**
    * Reads the target by its ID.
    */
-  async read(data: { campaignId: string; targetId: string }): Promise<FullTargetModel> {
-    const target = await this.targetRepository.readFull(data.campaignId, data.targetId)
+  async read(data: { campaignId: string; targetId: string }): Promise<TargetModel> {
+    const target = await this.targetRepository.read(data.campaignId, data.targetId)
 
     if (!target) {
       throw ReplServerError.notFound(`Target not found`)

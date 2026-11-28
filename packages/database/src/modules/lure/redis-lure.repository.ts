@@ -62,6 +62,18 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     redirectorId: string,
     lockSecret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'create',
+      params: {
+        campaignId,
+        lureId,
+        path,
+        redirectorId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.create_lure(
         this.options.prefix,
@@ -74,31 +86,22 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database create lure`, {
-        data: {
-          lure: {
-            campaignId,
-            lureId,
-            path,
-            redirectorId,
-          },
-        },
-      })
+      this.logger.info(`Database create lure`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: {
-          campaignId,
-          lureId,
-          path,
-          redirectorId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async read(campaignId: string, lureId: string): Promise<LureModel | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'read',
+      params: {
+        campaignId,
+        lureId,
+      },
+    } as const
+
     try {
       const rawModel = await this.connection.famir.read_lure(
         this.options.prefix,
@@ -108,18 +111,20 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return this.buildModel(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'read',
-        params: {
-          campaignId,
-          lureId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async find(campaignId: string, path: string): Promise<LureModel | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'find',
+      params: {
+        campaignId,
+        path,
+      },
+    } as const
+
     try {
       const lureId = await this.connection.famir.find_lure_id(this.options.prefix, campaignId, path)
 
@@ -137,18 +142,21 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return this.buildModel(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'find',
-        params: {
-          campaignId,
-          path,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async enable(campaignId: string, lureId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'enable',
+      params: {
+        campaignId,
+        lureId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.enable_lure(
         this.options.prefix,
@@ -159,27 +167,23 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database enable lure`, {
-        data: {
-          lure: {
-            campaignId,
-            lureId,
-          },
-        },
-      })
+      this.logger.info(`Database enable lure`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'enable',
-        params: {
-          campaignId,
-          lureId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async disable(campaignId: string, lureId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'disable',
+      params: {
+        campaignId,
+        lureId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.disable_lure(
         this.options.prefix,
@@ -190,23 +194,9 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database disable lure`, {
-        data: {
-          lure: {
-            campaignId,
-            lureId,
-          },
-        },
-      })
+      this.logger.info(`Database disable lure`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'disable',
-        params: {
-          campaignId,
-          lureId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -216,6 +206,17 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
     redirectorId: string,
     lockSecret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'delete',
+      params: {
+        campaignId,
+        lureId,
+        redirectorId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.delete_lure(
         this.options.prefix,
@@ -227,29 +228,21 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database delete lure`, {
-        data: {
-          lure: {
-            campaignId,
-            lureId,
-            redirectorId,
-          },
-        },
-      })
+      this.logger.info(`Database delete lure`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: {
-          campaignId,
-          lureId,
-          redirectorId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async list(campaignId: string): Promise<LureModel[] | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'list',
+      params: {
+        campaignId,
+      },
+    } as const
+
     try {
       const index = await this.connection.famir.read_lure_index(this.options.prefix, campaignId)
 
@@ -267,13 +260,7 @@ export class RedisLureRepository extends RedisBaseRepository implements LureRepo
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'list',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 

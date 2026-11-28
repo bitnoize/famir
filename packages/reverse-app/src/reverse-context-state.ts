@@ -1,7 +1,7 @@
 import {
-  type EnabledTargetModel,
-  type EnabledProxyModel,
   type CampaignModel,
+  type EnabledProxyModel,
+  type EnabledTargetModel,
   type SessionModel,
   type TargetModel,
 } from '@famir/domain'

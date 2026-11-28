@@ -2,8 +2,6 @@
 -- Target methods
 --
 
-local TARGET_SUB_APEX = '@'
-
 local function create_target(keys, raw_args)
   if #keys ~= 7 then
     return redis.error_reply('ERR wrong number of keys')
@@ -28,7 +26,7 @@ local function create_target(keys, raw_args)
     { name = 'mirror_secure', kind = 'int', min = 0, max = 1 },
     { name = 'mirror_sub', kind = 'str' },
     { name = 'mirror_port', kind = 'str' },
-    { name = 'tenant', kind = 'any' },
+    { name = 'label', kind = 'any' },
     { name = 'connect_timeout', kind = 'int', min = 1 },
     { name = 'simple_timeout', kind = 'int', min = 1 },
     { name = 'stream_timeout', kind = 'int', min = 1 },
@@ -106,7 +104,7 @@ local function create_target(keys, raw_args)
     return redis.status_reply('CONFLICT target mirror already taken')
   end
 
-  local mirror_hostname = args.mirror_sub ~= TARGET_SUB_APEX
+  local mirror_hostname = args.mirror_sub ~= '@'
       and (args.mirror_sub .. '.' .. campaign.mirror_domain)
     or campaign.mirror_domain
 
@@ -132,7 +130,7 @@ local function create_target(keys, raw_args)
     'mirror_secure', args.mirror_secure,
     'mirror_sub', args.mirror_sub,
     'mirror_port', args.mirror_port,
-    'tenant', args.tenant,
+    'label', args.label,
     'connect_timeout', args.connect_timeout,
     'simple_timeout', args.simple_timeout,
     'stream_timeout', args.stream_timeout,
@@ -196,7 +194,7 @@ local function read_target(keys, args)
     'mirror_secure',
     'mirror_sub',
     'mirror_port',
-    'tenant',
+    'label',
     'connect_timeout',
     'simple_timeout',
     'stream_timeout',
@@ -224,7 +222,7 @@ local function read_target(keys, args)
     { name = 'mirror_secure', kind = 'int', min = 0, max = 1 },
     { name = 'mirror_sub', kind = 'str' },
     { name = 'mirror_port', kind = 'str' },
-    { name = 'tenant', kind = 'any' },
+    { name = 'label', kind = 'any' },
     { name = 'connect_timeout', kind = 'int', min = 1 },
     { name = 'simple_timeout', kind = 'int', min = 1 },
     { name = 'stream_timeout', kind = 'int', min = 1 },
@@ -768,7 +766,7 @@ local function delete_target(keys, raw_args)
     .. '\0' .. target.mirror_sub
     .. '\0' .. target.mirror_port
 
-  local mirror_hostname = target.mirror_sub ~= TARGET_SUB_APEX
+  local mirror_hostname = target.mirror_sub ~= '@'
       and (target.mirror_sub .. '.' .. campaign.mirror_domain)
     or campaign.mirror_domain
 

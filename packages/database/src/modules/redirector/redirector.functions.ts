@@ -122,7 +122,7 @@ export const redirectorFunctions = {
     transformReply: undefined as unknown as () => unknown,
   },
 
-  remove_redirector_fields: {
+  clear_redirector_fields: {
     NUMBER_OF_KEYS: 4,
 
     parseCommand(

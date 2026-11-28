@@ -61,6 +61,17 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
     url: string,
     lockSecret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'create',
+      params: {
+        campaignId,
+        proxyId,
+        url,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.create_proxy(
         this.options.prefix,
@@ -73,29 +84,22 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database create proxy`, {
-        data: {
-          proxy: {
-            campaignId,
-            proxyId,
-            url,
-          },
-        },
-      })
+      this.logger.info(`Database create proxy`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: {
-          campaignId,
-          proxyId,
-          url,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async read(campaignId: string, proxyId: string): Promise<ProxyModel | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'read',
+      params: {
+        campaignId,
+        proxyId,
+      },
+    } as const
+
     try {
       const rawModel = await this.connection.famir.read_proxy(
         this.options.prefix,
@@ -105,18 +109,21 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return this.buildModel(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'read',
-        params: {
-          campaignId,
-          proxyId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async enable(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'enable',
+      params: {
+        campaignId,
+        proxyId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.enable_proxy(
         this.options.prefix,
@@ -127,27 +134,23 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database enable proxy`, {
-        data: {
-          proxy: {
-            campaignId,
-            proxyId,
-          },
-        },
-      })
+      this.logger.info(`Database enable proxy`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'enable',
-        params: {
-          campaignId,
-          proxyId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async disable(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'disable',
+      params: {
+        campaignId,
+        proxyId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.disable_proxy(
         this.options.prefix,
@@ -158,27 +161,23 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database disable proxy`, {
-        data: {
-          proxy: {
-            campaignId,
-            proxyId,
-          },
-        },
-      })
+      this.logger.info(`Database disable proxy`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'disable',
-        params: {
-          campaignId,
-          proxyId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async delete(campaignId: string, proxyId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'delete',
+      params: {
+        campaignId,
+        proxyId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.delete_proxy(
         this.options.prefix,
@@ -189,27 +188,21 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database delete proxy`, {
-        data: {
-          proxy: {
-            campaignId,
-            proxyId,
-          },
-        },
-      })
+      this.logger.info(`Database delete proxy`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: {
-          campaignId,
-          proxyId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async list(campaignId: string): Promise<ProxyModel[] | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'list',
+      params: {
+        campaignId,
+      },
+    } as const
+
     try {
       const index = await this.connection.famir.read_proxy_index(this.options.prefix, campaignId)
 
@@ -227,13 +220,7 @@ export class RedisProxyRepository extends RedisBaseRepository implements ProxyRe
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'list',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 

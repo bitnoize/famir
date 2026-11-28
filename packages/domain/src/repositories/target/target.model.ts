@@ -40,7 +40,7 @@ export class TargetModel {
    * @param mirrorSub - The mirror subdomain.
    * @param mirrorDomain - The mirror domain.
    * @param mirrorPort - The mirror server port.
-   * @param tenant - The tenant for categorization.
+   * @param label - The label for categorization.
    * @param connectTimeout - The connection timeout in milliseconds.
    * @param simpleTimeout - The simple request timeout in milliseconds.
    * @param streamTimeout - The streaming request timeout in milliseconds.
@@ -68,7 +68,7 @@ export class TargetModel {
     readonly mirrorSub: string,
     readonly mirrorDomain: string,
     readonly mirrorPort: number,
-    readonly tenant: string,
+    readonly label: string,
     readonly connectTimeout: number,
     readonly simpleTimeout: number,
     readonly streamTimeout: number,

@@ -79,8 +79,8 @@ export interface CampaignPresetCampaign {
   sessionExpire: number
   newSessionExpire: number
   messageExpire: number
-  limiterLimit: number
-  limiterExpire: number
+  limiterBurst: number
+  limiterRate: number
 }
 
 /**
@@ -96,8 +96,8 @@ export interface RawCampaignPresetCampaign {
   sessionExpire?: number | null | undefined
   newSessionExpire?: number | null | undefined
   messageExpire?: number | null | undefined
-  limiterLimit?: number | null | undefined
-  limiterExpire?: number | null | undefined
+  limiterBurst?: number | null | undefined
+  limiterRate?: number | null | undefined
 }
 
 /**

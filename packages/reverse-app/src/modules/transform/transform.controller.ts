@@ -192,8 +192,8 @@ export class TransformController extends BaseController {
     this.router.add('transform-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (target.tenant) {
-        const hook = this.tenantSwitch.find('transform', target.tenant)
+      if (target.label) {
+        const hook = this.tenantSwitch.find('transform', target.label)
 
         await hook(ctx, next)
       } else {

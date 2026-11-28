@@ -130,6 +130,12 @@ export const messageFunctions = {
       parser.pushKey(proxyKey(prefix, campaignId, proxyId))
       parser.pushKey(targetKey(prefix, campaignId, targetId))
       parser.pushKey(sessionKey(prefix, campaignId, sessionId))
+
+      parser.push(campaignId)
+      parser.push(messageId)
+      parser.push(proxyId)
+      parser.push(targetId)
+      parser.push(sessionId)
     },
 
     transformReply: undefined as unknown as () => unknown,
@@ -171,7 +177,7 @@ export const messageFunctions = {
   },
 
   delete_message: {
-    NUMBER_OF_KEYS: 3,
+    NUMBER_OF_KEYS: 6,
 
     parseCommand(parser: CommandParser, prefix: string, campaignId: string, messageId: string) {
       parser.pushKey(campaignKey(prefix, campaignId))

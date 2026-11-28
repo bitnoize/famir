@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
 import {
-  FullRedirectorModel,
   Logger,
   LOGGER,
   RedirectorModel,
@@ -131,7 +130,7 @@ export class RedirectorController extends BaseController {
     return this
   }
 
-  private showRedirectorModel(console: Console, redirector: FullRedirectorModel) {
+  private showRedirectorModel(console: Console, redirector: RedirectorModel) {
     console.table({
       campaignId: redirector.campaignId,
       redirectorId: redirector.redirectorId,

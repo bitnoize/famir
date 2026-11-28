@@ -4,17 +4,16 @@ import {
   CampaignModel,
   CampaignRepository,
   DatabaseError,
-  FullCampaignModel,
-  FullRedirectorModel,
-  FullTargetModel,
   LURE_REPOSITORY,
   LureRepository,
   PROXY_REPOSITORY,
   ProxyRepository,
   REDIRECTOR_REPOSITORY,
+  RedirectorModel,
   RedirectorRepository,
   ReplServerError,
   TARGET_REPOSITORY,
+  TargetModel,
   TargetRepository,
 } from '@famir/domain'
 import {
@@ -89,8 +88,8 @@ export class CampaignService {
         campaign.sessionExpire,
         campaign.newSessionExpire,
         campaign.messageExpire,
-        campaign.limiterLimit,
-        campaign.limiterExpire
+        campaign.limiterBurst,
+        campaign.limiterRate
       )
     } catch (error) {
       if (error instanceof DatabaseError) {
@@ -190,8 +189,8 @@ export class CampaignService {
   /**
    * Reads the campaign by its ID.
    */
-  async read(data: { campaignId: string }): Promise<FullCampaignModel> {
-    const campaign = await this.campaignRepository.readFull(data.campaignId)
+  async read(data: { campaignId: string }): Promise<CampaignModel> {
+    const campaign = await this.campaignRepository.read(data.campaignId)
 
     if (!campaign) {
       throw ReplServerError.notFound(`Campaign not found`)
@@ -207,10 +206,10 @@ export class CampaignService {
     const lockSecret = await this.lockCampaign(campaign.campaignId)
 
     try {
-      const origCampaign = await this.campaignRepository.readFull(campaign.campaignId)
+      const origCampaign = await this.campaignRepository.read(campaign.campaignId)
       const origProxies = await this.proxyRepository.list(campaign.campaignId)
-      const origTargets = await this.targetRepository.listFull(campaign.campaignId)
-      const origRedirectors = await this.redirectorRepository.listFull(campaign.campaignId)
+      const origTargets = await this.targetRepository.list(campaign.campaignId)
+      const origRedirectors = await this.redirectorRepository.list(campaign.campaignId)
       const origLures = await this.lureRepository.list(campaign.campaignId)
 
       if (!(origCampaign && origProxies && origTargets && origRedirectors && origLures)) {
@@ -223,8 +222,8 @@ export class CampaignService {
         campaign.sessionExpire,
         campaign.newSessionExpire,
         campaign.messageExpire,
-        campaign.limiterLimit,
-        campaign.limiterExpire,
+        campaign.limiterBurst,
+        campaign.limiterRate,
         lockSecret
       )
 
@@ -248,7 +247,7 @@ export class CampaignService {
 
       const createTargets: CampaignPresetTarget[] = []
       const updateTargets: CampaignPresetTarget[] = []
-      const deleteTargets: FullTargetModel[] = []
+      const deleteTargets: TargetModel[] = []
 
       targets.forEach((target) => {
         const exists = origTargets.some((origTarget) => origTarget.targetId === target.targetId)
@@ -335,7 +334,7 @@ export class CampaignService {
 
       const createRedirectors: CampaignPresetRedirector[] = []
       const updateRedirectors: CampaignPresetRedirector[] = []
-      const deleteRedirectors: FullRedirectorModel[] = []
+      const deleteRedirectors: RedirectorModel[] = []
 
       redirectors.forEach((redirector) => {
         const exists = origRedirectors.some(
@@ -383,7 +382,7 @@ export class CampaignService {
           lockSecret
         )
 
-        await this.redirectorRepository.removeFields(
+        await this.redirectorRepository.clearFields(
           campaign.campaignId,
           redirector.redirectorId,
           lockSecret
@@ -484,10 +483,10 @@ export class CampaignService {
     const lockSecret = await this.lockCampaign(data.campaignId)
 
     try {
-      const campaign = await this.campaignRepository.readFull(data.campaignId)
+      const campaign = await this.campaignRepository.read(data.campaignId)
       const proxies = await this.proxyRepository.list(data.campaignId)
-      const targets = await this.targetRepository.listFull(data.campaignId)
-      const redirectors = await this.redirectorRepository.listFull(data.campaignId)
+      const targets = await this.targetRepository.list(data.campaignId)
+      const redirectors = await this.redirectorRepository.list(data.campaignId)
       const lures = await this.lureRepository.list(data.campaignId)
 
       if (!(campaign && proxies && targets && redirectors && lures)) {

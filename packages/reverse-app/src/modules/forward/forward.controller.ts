@@ -96,8 +96,8 @@ export class ForwardController extends BaseController {
     this.router.add('forward-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (target.tenant) {
-        const hook = this.tenantSwitch.find('forward', target.tenant)
+      if (target.label) {
+        const hook = this.tenantSwitch.find('forward', target.label)
 
         await hook(ctx, next)
       } else {

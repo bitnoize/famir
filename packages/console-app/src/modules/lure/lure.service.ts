@@ -212,19 +212,19 @@ export class LureService {
       throw ReplServerError.notFound(`Lure not found`)
     }
 
-    const campaign = await this.campaignRepository.readFull(data.campaignId)
+    const campaign = await this.campaignRepository.read(data.campaignId)
 
     if (!campaign) {
       throw ReplServerError.notFound(`Campaign not found`)
     }
 
-    const target = await this.targetRepository.readFull(data.campaignId, data.targetId)
+    const target = await this.targetRepository.read(data.campaignId, data.targetId)
 
     if (!target) {
       throw ReplServerError.notFound(`Target not found`)
     }
 
-    const redirector = await this.redirectorRepository.readFull(data.campaignId, lure.redirectorId)
+    const redirector = await this.redirectorRepository.read(data.campaignId, lure.redirectorId)
 
     if (!redirector) {
       throw ReplServerError.notFound(`Redirector not found`)

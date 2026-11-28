@@ -8,8 +8,7 @@ import { DomainError, DomainErrorOptions, ErrorContext } from '../../domain.erro
  *
  * @category Database Service
  */
-export type DatabaseErrorCode =
-  'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT' | 'TOO_MANY_REQUESTS' | 'INTERNAL_ERROR'
+export type DatabaseErrorCode = 'FORBIDDEN' | 'NOT_FOUND' | 'CONFLICT' | 'INTERNAL_ERROR'
 
 /**
  * Options for creating a database error.
@@ -88,25 +87,6 @@ export class DatabaseError extends DomainError {
   }
 
   /**
-   * Creates a new database error with `TOO_MANY_REQUESTS` code.
-   *
-   * @param message - The human-readable description of the error.
-   * @param context - The optional error context.
-   * @param cause - The optional upstream error.
-   */
-  static tooManyRequests(
-    message: string,
-    context?: ErrorContext | null,
-    cause?: unknown
-  ): DatabaseError {
-    return new DatabaseError(message, {
-      cause,
-      context,
-      code: 'TOO_MANY_REQUESTS',
-    })
-  }
-
-  /**
    * Creates a new database error with `INTERNAL_ERROR` code.
    *
    * @param message - The human-readable description of the error.
@@ -153,10 +133,6 @@ export class DatabaseError extends DomainError {
 
   get isConflict(): boolean {
     return this.code === 'CONFLICT'
-  }
-
-  get isTooManyRequests(): boolean {
-    return this.code === 'TOO_MANY_REQUESTS'
   }
 
   get isInternalError(): boolean {

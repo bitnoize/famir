@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
 import {
-  FullRedirectorModel,
   REDIRECTOR_REPOSITORY,
   RedirectorModel,
   RedirectorRepository,
@@ -42,8 +41,8 @@ export class RedirectorService {
   /**
    * Reads the redirector by its ID.
    */
-  async read(data: { campaignId: string; redirectorId: string }): Promise<FullRedirectorModel> {
-    const redirector = await this.redirectorRepository.readFull(data.campaignId, data.redirectorId)
+  async read(data: { campaignId: string; redirectorId: string }): Promise<RedirectorModel> {
+    const redirector = await this.redirectorRepository.read(data.campaignId, data.redirectorId)
 
     if (!redirector) {
       throw ReplServerError.notFound(`Redirector not found`)

@@ -1,9 +1,9 @@
 import {
   EnabledTargetModel,
-  RedirectorModel,
   HttpClientError,
   HttpServerError,
   Logger,
+  RedirectorModel,
   Templater,
   TemplaterData,
   Validator,
@@ -132,10 +132,7 @@ export abstract class BaseController {
     await this.sendRedirectTo(ctx, '/')
   }
 
-  protected async sendMainPage(
-    ctx: HttpServerContext,
-    target: EnabledTargetModel
-  ): Promise<void> {
+  protected async sendMainPage(ctx: HttpServerContext, target: EnabledTargetModel): Promise<void> {
     ctx.sureNormal()
 
     if (target.mainPage && ctx.method.is(['GET', 'HEAD'])) {
@@ -248,10 +245,7 @@ export abstract class BaseController {
     }
   }
 
-  protected async sendRobotsTxt(
-    ctx: HttpServerContext,
-    target: EnabledTargetModel
-  ): Promise<void> {
+  protected async sendRobotsTxt(ctx: HttpServerContext, target: EnabledTargetModel): Promise<void> {
     ctx.sureNormal()
 
     if (target.robotsTxt && ctx.method.is(['GET', 'HEAD'])) {

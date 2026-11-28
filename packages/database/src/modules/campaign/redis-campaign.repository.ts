@@ -2,6 +2,7 @@ import { DIContainer, randomIdent } from '@famir/common'
 import {
   CAMPAIGN_LOCK_TIMEOUT,
   CAMPAIGN_REPOSITORY,
+  CampaignLimiter,
   CampaignModel,
   CampaignRepository,
   CONFIG,
@@ -15,8 +16,8 @@ import {
   VALIDATOR,
 } from '@famir/domain'
 import { RedisBaseRepository } from '../base/index.js'
-import { RawCampaign } from './campaign.functions.js'
-import { rawCampaignSchema } from './campaign.schemas.js'
+import { RawCampaign, RawCampaignLimiter } from './campaign.functions.js'
+import { rawCampaignLimiterSchema, rawCampaignSchema } from './campaign.schemas.js'
 
 /**
  * Redis-based campaign repository implementation.
@@ -53,7 +54,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
   constructor(validator: Validator, config: Config, logger: Logger, connector: DatabaseConnector) {
     super(validator, config, logger, connector, 'campaign')
 
-    this.validator.addSchema('database-raw-campaign', rawCampaignSchema)
+    this.validator
+      .addSchema('database-raw-campaign', rawCampaignSchema)
+      .addSchema('database-raw-campaign-limiter', rawCampaignLimiterSchema)
   }
 
   async create(
@@ -69,6 +72,24 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     limiterBurst: number,
     limiterRate: number
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'create',
+      params: {
+        campaignId,
+        mirrorDomain,
+        description: `content string (${description.length.toString()} bytes)`,
+        cryptSecret: '********',
+        upgradeSessionPath,
+        sessionCookieName,
+        sessionExpire,
+        newSessionExpire,
+        messageExpire,
+        limiterBurst,
+        limiterRate,
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.create_campaign(
         this.options.prefix,
@@ -87,44 +108,41 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database create campaign`, {
-        data: {
-          campaign: {
-            campaignId,
-            mirrorDomain,
-          },
-        },
-      })
+      this.logger.info(`Database create campaign`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: {
-          campaignId,
-          mirrorDomain,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async read(campaignId: string): Promise<CampaignModel | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'read',
+      params: {
+        campaignId,
+      },
+    } as const
+
     try {
       const rawModel = await this.connection.famir.read_campaign(this.options.prefix, campaignId)
 
       return this.buildModel(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'read',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async lock(campaignId: string): Promise<string> {
     const lockSecret = randomIdent()
+
+    const details = {
+      repository: this.repositoryName,
+      method: 'lock',
+      params: {
+        campaignId,
+        lockSecret: '********',
+      },
+    } as const
 
     try {
       const statusReply = await this.connection.famir.lock_campaign(
@@ -136,27 +154,24 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database lock campaign`, {
-        data: {
-          campaign: {
-            campaignId,
-          },
-        },
-      })
+      this.logger.info(`Database lock campaign`, { data: details })
 
       return lockSecret
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'lock',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async unlock(campaignId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'unlock',
+      params: {
+        campaignId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.unlock_campaign(
         this.options.prefix,
@@ -166,21 +181,9 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database unlock campaign`, {
-        data: {
-          campaign: {
-            campaignId,
-          },
-        },
-      })
+      this.logger.info(`Database unlock campaign`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'unlock',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -194,6 +197,21 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     limiterRate: number,
     lockSecret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'update',
+      params: {
+        campaignId,
+        description: `content string (${description.length.toString()} bytes)`,
+        sessionExpire,
+        newSessionExpire,
+        messageExpire,
+        limiterBurst,
+        limiterRate,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.update_campaign(
         this.options.prefix,
@@ -209,25 +227,22 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database update campaign`, {
-        data: {
-          campaign: {
-            campaignId,
-          },
-        },
-      })
+      this.logger.info(`Database update campaign`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'update',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async appendFlag(campaignId: string, flag: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'appendFlag',
+      params: {
+        campaignId,
+        flag,
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.append_campaign_flag(
         this.options.prefix,
@@ -237,27 +252,22 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database append campaign flag`, {
-        data: {
-          campaign: {
-            campaignId,
-            flag,
-          },
-        },
-      })
+      this.logger.info(`Database append campaign flag`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'appendFlag',
-        params: {
-          campaignId,
-          flag,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async removeFlag(campaignId: string, flag: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'removeFlag',
+      params: {
+        campaignId,
+        flag,
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.remove_campaign_flag(
         this.options.prefix,
@@ -267,27 +277,22 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database remove campaign flag`, {
-        data: {
-          campaign: {
-            campaignId,
-            flag,
-          },
-        },
-      })
+      this.logger.info(`Database remove campaign flag`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'removeFlag',
-        params: {
-          campaignId,
-          flag,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async delete(campaignId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'delete',
+      params: {
+        campaignId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.delete_campaign(
         this.options.prefix,
@@ -297,25 +302,19 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database delete campaign`, {
-        data: {
-          campaign: {
-            campaignId,
-          },
-        },
-      })
+      this.logger.info(`Database delete campaign`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async list(): Promise<CampaignModel[]> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'list',
+      params: null,
+    } as const
+
     try {
       const index = await this.connection.famir.read_campaign_index(this.options.prefix)
 
@@ -329,43 +328,36 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'list',
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
-  async checkLimiter(campaignId: string, identity: string, limiterCost: number): Promise<void> {
+  async checkLimiter(
+    campaignId: string,
+    identity: string,
+    cost: number
+  ): Promise<CampaignLimiter | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'checkLimiter',
+      params: {
+        campaignId,
+        identity,
+        cost,
+      },
+    } as const
+
     try {
-      const statusReply = await this.connection.famir.check_campaign_limiter(
+      const rawLimiter = await this.connection.famir.check_campaign_limiter(
         this.options.prefix,
         campaignId,
         identity,
-        limiterCost
+        cost
       )
 
-      this.checkStatusReply(statusReply)
-
-      this.logger.debug(`Database check campaign limiter`, {
-        data: {
-          campaign: {
-            campaignId,
-            identity,
-            limiterCost,
-          },
-        },
-      })
+      return this.buildLimiter(rawLimiter)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'checkLimiter',
-        params: {
-          campaignId,
-          identity,
-          limiterCost,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -422,5 +414,28 @@ export class RedisCampaignRepository extends RedisBaseRepository implements Camp
     return rawCollection
       .map((rawModel) => this.buildModel(rawModel))
       .filter(CampaignModel.isNotNull)
+  }
+
+  /**
+   * Converts raw Redis data to a campaign limiter.
+   *
+   * @param rawLimiter - The raw data from Redis.
+   * @returns The campaign limiter, or `null` if the raw data is `null`.
+   * @throws DatabaseError If the raw data fails validation.
+   */
+  protected buildLimiter(rawLimiter: unknown): CampaignLimiter | null {
+    if (rawLimiter === null) {
+      return null
+    }
+
+    this.validateReply<RawCampaignLimiter>('database-raw-campaign-limiter', rawLimiter)
+
+    return {
+      isAllowed: rawLimiter.is_allowed,
+      tokens: rawLimiter.tokens,
+      ts: rawLimiter.ts,
+      cost: rawLimiter.cost,
+      retryAfterMs: rawLimiter.retry_after_ms,
+    }
   }
 }

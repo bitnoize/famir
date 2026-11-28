@@ -61,6 +61,17 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     page: string,
     lockSecret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'create',
+      params: {
+        campaignId,
+        redirectorId,
+        page: page,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.create_redirector(
         this.options.prefix,
@@ -72,27 +83,22 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database create redirector`, {
-        data: {
-          redirector: {
-            campaignId,
-            redirectorId,
-          },
-        },
-      })
+      this.logger.info(`Database create redirector`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: {
-          campaignId,
-          redirectorId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async read(campaignId: string, redirectorId: string): Promise<RedirectorModel | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'read',
+      params: {
+        campaignId,
+        redirectorId,
+      },
+    } as const
+
     try {
       const rawModel = await this.connection.famir.read_redirector(
         this.options.prefix,
@@ -102,14 +108,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildModel(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'read',
-        params: {
-          campaignId,
-          redirectorId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -119,6 +118,17 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     page: string,
     lockSecret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'update',
+      params: {
+        campaignId,
+        redirectorId,
+        page,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.update_redirector(
         this.options.prefix,
@@ -130,23 +140,9 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database update redirector`, {
-        data: {
-          redirector: {
-            campaignId,
-            redirectorId,
-          },
-        },
-      })
+      this.logger.info(`Database update redirector`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'update',
-        params: {
-          campaignId,
-          redirectorId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -156,6 +152,17 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
     fields: string[],
     lockSecret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'appendFields',
+      params: {
+        campaignId,
+        redirectorId,
+        fields,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       if (fields.length === 0) {
         return
@@ -175,31 +182,25 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.checkStatusReplies(statusReplies)
 
-      this.logger.info(`Database append redirector fields`, {
-        data: {
-          redirector: {
-            campaignId,
-            redirectorId,
-            fields,
-          },
-        },
-      })
+      this.logger.info(`Database append redirector fields`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'appendFields',
-        params: {
-          campaignId,
-          redirectorId,
-          fields,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
-  async removeFields(campaignId: string, redirectorId: string, lockSecret: string): Promise<void> {
+  async clearFields(campaignId: string, redirectorId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'clearFields',
+      params: {
+        campaignId,
+        redirectorId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
-      const statusReply = await this.connection.famir.remove_redirector_fields(
+      const statusReply = await this.connection.famir.clear_redirector_fields(
         this.options.prefix,
         campaignId,
         redirectorId,
@@ -208,27 +209,23 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database remove redirector fields`, {
-        data: {
-          redirector: {
-            campaignId,
-            redirectorId,
-          },
-        },
-      })
+      this.logger.info(`Database clear redirector fields`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'removeFields',
-        params: {
-          campaignId,
-          redirectorId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async delete(campaignId: string, redirectorId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'delete',
+      params: {
+        campaignId,
+        redirectorId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.delete_redirector(
         this.options.prefix,
@@ -239,27 +236,21 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database delete redirector`, {
-        data: {
-          redirector: {
-            campaignId,
-            redirectorId,
-          },
-        },
-      })
+      this.logger.info(`Database delete redirector`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: {
-          campaignId,
-          redirectorId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async list(campaignId: string): Promise<RedirectorModel[] | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'list',
+      params: {
+        campaignId,
+      },
+    } as const
+
     try {
       const index = await this.connection.famir.read_redirector_index(
         this.options.prefix,
@@ -280,13 +271,7 @@ export class RedisRedirectorRepository extends RedisBaseRepository implements Re
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'list',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 

@@ -72,7 +72,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     mirrorSecure: boolean,
     mirrorSub: string,
     mirrorPort: number,
-    tenant: string,
+    label: string,
     connectTimeout: number,
     simpleTimeout: number,
     streamTimeout: number,
@@ -86,6 +86,36 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     allowWebSockets: boolean,
     lockSecret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'create',
+      params: {
+        campaignId,
+        targetId,
+        accessLevel,
+        donorSecure,
+        donorSub,
+        donorDomain,
+        donorPort,
+        mirrorSecure,
+        mirrorSub,
+        mirrorPort,
+        label,
+        connectTimeout,
+        simpleTimeout,
+        streamTimeout,
+        headersSizeLimit,
+        bodySizeLimit,
+        mainPage,
+        notFoundPage,
+        faviconIco,
+        robotsTxt,
+        sitemapXml,
+        allowWebSockets,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.create_target(
         this.options.prefix,
@@ -99,7 +129,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
         mirrorSecure,
         mirrorSub,
         mirrorPort,
-        tenant,
+        label,
         connectTimeout,
         simpleTimeout,
         streamTimeout,
@@ -116,27 +146,22 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database create target`, {
-        data: {
-          target: {
-            campaignId,
-            targetId,
-          },
-        },
-      })
+      this.logger.info(`Database create target`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: {
-          campaignId,
-          targetId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async read(campaignId: string, targetId: string): Promise<TargetModel | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'read',
+      params: {
+        campaignId,
+        targetId,
+      },
+    } as const
+
     try {
       const rawModel = await this.connection.famir.read_target(
         this.options.prefix,
@@ -146,18 +171,17 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildModel(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'read',
-        params: {
-          campaignId,
-          targetId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async readHosts(): Promise<TargetHosts> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'readHosts',
+      params: null,
+    } as const
+
     try {
       const hosts = await this.connection.famir.read_target_hosts(this.options.prefix)
 
@@ -165,14 +189,19 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return hosts
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'readHosts',
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async find(mirrorHost: string): Promise<TargetLink | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'find',
+      params: {
+        mirrorHost,
+      },
+    } as const
+
     try {
       const targetLink = await this.connection.famir.find_target_link(
         this.options.prefix,
@@ -187,13 +216,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return targetLink
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'find',
-        params: {
-          mirrorHost,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -213,6 +236,27 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
     allowWebSockets: boolean,
     lockSecret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'update',
+      params: {
+        campaignId,
+        targetId,
+        connectTimeout,
+        simpleTimeout,
+        streamTimeout,
+        headersSizeLimit,
+        bodySizeLimit,
+        mainPage,
+        notFoundPage,
+        faviconIco,
+        robotsTxt,
+        sitemapXml,
+        allowWebSockets,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.update_target(
         this.options.prefix,
@@ -234,27 +278,23 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database update target`, {
-        data: {
-          target: {
-            campaignId,
-            targetId,
-          },
-        },
-      })
+      this.logger.info(`Database update target`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'update',
-        params: {
-          campaignId,
-          targetId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async enable(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'enable',
+      params: {
+        campaignId,
+        targetId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.enable_target(
         this.options.prefix,
@@ -265,27 +305,23 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database enable target`, {
-        data: {
-          target: {
-            campaignId,
-            targetId,
-          },
-        },
-      })
+      this.logger.info(`Database enable target`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'enable',
-        params: {
-          campaignId,
-          targetId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async disable(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'disable',
+      params: {
+        campaignId,
+        targetId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.disable_target(
         this.options.prefix,
@@ -296,27 +332,23 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database disable target`, {
-        data: {
-          target: {
-            campaignId,
-            targetId,
-          },
-        },
-      })
+      this.logger.info(`Database disable target`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'disable',
-        params: {
-          campaignId,
-          targetId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async delete(campaignId: string, targetId: string, lockSecret: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'delete',
+      params: {
+        campaignId,
+        targetId,
+        lockSecret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.delete_target(
         this.options.prefix,
@@ -327,27 +359,21 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database delete target`, {
-        data: {
-          target: {
-            campaignId,
-            targetId,
-          },
-        },
-      })
+      this.logger.info(`Database delete target`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: {
-          campaignId,
-          targetId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async list(campaignId: string): Promise<TargetModel[] | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'list',
+      params: {
+        campaignId,
+      },
+    } as const
+
     try {
       const index = await this.connection.famir.read_target_index(this.options.prefix, campaignId)
 
@@ -365,13 +391,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'list',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -401,7 +421,7 @@ export class RedisTargetRepository extends RedisBaseRepository implements Target
       rawModel.mirror_sub,
       rawModel.mirror_domain,
       rawModel.mirror_port,
-      rawModel.tenant,
+      rawModel.label,
       rawModel.connect_timeout,
       rawModel.simple_timeout,
       rawModel.stream_timeout,

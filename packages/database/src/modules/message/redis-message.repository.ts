@@ -96,6 +96,32 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     startTime: number,
     finishTime: number
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'create',
+      params: {
+        campaignId,
+        messageId,
+        proxyId,
+        targetId,
+        sessionId,
+        type,
+        method,
+        url,
+        requestHeaders: `JSON object (${Object.keys(requestHeaders).length.toString()} keys)`,
+        requestBody: `Base64 data (${requestBody.length.toString()} bytes)`,
+        status,
+        responseHeaders: `JSON object (${Object.keys(responseHeaders).length.toString()} keys)`,
+        responseBody: `Base64 data (${responseBody.length.toString()} bytes)`,
+        connection: `JSON object (${Object.keys(connection).length.toString()} keys)`,
+        payload: `JSON object (${Object.keys(payload).length.toString()} keys)`,
+        errors: `JSON array (${errors.length.toString()} items)`,
+        analyze,
+        startTime,
+        finishTime,
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.create_message(
         this.options.prefix,
@@ -123,29 +149,9 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database create message`, {
-        data: {
-          message: {
-            campaignId,
-            messageId,
-            proxyId,
-            targetId,
-            sessionId,
-          },
-        },
-      })
+      this.logger.info(`Database create message`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: {
-          campaignId,
-          messageId,
-          proxyId,
-          targetId,
-          sessionId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -156,6 +162,18 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
     targetId: string,
     sessionId: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'createDummy',
+      params: {
+        campaignId,
+        messageId,
+        proxyId,
+        targetId,
+        sessionId,
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.create_dummy_message(
         this.options.prefix,
@@ -168,33 +186,22 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database create dummy message`, {
-        data: {
-          message: {
-            campaignId,
-            messageId,
-            proxyId,
-            targetId,
-            sessionId,
-          },
-        },
-      })
+      this.logger.info(`Database create dummy message`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'createDummy',
-        params: {
-          campaignId,
-          messageId,
-          proxyId,
-          targetId,
-          sessionId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async read(campaignId: string, messageId: string): Promise<MessageModel | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'read',
+      params: {
+        campaignId,
+        messageId,
+      },
+    } as const
+
     try {
       const rawModel = await this.connection.famir.read_message(
         this.options.prefix,
@@ -204,18 +211,20 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return this.buildModel(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'read',
-        params: {
-          campaignId,
-          messageId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async readFull(campaignId: string, messageId: string): Promise<FullMessageModel | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'readFull',
+      params: {
+        campaignId,
+        messageId,
+      },
+    } as const
+
     try {
       const rawModel = await this.connection.famir.read_full_message(
         this.options.prefix,
@@ -225,18 +234,20 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return this.buildFullModel(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'readFull',
-        params: {
-          campaignId,
-          messageId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async delete(campaignId: string, messageId: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'delete',
+      params: {
+        campaignId,
+        messageId,
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.delete_message(
         this.options.prefix,
@@ -246,27 +257,22 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database delete message`, {
-        data: {
-          message: {
-            campaignId,
-            messageId,
-          },
-        },
-      })
+      this.logger.info(`Database delete message`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'delete',
-        params: {
-          campaignId,
-          messageId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async list(campaignId: string, limit: number): Promise<MessageModel[] | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'list',
+      params: {
+        campaignId,
+        limit,
+      },
+    } as const
+
     try {
       const index = await this.connection.famir.read_message_history(
         this.options.prefix,
@@ -288,17 +294,19 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'list',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async clear(campaignId: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'clear',
+      params: {
+        campaignId,
+      },
+    } as const
+
     try {
       const index = await this.connection.famir.read_message_history(
         this.options.prefix,
@@ -324,21 +332,9 @@ export class RedisMessageRepository extends RedisBaseRepository implements Messa
 
       this.checkStatusReplies(statusReplies)
 
-      this.logger.info(`Database delete all messages`, {
-        data: {
-          campaign: {
-            campaignId,
-          },
-        },
-      })
+      this.logger.info(`Database delete all messages`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'deleteAll',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 

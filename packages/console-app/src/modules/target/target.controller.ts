@@ -1,6 +1,5 @@
 import { DIContainer } from '@famir/common'
 import {
-  FullTargetModel,
   Logger,
   LOGGER,
   TargetModel,
@@ -150,7 +149,7 @@ export class TargetController extends BaseController {
     return this
   }
 
-  private showTargetModel(console: Console, target: FullTargetModel) {
+  private showTargetModel(console: Console, target: TargetModel) {
     console.table({
       campaignId: target.campaignId,
       targetId: target.targetId,

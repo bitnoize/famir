@@ -82,20 +82,19 @@ redis.register_function({
 })
 
 local function read_campaign(keys, args)
-  if #keys ~= 10 then
+  if #keys ~= 9 then
     return redis.error_reply('ERR wrong number of keys')
   end
 
   local campaign_key = keys[1]
   local campaign_lock_key = keys[2]
   local campaign_flags_key = keys[3]
-  local campaign_session_cookie_names_key = keys[4]
-  local proxy_index_key = keys[5]
-  local target_index_key = keys[6]
-  local redirector_index_key = keys[7]
-  local lure_index_key = keys[8]
-  local session_history_key = keys[9]
-  local message_history_key = keys[10]
+  local proxy_index_key = keys[4]
+  local target_index_key = keys[5]
+  local redirector_index_key = keys[6]
+  local lure_index_key = keys[7]
+  local session_history_key = keys[8]
+  local message_history_key = keys[9]
 
   if #args ~= 0 then
     return redis.error_reply('ERR wrong number of args')
@@ -145,7 +144,6 @@ local function read_campaign(keys, args)
     return redis.error_reply('ERR normalize campaign: ' .. campaign_err)
   end
 
-  campaign.session_cookie_names = redis.call('SMEMBERS', campaign_session_cookie_names_key)
   campaign.is_locked = redis.call('EXISTS', campaign_lock_key) == 1
   campaign.flags = redis.call('SMEMBERS', campaign_flags_key)
   campaign.proxy_index = redis.call('ZCARD', proxy_index_key)
@@ -561,7 +559,7 @@ local function check_campaign_limiter(keys, raw_args)
   )
 
   local limiter, limiter_err = normalize(raw_limiter, {
-    { name = 'tokens', kind = 'num', min = 0 },
+    { name = 'tokens', kind = 'num', min = 0, max = 1000 },
     { name = 'ts', kind = 'int', min = 0 },
   })
 
@@ -577,16 +575,16 @@ local function check_campaign_limiter(keys, raw_args)
 
   limiter.ts = now
 
-  local is_allowed, retry_after
+  local is_allowed, retry_after_ms
 
   if limiter.tokens >= args.limiter_cost then
     limiter.tokens = limiter.tokens - args.limiter_cost
 
     is_allowed = true
-    retry_after = 0
+    retry_after_ms = 0
   else
     is_allowed = false
-    retry_after = math.ceil((args.limiter_cost - limiter.tokens) / campaign.limiter_rate * 1000)
+    retry_after_ms = math.ceil((args.limiter_cost - limiter.tokens) / campaign.limiter_rate * 1000)
   end
 
   limiter.tokens = math.max(0, limiter.tokens)
@@ -608,7 +606,7 @@ local function check_campaign_limiter(keys, raw_args)
       tokens = limiter.tokens,
       ts = limiter.ts,
       cost = args.limiter_cost,
-      retry_after = retry_after,
+      retry_after_ms = retry_after_ms,
     },
   }
 end

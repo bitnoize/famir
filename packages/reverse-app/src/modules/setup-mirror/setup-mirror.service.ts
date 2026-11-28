@@ -1,10 +1,10 @@
 import { DIContainer } from '@famir/common'
 import {
   CAMPAIGN_REPOSITORY,
-  CampaignRepository,
-  DatabaseError,
-  EnabledTargetModel,
+  CampaignLimiter,
   CampaignModel,
+  CampaignRepository,
+  EnabledTargetModel,
   HttpServerError,
   TARGET_REPOSITORY,
   TargetLink,
@@ -52,22 +52,24 @@ export class SetupMirrorService {
     protected readonly targetRepository: TargetRepository
   ) {}
 
-  async checkCampaignLimiter(data: { campaignId: string; identity: string }): Promise<void> {
-    try {
-      await this.campaignRepository.checkLimiter(data.campaignId, data.identity)
-    } catch (error) {
-      if (error instanceof DatabaseError) {
-        if (error.isNotFound) {
-          throw HttpServerError.serviceUnavailable(`Service unavailable`, {
-            reason: `Campaign not found`,
-          })
-        }
+  async checkCampaignLimiter(data: {
+    campaignId: string
+    identity: string
+    cost: number
+  }): Promise<CampaignLimiter> {
+    const limiter = await this.campaignRepository.checkLimiter(
+      data.campaignId,
+      data.identity,
+      data.cost
+    )
 
-        throw HttpServerError.internalError(`Check campaign limiter failed`, null, error)
-      }
-
-      throw error
+    if (!limiter) {
+      throw HttpServerError.serviceUnavailable(`Service unavailable`, {
+        reason: `Check campaign limiter failed`,
+      })
     }
+
+    return limiter
   }
 
   async findTargetLink(data: { mirrorHost: string }): Promise<TargetLink> {
@@ -93,10 +95,7 @@ export class SetupMirrorService {
     return campaign
   }
 
-  async readTarget(data: {
-    campaignId: string
-    targetId: string
-  }): Promise<EnabledTargetModel> {
+  async readTarget(data: { campaignId: string; targetId: string }): Promise<EnabledTargetModel> {
     const target = await this.targetRepository.read(data.campaignId, data.targetId)
 
     if (!(target && TargetModel.isEnabled(target))) {

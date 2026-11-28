@@ -2,8 +2,8 @@ import { JSONSchemaType, booleanSchema, customIdentSchema, secretSchema } from '
 import {
   campaignDescriptionSchema,
   campaignFlagSchema,
-  campaignLimiterExpireSchema,
-  campaignLimiterLimitSchema,
+  campaignLimiterBurstSchema,
+  campaignLimiterRateSchema,
   campaignMessageExpireSchema,
   campaignMirrorDomainSchema,
   campaignNewSessionExpireSchema,
@@ -232,12 +232,12 @@ const rawCampaignPresetCampaignSchema: JSONSchemaType<RawCampaignPresetCampaign>
       ...campaignMessageExpireSchema,
       nullable: true,
     },
-    limiterLimit: {
-      ...campaignLimiterLimitSchema,
+    limiterBurst: {
+      ...campaignLimiterBurstSchema,
       nullable: true,
     },
-    limiterExpire: {
-      ...campaignLimiterExpireSchema,
+    limiterRate: {
+      ...campaignLimiterRateSchema,
       nullable: true,
     },
   },

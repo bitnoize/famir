@@ -95,7 +95,7 @@ export interface RedirectorRepository {
    * @throws DatabaseError If the redirector does not exist.
    * @throws DatabaseError If the data validation fails.
    */
-  removeFields(campaignId: string, redirectorId: string, lockSecret: string): Promise<void>
+  clearFields(campaignId: string, redirectorId: string, lockSecret: string): Promise<void>
 
   /**
    * Deletes the redirector by its ID.

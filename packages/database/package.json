@@ -20,8 +20,8 @@
     "format": "prettier -w \"src/**/*.ts\" README.md",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "node --test dist/**/*.test.js",
-    "stylua": "stylua redis-functions.lua",
-    "selene": "selene redis-functions.lua",
+    "stylua": "stylua redis-functions",
+    "selene": "selene redis-functions",
     "prebuild": "node generate-redis-functions.js",
     "build": "tsc -b",
     "clean": "rimraf dist *.tsbuildinfo"

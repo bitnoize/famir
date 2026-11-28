@@ -1,3 +1,4 @@
+import { CampaignLimiter } from './campaign.js'
 import { CampaignModel } from './campaign.model.js'
 
 /**
@@ -164,5 +165,9 @@ export interface CampaignRepository {
    * @throws DatabaseError If the request limiter exceeded.
    * @throws DatabaseError If the data validation fails.
    */
-  checkLimiter(campaignId: string, identity: string, limiterCost: number): Promise<void>
+  checkLimiter(
+    campaignId: string,
+    identity: string,
+    limiterCost: number
+  ): Promise<CampaignLimiter | null>
 }

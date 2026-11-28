@@ -58,6 +58,16 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
   async create(campaignId: string): Promise<SessionModel> {
     const [sessionId, secret] = [randomIdent(), randomIdent()]
 
+    const details = {
+      repository: this.repositoryName,
+      method: 'create',
+      params: {
+        campaignId,
+        sessionId,
+        secret: '********',
+      },
+    } as const
+
     try {
       const [statusReply, rawModel] = await Promise.all([
         this.connection.famir.create_session(this.options.prefix, campaignId, sessionId, secret),
@@ -67,29 +77,24 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database create session`, {
-        data: {
-          session: {
-            campaignId,
-            sessionId,
-          },
-        },
-      })
+      this.logger.info(`Database create session`, { data: details })
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'create',
-        params: {
-          campaignId,
-          sessionId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async read(campaignId: string, sessionId: string): Promise<SessionModel | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'read',
+      params: {
+        campaignId,
+        sessionId,
+      },
+    } as const
+
     try {
       const rawModel = await this.connection.famir.read_session(
         this.options.prefix,
@@ -99,18 +104,20 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       return this.buildModel(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'read',
-        params: {
-          campaignId,
-          sessionId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async auth(campaignId: string, sessionId: string): Promise<SessionModel> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'auth',
+      params: {
+        campaignId,
+        sessionId,
+      },
+    } as const
+
     try {
       const [statusReply, rawModel] = await Promise.all([
         this.connection.famir.auth_session(this.options.prefix, campaignId, sessionId),
@@ -120,25 +127,11 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database auth session`, {
-        data: {
-          session: {
-            campaignId,
-            sessionId,
-          },
-        },
-      })
+      this.logger.info(`Database auth session`, { data: details })
 
       return this.buildModelStrict(rawModel)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'auth',
-        params: {
-          campaignId,
-          sessionId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -148,6 +141,17 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     sessionId: string,
     secret: string
   ): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'upgrade',
+      params: {
+        campaignId,
+        lureId,
+        sessionId,
+        secret: '********',
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.upgrade_session(
         this.options.prefix,
@@ -159,29 +163,22 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database upgrade session`, {
-        data: {
-          session: {
-            campaignId,
-            lureId,
-            sessionId,
-          },
-        },
-      })
+      this.logger.info(`Database upgrade session`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'upgrade',
-        params: {
-          campaignId,
-          lureId,
-          sessionId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async revoke(campaignId: string, sessionId: string): Promise<void> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'revoke',
+      params: {
+        campaignId,
+        sessionId,
+      },
+    } as const
+
     try {
       const statusReply = await this.connection.famir.revoke_session(
         this.options.prefix,
@@ -191,27 +188,22 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       this.checkStatusReply(statusReply)
 
-      this.logger.info(`Database revoke session`, {
-        data: {
-          session: {
-            campaignId,
-            sessionId,
-          },
-        },
-      })
+      this.logger.info(`Database revoke session`, { data: details })
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'revoke',
-        params: {
-          campaignId,
-          sessionId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
   async list(campaignId: string, limit: number): Promise<SessionModel[] | null> {
+    const details = {
+      repository: this.repositoryName,
+      method: 'list',
+      params: {
+        campaignId,
+        limit,
+      },
+    } as const
+
     try {
       const index = await this.connection.famir.read_session_history(
         this.options.prefix,
@@ -233,13 +225,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
 
       return this.buildCollection(rawCollection)
     } catch (error) {
-      throw DatabaseError.wrap(error, {
-        repository: this.repositoryName,
-        method: 'list',
-        params: {
-          campaignId,
-        },
-      })
+      throw DatabaseError.wrap(error, details)
     }
   }
 
@@ -282,9 +268,7 @@ export class RedisSessionRepository extends RedisBaseRepository implements Sessi
     const model = this.buildModel(rawModel)
 
     if (!SessionModel.isNotNull(model)) {
-      throw new DatabaseError(`Session unexpected lost`, {
-        code: 'INTERNAL_ERROR',
-      })
+      throw DatabaseError.internalError(`Session unexpected lost`)
     }
 
     return model

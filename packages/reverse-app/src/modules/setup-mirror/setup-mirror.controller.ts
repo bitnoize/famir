@@ -95,7 +95,11 @@ export class SetupMirrorController extends BaseController {
         mirrorHost,
       })
 
-      const limiter = await this.setupMirrorService.checkCampaignLimiter({ campaignId, identity: 'a-b-c-d' })
+      const limiter = await this.setupMirrorService.checkCampaignLimiter({
+        campaignId,
+        identity: 'a-b-c-d',
+        cost: 1,
+      })
 
       if (!limiter.isAllowed) {
         throw HttpServerError.tooManyRequests(`Too many requests`, {
@@ -135,8 +139,8 @@ export class SetupMirrorController extends BaseController {
     this.router.add('setup-mirror-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (target.tenant) {
-        const hook = this.tenantSwitch.find('setup-mirror', target.tenant)
+      if (target.label) {
+        const hook = this.tenantSwitch.find('setup-mirror', target.label)
 
         await hook(ctx, next)
       } else {

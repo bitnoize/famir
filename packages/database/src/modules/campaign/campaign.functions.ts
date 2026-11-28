@@ -47,6 +47,20 @@ export interface RawCampaign {
 }
 
 /**
+ * Raw campaign limiter data structure.
+ *
+ * @category Campaign
+ * @internal
+ */
+export interface RawCampaignLimiter {
+  is_allowed: boolean
+  tokens: number
+  ts: number
+  cost: number
+  retry_after_ms: number
+}
+
+/**
  * Redis Lua function definitions for campaign operations.
  *
  * @category Campaign
@@ -93,13 +107,12 @@ export const campaignFunctions = {
   },
 
   read_campaign: {
-    NUMBER_OF_KEYS: 10,
+    NUMBER_OF_KEYS: 9,
 
     parseCommand(parser: CommandParser, prefix: string, campaignId: string) {
       parser.pushKey(campaignKey(prefix, campaignId))
       parser.pushKey(campaignLockKey(prefix, campaignId))
       parser.pushKey(campaignFlagsKey(prefix, campaignId))
-      parser.pushKey(campaignSessionCookieNamesKey(prefix))
       parser.pushKey(proxyIndexKey(prefix, campaignId))
       parser.pushKey(targetIndexKey(prefix, campaignId))
       parser.pushKey(redirectorIndexKey(prefix, campaignId))
@@ -211,7 +224,7 @@ export const campaignFunctions = {
   },
 
   delete_campaign: {
-    NUMBER_OF_KEYS: 10,
+    NUMBER_OF_KEYS: 12,
 
     parseCommand(parser: CommandParser, prefix: string, campaignId: string, lockSecret: string) {
       parser.pushKey(campaignKey(prefix, campaignId))
@@ -224,6 +237,8 @@ export const campaignFunctions = {
       parser.pushKey(targetIndexKey(prefix, campaignId))
       parser.pushKey(redirectorIndexKey(prefix, campaignId))
       parser.pushKey(lureIndexKey(prefix, campaignId))
+      parser.pushKey(sessionHistoryKey(prefix, campaignId))
+      parser.pushKey(messageHistoryKey(prefix, campaignId))
 
       parser.push(lockSecret)
     },
@@ -239,12 +254,12 @@ export const campaignFunctions = {
       prefix: string,
       campaignId: string,
       identity: string,
-      limiterCost: number
+      cost: number
     ) {
       parser.pushKey(campaignKey(prefix, campaignId))
       parser.pushKey(campaignLimiterKey(prefix, campaignId, identity))
 
-      parser.push(limiterCost.toString())
+      parser.push(cost.toString())
     },
 
     transformReply: undefined as unknown as () => unknown,

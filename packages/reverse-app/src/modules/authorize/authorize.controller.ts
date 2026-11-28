@@ -2,10 +2,10 @@ import { decrypt, DIContainer, encrypt, randomIdentSchema, randomName } from '@f
 import { redirectorParamsSchema, upgradeSessionParamsSchema } from '@famir/database'
 import {
   CampaignModel,
-  RedirectorModel,
   HttpCookie,
   Logger,
   LOGGER,
+  RedirectorModel,
   RedirectorParams,
   SessionModel,
   TEMPLATER,
@@ -113,8 +113,8 @@ export class AuthorizeController extends BaseController {
     this.router.add('authorize-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (target.tenant) {
-        const hook = this.tenantSwitch.find('authorize', target.tenant)
+      if (target.label) {
+        const hook = this.tenantSwitch.find('authorize', target.label)
 
         await hook(ctx, next)
       } else {

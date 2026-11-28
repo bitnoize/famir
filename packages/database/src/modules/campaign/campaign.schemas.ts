@@ -6,7 +6,7 @@ import {
   secretSchema,
   timestampSchema,
 } from '@famir/common'
-import { RawCampaign } from './campaign.functions.js'
+import { RawCampaign, RawCampaignLimiter } from './campaign.functions.js'
 
 /**
  * Validate a campaign mirror domain.
@@ -108,6 +108,28 @@ export const campaignLimiterRateSchema: JSONSchemaType<number> = {
 } as const
 
 /**
+ * Validate a campaign limiter cost.
+ *
+ * @category Campaign
+ */
+export const campaignLimiterCostSchema: JSONSchemaType<number> = {
+  type: 'number',
+  minimum: 0.001,
+  maximum: 1000,
+} as const
+
+/**
+ * Validate a campaign limiter tokens.
+ *
+ * @category Campaign
+ */
+export const campaignLimiterTokensSchema: JSONSchemaType<number> = {
+  type: 'number',
+  minimum: 0,
+  maximum: 1000,
+} as const
+
+/**
  * Validate a campaign flag.
  *
  * @category Campaign
@@ -177,6 +199,23 @@ export const rawCampaignSchema: JSONSchemaType<RawCampaign> = {
     message_count: counterSchema,
     message_history: counterSchema,
     created_at: timestampSchema,
+  },
+  additionalProperties: false,
+} as const
+
+/**
+ * @category Campaign
+ * @internal
+ */
+export const rawCampaignLimiterSchema: JSONSchemaType<RawCampaignLimiter> = {
+  type: 'object',
+  required: ['is_allowed', 'tokens', 'ts', 'cost', 'retry_after_ms'],
+  properties: {
+    is_allowed: booleanSchema,
+    tokens: campaignLimiterTokensSchema,
+    ts: timestampSchema,
+    cost: campaignLimiterCostSchema,
+    retry_after_ms: counterSchema,
   },
   additionalProperties: false,
 } as const

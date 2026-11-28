@@ -1,7 +1,6 @@
 import { DIContainer } from '@famir/common'
 import {
   CampaignModel,
-  FullCampaignModel,
   Logger,
   LOGGER,
   ReplServerError,
@@ -335,19 +334,18 @@ export class CampaignController extends BaseController {
     return this
   }
 
-  protected showCampaignModel(console: Console, campaign: FullCampaignModel) {
+  protected showCampaignModel(console: Console, campaign: CampaignModel) {
     console.table({
       campaignId: campaign.campaignId,
       mirrorDomain: campaign.mirrorDomain,
       cryptSecret: campaign.cryptSecret,
       upgradeSessionPath: campaign.upgradeSessionPath,
       sessionCookieName: campaign.sessionCookieName,
-      //sessionCookieNames: campaign.sessionCookieNames.length,
       sessionExpire: campaign.sessionExpire,
       newSessionExpire: campaign.newSessionExpire,
       messageExpire: campaign.messageExpire,
-      limiterLimit: campaign.limiterLimit,
-      limiterExpire: campaign.limiterExpire,
+      limiterBurst: campaign.limiterBurst,
+      limiterRate: campaign.limiterRate,
       isLocked: campaign.isLocked,
       flags: campaign.flags.length > 0 ? campaign.flags.join(', ') : null,
       proxyIndex: campaign.proxyIndex,
@@ -435,8 +433,8 @@ export class CampaignController extends BaseController {
       sessionExpire: rawCampaign.sessionExpire ?? 24 * 3600 * 1000,
       newSessionExpire: rawCampaign.newSessionExpire ?? 300 * 1000,
       messageExpire: rawCampaign.messageExpire ?? 3600 * 1000,
-      limiterLimit: rawCampaign.limiterLimit ?? 100,
-      limiterExpire: rawCampaign.limiterExpire ?? 1000,
+      limiterBurst: rawCampaign.limiterBurst ?? 10,
+      limiterRate: rawCampaign.limiterRate ?? 5,
     }
   }
 

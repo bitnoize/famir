@@ -154,8 +154,8 @@ export class CompleteController extends BaseController {
     this.router.add('complete-hook', async (ctx, next) => {
       const target = this.getState(ctx, 'target')
 
-      if (target.tenant) {
-        const hook = this.tenantSwitch.find('complete', target.tenant)
+      if (target.label) {
+        const hook = this.tenantSwitch.find('complete', target.label)
 
         await hook(ctx, next)
       } else {
